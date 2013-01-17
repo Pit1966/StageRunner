@@ -3,6 +3,8 @@
 
 #include "commandsystem.h"
 
+#include <phonon/BackendCapabilities>
+#include <phonon/AudioOutputDevice>
 #include <QObject>
 #include <QList>
 
@@ -16,6 +18,7 @@ class AudioControl : public QObject
 	Q_OBJECT
 private:
 	QList<AudioSlot*> audio_channels;
+	QList<Phonon::EffectDescription> available_effects;
 
 public:
 	AudioControl();

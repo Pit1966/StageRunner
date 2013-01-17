@@ -3,9 +3,7 @@
 #include "audiochannel.h"
 #include "system/log.h"
 
-#include <phonon/BackendCapabilities>
-#include <phonon/AudioOutputDevice>
-#include <QList>
+
 #include <QStringList>
 #include <QDebug>
 
@@ -45,6 +43,8 @@ void AudioControl::getAudioDevices()
 		Phonon::EffectDescription fx = effects[t];
 
 		qDebug() << fx.name();
+		qDebug() << fx.propertyNames();
+		qDebug() << "--------------------------------";
 	}
 
 	// QStringList mime = Phonon::BackendCapabilities::availableMimeTypes();
