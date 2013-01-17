@@ -1,0 +1,181 @@
+#ifndef PREFVARSET_H
+#define PREFVARSET_H
+
+#include <QList>
+#include <QAtomicInt>
+#include <QStringList>
+
+
+#include "prefvar.h"
+#include "toolclasses.h"
+
+class PrefVarCore;
+class Database;
+class DBfield;
+
+
+
+class VarSet
+{
+public:
+	enum RegVarType {
+		REG_NONE,				///< keine Aktion
+		REG_QSET_GLOBAL,		///< Ist für Gebrauch in Globaler analyzer4D.conf Datei in .config eingetragen
+		REG_DB_GLOBAL,			///< Ist für Gebrauch in Database Tabelle 'globalsettings' eingetragen)
+		REG_DB_TABLE			///< Ist für Gebrauch mit eigenständiger Databasetabelle registriert
+	};
+
+	class RegVarItem {
+	public:
+		bool isValid;
+		RegVarType type;				///< Der Typ des registrierten Objekts
+		PrefVarCore::VarClass varClass;
+		QString className;				///< Klassenname und damit auch Tabellen oder Gruppenname (Tabellenname wird mit 'vset_' ergänzt)
+		QString dbTableName;			///< Das wird der Tabellenname, falls VarSer als Datenbank Objekt (nicht global) registriert wird
+		VarSet *object;					///< Pointer auf registriertes Objekt
+		QString coderComment;			///< Kommentar, der auf den Ort der Benutzung hinweisen sollte
+	public:
+		RegVarItem();
+		RegVarItem(RegVarType t, PrefVarCore::VarClass myclass, const QString & classname, VarSet *obj);
+	};
+
+protected:
+	// Temp Vars fileLoad
+	QString curClassname;					///< Der aktuell gelesene Klassenname (Gruppenname)
+	QString curProjectid;					///< Die aktuell gelesene Projekt ID für das VarSet
+	QString curIndex;						///< Die aktuell gelesene Index nummer (VarSet Zähler)
+	QString curKey;
+	QString curValue;
+
+private:
+	MutexQList<PrefVarCore *>var_list;		///< Die Liste mit allen Variablen, die zu diesem Set gehören
+	PrefVarCore::VarClass myclass;			///< Die Klasse des Sets, gibt an, wo die Variablen Verwendung finden
+	QString myclassname;
+	QString name;							///< Der Name des Sets
+	QString description;					///< Beschreibung des Sets
+
+	bool modified_f;						///< Eine der Variablen im Set wurde modifiziert
+	int db_global_idx;						///< Index, der für das speichern der Settings in die globale Datenbanktabelle verwendet wird
+	int db_vset_index;						///< Index, der für das speichern eines Eintrags in DB-Tabelle verwendet wird
+	quint64 db_vset_projectid;				///< ProjectId, die für das speichern der Settings in die Datenbanktabelle verwendet wird (1 für global setting)
+	bool is_registered_f;					///< VarSet ist mindestens einmal in var_registry vertreten
+	bool is_db_table_registered_f;			///< Ist mit registerDatabaseTable registriert worden
+	int function_count;						///< Zähler für spezielle Funktionsvariablen (Variablenname wird "function|{$function_count}")
+
+	// Varwaltung aller VarSets
+	static QAtomicInt instance_cnt;					///< Soviele VarSet Instanzen gibt es
+	static const char *db_type_strings[4];			///< Tabelle mit korrespondierenden MySQL Variablen Typen
+	static MutexQList<RegVarItem*>*var_registry;	///< Liste, die alle registrierten Instanzen nachhält
+
+
+public:
+	VarSet();
+	VarSet(const VarSet & other);
+	~VarSet();
+
+	VarSet & operator= (const VarSet & other);
+	void cloneFrom(const VarSet &other);
+
+	bool checkModified();
+	void setModified(bool state);
+	bool isModified() {return modified_f;}
+
+	/**
+	 * @brief setName Den Namen des VarSets festlegen
+	 * @param n String mit dem Namen
+	 *
+	 * Dieser String wird auch der Tabellenname, falls das VarSet in eine Datei gespeichert wird
+	 */
+	inline void setName(const QString & n) {name = n;}
+	/**
+	 * @brief Beschreibung des VarSets festlegen
+	 * @param d String mit Text, der den Sinn dieses Sets beschreibt
+	 */
+	inline void setDescription(const QString & d) {description = d;}
+
+	bool addExistingVar(pint32 & var, const QString & name, qint32 p_min = 0, qint32 p_max = 0x7FFFFFFF, qint32 p_default = 0, const QString & descrip = "");
+	bool addExistingVar(pint64 & var, const QString & name, qint64 p_min = 0, qint64 p_max = 0x7FFFFFFFFFFFFFFFll, qint64 p_default = 0, const QString & descrip = "");
+	bool addExistingVar(pstring & var, const QString & name, const QString & p_default = "", const QString & descrip = "");
+	bool addExistingVar(pbool & var, const QString & name, bool p_default = false, const QString & descrip = "");
+
+	bool addExistingVar(qint32 & var, const QString & name, qint32 p_min = 0, qint32 p_max = 0x7FFFFFFF, qint32 p_default = 0, const QString & descrip = "");
+	bool addExistingVar(qint64 & var, const QString & name, qint64 p_min = 0, qint64 p_max = 0x7FFFFFFFFFFFFFFFll, qint64 p_default = 0, const QString & descrip = "");
+	bool addExistingVar(bool & var, const QString & name, bool p_default = false, const QString & descrip = "");
+	bool addExistingVar(QString &var, const QString & name, const QString & p_default = "", const QString & descrip = "");
+
+	pint32 * addDynamicPint32(const QString & name, qint32 p_min=0, qint32 p_max=0x7fffffff, qint32 p_default=0, const QString & descrip = "");
+	pint64 * addDynamicPint64(const QString & name, qint64 p_min=0, qint64 p_max=0x7fffffffffffffffll, qint64 p_default=0, const QString & descrip = "");
+	pstring * addDynamicPstring(const QString & name, const QString & p_default = "", const QString & descrip = "");
+	pbool * addDynamicPbool(const QString & name, bool p_default = false, const QString & descrip = "");
+	pstring * addDynamicFunction(const QString & func_name, const QString & func_para);
+
+	inline bool contains(PrefVarCore * varcore) {return var_list.lockContains(varcore);}
+	bool removeOne(PrefVarCore * varcore);
+
+	bool exists(const QString & name);
+	PrefVarCore *getVar(const QString & name);
+	PrefVarCore * find(const QString & name, PrefVarCore::PrefVarType type);
+	int find(const PrefVarCore *other);
+
+	bool getPbool(const QString & name);
+	qint32 getPint32(const QString & name);
+	qint64 getPint64(const QString & name);
+	QString getPstring(const QString & name);
+	char * getPstringAscii(const QString & name);
+
+	QVariant pValue(const QString & name);
+
+	void setVar(const QString & name, bool);
+	void setVar(const QString & name, qint32 val);
+	void setVar(const QString & name, qint64 val);
+	void setVar(const QString & name, const QString & str);
+
+	int elements() {return var_list.size();}
+
+	/**
+	 * @brief setName Den Klassentyp und -namen des VarSets festlegen
+	 * @param classtype Type @see PrefVarCore::VarClass
+	 * @param classname Klassenname als String
+	 *
+	 * Dieser String wird auch der Tabellenname, falls das VarSet in eine DB gespeichert wird
+	 * bzw. der Groupname beim Speichern in QSettings
+	 */
+	void setClass(PrefVarCore::VarClass classtype, const QString & classname);
+	void debugListVars();
+	bool writeToPref();
+	bool readFromPref();
+
+	bool fileSave(const QString & path, bool append = false, bool empty_line = false);
+	bool fileLoad(const QString & path, bool *exists = 0);
+
+	bool registerDatabaseGlobal(const QString &desc, int index = 1);
+	bool registerDatabaseTable(const QString &desc);
+	bool registerQSetGlobal(const QString &desc);
+	bool setDatabaseReferences(quint64 projectid, int index = 1);
+	bool dbSaveGlobal(Database *db);
+	bool dbLoadGlobal(Database *db);
+	bool dbSave(Database *db);
+	bool dbLoad(Database *db, bool *exists = 0);
+
+	DBfield * getDynamicDbTableDefinition();
+
+	bool isRegistered(RegVarType reg_type);
+	static void clearDbTableDefinitionQuery(DBfield *field);
+	static QStringList getRegistryInfo();
+	static bool isRegistered(RegVarType reg_type, VarSet *obj, RegVarItem **rvi = 0);
+	static bool unRegister(RegVarType reg_type, VarSet *obj);
+	static RegVarItem getRegisterItemCopy(RegVarType reg_type, VarSet *obj);
+	static QList<VarSet *>getDatabaseTableVarLists();
+
+protected:
+	bool analyzeLine(const QString &line, VarSet *varset);
+	void clearCurrentVars();
+
+private:
+	void add_to_registry(RegVarItem* reg);
+	void clear_var_list();
+	void init();
+
+};
+
+#endif // PREFVARSET_H

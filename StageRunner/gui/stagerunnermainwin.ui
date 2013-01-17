@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StageRunnerMainWin</class>
+ <widget class="QMainWindow" name="StageRunnerMainWin">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1184</width>
+    <height>712</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="FxListWidget" name="fxListWidget" native="true"/>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <widget class="QWidget" name="controlTab">
+        <attribute name="icon">
+         <iconset resource="../gfx_ressource.qrc">
+          <normaloff>:/gfx/icons/audio_play.png</normaloff>:/gfx/icons/audio_play.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Control</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="SequenceControlWidget" name="seqCtrlGroup">
+           <property name="title">
+            <string>Sequence Control</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="AudioControlWidget" name="audioCtrlGroup">
+           <property name="title">
+            <string>Audio Control</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="logTab">
+        <attribute name="icon">
+         <iconset resource="../gfx_ressource.qrc">
+          <normaloff>:/gfx/icons/mode_edit_list.png</normaloff>:/gfx/icons/mode_edit_list.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Logging</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QTextEdit" name="logEdit"/>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="clearLogButton">
+             <property name="text">
+              <string>Clear Log</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="develTab">
+        <attribute name="title">
+         <string>Development</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QGroupBox" name="develGroup">
+           <property name="title">
+            <string>Development Quick Functions</string>
+           </property>
+           <widget class="QPushButton" name="addAudioFxButton">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>30</y>
+              <width>151</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Add Audio Fx</string>
+            </property>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1184</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Project"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoad_Project"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Project"/>
+    <addaction name="actionSave_Project_as"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSave_Project">
+   <property name="text">
+    <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionSave_Project_as">
+   <property name="icon">
+    <iconset resource="../gfx_ressource.qrc">
+     <normaloff>:/gfx/icons/media-floppy.png</normaloff>:/gfx/icons/media-floppy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Project as</string>
+   </property>
+  </action>
+  <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+  </action>
+  <action name="actionLoad_Project">
+   <property name="text">
+    <string>Load Project</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FxListWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/fxlistwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AudioControlWidget</class>
+   <extends>QGroupBox</extends>
+   <header>gui/audiocontrolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SequenceControlWidget</class>
+   <extends>QGroupBox</extends>
+   <header>gui/sequencecontrolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../gfx_ressource.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>clearLogButton</sender>
+   <signal>clicked()</signal>
+   <receiver>logEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>417</x>
+     <y>590</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>506</x>
+     <y>432</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

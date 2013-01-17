@@ -1,0 +1,38 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gfx/icons/audio_back.png</file>
+        <file>gfx/icons/audio_eject.png</file>
+        <file>gfx/icons/audio_pause.png</file>
+        <file>gfx/icons/audio_play.png</file>
+        <file>gfx/icons/audio_play_green.png</file>
+        <file>gfx/icons/audio_rec.png</file>
+        <file>gfx/icons/audio_shuffle.png</file>
+        <file>gfx/icons/audio_skip.png</file>
+        <file>gfx/icons/audio_stop.png</file>
+        <file>gfx/icons/cur_right_end.png</file>
+        <file>gfx/icons/cur_up.png</file>
+        <file>gfx/icons/cur_up_end.png</file>
+        <file>gfx/icons/floppy.png</file>
+        <file>gfx/icons/key_normal.png</file>
+        <file>gfx/icons/key_press.png</file>
+        <file>gfx/icons/media-floppy.png</file>
+        <file>gfx/icons/mode_audio_mixer.png</file>
+        <file>gfx/icons/mode_edit.png</file>
+        <file>gfx/icons/audip_loop.png</file>
+        <file>gfx/icons/audip_power.png</file>
+        <file>gfx/icons/config-date.png</file>
+        <file>gfx/icons/cur_down.png</file>
+        <file>gfx/icons/cur_down_end.png</file>
+        <file>gfx/icons/cur_left.png</file>
+        <file>gfx/icons/cur_left_end.png</file>
+        <file>gfx/icons/cur_right.png</file>
+        <file>gfx/icons/mode_edit_list.png</file>
+        <file>gfx/icons/mode_hardware.png</file>
+        <file>gfx/icons/mode_microphone.png</file>
+        <file>gfx/icons/mode_notes.png</file>
+        <file>gfx/icons/mode_system.png</file>
+        <file>gfx/icons/volume_high.png</file>
+        <file>gfx/icons/volume_low.png</file>
+        <file>gfx/icons/volume_mute.png</file>
+    </qresource>
+</RCC>
