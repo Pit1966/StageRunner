@@ -25,6 +25,8 @@ AudioControl::~AudioControl()
 
 void AudioControl::getAudioDevices()
 {
+#ifndef IS_QT5
+
 	QList<Phonon::AudioOutputDevice>audiodevs = Phonon::BackendCapabilities::availableAudioOutputDevices();
 
 	qDebug() << "Audio Devices";
@@ -50,6 +52,7 @@ void AudioControl::getAudioDevices()
 	// QStringList mime = Phonon::BackendCapabilities::availableMimeTypes();
 	// qDebug() << mime;
 
+#endif
 }
 
 bool AudioControl::startFxAudio(FxAudioItem *fxa)
@@ -98,8 +101,10 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2").arg(msg.slotNumber+1).arg(msg.volume));
+#ifndef IS_QT5
 		audio_channels[msg.slotNumber]->audioSink()->setVolume((qreal)msg.volume/100);
 		qDebug("Vol: %f",audio_channels[msg.slotNumber]->audioSink()->volume());
+#endif
 		break;
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);

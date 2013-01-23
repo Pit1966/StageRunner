@@ -446,7 +446,7 @@ bool VarSet::exists(const QString &name)
 			break;
 		}
 	}
-	// if (!found) qDebug("VarSet::exists: pVar '%s' not found!",name.toAscii().data());
+	// if (!found) qDebug("VarSet::exists: pVar '%s' not found!",name.toLatin1().data());
 	return found;
 }
 
@@ -487,7 +487,7 @@ PrefVarCore *VarSet::find(const QString &name, PrefVarCore::PrefVarType type)
 			break;
 		}
 	}
-	if (!var) qFatal("pVar '%s' not found!",name.toAscii().data());
+	if (!var) qFatal("pVar '%s' not found!",name.toLatin1().data());
 	return var;
 }
 
@@ -516,7 +516,7 @@ bool VarSet::getPbool(const QString &name)
 	if (var) {
 		return var->get_value().toBool();
 	} else {
-		if (!var) qFatal("VarSet::getPbool: pVar '%s' not found!",name.toAscii().data());
+		if (!var) qFatal("VarSet::getPbool: pVar '%s' not found!",name.toLatin1().data());
 		return false;
 	}
 }
@@ -527,7 +527,7 @@ qint32 VarSet::getPint32(const QString &name)
 	if (var) {
 		return var->get_value().toInt();
 	} else {
-		if (!var) qFatal("VarSet::getPint32: pVar '%s' not found!",name.toAscii().data());
+		if (!var) qFatal("VarSet::getPint32: pVar '%s' not found!",name.toLatin1().data());
 		return 0;
 	}
 }
@@ -538,7 +538,7 @@ qint64 VarSet::getPint64(const QString &name)
 	if (var) {
 		return var->get_value().toLongLong();
 	} else {
-		if (!var) qFatal("VarSet::getPint64: pVar '%s' not found!",name.toAscii().data());
+		if (!var) qFatal("VarSet::getPint64: pVar '%s' not found!",name.toLatin1().data());
 		return 0;
 	}
 }
@@ -553,7 +553,7 @@ QString VarSet::getPstring(const QString &name)
 			return var->pvalue;
 		}
 	} else {
-		if (!var) qFatal("VarSet::getPstring: pVar '%s' not found!",name.toAscii().data());
+		if (!var) qFatal("VarSet::getPstring: pVar '%s' not found!",name.toLatin1().data());
 		return "";
 	}
 }
@@ -561,7 +561,7 @@ QString VarSet::getPstring(const QString &name)
 /// @todo: blödsinn, Objekt wird vor Rückgabe gelöscht
 char *VarSet::getPstringAscii(const QString &name)
 {
-	return getPstring(name).toAscii().data();
+	return getPstring(name).toLatin1().data();
 }
 
 
@@ -823,7 +823,7 @@ bool VarSet::fileLoad(const QString &path, bool *exists)
 bool VarSet::registerDatabaseGlobal(const QString &desc, int index)
 {
 	if (isRegistered(VarSet::REG_DB_GLOBAL) || myclassname.isEmpty()) {
-		DEBUGERROR ("VarSet: '%s'' is already registered or has insufficient settings",myclassname.toAscii().data());
+		DEBUGERROR ("VarSet: '%s'' is already registered or has insufficient settings",myclassname.toLatin1().data());
 		return false;
 	}
 
@@ -839,7 +839,7 @@ bool VarSet::registerDatabaseGlobal(const QString &desc, int index)
 bool VarSet::registerDatabaseTable(const QString &desc)
 {
 	if (isRegistered(VarSet::REG_DB_TABLE) || myclassname.isEmpty()) {
-		DEBUGERROR ("VarSet: '%s'' is already registered or has insufficient settings",myclassname.toAscii().data());
+		DEBUGERROR ("VarSet: '%s'' is already registered or has insufficient settings",myclassname.toLatin1().data());
 		return false;
 	}
 
@@ -901,7 +901,7 @@ void VarSet::clear_var_list()
 	while (var_list.size()) {
 		PrefVarCore * varcore = var_list.lockTakeFirst();
 		// qDebug() << "var" << varcore->myname << varcore->refcnt;
-		if (varcore->refcnt == 1) {
+		if (varcore->refcnt.load() == 1) {
 			// qDebug() << "delete" << varcore->myname;
 			delete varcore;
 		}
@@ -984,7 +984,7 @@ bool VarSet::dbLoadGlobal(Database *db)
 		if (var) {
 			var->set_value(value);
 		} else {
-			qDebug("%s Varname:'%s' not found.",__func__,name.toAscii().data());
+			qDebug("%s Varname:'%s' not found.",__func__,name.toLatin1().data());
 		}
 	}
 
@@ -1044,12 +1044,12 @@ bool VarSet::dbLoad(Database *db, bool *exists)
 	if (q.execPrepared()) {
 		if (q.size() > 1) {
 			DEBUGERROR("VarSet::dbLoad: Search was ambiguous in '%s', projectid:%llu, index:%d"
-					   ,item.dbTableName.toAscii().data(), db_vset_projectid, db_vset_index);
+					   ,item.dbTableName.toLatin1().data(), db_vset_projectid, db_vset_index);
 			return false;
 		}
 		else if (q.size() == 0) {
 			if (debug > 2) DEBUGTEXT("VarSet::dbLoad: No record found in '%s' for projectid:%llu, index:%d"
-									 ,item.dbTableName.toAscii().data(), db_vset_projectid, db_vset_index);
+									 ,item.dbTableName.toLatin1().data(), db_vset_projectid, db_vset_index);
 			return true;
 		}
 		else {
@@ -1089,7 +1089,7 @@ DBfield *VarSet::getDynamicDbTableDefinition()
 
 	field[f_idx].com = strdup("_COM");
 	field[f_idx].para = strdup("_TABLENAME");
-	field[f_idx++].attr = strdup(QString("vset_%1").arg(myclassname).toAscii().data());
+	field[f_idx++].attr = strdup(QString("vset_%1").arg(myclassname).toLatin1().data());
 
 	field[f_idx].com = strdup("id");
 	field[f_idx].para = strdup("INT");
@@ -1127,7 +1127,7 @@ DBfield *VarSet::getDynamicDbTableDefinition()
 		}
 
 		// Field zusammenbauen
-		field[f_idx].com = strdup(var->pVarName().toAscii().data());
+		field[f_idx].com = strdup(var->pVarName().toLatin1().data());
 		field[f_idx].para = strdup(dbtype);
 		field[f_idx++].attr = strdup("DEF");
 
@@ -1144,7 +1144,7 @@ DBfield *VarSet::getDynamicDbTableDefinition()
 
 	field[f_idx].com = strdup("_COM");
 	field[f_idx].para = strdup("_TABLECOMMENT");
-	field[f_idx++].attr = strdup(description.toAscii().data());
+	field[f_idx++].attr = strdup(description.toLatin1().data());
 
 	field[f_idx].com = strdup("_COM");
 	field[f_idx].para = strdup("ENGINE");
@@ -1211,12 +1211,12 @@ bool VarSet::unRegister(VarSet::RegVarType reg_type, VarSet *obj)
 	VarSet::RegVarItem *reg;
 	if (isRegistered(reg_type, obj, &reg)) {
 		if (!var_registry->lockRemoveOne(reg)) {
-			qFatal("%s: unregister failed: %s",__func__,obj->myclassname.toAscii().data());
+			qFatal("%s: unregister failed: %s",__func__,obj->myclassname.toLatin1().data());
 		}
 		delete reg;
 		return true;
 	} else {
-		DEBUGERROR("%s: VarSet was not registered: %s",__func__,obj->myclassname.toAscii().data());
+		DEBUGERROR("%s: VarSet was not registered: %s",__func__,obj->myclassname.toLatin1().data());
 		return false;
 	}
 }

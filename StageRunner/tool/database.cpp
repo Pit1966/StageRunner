@@ -225,7 +225,7 @@ bool Database::connectToDatabase() {
 	for (int t=0; t<MAX_DATABASE_CONNECTIONS; t++) {
 		if (s_valid_f[t]) {
 			DEBUGTEXT("Database::connectToDatabase(): Reconnect connection #%s -> cancel old connection and try to establish a new"
-					  ,connection_names[t].toAscii().data());
+					  ,connection_names[t].toLatin1().data());
 			QSqlDatabase::database(connection_names[t]).close();
 			QSqlDatabase::removeDatabase(connection_names[t]);
 			connection_names[t].clear();
@@ -1027,14 +1027,14 @@ bool Database::copy_db_entry_childs(Database *target_db, const Database::DbCopyR
 	bool found = false;
 	int idx = 0;
 	while (idx < Database::table_list->size() && !found) {
-		if (strcmp(Database::table_list->at(idx)->attr, rule->childTable.toAscii().data()) == 0) {
+		if (strcmp(Database::table_list->at(idx)->attr, rule->childTable.toLatin1().data()) == 0) {
 			found = true;
 		} else {
 			idx++;
 		}
 	}
 	if (!found) {
-		DEBUGERROR("Table %s not found",rule->childTable.toAscii().data());
+		DEBUGERROR("Table %s not found",rule->childTable.toLatin1().data());
 		return false;
 	}
 	DBfield * entrys = Database::table_list->at(idx);
@@ -1130,7 +1130,7 @@ int Database::getConnectionIndex(QThread * for_thread)
 		if (found) {
 			// Zähler erhöhen
 			used_cnt[con]++;
-			if (debug > 5) DEVELTEXT("Database::getConnectionIndex: DBquery use count for thread '%s' is %d",for_thread->objectName().toAscii().data(),used_cnt[con]);
+			if (debug > 5) DEVELTEXT("Database::getConnectionIndex: DBquery use count for thread '%s' is %d",for_thread->objectName().toLatin1().data(),used_cnt[con]);
 		} else {
 			// Thread ist nicht registriert
 			// Also eine freie Verbindung suchen
@@ -1140,7 +1140,7 @@ int Database::getConnectionIndex(QThread * for_thread)
 					found = true;
 					used_by_thread[con] = for_thread;
 					used_cnt[con] = 1;
-					if (debug > 4) DEVELTEXT("Database::getConnectionIndex: Registered DBquery for thread '%s'",for_thread->objectName().toAscii().data());
+					if (debug > 4) DEVELTEXT("Database::getConnectionIndex: Registered DBquery for thread '%s'",for_thread->objectName().toLatin1().data());
 				} else {
 					con++;
 				}
@@ -1188,20 +1188,20 @@ bool Database::freeConnectionIndex(QThread * thread)
 		used_cnt[con]--;
 		if (used_cnt[con] == 0) {
 			used_by_thread[con] = 0;
-			if (debug > 5) DEVELTEXT("Database::freeConnectionIndex: Freed last DBquery for thread '%s'",thread->objectName().toAscii().data());
+			if (debug > 5) DEVELTEXT("Database::freeConnectionIndex: Freed last DBquery for thread '%s'",thread->objectName().toLatin1().data());
 
 		}
 		else if (used_cnt[con] < 0) {
-			DEBUGERROR("Database::freeConnectionIndex: Thread use count < 0 for thread '%s' -> Clear",thread->objectName().toAscii().data());
+			DEBUGERROR("Database::freeConnectionIndex: Thread use count < 0 for thread '%s' -> Clear",thread->objectName().toLatin1().data());
 			used_cnt[con] = 0;
 		}
 		else {
-			if (debug > 5) DEVELTEXT("Database::freeConnectionIndex: DBquery use count for thread '%s' is %d",thread->objectName().toAscii().data(),used_cnt[con]);
+			if (debug > 5) DEVELTEXT("Database::freeConnectionIndex: DBquery use count for thread '%s' is %d",thread->objectName().toLatin1().data(),used_cnt[con]);
 		}
 	} else {
 		// Thread Eintrag wurde nicht gefunden
 		// Das darf nicht passieren
-		DEBUGERROR("Database::freeConnectionIndex: Thread '%s' not registered",thread->objectName().toAscii().data());
+		DEBUGERROR("Database::freeConnectionIndex: Thread '%s' not registered",thread->objectName().toLatin1().data());
 	}
 
 

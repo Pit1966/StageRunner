@@ -26,7 +26,7 @@ QList <DBquery *> DBquery::dbquery_list;
 DBquery::DBquery(Database * p_database, QueryMode p_mode, const QString & table)
 {
 	QThread * mythread = logThread->currentThread();
-	if (debug > 4) DEVELTEXT("DBquery for '%s'",mythread->objectName().toAscii().data());
+	if (debug > 4) DEVELTEXT("DBquery for '%s'",mythread->objectName().toLatin1().data());
 
 	if (!(database = p_database)) {
 		valid_f = false;
@@ -72,7 +72,7 @@ DBquery::DBquery(Database * p_database, QueryMode p_mode, const QString & table)
 DBquery::DBquery(Database * p_database, const QString & table) : database(p_database)
 {
 	QThread * mythread = logThread->currentThread();
-	if (debug > 4) DEVELTEXT("DBquery for '%s'",mythread->objectName().toAscii().data());
+	if (debug > 4) DEVELTEXT("DBquery for '%s'",mythread->objectName().toLatin1().data());
 	if (!(database = p_database)) {
 		valid_f = false;
 		ERROR("DBquery::DBquery",ERR_DB_NULL_POINTER_QUERY);
@@ -704,7 +704,7 @@ bool DBquery::exec_insert()
 				LOGTEXT(QString("DB->exec: Bind value #%1: %2").arg(t+1).arg(val_list.at(t).toString()));
 			}
 			if ( val_list.at(t).type() == QVariant::String &&  val_list.at(t).isNull() ) {
-				if (debug > 1) DEBUGTEXT("DBquery::exec_insert substitute NULL value to '' in field %s",field_list.at(t).toAscii().data());
+				if (debug > 1) DEBUGTEXT("DBquery::exec_insert substitute NULL value to '' in field %s",field_list.at(t).toLatin1().data());
 				query->addBindValue("");
 			} else {
 				query->addBindValue(val_list.at(t));

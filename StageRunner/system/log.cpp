@@ -276,7 +276,7 @@ void Log::appendDebugText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toAscii().data());
+		strcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
@@ -295,7 +295,7 @@ void Log::appendDevelText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toAscii().data());
+		strcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
@@ -314,7 +314,7 @@ void Log::appendDebugError(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toAscii().data());
+		strcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
@@ -533,7 +533,7 @@ int Log::readAppendLogFile(const QString & path)
 			}
 		}
 	} else {
-		DEBUGERROR("Log::readAppendLogFile: Could not open logfile: %s",file.errorString().toAscii().data());
+		DEBUGERROR("Log::readAppendLogFile: Could not open logfile: %s",file.errorString().toLatin1().data());
 		lines = -1;
 	}
 

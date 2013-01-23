@@ -6,10 +6,10 @@
    Extracted into a standalone Qt3 widget by Pedro Lopez-Cabanillas
    and adapted for use in QSynth.
    Ported to Qt4 by Chris Cannam.
-   Adapted as a QStyle by Pedro Lopez-Cabanillas.   
-  
-   This file copyright 2003-2006 Chris Cannam, 
-   copyright 2005,2008 Pedro Lopez-Cabanillas, 
+   Adapted as a QStyle by Pedro Lopez-Cabanillas.
+
+   This file copyright 2003-2006 Chris Cannam,
+   copyright 2005,2008 Pedro Lopez-Cabanillas,
    copyright 2006 Queen Mary, University of London.
 
    This program is free software; you can redistribute it and/or
@@ -33,6 +33,10 @@
 
 #include <QtGui>
 
+#if IS_QT5
+#include <QtWidgets>
+#endif
+
 class qsynthDialClassicStyle : public QCommonStyle
 {
 public:
@@ -40,7 +44,7 @@ public:
 	virtual ~qsynthDialClassicStyle() {};
 
 	virtual void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *opt, QPainter *p,
-                            		const QWidget *widget = 0) const;
+									const QWidget *widget = 0) const;
 
 };
 

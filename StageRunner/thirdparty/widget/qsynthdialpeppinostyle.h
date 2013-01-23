@@ -1,11 +1,11 @@
 /***************************************************************************
 
-   This style is based on a widget designed by Giuseppe Cigala,  
+   This style is based on a widget designed by Giuseppe Cigala,
    adapted as a Qt style for QSynth by Pedro Lopez-Cabanillas
 
    This file,
-   Copyright (C) 2008 Giuseppe Cigala <g_cigala@virgilio.it>          
-   Copyright (C) 2008 Pedro Lopez-Cabanillas <plcl@users.sf.net>         
+   Copyright (C) 2008 Giuseppe Cigala <g_cigala@virgilio.it>
+   Copyright (C) 2008 Pedro Lopez-Cabanillas <plcl@users.sf.net>
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
@@ -27,15 +27,16 @@
 #define PEPPINOSTYLE_H_
 
 #include <QtGui>
+#include <QCommonStyle>
 
 class qsynthDialPeppinoStyle : public QCommonStyle
 {
 public:
 	qsynthDialPeppinoStyle() {};
 	virtual ~qsynthDialPeppinoStyle() {};
-	
+
 	virtual void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *opt, QPainter *p,
-                            		const QWidget *widget = 0) const;
+									const QWidget *widget = 0) const;
 };
 
 #endif /*PEPPINOSTYLE_H_*/

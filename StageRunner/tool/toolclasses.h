@@ -1,12 +1,6 @@
 /** @file toolclasses.h */
 /***************************************************************************
-*   Copyright (C) 2008-2012 QASS GmbH                                     *
-*                                                                         *
-*   Ulrich Seuthe <useuthe@qass.net>                                      *
-*   Peter Steinmeyer <steinmeyer@qass.net>                                *
-*   Christian Günther <c.guenther@qass.net>                               *
-*                                                                         *
-*  This file is part of the OPTIMIZER project                             *
+
 ***************************************************************************/
 #ifndef TOOLCLASSES_H
 #define TOOLCLASSES_H
@@ -37,7 +31,7 @@ public:
 	~MutexQList() {
 		if (lock_cnt > 0) {
 			DEBUGERROR("MutexQList is locked while deleting: '%s'"
-					   ,name.toAscii().data());
+					   ,name.toLatin1().data());
 		} else {
 			delete mutex;
 		}
@@ -64,7 +58,7 @@ public:
 		if (lock_cnt > 0) {
 			if (lock_cnt > 0) {
 				DEVELTEXT("MutexQList lock:: maybe DOUBLE-LOCK! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toAscii().data());
+					  ,lock_cnt,this,name.toLatin1().data());
 				if (mutex->tryLock()) {
 					lock_cnt++;
 					DEVELTEXT("Lock it after TryLock");
@@ -88,7 +82,7 @@ public:
 	inline void unlock() {
 		if (lock_cnt < 1) {
 			DEVELTEXT("MutexQList unlock:: NOT_LOCKED! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toAscii().data());
+					  ,lock_cnt,this,name.toLatin1().data());
 		} else {
 			lock_cnt--;
 			mutex->unlock();
@@ -115,7 +109,7 @@ public:
 		if (lock_cnt > 0) {
 			if (lock_cnt > 0) {
 				DEVELTEXT("MutexQList tryLock:: maybe DOUBLE-LOCK! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toAscii().data());
+					  ,lock_cnt,this,name.toLatin1().data());
 				if (mutex->tryLock()) {
 					lock_cnt++;
 					DEVELTEXT("Lock it after TryLock");

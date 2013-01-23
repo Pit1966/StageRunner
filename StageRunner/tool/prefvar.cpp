@@ -42,7 +42,7 @@ PrefVarCore::~PrefVarCore()
 	for (int t=0; t<parent_var_sets.size(); t++) {
 		// qDebug() << "test parent list" << t << myname;
 		if (parent_var_sets.at(t)->contains(this)) {
-			// qDebug("Deleted '%s' from parent list",myname.toAscii().data() );
+			// qDebug("Deleted '%s' from parent list",myname.toLatin1().data() );
 			parent_var_sets.at(t)->removeOne(this);
 		}
 	}
@@ -50,8 +50,8 @@ PrefVarCore::~PrefVarCore()
 	glob_var_list->lockRemoveOne(this);
 
 	if (refcnt.deref()) {
-		int r = refcnt;
-		qWarning("Deleted '%s' with refs (%d)",myname.toAscii().data(),r);
+		int r = refcnt.load();
+		qWarning("Deleted '%s' with refs (%d)",myname.toLatin1().data(),r);
 	}
 
 	// Falls letzte Instanz gelöscht wurde, wird die globale Tracking-Liste der Instanzen auch gelöscht

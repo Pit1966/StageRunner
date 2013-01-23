@@ -3,8 +3,11 @@
 
 #include "commandsystem.h"
 
+#ifndef IS_QT5
 #include <phonon/BackendCapabilities>
 #include <phonon/AudioOutputDevice>
+#endif
+
 #include <QObject>
 #include <QList>
 
@@ -18,7 +21,9 @@ class AudioControl : public QObject
 	Q_OBJECT
 private:
 	QList<AudioSlot*> audio_channels;
+#ifndef IS_QT5
 	QList<Phonon::EffectDescription> available_effects;
+#endif
 
 public:
 	AudioControl();
