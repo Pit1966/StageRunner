@@ -73,7 +73,10 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	media_player->setMedia(QUrl::fromLocalFile(fxa->filePath()));
 	media_player->play();
 	media_player->setVolume(fxa->initialVolume);
-	media_probe->setSource(media_player);
+	bool probe_ok = media_probe->setSource(media_player);
+	if (!probe_ok) {
+		DEBUGERROR("Could not inject audio probe for level monitoring");
+	}
 	// qDebug() << "start:" << media_player->mediaStatus() << media_player->errorString();
 	// qDebug() << media_player->media().canonicalUrl();
 #endif
