@@ -901,10 +901,17 @@ void VarSet::clear_var_list()
 	while (var_list.size()) {
 		PrefVarCore * varcore = var_list.lockTakeFirst();
 		// qDebug() << "var" << varcore->myname << varcore->refcnt;
+#ifdef IS_QT5
 		if (varcore->refcnt.load() == 1) {
 			// qDebug() << "delete" << varcore->myname;
 			delete varcore;
 		}
+#else
+		if (varcore->refcnt == 1) {
+			// qDebug() << "delete" << varcore->myname;
+			delete varcore;
+		}
+#endif
 	}
 }
 

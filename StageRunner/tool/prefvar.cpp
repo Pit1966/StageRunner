@@ -50,7 +50,11 @@ PrefVarCore::~PrefVarCore()
 	glob_var_list->lockRemoveOne(this);
 
 	if (refcnt.deref()) {
+#ifdef IS_QT5
 		int r = refcnt.load();
+#else
+		int r = refcnt;
+#endif
 		qWarning("Deleted '%s' with refs (%d)",myname.toLatin1().data(),r);
 	}
 

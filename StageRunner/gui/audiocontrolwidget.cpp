@@ -5,6 +5,7 @@
 #include "main/appcentral.h"
 
 #include <QHBoxLayout>
+#include <QDebug>
 
 AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	QGroupBox(parent)
@@ -44,7 +45,7 @@ void AudioControlWidget::init_gui()
 
 void AudioControlWidget::audioCtrlReceiver(AudioCtrlMsg msg)
 {
-	qDebug("AudioCtrlWidget::Audio Ctrl Msg Received");
+	qDebug() << "AudioCtrlWidget::Audio Ctrl Msg Received " << msg.ctrlCmd << msg.currentAudioStatus << msg.volume;
 	if (msg.slotNumber < 0 || msg.slotNumber >= MAX_AUDIO_SLOTS) {
 		DEBUGERROR("AudioControlWidget::audioCtrlReceiver: illegal slot number received: %d", msg.slotNumber);
 		return;

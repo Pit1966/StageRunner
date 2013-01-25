@@ -6,7 +6,9 @@
 
 #include <QTime>
 #include <QApplication>
+#ifdef IS_QT5
 #include <QMediaContent>
+#endif
 
 AudioSlot::AudioSlot()
 	: QObject()
@@ -23,8 +25,8 @@ AudioSlot::AudioSlot()
 	audio_out = new Phonon::AudioOutput(Phonon::MusicCategory);
 	path = Phonon::createPath(media_obj, audio_out);
 
-	connect(media_obj,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(setAudioState(Phonon::State,Phonon::State)));
-	connect(media_obj,SIGNAL(finished()),this,SLOT(setFinished()));
+	connect(media_obj,SIGNAL(stateChanged(Phonon::State,Phonon::State)),this,SLOT(setPhononAudioState(Phonon::State,Phonon::State)));
+	connect(media_obj,SIGNAL(finished()),this,SLOT(setPhononFinished()));
 #else
 	media_player = new QMediaPlayer;
 	media_probe = new QAudioProbe;
@@ -174,8 +176,8 @@ void AudioSlot::setPhononAudioState(Phonon::State newstate, Phonon::State oldsta
 	}
 
 	if (oldstate != newstate) {
-		// qDebug("emit status: %d %d",run_status, slotNumber);
-		AudioCtrlMsg msg(run_status,slotNumber);
+		qDebug("emit status: %d %d",run_status, slotNumber);
+		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
 		emit audioCtrlMsgEmitted(msg);
 	}
 }
