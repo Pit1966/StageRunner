@@ -33,7 +33,6 @@ void AudioControlWidget::init_gui()
 		AudioSlotWidget *slot = new AudioSlotWidget;
 		slot->slotNumber = t;
 
-		// connect(slot,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),this,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)));
 		connect(slot,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 
 		audioSlotWidgets.append(slot);
@@ -64,4 +63,11 @@ void AudioControlWidget::audioCtrlReceiver(AudioCtrlMsg msg)
 void AudioControlWidget::audioCtrlRepeater(AudioCtrlMsg msg)
 {
 	emit audioCtrlCmdEmitted(msg);
+}
+
+void AudioControlWidget::setVuMeterLevel(int channel, int left, int right)
+{
+	if (channel >= 0 && channel < audioSlotWidgets.size()) {
+		audioSlotWidgets[channel]->setVuLevel(left,right);
+	}
 }

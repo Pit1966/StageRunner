@@ -40,6 +40,7 @@ public:
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
 
+
 private:
 	void init(qint32 fxID);
 

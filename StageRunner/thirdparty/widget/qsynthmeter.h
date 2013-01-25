@@ -24,6 +24,8 @@
 
 #include <QFrame>
 
+#define CONFIG_GRADIENT
+
 // Forward declarations.
 class qsynthMeter;
 
@@ -126,7 +128,7 @@ public:
 	// Port count accessor.
 	int portCount() const;
 
-	// Value proxy.    
+	// Value proxy.
 	void setValue(int iPort, float fValue);
 
 	// IEC scale accessors.

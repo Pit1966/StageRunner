@@ -39,6 +39,7 @@ void StageRunnerMainWin::initConnects()
 	// Audio Control Panel <-> Audio Control
 	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
 
 }
 
@@ -78,6 +79,22 @@ void StageRunnerMainWin::init()
 {
 }
 
+
+/**
+ * @brief Initialize Application and restore Usersettings
+ *
+ * This includes:
+ * - Loading predefined project (or last loaded project)
+ *
+ */
+void StageRunnerMainWin::initAppDefaults()
+{
+	if (mainapp->userSettings->pLastProjectLoadPath.size()) {
+		mainapp->project->loadFromFile(mainapp->userSettings->pLastProjectLoadPath);
+		fxListWidget->setFxList(mainapp->project->fxList);
+
+	}
+}
 
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
@@ -127,4 +144,10 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 
 		/// @todo Error handling
 	}
+}
+
+void StageRunnerMainWin::on_actionNew_Project_triggered()
+{
+	clearProject();
+
 }

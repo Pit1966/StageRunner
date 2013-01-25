@@ -33,6 +33,7 @@ private slots:
 public slots:
 	void setPlayState(bool state);
 	void updateGuiStatus(AudioCtrlMsg msg);
+	void setVuLevel(int left, int right);
 
 signals:
 	void playClicked(int slotNum);

@@ -12,14 +12,16 @@ int main(int argc, char *argv[])
 	app.setApplicationName(APP_NAME);
 	app.setOrganizationName(APP_ORG_STRING);
 
-	logThread = new Log;
 
 	AppCentral *myapp = AppCentral::instance();
 	StageRunnerMainWin *mywin = new StageRunnerMainWin(myapp);
 
+	logThread = new Log;
+	logThread->initLog(mywin->logWidget);
+
 	mywin->show();
 	mywin->initConnects();
-	logThread->initLog(mywin->logWidget);
+	mywin->initAppDefaults();
 
 	int ret =  app.exec();
 

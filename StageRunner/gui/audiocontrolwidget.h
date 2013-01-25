@@ -35,6 +35,7 @@ private:
 public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void audioCtrlRepeater(AudioCtrlMsg msg);
+	void setVuMeterLevel(int channel, int left, int right);
 
 signals:
 	void playClicked(int slotNum);

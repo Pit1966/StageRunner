@@ -1,5 +1,8 @@
 #include "audioslotwidget.h"
 #include "audiocontrolwidget.h"
+#include "config.h"
+
+#include <QDebug>
 
 AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	QGroupBox(parent)
@@ -33,7 +36,7 @@ void AudioSlotWidget::resizeEvent(QResizeEvent *event)
 void AudioSlotWidget::init_gui()
 {
 	mainLayout->setAlignment(Qt::AlignCenter);
-	slotVolumeDial->setRange(0,160);
+	slotVolumeDial->setRange(0,MAX_VOLUME);
 	slotVolumeDial->setNotchesVisible(true);
 	slotVolumeDial->setNotchTarget(18);
 
@@ -80,13 +83,31 @@ void AudioSlotWidget::setPlayState(bool state)
 
 void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 {
-	switch (msg.currentAudioStatus) {
-	case AUDIO_IDLE:
-	case AUDIO_ERROR:
-		setPlayState(false);
-		break;
-	default:
-		setPlayState(true);
-		break;
+	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
+	if (msg.ctrlCmd == CMD_STATUS_REPORT) {
+		// Set Play-Status Buttons in Audio Slot Panel
+		switch (msg.currentAudioStatus) {
+		case AUDIO_IDLE:
+		case AUDIO_ERROR:
+			setPlayState(false);
+			break;
+		default:
+			setPlayState(true);
+			break;
+		}
+		if (msg.volume >= 0) slotVolumeDial->setValue(msg.volume);
+	}
+}
+
+void AudioSlotWidget::setVuLevel(int left, int right)
+{
+	meterWidget->setValue(0,(float)left/10000);
+	meterWidget->setValue(1,(float)right/10000);
+	if (left == 0 && right == 0) {
+		for (int t=0;t<5;t++) {
+			meterWidget->setValue(0,0.001f);
+			meterWidget->setValue(1,0.001f);
+			meterWidget->peakReset();
+		}
 	}
 }

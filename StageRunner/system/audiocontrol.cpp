@@ -100,11 +100,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
-		LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2").arg(msg.slotNumber+1).arg(msg.volume));
-#ifndef IS_QT5
-		audio_channels[msg.slotNumber]->audioSink()->setVolume((qreal)msg.volume/100);
-		qDebug("Vol: %f",audio_channels[msg.slotNumber]->audioSink()->volume());
-#endif
+		audio_channels[msg.slotNumber]->setVolume(msg.volume);
 		break;
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
@@ -119,5 +115,6 @@ void AudioControl::init()
 		audio_channels.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SIGNAL(vuLevelChanged(int,int,int)));
 	}
 }

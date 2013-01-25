@@ -34,12 +34,12 @@ public:
 	int fadetime;
 
 public:
-	AudioCtrlMsg(AudioStatus status = AUDIO_IDLE, int slotnum = -1)
+	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_IDLE)
 		: slotNumber(slotnum)
-		, ctrlCmd(CMD_NONE)
+		, ctrlCmd(cmd)
 		, currentAudioStatus(status)
-		, volume(0)
-		, fadetime(0)
+		, volume(-1)
+		, fadetime(-1)
 	{}
 };
 

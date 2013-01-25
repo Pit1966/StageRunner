@@ -26,12 +26,16 @@ public:
 	void updateButtonStyles();
 
 	void clearProject();
+	void initAppDefaults();
+
 
 private slots:
 	void on_addAudioFxButton_clicked();
 	void on_actionSave_Project_as_triggered();
 
 	void on_actionLoad_Project_triggered();
+
+	void on_actionNew_Project_triggered();
 
 private:
 	void init();

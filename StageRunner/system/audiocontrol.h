@@ -44,7 +44,7 @@ private:
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
-
+	void vuLevelChanged(int slotnum, int left, int right);
 };
 
 #endif // AUDIOCONTROL_H
