@@ -41,6 +41,10 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 
 	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
+		if (run_time.elapsed() > 500) {
+			DEBUGERROR("No data available from audio IODevice after 300ms -> Cancel");
+			emit readReady();
+		}
 		for (int t=0; t<256; t++) {
 			data[t] = 0;
 		}
@@ -198,6 +202,7 @@ void AudioIODevice::start()
 	bytes_avail = 0;
 	frame_energy_peak = 0;
 	sample_peak = 0;
+	run_time.start();
 
 #ifdef IS_QT5
 	decoding_finished_f = false;

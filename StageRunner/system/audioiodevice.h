@@ -4,6 +4,8 @@
 #include "audioformat.h"
 
 #include <QIODevice>
+#include <QTime>
+
 #ifdef IS_QT5
 #include <QAudioDecoder>
 #endif // IS_QT5
@@ -31,6 +33,8 @@ private:
 
 private:
 	QString current_filename;
+	QTime run_time;
+
 	AudioFormat *audio_format;
 #ifdef IS_QT5
 	QAudioDecoder *audio_decoder;
