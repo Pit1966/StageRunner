@@ -3,21 +3,19 @@
 
 #include "commandsystem.h"
 
-#ifndef IS_QT5
-#include <phonon/MediaObject>
-#include <phonon/MediaSource>
-#include <phonon/AudioOutput>
-#else
-#include <QMediaPlayer>
-#include <QAudioProbe>
+#ifdef IS_QT5
+#include <QAudioDecoder>
 #endif
 
 #include <QObject>
 #include <QTime>
+#include <QAudioOutput>
+#include <QFile>
 
 using namespace AUDIO;
 
 class FxAudioItem;
+class AudioIODevice;
 
 
 class AudioSlot : public QObject
@@ -27,19 +25,15 @@ public:
 	int slotNumber;
 
 private:
-#ifndef IS_QT5
-	Phonon::MediaObject *media_obj;
-	Phonon::AudioOutput *audio_out;
-	Phonon::Path path;
-#else
-	QMediaPlayer * media_player;
-	QAudioProbe * media_probe;
+	AudioIODevice *audio_io;
+	QAudioOutput *audio_output;
+	QFile *audio_file;
 
-#endif
 	volatile AudioStatus run_status;
 
 	QTime run_time;
 	bool probe_init_f;
+	bool audio_decode_init_f;
 	double frame_energy_peak;
 	double sample_peak;
 
@@ -52,18 +46,10 @@ public:
 	void setVolume(qint32 vol);
 
 	inline AudioStatus status() {return run_status;}
-#ifndef IS_QT5
-	inline Phonon::AudioOutput *audioSink() {return audio_out;}
-#endif
 
-protected slots:
-#ifndef IS_QT5
-	void setPhononAudioState(Phonon::State newstate, Phonon::State oldstate);
-	void setPhononFinished();
-#else
-	void setQtAudioState(QMediaPlayer::State state);
-	void monitorQtAudioStream(QAudioBuffer audiobuf);
-#endif
+private slots:
+	void on_audio_output_status_changed(QAudio::State state);
+	void on_audio_io_read_ready();
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

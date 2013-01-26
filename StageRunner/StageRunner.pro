@@ -40,7 +40,9 @@ SOURCES += main.cpp\
 	thirdparty/widget/qsynthmeter.cpp \
 	thirdparty/widget/qsynthdialclassicstyle.cpp \
 	gui/audioslotwidget.cpp \
-	gui/audiocontrolwidget.cpp
+	gui/audiocontrolwidget.cpp \
+    system/audioiodevice.cpp \
+    system/audioformat.cpp
 
 HEADERS  += \
 	fx/fxitem.h \
@@ -67,7 +69,9 @@ HEADERS  += \
 	thirdparty/widget/qsynthdialclassicstyle.h \
 	gui/audioslotwidget.h \
 	gui/audiocontrolwidget.h \
-	system/commandsystem.h
+	system/commandsystem.h \
+    system/audioiodevice.h \
+    system/audioformat.h
 
 FORMS    += \
 	gui/fxlistwidget.ui \
