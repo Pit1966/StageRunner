@@ -1,6 +1,6 @@
 #include "sequencecontrolwidget.h"
 
-#include "main/appcentral.h"
+#include "../main/appcentral.h"
 
 SequenceControlWidget::SequenceControlWidget(QWidget *parent) :
 	QGroupBox(parent)

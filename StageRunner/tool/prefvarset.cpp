@@ -6,6 +6,9 @@
 
 #include <QSettings>
 
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
 
 /// Statics
 
@@ -933,7 +936,7 @@ bool VarSet::dbSaveGlobal(Database *db)
 	if (!db->isValid()) return true;
 
 	if (myclass == PrefVarCore::NO_CLASS || myclass == PrefVarCore::VAR_SET_CLASS || myclassname.isEmpty()) {
-		qFatal("%s bad configured",__func__);
+		// qFatal("%s bad configured",__func__);
 		return false;
 	}
 
@@ -964,7 +967,7 @@ bool VarSet::dbLoadGlobal(Database *db)
 	if (!db->isValid()) return true;
 
 	if (myclass == PrefVarCore::NO_CLASS || myclass == PrefVarCore::VAR_SET_CLASS || myclassname.isEmpty()) {
-		qFatal("%s bad configured",__func__);
+		// qFatal("%s bad configured",__func__);
 		return false;
 	}
 
@@ -991,7 +994,7 @@ bool VarSet::dbLoadGlobal(Database *db)
 		if (var) {
 			var->set_value(value);
 		} else {
-			qDebug("%s Varname:'%s' not found.",__func__,name.toLatin1().data());
+			// qDebug("%s Varname:'%s' not found.",__func__,name.toLatin1().data());
 		}
 	}
 
@@ -1004,12 +1007,12 @@ bool VarSet::dbSave(Database *db)
 
 	VarSet::RegVarItem item = getRegisterItemCopy(VarSet::REG_DB_TABLE,this);
 	if (!item.isValid) {
-		DEVELTEXT("%s bad configured, VarSet not registered for database",__func__);
+		// DEVELTEXT("%s bad configured, VarSet not registered for database",__func__);
 		return false;
 	}
 
 	if (db_vset_projectid <= 0) {
-		DEVELTEXT("%s bad configured, db_ProjectId for VarSet not defined",__func__);
+		// DEVELTEXT("%s bad configured, db_ProjectId for VarSet not defined",__func__);
 		return false;
 	}
 
@@ -1035,12 +1038,12 @@ bool VarSet::dbLoad(Database *db, bool *exists)
 
 	VarSet::RegVarItem item = getRegisterItemCopy(VarSet::REG_DB_TABLE,this);
 	if (!item.isValid) {
-		DEVELTEXT("%s bad configured, VarSet not registered for database",__func__);
+		// DEVELTEXT("%s bad configured, VarSet not registered for database",__func__);
 		return false;
 	}
 
 	if (db_vset_projectid <= 0) {
-		DEVELTEXT("%s bad configured, db_ProjectId for VarSet not defined",__func__);
+		// DEVELTEXT("%s bad configured, db_ProjectId for VarSet not defined",__func__);
 		return false;
 	}
 
@@ -1218,12 +1221,12 @@ bool VarSet::unRegister(VarSet::RegVarType reg_type, VarSet *obj)
 	VarSet::RegVarItem *reg;
 	if (isRegistered(reg_type, obj, &reg)) {
 		if (!var_registry->lockRemoveOne(reg)) {
-			qFatal("%s: unregister failed: %s",__func__,obj->myclassname.toLatin1().data());
+			// qFatal("%s: unregister failed: %s",__func__,obj->myclassname.toLatin1().data());
 		}
 		delete reg;
 		return true;
 	} else {
-		DEBUGERROR("%s: VarSet was not registered: %s",__func__,obj->myclassname.toLatin1().data());
+		// DEBUGERROR("%s: VarSet was not registered: %s",__func__,obj->myclassname.toLatin1().data());
 		return false;
 	}
 }

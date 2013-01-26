@@ -30,7 +30,7 @@ FxItem::~FxItem()
 {
 	// remove the reference to this effect from global list
 	if (! global_fx_list->removeOne(this)) {
-		qDebug("%s: FxItem not found in global list",__func__);
+		// qDebug("%s: FxItem not found in global list",__func__);
 	}
 
 	// delete list if empty

@@ -1,7 +1,7 @@
 #ifndef USERSETTINGS_H
 #define USERSETTINGS_H
 
-#include "tool/prefvarset.h"
+#include "../tool/prefvarset.h"
 
 class UserSettings : public VarSet
 {

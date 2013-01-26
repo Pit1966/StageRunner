@@ -1,6 +1,6 @@
 #include "audioiodevice.h"
 #include "audioformat.h"
-#include "system/log.h"
+#include "../system/log.h"
 
 #include <QTime>
 #include <QByteArray>
@@ -37,11 +37,21 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
 
+	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
+		for (int t=0; t<256; t++) {
+			data[t] = 0;
+		}
+		qDebug("transfer 0");
+		return 256;
+	}
+
 	// qDebug("readData %lli",maxlen);
 	if (maxlen>avail) {
-		qDebug("maxlen, avail, %lli, %lli",maxlen,avail);
+		if (decoding_finished_f) {
+			emit readReady();
+			qDebug("maxlen %lli, avail %lli",maxlen,avail);
+		}
 		maxlen = avail;
-		if (decoding_finished_f) emit readReady();
 	}
 
 	memcpy(data, audio_buffer->data()+bytes_read, maxlen);
@@ -78,8 +88,10 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 	int samplerate = form.sampleRate();
 	QString codec = form.codec();
 
-	// qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
-	//	   ,samplerate,channels,samplesize,codec.toLatin1().data());
+	if (debug) {
+		qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
+			   ,samplerate,channels,samplesize,codec.toLatin1().data());
+	}
 
 }
 

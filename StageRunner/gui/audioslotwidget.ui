@@ -51,44 +51,51 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="slotPlayButton">
-     <property name="text">
-      <string/>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="topMargin">
+      <number>0</number>
      </property>
-     <property name="icon">
-      <iconset resource="../gfx_ressource.qrc">
-       <normaloff>:/gfx/icons/audio_play.png</normaloff>:/gfx/icons/audio_play.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="slotStopButton">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../gfx_ressource.qrc">
-       <normaloff>:/gfx/icons/audio_stop.png</normaloff>:/gfx/icons/audio_stop.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>36</width>
-       <height>36</height>
-      </size>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="slotPlayButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../gfx_ressource.qrc">
+         <normaloff>:/gfx/icons/audio_play.png</normaloff>:/gfx/icons/audio_play.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="slotStopButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../gfx_ressource.qrc">
+         <normaloff>:/gfx/icons/audio_stop.png</normaloff>:/gfx/icons/audio_stop.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>36</width>
+         <height>36</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="qsynthMeter" name="meterWidget" native="true">

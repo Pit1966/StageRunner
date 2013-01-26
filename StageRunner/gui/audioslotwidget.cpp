@@ -1,6 +1,6 @@
 #include "audioslotwidget.h"
 #include "audiocontrolwidget.h"
-#include "config.h"
+#include "../config.h"
 
 #include <QDebug>
 

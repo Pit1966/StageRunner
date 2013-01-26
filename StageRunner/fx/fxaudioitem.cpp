@@ -1,5 +1,5 @@
 #include "fxaudioitem.h"
-#include "config.h"
+#include "../config.h"
 
 #include <QFileInfo>
 

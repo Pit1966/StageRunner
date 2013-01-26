@@ -1,7 +1,7 @@
 #include "audiocontrol.h"
-#include "config.h"
+#include "../config.h"
 #include "audiochannel.h"
-#include "system/log.h"
+#include "../system/log.h"
 
 
 #include <QStringList>

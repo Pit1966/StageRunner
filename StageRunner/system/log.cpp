@@ -4,7 +4,7 @@
 #define LOG_CPP
 
 #include "log.h"
-#include "config.h"
+#include "../config.h"
 #ifdef unix
 #include <unistd.h>
 #endif
@@ -276,13 +276,13 @@ void Log::appendDebugText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
 	va_start(varg_p,str);
 
-	vsnprintf (temp+pn,950,str,varg_p);
+	qvsnprintf (temp+pn,950,str,varg_p);
 	qDebug(temp);
 	va_end(varg_p);
 	do_append_log_text(QString(temp),3, MSG_DEBUGTXT, false);
@@ -295,13 +295,13 @@ void Log::appendDevelText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
 	va_start(varg_p,str);
 
-	vsnprintf (temp+pn,950,str,varg_p);
+	qvsnprintf (temp+pn,950,str,varg_p);
 	qDebug(temp);
 	va_end(varg_p);
 	do_append_log_text(QString(temp),5, MSG_DEVELTXT,false);
@@ -314,12 +314,12 @@ void Log::appendDebugError(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		strcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLatin1().data());
 	}
 
 	va_list varg_p;
 	va_start(varg_p,str);
-	vsnprintf (temp+pn,950,str,varg_p);
+	qvsnprintf (temp+pn,950,str,varg_p);
 	qDebug (temp);
 	va_end(varg_p);
 	do_append_log_error(QString(temp),3, MSG_DEBUGERR, false);

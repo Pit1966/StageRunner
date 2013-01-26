@@ -66,7 +66,7 @@ float qsynthKnob::mouseAngle ( const QPoint& pos )
 {
 	float dx = pos.x() - (width() / 2);
 	float dy = (height() / 2) - pos.y();
-	return 180.0f * atan2f(dx, dy) / float(M_PI);
+	return 180.0f * atan2f(dx, dy) / float(3.1415f);
 }
 
 

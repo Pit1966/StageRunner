@@ -1,6 +1,6 @@
 #include "fxlistwidget.h"
-#include "fx/fxlist.h"
-#include "fx/fxitem.h"
+#include "../fx/fxlist.h"
+#include "../fx/fxitem.h"
 
 #include <QDebug>
 

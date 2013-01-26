@@ -1,7 +1,7 @@
 #include "project.h"
 
-#include "fx/fxlist.h"
-#include "fx/fxitem.h"
+#include "../fx/fxlist.h"
+#include "../fx/fxitem.h"
 
 #include <QDateTime>
 #include <QFile>

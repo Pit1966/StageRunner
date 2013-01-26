@@ -2,7 +2,7 @@
 #define AUDIOSLOTWIDGET_H
 
 #include "ui_audioslotwidget.h"
-#include "system/commandsystem.h"
+#include "../system/commandsystem.h"
 
 using namespace AUDIO;
 

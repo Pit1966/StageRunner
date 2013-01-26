@@ -9,7 +9,7 @@
 #include <QMutex>
 #include <QString>
 
-#include "system/log.h"
+#include "../system/log.h"
 
 // #define USE_SAFE_MUTEX
 

@@ -1,8 +1,8 @@
 #ifndef FXITEM_H
 #define FXITEM_H
 
-#include "system/commandsystem.h"
-#include "tool/prefvarset.h"
+#include "../tool/prefvarset.h"
+#include "../system/commandsystem.h"
 
 #include <QString>
 #include <QList>

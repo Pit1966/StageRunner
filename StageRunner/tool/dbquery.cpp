@@ -11,7 +11,7 @@
 
 #include "dbquery.h"
 #include "database.h"
-#include "system/log.h"
+#include "../system/log.h"
 #include "toolclasses.h"
 
 extern Log *logThread;

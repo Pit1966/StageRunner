@@ -14,8 +14,8 @@
 
 class QThread;
 
-
-struct DBfield {
+class DBfield {
+public:
 	const char * com;
 	const char * para;
 	const char * attr;

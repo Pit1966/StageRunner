@@ -2,7 +2,7 @@
 
 #include "prefvar.h"
 #include "prefvarset.h"
-#include "config.h"
+#include "../config.h"
 
 #include <QSettings>
 #include <QtGlobal>

@@ -1,9 +1,9 @@
 #include "appcentral.h"
-#include "system/commandsystem.h"
-#include "system/audiocontrol.h"
-#include "fx/fxlist.h"
-#include "fx/fxitem.h"
-#include "fx/fxaudioitem.h"
+#include "../system/commandsystem.h"
+#include "../system/audiocontrol.h"
+#include "../fx/fxlist.h"
+#include "../fx/fxitem.h"
+#include "../fx/fxaudioitem.h"
 #include "project.h"
 #include "usersettings.h"
 
@@ -43,6 +43,8 @@ void AppCentral::stopAllFxAudio()
 
 void AppCentral::executeFxCmd(FxItem *fx, int cmd)
 {
+	Q_UNUSED(cmd);
+
 	switch (fx->fxType()) {
 	case FX_AUDIO:
 		unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));

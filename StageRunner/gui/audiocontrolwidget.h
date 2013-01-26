@@ -1,7 +1,7 @@
 #ifndef AUDIOCONTROLWIDGET_H
 #define AUDIOCONTROLWIDGET_H
 
-#include "system/commandsystem.h"
+#include "../system/commandsystem.h"
 
 #include "ui_audiocontrolwidget.h"
 

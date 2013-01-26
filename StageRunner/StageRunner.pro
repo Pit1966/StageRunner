@@ -16,6 +16,7 @@ lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 TARGET = StageRunner
 TEMPLATE = app
 
+INCLUDEPATH += D:\work\PeterCoding\git_StageRunner\StageRunner
 
 SOURCES += main.cpp\
 	fx/fxitem.cpp \
