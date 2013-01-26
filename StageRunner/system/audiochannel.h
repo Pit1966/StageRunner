@@ -33,9 +33,6 @@ private:
 
 	QTime run_time;
 	bool probe_init_f;
-	bool audio_decode_init_f;
-	double frame_energy_peak;
-	double sample_peak;
 
 public:
 	AudioSlot();
@@ -50,6 +47,8 @@ public:
 private slots:
 	void on_audio_output_status_changed(QAudio::State state);
 	void on_audio_io_read_ready();
+	void on_vulevel_changed(int left, int right);
+
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

@@ -12,6 +12,8 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_buffer_count = 0;
 	bytes_avail = 0;
 	bytes_read = 0;
+	frame_energy_peak = 0;
+	sample_peak = 0;
 	audio_format = new AudioFormat(format);
 	audio_buffer = new QByteArray;
 
@@ -37,11 +39,11 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
 
+
 	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
 		for (int t=0; t<256; t++) {
 			data[t] = 0;
 		}
-		qDebug("transfer 0");
 		return 256;
 	}
 
@@ -56,6 +58,9 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 	memcpy(data, audio_buffer->data()+bytes_read, maxlen);
 	bytes_read += maxlen;
+
+	calc_vu_level(data,maxlen);
+
 	return maxlen;
 }
 
@@ -95,6 +100,94 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 
 }
 
+void AudioIODevice::calc_vu_level(const char *data, int size)
+{
+	if (!audio_format) return;
+
+	qint64 left = 0;
+	qint64 right = 0;
+	int channels = audio_format->channelCount();
+	int frames = size / channels;
+
+	if (frames == 0) return;
+
+
+	switch (audio_format->sampleType()) {
+	case QAudioFormat::SignedInt:
+	case QAudioFormat::UnSignedInt:
+	{
+		qint64 energy[4] = {0,0,0,0};
+		switch (audio_format->sampleSize()) {
+		case 16:
+		{
+			const qint16 *dat = reinterpret_cast<const qint16*>(data);
+			frames /= 2;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					qint16 val = dat[frame*channels+chan];
+					if (val > sample_peak) sample_peak = val;
+					if (val > 0) {
+						energy[chan] += val;
+					} else {
+						energy[chan] -= val;
+					}
+
+				}
+			}
+		}
+			break;
+		default:
+			DEBUGERROR("Sampletype in audiostream not supported");
+			break;
+		}
+		left = energy[0];
+		right = energy[1];
+	}
+		break;
+	case QAudioFormat::Float:
+	{
+		double energy[4] = {0,0,0,0};
+		switch (audio_format->sampleSize()) {
+		case 32:
+		{
+			const float *dat = reinterpret_cast<const float*>(data);
+			frames /= 4;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					float val = dat[frame*channels+chan];
+					if (val > sample_peak) sample_peak = val;
+					val *= 32768;
+					if (val > 0) {
+						energy[chan] += val;
+					} else {
+						energy[chan] -= val;
+					}
+
+				}
+			}
+		}
+			break;
+		default:
+			DEBUGERROR("Sampletype in audiostream not supported");
+			break;
+		}
+		left = energy[0];
+		right = energy[1];
+	}
+		break;
+	case QAudioFormat::Unknown:
+		DEBUGERROR("Sampletype in audiostream unknown");
+		break;
+	}
+
+	//	qDebug("left:%lli right:%lli",left/frames,right/frames);
+	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
+
+	emit vuLevelChanged(left/frames, right/frames);
+}
+
 void AudioIODevice::start()
 {
 	open(QIODevice::ReadOnly);
@@ -103,6 +196,8 @@ void AudioIODevice::start()
 	audio_buffer->clear();
 	bytes_read = 0;
 	bytes_avail = 0;
+	frame_energy_peak = 0;
+	sample_peak = 0;
 
 #ifdef IS_QT5
 	decoding_finished_f = false;
@@ -135,4 +230,5 @@ void AudioIODevice::on_decoding_finished()
 	LOGTEXT(tr("Decoding of audio file '%1' finished").arg(current_filename));
 	if (debug) qDebug("Audio decoding finished");
 }
+
 

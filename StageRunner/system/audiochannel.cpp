@@ -19,15 +19,13 @@ AudioSlot::AudioSlot()
 	run_status = AUDIO_IDLE;
 	slotNumber = -1;
 	probe_init_f = false;
-	audio_decode_init_f = false;
-	frame_energy_peak = 0;
-	sample_peak = 0;
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()));
+	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)));
 
 }
 
@@ -41,9 +39,6 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 {
 	LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
 			.arg(fxa->displayName()).arg(slotNumber+1));
-
-	sample_peak = 0;
-	frame_energy_peak = 0;
 
 	run_status = AUDIO_INIT;
 	run_time.start();
@@ -132,6 +127,11 @@ void AudioSlot::on_audio_io_read_ready()
 	audio_io->stop();
 }
 
+void AudioSlot::on_vulevel_changed(int left, int right)
+{
+	emit vuLevelChanged(slotNumber, left, right);
+}
+
 #ifndef IS_QT5
 void AudioSlot::setPhononAudioState(Phonon::State newstate, Phonon::State oldstate)
 {
@@ -185,103 +185,3 @@ void AudioSlot::setPhononFinished()
 	DEBUGTEXT("AudioSlot:%d finished",slotNumber+1);
 }
 #endif
-
-//void AudioSlot::monitorQtAudioStream(QAudioBuffer audiobuf)
-//{
-//	QAudioFormat form = audiobuf.format();
-//	int samplesize = form.sampleSize();
-
-//	int samples = audiobuf.sampleCount();
-//	int frames = audiobuf.frameCount();
-//	if (frames <= 0) return;
-
-//	int channels = form.channelCount();
-//	int samplerate = form.sampleRate();
-//	QString codec = form.codec();
-
-//	if (probe_init_f) {
-//		qDebug("samples:%d/%d (channels:%d) samplerate:%d - codec:%s",samples,frames,channels,samplerate,codec.toLatin1().data());
-//		qDebug() << "SampleType" << form.sampleType() << "Samplesize" << form.sampleSize();
-//	}
-
-//	qint64 left = 0;
-//	qint64 right = 0;
-
-//	switch (form.sampleType()) {
-//	case QAudioFormat::SignedInt:
-//	case QAudioFormat::UnSignedInt:
-//		{
-//			qint64 energy[4] = {0,0,0,0};
-//			switch (samplesize) {
-//			case 16:
-//				{
-//					const qint16 *dat = audiobuf.constData<qint16>();
-//					for (int chan = 0; chan < channels; chan++) {
-//						for (int frame = 0; frame<frames; frame++) {
-//							qint16 val = dat[frame*channels+chan];
-//							if (val > sample_peak) sample_peak = val;
-//							if (val > 0) {
-//								energy[chan] += val;
-//							} else {
-//								energy[chan] -= val;
-//							}
-
-//						}
-//					}
-//				}
-//				break;
-//			default:
-//				if (probe_init_f) {
-//					DEBUGERROR("Sampletype in audiostream not supported");
-//				}
-//				break;
-//			}
-//			left = energy[0];
-//			right = energy[1];
-//		}
-//		break;
-//	case QAudioFormat::Float:
-//		{
-//			double energy[4] = {0,0,0,0};
-//			switch (samplesize) {
-//			case 32:
-//				{
-//					const float *dat = audiobuf.constData<float>();
-//					for (int chan = 0; chan < channels; chan++) {
-//						for (int frame = 0; frame<frames; frame++) {
-//							float val = dat[frame*channels+chan];
-//							if (val > sample_peak) sample_peak = val;
-//							val *= 32768;
-//							if (val > 0) {
-//								energy[chan] += val;
-//							} else {
-//								energy[chan] -= val;
-//							}
-
-//						}
-//					}
-//				}
-//				break;
-//			default:
-//				if (probe_init_f) {
-//					DEBUGERROR("Sampletype in audiostream not supported");
-//				}
-//				break;
-//			}
-//			left = energy[0];
-//			right = energy[1];
-//		}
-//		break;
-//	case QAudioFormat::Unknown:
-//		if (probe_init_f) {
-//			DEBUGERROR("Sampletype in audiostream unknown");
-//		}
-//		break;
-//	}
-
-//	//	qDebug("left:%lli right:%lli",left/frames,right/frames);
-//	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
-
-//	if (run_status == AUDIO_RUNNING) emit vuLevelChanged(slotNumber, left/frames, right/frames);
-//	probe_init_f = false;
-//}

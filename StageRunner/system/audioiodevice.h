@@ -25,6 +25,9 @@ public:
 	void examineQAudioFormat(AudioFormat & form);
 	AudioFormat & audioFormat() const {return *audio_format;}
 
+private:
+	void calc_vu_level(const char *data, int size);
+
 
 private:
 	QString current_filename;
@@ -37,8 +40,9 @@ private:
 	qint64 bytes_read;
 	int audio_buffer_count;
 	bool decoding_finished_f;
+	double frame_energy_peak;
+	double sample_peak;
 
-signals:
 
 public slots:
 	void start();
@@ -50,6 +54,7 @@ private slots:
 
 signals:
 	void readReady();
+	void vuLevelChanged(int left, int right);
 
 };
 
