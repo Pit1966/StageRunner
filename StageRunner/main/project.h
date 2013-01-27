@@ -1,7 +1,7 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
-#include "../tool/prefvarset.h"
+#include "tool/prefvarset.h"
 
 class FxList;
 

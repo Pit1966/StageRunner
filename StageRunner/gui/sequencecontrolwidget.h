@@ -2,8 +2,10 @@
 #define SEQUENCECONTROLWIDGET_H
 
 #include "ui_sequencecontrolwidget.h"
+#include "system/commandsystem.h"
 
 class AppCentral;
+class FxItem;
 
 class SequenceControlWidget : public QGroupBox, private Ui::SequenceControlWidget
 {
@@ -13,10 +15,22 @@ private:
 	AppCentral *appcentral;
 
 public:
-	explicit SequenceControlWidget(QWidget *parent = 0);
+	SequenceControlWidget(QWidget *parent = 0);
+
+
+private:
+	void init();
+
+public slots:
+	void setNextFx(FxItem *fx);
+
 private slots:
 	void on_ctrlPlayButton_clicked();
 	void on_ctrlStopButton_clicked();
+
+signals:
+	void fxCmdActivated(FxItem *, CtrlCmd);
+
 };
 
 #endif // SEQUENCECONTROLWIDGET_H

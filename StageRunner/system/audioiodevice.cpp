@@ -44,18 +44,20 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 		if (run_time.elapsed() > 500) {
 			DEBUGERROR("No data available from audio IODevice after 300ms -> Cancel");
 			emit readReady();
+			return 0;
 		}
-		for (int t=0; t<256; t++) {
+		for (int t=0; t<maxlen; t++) {
 			data[t] = 0;
 		}
-		return 256;
+		return maxlen;
 	}
 
 	// qDebug("readData %lli",maxlen);
 	if (maxlen>avail) {
 		if (decoding_finished_f) {
-			emit readReady();
 			qDebug("maxlen %lli, avail %lli",maxlen,avail);
+			emit readReady();
+			return 0;
 		}
 		maxlen = avail;
 	}

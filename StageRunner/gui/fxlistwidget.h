@@ -2,6 +2,8 @@
 #define FXLISTWIDGET_H
 
 #include "ui_fxlistwidget.h"
+#include "system/commandsystem.h"
+
 #include <QTableWidgetItem>
 
 class FxList;
@@ -32,18 +34,24 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 
 private:
 	bool is_modified_f;
-
+	FxList * myfxlist;
 
 public:
 	FxListWidget(QWidget *parent = 0);
 
-	void setFxList(const FxList *fxlist);
+	void setFxList(FxList *fxlist);
+
+private:
+	void init();
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);
 
+	void on_fxTable_itemDoubleClicked(QTableWidgetItem *item);
+
 signals:
-	void fxCmdActivated(FxItem *, int);
+	void fxCmdActivated(FxItem *, CtrlCmd);
+	void fxItemSelected(FxItem *);
 
 };
 

@@ -1,6 +1,6 @@
 #include "fxlistwidget.h"
-#include "../fx/fxlist.h"
-#include "../fx/fxitem.h"
+#include "fx/fxlist.h"
+#include "fx/fxitem.h"
 
 #include <QDebug>
 
@@ -10,18 +10,23 @@
 FxListWidget::FxListWidget(QWidget *parent) :
 	QWidget(parent)
 {
+	init();
+
 	setupUi(this);
 	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
 	fxTable->setDragEnabled(true);
 	fxTable->setDropIndicatorShown(true);
-
-	is_modified_f = false;
 }
 
-void FxListWidget::setFxList(const FxList *fxlist)
+void FxListWidget::setFxList(FxList *fxlist)
 {
 	fxTable->clear();
 	is_modified_f = true;
+	if (!fxlist) {
+		myfxlist = 0;
+		return;
+	}
+	myfxlist = fxlist;
 
 	int rows = fxlist->size();
 
@@ -48,6 +53,11 @@ void FxListWidget::setFxList(const FxList *fxlist)
 
 }
 
+void FxListWidget::init()
+{
+	is_modified_f = false;
+}
+
 
 FxListWidgetItem::FxListWidgetItem(FxItem *fxitem, const QString &text)
 	: QTableWidgetItem(text)
@@ -64,7 +74,18 @@ void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 
 	if (fx) {
 		qDebug() << "clicked:" << fx->displayName() << "ColType:" << myitem->columnType;
+		myfxlist->setNextFx(fx);
+		emit fxItemSelected(fx);
+	}
+}
+
+void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
+{
+	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
+	FxItem *fx = myitem->linkedFxItem;
+
+	if (fx) {
+		qDebug() << "double clicked:" << fx->displayName() << "ColType:" << myitem->columnType;
 		emit fxCmdActivated(fx,CMD_FX_START);
 	}
-
 }

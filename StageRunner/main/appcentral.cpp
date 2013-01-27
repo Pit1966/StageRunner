@@ -1,11 +1,11 @@
 #include "appcentral.h"
-#include "../system/commandsystem.h"
-#include "../system/audiocontrol.h"
-#include "../fx/fxlist.h"
-#include "../fx/fxitem.h"
-#include "../fx/fxaudioitem.h"
+#include "system/audiocontrol.h"
+#include "fx/fxlist.h"
+#include "fx/fxitem.h"
+#include "fx/fxaudioitem.h"
 #include "project.h"
 #include "usersettings.h"
+#include "fx/fxlist.h"
 
 using namespace AUDIO;
 
@@ -41,18 +41,72 @@ void AppCentral::stopAllFxAudio()
 	unitAudio->stopAllFxAudio();
 }
 
-void AppCentral::executeFxCmd(FxItem *fx, int cmd)
+int AppCentral::registerFxList(FxList *fxlist)
 {
-	Q_UNUSED(cmd);
+	if (fxlist->regId() > 0) {
+		DEBUGERROR("FxList is already registered with Id: %d",fxlist->regId());
+		return 0;
+	}
+
+	int id = 0;
+	for (int t=0; t<registered_fx_lists.size(); t++) {
+		FxList *fxl = registered_fx_lists.at(t);
+		if (fxl->regId() > id) id = fxl->regId();
+	}
+	id++;
+
+	fxlist->setRegId(id);
+	registered_fx_lists.append(fxlist);
+	return id;
+}
+
+FxList *AppCentral::getRegisteredFxList(int id)
+{
+	for (int t=0; t<registered_fx_lists.size(); t++) {
+		if (id == registered_fx_lists.at(t)->regId()) {
+			return registered_fx_lists.at(t);
+		}
+	}
+	DEBUGERROR("FxList with Id: %d is not registered",id);
+
+	return 0;
+}
+
+
+
+void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
+{
+	if (!FxItem::exists(fx)) {
+		DEBUGERROR("Execute FX: FxItem not found in FX list");
+		return;
+	}
 
 	switch (fx->fxType()) {
 	case FX_AUDIO:
-		unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));
+		switch (cmd) {
+		case CMD_AUDIO_START:
+			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));
+			break;
+		default:
+			DEBUGERROR("Execute FX: Unimplemented Command: %d",cmd);
+			break;
+		}
 		break;
 	default:
 		break;
 	}
+}
 
+void AppCentral::executeNextFx(int listID)
+{
+	qDebug("Execute next in Sequence for list Id: %d",listID);
+	FxList *fxlist = getRegisteredFxList(listID);
+	if (!fxlist) return;
+
+	FxItem *fx = fxlist->getSequenceNext();
+	if (!fx) return;
+
+	executeFxCmd(fx,CMD_FX_START);
 }
 
 AppCentral::AppCentral()
@@ -73,6 +127,9 @@ void AppCentral::init()
 
 	unitAudio = new AudioControl;
 	project = new Project;
+
+	int id = registerFxList(project->fxList);
+	qDebug("Registered Project FX list with Id:%d",id);
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 }

@@ -1,6 +1,8 @@
 #ifndef APPCENTRAL_H
 #define APPCENTRAL_H
 
+#include "system/commandsystem.h"
+
 #include <QList>
 #include <QObject>
 
@@ -8,6 +10,7 @@ class AudioControl;
 class Project;
 class UserSettings;
 class FxItem;
+class FxList;
 
 class AppCentral : public QObject
 {
@@ -15,6 +18,8 @@ class AppCentral : public QObject
 
 private:
 	static AppCentral *myinstance;
+	QList<FxList*>registered_fx_lists;
+
 
 public:
 	AudioControl *unitAudio;
@@ -34,9 +39,12 @@ public:
 
 
 	void stopAllFxAudio();
+	int registerFxList(FxList *fxlist);
+	FxList *getRegisteredFxList(int id);
 
 public slots:
-	void executeFxCmd(FxItem *fx, int cmd);
+	void executeFxCmd(FxItem *fx, CtrlCmd cmd);
+	void executeNextFx(int listID);
 
 };
 

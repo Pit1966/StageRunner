@@ -1,12 +1,12 @@
 #include "stagerunnermainwin.h"
-#include "../system/commandsystem.h"
-#include "../main/appcentral.h"
-#include "../system/audiocontrol.h"
-#include "../fx/fxlist.h"
-#include "../main/project.h"
-#include "../main/usersettings.h"
-#include "../thirdparty/widget/qsynthdialpeppinostyle.h"
-#include "../thirdparty/widget/qsynthdialclassicstyle.h"
+#include "system/commandsystem.h"
+#include "main/appcentral.h"
+#include "system/audiocontrol.h"
+#include "fx/fxlist.h"
+#include "main/project.h"
+#include "main/usersettings.h"
+#include "thirdparty/widget/qsynthdialpeppinostyle.h"
+#include "thirdparty/widget/qsynthdialclassicstyle.h"
 
 #include <QFileDialog>
 
@@ -34,12 +34,16 @@ StageRunnerMainWin::~StageRunnerMainWin()
 
 void StageRunnerMainWin::initConnects()
 {
-	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,int)),mainapp,SLOT(executeFxCmd(FxItem*,int)));
+	// FxListWidget (Liste der Effekte im Mainwin)
+	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),mainapp,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
+	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 
 	// Audio Control Panel <-> Audio Control
 	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
+
+
 
 }
 

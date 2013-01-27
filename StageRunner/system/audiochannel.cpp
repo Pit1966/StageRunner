@@ -22,10 +22,11 @@ AudioSlot::AudioSlot()
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
+	audio_output->setBufferSize(1000);
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
-	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()));
-	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)));
+	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
+	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)),Qt::QueuedConnection);
 
 }
 
@@ -37,6 +38,8 @@ AudioSlot::~AudioSlot()
 
 bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 {
+	if (!audio_output) return false;
+
 	LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
 			.arg(fxa->displayName()).arg(slotNumber+1));
 
@@ -52,7 +55,8 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	audio_io->setSourceFilename(fxa->filePath());
 	// Start decoding of audio file to default (pcm 44100, 2Ch, 16bit) format
 	audio_io->start();
-	// Feed Audio Device with decoded data
+	// Feed Audio Device with decoded data and set initial Volume
+	setVolume(fxa->initialVolume);
 	audio_output->start(audio_io);
 
 	bool ok = false;
@@ -90,6 +94,9 @@ bool AudioSlot::stopFxAudio()
 
 void AudioSlot::setVolume(qint32 vol)
 {
+	if (!audio_output) return;
+
+	audio_output->setVolume((float)vol/MAX_VOLUME);
 
 	LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2").arg(slotNumber+1).arg(vol));
 }
@@ -109,7 +116,6 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 	case QAudio::SuspendedState:
 	case QAudio::StoppedState:
 		run_status = AUDIO_IDLE;
-		audio_output->stop();
 		break;
 	}
 
