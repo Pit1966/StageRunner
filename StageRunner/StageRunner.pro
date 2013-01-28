@@ -43,7 +43,8 @@ SOURCES += main.cpp\
 	gui/audioslotwidget.cpp \
 	gui/audiocontrolwidget.cpp \
     system/audioiodevice.cpp \
-    system/audioformat.cpp
+    system/audioformat.cpp \
+    gui/ptablewidget.cpp
 
 HEADERS  += \
 	fx/fxitem.h \
@@ -72,7 +73,8 @@ HEADERS  += \
 	gui/audiocontrolwidget.h \
 	system/commandsystem.h \
     system/audioiodevice.h \
-    system/audioformat.h
+    system/audioformat.h \
+    gui/ptablewidget.h
 
 FORMS    += \
 	gui/fxlistwidget.ui \

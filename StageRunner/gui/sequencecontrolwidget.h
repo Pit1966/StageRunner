@@ -28,6 +28,8 @@ private slots:
 	void on_ctrlPlayButton_clicked();
 	void on_ctrlStopButton_clicked();
 
+	void on_masterVolDial_sliderMoved(int position);
+
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);
 

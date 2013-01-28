@@ -3,11 +3,6 @@
 
 #include "commandsystem.h"
 
-#ifndef IS_QT5
-#include <phonon/BackendCapabilities>
-#include <phonon/AudioOutputDevice>
-#endif
-
 #include <QObject>
 #include <QList>
 
@@ -21,9 +16,7 @@ class AudioControl : public QObject
 	Q_OBJECT
 private:
 	QList<AudioSlot*> audio_channels;
-#ifndef IS_QT5
-	QList<Phonon::EffectDescription> available_effects;
-#endif
+	int master_volume;
 
 public:
 	AudioControl();
@@ -35,9 +28,13 @@ public slots:
 	bool startFxAudio(FxAudioItem *fxa);
 	void stopAllFxAudio();
 	void stopFxAudio(int slot);
+	void fadeoutAllFxAudio(int time_ms = 5000);
+	void fadeoutFxAudio(int slot, int time_ms);
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);
+	void setMasterVolume(int vol);
+	void setVolume(int slot, int vol);
 
 private:
 	void init();

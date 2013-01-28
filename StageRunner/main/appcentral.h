@@ -39,6 +39,7 @@ public:
 
 
 	void stopAllFxAudio();
+	void fadeoutAllFxAudio();
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
 

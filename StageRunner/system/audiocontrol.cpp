@@ -82,6 +82,20 @@ void AudioControl::stopFxAudio(int slot)
 	}
 }
 
+void AudioControl::fadeoutAllFxAudio(int time_ms)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		audio_channels[t]->fadeoutFxAudio(time_ms);
+	}
+}
+
+void AudioControl::fadeoutFxAudio(int slot, int time_ms)
+{
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		audio_channels[slot]->fadeoutFxAudio(time_ms);
+	}
+}
+
 void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 {
 	// qDebug("AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded");
@@ -108,10 +122,38 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 	}
 }
 
+void AudioControl::setMasterVolume(int vol)
+{
+	if (vol < 0) {
+		vol = 0;
+	}
+	else if (vol > MAX_VOLUME) {
+		vol = MAX_VOLUME;
+	}
+	master_volume = vol;
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		audio_channels[t]->setMasterVolume(vol);
+	}
+}
+
+void AudioControl::setVolume(int slot, int vol)
+{
+	if (vol < 0) {
+		vol = 0;
+	}
+	else if (vol > MAX_VOLUME) {
+		vol = MAX_VOLUME;
+	}
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		audio_channels[slot]->setVolume(vol);
+	}
+}
+
 void AudioControl::init()
 {
+	master_volume = MAX_VOLUME;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		AudioSlot *slot = new AudioSlot;
+		AudioSlot *slot = new AudioSlot(this);
 		audio_channels.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));

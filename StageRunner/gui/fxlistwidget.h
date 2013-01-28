@@ -5,9 +5,11 @@
 #include "system/commandsystem.h"
 
 #include <QTableWidgetItem>
+#include <QTableWidget>
 
 class FxList;
 class FxItem;
+
 
 class FxListWidgetItem : public QTableWidgetItem
 {
@@ -35,23 +37,32 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 private:
 	bool is_modified_f;
 	FxList * myfxlist;
+	FxItem * cur_selected_item;
 
 public:
 	FxListWidget(QWidget *parent = 0);
-
 	void setFxList(FxList *fxlist);
+
+public slots:
+	void selectFx(FxItem *fx);
+
 
 private:
 	void init();
 
+public slots:
+	void refreshList();
+
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);
-
 	void on_fxTable_itemDoubleClicked(QTableWidgetItem *item);
+	void moveRowFromTo(int srcrow, int destrow);
+	void on_autoProceedCheck_clicked(bool checked);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);
 	void fxItemSelected(FxItem *);
+	void dropEventReceived(QString text);
 
 };
 

@@ -5,6 +5,7 @@
 #include "system/log.h"
 #include "config.h"
 #include "audioiodevice.h"
+#include "audiocontrol.h"
 
 #include <QTime>
 #include <QApplication>
@@ -12,13 +13,15 @@
 #include <QMediaContent>
 #endif
 
-AudioSlot::AudioSlot()
+AudioSlot::AudioSlot(AudioControl *parent)
 	: QObject()
 {
 
 	run_status = AUDIO_IDLE;
 	slotNumber = -1;
-	probe_init_f = false;
+	fade_out_initial_vol = 0;
+	current_fx = 0;
+	master_volume = MAX_VOLUME;
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
@@ -27,6 +30,10 @@ AudioSlot::AudioSlot()
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
 	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)),Qt::QueuedConnection);
+
+	//Fadeout Timeline
+	connect(&fadeout_timeline,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_out_frame_changed(qreal)));
+	connect(&fadeout_timeline,SIGNAL(finished()),this,SLOT(on_fade_out_finished()));
 
 }
 
@@ -66,6 +73,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->displayName().toLatin1().data(),run_time.elapsed());
 			ok = true;
 			run_time.start();
+			current_fx = fxa;
 		}
 		else if (run_status == AUDIO_ERROR) {
 			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->displayName().toLatin1().data());
@@ -79,7 +87,12 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 
 bool AudioSlot::stopFxAudio()
 {
+	if (fadeout_timeline.state() == QTimeLine::Running) {
+		fadeout_timeline.stop();
+	}
+
 	emit vuLevelChanged(slotNumber,0,0);
+
 
 	if (run_status != AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
@@ -92,13 +105,43 @@ bool AudioSlot::stopFxAudio()
 	return false;
 }
 
-void AudioSlot::setVolume(qint32 vol)
+bool AudioSlot::fadeoutFxAudio(int time_ms)
+{
+	// Fadeout only possible if audio is running
+	if (audio_output->state() != QAudio::ActiveState) return false;
+
+	if (!FxItem::exists(current_fx)) return false;
+
+	// Set Fadeout time
+	fade_out_initial_vol = audio_output->volume() * MAX_VOLUME;
+	fadeout_timeline.setDuration(time_ms);
+
+	// and start the time line ticker
+	fadeout_timeline.start();
+	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
+			.arg(slotNumber+1).arg(current_fx->displayName()).arg(time_ms));
+}
+
+void AudioSlot::setVolume(int vol)
 {
 	if (!audio_output) return;
 
-	audio_output->setVolume((float)vol/MAX_VOLUME);
+	float level = (float)vol / MAX_VOLUME;
+	if (master_volume >= 0) {
+		level *= (float)master_volume / MAX_VOLUME;
+	}
+	audio_output->setVolume(level);
+	current_volume = vol;
 
-	LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2").arg(slotNumber+1).arg(vol));
+	LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol));
+}
+
+void AudioSlot::setMasterVolume(int vol)
+{
+	master_volume = vol;
+	if (run_status != AUDIO_IDLE) {
+		setVolume(current_volume);
+	}
 }
 
 void AudioSlot::on_audio_output_status_changed(QAudio::State state)
@@ -138,6 +181,29 @@ void AudioSlot::on_vulevel_changed(int left, int right)
 	emit vuLevelChanged(slotNumber, left, right);
 }
 
+void AudioSlot::on_fade_out_frame_changed(qreal value)
+{
+	// calculate new volume from timeline value
+	qreal new_volume = fade_out_initial_vol;
+	new_volume -= value * fade_out_initial_vol;
+
+	// set volume in audio output
+	setVolume(new_volume);
+
+	// send message in order to update GUI
+	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
+	msg.volume = new_volume;
+	emit audioCtrlMsgEmitted(msg);
+}
+
+void AudioSlot::on_fade_out_finished()
+{
+	stopFxAudio();
+
+	LOGTEXT(tr("Fade out finished for slot %1: '%2'")
+			.arg(slotNumber+1).arg(current_fx->displayName()));
+}
+
 #ifndef IS_QT5
 void AudioSlot::setPhononAudioState(Phonon::State newstate, Phonon::State oldstate)
 {
@@ -152,7 +218,6 @@ void AudioSlot::setPhononAudioState(Phonon::State newstate, Phonon::State oldsta
 	case Phonon::PlayingState:
 		DEBUGTEXT("AudioSlot:%d Playing",slotNumber+1);
 		run_status = AUDIO_RUNNING;
-		probe_init_f = true;
 		break;
 	case Phonon::StoppedState:
 		DEBUGTEXT("AudioSlot:%d Stopped",slotNumber+1);

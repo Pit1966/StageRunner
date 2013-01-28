@@ -28,14 +28,17 @@ public:
 	void clearProject();
 	void initAppDefaults();
 
+private:
+	bool eventFilter(QObject *obj, QEvent *event);
+
 
 private slots:
+	void slot_addFxFile(QString path);
 	void on_addAudioFxButton_clicked();
 	void on_actionSave_Project_as_triggered();
-
 	void on_actionLoad_Project_triggered();
-
 	void on_actionNew_Project_triggered();
+
 
 private:
 	void init();

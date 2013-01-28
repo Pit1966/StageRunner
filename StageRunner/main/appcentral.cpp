@@ -41,6 +41,11 @@ void AppCentral::stopAllFxAudio()
 	unitAudio->stopAllFxAudio();
 }
 
+void AppCentral::fadeoutAllFxAudio()
+{
+	unitAudio->fadeoutAllFxAudio();
+}
+
 int AppCentral::registerFxList(FxList *fxlist)
 {
 	if (fxlist->regId() > 0) {
@@ -103,7 +108,7 @@ void AppCentral::executeNextFx(int listID)
 	FxList *fxlist = getRegisteredFxList(listID);
 	if (!fxlist) return;
 
-	FxItem *fx = fxlist->getSequenceNext();
+	FxItem *fx = fxlist->stepToSequenceNext();
 	if (!fx) return;
 
 	executeFxCmd(fx,CMD_FX_START);

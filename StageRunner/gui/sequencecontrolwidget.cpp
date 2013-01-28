@@ -2,12 +2,18 @@
 
 #include "main/appcentral.h"
 #include "fx/fxitem.h"
+#include "config.h"
+#include "system/audiocontrol.h"
+
+#include <QKeyEvent>
 
 SequenceControlWidget::SequenceControlWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
 	init();
 	setupUi(this);
+	masterVolDial->setRange(0,MAX_VOLUME);
+	masterVolDial->setValue(MAX_VOLUME);
 
 	appcentral = AppCentral::instance();
 }
@@ -35,4 +41,7 @@ void SequenceControlWidget::on_ctrlStopButton_clicked()
 	appcentral->stopAllFxAudio();
 }
 
-
+void SequenceControlWidget::on_masterVolDial_sliderMoved(int position)
+{
+	appcentral->unitAudio->setMasterVolume(position);
+}

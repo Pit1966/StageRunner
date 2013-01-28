@@ -37,13 +37,16 @@ void StageRunnerMainWin::initConnects()
 	// FxListWidget (Liste der Effekte im Mainwin)
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),mainapp,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
+	connect(fxListWidget,SIGNAL(dropEventReceived(QString)),this,SLOT(slot_addFxFile(QString)));
+	connect(mainapp->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
+
 
 	// Audio Control Panel <-> Audio Control
 	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
 
-
+	qApp->installEventFilter(this);
 
 }
 
@@ -155,3 +158,52 @@ void StageRunnerMainWin::on_actionNew_Project_triggered()
 	clearProject();
 
 }
+
+bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
+{
+	if (event->type() == 6) {
+		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+		int key = ev->key();
+		// if (key == Qt::Key_Shift) shift_pressed_f = true;
+		qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
+		switch (key) {
+		case Qt::Key_Space:
+			mainapp->fadeoutAllFxAudio();
+			break;
+		case Qt::Key_Escape:
+			mainapp->stopAllFxAudio();
+			break;
+		case Qt::Key_Delete:
+			mainapp->project->fxList->deleteFx(mainapp->project->fxList->nextFx());
+			break;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+	if (event->type() == 7) {
+		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+		// if (ev->key() == Qt::Key_Shift) shift_pressed_f = false;
+		// qDebug() << "keyup" << ev->key() << " " << obj->objectName();
+	}
+	return qApp->eventFilter(obj, event);
+}
+
+void StageRunnerMainWin::slot_addFxFile(QString path)
+{
+	if (!path.startsWith("file://")) {
+		DEBUGERROR("Add Drag'n'Drop File: %s not valid",path.toLatin1().data());
+		return;
+	}
+	path = path.mid(7);
+
+	if (path.size()) {
+		qDebug() << path;
+		FxList *fxlist = mainapp->project->fxList;
+		fxlist->addFxAudioSimple(path);
+		fxListWidget->setFxList(fxlist);
+	}
+}
+
