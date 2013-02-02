@@ -25,34 +25,6 @@ AudioControl::~AudioControl()
 
 void AudioControl::getAudioDevices()
 {
-#ifndef IS_QT5
-
-	QList<Phonon::AudioOutputDevice>audiodevs = Phonon::BackendCapabilities::availableAudioOutputDevices();
-
-	qDebug() << "Audio Devices";
-	for (int t=0; t<audiodevs.size(); t++) {
-		Phonon::AudioOutputDevice dev = audiodevs[t];
-
-		qDebug() << "valid:" << dev.isValid() << "name:" << dev.name();
-		// qDebug() << "props" << dev.propertyNames();
-	}
-
-
-	QList<Phonon::EffectDescription>effects = Phonon::BackendCapabilities::availableAudioEffects();
-
-	qDebug() << "Audio Fx";
-	for (int t=0; t<effects.size(); t++) {
-		Phonon::EffectDescription fx = effects[t];
-
-		qDebug() << fx.name();
-		qDebug() << fx.propertyNames();
-		qDebug() << "--------------------------------";
-	}
-
-	// QStringList mime = Phonon::BackendCapabilities::availableMimeTypes();
-	// qDebug() << mime;
-
-#endif
 }
 
 bool AudioControl::startFxAudio(FxAudioItem *fxa)

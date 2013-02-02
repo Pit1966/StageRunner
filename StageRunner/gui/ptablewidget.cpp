@@ -40,19 +40,18 @@ void PTableWidget::dropEvent(QDropEvent *event)
 	// QTableWidget::dropEvent(event);
 	const QMimeData * mime = event->mimeData();
 	QPoint droppos = event->pos();
+	drag_dest_row = indexAt(droppos).row();
 
 	qDebug("Drop event '%s'",mime->text().toLatin1().data());
 
 	if (event->source() == this) {
-		drag_dest_row = indexAt(droppos).row();
 		qDebug("Moved from row %d to %d",drag_start_row, drag_dest_row);
-
 		event->setDropAction(Qt::MoveAction);
-		event->ignore();
+		event->accept();
 		emit rowMovedFromTo(drag_start_row,drag_dest_row);
 	} else {
 		event->setDropAction(Qt::CopyAction);
 		event->accept();
-		emit dropEventReceived(mime->text());
+		emit dropEventReceived(mime->text(),drag_dest_row);
 	}
 }

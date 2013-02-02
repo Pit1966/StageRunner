@@ -42,7 +42,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
 		if (run_time.elapsed() > 500) {
-			DEBUGERROR("No data available from audio IODevice after 300ms -> Cancel");
+			DEBUGERROR("No data available from audio IODevice after 500ms -> Cancel");
 			emit readReady();
 			return 0;
 		}
@@ -85,8 +85,10 @@ qint64 AudioIODevice::bytesAvailable() const
 
 bool AudioIODevice::setSourceFilename(const QString &filename)
 {
+#ifdef IS_QT5
 	audio_decoder->setSourceFilename(filename);
 	audio_decoder->setAudioFormat(*audio_format);
+#endif
 	current_filename = filename;
 
 	return true;
@@ -221,14 +223,16 @@ void AudioIODevice::stop()
 
 void AudioIODevice::process_decoder_buffer()
 {
+#ifdef IS_QT5
 	QAudioBuffer audiobuf = audio_decoder->read();
-	AudioFormat form = audiobuf.format();
+	// AudioFormat form = audiobuf.format();
 	const char *data = audiobuf.constData<char>();
 	audio_buffer->append(data,audiobuf.byteCount());
 	bytes_avail += audiobuf.byteCount();
 
 	// qDebug("processAudio %d: size: %d",audio_buffer_count, frames);
 	audio_buffer_count++;
+#endif
 }
 
 void AudioIODevice::on_decoding_finished()

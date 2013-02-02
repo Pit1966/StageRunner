@@ -42,6 +42,8 @@ private:
 public:
 	FxListWidget(QWidget *parent = 0);
 	void setFxList(FxList *fxlist);
+	inline FxList * fxList() const {return myfxlist;}
+	void setAutoProceedSequence(bool state);
 
 public slots:
 	void selectFx(FxItem *fx);
@@ -59,10 +61,13 @@ private slots:
 	void moveRowFromTo(int srcrow, int destrow);
 	void on_autoProceedCheck_clicked(bool checked);
 
+	void on_fxTable_itemChanged(QTableWidgetItem *item);
+
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);
 	void fxItemSelected(FxItem *);
-	void dropEventReceived(QString text);
+	void dropEventReceived(QString text, int row);
+	void listModified();
 
 };
 

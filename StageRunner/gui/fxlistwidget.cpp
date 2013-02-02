@@ -16,8 +16,8 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
 	fxTable->setDropIndicatorShown(true);
 	// fxTable->viewport()->acceptDrops();
-	connect(fxTable,SIGNAL(dropEventReceived(QString)),this,SIGNAL(dropEventReceived(QString)));
-	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)));
+	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
+	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
 }
 
 void FxListWidget::setFxList(FxList *fxlist)
@@ -60,6 +60,14 @@ void FxListWidget::setFxList(FxList *fxlist)
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 	qDebug() << "setFxList";
 
+}
+
+void FxListWidget::setAutoProceedSequence(bool state)
+{
+	if (myfxlist) {
+		autoProceedCheck->setChecked(state);
+		myfxlist->setAutoProceedSequence(state);
+	}
 }
 
 void FxListWidget::selectFx(FxItem *fx)
@@ -141,6 +149,7 @@ void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 			cur_selected_item = cur;
 			selectFx(cur);
 		}
+		emit listModified();
 	}
 }
 
@@ -149,5 +158,15 @@ void FxListWidget::on_autoProceedCheck_clicked(bool checked)
 {
 	if (myfxlist) {
 		myfxlist->setAutoProceedSequence(checked);
+	}
+}
+
+void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
+{
+	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
+	FxItem *fx = myitem->linkedFxItem;
+	if (myitem->columnType == FxListWidgetItem::CT_NAME) {
+		fx->setDisplayName(myitem->text());
+		emit listModified();
 	}
 }

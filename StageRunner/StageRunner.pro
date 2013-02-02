@@ -1,10 +1,12 @@
-QT		+= core gui
-QT		+= sql
+QT += core gui
+QT += sql
+QT += multimedia
+
 # QT		+= network
+
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 QT += widgets
-QT += multimedia
 
 DEFINES += IS_QT5
 
@@ -16,7 +18,8 @@ lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 TARGET = StageRunner
 TEMPLATE = app
 
-INCLUDEPATH += D:\work\PeterCoding\git_StageRunner\StageRunner
+# INCLUDEPATH += D:\work\PeterCoding\git_StageRunner\StageRunner
+INCLUDEPATH += .
 
 SOURCES += main.cpp\
 	fx/fxitem.cpp \
@@ -42,9 +45,9 @@ SOURCES += main.cpp\
 	thirdparty/widget/qsynthdialclassicstyle.cpp \
 	gui/audioslotwidget.cpp \
 	gui/audiocontrolwidget.cpp \
-    system/audioiodevice.cpp \
-    system/audioformat.cpp \
-    gui/ptablewidget.cpp
+	system/audioiodevice.cpp \
+	system/audioformat.cpp \
+	gui/ptablewidget.cpp
 
 HEADERS  += \
 	fx/fxitem.h \
@@ -72,9 +75,9 @@ HEADERS  += \
 	gui/audioslotwidget.h \
 	gui/audiocontrolwidget.h \
 	system/commandsystem.h \
-    system/audioiodevice.h \
-    system/audioformat.h \
-    gui/ptablewidget.h
+	system/audioiodevice.h \
+	system/audioformat.h \
+	gui/ptablewidget.h
 
 FORMS    += \
 	gui/fxlistwidget.ui \
@@ -85,4 +88,5 @@ FORMS    += \
 
 RESOURCES += \
 	gfx_ressource.qrc
+
 

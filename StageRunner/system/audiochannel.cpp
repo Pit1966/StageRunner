@@ -113,8 +113,10 @@ bool AudioSlot::fadeoutFxAudio(int time_ms)
 	if (!FxItem::exists(current_fx)) return false;
 
 	// Set Fadeout time
+#ifdef IS_QT5
 	fade_out_initial_vol = audio_output->volume() * MAX_VOLUME;
-	fadeout_timeline.setDuration(time_ms);
+#endif
+    fadeout_timeline.setDuration(time_ms);
 
 	// and start the time line ticker
 	fadeout_timeline.start();
@@ -130,7 +132,9 @@ void AudioSlot::setVolume(int vol)
 	if (master_volume >= 0) {
 		level *= (float)master_volume / MAX_VOLUME;
 	}
+#ifdef IS_QT_5
 	audio_output->setVolume(level);
+#endif
 	current_volume = vol;
 
 	LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol));
@@ -204,55 +208,3 @@ void AudioSlot::on_fade_out_finished()
 			.arg(slotNumber+1).arg(current_fx->displayName()));
 }
 
-#ifndef IS_QT5
-void AudioSlot::setPhononAudioState(Phonon::State newstate, Phonon::State oldstate)
-{
-	// Q_UNUSED(oldstate);
-	// AudioStatus oldstat = run_status;
-
-	switch (newstate) {
-	case Phonon::LoadingState:
-		DEBUGTEXT("AudioSlot:%d Loading",slotNumber+1);
-		run_status = AUDIO_INIT;
-		break;
-	case Phonon::PlayingState:
-		DEBUGTEXT("AudioSlot:%d Playing",slotNumber+1);
-		run_status = AUDIO_RUNNING;
-		break;
-	case Phonon::StoppedState:
-		DEBUGTEXT("AudioSlot:%d Stopped",slotNumber+1);
-		if (run_status != AUDIO_INIT) {
-			run_status = AUDIO_IDLE;
-		}
-		break;
-	case Phonon::PausedState:
-		DEBUGTEXT("AudioSlot:%d Paused",slotNumber+1);
-		if (run_status != AUDIO_INIT) {
-			run_status = AUDIO_IDLE;
-		}
-		break;
-	case Phonon::ErrorState:
-		DEBUGTEXT("AudioSlot:%d Error",slotNumber+1);
-		run_status = AUDIO_ERROR;
-		break;
-	case Phonon::BufferingState:
-		DEBUGTEXT("AudioSlot:%d Buffering",slotNumber+1);
-		run_status = AUDIO_INIT;
-		break;
-
-	default:
-		break;
-	}
-
-	if (oldstate != newstate) {
-		qDebug("emit status: %d %d",run_status, slotNumber);
-		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
-		emit audioCtrlMsgEmitted(msg);
-	}
-}
-
-void AudioSlot::setPhononFinished()
-{
-	DEBUGTEXT("AudioSlot:%d finished",slotNumber+1);
-}
-#endif

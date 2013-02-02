@@ -65,12 +65,15 @@ FxItem *FxList::findSequenceFollower(FxItem *curfx)
 	return followfx;
 }
 
-bool FxList::addFxAudioSimple(const QString &path)
+bool FxList::addFxAudioSimple(const QString &path, int pos)
 {
 	FxAudioItem *fx = new FxAudioItem(path);
 	fx->refCount.ref();
-
-	fx_list.append(fx);
+	if (pos < 0 || pos >= fx_list.size()) {
+		fx_list.append(fx);
+	} else {
+		fx_list.insert(pos,fx);
+	}
 
 	return true;
 }

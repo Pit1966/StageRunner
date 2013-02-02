@@ -86,5 +86,6 @@ void Project::init()
 	addExistingVar(pProjectId,"ProjectId");
 	addExistingVar(pProjectName,"ProjectName");
 	addExistingVar(pComment,"Comment");
+	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 
 }

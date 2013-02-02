@@ -37,7 +37,7 @@ void StageRunnerMainWin::initConnects()
 	// FxListWidget (Liste der Effekte im Mainwin)
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),mainapp,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
-	connect(fxListWidget,SIGNAL(dropEventReceived(QString)),this,SLOT(slot_addFxFile(QString)));
+	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
 	connect(mainapp->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 
 
@@ -99,8 +99,18 @@ void StageRunnerMainWin::initAppDefaults()
 	if (mainapp->userSettings->pLastProjectLoadPath.size()) {
 		mainapp->project->loadFromFile(mainapp->userSettings->pLastProjectLoadPath);
 		fxListWidget->setFxList(mainapp->project->fxList);
-
+		copyProjectSettingsToGui();
 	}
+}
+
+void StageRunnerMainWin::copyGuiSettingsToProject()
+{
+	mainapp->project->pAutoProceedSequence = fxListWidget->fxList()->autoProceedSequence();
+}
+
+void StageRunnerMainWin::copyProjectSettingsToGui()
+{
+	fxListWidget->setAutoProceedSequence( mainapp->project->pAutoProceedSequence );
 }
 
 
@@ -126,6 +136,7 @@ void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 			path += ".srp";
 		}
 		mainapp->userSettings->pLastProjectSavePath = path;
+		copyGuiSettingsToProject();
 		mainapp->project->saveToFile(path);
 
 		/// @todo Error handling
@@ -148,7 +159,7 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 		debug = 0;
 
 		fxListWidget->setFxList(mainapp->project->fxList);
-
+		copyProjectSettingsToGui();
 		/// @todo Error handling
 	}
 }
@@ -161,6 +172,8 @@ void StageRunnerMainWin::on_actionNew_Project_triggered()
 
 bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 {
+	if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
+
 	if (event->type() == 6) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
@@ -191,7 +204,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	return qApp->eventFilter(obj, event);
 }
 
-void StageRunnerMainWin::slot_addFxFile(QString path)
+void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 {
 	if (!path.startsWith("file://")) {
 		DEBUGERROR("Add Drag'n'Drop File: %s not valid",path.toLatin1().data());
@@ -202,7 +215,7 @@ void StageRunnerMainWin::slot_addFxFile(QString path)
 	if (path.size()) {
 		qDebug() << path;
 		FxList *fxlist = mainapp->project->fxList;
-		fxlist->addFxAudioSimple(path);
+		fxlist->addFxAudioSimple(path,pos);
 		fxListWidget->setFxList(fxlist);
 	}
 }

@@ -36,6 +36,7 @@ public:
 
 	inline int fxType() const {return myType;}
 	inline const QString & displayName() const {return myName;}
+	inline void setDisplayName(const QString &name) {myName = name;}
 	inline int fxID() const {return myId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}

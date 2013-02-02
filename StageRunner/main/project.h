@@ -10,6 +10,8 @@ class Project : public VarSet
 public:
 	FxList *fxList;
 
+	pbool pAutoProceedSequence;
+
 protected:
 	pint64 pProjectId;
 	pstring pProjectName;

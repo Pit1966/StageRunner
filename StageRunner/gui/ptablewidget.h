@@ -19,7 +19,7 @@ private:
 
 
 signals:
-	void dropEventReceived(QString text);
+	void dropEventReceived(QString text, int row);
 	void rowMovedFromTo(int srcrow, int destrow);
 
 public slots:

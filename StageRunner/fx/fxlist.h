@@ -42,7 +42,7 @@ public:
 	inline void setAutoProceedSequence(bool state) {auto_proceed_f = state;}
 	inline bool autoProceedSequence() {return auto_proceed_f;}
 
-	bool addFxAudioSimple(const QString & path);
+	bool addFxAudioSimple(const QString & path, int pos = -1);
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 
