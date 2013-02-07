@@ -84,6 +84,7 @@ void StageRunnerMainWin::clearProject()
 
 void StageRunnerMainWin::init()
 {
+	shiftPressedFlag = false;
 }
 
 
@@ -177,9 +178,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == 6) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
-		// if (key == Qt::Key_Shift) shift_pressed_f = true;
 		qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
 		switch (key) {
+		case Qt::Key_Shift:
+			shiftPressedFlag = true;
+			break;
 		case Qt::Key_Space:
 			mainapp->fadeoutAllFxAudio();
 			break;
@@ -198,7 +201,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	}
 	if (event->type() == 7) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
-		// if (ev->key() == Qt::Key_Shift) shift_pressed_f = false;
+		if (ev->key() == Qt::Key_Shift) shiftPressedFlag = false;
 		// qDebug() << "keyup" << ev->key() << " " << obj->objectName();
 	}
 	return qApp->eventFilter(obj, event);

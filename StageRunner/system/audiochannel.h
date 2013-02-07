@@ -9,6 +9,7 @@
 
 #include <QObject>
 #include <QTime>
+#include <QTimer>
 #include <QAudioOutput>
 #include <QFile>
 #include <QTimeLine>
@@ -36,6 +37,8 @@ private:
 	FxAudioItem *current_fx;								///< The current/last Fx loaded into this audio slot
 
 
+	QTimer volset_timer;
+	QString volset_text;
 	QTime run_time;
 	QTimeLine fadeout_timeline;
 	int fade_out_initial_vol;						///< The Volume the fadeout starts with
@@ -60,6 +63,7 @@ private slots:
 	void on_vulevel_changed(int left, int right);
 	void on_fade_out_frame_changed(qreal value);
 	void on_fade_out_finished();
+	void on_volset_timer_finished();
 
 
 signals:

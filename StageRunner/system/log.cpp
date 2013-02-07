@@ -427,22 +427,22 @@ void Log::closeLogfile()
 	logfile_mutex.unlock();
 }
 
-void Log::errorPopupMsg(const QString & where, const QString & text, int glob_err_num)
+void Log::errorPopupMsg(const QString & where, const QString & text)
 {
 	// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
 	QString logtext = text;
 	logtext.replace("\n"," > ");
 	LOGERROR(QString("%1: %2").arg(where,logtext));
-	/// @todo implement me emit extMsg (ERROR_MSG,glob_err_num,0,text);
+
 	return;
 }
-void Log::infoPopupMsg(const QString & where, const QString & text, int glob_err_num)
+void Log::infoPopupMsg(const QString & where, const QString & text)
 {
 	// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
 	QString logtext = text;
 	logtext.replace("\n"," > ");
 	LOGTEXT(QString("%1: %2").arg(where,logtext));
-	/// @todo implement me emit extMsg (SIMPLE_MSG,glob_err_num,0,text);
+
 	return;
 }
 

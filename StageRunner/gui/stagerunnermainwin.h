@@ -17,6 +17,7 @@ private:
 
 public:
 	QTextEdit *logWidget;
+	bool shiftPressedFlag;
 
 public:
 	StageRunnerMainWin(AppCentral * myapp);

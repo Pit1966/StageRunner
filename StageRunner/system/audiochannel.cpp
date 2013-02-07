@@ -16,6 +16,7 @@
 AudioSlot::AudioSlot(AudioControl *parent)
 	: QObject()
 {
+	audio_ctrl = parent;
 
 	run_status = AUDIO_IDLE;
 	slotNumber = -1;
@@ -23,9 +24,14 @@ AudioSlot::AudioSlot(AudioControl *parent)
 	current_fx = 0;
 	master_volume = MAX_VOLUME;
 
+	// Vol Set Logging
+	volset_timer.setSingleShot(true);
+	volset_timer.setInterval(500);
+	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
+
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
-	audio_output->setBufferSize(1000);
+	// audio_output->setBufferSize(1000);
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
@@ -122,6 +128,8 @@ bool AudioSlot::fadeoutFxAudio(int time_ms)
 	fadeout_timeline.start();
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
 			.arg(slotNumber+1).arg(current_fx->displayName()).arg(time_ms));
+
+	return true;
 }
 
 void AudioSlot::setVolume(int vol)
@@ -132,12 +140,13 @@ void AudioSlot::setVolume(int vol)
 	if (master_volume >= 0) {
 		level *= (float)master_volume / MAX_VOLUME;
 	}
-#ifdef IS_QT_5
+#ifdef IS_QT5
 	audio_output->setVolume(level);
 #endif
 	current_volume = vol;
 
-	LOGTEXT(tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol));
+	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
+	volset_timer.start();
 }
 
 void AudioSlot::setMasterVolume(int vol)
@@ -206,5 +215,10 @@ void AudioSlot::on_fade_out_finished()
 
 	LOGTEXT(tr("Fade out finished for slot %1: '%2'")
 			.arg(slotNumber+1).arg(current_fx->displayName()));
+}
+
+void AudioSlot::on_volset_timer_finished()
+{
+	LOGTEXT(volset_text);
 }
 
