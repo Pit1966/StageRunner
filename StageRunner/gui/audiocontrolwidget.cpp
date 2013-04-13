@@ -2,7 +2,7 @@
 #include "system/log.h"
 #include "config.h"
 #include "gui/audioslotwidget.h"
-#include "main/appcentral.h"
+#include "appcontrol/appcentral.h"
 
 #include <QHBoxLayout>
 #include <QDebug>

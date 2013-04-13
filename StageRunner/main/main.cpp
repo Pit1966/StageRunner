@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "config.h"
-#include "main/appcentral.h"
+#include "appcontrol/appcentral.h"
 #include "gui/stagerunnermainwin.h"
 #include "system/log.h"
 

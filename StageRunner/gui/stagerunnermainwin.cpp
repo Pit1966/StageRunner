@@ -1,10 +1,10 @@
 #include "stagerunnermainwin.h"
 #include "system/commandsystem.h"
-#include "main/appcentral.h"
+#include "appcontrol/appcentral.h"
 #include "system/audiocontrol.h"
 #include "fx/fxlist.h"
-#include "main/project.h"
-#include "main/usersettings.h"
+#include "appcontrol/project.h"
+#include "appcontrol/usersettings.h"
 #include "thirdparty/widget/qsynthdialpeppinostyle.h"
 #include "thirdparty/widget/qsynthdialclassicstyle.h"
 

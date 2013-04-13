@@ -1,6 +1,6 @@
 #include "sequencecontrolwidget.h"
 
-#include "main/appcentral.h"
+#include "appcontrol/appcentral.h"
 #include "fx/fxitem.h"
 #include "config.h"
 #include "system/audiocontrol.h"
