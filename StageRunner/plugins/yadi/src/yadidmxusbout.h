@@ -11,11 +11,12 @@ class YadiDevice;
 class YadiDMXUSBOut : public QLCIOPlugin
 {
 	Q_OBJECT
+
+	Q_INTERFACES(QLCIOPlugin)
 #ifdef IS_QT5
 	Q_PLUGIN_METADATA(IID "de.stonechip.stagerunner.yadi" FILE "yadi.json")
-#else
-	Q_INTERFACES(QLCIOPlugin)
 #endif
+
 private:
 	QStringList output_devices;
 	QStringList input_devices;

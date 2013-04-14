@@ -55,4 +55,5 @@ void FxItem::init(qint32 id)
 	addExistingVar(myName,"DisplayName");
 	addExistingVar(myFile,"FileName");
 	addExistingVar(myPath,"FilePath");
+	addExistingVar(myKey,"KeyCode");
 }

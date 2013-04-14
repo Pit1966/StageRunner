@@ -1,6 +1,7 @@
 #include "fxlistwidget.h"
 #include "fx/fxlist.h"
 #include "fx/fxitem.h"
+#include "appcontrol/appcentral.h"
 
 #include <QDebug>
 
@@ -38,28 +39,33 @@ void FxListWidget::setFxList(FxList *fxlist)
 	int rows = fxlist->size();
 
 	fxTable->setRowCount(rows);
-	fxTable->setColumnCount(2);
+	fxTable->setColumnCount(3);
 
 	QStringList header;
-	header << tr("Name") << tr("Id");
+	header << tr("Key") << tr("Name") << tr("Id");
 	fxTable->setHorizontalHeaderLabels(header);
 
 	for (int t=0; t<rows; t++) {
+		int col = 0;
 		FxItem *fx = fxlist->at(t);
 		FxListWidgetItem *item;
 
+		item = new FxListWidgetItem(fx,QChar(fx->keyCode()));
+		item->columnType = FxListWidgetItem::CT_KEY;
+		fxTable->setItem(t,col++,item);
+
 		item = new FxListWidgetItem(fx,fx->displayName());
 		item->columnType = FxListWidgetItem::CT_NAME;
-		fxTable->setItem(t,0,item);
+		fxTable->setItem(t,col++,item);
 
 		item = new FxListWidgetItem(fx,QString::number(fx->fxID()));
 		item->columnType = FxListWidgetItem::CT_ID;
-		fxTable->setItem(t,1,item);
+		fxTable->setItem(t,col++,item);
+
+
 	}
 	fxTable->resizeColumnsToContents();
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
-	qDebug() << "setFxList";
-
 }
 
 void FxListWidget::setAutoProceedSequence(bool state)
@@ -74,7 +80,7 @@ void FxListWidget::selectFx(FxItem *fx)
 {
 	bool found = false;
 	int row=0;
-	while (row < fxTable->rowCount() && !found) {
+	while (fx && row < fxTable->rowCount() && !found) {
 		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->item(row,0);
 		if (item->linkedFxItem == fx) {
 			fxTable->clearSelection();
@@ -86,6 +92,9 @@ void FxListWidget::selectFx(FxItem *fx)
 			}
 		}
 		row++;
+	}
+	if (!found) {
+		emit fxItemSelected(0);
 	}
 }
 
@@ -123,6 +132,8 @@ void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 			cur_selected_item = fx;
 			emit fxItemSelected(fx);
 		}
+	} else {
+		myfxlist->setNextFx(0);
 	}
 }
 
@@ -133,7 +144,9 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 
 	if (fx) {
 		qDebug() << "double clicked:" << fx->displayName() << "ColType:" << myitem->columnType;
-		emit fxCmdActivated(fx,CMD_FX_START);
+		if (!AppCentral::instance()->isEditMode()) {
+			emit fxCmdActivated(fx,CMD_FX_START);
+		}
 	}
 }
 
@@ -165,8 +178,26 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
 	FxItem *fx = myitem->linkedFxItem;
-	if (myitem->columnType == FxListWidgetItem::CT_NAME) {
+	switch (myitem->columnType) {
+	case FxListWidgetItem::CT_NAME:
 		fx->setDisplayName(myitem->text());
 		emit listModified();
+		break;
+	case FxListWidgetItem::CT_KEY:
+		{
+			ushort old_code = fx->keyCode();
+			ushort code = 0;
+			QString text = myitem->text();
+			if (text.size()) {
+				code = text.at(0).toUpper().unicode();
+			}
+			if (old_code != code) {
+				fx->setKeyCode(code);
+				emit listModified();
+			}
+			myitem->setText(QString(QChar(code)));
+		}
+	default:
+		break;
 	}
 }

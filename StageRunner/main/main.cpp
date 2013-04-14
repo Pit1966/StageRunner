@@ -19,10 +19,15 @@ int main(int argc, char *argv[])
 	logThread = new Log;
 	logThread->initLog(mywin->logWidget);
 
+	// Init GUI
 	mywin->show();
 	mywin->initConnects();
 	mywin->initAppDefaults();
 
+	// Load Plugins
+	myapp->loadPlugins();
+
+	// and run
 	int ret =  app.exec();
 
 

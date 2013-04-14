@@ -32,8 +32,6 @@ win32:DESTDIR  = ./
 # Don't whine about some imports
 win32:QMAKE_LFLAGS += -enable-auto-import
 
-# Enable unit test coverage measurement ('qmake CONFIG+=coverage' works, too)
-#CONFIG        += coverage
 
 #############################################################################
 # Installation paths
@@ -63,11 +61,6 @@ macx:DATADIR       = Resources
 win32:DOCSDIR      = Documents
 unix:!macx:DOCSDIR = $$DATADIR/documents
 macx:DOCSDIR       = $$DATADIR/Documents
-
-# Input profiles
-win32:INPUTPROFILEDIR          = InputProfiles
-unix:!macx:INPUTPROFILEDIR     = $$DATADIR/inputprofiles
-macx:INPUTPROFILEDIR           = $$DATADIR/InputProfiles
 
 # Plugins
 win32:PLUGINDIR      = Plugins

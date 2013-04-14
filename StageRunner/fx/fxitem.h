@@ -28,6 +28,7 @@ protected:
 	QString myName;
 	QString myFile;
 	QString myPath;
+	qint32 myKey;
 
 public:
 	FxItem();
@@ -40,6 +41,8 @@ public:
 	inline int fxID() const {return myId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
+	inline void setKeyCode(ushort code) {myKey = code;}
+	inline ushort keyCode() {return myKey;}
 
 
 private:

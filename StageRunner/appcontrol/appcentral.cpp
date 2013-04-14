@@ -6,6 +6,7 @@
 #include "project.h"
 #include "usersettings.h"
 #include "fx/fxlist.h"
+#include "ioplugincentral.h"
 
 using namespace AUDIO;
 
@@ -77,6 +78,10 @@ FxList *AppCentral::getRegisteredFxList(int id)
 	return 0;
 }
 
+void AppCentral::loadPlugins()
+{
+	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
+}
 
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
@@ -104,7 +109,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 
 void AppCentral::executeNextFx(int listID)
 {
-	qDebug("Execute next in Sequence for list Id: %d",listID);
+	if (debug) DEBUGTEXT("Execute next in Sequence for list Id: %d",listID);
 	FxList *fxlist = getRegisteredFxList(listID);
 	if (!fxlist) return;
 
@@ -121,6 +126,7 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
+	delete pluginCentral;
 	delete userSettings;
 	delete project;
 	delete unitAudio;
@@ -128,13 +134,17 @@ AppCentral::~AppCentral()
 
 void AppCentral::init()
 {
+	edit_mode_f = false;
+
 	userSettings = new UserSettings;
 
 	unitAudio = new AudioControl;
 	project = new Project;
+	pluginCentral = new IOPluginCentral;
 
 	int id = registerFxList(project->fxList);
 	qDebug("Registered Project FX list with Id:%d",id);
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+
 }

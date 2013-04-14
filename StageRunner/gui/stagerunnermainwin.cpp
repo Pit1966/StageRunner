@@ -194,6 +194,16 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 
 		default:
+			{
+				QString key = ev->text().toUpper();
+				if (key.size()) {
+					FxItem *fx = mainapp->project->fxList->getFxByKeyCode(key.at(0).unicode());
+					if (fx) {
+						mainapp->executeFxCmd(fx, CMD_AUDIO_START);
+						// fxListWidget->selectFx(fx);
+					}
+				}
+			}
 			break;
 		}
 
@@ -223,3 +233,8 @@ void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 	}
 }
 
+
+void StageRunnerMainWin::on_actionEdit_Mode_toggled(bool arg1)
+{
+	AppCentral::instance()->setEditMode(arg1);
+}

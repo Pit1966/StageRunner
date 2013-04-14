@@ -43,6 +43,8 @@ private slots:
 	void on_actionNew_Project_triggered();
 
 
+	void on_actionEdit_Mode_toggled(bool arg1);
+
 private:
 	void init();
 };

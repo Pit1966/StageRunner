@@ -17,7 +17,8 @@ public:
 	enum ColumnType {
 		CT_UNDEF,
 		CT_NAME,
-		CT_ID
+		CT_ID,
+		CT_KEY
 	};
 
 	FxItem *linkedFxItem;

@@ -12,6 +12,7 @@ INCLUDEPATH  += ../main
 INCLUDEPATH  += ../system
 INCLUDEPATH  += ../thirdparty
 INCLUDEPATH  += ../tool
+INCLUDEPATH  += ../plugins/interfaces
 
 QT += core gui
 QT += sql
@@ -58,7 +59,8 @@ SOURCES += \
 	../gui/sequencecontrolwidget.cpp \
 	../gui/audioslotwidget.cpp \
 	../gui/audiocontrolwidget.cpp \
-	../gui/ptablewidget.cpp
+	../gui/ptablewidget.cpp \
+	../appcontrol/ioplugincentral.cpp
 
 HEADERS  += \
 	../config.h \
@@ -88,7 +90,8 @@ HEADERS  += \
 	../gui/sequencecontrolwidget.h \
 	../gui/audioslotwidget.h \
 	../gui/audiocontrolwidget.h \
-	../gui/ptablewidget.h
+	../gui/ptablewidget.h \
+	../appcontrol/ioplugincentral.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -104,3 +107,45 @@ RESOURCES += \
 # Installation
 target.path = $$INSTALLROOT/$$BINDIR
 INSTALLS   += target
+
+#############################################################################
+# configrev.h generation
+#############################################################################
+
+CONFIGFILE = configrev.h
+conf.target = $$CONFIGFILE
+QMAKE_EXTRA_TARGETS += conf
+PRE_TARGETDEPS += $$CONFIGFILE
+QMAKE_CLEAN += $$CONFIGFILE
+QMAKE_DISTCLEAN += $$CONFIGFILE
+
+macx {
+	conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define CONFIGREV_H\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APPNAME \\\"$$APPNAME\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APPVERSION \\\"$$APPVERSION\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
+}
+unix:!macx {
+	conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define CONFIGREV_H\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APPNAME \\\"$$APPNAME\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APPVERSION \\\"$$APPVERSION\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$INSTALLROOT/$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$INSTALLROOT/$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
+}
+win32 {
+	conf.commands += @echo $$LITERAL_HASH ifndef CONFIG_H > $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define CONFIG_H >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define APPNAME \"$$APPNAME\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define APPVERSION \"$$APPVERSION\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define DOCSDIR \"$$DOCSDIR\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define PLUGINDIR \"$$PLUGINDIR\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH endif >> $$CONFIGFILE
+}

@@ -52,6 +52,16 @@ FxItem *FxList::stepToSequenceNext()
 	return fx_current;
 }
 
+FxItem *FxList::getFxByKeyCode(ushort keycode) const
+{
+	QListIterator<FxItem*> it(fx_list);
+	while (it.hasNext()) {
+		FxItem *fx = it.next();
+		if (fx->keyCode() == keycode) return fx;
+	}
+	return 0;
+}
+
 FxItem *FxList::findSequenceFollower(FxItem *curfx)
 {
 	FxItem *followfx = 0;
