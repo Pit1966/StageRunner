@@ -45,6 +45,8 @@ private slots:
 
 	void on_actionEdit_Mode_toggled(bool arg1);
 
+	void on_actionSetup_triggered();
+
 private:
 	void init();
 };

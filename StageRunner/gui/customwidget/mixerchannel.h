@@ -12,6 +12,7 @@ class MixerChannel : public QAbstractSlider
 private:
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
+	QPixmap org_pix_knob_active;
 
 	int knob_xsize;					///< Width of scaled knob without shadow border
 	int knob_ysize;					///< Height of scaled knob without shadow border
@@ -27,6 +28,7 @@ private:
 	float pos_range_percent;
 
 	bool knob_selected_f;			///< Slider knob is clicked and selelected
+	bool knob_over_f;				///< Mouse is over knob
 	QPoint click_position;			///< Mouseposition when clicked in Widget
 	int click_value;				///< Value when mouse clicked in widget
 	QSize minimum_size_hint;
@@ -36,14 +38,15 @@ public:
 	~MixerChannel();
 
 private:
-
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void resizeEvent(QResizeEvent *event);
 	void paintEvent(QPaintEvent *event);
+	void leaveEvent(QEvent *event);
 	void generate_scaled_knob();
 	QSize minimumSizeHint() const;
+
 
 
 signals:

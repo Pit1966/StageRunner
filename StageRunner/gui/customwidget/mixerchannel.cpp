@@ -20,6 +20,8 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	knob_yoffset = 0;
 
 	knob_selected_f = false;
+	knob_over_f = false;
+
 	click_value = 0;
 
 	lo_pos_percent = float(LO_POS_PERCENT) / 100;
@@ -28,9 +30,11 @@ MixerChannel::MixerChannel(QWidget *parent) :
 
 	org_pix_back = QPixmap(":/gfx/customwidget/slider_back.png");
 	org_pix_knob = QPixmap(":/gfx/customwidget/slider_button.png");
+	org_pix_knob_active = QPixmap(":/gfx/customwidget/slider_button_active.png");
 
 	minimum_size_hint = QSize(org_pix_back.width() / 4,org_pix_back.height()/2);
 	setMaximumWidth(org_pix_back.width());
+	setMouseTracking(true);
 }
 
 MixerChannel::~MixerChannel()
@@ -50,16 +54,26 @@ void MixerChannel::mousePressEvent(QMouseEvent *event)
 
 void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 {
+	static bool was_in = false;
 	if (knob_selected_f) {
+		knob_over_f = false;
 		float movedif = click_position.y() - event->pos().y();
 		setValue( float(click_value) + ( movedif * maximum() / (pos_range_percent * height())) );
 		update();
+	} else {
+		knob_over_f = knob_rect.contains(event->pos());
+		if (knob_over_f != was_in) {
+			was_in = knob_over_f;
+			update();
+		}
 	}
 }
 
 void MixerChannel::mouseReleaseEvent(QMouseEvent *event)
 {
+	Q_UNUSED(event);
 	knob_selected_f = false;
+	update();
 }
 
 void MixerChannel::resizeEvent(QResizeEvent *event)
@@ -82,8 +96,19 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	knob_rect.setRect((width() - knob_xsize) / 2 , y ,knob_xsize, knob_ysize);
 	knob_scaled_rect.setRect((width() - knob_xsize) / 2 , y ,knob_scaled_xsize, knob_scaled_ysize);
-	p.drawPixmap(knob_scaled_rect,org_pix_knob);
+	if (knob_selected_f || knob_over_f) {
+		p.drawPixmap(knob_scaled_rect,org_pix_knob_active);
+	} else {
+		p.drawPixmap(knob_scaled_rect,org_pix_knob);
+	}
 
+}
+
+void MixerChannel::leaveEvent(QEvent *event)
+{
+	Q_UNUSED(event);
+	knob_over_f = false;
+	update();
 }
 
 void MixerChannel::generate_scaled_knob()

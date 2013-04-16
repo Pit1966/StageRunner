@@ -7,6 +7,7 @@
 #include "appcontrol/usersettings.h"
 #include "thirdparty/widget/qsynthdialpeppinostyle.h"
 #include "thirdparty/widget/qsynthdialclassicstyle.h"
+#include "gui/setupwidget.h"
 
 #include <QFileDialog>
 
@@ -237,4 +238,12 @@ void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 void StageRunnerMainWin::on_actionEdit_Mode_toggled(bool arg1)
 {
 	AppCentral::instance()->setEditMode(arg1);
+}
+
+void StageRunnerMainWin::on_actionSetup_triggered()
+{
+	SetupWidget setup(mainapp);
+	setup.show();
+	setup.exec();
+
 }

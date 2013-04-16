@@ -20,6 +20,7 @@ public:
 
 	QLCIOPlugin * getQLCPluginByName(const QString & name);
 	void loadQLCPlugins(const QString & dir_str);
+	const QList<QLCIOPlugin*> & qlcPlugins() const {return qlc_plugins;}
 	/**
 	 * @brief Determine system default plugin directory path
 	 *

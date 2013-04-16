@@ -61,7 +61,8 @@ SOURCES += \
 	../gui/audiocontrolwidget.cpp \
 	../gui/ptablewidget.cpp \
 	../appcontrol/ioplugincentral.cpp \
-    ../gui/customwidget/mixerchannel.cpp
+    ../gui/customwidget/mixerchannel.cpp \
+    ../gui/setupwidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -94,14 +95,16 @@ HEADERS  += \
 	../gui/audiocontrolwidget.h \
 	../gui/ptablewidget.h \
 	../appcontrol/ioplugincentral.h \
-    ../gui/customwidget/mixerchannel.h
+    ../gui/customwidget/mixerchannel.h \
+    ../gui/setupwidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
 	../gui/stagerunnermainwin.ui \
 	../gui/sequencecontrolwidget.ui \
 	../gui/audioslotwidget.ui \
-	../gui/audiocontrolwidget.ui
+	../gui/audiocontrolwidget.ui \
+    ../gui/setupwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc
