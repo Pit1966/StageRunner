@@ -34,5 +34,7 @@
         <file>gfx/icons/volume_high.png</file>
         <file>gfx/icons/volume_low.png</file>
         <file>gfx/icons/volume_mute.png</file>
+        <file>gfx/customwidget/slider_back.png</file>
+        <file>gfx/customwidget/slider_button.png</file>
     </qresource>
 </RCC>

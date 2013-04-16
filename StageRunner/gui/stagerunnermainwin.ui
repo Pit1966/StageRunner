@@ -14,7 +14,7 @@
    <string>StageRunner (C) Stonechip Entertainment</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../gfx_ressource.qrc">
     <normaloff>:/gfx/icons/audip_power.png</normaloff>:/gfx/icons/audip_power.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -27,7 +27,7 @@
       <widget class="FxListWidget" name="fxListWidget" native="true"/>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="iconSize">
         <size>
@@ -37,7 +37,7 @@
        </property>
        <widget class="QWidget" name="controlTab">
         <attribute name="icon">
-         <iconset>
+         <iconset resource="../gfx_ressource.qrc">
           <normaloff>:/gfx/icons/audio_play.png</normaloff>:/gfx/icons/audio_play.png</iconset>
         </attribute>
         <attribute name="title">
@@ -62,7 +62,7 @@
        </widget>
        <widget class="QWidget" name="logTab">
         <attribute name="icon">
-         <iconset>
+         <iconset resource="../gfx_ressource.qrc">
           <normaloff>:/gfx/icons/mode_edit_list.png</normaloff>:/gfx/icons/mode_edit_list.png</iconset>
         </attribute>
         <attribute name="title">
@@ -98,19 +98,60 @@
            <property name="title">
             <string>Development Quick Functions</string>
            </property>
-           <widget class="QPushButton" name="addAudioFxButton">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>30</y>
-              <width>151</width>
-              <height>26</height>
-             </rect>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string>Add Audio Fx</string>
-            </property>
-           </widget>
+            <item row="0" column="2">
+             <widget class="MixerChannel" name="verticalSlider">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QPushButton" name="addAudioFxButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Add Audio Fx</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="MixerChannel" name="testMixer">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="value">
+               <number>255</number>
+              </property>
+              <property name="sliderPosition">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="MixerChannel" name="verticalSlider_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -126,7 +167,7 @@
      <x>0</x>
      <y>0</y>
      <width>1184</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -169,7 +210,7 @@
   </action>
   <action name="actionSave_Project_as">
    <property name="icon">
-    <iconset>
+    <iconset resource="../gfx_ressource.qrc">
      <normaloff>:/gfx/icons/media-floppy.png</normaloff>:/gfx/icons/media-floppy.png</iconset>
    </property>
    <property name="text">
@@ -214,8 +255,15 @@
    <header>gui/sequencecontrolwidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>MixerChannel</class>
+   <extends>QSlider</extends>
+   <header location="global">gui/customwidget/mixerchannel.h</header>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../gfx_ressource.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>clearLogButton</sender>

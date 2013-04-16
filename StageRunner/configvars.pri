@@ -3,14 +3,14 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = 0.1.0
+APPVERSION = 0.1.1
 
 #############################################################################
 # Compiler & linker configuration
 #############################################################################
 
 # Treat all compiler warnings as errors
-QMAKE_CXXFLAGS += -Werror
+# QMAKE_CXXFLAGS += -Werror
 CONFIG         += warn_on
 
 # Build everything in the order specified in .pro files

@@ -60,10 +60,12 @@ SOURCES += \
 	../gui/audioslotwidget.cpp \
 	../gui/audiocontrolwidget.cpp \
 	../gui/ptablewidget.cpp \
-	../appcontrol/ioplugincentral.cpp
+	../appcontrol/ioplugincentral.cpp \
+    ../gui/customwidget/mixerchannel.cpp
 
 HEADERS  += \
 	../config.h \
+	../configref.h \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
@@ -91,7 +93,8 @@ HEADERS  += \
 	../gui/audioslotwidget.h \
 	../gui/audiocontrolwidget.h \
 	../gui/ptablewidget.h \
-	../appcontrol/ioplugincentral.h
+	../appcontrol/ioplugincentral.h \
+    ../gui/customwidget/mixerchannel.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
