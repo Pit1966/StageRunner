@@ -69,6 +69,34 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 	}
 }
 
+bool IOPluginCentral::openPlugins()
+{
+	bool one_opened = false;
+
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		QStringList outputs = plugin->outputs();
+		for (int o=0; o<outputs.size(); o++) {
+			LOGTEXT(tr("Open Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
+			plugin->openOutput(o);
+			one_opened = true;
+		}
+	}
+	return one_opened;
+}
+
+void IOPluginCentral::closePlugins()
+{
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		QStringList outputs = plugin->outputs();
+		for (int o=0; o<outputs.size(); o++) {
+			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
+			plugin->closeOutput(o);
+		}
+	}
+}
+
 QString IOPluginCentral::sysPluginDir()
 {
 	QString dir;

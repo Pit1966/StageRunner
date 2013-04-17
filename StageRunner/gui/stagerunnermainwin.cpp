@@ -47,6 +47,9 @@ void StageRunnerMainWin::initConnects()
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
 
+	// DMX Direct Control
+	connect(dmxDirectWidget,SIGNAL(mixerMoved(int,int)),mainapp,SLOT(testSetDmxChannel(int,int)));
+
 	qApp->installEventFilter(this);
 
 }
@@ -103,6 +106,9 @@ void StageRunnerMainWin::initAppDefaults()
 		fxListWidget->setFxList(mainapp->project->fxList);
 		copyProjectSettingsToGui();
 	}
+
+	dmxDirectWidget->setMixerCount(24);
+	dmxDirectWidget->setRange(0,255);
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()

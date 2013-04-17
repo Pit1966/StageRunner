@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1184</width>
+    <width>888</width>
     <height>712</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="FxListWidget" name="fxListWidget" native="true"/>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
         <number>2</number>
        </property>
@@ -85,6 +85,16 @@
             </widget>
            </item>
           </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>DMX Direct</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="MixerGroup" name="dmxDirectWidget" native="true"/>
          </item>
         </layout>
        </widget>
@@ -166,7 +176,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1184</width>
+     <width>888</width>
      <height>20</height>
     </rect>
    </property>
@@ -270,7 +280,13 @@
   <customwidget>
    <class>MixerChannel</class>
    <extends>QSlider</extends>
-   <header location="global">gui/customwidget/mixerchannel.h</header>
+   <header>gui/customwidget/mixerchannel.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MixerGroup</class>
+   <extends>QWidget</extends>
+   <header>gui/customwidget/mixergroup.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

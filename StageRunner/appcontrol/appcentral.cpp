@@ -7,6 +7,7 @@
 #include "usersettings.h"
 #include "fx/fxlist.h"
 #include "ioplugincentral.h"
+#include "plugins/interfaces/qlcioplugin.h"
 
 using namespace AUDIO;
 
@@ -83,6 +84,16 @@ void AppCentral::loadPlugins()
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
 }
 
+void AppCentral::openPlugins()
+{
+	pluginCentral->openPlugins();
+}
+
+void AppCentral::closePlugins()
+{
+	pluginCentral->closePlugins();
+}
+
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 {
@@ -119,6 +130,24 @@ void AppCentral::executeNextFx(int listID)
 	executeFxCmd(fx,CMD_FX_START);
 }
 
+void AppCentral::testSetDmxChannel(int val, int channel)
+{
+	bool changed = false;
+	if (dmx_direct_data.at(channel) != val) {
+		dmx_direct_data[channel] = val;
+		changed = true;
+	}
+
+	if (changed) {
+		QList<QLCIOPlugin*>plugins = pluginCentral->qlcPlugins();
+		for (int t=0; t<plugins.size(); t++) {
+			QLCIOPlugin *plugin = plugins.at(t);
+			plugin->writeUniverse(0,dmx_direct_data);
+
+		}
+	}
+}
+
 AppCentral::AppCentral()
 {
 	init();
@@ -135,6 +164,7 @@ AppCentral::~AppCentral()
 void AppCentral::init()
 {
 	edit_mode_f = false;
+	dmx_direct_data.resize(512);
 
 	userSettings = new UserSettings;
 

@@ -10,9 +10,12 @@ class MixerChannel : public QAbstractSlider
 {
 	Q_OBJECT
 private:
+	int my_id;						///< Id of MixerChannel instance (usualy the channel number) or -1 if not used
+
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
 	QPixmap org_pix_knob_active;
+	QPixmap org_pix_back_active;
 
 	int knob_xsize;					///< Width of scaled knob without shadow border
 	int knob_ysize;					///< Height of scaled knob without shadow border
@@ -27,6 +30,8 @@ private:
 	float hi_pos_percent;
 	float pos_range_percent;
 
+	bool do_paint_f;				///< Widget Resources ok and can be drawn
+
 	bool knob_selected_f;			///< Slider knob is clicked and selelected
 	bool knob_over_f;				///< Mouse is over knob
 	QPoint click_position;			///< Mouseposition when clicked in Widget
@@ -36,6 +41,8 @@ private:
 public:
 	MixerChannel(QWidget *parent = 0);
 	~MixerChannel();
+	inline void setId(int id) {my_id = id;}
+	inline int id() {return my_id;}
 
 private:
 	void mousePressEvent(QMouseEvent *event);
@@ -44,12 +51,13 @@ private:
 	void resizeEvent(QResizeEvent *event);
 	void paintEvent(QPaintEvent *event);
 	void leaveEvent(QEvent *event);
-	void generate_scaled_knob();
+	bool generate_scaled_knob();
 	QSize minimumSizeHint() const;
 
 
 
 signals:
+	void mixerMoved(int val, int id);
 
 public slots:
 

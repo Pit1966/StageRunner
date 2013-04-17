@@ -37,5 +37,7 @@
         <file>gfx/customwidget/slider_back.png</file>
         <file>gfx/customwidget/slider_button.png</file>
         <file>gfx/customwidget/slider_button_active.png</file>
+        <file>gfx/customwidget/slider_back_brush.png</file>
+        <file>gfx/customwidget/slider_back_active.png</file>
     </qresource>
 </RCC>

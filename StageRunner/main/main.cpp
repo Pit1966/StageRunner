@@ -26,10 +26,13 @@ int main(int argc, char *argv[])
 
 	// Load Plugins
 	myapp->loadPlugins();
+	myapp->openPlugins();
 
 	// and run
 	int ret =  app.exec();
 
+	// Clean up plugins
+	myapp->closePlugins();
 
 	logThread->stopLog();
 	delete mywin;

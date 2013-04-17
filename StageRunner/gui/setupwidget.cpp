@@ -43,14 +43,29 @@ void SetupWidget::on_cancelButton_clicked()
 
 void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 {
-	cur_selected_qlc_plugin = myapp->pluginCentral->getQLCPluginByName(item->text());
+	QString info;
 
+	cur_selected_qlc_plugin = myapp->pluginCentral->getQLCPluginByName(item->text());
 	if (cur_selected_qlc_plugin) {
-		qlcPluginEdit->setHtml(cur_selected_qlc_plugin->outputInfo(0));
 		configurePluginButton->setEnabled(true);
-	} else {
+
+		info += tr("<br><font color=blue>Available outputs</font><br>");
+		QStringList outputs = cur_selected_qlc_plugin->outputs();
+		for (int t=0; t<outputs.size(); t++) {
+			info += cur_selected_qlc_plugin->outputInfo(t);
+		}
+
+		info += tr("<br><font color=blue>Available inputs</font><br>");
+		QStringList inputs = cur_selected_qlc_plugin->inputs();
+		for (int t=0; t<inputs.size(); t++) {
+			info += cur_selected_qlc_plugin->inputInfo(t);
+		}
+
+	}  else {
 		configurePluginButton->setEnabled(false);
 	}
+
+	qlcPluginEdit->setHtml(info);
 }
 
 void SetupWidget::on_configurePluginButton_clicked()

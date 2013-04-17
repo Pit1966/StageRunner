@@ -62,7 +62,8 @@ SOURCES += \
 	../gui/ptablewidget.cpp \
 	../appcontrol/ioplugincentral.cpp \
     ../gui/customwidget/mixerchannel.cpp \
-    ../gui/setupwidget.cpp
+    ../gui/setupwidget.cpp \
+    ../gui/customwidget/mixergroup.cpp
 
 HEADERS  += \
 	../config.h \
@@ -96,7 +97,8 @@ HEADERS  += \
 	../gui/ptablewidget.h \
 	../appcontrol/ioplugincentral.h \
     ../gui/customwidget/mixerchannel.h \
-    ../gui/setupwidget.h
+    ../gui/setupwidget.h \
+    ../gui/customwidget/mixergroup.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

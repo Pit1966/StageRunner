@@ -105,6 +105,8 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
 		}
 
+	} else {
+		qDebug("YadiDMXUSBOut::openOutput(%d) failed! Device list own %d outputs",output+1,output_devices.size());
 	}
 }
 

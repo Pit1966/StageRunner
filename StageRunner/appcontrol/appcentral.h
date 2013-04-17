@@ -5,6 +5,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QByteArray>
 
 class AudioControl;
 class Project;
@@ -21,6 +22,7 @@ private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
 	bool edit_mode_f;
+	QByteArray dmx_direct_data;
 
 public:
 	AudioControl *unitAudio;
@@ -48,10 +50,14 @@ public:
 	inline void setEditMode(bool state) {edit_mode_f = state;}
 
 	void loadPlugins();
+	void openPlugins();
+	void closePlugins();
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd);
 	void executeNextFx(int listID);
+
+	void testSetDmxChannel(int val, int channel);
 
 };
 
