@@ -66,7 +66,8 @@ SOURCES += \
 	../gui/setupwidget.cpp \
 	../gui/customwidget/mixergroup.cpp \
 	../gui/fxitempropertywidget.cpp \
-    ../system/dmxchannel.cpp
+    ../system/dmxchannel.cpp \
+    ../fx/fxsceneitem.cpp
 
 HEADERS  += \
 	../config.h \
@@ -103,7 +104,8 @@ HEADERS  += \
 	../gui/setupwidget.h \
 	../gui/customwidget/mixergroup.h \
 	../gui/fxitempropertywidget.h \
-    ../system/dmxchannel.h
+    ../system/dmxchannel.h \
+    ../fx/fxsceneitem.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

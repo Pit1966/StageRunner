@@ -20,11 +20,11 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	}
 	cur_fx = fx;
 
-	nameEdit->setText(fx->displayName());
-	idEdit->setText(QString::number(fx->fxID()));
+	nameEdit->setText(fx->name());
+	idEdit->setText(QString::number(fx->id()));
 	keyEdit->setText(QChar(fx->keyCode()));
 
-	if (fx->fxType() == FX_AUDIO) {
+	if (fx->type() == FX_AUDIO) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioGroup->setVisible(true);
@@ -52,7 +52,7 @@ void FxItemPropertyWidget::on_initialVolDial_sliderMoved(int position)
 void FxItemPropertyWidget::on_nameEdit_textEdited(const QString &arg1)
 {
 	if (FxItem::exists(cur_fx)) {
-		cur_fx->setDisplayName(arg1);
+		cur_fx->setName(arg1);
 		cur_fx->setModified(true);
 		emit modified();
 	}

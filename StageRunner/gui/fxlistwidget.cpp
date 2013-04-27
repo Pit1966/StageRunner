@@ -65,11 +65,11 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->columnType = FxListWidgetItem::CT_KEY;
 		fxTable->setItem(t,col++,item);
 
-		item = new FxListWidgetItem(fx,fx->displayName());
+		item = new FxListWidgetItem(fx,fx->name());
 		item->columnType = FxListWidgetItem::CT_NAME;
 		fxTable->setItem(t,col++,item);
 
-		item = new FxListWidgetItem(fx,QString::number(fx->fxID()));
+		item = new FxListWidgetItem(fx,QString::number(fx->id()));
 		item->columnType = FxListWidgetItem::CT_ID;
 		fxTable->setItem(t,col++,item);
 
@@ -137,7 +137,7 @@ void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 
 	if (fx) {
-		qDebug() << "clicked:" << fx->displayName() << "ColType:" << myitem->columnType;
+		qDebug() << "clicked:" << fx->name() << "ColType:" << myitem->columnType;
 		myfxlist->setNextFx(fx);
 		if (cur_selected_item != fx) {
 			cur_selected_item = fx;
@@ -154,7 +154,7 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 
 	if (fx) {
-		qDebug() << "double clicked:" << fx->displayName() << "ColType:" << myitem->columnType;
+		qDebug() << "double clicked:" << fx->name() << "ColType:" << myitem->columnType;
 		if (!AppCentral::instance()->isEditMode()) {
 			emit fxCmdActivated(fx,CMD_FX_START);
 		}
@@ -169,7 +169,7 @@ void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 		myfxlist->moveFromTo(srcrow,destrow);
 		// setFxList(myfxlist);
 		if (cur) {
-			qDebug() << "select current:" << cur->displayName();
+			qDebug() << "select current:" << cur->name();
 			cur_selected_item = cur;
 			selectFx(cur);
 		}
@@ -191,7 +191,7 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 	switch (myitem->columnType) {
 	case FxListWidgetItem::CT_NAME:
-		fx->setDisplayName(myitem->text());
+		fx->setName(myitem->text());
 		emit listModified();
 		break;
 	case FxListWidgetItem::CT_KEY:

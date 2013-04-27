@@ -23,7 +23,7 @@ void SequenceControlWidget::setNextFx(FxItem *fx)
 	if (fx == 0) {
 		nextInSeqLabel->clear();
 	} else {
-		nextInSeqLabel->setText(fx->displayName());
+		nextInSeqLabel->setText(fx->name());
 	}
 }
 

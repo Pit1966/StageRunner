@@ -34,7 +34,7 @@ bool Project::saveToFile(const QString &path)
 		curProjectFilePath = path;
 		for (int t=0; t<fxList->size(); t++) {
 			FxItem *fx = fxList->at(t);
-			qDebug("Save: %d",fx->fxID());
+			qDebug("Save: %d",fx->id());
 			fx->setDatabaseReferences((qint64)pProjectId,t+1);
 			// append to previously saved file
 			ok = fx->fileSave(path, true, true);
@@ -71,7 +71,7 @@ bool Project::loadFromFile(const QString &path)
 				// have to initialize
 				if (curKey == "FxType") {
 					fx = fxList->addFx(curValue.toInt());
-					if (debug > 1) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->fxType());
+					if (debug > 1) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->type());
 				}
 			}
 		}

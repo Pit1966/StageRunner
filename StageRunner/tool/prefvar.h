@@ -38,7 +38,8 @@ public:
 		SYSTEM_CONFIG,			///< Die Variable enthält System-Einstellungen, die später auch in ".config" gespeichert werden
 		USER_CONFIG,			///< Wird in "./config" in der USER Sektion gespeichert
 		PROJECT,				///< Globale Triggereinstellung
-		FX_ITEM
+		FX_ITEM,
+		DMX_CHANNEL
 	};
 
 

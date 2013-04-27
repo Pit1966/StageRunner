@@ -54,7 +54,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	if (!audio_output) return false;
 
 	LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
-			.arg(fxa->displayName()).arg(slotNumber+1));
+			.arg(fxa->name()).arg(slotNumber+1));
 
 	run_status = AUDIO_INIT;
 	run_time.start();
@@ -76,13 +76,13 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
-			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->displayName().toLatin1().data(),run_time.elapsed());
+			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->name().toLatin1().data(),run_time.elapsed());
 			ok = true;
 			run_time.start();
 			current_fx = fxa;
 		}
 		else if (run_status == AUDIO_ERROR) {
-			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->displayName().toLatin1().data());
+			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLatin1().data());
 			break;
 		}
 
@@ -122,12 +122,12 @@ bool AudioSlot::fadeoutFxAudio(int time_ms)
 #ifdef IS_QT5
 	fade_out_initial_vol = audio_output->volume() * MAX_VOLUME;
 #endif
-    fadeout_timeline.setDuration(time_ms);
+	fadeout_timeline.setDuration(time_ms);
 
 	// and start the time line ticker
 	fadeout_timeline.start();
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
-			.arg(slotNumber+1).arg(current_fx->displayName()).arg(time_ms));
+			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
 
 	return true;
 }
@@ -214,7 +214,7 @@ void AudioSlot::on_fade_out_finished()
 	stopFxAudio();
 
 	LOGTEXT(tr("Fade out finished for slot %1: '%2'")
-			.arg(slotNumber+1).arg(current_fx->displayName()));
+			.arg(slotNumber+1).arg(current_fx->name()));
 }
 
 void AudioSlot::on_volset_timer_finished()
