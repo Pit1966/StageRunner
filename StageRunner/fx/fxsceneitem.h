@@ -10,6 +10,8 @@ class QWidget;
 class FxSceneItem : public FxItem
 {
 public:
+	qint32 defaultFadeInTime;
+	qint32 defaultFadeOutTime;
 	VarSetList<DmxChannel*>tubes;
 
 public:

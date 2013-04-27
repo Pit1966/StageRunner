@@ -12,6 +12,7 @@
 class PrefVarCore;
 class Database;
 class DBfield;
+
 template <class T> class VarSetList;
 
 class VarSet
@@ -104,7 +105,17 @@ public:
 	bool addExistingVar(qint64 & var, const QString & name, qint64 p_min = 0, qint64 p_max = 0x7FFFFFFFFFFFFFFFll, qint64 p_default = 0, const QString & descrip = "");
 	bool addExistingVar(bool & var, const QString & name, bool p_default = false, const QString & descrip = "");
 	bool addExistingVar(QString &var, const QString & name, const QString & p_default = "", const QString & descrip = "");
-	bool addExistingVar(VarSetList<class T> &var, const QString &name);
+	template <typename T> bool addExistingVarSetList(VarSetList<T> &var, const QString &name) {
+			if (exists(name)) return false;
+			PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET_LIST,name);
+			newvar->parent_var_sets.append(this);
+			newvar->myclass = myclass;
+			newvar->p_refvar = (void *) &var;
+			newvar->function_f = true;
+			var_list.lockAppend(newvar);
+			return true;
+	}
+
 
 	pint32 * addDynamicPint32(const QString & name, qint32 p_min=0, qint32 p_max=0x7fffffff, qint32 p_default=0, const QString & descrip = "");
 	pint64 * addDynamicPint64(const QString & name, qint64 p_min=0, qint64 p_max=0x7fffffffffffffffll, qint64 p_default=0, const QString & descrip = "");
@@ -180,6 +191,7 @@ private:
 	void add_to_registry(RegVarItem* reg);
 	void clear_var_list();
 	void init();
+	bool file_save_append(QTextStream &write);
 
 };
 

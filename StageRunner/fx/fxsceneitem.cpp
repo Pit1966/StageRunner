@@ -20,5 +20,8 @@ void FxSceneItem::createDefaultTubes(int tubecount)
 
 void FxSceneItem::init()
 {
+	addExistingVar(defaultFadeInTime,"DefFadeInTime");
+	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
+	addExistingVarSetList(tubes,"SceneTubes");
 
 }

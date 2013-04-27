@@ -1,4 +1,5 @@
 #include "varset.h"
+#include "varsetlist.h"
 #include "config.h"
 #include "database.h"
 #include "dbquery.h"
@@ -365,16 +366,6 @@ bool VarSet::addExistingVar(QString & var, const QString &name, const QString &p
 	return true;
 }
 
-bool VarSet::addExistingVar(VarSetList<class T> &var, const QString &name)
-{
-	if (exists(name)) return false;
-	PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET_LIST,name);
-	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
-	newvar->p_refvar = (void *) &var;
-	var_list.lockAppend(newvar);
-	return true;
-}
 
 pint32 * VarSet::addDynamicPint32(const QString &name, qint32 p_min, qint32 p_max, qint32 p_default, const QString &descrip)
 {
@@ -783,9 +774,17 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 				// spezielle virtuelle Funktionsvariablen untersuchen
 				QString func_name = var->get_value().toString();
 				QString func_para = var->pDescription();
+				if (var->mytype == PrefVarCore::VARSET_LIST) {
+					VarSetList<VarSet*> *varlist = (VarSetList<VarSet*>*)var->p_refvar;
+					write << "[CHILD|" << var->myname << "]" << "\n";
+					for (int i=0; i<varlist->size(); i++) {
+						varlist->at(i)->file_save_append(write);
+						write << "\n";
+					}
+					write << "[CHILDEND]" << "\n";
+				}
+				else if (func_name == "group") { 				// Gruppe
 
-				// Gruppe
-				if (func_name == "group") {
 					write << "[" << func_para << "]" << "\n";
 				}
 			} else {
@@ -807,6 +806,45 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 	}
 	return ok;
 }
+
+bool VarSet::file_save_append(QTextStream &write)
+{
+	bool ok = true;
+
+	if (myclassname.size()) {
+		write << "[" << myclassname << "]";
+		if (db_vset_projectid > 0 || db_vset_index > 0) {
+			write << "[" << db_vset_projectid << "]";
+			if (db_vset_index > 0) {
+				write << "[" << db_vset_index << "]";
+			}
+		}
+		write << "\n";
+	}
+	for (int t=0; t<var_list.size(); t++) {
+		PrefVarCore *var = var_list.at(t);
+		if (var->function_f) {
+			// spezielle virtuelle Funktionsvariablen untersuchen
+			QString func_name = var->get_value().toString();
+			QString func_para = var->pDescription();
+			if (var->mytype == PrefVarCore::VARSET_LIST) {
+				write << "[CHILD|" << var->myname << "]" << "\n";
+
+				write << "[CHILDEND]" << "\n";
+			}
+			else if (func_name == "group") { 				// Gruppe
+
+				write << "[" << func_para << "]" << "\n";
+			}
+		} else {
+			write << var->pVarName() << "=" << var->pValue().toString() << "\n";
+		}
+	}
+
+	return ok;
+}
+
+
 
 /**
  * @brief VarSet aus Datei laden
