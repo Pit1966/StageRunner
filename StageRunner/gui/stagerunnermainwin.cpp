@@ -1,3 +1,4 @@
+#include "config.h"
 #include "stagerunnermainwin.h"
 #include "system/commandsystem.h"
 #include "appcontrol/appcentral.h"
@@ -152,7 +153,7 @@ void StageRunnerMainWin::initAppDefaults()
 	}
 
 	dmxDirectWidget->setMixerCount(24);
-	dmxDirectWidget->setRange(0,255);
+	dmxDirectWidget->setRange(0,MAX_DMX_FADER_RANGE);
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
@@ -351,3 +352,14 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 
 }
 
+
+void StageRunnerMainWin::on_actionExit_StageRunner_triggered()
+{
+	close();
+}
+
+void StageRunnerMainWin::on_addFxSceneButton_clicked()
+{
+	mainapp->project->fxList->addFxScene(12);
+	fxListWidget->refreshList();
+}

@@ -1,7 +1,9 @@
 #include "fxlistwidget.h"
 #include "fx/fxlist.h"
 #include "fx/fxitem.h"
+#include "fxsceneitem.h"
 #include "appcontrol/appcentral.h"
+#include "scenedeskwidget.h"
 
 #include <QDebug>
 
@@ -42,7 +44,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 	fxTable->setColumnCount(3);
 
 	QStringList header;
-	header << tr("Key") << tr("Name") << tr("Id");
+	header << tr("Key") << tr("Name") << tr("Function") << tr("Id");
 	fxTable->setHorizontalHeaderLabels(header);
 
 	QFont key_font;
@@ -67,6 +69,10 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 		item = new FxListWidgetItem(fx,fx->name());
 		item->columnType = FxListWidgetItem::CT_NAME;
+		fxTable->setItem(t,col++,item);
+
+		item = new FxListWidgetItem(fx,QString::number(fx->fxType()));
+		item->columnType = FxListWidgetItem::CT_FX_TYPE;
 		fxTable->setItem(t,col++,item);
 
 		item = new FxListWidgetItem(fx,QString::number(fx->id()));
@@ -115,6 +121,13 @@ void FxListWidget::init()
 	cur_selected_item = 0;
 }
 
+void FxListWidget::open_scence_desk(FxSceneItem *fx)
+{
+
+	SceneDeskWidget *desk = new SceneDeskWidget(fx);
+	desk->show();
+}
+
 void FxListWidget::refreshList()
 {
 	qDebug("FxListWidget refresh");
@@ -154,6 +167,10 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 
 	if (fx) {
+		if (fx->fxType() == FX_SCENE) {
+			open_scence_desk(static_cast<FxSceneItem*>(fx));
+			return;
+		}
 		qDebug() << "double clicked:" << fx->name() << "ColType:" << myitem->columnType;
 		if (!AppCentral::instance()->isEditMode()) {
 			emit fxCmdActivated(fx,CMD_FX_START);
@@ -212,3 +229,4 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 		break;
 	}
 }
+

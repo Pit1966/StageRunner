@@ -18,6 +18,8 @@ private:
 public:
 	explicit MixerGroup(QWidget *parent = 0);
 	void setMixerCount(int number);
+	void clear();
+	MixerChannel * appendMixer();
 	void setRange(int min, int max);
 
 signals:

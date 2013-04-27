@@ -67,7 +67,7 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 		if (new_value != value()) {
 			setValue( new_value );
 			emit sliderMoved(value());
-			emit mixerMoved(value(),my_id);
+			emit mixerMoved(value(),int(my_id));
 		}
 		update();
 	} else {

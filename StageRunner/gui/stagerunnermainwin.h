@@ -56,6 +56,10 @@ private slots:
 	void on_actionSetup_triggered();
 	void on_actionSave_Project_triggered();
 
+	void on_actionExit_StageRunner_triggered();
+
+	void on_addFxSceneButton_clicked();
+
 private:
 	void init();
 	void setup_gui_docks();

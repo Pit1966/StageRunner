@@ -1,3 +1,4 @@
+#include "config.h"
 #include "appcentral.h"
 #include "system/audiocontrol.h"
 #include "fx/fxlist.h"
@@ -102,7 +103,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 		return;
 	}
 
-	switch (fx->type()) {
+	switch (fx->fxType()) {
 	case FX_AUDIO:
 		switch (cmd) {
 		case CMD_AUDIO_START:
@@ -133,6 +134,8 @@ void AppCentral::executeNextFx(int listID)
 void AppCentral::testSetDmxChannel(int val, int channel)
 {
 	bool changed = false;
+	val = val * 255 / MAX_DMX_FADER_RANGE;
+
 	if (dmx_direct_data.at(channel) != val) {
 		dmx_direct_data[channel] = val;
 		changed = true;

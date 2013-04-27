@@ -51,7 +51,7 @@ void FxItem::init(qint32 id)
 	setClass(PrefVarCore::FX_ITEM,"FxItem");
 
 	addExistingVar(myId,"FxId",0,10000,id);
-	addExistingVar(myType,"FxType",FX_NULL,FX_SIZE,FX_NULL);
+	addExistingVar(myFxType,"FxType",FX_NULL,FX_SIZE,FX_NULL);
 	addExistingVar(myName,"DisplayName");
 	addExistingVar(myFile,"FileName");
 	addExistingVar(myPath,"FilePath");

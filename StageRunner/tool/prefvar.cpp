@@ -1,7 +1,7 @@
 /** @file prefvar.cpp */
 
 #include "prefvar.h"
-#include "prefvarset.h"
+#include "varset.h"
 #include "../config.h"
 
 #include <QSettings>
@@ -27,6 +27,11 @@ PrefVarCore::PrefVarCore(PrefVarType type, const QString & name)
 
 	mytype = type;
 	myname = name;
+
+	// Var could be a Dummy for function
+	if (type == PrefVarCore::VARSET_LIST) {
+		function_f = true;
+	}
 
 
 	// Variable in Liste merken

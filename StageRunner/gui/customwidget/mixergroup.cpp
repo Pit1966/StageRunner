@@ -11,6 +11,7 @@ MixerGroup::MixerGroup(QWidget *parent) :
 
 	QHBoxLayout * mixerlayout = new QHBoxLayout;
 	mixerlayout->setSpacing(0);
+	mixerlayout->setMargin(0);
 	setLayout(mixerlayout);
 
 	setMixerCount(12);
@@ -19,6 +20,9 @@ MixerGroup::MixerGroup(QWidget *parent) :
 /**
  * @brief Set Number of Mixers to be displayed
  * @param number
+ *
+ * This function deletes all current mixers if there numbe is lower
+ * than new one
  */
 void MixerGroup::setMixerCount(int number)
 {
@@ -27,14 +31,27 @@ void MixerGroup::setMixerCount(int number)
 	}
 
 	while (mixerlist.size() < number) {
-		MixerChannel *mixer = new MixerChannel;
-		mixer->setId(mixerlist.size());
-		mixer->setRange(default_min,default_max);
-		mixerlist.append(mixer);
-		layout()->addWidget(mixer);
-		connect(mixer,SIGNAL(mixerMoved(int,int)),this,SLOT(on_mixer_moved(int,int)));
+		appendMixer();
 	}
+}
 
+void MixerGroup::clear()
+{
+	while (mixerlist.size()) {
+		delete mixerlist.takeFirst();
+	}
+}
+
+MixerChannel *MixerGroup::appendMixer()
+{
+	MixerChannel *mixer = new MixerChannel;
+	mixer->setId(mixerlist.size());
+	mixer->setRange(default_min,default_max);
+	mixerlist.append(mixer);
+	layout()->addWidget(mixer);
+	connect(mixer,SIGNAL(mixerMoved(int,int)),this,SLOT(on_mixer_moved(int,int)));
+
+	return mixer;
 }
 
 void MixerGroup::setRange(int min, int max)

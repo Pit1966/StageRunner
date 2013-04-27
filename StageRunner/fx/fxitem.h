@@ -1,7 +1,7 @@
 #ifndef FXITEM_H
 #define FXITEM_H
 
-#include "../tool/prefvarset.h"
+#include "../tool/varset.h"
 #include "../system/commandsystem.h"
 
 #include <QString>
@@ -11,6 +11,7 @@
 enum FxType {
 	FX_NULL,				// no fx type set
 	FX_AUDIO,				// is Audio Fx
+	FX_SCENE,				// is Light Scene
 
 	FX_SIZE
 };
@@ -24,7 +25,7 @@ private:
 protected:
 	QAtomicInt refCount;
 	qint32 myId;
-	qint32 myType;
+	qint32 myFxType;
 	QString myName;
 	QString myFile;
 	QString myPath;
@@ -35,7 +36,7 @@ public:
 	~FxItem();
 	static bool exists(const FxItem *item);
 
-	inline int type() const {return myType;}
+	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
 	inline void setName(const QString &name) {myName = name;}
 	inline int id() const {return myId;}

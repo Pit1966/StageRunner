@@ -1,4 +1,4 @@
-#include "prefvarset.h"
+#include "varset.h"
 #include "config.h"
 #include "database.h"
 #include "dbquery.h"
@@ -13,11 +13,12 @@
 /// Statics
 
 /// Das pvar -> database Variablen Typemapping. Unbedingt synchron halten mit PrefVarCore::PrefVarType
-const char *VarSet::db_type_strings[4] = {
+const char *VarSet::db_type_strings[5] = {
 	"BIGINT",
 	"INT",
 	"varchar(512)",
-	"BOOL"
+	"BOOL",
+	"INT"					///< Dummy
 };
 
 MutexQList<VarSet::RegVarItem*>*VarSet::var_registry = 0;
@@ -211,6 +212,10 @@ void VarSet::cloneFrom(const VarSet &other)
 					}
 				}
 				break;
+			case PrefVarCore::VARSET_LIST:
+				DEBUGERROR("%s: Implement me: Line %d PrefVar '%s' not cloned"
+						   ,Q_FUNC_INFO,__LINE__,o->myname.toLocal8Bit().data());
+				break;
 
 			}
 			modified_f = true;
@@ -357,6 +362,17 @@ bool VarSet::addExistingVar(QString & var, const QString &name, const QString &p
 	var_list.lockAppend(newvar);
 	// Default Wert in existierender Variable setzen
 	var = p_default;
+	return true;
+}
+
+bool VarSet::addExistingVar(VarSetList<class T> &var, const QString &name)
+{
+	if (exists(name)) return false;
+	PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET_LIST,name);
+	newvar->parent_var_sets.append(this);
+	newvar->myclass = myclass;
+	newvar->p_refvar = (void *) &var;
+	var_list.lockAppend(newvar);
 	return true;
 }
 
@@ -1133,6 +1149,10 @@ DBfield *VarSet::getDynamicDbTableDefinition()
 			break;
 		case PrefVarCore::BOOL:
 			dbtype = db_type_strings[3];
+			break;
+		case PrefVarCore::VARSET_LIST:
+			dbtype = db_type_strings[4];
+			DEBUGERROR("%s: Implement me: Line %d",Q_FUNC_INFO,__LINE__);
 			break;
 		}
 

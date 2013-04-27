@@ -11,7 +11,7 @@
 
 #include "database.h"
 #include "toolclasses.h"
-#include "prefvarset.h"
+#include "varset.h"
 
 #include <string.h>
 #include <QMessageBox>

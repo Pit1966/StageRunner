@@ -12,8 +12,7 @@
 class PrefVarCore;
 class Database;
 class DBfield;
-
-
+template <class T> class VarSetList;
 
 class VarSet
 {
@@ -64,7 +63,7 @@ private:
 
 	// Varwaltung aller VarSets
 	static QAtomicInt instance_cnt;					///< Soviele VarSet Instanzen gibt es
-	static const char *db_type_strings[4];			///< Tabelle mit korrespondierenden MySQL Variablen Typen
+	static const char *db_type_strings[5];			///< Tabelle mit korrespondierenden MySQL Variablen Typen
 	static MutexQList<RegVarItem*>*var_registry;	///< Liste, die alle registrierten Instanzen nachhält
 
 
@@ -79,6 +78,9 @@ public:
 	bool checkModified();
 	void setModified(bool state);
 	bool isModified() {return modified_f;}
+
+	inline PrefVarCore::VarClass classType() const {return myclass;}
+	inline const QString & className() const {return myclassname;}
 
 	/**
 	 * @brief setName Den Namen des VarSets festlegen
@@ -102,6 +104,7 @@ public:
 	bool addExistingVar(qint64 & var, const QString & name, qint64 p_min = 0, qint64 p_max = 0x7FFFFFFFFFFFFFFFll, qint64 p_default = 0, const QString & descrip = "");
 	bool addExistingVar(bool & var, const QString & name, bool p_default = false, const QString & descrip = "");
 	bool addExistingVar(QString &var, const QString & name, const QString & p_default = "", const QString & descrip = "");
+	bool addExistingVar(VarSetList<class T> &var, const QString &name);
 
 	pint32 * addDynamicPint32(const QString & name, qint32 p_min=0, qint32 p_max=0x7fffffff, qint32 p_default=0, const QString & descrip = "");
 	pint64 * addDynamicPint64(const QString & name, qint64 p_min=0, qint64 p_max=0x7fffffffffffffffll, qint64 p_default=0, const QString & descrip = "");
@@ -166,6 +169,8 @@ public:
 	static bool unRegister(RegVarType reg_type, VarSet *obj);
 	static RegVarItem getRegisterItemCopy(RegVarType reg_type, VarSet *obj);
 	static QList<VarSet *>getDatabaseTableVarLists();
+
+	static inline bool isVarSet() {return true;}
 
 protected:
 	bool analyzeLine(const QString &line, VarSet *varset);

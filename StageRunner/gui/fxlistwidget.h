@@ -9,6 +9,7 @@
 
 class FxList;
 class FxItem;
+class FxSceneItem;
 
 
 class FxListWidgetItem : public QTableWidgetItem
@@ -18,7 +19,8 @@ public:
 		CT_UNDEF,
 		CT_NAME,
 		CT_ID,
-		CT_KEY
+		CT_KEY,
+		CT_FX_TYPE
 	};
 
 	FxItem *linkedFxItem;
@@ -52,6 +54,7 @@ public slots:
 
 private:
 	void init();
+	void open_scence_desk(FxSceneItem *fx);
 
 public slots:
 	void refreshList();

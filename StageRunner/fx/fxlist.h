@@ -45,12 +45,13 @@ public:
 	inline bool autoProceedSequence() {return auto_proceed_f;}
 
 	bool addFxAudioSimple(const QString & path, int pos = -1);
+	bool addFxScene(int tubes = 1);
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool isModified() const;
 	void setModified(bool state);
 
-	FxItem * addFx(int fxtype);
+	FxItem * addFx(int fxtype, int option = -1);
 	FxItem *findSequenceFollower(FxItem *curfx);
 
 signals:

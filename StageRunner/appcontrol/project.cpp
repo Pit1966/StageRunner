@@ -2,6 +2,7 @@
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
+#include "fxsceneitem.h"
 
 #include <QDateTime>
 #include <QFile>
@@ -71,7 +72,7 @@ bool Project::loadFromFile(const QString &path)
 				// have to initialize
 				if (curKey == "FxType") {
 					fx = fxList->addFx(curValue.toInt());
-					if (debug > 1) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->type());
+					if (debug > 1) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->fxType());
 				}
 			}
 		}
@@ -101,6 +102,11 @@ bool Project::isModified()
 	return modified;
 }
 
+void Project::setModified(bool state)
+{
+	VarSet::setModified(state);
+}
+
 void Project::init()
 {
 	fxList = new FxList;
@@ -116,6 +122,3 @@ void Project::init()
 }
 
 
-void Project::setModified(bool state)
-{
-}

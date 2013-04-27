@@ -24,7 +24,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	idEdit->setText(QString::number(fx->id()));
 	keyEdit->setText(QChar(fx->keyCode()));
 
-	if (fx->type() == FX_AUDIO) {
+	if (fx->fxType() == FX_AUDIO) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioGroup->setVisible(true);

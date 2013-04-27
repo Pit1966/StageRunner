@@ -47,7 +47,6 @@ SOURCES += \
 	../appcontrol/project.cpp \
 	../appcontrol/usersettings.cpp \
 	../tool/toolclasses.cpp \
-	../tool/prefvarset.cpp \
 	../tool/prefvar.cpp \
 	../tool/dbquery.cpp \
 	../tool/database.cpp \
@@ -67,7 +66,9 @@ SOURCES += \
 	../gui/customwidget/mixergroup.cpp \
 	../gui/fxitempropertywidget.cpp \
     ../system/dmxchannel.cpp \
-    ../fx/fxsceneitem.cpp
+    ../fx/fxsceneitem.cpp \
+    ../tool/varset.cpp \
+    ../gui/scenedeskwidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -85,7 +86,6 @@ HEADERS  += \
 	../appcontrol/project.h \
 	../appcontrol/usersettings.h \
 	../tool/toolclasses.h \
-	../tool/prefvarset.h \
 	../tool/prefvar.h \
 	../tool/dbquery.h \
 	../tool/database.h \
@@ -105,7 +105,10 @@ HEADERS  += \
 	../gui/customwidget/mixergroup.h \
 	../gui/fxitempropertywidget.h \
     ../system/dmxchannel.h \
-    ../fx/fxsceneitem.h
+    ../fx/fxsceneitem.h \
+    ../tool/varset.h \
+    ../tool/varsetlist.h \
+    ../gui/scenedeskwidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -114,7 +117,8 @@ FORMS    += \
 	../gui/audioslotwidget.ui \
 	../gui/audiocontrolwidget.ui \
 	../gui/setupwidget.ui \
-	../gui/fxitempropertywidget.ui
+	../gui/fxitempropertywidget.ui \
+    ../gui/scenedeskwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

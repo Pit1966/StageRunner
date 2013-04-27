@@ -23,13 +23,15 @@ class VarSet;
 
 class PrefVarCore : public QObject {
 
-	Q_OBJECT;
+	Q_OBJECT
+
 public:
 	enum PrefVarType {			///< Die einzelnen Variablentypen. Unbedingt synchron halten mit VarSet::db_type_strings !!
 		INT64,
 		INT32,
 		STRING,
-		BOOL
+		BOOL,
+		VARSET_LIST
 	};
 
 	enum VarClass {
