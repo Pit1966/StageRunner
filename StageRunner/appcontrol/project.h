@@ -12,6 +12,9 @@ public:
 
 	pbool pAutoProceedSequence;
 
+	QString curProjectFilePath;					///< Stores the location of the project file, is previously saved or loaded from disk (used for project-save)
+private:
+
 protected:
 	pint64 pProjectId;
 	pstring pProjectName;
@@ -25,6 +28,8 @@ public:
 
 	bool saveToFile(const QString & path);
 	bool loadFromFile(const QString & path);
+	bool isModified();
+	void setModified(bool state);
 
 private:
 	void init();

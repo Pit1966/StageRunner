@@ -7,6 +7,8 @@
 #define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
 
+#define PLUGINDIR "/usr/lib/qt4/plugins/stagerunner"
+
 #define FX_AUDIO_START_WAIT_DELAY 100			// Time in ms that will be waited for a successful started audio effect
 
 

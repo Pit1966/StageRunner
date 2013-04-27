@@ -134,6 +134,8 @@ signals:
 	void newcolor(const QColor &);
 	void clearlog();
 	void msgLogged(const QString, quint32);
+	void infoMsgReceived(const QString & func, const QString & text);
+	void errorMsgReceived(const QString & func, const QString & text);
 };
 
 

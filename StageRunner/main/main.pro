@@ -5,6 +5,7 @@ LANGUAGE = C++
 TARGET   = stagerunner
 
 
+INCLUDEPATH  += .
 INCLUDEPATH  += ../
 INCLUDEPATH  += ../fx
 INCLUDEPATH  += ../gui
@@ -61,13 +62,15 @@ SOURCES += \
 	../gui/audiocontrolwidget.cpp \
 	../gui/ptablewidget.cpp \
 	../appcontrol/ioplugincentral.cpp \
-    ../gui/customwidget/mixerchannel.cpp \
-    ../gui/setupwidget.cpp \
-    ../gui/customwidget/mixergroup.cpp
+	../gui/customwidget/mixerchannel.cpp \
+	../gui/setupwidget.cpp \
+	../gui/customwidget/mixergroup.cpp \
+	../gui/fxitempropertywidget.cpp \
+    ../system/dmxchannel.cpp
 
 HEADERS  += \
 	../config.h \
-	../configref.h \
+#	../configref.h \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
@@ -96,9 +99,11 @@ HEADERS  += \
 	../gui/audiocontrolwidget.h \
 	../gui/ptablewidget.h \
 	../appcontrol/ioplugincentral.h \
-    ../gui/customwidget/mixerchannel.h \
-    ../gui/setupwidget.h \
-    ../gui/customwidget/mixergroup.h
+	../gui/customwidget/mixerchannel.h \
+	../gui/setupwidget.h \
+	../gui/customwidget/mixergroup.h \
+	../gui/fxitempropertywidget.h \
+    ../system/dmxchannel.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -106,7 +111,8 @@ FORMS    += \
 	../gui/sequencecontrolwidget.ui \
 	../gui/audioslotwidget.ui \
 	../gui/audiocontrolwidget.ui \
-    ../gui/setupwidget.ui
+	../gui/setupwidget.ui \
+	../gui/fxitempropertywidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

@@ -8,19 +8,23 @@
 #include "thirdparty/widget/qsynthdialpeppinostyle.h"
 #include "thirdparty/widget/qsynthdialclassicstyle.h"
 #include "gui/setupwidget.h"
+#include "gui/fxitempropertywidget.h"
 
 #include <QFileDialog>
+#include <QErrorMessage>
 
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	QMainWindow(0)
 {
 	mainapp = myapp;
-	dialWidgetStyle = 0;
 
 	init();
 
+
+
 	setupUi(this);
+	setup_gui_docks();
 
 	updateButtonStyles();
 
@@ -31,6 +35,8 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 StageRunnerMainWin::~StageRunnerMainWin()
 {
 	delete dialWidgetStyle;
+	delete msg_dialog;
+	delete fxitem_editor_dock;
 }
 
 void StageRunnerMainWin::initConnects()
@@ -41,6 +47,9 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
 	connect(mainapp->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 
+	// FxListWidget <-> Fx Editor (Dock Widget)
+	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
+	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
 
 	// Audio Control Panel <-> Audio Control
 	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
@@ -50,8 +59,35 @@ void StageRunnerMainWin::initConnects()
 	// DMX Direct Control
 	connect(dmxDirectWidget,SIGNAL(mixerMoved(int,int)),mainapp,SLOT(testSetDmxChannel(int,int)));
 
+	// Global Info & Error Messaging
+	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
+	connect(logThread,SIGNAL(errorMsgReceived(QString,QString)),this,SLOT(showErrorMsg(QString,QString)));
+
 	qApp->installEventFilter(this);
 
+}
+
+void StageRunnerMainWin::setup_gui_docks()
+{
+	fxitem_editor_dock = new QDockWidget(this);
+	fxItemEditor = new FxItemPropertyWidget(this);
+
+	fxitem_editor_dock->setObjectName("Fx Editor");
+	fxitem_editor_dock->setWindowTitle("Fx Editor");
+	fxitem_editor_dock->setWidget(fxItemEditor);
+	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	this->addDockWidget(Qt::LeftDockWidgetArea,fxitem_editor_dock);
+
+}
+
+void StageRunnerMainWin::restore_window()
+{
+	QSettings set;
+	set.beginGroup("GuiSettings");
+	if (set.contains("MainWinGeometry")) {
+		restoreGeometry(set.value("MainWinGeometry").toByteArray());
+		restoreState(set.value("MainWinDocks").toByteArray());
+	}
 }
 
 void StageRunnerMainWin::updateButtonStyles()
@@ -69,6 +105,7 @@ void StageRunnerMainWin::updateButtonStyles()
 		dial->setStyle(dialWidgetStyle);
 		dial->setDialMode(qsynthKnob::LinearMode);
 	}
+
 
 }
 
@@ -89,6 +126,11 @@ void StageRunnerMainWin::clearProject()
 void StageRunnerMainWin::init()
 {
 	shiftPressedFlag = false;
+	dialWidgetStyle = 0;
+
+	msg_dialog = new QErrorMessage(this);
+	fxitem_editor_dock = 0;
+	fxItemEditor = 0;
 }
 
 
@@ -101,6 +143,8 @@ void StageRunnerMainWin::init()
  */
 void StageRunnerMainWin::initAppDefaults()
 {
+	restore_window();
+
 	if (mainapp->userSettings->pLastProjectLoadPath.size()) {
 		mainapp->project->loadFromFile(mainapp->userSettings->pLastProjectLoadPath);
 		fxListWidget->setFxList(mainapp->project->fxList);
@@ -135,6 +179,21 @@ void StageRunnerMainWin::on_addAudioFxButton_clicked()
 	fxListWidget->setFxList(fxlist);
 }
 
+void StageRunnerMainWin::on_actionSave_Project_triggered()
+{
+	Project * pro = mainapp->project;
+
+	if (pro->curProjectFilePath.size()) {
+		if (pro->saveToFile(pro->curProjectFilePath)) {
+			POPUPINFOMSG(Q_FUNC_INFO,tr("Project successfully saved!"));
+		}
+	} else {
+		on_actionSave_Project_as_triggered();
+	}
+
+}
+
+
 void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 {
 	QString path = QFileDialog::getSaveFileName(this,tr("Choose Project save path")
@@ -145,9 +204,11 @@ void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 		}
 		mainapp->userSettings->pLastProjectSavePath = path;
 		copyGuiSettingsToProject();
-		mainapp->project->saveToFile(path);
-
-		/// @todo Error handling
+		if (mainapp->project->saveToFile(path)) {
+			POPUPINFOMSG(Q_FUNC_INFO,tr("Project successfully saved!"));
+		} else {
+			POPUPERRORMSG(Q_FUNC_INFO,tr("Could not save project!"));
+		}
 	}
 
 }
@@ -224,6 +285,42 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	return qApp->eventFilter(obj, event);
 }
 
+void StageRunnerMainWin::closeEvent(QCloseEvent *event)
+{
+	if (mainapp->project->isModified()) {
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("Project is modified!\n\nDo you want to save it now?"));
+		if (ret == QMessageBox::Yes) {
+			on_actionSave_Project_triggered();
+		}
+	}
+	QSettings set;
+	set.beginGroup("GuiSettings");
+	set.setValue("MainWinGeometry",saveGeometry());
+	set.setValue("MainWinDocks",saveState());
+	QMainWindow::closeEvent(event);
+}
+
+
+
+
+void StageRunnerMainWin::showInfoMsg(QString where, QString text)
+{
+	Q_UNUSED(where);
+	QString msg = QString("<font color=#222222>%1</font><br><br>Reported from function:%2")
+			.arg(text,where);
+	msg_dialog->setStyleSheet("");
+	msg_dialog->showMessage(text,where);
+}
+
+void StageRunnerMainWin::showErrorMsg(QString where, QString text)
+{
+	QString msg = QString("<font color=red>%1</font><br><br>Reported from function:%2")
+			.arg(text,where);
+	msg_dialog->setStyleSheet("color:red;");
+	msg_dialog->showMessage(text,where);
+}
+
 void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 {
 	if (!path.startsWith("file://")) {
@@ -253,3 +350,4 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 	setup.exec();
 
 }
+

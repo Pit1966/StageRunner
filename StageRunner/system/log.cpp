@@ -433,8 +433,7 @@ void Log::errorPopupMsg(const QString & where, const QString & text)
 	QString logtext = text;
 	logtext.replace("\n"," > ");
 	LOGERROR(QString("%1: %2").arg(where,logtext));
-
-	return;
+	emit errorMsgReceived(where, text);
 }
 void Log::infoPopupMsg(const QString & where, const QString & text)
 {
@@ -442,8 +441,7 @@ void Log::infoPopupMsg(const QString & where, const QString & text)
 	QString logtext = text;
 	logtext.replace("\n"," > ");
 	LOGTEXT(QString("%1: %2").arg(where,logtext));
-
-	return;
+	emit infoMsgReceived(where, text);
 }
 
 

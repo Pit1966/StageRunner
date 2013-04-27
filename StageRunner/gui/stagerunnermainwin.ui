@@ -27,7 +27,7 @@
       <widget class="FxListWidget" name="fxListWidget" native="true"/>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <property name="iconSize">
         <size>
@@ -112,13 +112,6 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item row="0" column="2">
-             <widget class="MixerChannel" name="verticalSlider">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QPushButton" name="addAudioFxButton">
               <property name="sizePolicy">
@@ -129,35 +122,6 @@
               </property>
               <property name="text">
                <string>Add Audio Fx</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="MixerChannel" name="testMixer">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="value">
-               <number>255</number>
-              </property>
-              <property name="sliderPosition">
-               <number>255</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="MixerChannel" name="verticalSlider_2">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
               </property>
              </widget>
             </item>
@@ -276,11 +240,6 @@
    <extends>QGroupBox</extends>
    <header>gui/sequencecontrolwidget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MixerChannel</class>
-   <extends>QSlider</extends>
-   <header>gui/customwidget/mixerchannel.h</header>
   </customwidget>
   <customwidget>
    <class>MixerGroup</class>

@@ -18,6 +18,7 @@ private:
 	FxItem * fx_current;
 
 	bool auto_proceed_f;
+	bool modified_f;
 
 public:
 	FxList();
@@ -46,6 +47,8 @@ public:
 	bool addFxAudioSimple(const QString & path, int pos = -1);
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
+	bool isModified() const;
+	void setModified(bool state);
 
 	FxItem * addFx(int fxtype);
 	FxItem *findSequenceFollower(FxItem *curfx);

@@ -1,6 +1,8 @@
 #include "fxlist.h"
 #include "fxaudioitem.h"
 
+#include <QMutableListIterator>
+
 FxList::FxList() :
 	QObject()
 {
@@ -9,6 +11,7 @@ FxList::FxList() :
 	fx_current = 0;
 	auto_proceed_f = false;
 	id = 0;
+	modified_f = false;
 }
 
 FxList::~FxList()
@@ -21,6 +24,7 @@ void FxList::clear()
 	fx_last = 0;
 	fx_next = 0;
 	fx_current = 0;
+	modified_f = true;
 
 	while (!fx_list.isEmpty()) {
 		// remove effect from list and delete it if there is no more reference
@@ -84,6 +88,7 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 	} else {
 		fx_list.insert(pos,fx);
 	}
+	modified_f = true;
 
 	return true;
 }
@@ -106,6 +111,7 @@ void FxList::moveFromTo(int srcidx, int destidx)
 	else if (destidx <= srcidx ){
 		fx_list.insert(destidx,xitem);
 	}
+	modified_f = true;
 
 	emit fxListChanged();
 }
@@ -119,8 +125,32 @@ bool FxList::deleteFx(FxItem *fx)
 		if (fx == fx_current) fx_current = 0;
 		delete fx;
 		emit fxListChanged();
+		modified_f = true;
 	}
 	return del;
+}
+
+bool FxList::isModified() const
+{
+	bool modified = modified_f;
+	QListIterator<FxItem*> it(fx_list);
+	while (it.hasNext()) {
+		FxItem *fx = it.next();
+		if (fx->isModified()) {
+			modified = true;
+		}
+	}
+	return modified;
+}
+
+void FxList::setModified(bool state)
+{
+	QMutableListIterator<FxItem*> it(fx_list);
+	while (it.hasNext()) {
+		FxItem *fx = it.next();
+		fx->setModified(state);
+	}
+	modified_f = state;
 }
 
 FxItem *FxList::addFx(int fxtype)
@@ -131,6 +161,7 @@ FxItem *FxList::addFx(int fxtype)
 			FxAudioItem *fx = new FxAudioItem();
 			fx->refCount.ref();
 			fx_list.append(fx);
+			modified_f = true;
 			return fx;
 		}
 		break;

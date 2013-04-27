@@ -18,7 +18,7 @@ enum FxType {
 class FxItem : public VarSet
 {
 private:
-	static QList<FxItem*>*global_fx_list;
+	static QList<const FxItem*>*global_fx_list;
 
 
 protected:
@@ -33,20 +33,20 @@ protected:
 public:
 	FxItem();
 	~FxItem();
-	static bool exists(FxItem * item);
+	static bool exists(const FxItem *item);
 
-	inline int fxType() const {return myType;}
-	inline const QString & displayName() const {return myName;}
-	inline void setDisplayName(const QString &name) {myName = name;}
-	inline int fxID() const {return myId;}
+	inline int type() const {return myType;}
+	inline const QString & name() const {return myName;}
+	inline void setName(const QString &name) {myName = name;}
+	inline int id() const {return myId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
 	inline void setKeyCode(ushort code) {myKey = code;}
-	inline ushort keyCode() {return myKey;}
+	inline ushort keyCode() const {return myKey;}
 
 
 private:
-	void init(qint32 fxID);
+	void init(qint32 id);
 
 	friend class FxList;
 };

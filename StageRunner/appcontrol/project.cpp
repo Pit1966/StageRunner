@@ -31,13 +31,20 @@ bool Project::saveToFile(const QString &path)
 	bool ok = fileSave(path, false, true);
 
 	if (ok) {
+		curProjectFilePath = path;
 		for (int t=0; t<fxList->size(); t++) {
 			FxItem *fx = fxList->at(t);
 			qDebug("Save: %d",fx->fxID());
 			fx->setDatabaseReferences((qint64)pProjectId,t+1);
 			// append to previously saved file
-			fx->fileSave(path, true, true);
+			ok = fx->fileSave(path, true, true);
 		}
+
+	}
+
+	if (ok) {
+		fxList->setModified(false);
+		setModified(false);
 	}
 
 
@@ -69,11 +76,29 @@ bool Project::loadFromFile(const QString &path)
 			}
 		}
 		file.close();
+		curProjectFilePath = path;
+		fxList->setModified(false);
+		setModified(false);
 	} else {
 		ok = false;
 	}
 
 	return ok;
+}
+
+bool Project::isModified()
+{
+	bool modified = false;
+	if (fxList->isModified()) {
+		qDebug("Project:: fxList is modified");
+		modified = true;
+	}
+	if (VarSet::isModified()) {
+		qDebug("Project:: Project is modified");
+		modified = true;
+	}
+
+	return modified;
 }
 
 void Project::init()
@@ -88,4 +113,9 @@ void Project::init()
 	addExistingVar(pComment,"Comment");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 
+}
+
+
+void Project::setModified(bool state)
+{
 }

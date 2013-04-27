@@ -8,8 +8,8 @@
 #include <QListWidgetItem>
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
-	: myapp(app_central)
-	, QDialog(parent)
+	: QDialog(parent)
+	, myapp(app_central)
 {
 	init();
 

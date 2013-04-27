@@ -45,12 +45,23 @@ void FxListWidget::setFxList(FxList *fxlist)
 	header << tr("Key") << tr("Name") << tr("Id");
 	fxTable->setHorizontalHeaderLabels(header);
 
+	QFont key_font;
+	key_font.setPointSize(14);
+	key_font.setBold(true);
+
 	for (int t=0; t<rows; t++) {
 		int col = 0;
 		FxItem *fx = fxlist->at(t);
 		FxListWidgetItem *item;
 
-		item = new FxListWidgetItem(fx,QChar(fx->keyCode()));
+		QChar key;
+		if (fx->keyCode() > 0) {
+			key = fx->keyCode();
+		} else {
+			key = ' ';
+		}
+		item = new FxListWidgetItem(fx,key);
+		item->setFont(key_font);
 		item->columnType = FxListWidgetItem::CT_KEY;
 		fxTable->setItem(t,col++,item);
 

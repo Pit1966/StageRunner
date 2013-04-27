@@ -157,7 +157,7 @@ bool MixerChannel::generate_scaled_knob()
 	if (knob_scaled_ysize > knobprob * knob_scaled_xsize) {
 		knob_scaled_ysize = knobprob * knob_scaled_xsize;
 	}
-	if (org_pix_back.width() / width() > 2) {
+	if (float(org_pix_back.width()) / width() > 2.0f) {
 		knob_scaled_ysize *= 2;
 	}
 

@@ -73,6 +73,7 @@ bool YadiDevice::activateDevice()
 		if (SerialWrapper::deviceNodeExists(devNodePath)) {
 			file = new SerialWrapper(devNodePath);
 			outUniverse.resize(512);
+			memset(outUniverse.data(),0,512);
 		} else {
 			ok = false;
 		}

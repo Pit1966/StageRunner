@@ -102,7 +102,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 		return;
 	}
 
-	switch (fx->fxType()) {
+	switch (fx->type()) {
 	case FX_AUDIO:
 		switch (cmd) {
 		case CMD_AUDIO_START:
@@ -165,6 +165,7 @@ void AppCentral::init()
 {
 	edit_mode_f = false;
 	dmx_direct_data.resize(512);
+	memset(dmx_direct_data.data(),0,512);
 
 	userSettings = new UserSettings;
 

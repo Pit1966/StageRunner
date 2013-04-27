@@ -1,7 +1,7 @@
 #include "ioplugincentral.h"
 #include "log.h"
 #include "qlcioplugin.h"
-#include "configrev.h"
+#include "config.h"
 
 #include <QDir>
 #include <QPluginLoader>
