@@ -131,7 +131,6 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 	}
 
 	if (curKey.startsWith('[')) {
-		int ret = 0;
 		QString b1;
 		QString b2;
 		QString b3;
@@ -258,32 +257,6 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 	return -1;
 }
 
-bool VarSet::analyzeChildList(QTextStream &read, VarSet *varset, const QString &listname)
-{
-	if (!varset) return false;
-
-	// Find the VarSetList
-	VarSetList<VarSet*> *varsetlist = 0;
-	int i = 0;
-	while (i<varset->var_list.size() && !varsetlist) {
-		PrefVarCore *var = varset->var_list.at(i);
-		if (var->myname == listname) {
-			// We have found the class and assume that it is our VarSetList
-			varsetlist = reinterpret_cast<VarSetList<VarSet*>*>(var->p_refvar);
-		}
-		i++;
-	}
-
-	if (varsetlist) {
-		// We Found the list
-		// Now we will create an Object of this this type
-		qDebug() << "Found VarSetList:" << listname;
-
-	}
-
-	return true;
-}
-
 
 void VarSet::clearCurrentVars()
 {
@@ -344,6 +317,7 @@ void VarSet::cloneFrom(const VarSet &other)
 					}
 				}
 				break;
+			case PrefVarCore::VARSET:
 			case PrefVarCore::VARSET_LIST:
 				DEBUGERROR("%s: Implement me: Line %d PrefVar '%s' not cloned"
 						   ,Q_FUNC_INFO,__LINE__,o->myname.toLocal8Bit().data());
@@ -505,6 +479,7 @@ bool VarSet::addExistingVar(VarSet &var, const QString &name, const QString &des
 	newvar->myclass = var.myclass;
 	newvar->p_refvar = (void *) &var;
 	newvar->function_f = true;
+	newvar->description = descrip;
 	var_list.lockAppend(newvar);
 	return true;
 }
@@ -965,12 +940,14 @@ bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_e
 				write << "[" << func_para << "]" << "\n";
 			}
 		} else {
-			// Insert an indent depending on the recursion deep
-			for (int i=0; i<child_level; i++) {
-				write << "  ";
+			if (var->pValue() != var->pDefaultValue()) {
+				// Insert an indent depending on the recursion deep
+				for (int i=0; i<child_level; i++) {
+					write << "  ";
+				}
+				// Write a simple date from the varset
+				write << var->pVarName() << "=" << var->pValue().toString() << "\n";
 			}
-			// Write a simple date from the varset
-			write << var->pVarName() << "=" << var->pValue().toString() << "\n";
 		}
 	}
 
@@ -1342,6 +1319,7 @@ DBfield *VarSet::getDynamicDbTableDefinition()
 		case PrefVarCore::BOOL:
 			dbtype = db_type_strings[3];
 			break;
+		case PrefVarCore::VARSET:
 		case PrefVarCore::VARSET_LIST:
 			dbtype = db_type_strings[4];
 			DEBUGERROR("%s: Implement me: Line %d",Q_FUNC_INFO,__LINE__);

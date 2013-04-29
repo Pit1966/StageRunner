@@ -88,6 +88,7 @@ public:
 	 * die virtuelle Methode richtig implementiert wurde)
 	 */
 	inline QVariant pValue() const {return get_value();}
+	inline QVariant pDefaultValue() const {return get_default();}
 	inline void pSetValue(QVariant val) {set_value(val);}
 	inline VarClass varClass() {return myclass;}
 	inline const QString & varClassName() {return myclassname;}

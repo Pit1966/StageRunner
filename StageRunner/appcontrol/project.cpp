@@ -35,7 +35,6 @@ bool Project::saveToFile(const QString &path)
 		curProjectFilePath = path;
 		for (int t=0; t<fxList->size(); t++) {
 			FxItem *fx = fxList->at(t);
-			qDebug("Save: %d",fx->id());
 			fx->setDatabaseReferences((qint64)pProjectId,t+1);
 			// append to previously saved file
 			ok = fx->fileSave(path, true, true);

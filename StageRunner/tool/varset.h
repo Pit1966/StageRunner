@@ -192,7 +192,6 @@ public:
 protected:
 	int analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number);
 	int analyzeLine(QTextStream &read, VarSet *varset, int child_level, int * p_line_number);
-	bool analyzeChildList(QTextStream &read, VarSet *varset, const QString & listname);
 	void clearCurrentVars();
 
 private:

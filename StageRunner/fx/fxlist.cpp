@@ -96,8 +96,10 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 
 bool FxList::addFxScene(int tubes)
 {
-	FxItem *fx = addFx(FX_SCENE,8);
+	FxItem *fx = addFx(FX_SCENE,tubes);
 	fx->setName("New Scene");
+
+	return true;
 }
 
 void FxList::moveFromTo(int srcidx, int destidx)
