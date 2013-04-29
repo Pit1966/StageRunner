@@ -24,8 +24,6 @@ public:
 
 	inline void append(const T &t) {
 		list.append(t);
-		VarSet *set = t;
-		qDebug("Member: %d: %s",list.size(),set->className().toLocal8Bit().data());
 	}
 
 	inline const T &at(int i) const {
@@ -44,7 +42,7 @@ public:
 		list.removeAt(i);
 	}
 
-	inline T &takeAt(int i) {
+	inline T takeAt(int i) {
 		return list.takeAt(i);
 	}
 

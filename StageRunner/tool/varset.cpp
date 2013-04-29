@@ -5,6 +5,8 @@
 #include "dbquery.h"
 #include "system/log.h"
 
+#include "dmxchannel.h"
+
 #include <QSettings>
 
 #ifdef _MSC_VER
@@ -93,46 +95,148 @@ void VarSet::init()
 	is_registered_f = false;
 	is_db_table_registered_f = false;
 	function_count = 0;
+	curChildActive = false;
+	curChildItemFound = false;
 
 }
 
-bool VarSet::analyzeLine(const QString & line, VarSet *varset)
+/**
+ * @brief VarSet::analyzeLine
+ * @param read
+ * @param varset
+ * @param child_level
+ * @param p_line_number
+ * @return 0: ok, -1: Fehler, 1: Child level kann verlassen werden
+ */
+int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
 {
+	int seek = read.pos();
+
+	QString line = read.readLine();
+	(*p_line_number)++;
+	qDebug() << "line" << *p_line_number << "level:" << child_level;
+
+
 	if (line.size() > 2 && !line.startsWith("#")) {
 		curKey = line.section('=',0,0).simplified();
 		curValue = line.section('=',1);
 	} else {
-		return true;
+		return 0;
 	}
 
 	QString & key = curKey;
 	QString & val = curValue;
-
+	if (*p_line_number == 95) {
+		qDebug() << "break";
+	}
 
 	if (curKey.startsWith('[')) {
+		int ret = 0;
+		QString b1;
+		QString b2;
+		QString b3;
 		QStringList parts = key.split('[',QString::SkipEmptyParts);
 		switch (parts.size()) {
 		case 3:
 			curIndex = parts[2].remove(QChar(']')).trimmed();
-			if (debug > 2) qDebug() << "VarSet:: read Index" << curIndex;
+			b3 = curIndex;
+			if (debug > 2) qDebug() << "VarSet:: Bracket Header 3:" << curIndex;
 		case 2:
 			curProjectid = parts[1].remove(QChar(']')).trimmed();
-			if (debug > 2) qDebug() << "VarSet:: read ProjectId" << curProjectid;
+			b2 = curProjectid;
+			if (debug > 2) qDebug() << "VarSet:: Bracket Header 2:" << curProjectid;
 		case 1:
 			curClassname = parts[0].remove(QChar(']')).trimmed();
-			if (debug > 2) qDebug() << "VarSet:: read Group" << curClassname;
-			return true;
+			b1 = curClassname;
+			if (debug > 2) qDebug() << "VarSet:: Bracket Header 1:" << curClassname;
+
+			if (b1 == "CHILDLISTEND") {
+				if (curChildActive) {
+					curChildActive = false;
+					curChildItemFound = false;
+					qDebug() << "Child list end:" << curChildListName << "class:" << curChildItemClass;
+					curChildListName.clear();
+					curChildItemClass.clear();
+					return 0;
+				} else {
+					qDebug() << "Child list parent end";
+					// End Recursion
+					read.seek(seek);
+					(*p_line_number)--;
+					return 1;
+				}
+			}
+
+			if (varset) {
+				if (curChildActive) {
+					if (1 || !curChildItemFound) {
+						curChildItemFound = true;
+						curChildItemClass = b1;
+						qDebug() << "Found Child Item with class name:" << b1 << "list num:" << b3;
+
+						// Liste finden
+						for (int t=0; t<varset->var_list.size(); t++) {
+							PrefVarCore *var = varset->var_list.at(t);
+							if (var->myname == curChildListName) {
+								if (var->myclass == PrefVarCore::DMX_CHANNEL) {
+									qDebug("Found List with class DMX_CHANNEL");
+									VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
+									DmxChannel *item = new DmxChannel;
+									varsetlist->append(item);
+									return item->analyzeLoop(read,item,child_level+1,p_line_number);
+								}
+
+							}
+						}
+					}
+				} else {
+					// Test if bracket1 matches a VarSet member name.
+					for (int t=0; t<varset->var_list.size(); t++) {
+						PrefVarCore *var = varset->var_list.at(t);
+						if (var->mytype == PrefVarCore::VARSET) {
+							VarSet *targetset = reinterpret_cast<VarSet*>(var->p_refvar);
+							if (targetset->myclassname == b1) {
+								qDebug() << "Found bracket1 as myclassname:" << b1;
+								bool ok = analyzeLoop(read,targetset,child_level+1, p_line_number);
+								if (ok) {
+									return 0;
+								} else {
+									return -1;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (child_level > 0 && !curChildActive) {
+				// End Recursion
+				read.seek(seek);
+				(*p_line_number)--;
+				return 1;
+
+			}
+
+			if (b1 == "CHILDLIST") {
+				curChildActive = true;
+				curChildListName = b2;
+				qDebug() << "Child list found:" << b2;
+				return 0;
+			}
+
+			return 0;
+
 		default:
 			break;
 		}
 	}
 
-	if (!varset) return true;
+	if (!varset) return 0;
 
 	if (curClassname.size() && curClassname != varset->myclassname) {
 		if (debug > 3) qDebug() << "VarSet:: ClassName does not match: "
 								<< curClassname << "read key:" << key << "val:" << val;
-		return true;
+		return 0;
 	} else {
 		if (debug > 3) qDebug() << "VarSet:: read key:" << key << "val:" << val;
 	}
@@ -144,15 +248,42 @@ bool VarSet::analyzeLine(const QString & line, VarSet *varset)
 			if (key == var->pVarName()) {
 				var->set_value(val);
 				var->exists_in_file_f = true;
-				return true;
+				return 0;
 			}
 			i++;
 		}
 	}
 	qDebug() << "VarSet:: FAILED: read key:" << key << "not found!!";
 	// Key nicht in VarSet gefunden
-	return false;
+	return -1;
 }
+
+bool VarSet::analyzeChildList(QTextStream &read, VarSet *varset, const QString &listname)
+{
+	if (!varset) return false;
+
+	// Find the VarSetList
+	VarSetList<VarSet*> *varsetlist = 0;
+	int i = 0;
+	while (i<varset->var_list.size() && !varsetlist) {
+		PrefVarCore *var = varset->var_list.at(i);
+		if (var->myname == listname) {
+			// We have found the class and assume that it is our VarSetList
+			varsetlist = reinterpret_cast<VarSetList<VarSet*>*>(var->p_refvar);
+		}
+		i++;
+	}
+
+	if (varsetlist) {
+		// We Found the list
+		// Now we will create an Object of this this type
+		qDebug() << "Found VarSetList:" << listname;
+
+	}
+
+	return true;
+}
+
 
 void VarSet::clearCurrentVars()
 {
@@ -363,6 +494,18 @@ bool VarSet::addExistingVar(QString & var, const QString &name, const QString &p
 	var_list.lockAppend(newvar);
 	// Default Wert in existierender Variable setzen
 	var = p_default;
+	return true;
+}
+
+bool VarSet::addExistingVar(VarSet &var, const QString &name, const QString &descrip)
+{
+	if (exists(name)) return false;
+	PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET,name);
+	newvar->parent_var_sets.append(this);
+	newvar->myclass = var.myclass;
+	newvar->p_refvar = (void *) &var;
+	newvar->function_f = true;
+	var_list.lockAppend(newvar);
 	return true;
 }
 
@@ -758,42 +901,9 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 	if ( file.open(QIODevice::ReadWrite | QIODevice::Text | append_flag) ) {
 		QTextStream write(&file);
 		write.setCodec("UTF-8");
-		if (myclassname.size()) {
-			write << "[" << myclassname << "]";
-			if (db_vset_projectid > 0 || db_vset_index > 0) {
-				write << "[" << db_vset_projectid << "]";
-				if (db_vset_index > 0) {
-					write << "[" << db_vset_index << "]";
-				}
-			}
-			write << "\n";
-		}
-		for (int t=0; t<var_list.size(); t++) {
-			PrefVarCore *var = var_list.at(t);
-			if (var->function_f) {
-				// spezielle virtuelle Funktionsvariablen untersuchen
-				QString func_name = var->get_value().toString();
-				QString func_para = var->pDescription();
-				if (var->mytype == PrefVarCore::VARSET_LIST) {
-					VarSetList<VarSet*> *varlist = (VarSetList<VarSet*>*)var->p_refvar;
-					write << "[CHILD|" << var->myname << "]" << "\n";
-					for (int i=0; i<varlist->size(); i++) {
-						varlist->at(i)->file_save_append(write);
-						write << "\n";
-					}
-					write << "[CHILDEND]" << "\n";
-				}
-				else if (func_name == "group") { 				// Gruppe
 
-					write << "[" << func_para << "]" << "\n";
-				}
-			} else {
-				write << var->pVarName() << "=" << var->pValue().toString() << "\n";
-			}
-		}
-		if (empty_line) {
-			write << "\n";
-		}
+		int child_level = 0;
+		ok = file_save_append(write,child_level,empty_line);
 
 
 		file.close();
@@ -807,11 +917,17 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 	return ok;
 }
 
-bool VarSet::file_save_append(QTextStream &write)
+bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_empty_line)
 {
 	bool ok = true;
 
+	// First Write the Header tag which is the classname
+	// In addition the projectID and index will be written if projectId > 0
 	if (myclassname.size()) {
+		// Insert an indent depending on the recursion deep
+		for (int i=0; i<child_level; i++) {
+			write << "  ";
+		}
 		write << "[" << myclassname << "]";
 		if (db_vset_projectid > 0 || db_vset_index > 0) {
 			write << "[" << db_vset_projectid << "]";
@@ -827,18 +943,39 @@ bool VarSet::file_save_append(QTextStream &write)
 			// spezielle virtuelle Funktionsvariablen untersuchen
 			QString func_name = var->get_value().toString();
 			QString func_para = var->pDescription();
-			if (var->mytype == PrefVarCore::VARSET_LIST) {
-				write << "[CHILD|" << var->myname << "]" << "\n";
-
-				write << "[CHILDEND]" << "\n";
+			if (var->mytype == PrefVarCore::VARSET) {
+				VarSet *set = reinterpret_cast<VarSet*>(var->p_refvar);
+				ok = set->file_save_append(write,child_level+1,append_empty_line);
+			}
+			else if (var->mytype == PrefVarCore::VARSET_LIST) {
+				VarSetList<VarSet*>*childlist = reinterpret_cast<VarSetList<VarSet*>*>(var->p_refvar);
+				write << "[CHILDLIST]";
+				write << "[" << var->myname << "]" << "\n";
+				// Recursivly call every member of the VarSetList as a VarSet
+				for (int i=0; i<childlist->size(); i++) {
+					VarSet *set = childlist->at(i);
+					// Put list index into variable
+					set->setDatabaseReferences(db_vset_projectid,i+1);
+					ok = set->file_save_append(write,child_level+1,append_empty_line);
+				}
+				write << "[CHILDLISTEND]" << "\n";
 			}
 			else if (func_name == "group") { 				// Gruppe
 
 				write << "[" << func_para << "]" << "\n";
 			}
 		} else {
+			// Insert an indent depending on the recursion deep
+			for (int i=0; i<child_level; i++) {
+				write << "  ";
+			}
+			// Write a simple date from the varset
 			write << var->pVarName() << "=" << var->pValue().toString() << "\n";
 		}
+	}
+
+	if (append_empty_line) {
+		write << "\n";
 	}
 
 	return ok;
@@ -861,19 +998,36 @@ bool VarSet::fileLoad(const QString &path, bool *exists)
 	}
 
 	bool ok = true;
+	int line_number = 0;
 	QFile file(path);
 	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
 		QTextStream read(&file);
-		while (!read.atEnd() && ok) {
-			QString line = read.readLine();
-			ok = analyzeLine(line, this);
-		}
+		int child_level = 0;
+		int ret = analyzeLoop(read,this,child_level,&line_number);
+		if (ret < 0) ok = false;
 		file.close();
 	} else {
 		ok = false;
 	}
 
 	return ok;
+}
+
+int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
+{
+	while (!read.atEnd()) {
+		int ret = analyzeLine(read, varset, child_level,p_line_number);
+		if (ret < 0) {
+			qDebug() << Q_FUNC_INFO << "Exit with failure!";
+			return -1;
+		}
+		else if (ret > 0) {
+			qDebug() << Q_FUNC_INFO << "Leave Child level" << child_level;
+			return 1;
+		}
+	}
+	qDebug() << Q_FUNC_INFO << "File end at Child level " << child_level;
+	return 0;
 }
 
 

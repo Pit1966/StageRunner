@@ -60,14 +60,20 @@ bool Project::loadFromFile(const QString &path)
 	clearCurrentVars();
 	QFile file(path);
 	FxItem *fx = 0;
+	int line_number = 0;
 	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
 		QTextStream read(&file);
 		while (!read.atEnd() && ok) {
-			QString line = read.readLine();
-			ok = analyzeLine(line,fx);
+			int child_level = 0;
+			int ret = analyzeLine(read,fx,child_level,&line_number);
+			if (ret < 0) {
+				qDebug() << "AnalyzeLine failed while searching for fxItem";
+				ok = false;
+			}
 			// Wait for ClassName matching FxItem Type
 			if (curClassname == "FxItem") {
-				if (curKey.startsWith('[')) fx = 0;
+				// An opening bracket could mean a new instance will come
+				if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
 				// We have to wait for FxType to determine what kind of Fx we
 				// have to initialize
 				if (curKey == "FxType") {
@@ -83,6 +89,9 @@ bool Project::loadFromFile(const QString &path)
 	} else {
 		ok = false;
 	}
+	qDebug() << Q_FUNC_INFO << "Lines:" << line_number;
+
+	// FxSceneItem *scene = (FxSceneItem*)fxList->at(9);
 
 	return ok;
 }

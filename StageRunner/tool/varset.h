@@ -46,6 +46,10 @@ protected:
 	QString curIndex;						///< Die aktuell gelesene Index nummer (VarSet Zähler)
 	QString curKey;
 	QString curValue;
+	QString curChildListName;
+	QString curChildItemClass;
+	bool curChildActive;
+	bool curChildItemFound;
 
 private:
 	MutexQList<PrefVarCore *>var_list;		///< Die Liste mit allen Variablen, die zu diesem Set gehören
@@ -105,16 +109,18 @@ public:
 	bool addExistingVar(qint64 & var, const QString & name, qint64 p_min = 0, qint64 p_max = 0x7FFFFFFFFFFFFFFFll, qint64 p_default = 0, const QString & descrip = "");
 	bool addExistingVar(bool & var, const QString & name, bool p_default = false, const QString & descrip = "");
 	bool addExistingVar(QString &var, const QString & name, const QString & p_default = "", const QString & descrip = "");
-	template <typename T> bool addExistingVarSetList(VarSetList<T> &var, const QString &name) {
+	bool addExistingVar(VarSet &var, const QString &name, const QString & descrip = "");
+	template <typename T> bool addExistingVarSetList(VarSetList<T> &var, const QString &name, PrefVarCore::VarClass p_class) {
 			if (exists(name)) return false;
 			PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET_LIST,name);
 			newvar->parent_var_sets.append(this);
-			newvar->myclass = myclass;
+			newvar->myclass = p_class;
 			newvar->p_refvar = (void *) &var;
 			newvar->function_f = true;
 			var_list.lockAppend(newvar);
 			return true;
 	}
+
 
 
 	pint32 * addDynamicPint32(const QString & name, qint32 p_min=0, qint32 p_max=0x7fffffff, qint32 p_default=0, const QString & descrip = "");
@@ -184,14 +190,16 @@ public:
 	static inline bool isVarSet() {return true;}
 
 protected:
-	bool analyzeLine(const QString &line, VarSet *varset);
+	int analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number);
+	int analyzeLine(QTextStream &read, VarSet *varset, int child_level, int * p_line_number);
+	bool analyzeChildList(QTextStream &read, VarSet *varset, const QString & listname);
 	void clearCurrentVars();
 
 private:
 	void add_to_registry(RegVarItem* reg);
 	void clear_var_list();
 	void init();
-	bool file_save_append(QTextStream &write);
+	bool file_save_append(QTextStream &write, int child_level, bool append_empty_line);
 
 };
 

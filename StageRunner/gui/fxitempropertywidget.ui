@@ -165,14 +165,18 @@ Volume</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="dummyLabel">
+       <widget class="QLabel" name="faderCountLabel">
         <property name="text">
-         <string>Scene setting will appear here</string>
+         <string>Fader
+count</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="faderCountEdit"/>
       </item>
      </layout>
     </widget>

@@ -31,6 +31,7 @@ public:
 		INT32,
 		STRING,
 		BOOL,
+		VARSET,
 		VARSET_LIST
 	};
 
