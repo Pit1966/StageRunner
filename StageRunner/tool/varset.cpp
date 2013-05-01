@@ -478,7 +478,7 @@ bool VarSet::addExistingVar(VarSet &var, const QString &name, const QString &des
 	newvar->parent_var_sets.append(this);
 	newvar->myclass = var.myclass;
 	newvar->p_refvar = (void *) &var;
-	newvar->function_f = true;
+	newvar->function = PrefVarCore::FUNC_VARSET;
 	newvar->description = descrip;
 	var_list.lockAppend(newvar);
 	return true;
@@ -543,7 +543,7 @@ pstring *VarSet::addDynamicFunction(const QString &func_name, const QString &fun
 
 	pstring *newvar = new pstring;
 	newvar->initPara(varname, func_name, func_para);
-	newvar->function_f = true;
+	newvar->function = PrefVarCore::FUNC_FUNCTION;
 	newvar->myclass = myclass;
 	newvar->myclassname = myclassname;
 	var_list.lockAppend(newvar);
@@ -581,14 +581,20 @@ bool VarSet::exists(const QString &name)
 /**
  * @brief bestimmte Variable im Set finden
  * @param name Der Name der Variable
+ * @param Pointer auf Function Type Variable, in der der Funktionstyp zurückgegeben wird
  * @return Pointer auf Variable
  */
-PrefVarCore *VarSet::getVar(const QString &name)
+PrefVarCore *VarSet::getVar(const QString &name, PrefVarCore::Function *function_type_p)
 {
 	PrefVarCore *var = 0;
 	for (int t=0; t<var_list.size(); t++) {
 		if (var_list[t]->pVarName() == name) {
 			var = var_list[t];
+			if (function_type_p) {
+				if (var->function) {
+					*function_type_p = var->function;
+				}
+			}
 			break;
 		}
 	}
@@ -783,7 +789,7 @@ bool VarSet::writeToPref()
 	for (int t=0; t<var_list.size(); t++) {
 		PrefVarCore *var = var_list.at(t);
 
-		if (var->function_f) {
+		if (var->function == PrefVarCore::FUNC_FUNCTION) {
 			// spezielle virtuelle Funktionsvariablen untersuchen
 			QString func_name = var->get_value().toString();
 			QString func_para = var->pDescription();
@@ -830,7 +836,7 @@ bool VarSet::readFromPref()
 	}
 	for (int t=0; t<var_list.size(); t++) {
 		PrefVarCore *var = var_list.at(t);
-		if (var->function_f) {
+		if (var->function == PrefVarCore::FUNC_FUNCTION) {
 			// spezielle virtuelle Funktionsvariablen untersuchen
 			QString func_name = var->get_value().toString();
 			QString func_para = var->pDescription();
@@ -914,7 +920,7 @@ bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_e
 	}
 	for (int t=0; t<var_list.size(); t++) {
 		PrefVarCore *var = var_list.at(t);
-		if (var->function_f) {
+		if (var->function != PrefVarCore::FUNC_NORMAL) {
 			// spezielle virtuelle Funktionsvariablen untersuchen
 			QString func_name = var->get_value().toString();
 			QString func_para = var->pDescription();

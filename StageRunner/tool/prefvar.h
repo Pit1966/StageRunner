@@ -45,6 +45,15 @@ public:
 		DMX_CHANNEL
 	};
 
+	/**
+	 * Function Type definitions of a PrefVarCore variable
+	 */
+	enum Function {
+		FUNC_NORMAL,
+		FUNC_FUNCTION,
+		FUNC_VARSET,
+		FUNC_VARSET_LIST_HEADER
+	};
 
 protected:
 	QString myname;				///< Name der Variable wie er in Textdateien und in der Datenbank angelegt wird
@@ -55,7 +64,7 @@ protected:
 	QString myclassname;		///< Noch ein Bezeichner für die Klasse
 	bool initialized_f;			///< true, falls die Variable initialisiert wurde
 	bool modified_f;			///< Variable wurde modifiziert
-	bool function_f;			///< zeigt an, dass es sich um eine Funktionsvariable handelt
+	Function function;			///< zeigt an, dass es sich um eine Funktionsvariable handelt
 	bool exists_in_file_f;		///< Falls Variable Teil eines VarSets ist, wird hier angezeigt, ob Variable im gelesenen File vorhanden war
 
 	QAtomicInt refcnt;
@@ -98,7 +107,8 @@ public:
 	 */
 	inline bool existsInFile() {return exists_in_file_f;}
 	inline bool isInitialized() {return initialized_f;}
-	inline bool isFunction() {return function_f;}
+	inline Function getFunction() {return function;}
+	inline bool isFunction() {return function != FUNC_NORMAL;}
 
 	static void debugDumpAllVars();
 	static bool writeAllToPref();
