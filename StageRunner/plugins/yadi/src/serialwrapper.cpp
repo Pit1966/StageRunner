@@ -32,6 +32,7 @@ SerialWrapper::~SerialWrapper()
 bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 {
 #if defined(WIN32)
+	return true;
 
 
 #elif defined(unix)
@@ -55,9 +56,11 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 	bool ok = false;
 
 #if defined(WIN32)
-	close();
+	if (serial_handle) {
+		CloseHandle(serial_handle);
+	}
 
-	serial_handle = CreateFileA( device_name.toLocal8Bit().data(),
+	serial_handle = CreateFileA( device_node.toLocal8Bit().data(),
 							   GENERIC_READ | GENERIC_WRITE,
 							   0,
 							   0,
@@ -220,7 +223,7 @@ bool SerialWrapper::isOpen()
 {
 	bool open = false;
 #if defined(WIN32)
-	if (serial_handle > 0) {
+	if (serial_handle) {
 		open = true;
 	}
 #elif defined(unix)

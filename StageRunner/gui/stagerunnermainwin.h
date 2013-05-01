@@ -60,6 +60,8 @@ private slots:
 
 	void on_addFxSceneButton_clicked();
 
+	void on_debugLevelSpin_valueChanged(int arg1);
+
 private:
 	void init();
 	void setup_gui_docks();

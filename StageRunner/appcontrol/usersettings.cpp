@@ -21,4 +21,5 @@ void UserSettings::init()
 	addExistingVar(pLastAudioFxImportPath,"LastAudioFxImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
+	addExistingVar(debug,"DebugLevel");
 }

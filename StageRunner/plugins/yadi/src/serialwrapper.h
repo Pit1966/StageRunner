@@ -4,6 +4,9 @@
 #include <QObject>
 
 #ifdef WIN32
+// This is a workaround for compiler BUG with MSVC and Qt5
+#define NOMINMAX
+
 #include <windows.h>
 #include <stdio.h>
 #endif

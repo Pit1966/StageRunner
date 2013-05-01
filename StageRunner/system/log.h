@@ -53,7 +53,7 @@ enum ErrMsgCode {
 #define DEBUGTEXT logThread->appendDebugText
 #define DEVELTEXT logThread->appendDevelText
 #define DEBUGERROR logThread->appendDebugError
-#define ERROR(w,num) {logThread->appendLogStdError(w,num);error=(num);}
+#define ERRORNOP(w,num) {logThread->appendLogStdError(w,num);error=(num);}
 #define ERRORPARA(w,num,para) {logThread->appendLogStdError(w,num,QString("%1").arg(para));error=(num);}
 
 class QTextEdit;

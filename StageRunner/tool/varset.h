@@ -9,6 +9,7 @@
 #include "prefvar.h"
 #include "toolclasses.h"
 
+
 class PrefVarCore;
 class Database;
 class DBfield;
@@ -19,7 +20,7 @@ class VarSet
 {
 public:
 	enum RegVarType {
-		REG_NONE,				///< keine Aktion
+		REG__NONE,				///< keine Aktion
 		REG_QSET_GLOBAL,		///< Ist für Gebrauch in Globaler analyzer4D.conf Datei in .config eingetragen
 		REG_DB_GLOBAL,			///< Ist für Gebrauch in Database Tabelle 'globalsettings' eingetragen)
 		REG_DB_TABLE			///< Ist für Gebrauch mit eigenständiger Databasetabelle registriert

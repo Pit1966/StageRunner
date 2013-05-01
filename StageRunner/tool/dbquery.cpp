@@ -30,7 +30,7 @@ DBquery::DBquery(Database * p_database, QueryMode p_mode, const QString & table)
 
 	if (!(database = p_database)) {
 		valid_f = false;
-		ERROR("DBquery::DBquery",ERR_DB_NULL_POINTER_QUERY);
+		ERRORNOP("DBquery::DBquery",ERR_DB_NULL_POINTER_QUERY);
 	} else {
 
 		int dbidx = p_database->getConnectionIndex(mythread);
@@ -75,7 +75,7 @@ DBquery::DBquery(Database * p_database, const QString & table) : database(p_data
 	if (debug > 4) DEVELTEXT("DBquery for '%s'",mythread->objectName().toLatin1().data());
 	if (!(database = p_database)) {
 		valid_f = false;
-		ERROR("DBquery::DBquery",ERR_DB_NULL_POINTER_QUERY);
+		ERRORNOP("DBquery::DBquery",ERR_DB_NULL_POINTER_QUERY);
 	} else {
 		int dbidx = p_database->getConnectionIndex(mythread);
 		if (dbidx >= 0) {
@@ -164,7 +164,7 @@ bool DBquery::prepareSelect(QString select)
 	// mode setzen
 	init_mode( SELECT );
 	if (!fromtable.size()) {
-		ERROR("DBquery::prepareSelect",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareSelect",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	select_string = select;
@@ -182,7 +182,7 @@ bool DBquery::prepareDelete(const QString & table)
 	init_mode( DELETE );
 	fromtable = table;
 	if (!fromtable.size()) {
-		ERROR("DBquery::prepareDelete",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareDelete",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	return true;
@@ -191,7 +191,7 @@ bool DBquery::prepareDelete(const QString & table)
 bool DBquery::prepareWhere(int search_id)
 {
 	if (!fromtable.size()) {
-		ERROR("DBquery::prepareWhere(id)",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareWhere(id)",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	where_string = "id = " + QString::number(search_id);
@@ -202,7 +202,7 @@ bool DBquery::prepareWhere(int search_id)
 bool DBquery::prepareWhere(const QString & where)
 {
 	if (!fromtable.size()) {
-		ERROR("DBquery::prepareWhere(String)",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareWhere(String)",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	where_string = where;
@@ -213,7 +213,7 @@ bool DBquery::prepareWhere(const QString & field, QVariant value)
 {
 	if (error) return false;
 	if (!field.size()) {
-		ERROR("DBquery::prepareWhere(String,Variant)",ERR_DB_INVALID_FIELD);
+		ERRORNOP("DBquery::prepareWhere(String,Variant)",ERR_DB_INVALID_FIELD);
 		return false;
 	}
 	bool flag = false;
@@ -239,7 +239,7 @@ bool DBquery::prepareValue(const QString & field, QVariant value)
 {
 	if (error) return false;
 	if (!field.size()) {
-		ERROR("DBquery::prepareValue",ERR_DB_INVALID_FIELD);
+		ERRORNOP("DBquery::prepareValue",ERR_DB_INVALID_FIELD);
 		return false;
 	}
 	// Keine leeren Strings vorbereiten
@@ -266,7 +266,7 @@ bool DBquery::prepareInsert(QString table)
 		fromtable = table;
 	}
 	if (!table.size()) {
-		ERROR("DBquery::prepareInsert",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareInsert",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	return true;
@@ -283,7 +283,7 @@ bool DBquery::prepareReplace(QString table)
 		fromtable = table;
 	}
 	if (!table.size()) {
-		ERROR("DBquery::prepareReplace",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareReplace",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	return true;
@@ -300,7 +300,7 @@ bool DBquery::prepareUpdate(QString table)
 		fromtable = table;
 	}
 	if (!table.size()) {
-		ERROR("DBquery::prepareUpdate",ERR_DB_QUERY_NOTABLE);
+		ERRORNOP("DBquery::prepareUpdate",ERR_DB_QUERY_NOTABLE);
 		return false;
 	}
 	return true;
@@ -316,7 +316,7 @@ bool DBquery::execPrepared()
 	if (error) return false;
 
 	if (!(last_inserted || last_updated) && exec_f) {
-		ERROR("DBquery::execPrepared",ERR_DB_QUERY_EXECUTED);
+		ERRORNOP("DBquery::execPrepared",ERR_DB_QUERY_EXECUTED);
 		return false;
 	} else {
 		exec_f = true;
@@ -779,7 +779,7 @@ bool DBquery::exec_replace()
 	sql += " WHERE " + where_string;
 
 	if (!where_string.size()) {
-		ERROR("DBquery::exec_replace",ERR_DB_REPLACE_WITHOUT_WHERE);
+		ERRORNOP("DBquery::exec_replace",ERR_DB_REPLACE_WITHOUT_WHERE);
 		return false;
 	}
 	// Und ausführen
@@ -825,7 +825,7 @@ bool DBquery::exec_update()
 	sql += " WHERE " + where_string;
 
 	if (!where_string.size()) {
-		ERROR("DBquery::exec_update",ERR_DB_UPDATE_WITHOUT_WHERE);
+		ERRORNOP("DBquery::exec_update",ERR_DB_UPDATE_WITHOUT_WHERE);
 		return false;
 	}
 	// Und ausführen

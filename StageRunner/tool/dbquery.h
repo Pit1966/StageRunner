@@ -14,6 +14,10 @@
 #include <QtSql>
 #include "toolclasses.h"
 
+#ifdef DELETE
+#undef DELETE
+#endif
+
 
 class Database;
 

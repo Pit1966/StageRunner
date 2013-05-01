@@ -30,7 +30,7 @@ macx:CONFIG    -= app_bundle # Let StageRunner construct the .app bundle
 win32:DESTDIR  = ./
 
 # Don't whine about some imports
-win32:QMAKE_LFLAGS += -enable-auto-import
+# win32:QMAKE_LFLAGS += -enable-auto-import
 
 
 #############################################################################

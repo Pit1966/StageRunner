@@ -295,7 +295,7 @@ bool Database::connectToDatabase() {
 	} else {
 		QMessageBox::critical(0, QObject::trUtf8("Database Error"),
 							  QObject::trUtf8("Could not establish connection to database!\n\n%1").arg(err.text()));
-		ERROR("Database::connectToDatabase",ERR_DB_OPEN_FAILED);
+		ERRORNOP("Database::connectToDatabase",ERR_DB_OPEN_FAILED);
 		LOGERROR(QString("Connection to MySQL database '%1:%2' as user '%3' failed! Error: '%4'").arg(hostName).arg(databaseName).arg(userName).arg(err.text()));
 		s_valid_f[0] = false;
 		return false;
@@ -622,7 +622,7 @@ bool Database::updateTable(DBfield *entrys) {
 	QString sql = "SELECT * FROM " + tablename;
 	ok = qq.exec(sql);
 	if (!ok) {
-		ERROR("Database::updateTable",ERR_DB_UPDATE_TABLE_FAILED);
+		ERRORNOP("Database::updateTable",ERR_DB_UPDATE_TABLE_FAILED);
 	} else {
 		LOGTEXT(QTranslator::trUtf8("Begin update of database table '%1' which yet has %2 records").arg(tablename).arg(qq.size()));
 

@@ -82,7 +82,11 @@ FxList *AppCentral::getRegisteredFxList(int id)
 
 void AppCentral::loadPlugins()
 {
+#ifdef WIN32
+	pluginCentral->loadQLCPlugins("../plugins");
+#else
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
+#endif
 }
 
 void AppCentral::openPlugins()

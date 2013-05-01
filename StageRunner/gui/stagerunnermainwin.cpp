@@ -29,6 +29,8 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	updateButtonStyles();
 
+	debugLevelSpin->setValue(debug);
+
 	// For external access
 	logWidget = logEdit;
 }
@@ -362,4 +364,9 @@ void StageRunnerMainWin::on_addFxSceneButton_clicked()
 {
 	mainapp->project->fxList->addFxScene(12);
 	fxListWidget->refreshList();
+}
+
+void StageRunnerMainWin::on_debugLevelSpin_valueChanged(int arg1)
+{
+	debug = arg1;
 }

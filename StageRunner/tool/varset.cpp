@@ -1474,7 +1474,7 @@ QStringList VarSet::getRegistryInfo()
 			VarSet::RegVarItem *var = var_registry->at(t);
 			QString line = var->className;
 			switch (var->type) {
-			case VarSet::REG_NONE:
+			case VarSet::REG__NONE:
 				line += ", REG_NONE";
 				break;
 			case VarSet::REG_QSET_GLOBAL:
@@ -1506,7 +1506,7 @@ QStringList VarSet::getRegistryInfo()
 VarSet::RegVarItem::RegVarItem()
 {
 	isValid = false;
-	type = VarSet::REG_NONE;
+	type = VarSet::REG__NONE;
 	varClass = PrefVarCore::NO_CLASS;
 	object = 0;
 }

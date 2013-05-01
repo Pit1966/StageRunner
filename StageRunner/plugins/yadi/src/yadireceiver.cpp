@@ -2,6 +2,7 @@
 #include "yadidevice.h"
 #include "serialwrapper.h"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QTime>
 #include <QMessageBox>
