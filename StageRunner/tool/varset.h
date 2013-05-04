@@ -117,7 +117,7 @@ public:
 			newvar->parent_var_sets.append(this);
 			newvar->myclass = p_class;
 			newvar->p_refvar = (void *) &var;
-			newvar->function_f = true;
+			newvar->function = PrefVarCore::FUNC_VARSET_LIST_HEADER;
 			var_list.lockAppend(newvar);
 			return true;
 	}
@@ -134,7 +134,7 @@ public:
 	bool removeOne(PrefVarCore * varcore);
 
 	bool exists(const QString & name);
-	PrefVarCore *getVar(const QString & name);
+	PrefVarCore *getVar(const QString & name, PrefVarCore::Function * function_type_p = 0);
 	PrefVarCore * find(const QString & name, PrefVarCore::PrefVarType type);
 	int find(const PrefVarCore *other);
 

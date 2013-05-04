@@ -30,7 +30,7 @@ PrefVarCore::PrefVarCore(PrefVarType type, const QString & name)
 
 	// Var could be a Dummy for function
 	if (type == PrefVarCore::VARSET_LIST) {
-		function_f = true;
+		function = PrefVarCore::FUNC_VARSET;
 	}
 
 
@@ -77,9 +77,9 @@ void PrefVarCore::init()
 {
 	initialized_f = false;
 	p_refvar = 0;
-	myclass = PrefVarCore::NO_CLASS;
+	myclass = NO_CLASS;
 	modified_f = false;
-	function_f = false;
+	function = FUNC_NORMAL;
 }
 
 bool PrefVarCore::writeToPrefGroup(QSettings * setting, const QString & group)
@@ -389,7 +389,7 @@ void pstring::initPara(const QString & name, const QString & p_default, const QS
 	description = descrip;
 	initialized_f = true;
 	modified_f = false;
-	function_f = false;
+	function = PrefVarCore::FUNC_NORMAL;
 	exists_in_file_f = false;
 }
 
