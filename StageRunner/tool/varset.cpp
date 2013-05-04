@@ -114,7 +114,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 
 	QString line = read.readLine();
 	(*p_line_number)++;
-	qDebug() << "line" << *p_line_number << "level:" << child_level;
+	if (debug > 2) qDebug() << "line" << *p_line_number << "level:" << child_level;
 
 
 	if (line.size() > 2 && !line.startsWith("#")) {
@@ -126,9 +126,6 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 
 	QString & key = curKey;
 	QString & val = curValue;
-	if (*p_line_number == 95) {
-		qDebug() << "break";
-	}
 
 	if (curKey.startsWith('[')) {
 		QString b1;
@@ -153,12 +150,12 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 				if (curChildActive) {
 					curChildActive = false;
 					curChildItemFound = false;
-					qDebug() << "Child list end:" << curChildListName << "class:" << curChildItemClass;
+					if (debug > 2) qDebug() << "Child list end:" << curChildListName << "class:" << curChildItemClass;
 					curChildListName.clear();
 					curChildItemClass.clear();
 					return 0;
 				} else {
-					qDebug() << "Child list parent end";
+					if (debug > 2) qDebug() << "Child list parent end";
 					// End Recursion
 					read.seek(seek);
 					(*p_line_number)--;
@@ -171,14 +168,13 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 					if (1 || !curChildItemFound) {
 						curChildItemFound = true;
 						curChildItemClass = b1;
-						qDebug() << "Found Child Item with class name:" << b1 << "list num:" << b3;
+						if (debug > 2) qDebug() << "Found Child Item with class name:" << b1 << "list num:" << b3;
 
 						// Liste finden
 						for (int t=0; t<varset->var_list.size(); t++) {
 							PrefVarCore *var = varset->var_list.at(t);
 							if (var->myname == curChildListName) {
 								if (var->myclass == PrefVarCore::DMX_CHANNEL) {
-									qDebug("Found List with class DMX_CHANNEL");
 									VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
 									DmxChannel *item = new DmxChannel;
 									varsetlist->append(item);
@@ -195,7 +191,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 						if (var->mytype == PrefVarCore::VARSET) {
 							VarSet *targetset = reinterpret_cast<VarSet*>(var->p_refvar);
 							if (targetset->myclassname == b1) {
-								qDebug() << "Found bracket1 as myclassname:" << b1;
+								if (debug > 2) qDebug() << "Found bracket1 as myclassname:" << b1;
 								bool ok = analyzeLoop(read,targetset,child_level+1, p_line_number);
 								if (ok) {
 									return 0;
@@ -219,7 +215,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 			if (b1 == "CHILDLIST") {
 				curChildActive = true;
 				curChildListName = b2;
-				qDebug() << "Child list found:" << b2;
+				if (debug > 2) qDebug() << "Child list found:" << b2;
 				return 0;
 			}
 
@@ -999,11 +995,11 @@ int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int 
 			return -1;
 		}
 		else if (ret > 0) {
-			qDebug() << Q_FUNC_INFO << "Leave Child level" << child_level;
+			if (debug > 2) qDebug() << Q_FUNC_INFO << "Leave Child level" << child_level;
 			return 1;
 		}
 	}
-	qDebug() << Q_FUNC_INFO << "File end at Child level " << child_level;
+	if (debug > 2) qDebug() << Q_FUNC_INFO << "File end at Child level " << child_level;
 	return 0;
 }
 

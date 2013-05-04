@@ -11,6 +11,9 @@ SerialWrapper::SerialWrapper(const QString &dev_node) :
 	error_num = 0;
 #if defined(WIN32)
 	serial_handle = 0;
+	if (dev_node.isEmpty()) {
+		device_node = "com3";
+	}
 #elif defined(unix)
 	serial_fd = 0;
 #endif

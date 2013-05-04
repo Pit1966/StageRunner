@@ -1,5 +1,6 @@
 #include "yadidevicemanager.h"
 #include "yadidevice.h"
+#include "serialwrapper.h"
 
 #ifdef unix
 #include <libudev.h>
@@ -9,6 +10,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QFile>
+#include <QTime>
 
 
 QList<YadiDevice*>YadiDeviceManager::globYadiDeviceList;
@@ -31,6 +33,80 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
+#ifdef WIN32
+	for (int com=3; com<10; com++) {
+		SerialWrapper ser(QString("com%1").arg(com));
+		if (ser.openSerial()) {
+			bool found_input_device = false;
+			bool found_output_device = false;
+			QString product;
+			qDebug() << "Connection to" << ser.deviceNode() << " established";
+			char send[] = "v";
+			char rec[100];
+			ser.writeSerial(send,1);
+			QTime wait;
+			wait.restart();
+			while (wait.elapsed() < 200) ;;
+			bool wait_loop = 0;
+			while ( wait_loop++ < 3 ) {
+				QByteArray rec = ser.readSerial(40);
+				qDebug() << rec;
+				if (rec.size() < 1) break;
+
+				if (rec.contains("Stonechip")) {
+					if (rec.contains("Transceiver")) {
+						product = "Stonechip DMX Transceiver";
+						found_output_device = true;
+					}
+					else if (rec.contains("Sender")) {
+						product = "Stonechip DMX Sender";
+						found_output_device = true;
+					}
+					else if (rec.contains("Receiver")) {
+						product = "Stonechip DMX Receiver";
+						found_input_device = true;
+					}
+					break;
+				}
+				wait.restart();
+				while (wait.elapsed() < 30) ;;
+			}
+			qDebug() << "Found Input:" << found_input_device << "Output:" << found_output_device;
+			if (found_input_device || found_output_device) {
+				YadiDevice *yadi = new YadiDevice(QString("com%1").arg(com));
+				globYadiDeviceList.append(yadi);
+
+				yadi->devNodePath = QString("com%1").arg(com);
+				yadi->deviceProductName = product;
+				yadi->deviceManufacturer = "Stonechip Entertainment";
+				yadi->deviceSerial = "";
+				yadi->idVendor = "";
+				yadi->idProduct = "";
+				yadi->deviceNodePresent = true;
+				if (product.contains("Transceiver")) {
+					yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE | YadiDevice::FL_OUTPUT_UNIVERSE;
+					yadi->maxDeviceDmxInChannels = 512;
+					yadi->maxDeviceDmxOutChannels = 512;
+					yadi->usedDmxOutChannels = 512;
+					yadi->usedDmxInChannels = 512;
+				}
+				else if (product.contains("Receiver")) {
+					yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE;
+					yadi->usedDmxOutChannels = 0;
+					yadi->maxDeviceDmxOutChannels = 0;
+					yadi->usedDmxInChannels = 128;
+					yadi->maxDeviceDmxInChannels = 128;
+				}
+				else if (product.contains("Sender")) {
+					yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
+				}
+
+			}
+		}
+
+	}
+
+#endif
 
 #ifdef unix
 	struct udev *udev;

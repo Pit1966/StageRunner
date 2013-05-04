@@ -2,7 +2,7 @@ include (../../../configvars.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = yadidmxusbout
+TARGET   = ../../yadidmxusbout
 
 CONFIG      += plugin
 CONFIG		+= debug
