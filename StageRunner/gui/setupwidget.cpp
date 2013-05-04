@@ -22,6 +22,7 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	}
 
 	configurePluginButton->setDisabled(true);
+	copy_settings_to_gui();
 }
 
 void SetupWidget::init()
@@ -30,10 +31,23 @@ void SetupWidget::init()
 
 }
 
+void SetupWidget::copy_settings_to_gui()
+{
+	UserSettings *set = myapp->userSettings;
+
+	audioBufferSizeEdit->setText(QString::number(set->pAudioBufferSize));
+}
+
+void SetupWidget::copy_gui_to_settings()
+{
+	UserSettings *set = myapp->userSettings;
+	set->pAudioBufferSize = audioBufferSizeEdit->text().toInt();
+}
+
 void SetupWidget::on_okButton_clicked()
 {
+	copy_gui_to_settings();
 	accept();
-
 }
 
 void SetupWidget::on_cancelButton_clicked()

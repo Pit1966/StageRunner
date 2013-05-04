@@ -16,6 +16,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
      <widget class="QWidget" name="dmxTab">
       <attribute name="title">
        <string>DMX</string>
@@ -43,10 +46,33 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="audioTab">
       <attribute name="title">
-       <string>Tab 2</string>
+       <string>Audio</string>
       </attribute>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Audio buffer size (kb)</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="audioBufferSizeEdit">
+       <property name="geometry">
+        <rect>
+         <x>160</x>
+         <y>20</y>
+         <width>113</width>
+         <height>23</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

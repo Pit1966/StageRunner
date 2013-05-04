@@ -28,6 +28,7 @@ private slots:
 	void on_keyEdit_textEdited(const QString &arg1);
 
 	void on_faderCountEdit_textEdited(const QString &arg1);
+	void on_audioFilePathEdit_doubleClicked();
 
 signals:
 	void modified();

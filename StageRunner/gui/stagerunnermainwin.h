@@ -62,6 +62,8 @@ private slots:
 
 	void on_debugLevelSpin_valueChanged(int arg1);
 
+	void on_stopMainLoopButton_clicked();
+
 private:
 	void init();
 	void setup_gui_docks();

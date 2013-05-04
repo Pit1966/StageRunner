@@ -13,6 +13,7 @@ class UserSettings;
 class FxItem;
 class FxList;
 class IOPluginCentral;
+class ControlLoopThreadInterface;
 
 class AppCentral : public QObject
 {
@@ -29,6 +30,7 @@ public:
 	Project *project;
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
+	ControlLoopThreadInterface *lightLoop;
 
 private:
 	AppCentral();
@@ -40,6 +42,7 @@ public:
 	static bool destroyInstance();
 
 	void clearProject();
+	bool setLightLoopEnabled(bool state);
 
 
 	void stopAllFxAudio();

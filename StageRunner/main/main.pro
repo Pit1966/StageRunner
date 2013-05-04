@@ -68,7 +68,10 @@ SOURCES += \
     ../system/dmxchannel.cpp \
     ../fx/fxsceneitem.cpp \
     ../tool/varset.cpp \
-    ../gui/scenedeskwidget.cpp
+    ../gui/scenedeskwidget.cpp \
+    ../appcontrol/controlloop.cpp \
+    ../appcontrol/controlloopthreadinterface.cpp \
+    ../gui/customwidget/pslineedit.cpp
 
 HEADERS  += \
 	../config.h \
@@ -108,7 +111,10 @@ HEADERS  += \
     ../fx/fxsceneitem.h \
     ../tool/varset.h \
     ../tool/varsetlist.h \
-    ../gui/scenedeskwidget.h
+    ../gui/scenedeskwidget.h \
+    ../appcontrol/controlloop.h \
+    ../appcontrol/controlloopthreadinterface.h \
+    ../gui/customwidget/pslineedit.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

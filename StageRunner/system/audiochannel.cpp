@@ -6,6 +6,8 @@
 #include "config.h"
 #include "audioiodevice.h"
 #include "audiocontrol.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/usersettings.h"
 
 #include <QTime>
 #include <QApplication>
@@ -31,7 +33,7 @@ AudioSlot::AudioSlot(AudioControl *parent)
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
-	audio_output->setBufferSize(100000);
+	audio_output->setBufferSize(parent->myApp->userSettings->pAudioBufferSize * 1000);
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);

@@ -10,16 +10,20 @@ using namespace AUDIO;
 
 class AudioSlot;
 class FxAudioItem;
+class AppCentral;
 
 class AudioControl : public QObject
 {
 	Q_OBJECT
+public:
+	AppCentral *myApp;
+
 private:
 	QList<AudioSlot*> audio_channels;
 	int master_volume;
 
 public:
-	AudioControl();
+	AudioControl(AppCentral *app_central);
 	~AudioControl();
 
 	void getAudioDevices();

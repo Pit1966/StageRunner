@@ -14,6 +14,7 @@
 
 #define MAX_VOLUME 100
 #define INITIAL_VOLUME 66
+#define LIGHT_LOOP_INTERVAL_MS 1000				// Interval time the light loop will be executed with in ms
 
 #define MAX_DMX_FADER_RANGE 10000				// This value is mapped to 255. But the resolution in the scenes needs a better graduation
 

@@ -370,3 +370,12 @@ void StageRunnerMainWin::on_debugLevelSpin_valueChanged(int arg1)
 {
 	debug = arg1;
 }
+
+void StageRunnerMainWin::on_stopMainLoopButton_clicked()
+{
+	qDebug() << "Mainloop stopped";
+	QTime wait;
+	wait.start();
+	while (wait.elapsed() < 3000) ;;
+	qDebug() << "Mainloop is back";
+}

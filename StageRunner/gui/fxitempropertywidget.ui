@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>112</width>
-    <height>568</height>
+    <width>305</width>
+    <height>791</height>
    </rect>
   </property>
   <property name="font">
@@ -45,17 +45,17 @@
       <string>Fx</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="idLabel">
-        <property name="text">
-         <string>Id:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="nameLabel">
         <property name="text">
          <string>Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="idLabel">
+        <property name="text">
+         <string>Id:</string>
         </property>
        </widget>
       </item>
@@ -71,9 +71,6 @@
          <bool>true</bool>
         </property>
        </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="nameEdit"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="keyLabel">
@@ -103,6 +100,9 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="nameEdit"/>
+      </item>
      </layout>
     </widget>
    </item>
@@ -113,6 +113,27 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Initial
+Volume</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="PsLineEdit" name="audioFilePathEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="audioFilePathLabel">
+        <property name="text">
+         <string>File path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="qsynthKnob" name="initialVolDial">
         <property name="maximumSize">
          <size>
@@ -130,30 +151,6 @@
          <bool>true</bool>
         </property>
        </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Initial
-Volume</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -201,6 +198,11 @@ count</string>
    <class>qsynthKnob</class>
    <extends>QDial</extends>
    <header>thirdparty/widget/qsynthknob.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PsLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>customwidget/pslineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

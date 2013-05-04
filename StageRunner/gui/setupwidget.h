@@ -15,8 +15,11 @@ private:
 
 public:
 	SetupWidget(AppCentral *app_central, QWidget *parent = 0);
+
 private:
 	void init();
+	void copy_settings_to_gui();
+	void copy_gui_to_settings();
 
 private slots:
 	void on_okButton_clicked();

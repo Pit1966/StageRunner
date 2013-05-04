@@ -9,6 +9,7 @@
 #include "fx/fxlist.h"
 #include "ioplugincentral.h"
 #include "plugins/interfaces/qlcioplugin.h"
+#include "controlloopthreadinterface.h"
 
 using namespace AUDIO;
 
@@ -37,6 +38,18 @@ bool AppCentral::destroyInstance()
 void AppCentral::clearProject()
 {
 	project->clear();
+}
+
+bool AppCentral::setLightLoopEnabled(bool state)
+{
+	bool ok = true;
+	if (state) {
+		ok = lightLoop->startThread();
+	} else {
+		ok = lightLoop->stopThread();
+	}
+
+	return ok;
 }
 
 void AppCentral::stopAllFxAudio()
@@ -162,6 +175,7 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
+	delete lightLoop;
 	delete pluginCentral;
 	delete userSettings;
 	delete project;
@@ -176,9 +190,10 @@ void AppCentral::init()
 
 	userSettings = new UserSettings;
 
-	unitAudio = new AudioControl;
+	unitAudio = new AudioControl(this);
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
+	lightLoop = new ControlLoopThreadInterface;
 
 	int id = registerFxList(project->fxList);
 	qDebug("Registered Project FX list with Id:%d",id);

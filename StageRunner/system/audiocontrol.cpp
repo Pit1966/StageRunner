@@ -1,16 +1,17 @@
 #include "audiocontrol.h"
 #include "../config.h"
-#include "audiochannel.h"
 #include "../system/log.h"
-
+#include "audiochannel.h"
+#include "appcontrol/appcentral.h"
 
 #include <QStringList>
 #include <QDebug>
 
 
 
-AudioControl::AudioControl()
+AudioControl::AudioControl(AppCentral *app_central)
 	: QObject()
+	,myApp(app_central)
 {
 	init();
 	getAudioDevices();

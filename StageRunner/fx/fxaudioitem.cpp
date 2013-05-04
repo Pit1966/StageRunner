@@ -13,12 +13,17 @@ FxAudioItem::FxAudioItem(const QString &path)
 	: FxItem()
 {
 	init();
-
 	QFileInfo fi(path);
 	myPath = path;
 	myFile = fi.fileName();
 	myName = fi.completeBaseName();
+}
 
+void FxAudioItem::setFilePath(const QString &path)
+{
+	QFileInfo fi(path);
+	myPath = path;
+	myFile = fi.fileName();
 }
 
 void FxAudioItem::init()

@@ -24,12 +24,20 @@ int main(int argc, char *argv[])
 	mywin->initConnects();
 	mywin->initAppDefaults();
 
+
+
 	// Load Plugins
 	myapp->loadPlugins();
 	myapp->openPlugins();
 
+	// Start the world :-)
+	myapp->setLightLoopEnabled(true);
+
 	// and run
 	int ret =  app.exec();
+
+	// Stop the world
+	myapp->setLightLoopEnabled(false);
 
 	// Clean up plugins
 	myapp->closePlugins();

@@ -2,6 +2,10 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "appcontrol/usersettings.h"
+#include "appcontrol/appcentral.h"
+
+#include <QFileDialog>
 
 FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	QWidget(parent)
@@ -29,6 +33,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	if (fx->fxType() == FX_AUDIO) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
+		audioFilePathEdit->setText(cur_fxa->fileName());
 		audioGroup->setVisible(true);
 	} else {
 		cur_fxa = 0;
@@ -89,6 +94,23 @@ void FxItemPropertyWidget::on_faderCountEdit_textEdited(const QString &arg1)
 		int num = arg1.toInt(&ok);
 		if (ok && num != cur_fxs->tubeCount()) {
 			cur_fxs->setTubeCount(num);
+		}
+	}
+}
+
+void FxItemPropertyWidget::on_audioFilePathEdit_doubleClicked()
+{
+	QString path = QFileDialog::getOpenFileName(this
+												,tr("Choose Audio File")
+												,AppCentral::instance()->userSettings->pLastAudioFxImportPath);
+	if (path.size()) {
+		AppCentral::instance()->userSettings->pLastAudioFxImportPath = path;
+
+		if (FxItem::exists(cur_fxa)) {
+			cur_fxa->setFilePath(path);
+			cur_fxa->setModified(true);
+			audioFilePathEdit->setText(cur_fxa->fileName());
+			emit modified();
 		}
 	}
 }

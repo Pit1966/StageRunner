@@ -12,6 +12,7 @@ public:
 public:
 	FxAudioItem();
 	FxAudioItem(const QString &path);
+	void setFilePath(const QString &path);
 
 private:
 	void init();

@@ -9,6 +9,7 @@ public:
 	pstring pLastAudioFxImportPath;
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
+	pint32 pAudioBufferSize;
 
 public:
 	UserSettings();
