@@ -1,5 +1,5 @@
-#include "controlloopthreadinterface.h"
-#include "controlloop.h"
+#include "lightloopthreadinterface.h"
+#include "lightloop.h"
 #include "log.h"
 
 #include <QDebug>

@@ -1,4 +1,4 @@
-#include "controlloop.h"
+#include "lightloop.h"
 #include "log.h"
 #include "fxlist.h"
 #include "fxitem.h"

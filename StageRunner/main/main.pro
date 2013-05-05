@@ -70,10 +70,10 @@ SOURCES += \
 	../fx/fxsceneitem.cpp \
 	../tool/varset.cpp \
 	../gui/scenedeskwidget.cpp \
-	../appcontrol/controlloop.cpp \
-	../appcontrol/controlloopthreadinterface.cpp \
 	../gui/customwidget/pslineedit.cpp \
-	../system/lightcontrol.cpp
+	../system/lightcontrol.cpp \
+    ../appcontrol/lightloop.cpp \
+    ../appcontrol/lightloopthreadinterface.cpp
 
 HEADERS  += \
 	../config.h \
@@ -114,10 +114,10 @@ HEADERS  += \
 	../tool/varset.h \
 	../tool/varsetlist.h \
 	../gui/scenedeskwidget.h \
-	../appcontrol/controlloop.h \
-	../appcontrol/controlloopthreadinterface.h \
 	../gui/customwidget/pslineedit.h \
-	../system/lightcontrol.h
+	../system/lightcontrol.h \
+    ../appcontrol/lightloopthreadinterface.h \
+    ../appcontrol/lightloop.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
