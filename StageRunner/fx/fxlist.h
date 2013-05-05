@@ -11,7 +11,11 @@ class FxList : public QObject
 {
 	Q_OBJECT
 private:
-	int id;						///< Becomes the register Id when registered in appCentral
+	/**
+	 * Becomes the register Id when registered in appCentral
+	 * This Id is unique in the the system
+	 */
+	int regid;
 	QList<FxItem*>fx_list;
 	FxItem * fx_last;
 	FxItem * fx_next;
@@ -39,8 +43,8 @@ public:
 	FxItem * stepToSequenceNext();
 	FxItem * getFxByKeyCode(ushort keycode) const;
 
-	inline int regId() const {return id;}
-	inline void setRegId(int new_id) {id = new_id;}
+	inline int regId() const {return regid;}
+	inline void setRegId(int new_id) {regid = new_id;}
 	inline void setAutoProceedSequence(bool state) {auto_proceed_f = state;}
 	inline bool autoProceedSequence() {return auto_proceed_f;}
 

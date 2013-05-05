@@ -11,7 +11,7 @@ FxList::FxList() :
 	fx_next = 0;
 	fx_current = 0;
 	auto_proceed_f = false;
-	id = 0;
+	regid = 0;
 	modified_f = false;
 }
 
