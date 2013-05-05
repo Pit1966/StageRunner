@@ -4,9 +4,9 @@
 
 #include <QDebug>
 
-LightLoopThreadInterface::LightLoopThreadInterface(LightControl *unit_light)
+LightLoopThreadInterface::LightLoopThreadInterface(LightControl &unit_light)
 	: QThread()
-	, unitLightRef(unit_light)
+	, lightControlRef(unit_light)
 {
 	lightLoop = 0;
 }
@@ -21,7 +21,6 @@ bool LightLoopThreadInterface::startThread(MutexQList<const FxList *> *listref)
 		if (!lightLoop) {
 			start();
 			while (!lightLoop) ;;
-			lightLoop->setFxListsRef(listref);
 		}
 	}
 
@@ -40,7 +39,7 @@ bool LightLoopThreadInterface::stopThread()
 
 void LightLoopThreadInterface::run()
 {
-	lightLoop = new LightLoop(unitLightRef);
+	lightLoop = new LightLoop(lightControlRef);
 	lightLoop->startProcessTimer();
 	exec();
 	lightLoop->stopProcessTimer();

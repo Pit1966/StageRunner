@@ -2,6 +2,8 @@
 #include "log.h"
 #include "fxsceneitem.h"
 #include "dmxchannel.h"
+#include "appcentral.h"
+#include "lightcontrol.h"
 #include "customwidget/mixergroup.h"
 #include "customwidget/mixerchannel.h"
 
@@ -95,11 +97,14 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
 			tube->curValue = tube->targetValue;
 		}
+		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
+
 	} else {
 		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
 			tube->curValue = 0;
 		}
+		AppCentral::instance()->unitLight->setSceneIdle(cur_fxscene);
 	}
 
 }

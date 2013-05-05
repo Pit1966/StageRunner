@@ -14,10 +14,10 @@ class LightLoopThreadInterface : public QThread
 	Q_OBJECT
 private:
 	LightLoop * lightLoop;
-	LightControl * unitLightRef;
+	LightControl & lightControlRef;
 
 public:
-	LightLoopThreadInterface(LightControl *unit_light);
+	LightLoopThreadInterface(LightControl & unit_light);
 	~LightLoopThreadInterface();
 
 	bool startThread(MutexQList<const FxList*>*listref);

@@ -6,15 +6,16 @@
 #include "toolclasses.h"
 #include "lightcontrol.h"
 #include "dmxchannel.h"
+#include "toolclasses.h"
 
 
 #include <QDebug>
 #include <QEventLoop>
 #include <QThread>
 
-LightLoop::LightLoop(LightControl *unit_light)
+LightLoop::LightLoop(LightControl &unit_light)
 	: QObject()
-	, unitLightRef(unit_light)
+	, lightCtrlRef(unit_light)
 {
 	init();
 }
@@ -23,14 +24,8 @@ LightLoop::~LightLoop()
 {
 }
 
-void LightLoop::setFxListsRef(MutexQList<const FxList *> *listref)
-{
-	fxListsRef = listref;
-}
-
 void LightLoop::init()
 {
-	fxListsRef = 0;
 	loop_status = STAT_IDLE;
 	first_process_event_f = true;
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -59,39 +54,45 @@ void LightLoop::processPendingEvents()
 	}
 
 	if (loop_time.elapsed() < loop_exec_target_time_ms) return;
+	// It seems to be the time for an update of DMX output and other light (scene) tasks
+	// First set the target time the next update should be done
 	loop_exec_target_time_ms += LIGHT_LOOP_INTERVAL_MS;
 
 	// qDebug() << "ControlLoop: Time elapsed:" << loop_time.elapsed();
 
+	// Clear the temporary dmx output channel values. We will search in every scene
+	// for active channels later and we will fill in the channel values here by highest takes precidence (HTP)
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		memset(dmxtout[t].data(),0,512);
 	}
 
-	if (fxListsRef) {
-		fxListsRef->lock();
-		for (int list=0; list<fxListsRef->size(); list++) {
-			const FxList *fxlist = fxListsRef->at(list);
-			for (int item=0; item<fxlist->size(); item++) {
-				FxItem *fxitem = fxlist->at(item);
-				if (fxitem->fxType() == FX_SCENE) {
-					processFxSceneItem(static_cast<const FxSceneItem*>(fxitem));
-
-				}
-			}
-		}
-		fxListsRef->unlock();
+	// Lets have a look onto the list with active marked scenes
+	MutexQHash<int, const FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
+	scenes.readLock();
+	// Get dmx channel output for every scene in the list
+	foreach (const FxSceneItem * sceneitem, scenes) {
+		// Fill channel data into temp dmx data
+		processFxSceneItem(sceneitem);
 	}
+//	QHashIterator<int,const FxSceneItem*> it(scenes);
+//	while (it.hasNext()) {
+//		it.next();
+//		processFxSceneItem(it.value());
+//	}
+	scenes.unlock();
 
+	// For the dmx channel data array should contain valid dmx data for stage output
+	// Checked if the output has changed and give it to the output modules if it has changed
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		for (int chan=0; chan<512; chan++) {
-			if (dmxtout[t].at(chan) != unitLightRef->dmxOutputValues[t].at(chan)) {
-				unitLightRef->dmxOutputChanged[t] = true;
+			if (dmxtout[t].at(chan) != lightCtrlRef.dmxOutputValues[t].at(chan)) {
+				lightCtrlRef.dmxOutputChanged[t] = true;
 			}
-			unitLightRef->dmxOutputValues[t][chan] = dmxtout[t].at(chan);
+			lightCtrlRef.dmxOutputValues[t][chan] = dmxtout[t].at(chan);
 		}
 	}
 
-	unitLightRef->sendChangedDmxData();
+	lightCtrlRef.sendChangedDmxData();
 }
 
 void LightLoop::processFxSceneItem(const FxSceneItem *scene)

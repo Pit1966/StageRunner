@@ -5,6 +5,7 @@
 #include "lightloopthreadinterface.h"
 #include "lightloop.h"
 #include "fxitem.h"
+#include "fxsceneitem.h"
 #include "fxlist.h"
 #include "qlcioplugin.h"
 #include "ioplugincentral.h"
@@ -79,6 +80,38 @@ bool LightControl::sendChangedDmxData()
 	return sent;
 }
 
+/**
+ * @brief Add Scene FxItem to active scene list
+ * @param scene
+ * @return true if added, false if it was in list before
+ *
+ * The function assures that the scene is not already in the list. So the scene will not be
+ * added double.
+ */
+bool LightControl::setSceneActive(const FxSceneItem *scene)
+{
+	if (activeScenes.lockContains(scene->id())) return false;
+
+	activeScenes.lockInsert(scene->id(),scene);
+	return true;
+}
+
+/**
+ * @brief Remove Scene FxItem from active scene list
+ * @param scene
+ * @return true: if found in list and removed
+ *
+ * The function assures that the scene is not already in the list. So the scene will not be
+ * added double.
+ */
+bool LightControl::setSceneIdle(const FxSceneItem *scene)
+{
+	if (!activeScenes.lockContains(scene->id())) return false;
+
+	activeScenes.lockRemove(scene->id());
+	return true;
+}
+
 void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -86,5 +119,5 @@ void LightControl::init()
 		dmxOutputValues[t].resize(512);
 		memset(dmxOutputValues[t].data(),0,512);
 	}
-	lightLoopInterface = new LightLoopThreadInterface(this);
+	lightLoopInterface = new LightLoopThreadInterface(*this);
 }

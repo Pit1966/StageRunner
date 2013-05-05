@@ -9,7 +9,6 @@
 class LightControl;
 class FxList;
 class FxSceneItem;
-template <class T> class MutexQList;
 
 class LightLoop : public QObject
 {
@@ -30,14 +29,11 @@ private:
 	QByteArray dmxtout[MAX_DMX_UNIVERSE];
 
 protected:
-	MutexQList<const FxList*>*fxListsRef;
-	LightControl *unitLightRef;
-
+	LightControl & lightCtrlRef;
 
 public:
-	LightLoop(LightControl *unit_light);
+	LightLoop(LightControl & unit_light);
 	~LightLoop();
-	void setFxListsRef(MutexQList<const FxList*>*listref);
 
 private:
 	void init();

@@ -38,11 +38,20 @@ private:
 	int click_value;				///< Value when mouse clicked in widget
 	QSize minimum_size_hint;
 
+protected:
+	QAbstractSlider refSlider;
+
 public:
 	MixerChannel(QWidget *parent = 0);
 	~MixerChannel();
 	inline void setId(int id) {my_id = id;}
 	inline int id() {return my_id;}
+	void setRange(int min, int max);
+	void setMinimum(int min);
+	void setMaximum(int max);
+	void setValues(int val, int refval);
+	void setRefValue(int val);
+	int refValue();
 
 private:
 	void mousePressEvent(QMouseEvent *event);

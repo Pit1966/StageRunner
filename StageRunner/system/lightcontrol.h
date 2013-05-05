@@ -11,6 +11,7 @@ class AppCentral;
 class LightLoopThreadInterface;
 class FxList;
 class QLCIOPlugin;
+class FxSceneItem;
 
 
 class LightControl : public QObject
@@ -20,6 +21,7 @@ public:
 	AppCentral *myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
+	MutexQHash<int,const FxSceneItem*>activeScenes;
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
 
@@ -30,6 +32,8 @@ public:
 	bool setLightLoopEnabled(bool state);
 	bool addFxListToControlLoop(const FxList *list);
 	bool sendChangedDmxData();
+	bool setSceneActive(const FxSceneItem * scene);
+	bool setSceneIdle(const FxSceneItem * scene);
 
 private:
 	void init();

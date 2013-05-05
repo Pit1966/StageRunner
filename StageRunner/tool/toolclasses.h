@@ -8,19 +8,112 @@
 #include <QList>
 #include <QMutex>
 #include <QString>
+#include <QHash>
+#include <QReadWriteLock>
+#include <QAtomicInt>
 
-#include "../system/log.h"
+#include "log.h"
 
 // #define USE_SAFE_MUTEX
 
+template <class Key, class T> class MutexQHash : public QHash <Key, T>
+{
+private:
+	/** Use this Mutex to lock Hash access */
+	QReadWriteLock * myLock;
+	/** How many times this instance was locked */
+	QAtomicInt lockCount;
+	/** For debugging give this instance a name */
+	QString myName;
 
-/**
-	@author QASS GmbH <steinmeyer@qass.net>
-*/
+public:
+	MutexQHash()
+		: myLock(new QReadWriteLock())
+	{
+	}
+	MutexQHash(const MutexQHash & other)
+		: myLock(new QReadWriteLock)
+	{
+		this->QHash<Key, T>::operator=(other);
+	}
+
+	~MutexQHash() {
+		if (lockCount.load()) {
+			DEBUGERROR("MutexQHash is locked %d times while deleting: '%s'"
+					   ,lockCount.load(), myName.toLocal8Bit().data());
+		} else {
+			delete myLock;
+		}
+	}
+
+	MutexQHash<Key, T> & operator =(const MutexQHash & other) {
+		this->QHash<Key, T>::operator=(other);
+		return *this;
+	}
+
+	inline void readLock() {
+		myLock->lockForRead();
+		lockCount.ref();
+	}
+
+	inline void writeLock() {
+		myLock->lockForWrite();
+		lockCount.ref();
+	}
+
+	inline void unlock() {
+		lockCount.deref();
+		myLock->unlock();
+	}
+
+	typename QHash<Key, T>::iterator lockInsert(const Key &key, const T &value) {
+		typename QHash<Key, T>::iterator it;
+		myLock->lockForWrite();
+		it = QHash<Key, T>::insert(key,value);
+		myLock->unlock();
+		return it;
+	}
+
+	bool lockContains(const Key &key) {
+		bool found;
+		myLock->lockForRead();
+		found = QHash<Key, T>::contains(key);
+		myLock->unlock();
+		return found;
+	}
+
+	int lockRemove(const Key &key) {
+		int removed;
+		myLock->lockForWrite();
+		removed = QHash<Key, T>::remove(key);
+		myLock->unlock();
+		return removed;
+	}
+
+
+
+
+
+};
+
+
+
+/***************************************************************************
+
+***************************************************************************/
+
 template <class T> class MutexQList : public QList <T>
 {
 public:
 	MutexQList() {
+		is_modified_f = false;
+		mutex = new QMutex();
+		lock_cnt = 0;
+		ci = 0;
+		co = 0;
+	}
+
+	MutexQList(const MutexQList & other) {
 		is_modified_f = false;
 		mutex = new QMutex();
 		lock_cnt = 0;
@@ -70,13 +163,6 @@ public:
 		}
 		mutex->lock();
 		lock_cnt++;
-
-//		if (name == "ProjectProcessList") {
-//			if (ci == 6) {
-//				qDebug("__stop");
-//			}
-//			qDebug("__in %d",ci++);
-//		}
 	}
 
 	inline void unlock() {

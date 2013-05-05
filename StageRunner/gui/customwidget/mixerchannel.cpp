@@ -5,6 +5,7 @@
 #include <QResizeEvent>
 #include <QMouseEvent>
 #include <QRect>
+#include <QPen>
 
 #define SHADOW_X_PERCENT 10
 #define SHADOW_Y_PERCENT 10
@@ -43,6 +44,40 @@ MixerChannel::MixerChannel(QWidget *parent) :
 
 MixerChannel::~MixerChannel()
 {
+}
+
+void MixerChannel::setRange(int min, int max)
+{
+	QAbstractSlider::setRange(min,max);
+	refSlider.setRange(min,max);
+}
+
+void MixerChannel::setMinimum(int min)
+{
+	QAbstractSlider::setMinimum(min);
+	refSlider.setMinimum(min);
+}
+
+void MixerChannel::setMaximum(int max)
+{
+	QAbstractSlider::setMaximum(max);
+	refSlider.setMaximum(max);
+}
+
+void MixerChannel::setValues(int val, int refval)
+{
+	QAbstractSlider::setValue(val);
+	refSlider.setValue(refval);
+}
+
+void MixerChannel::setRefValue(int val)
+{
+	refSlider.setValue(val);
+}
+
+int MixerChannel::refValue()
+{
+	return refSlider.value();
 }
 
 void MixerChannel::mousePressEvent(QMouseEvent *event)
@@ -115,7 +150,24 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawLine(width()-linelen,y,width(),y);
 	}
 
+	// Draw the reference value;
+	QPen pen;
+	pen.setColor(Qt::blue);
+	if (width() < 20) {
+		pen.setWidth(1);
+	}
+	else if (width() < 30) {
+		pen.setWidth(2);
+	}
+	else {
+		pen.setWidth(3);
+	}
+	p.setPen(pen);
+	int y1 = lo_pos_percent * height();
+	int y2 = y1 - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
+	p.drawLine(width()/2, y1, width()/2, y2);
 
+	// Draw the knob
 	y = lo_pos_percent * height();
 	y -= (knob_ysize / 2) + (knob_ysize * 3 / 100);
 	y -= float(value()) / float(maximum()) * pos_range_percent * height();

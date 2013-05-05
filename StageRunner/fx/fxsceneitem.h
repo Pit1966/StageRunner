@@ -12,11 +12,13 @@ class FxSceneItem : public FxItem
 public:
 	qint32 defaultFadeInTime;
 	qint32 defaultFadeOutTime;
-	DmxChannel *dmxChannelDummy;
+	DmxChannel *sceneMaster;
 	VarSetList<DmxChannel*>tubes;
 
 public:
 	FxSceneItem();
+	~FxSceneItem();
+
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}

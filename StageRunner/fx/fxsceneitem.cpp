@@ -8,6 +8,11 @@ FxSceneItem::FxSceneItem()
 	init();
 }
 
+FxSceneItem::~FxSceneItem()
+{
+	delete sceneMaster;
+}
+
 void FxSceneItem::createDefaultTubes(int tubecount)
 {
 	for (int t=0; t<tubecount; t++) {
@@ -38,12 +43,11 @@ void FxSceneItem::setTubeCount(int tubecount)
 
 void FxSceneItem::init()
 {
-	dmxChannelDummy = new DmxChannel;
-	dmxChannelDummy->dmxUniverse = 1;
+	sceneMaster = new DmxChannel;
 
 	addExistingVar(defaultFadeInTime,"DefFadeInTime");
 	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
-	addExistingVar(*dmxChannelDummy,"DmxChannelDummy");
+	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
 
 }
