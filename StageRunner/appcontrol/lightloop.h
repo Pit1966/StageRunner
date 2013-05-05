@@ -45,7 +45,7 @@ public slots:
 	void startProcessTimer();
 	void stopProcessTimer();
 	void processPendingEvents();
-	void processFxSceneItem(const FxSceneItem * scene);
+	void processFxSceneItem(FxSceneItem *scene);
 
 };
 

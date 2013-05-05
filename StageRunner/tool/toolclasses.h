@@ -32,9 +32,9 @@ public:
 	{
 	}
 	MutexQHash(const MutexQHash & other)
-		: myLock(new QReadWriteLock)
+		: QHash<Key, T>(other)
+		,myLock(new QReadWriteLock)
 	{
-		this->QHash<Key, T>::operator=(other);
 	}
 
 	~MutexQHash() {

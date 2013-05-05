@@ -161,6 +161,12 @@ Volume</string>
       <string>Scene</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="fadeInTimeEdit"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="faderCountEdit"/>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="faderCountLabel">
         <property name="text">
@@ -172,8 +178,22 @@ count</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="faderCountEdit"/>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="fadeOutTimeEdit"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="fadeInTimeLabel">
+        <property name="text">
+         <string>Fade In Time:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="fadeOutTimeLabel">
+        <property name="text">
+         <string>Fade Out Time:</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -15,7 +15,7 @@ LightLoopThreadInterface::~LightLoopThreadInterface()
 {
 }
 
-bool LightLoopThreadInterface::startThread(MutexQList<const FxList *> *listref)
+bool LightLoopThreadInterface::startThread()
 {
 	if (!isRunning()) {
 		if (!lightLoop) {

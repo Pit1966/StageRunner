@@ -41,8 +41,68 @@ void FxSceneItem::setTubeCount(int tubecount)
 	}
 }
 
+bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
+{
+	int cmd_time = 0;
+
+	switch(cmd) {
+	case CMD_SCENE_BLACK:
+		cmd_time = 0;
+		is_active = false;
+		break;
+	case CMD_SCENE_FADEIN:
+		cmd_time = defaultFadeInTime;
+		is_active = true;
+		break;
+	case CMD_SCENE_FADEOUT:
+		cmd_time = defaultFadeOutTime;
+		is_active = false;
+		break;
+	case CMD_SCENE_FADETO:
+		cmd_time = defaultFadeInTime;
+		is_active = true;
+		break;
+	default:
+		return false;
+	}
+
+	bool running = false;
+
+	// Iterate over all tubes and set parameters
+	for (int t=0; t<tubeCount(); t++) {
+		DmxChannel *tube = tubes.at(t);
+		if (tube->dmxType == DMX_INTENSITY) {
+			if (tube->initFadeCmd(cmd,cmd_time)) {
+				running = true;
+			}
+		}
+	}
+
+	return running;
+}
+
+/**
+ * @brief Execute Scene
+ * @return true: if at least one channel is active in the scene
+ *
+ * This function prosseses activ CtrlCmds in the tubes of the scene
+ * Usualy loopFunction() is called from a timer function or a event loop;
+ */
+bool FxSceneItem::loopFunction()
+{
+	bool active = false;
+
+	for (int t=0; t<tubeCount(); t++) {
+		active |= tubes.at(t)->loopFunction();
+	}
+	return active;
+}
+
 void FxSceneItem::init()
 {
+	is_live = false;
+	is_active = false;
+
 	sceneMaster = new DmxChannel;
 
 	addExistingVar(defaultFadeInTime,"DefFadeInTime");

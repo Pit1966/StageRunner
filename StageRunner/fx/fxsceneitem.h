@@ -3,6 +3,7 @@
 
 #include "fxitem.h"
 #include "varsetlist.h"
+#include "commandsystem.h"
 
 class DmxChannel;
 class QWidget;
@@ -15,6 +16,10 @@ public:
 	DmxChannel *sceneMaster;
 	VarSetList<DmxChannel*>tubes;
 
+private:
+	bool is_live;
+	bool is_active;
+
 public:
 	FxSceneItem();
 	~FxSceneItem();
@@ -22,6 +27,12 @@ public:
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
+
+	bool initSceneCommand(CtrlCmd cmd);
+	bool loopFunction();
+	inline bool isActive() const {return is_active;}
+	inline bool isIdle() const {return !is_active;}
+	inline bool isLive() const {return is_live;}
 
 private:
 	void init();

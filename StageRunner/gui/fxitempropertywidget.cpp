@@ -43,6 +43,16 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	if (fx->fxType() == FX_SCENE) {
 		cur_fxs = static_cast<FxSceneItem*>(fx);
 		faderCountEdit->setText(QString::number(cur_fxs->tubeCount()));
+		if (cur_fxs->defaultFadeInTime >= 10000) {
+			fadeInTimeEdit->setText(QString("%1s").arg(cur_fxs->defaultFadeInTime / 1000));
+		} else {
+			fadeInTimeEdit->setText(QString("%1ms").arg(cur_fxs->defaultFadeInTime));
+		}
+		if (cur_fxs->defaultFadeOutTime >= 10000) {
+			fadeOutTimeEdit->setText(QString("%1s").arg(cur_fxs->defaultFadeOutTime / 1000));
+		} else {
+			fadeOutTimeEdit->setText(QString("%1ms").arg(cur_fxs->defaultFadeOutTime));
+		}
 		sceneGroup->setVisible(true);
 	} else {
 		cur_fxs = 0;
@@ -113,4 +123,37 @@ void FxItemPropertyWidget::on_audioFilePathEdit_doubleClicked()
 			emit modified();
 		}
 	}
+}
+
+void FxItemPropertyWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxs)) return;
+
+	QString number = arg1.simplified().toLower();
+	QString arg = number;
+	number.replace(QRegExp("\\D"),"");
+	if (arg.endsWith("s") && !arg.contains("m")) {
+		cur_fxs->defaultFadeInTime = number.toInt() * 1000;
+	} else {
+		cur_fxs->defaultFadeInTime = number.toInt();
+	}
+	cur_fxs->setModified(true);
+	emit modified();
+
+}
+
+void FxItemPropertyWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxs)) return;
+
+	QString number = arg1.simplified().toLower();
+	QString arg = number;
+	number.replace(QRegExp("\\D"),"");
+	if (arg.endsWith("s")  && !arg.contains("m")) {
+		cur_fxs->defaultFadeOutTime = number.toInt() * 1000;
+	} else {
+		cur_fxs->defaultFadeOutTime = number.toInt();
+	}
+	cur_fxs->setModified(true);
+	emit modified();
 }

@@ -120,8 +120,16 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));
 			break;
 		default:
-			DEBUGERROR("Execute FX: Unimplemented Command: %d",cmd);
+			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
+		}
+		break;
+	case FX_SCENE:
+		switch (cmd) {
+		case CMD_SCENE_START:
+			unitLight->startFxSceneSimple(reinterpret_cast<FxSceneItem*>(fx));
 			break;
+		default:
+			DEBUGERROR("Execute FX: Unimplemented Command: %d for scene",cmd);
 		}
 		break;
 	default:

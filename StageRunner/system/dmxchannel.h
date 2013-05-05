@@ -2,6 +2,7 @@
 #define DMXCHANNEL_H
 
 #include "varset.h"
+#include "commandsystem.h"
 
 enum DmxChannelType {
 	DMX_GENERIC,
@@ -36,9 +37,20 @@ public:
 	qint32 targetValue;					///< 100% Output value target in a scene (0 - targetFullValue) The dmx Output will be scaled to this
 	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
 
+protected:
+	// These Vars are mainly for animation/fading control in the scenes
+	CtrlCmd curCmd;						///< This is the command currently running on this channel
+	float fadeTargetValue;
+	float fadeStartValue;
+	float fadeValue;
+	float fadeStep;
+
 public:
 	DmxChannel();
 	~DmxChannel();
+
+	bool initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value=0 );
+	bool loopFunction();
 
 private:
 	void init();

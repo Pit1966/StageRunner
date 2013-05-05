@@ -28,7 +28,7 @@ bool LightControl::setLightLoopEnabled(bool state)
 {
 	bool ok = true;
 	if (state) {
-		ok = lightLoopInterface->startThread(&lightFxLists);
+		ok = lightLoopInterface->startThread();
 	} else {
 		ok = lightLoopInterface->stopThread();
 	}
@@ -81,6 +81,29 @@ bool LightControl::sendChangedDmxData()
 }
 
 /**
+ * @brief start/stop a scene
+ * @param scene Pointer to FxSceneItem that should will be processed
+ * @return
+ *
+ * If the Scene is idle (BLACK) the default fadein time will be used to activate the scene
+ * If the Scene is on stage the default fadeout time will be used to fade the scene out
+ *
+ */
+bool LightControl::startFxSceneSimple(FxSceneItem *scene)
+{
+	bool started;
+
+	if (scene->isIdle()) {
+		setSceneActive(scene);
+		started = scene->initSceneCommand(CMD_SCENE_FADEIN);
+	} else {
+		started = scene->initSceneCommand(CMD_SCENE_FADEOUT);
+	}
+
+	return started;
+}
+
+/**
  * @brief Add Scene FxItem to active scene list
  * @param scene
  * @return true if added, false if it was in list before
@@ -88,7 +111,7 @@ bool LightControl::sendChangedDmxData()
  * The function assures that the scene is not already in the list. So the scene will not be
  * added double.
  */
-bool LightControl::setSceneActive(const FxSceneItem *scene)
+bool LightControl::setSceneActive(FxSceneItem *scene)
 {
 	if (activeScenes.lockContains(scene->id())) return false;
 
@@ -104,7 +127,7 @@ bool LightControl::setSceneActive(const FxSceneItem *scene)
  * The function assures that the scene is not already in the list. So the scene will not be
  * added double.
  */
-bool LightControl::setSceneIdle(const FxSceneItem *scene)
+bool LightControl::setSceneIdle(FxSceneItem *scene)
 {
 	if (!activeScenes.lockContains(scene->id())) return false;
 

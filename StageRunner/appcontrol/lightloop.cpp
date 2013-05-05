@@ -67,10 +67,10 @@ void LightLoop::processPendingEvents()
 	}
 
 	// Lets have a look onto the list with active marked scenes
-	MutexQHash<int, const FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
+	MutexQHash<int, FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
 	// Get dmx channel output for every scene in the list
-	foreach (const FxSceneItem * sceneitem, scenes) {
+	foreach (FxSceneItem * sceneitem, scenes) {
 		// Fill channel data into temp dmx data
 		processFxSceneItem(sceneitem);
 	}
@@ -95,15 +95,16 @@ void LightLoop::processPendingEvents()
 	lightCtrlRef.sendChangedDmxData();
 }
 
-void LightLoop::processFxSceneItem(const FxSceneItem *scene)
+void LightLoop::processFxSceneItem(FxSceneItem *scene)
 {
+	scene->loopFunction();
+
 	for (int t=0; t<scene->tubeCount(); t++) {
 		DmxChannel *tube = scene->tubes.at(t);
 		int channel = tube->dmxChannel;
 		int universe = tube->dmxUniverse;
 		tube->dmxValue = tube->curValue * 255 / tube->targetFullValue;
 		if (tube->dmxValue > quint16(dmxtout[universe].at(channel)) ) {
-			if (t==2) qDebug() << tube->dmxValue;
 			dmxtout[universe][channel] = tube->dmxValue;
 		}
 	}

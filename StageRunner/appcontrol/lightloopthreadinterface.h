@@ -20,7 +20,7 @@ public:
 	LightLoopThreadInterface(LightControl & unit_light);
 	~LightLoopThreadInterface();
 
-	bool startThread(MutexQList<const FxList*>*listref);
+	bool startThread();
 	bool stopThread();
 
 private:
