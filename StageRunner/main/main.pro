@@ -7,6 +7,7 @@ TARGET   = stagerunner
 
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
+INCLUDEPATH  += ../appcontrol
 INCLUDEPATH  += ../fx
 INCLUDEPATH  += ../gui
 INCLUDEPATH  += ../main
@@ -65,13 +66,14 @@ SOURCES += \
 	../gui/setupwidget.cpp \
 	../gui/customwidget/mixergroup.cpp \
 	../gui/fxitempropertywidget.cpp \
-    ../system/dmxchannel.cpp \
-    ../fx/fxsceneitem.cpp \
-    ../tool/varset.cpp \
-    ../gui/scenedeskwidget.cpp \
-    ../appcontrol/controlloop.cpp \
-    ../appcontrol/controlloopthreadinterface.cpp \
-    ../gui/customwidget/pslineedit.cpp
+	../system/dmxchannel.cpp \
+	../fx/fxsceneitem.cpp \
+	../tool/varset.cpp \
+	../gui/scenedeskwidget.cpp \
+	../appcontrol/controlloop.cpp \
+	../appcontrol/controlloopthreadinterface.cpp \
+	../gui/customwidget/pslineedit.cpp \
+	../system/lightcontrol.cpp
 
 HEADERS  += \
 	../config.h \
@@ -107,14 +109,15 @@ HEADERS  += \
 	../gui/setupwidget.h \
 	../gui/customwidget/mixergroup.h \
 	../gui/fxitempropertywidget.h \
-    ../system/dmxchannel.h \
-    ../fx/fxsceneitem.h \
-    ../tool/varset.h \
-    ../tool/varsetlist.h \
-    ../gui/scenedeskwidget.h \
-    ../appcontrol/controlloop.h \
-    ../appcontrol/controlloopthreadinterface.h \
-    ../gui/customwidget/pslineedit.h
+	../system/dmxchannel.h \
+	../fx/fxsceneitem.h \
+	../tool/varset.h \
+	../tool/varsetlist.h \
+	../gui/scenedeskwidget.h \
+	../appcontrol/controlloop.h \
+	../appcontrol/controlloopthreadinterface.h \
+	../gui/customwidget/pslineedit.h \
+	../system/lightcontrol.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -124,7 +127,7 @@ FORMS    += \
 	../gui/audiocontrolwidget.ui \
 	../gui/setupwidget.ui \
 	../gui/fxitempropertywidget.ui \
-    ../gui/scenedeskwidget.ui
+	../gui/scenedeskwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

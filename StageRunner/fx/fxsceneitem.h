@@ -19,7 +19,7 @@ public:
 	FxSceneItem();
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
-	inline int tubeCount() {return tubes.size();}
+	inline int tubeCount() const {return tubes.size();}
 
 private:
 	void init();

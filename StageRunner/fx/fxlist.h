@@ -39,7 +39,7 @@ public:
 	FxItem * stepToSequenceNext();
 	FxItem * getFxByKeyCode(ushort keycode) const;
 
-	inline int regId() {return id;}
+	inline int regId() const {return id;}
 	inline void setRegId(int new_id) {id = new_id;}
 	inline void setAutoProceedSequence(bool state) {auto_proceed_f = state;}
 	inline bool autoProceedSequence() {return auto_proceed_f;}

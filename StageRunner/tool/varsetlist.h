@@ -30,7 +30,7 @@ public:
 		return list.at(i);
 	}
 
-	inline int size() {
+	inline int size() const {
 		return list.size();
 	}
 

@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 
 	logThread->stopLog();
 	delete mywin;
+
 	AppCentral::destroyInstance();
 	delete logThread;
 

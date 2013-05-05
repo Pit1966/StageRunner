@@ -13,6 +13,8 @@ void FxSceneItem::createDefaultTubes(int tubecount)
 	for (int t=0; t<tubecount; t++) {
 		DmxChannel *dmx = new DmxChannel;
 		dmx->tube = t;
+		dmx->dmxUniverse = 0;
+		dmx->dmxChannel = t;
 		dmx->dmxType = DMX_INTENSITY;
 		tubes.append(dmx);
 	}
@@ -27,6 +29,8 @@ void FxSceneItem::setTubeCount(int tubecount)
 	while (tubes.size() < tubecount) {
 		DmxChannel *dmx = new DmxChannel;
 		dmx->tube = tubes.size();
+		dmx->dmxUniverse = 0;
+		dmx->dmxChannel = tubes.size();
 		dmx->dmxType = DMX_INTENSITY;
 		tubes.append(dmx);
 	}

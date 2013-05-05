@@ -1,10 +1,17 @@
 #ifndef CONTROLLOOP_H
 #define CONTROLLOOP_H
 
+#include "config.h"
+
 #include <QElapsedTimer>
 #include <QTimer>
 
-class ControlLoop : public QObject
+class LightControl;
+class FxList;
+class FxSceneItem;
+template <class T> class MutexQList;
+
+class LightLoop : public QObject
 {
 	Q_OBJECT
 public:
@@ -20,9 +27,17 @@ private:
 	qint32 loop_exec_target_time_ms;
 	bool first_process_event_f;
 
+	QByteArray dmxtout[MAX_DMX_UNIVERSE];
+
+protected:
+	MutexQList<const FxList*>*fxListsRef;
+	LightControl *unitLightRef;
+
+
 public:
-	ControlLoop(QObject *parent = 0);
-	~ControlLoop();
+	LightLoop(LightControl *unit_light);
+	~LightLoop();
+	void setFxListsRef(MutexQList<const FxList*>*listref);
 
 private:
 	void init();
@@ -34,6 +49,7 @@ public slots:
 	void startProcessTimer();
 	void stopProcessTimer();
 	void processPendingEvents();
+	void processFxSceneItem(const FxSceneItem * scene);
 
 };
 

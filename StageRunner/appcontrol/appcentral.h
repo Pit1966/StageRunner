@@ -1,19 +1,20 @@
 #ifndef APPCENTRAL_H
 #define APPCENTRAL_H
 
-#include "system/commandsystem.h"
+#include "commandsystem.h"
 
 #include <QList>
 #include <QObject>
 #include <QByteArray>
 
 class AudioControl;
+class LightControl;
 class Project;
 class UserSettings;
 class FxItem;
 class FxList;
 class IOPluginCentral;
-class ControlLoopThreadInterface;
+
 
 class AppCentral : public QObject
 {
@@ -23,14 +24,13 @@ private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
 	bool edit_mode_f;
-	QByteArray dmx_direct_data;
 
 public:
 	AudioControl *unitAudio;
+	LightControl *unitLight;
 	Project *project;
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
-	ControlLoopThreadInterface *lightLoop;
 
 private:
 	AppCentral();
@@ -43,7 +43,6 @@ public:
 
 	void clearProject();
 	bool setLightLoopEnabled(bool state);
-
 
 	void stopAllFxAudio();
 	void fadeoutAllFxAudio();

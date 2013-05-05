@@ -4,28 +4,31 @@
 
 #include <QDebug>
 
-ControlLoopThreadInterface::ControlLoopThreadInterface(QObject *parent) :
-	QThread(parent)
+LightLoopThreadInterface::LightLoopThreadInterface(LightControl *unit_light)
+	: QThread()
+	, unitLightRef(unit_light)
 {
-	worker = 0;
+	lightLoop = 0;
 }
 
-ControlLoopThreadInterface::~ControlLoopThreadInterface()
+LightLoopThreadInterface::~LightLoopThreadInterface()
 {
 }
 
-bool ControlLoopThreadInterface::startThread()
+bool LightLoopThreadInterface::startThread(MutexQList<const FxList *> *listref)
 {
 	if (!isRunning()) {
-		if (!worker) {
+		if (!lightLoop) {
 			start();
+			while (!lightLoop) ;;
+			lightLoop->setFxListsRef(listref);
 		}
 	}
 
 	return isRunning();
 }
 
-bool ControlLoopThreadInterface::stopThread()
+bool LightLoopThreadInterface::stopThread()
 {
 	if (isRunning()) {
 		quit();
@@ -35,12 +38,12 @@ bool ControlLoopThreadInterface::stopThread()
 	return true;
 }
 
-void ControlLoopThreadInterface::run()
+void LightLoopThreadInterface::run()
 {
-	worker = new ControlLoop;
-	worker->startProcessTimer();
+	lightLoop = new LightLoop(unitLightRef);
+	lightLoop->startProcessTimer();
 	exec();
-	worker->stopProcessTimer();
-	worker->deleteLater();
-	worker = 0;
+	lightLoop->stopProcessTimer();
+	delete lightLoop;
+	lightLoop = 0;
 }

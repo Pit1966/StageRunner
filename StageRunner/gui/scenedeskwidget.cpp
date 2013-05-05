@@ -11,6 +11,7 @@ SceneDeskWidget::SceneDeskWidget(QWidget *parent) :
 {
 	cur_fx = 0;
 	cur_fxscene = 0;
+	scene_is_live_f = false;
 	setupUi(this);
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -61,6 +62,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 
 void SceneDeskWidget::closeEvent(QCloseEvent *)
 {
+	on_liveCheck_clicked(false);
 	DEBUGTEXT("Desk CloseEvent");
 
 }
@@ -73,5 +75,31 @@ void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 	}
 
 	cur_fxscene->tubes.at(id)->targetValue = val;
+	if (scene_is_live_f) {
+		cur_fxscene->tubes.at(id)->curValue = val;
+	}
+}
+
+void SceneDeskWidget::on_liveCheck_clicked(bool checked)
+{
+	scene_is_live_f = checked;
+
+	if (!FxItem::exists(cur_fxscene)) {
+		DEBUGERROR("Scene in Desk does not exist anymore!");
+		return;
+	}
+
+
+	if (checked) {
+		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+			DmxChannel *tube = cur_fxscene->tubes.at(t);
+			tube->curValue = tube->targetValue;
+		}
+	} else {
+		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+			DmxChannel *tube = cur_fxscene->tubes.at(t);
+			tube->curValue = 0;
+		}
+	}
 
 }

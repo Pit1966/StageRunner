@@ -6,6 +6,7 @@
 #define APP_ORG_STRING "Stonechip"
 #define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
+#define MAX_DMX_UNIVERSE 4
 
 #define PLUGINDIR "/usr/lib/qt4/plugins/stagerunner"
 
@@ -14,8 +15,7 @@
 
 #define MAX_VOLUME 100
 #define INITIAL_VOLUME 66
-#define LIGHT_LOOP_INTERVAL_MS 1000				// Interval time the light loop will be executed with in ms
-
+#define LIGHT_LOOP_INTERVAL_MS 20				// Interval time the light loop will be executed with in ms
 #define MAX_DMX_FADER_RANGE 10000				// This value is mapped to 255. But the resolution in the scenes needs a better graduation
 
 #endif // CONFIG_H

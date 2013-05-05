@@ -3,19 +3,24 @@
 
 #include <QThread>
 
-class ControlLoop;
+class LightLoop;
+class FxList;
+class LightControl;
 
-class ControlLoopThreadInterface : public QThread
+template <class T> class MutexQList;
+
+class LightLoopThreadInterface : public QThread
 {
 	Q_OBJECT
 private:
-	ControlLoop * worker;
+	LightLoop * lightLoop;
+	LightControl * unitLightRef;
 
 public:
-	ControlLoopThreadInterface(QObject *parent = 0);
-	~ControlLoopThreadInterface();
+	LightLoopThreadInterface(LightControl *unit_light);
+	~LightLoopThreadInterface();
 
-	bool startThread();
+	bool startThread(MutexQList<const FxList*>*listref);
 	bool stopThread();
 
 private:

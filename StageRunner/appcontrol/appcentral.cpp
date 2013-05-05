@@ -1,15 +1,15 @@
 #include "config.h"
 #include "appcentral.h"
-#include "system/audiocontrol.h"
-#include "fx/fxlist.h"
-#include "fx/fxitem.h"
-#include "fx/fxaudioitem.h"
+#include "audiocontrol.h"
+#include "fxlist.h"
+#include "fxitem.h"
+#include "fxaudioitem.h"
 #include "project.h"
 #include "usersettings.h"
-#include "fx/fxlist.h"
+#include "fxlist.h"
 #include "ioplugincentral.h"
-#include "plugins/interfaces/qlcioplugin.h"
-#include "controlloopthreadinterface.h"
+#include "qlcioplugin.h"
+#include "lightcontrol.h"
 
 using namespace AUDIO;
 
@@ -42,14 +42,7 @@ void AppCentral::clearProject()
 
 bool AppCentral::setLightLoopEnabled(bool state)
 {
-	bool ok = true;
-	if (state) {
-		ok = lightLoop->startThread();
-	} else {
-		ok = lightLoop->stopThread();
-	}
-
-	return ok;
+	return unitLight->setLightLoopEnabled(state);
 }
 
 void AppCentral::stopAllFxAudio()
@@ -150,21 +143,11 @@ void AppCentral::executeNextFx(int listID)
 
 void AppCentral::testSetDmxChannel(int val, int channel)
 {
-	bool changed = false;
 	val = val * 255 / MAX_DMX_FADER_RANGE;
 
-	if (dmx_direct_data.at(channel) != val) {
-		dmx_direct_data[channel] = val;
-		changed = true;
-	}
-
-	if (changed) {
-		QList<QLCIOPlugin*>plugins = pluginCentral->qlcPlugins();
-		for (int t=0; t<plugins.size(); t++) {
-			QLCIOPlugin *plugin = plugins.at(t);
-			plugin->writeUniverse(0,dmx_direct_data);
-
-		}
+	if (unitLight->dmxOutputValues[0].at(channel) != val) {
+		unitLight->dmxOutputValues[0][channel] = val;
+		unitLight->dmxOutputChanged[0] = true;
 	}
 }
 
@@ -175,28 +158,29 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
-	delete lightLoop;
 	delete pluginCentral;
 	delete userSettings;
 	delete project;
+	delete unitLight;
 	delete unitAudio;
 }
 
 void AppCentral::init()
 {
 	edit_mode_f = false;
-	dmx_direct_data.resize(512);
-	memset(dmx_direct_data.data(),0,512);
 
 	userSettings = new UserSettings;
 
 	unitAudio = new AudioControl(this);
+	unitLight = new LightControl(this);
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
-	lightLoop = new ControlLoopThreadInterface;
 
 	int id = registerFxList(project->fxList);
 	qDebug("Registered Project FX list with Id:%d",id);
+	unitLight->addFxListToControlLoop(project->fxList);
+
+
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 
