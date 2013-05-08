@@ -66,13 +66,20 @@ void LightLoop::processPendingEvents()
 		memset(dmxtout[t].data(),0,512);
 	}
 
+	QList<FxSceneItem*>inactive_scenes;
+
 	// Lets have a look onto the list with active marked scenes
 	MutexQHash<int, FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
 	// Get dmx channel output for every scene in the list
 	foreach (FxSceneItem * sceneitem, scenes) {
-		// Fill channel data into temp dmx data
-		processFxSceneItem(sceneitem);
+		// Fill channel data into temp dmx data and determine if scene is still active
+		if (!processFxSceneItem(sceneitem)) {
+			inactive_scenes.append(sceneitem);
+		}
+		if (sceneitem->statusHasChanged()) {
+			emit sceneStatusChanged(sceneitem,sceneitem->status());
+		}
 	}
 //	QHashIterator<int,const FxSceneItem*> it(scenes);
 //	while (it.hasNext()) {
@@ -93,10 +100,16 @@ void LightLoop::processPendingEvents()
 	}
 
 	lightCtrlRef.sendChangedDmxData();
+
+	foreach (FxSceneItem *sceneitem, inactive_scenes) {
+		lightCtrlRef.setSceneIdle(sceneitem);
+	}
 }
 
-void LightLoop::processFxSceneItem(FxSceneItem *scene)
+bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 {
+	// Now call the function that processes all active fades. If this functions returns
+	// false no channel is active anymore
 	scene->loopFunction();
 
 	for (int t=0; t<scene->tubeCount(); t++) {
@@ -108,5 +121,7 @@ void LightLoop::processFxSceneItem(FxSceneItem *scene)
 			dmxtout[universe][channel] = tube->dmxValue;
 		}
 	}
+
+	return scene->status() & (SCENE_LIVE | SCENE_STAGE | SCENE_ACTIVE);
 }
 

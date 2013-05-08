@@ -42,6 +42,7 @@ private:
 signals:
 
 public slots:
+	void onSceneStatusChanged(FxSceneItem *scene, qint32 status);
 
 };
 

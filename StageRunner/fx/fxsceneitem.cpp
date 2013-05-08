@@ -48,37 +48,43 @@ bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
 		cmd_time = 0;
-		is_active = false;
+		myStatus &= ~SCENE_STAGE;
 		break;
 	case CMD_SCENE_FADEIN:
 		cmd_time = defaultFadeInTime;
-		is_active = true;
+		myStatus |= SCENE_STAGE;
 		break;
 	case CMD_SCENE_FADEOUT:
 		cmd_time = defaultFadeOutTime;
-		is_active = false;
+		myStatus &= ~SCENE_STAGE;
 		break;
 	case CMD_SCENE_FADETO:
 		cmd_time = defaultFadeInTime;
-		is_active = true;
+		myStatus |= SCENE_STAGE;
 		break;
 	default:
 		return false;
 	}
 
-	bool running = false;
+	bool active = false;
 
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
 		if (tube->dmxType == DMX_INTENSITY) {
 			if (tube->initFadeCmd(cmd,cmd_time)) {
-				running = true;
+				active = true;
 			}
 		}
 	}
 
-	return running;
+	if (active) {
+		myStatus |= SCENE_ACTIVE;
+	} else {
+		myStatus &= ~SCENE_ACTIVE;
+	}
+
+	return active;
 }
 
 /**
@@ -95,13 +101,36 @@ bool FxSceneItem::loopFunction()
 	for (int t=0; t<tubeCount(); t++) {
 		active |= tubes.at(t)->loopFunction();
 	}
+
+	if (active) {
+		myStatus |= SCENE_ACTIVE;
+	} else {
+		myStatus &= ~SCENE_ACTIVE;
+	}
+
 	return active;
+}
+
+
+/**
+ * @brief Check if SceneStatus has changed
+ * @return true, if status is different from status of last function call
+ *
+ * You have to call this function regulary to keep track of status changes
+ */
+bool FxSceneItem::statusHasChanged()
+{
+	if (myStatus != my_last_status) {
+		my_last_status = myStatus;
+		return true;
+	}
+	return false;
 }
 
 void FxSceneItem::init()
 {
-	is_live = false;
-	is_active = false;
+	myStatus = SCENE_IDLE;
+	my_last_status = SCENE_IDLE;
 
 	sceneMaster = new DmxChannel;
 

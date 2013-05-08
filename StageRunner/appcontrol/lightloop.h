@@ -39,13 +39,14 @@ private:
 	void init();
 
 signals:
+	void sceneStatusChanged(FxSceneItem *scene, qint32 stat);
 
 
 public slots:
 	void startProcessTimer();
 	void stopProcessTimer();
 	void processPendingEvents();
-	void processFxSceneItem(FxSceneItem *scene);
+	bool processFxSceneItem(FxSceneItem *scene);
 
 };
 

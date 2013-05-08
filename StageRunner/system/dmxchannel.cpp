@@ -16,7 +16,7 @@ DmxChannel::~DmxChannel()
  * @param cmd Fade command @see CtrlCmd
  * @param time_ms time the fade will run in ms
  * @param target_value some commands need a target fade value (e.g. CMD_SCENE_FADETO)
- * @return true if initialized ok
+ * @return True if a fade will occur. False if current output value is already the target value
  *
  * The Command will be saved in 'curCmd'
  */
@@ -27,16 +27,20 @@ bool DmxChannel::initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value)
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
+		if (curValue == 0) return false;
 		fadeTargetValue = 0;
 		time_ms = 0;
 		break;
 	case CMD_SCENE_FADEIN:
+		if (curValue >= targetValue) return false;
 		fadeTargetValue = targetValue;
 		break;
 	case CMD_SCENE_FADEOUT:
+		if (curValue <= 0) return false;
 		fadeTargetValue = 0;
 		break;
 	case CMD_SCENE_FADETO:
+		if (curValue == target_value) return false;
 		fadeTargetValue = target_value;
 		break;
 	default:
@@ -58,7 +62,7 @@ bool DmxChannel::initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value)
 
 /**
  * @brief Execute running commands
- * @return true: if command is (still) running, false: if channel is idle
+ * @return true: if command is (still) running, false: if channel is idle (fade has ended)
  *
  * loopFunction() should be called in the EventLoop
  */

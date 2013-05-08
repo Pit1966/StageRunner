@@ -22,6 +22,7 @@ public:
 
 	bool startThread();
 	bool stopThread();
+	inline LightLoop * getLightLoopInstance() {return lightLoop;}
 
 private:
 	void run();
