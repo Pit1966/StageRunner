@@ -128,6 +128,9 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 		case CMD_SCENE_START:
 			unitLight->startFxSceneSimple(reinterpret_cast<FxSceneItem*>(fx));
 			break;
+		case CMD_SCENE_STOP:
+			unitLight->stopFxScene(reinterpret_cast<FxSceneItem*>(fx));
+			break;
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for scene",cmd);
 		}
@@ -143,10 +146,16 @@ void AppCentral::executeNextFx(int listID)
 	FxList *fxlist = getRegisteredFxList(listID);
 	if (!fxlist) return;
 
-	FxItem *fx = fxlist->stepToSequenceNext();
-	if (!fx) return;
 
-	executeFxCmd(fx,CMD_FX_START);
+	FxItem *cur_fx = fxlist->currentFx();
+	FxItem *next_fx = fxlist->stepToSequenceNext();
+
+	if (cur_fx) {
+		executeFxCmd(cur_fx,CMD_FX_STOP);
+	}
+	if (next_fx) {
+		executeFxCmd(next_fx,CMD_FX_START);
+	}
 }
 
 void AppCentral::testSetDmxChannel(int val, int channel)

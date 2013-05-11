@@ -11,6 +11,8 @@ class AppCentral;
 class QErrorMessage;
 class FxItemPropertyWidget;
 class QDockWidget;
+class SceneStatusWidget;
+class FxSceneItem;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -19,11 +21,14 @@ private:
 	AppCentral *mainapp;
 	QErrorMessage *msg_dialog;
 	QDockWidget *fxitem_editor_dock;
+	QDockWidget *scene_status_dock;
 
 public:
 	QStyle *dialWidgetStyle;
 	QTextEdit *logWidget;
 	FxItemPropertyWidget *fxItemEditor;
+	SceneStatusWidget *sceneStatusDisplay;
+
 	bool shiftPressedFlag;
 
 public:

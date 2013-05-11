@@ -73,7 +73,8 @@ SOURCES += \
 	../gui/customwidget/pslineedit.cpp \
 	../system/lightcontrol.cpp \
     ../appcontrol/lightloop.cpp \
-    ../appcontrol/lightloopthreadinterface.cpp
+    ../appcontrol/lightloopthreadinterface.cpp \
+    ../gui/scenestatuswidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -117,7 +118,8 @@ HEADERS  += \
 	../gui/customwidget/pslineedit.h \
 	../system/lightcontrol.h \
     ../appcontrol/lightloopthreadinterface.h \
-    ../appcontrol/lightloop.h
+    ../appcontrol/lightloop.h \
+    ../gui/scenestatuswidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -127,7 +129,8 @@ FORMS    += \
 	../gui/audiocontrolwidget.ui \
 	../gui/setupwidget.ui \
 	../gui/fxitempropertywidget.ui \
-	../gui/scenedeskwidget.ui
+	../gui/scenedeskwidget.ui \
+    ../gui/scenestatuswidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

@@ -10,7 +10,9 @@ class MixerChannel : public QAbstractSlider
 {
 	Q_OBJECT
 private:
-	int my_id;						///< Id of MixerChannel instance (usualy the channel number) or -1 if not used
+	int my_id;						///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
+	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
+	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
 
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
@@ -32,13 +34,14 @@ private:
 
 	bool do_paint_f;				///< Widget Resources ok and can be drawn
 
-	bool knob_selected_f;			///< Slider knob is clicked and selelected
+	bool knob_selected_f;			///< Slider knob is clicked and selected
 	bool knob_over_f;				///< Mouse is over knob
 	QPoint click_position;			///< Mouseposition when clicked in Widget
 	int click_value;				///< Value when mouse clicked in widget
 	QSize minimum_size_hint;
 
 protected:
+	int refSliderColorIndex;
 	QAbstractSlider refSlider;
 
 public:
@@ -46,11 +49,14 @@ public:
 	~MixerChannel();
 	inline void setId(int id) {my_id = id;}
 	inline int id() {return my_id;}
+	inline void setDmxId(int universe, int dmx_channel) {my_universe = universe; my_dmx_channel = dmx_channel;}
+	inline int dmxUniverse() {return my_universe;}
+	inline int dmxChannel() {return my_dmx_channel;}
 	void setRange(int min, int max);
 	void setMinimum(int min);
 	void setMaximum(int max);
 	void setValues(int val, int refval);
-	void setRefValue(int val);
+	void setRefValue(int val, int colidx = -1);
 	int refValue();
 
 private:
@@ -64,6 +70,9 @@ private:
 	QSize minimumSizeHint() const;
 
 
+public slots:
+	void notifyChangedDmxChannel(int universe, int dmxchannel, int dmxvalue);
+	void setRefSliderColorIndex(int colidx);
 
 signals:
 	void mixerMoved(int val, int id);

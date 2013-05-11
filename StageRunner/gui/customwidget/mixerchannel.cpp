@@ -16,6 +16,8 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	QAbstractSlider(parent)
 {
 	my_id = -1;
+	my_universe = -1;
+	my_dmx_channel = -1;
 
 	knob_scaled_xsize = 0;
 	knob_scaled_ysize = 0;
@@ -27,6 +29,7 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	do_paint_f = false;
 
 	click_value = 0;
+
 
 	lo_pos_percent = float(LO_POS_PERCENT) / 100;
 	hi_pos_percent = float(HI_POS_PERCENT) / 100;
@@ -70,9 +73,15 @@ void MixerChannel::setValues(int val, int refval)
 	refSlider.setValue(refval);
 }
 
-void MixerChannel::setRefValue(int val)
+void MixerChannel::setRefValue(int val, int colidx)
 {
-	refSlider.setValue(val);
+	if (refSlider.value() != val || (colidx >=0 && refSliderColorIndex != colidx) ) {
+		refSlider.setValue(val);
+		if (colidx >= 0) {
+			refSliderColorIndex = colidx;
+		}
+		update();
+	}
 }
 
 int MixerChannel::refValue()
@@ -152,7 +161,11 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	// Draw the reference value;
 	QPen pen;
-	pen.setColor(Qt::blue);
+	if (refSliderColorIndex == 1) {
+		pen.setColor(Qt::red);
+	} else {
+		pen.setColor(Qt::blue);
+	}
 	if (width() < 20) {
 		pen.setWidth(1);
 	}
@@ -229,4 +242,23 @@ bool MixerChannel::generate_scaled_knob()
 QSize MixerChannel::minimumSizeHint() const
 {
 	return minimum_size_hint;
+}
+
+void MixerChannel::notifyChangedDmxChannel(int universe, int dmxchannel, int dmxvalue)
+{
+	if (dmxchannel == my_dmx_channel && universe == my_universe) {
+		int unscaled_dmx_value = dmxvalue * refSlider.maximum() / 255;
+		refSlider.setValue(unscaled_dmx_value);
+		update();
+	}
+}
+
+void MixerChannel::setRefSliderColorIndex(int colidx)
+{
+	if (colidx >= 0) {
+		if (colidx != refSliderColorIndex) {
+			refSliderColorIndex = colidx;
+			update();
+		}
+	}
 }

@@ -39,7 +39,7 @@ private:
 	void init();
 
 signals:
-	void sceneStatusChanged(FxSceneItem *scene, qint32 stat);
+	void sceneStatusChanged(FxSceneItem *scene, quint32 stat);
 
 
 public slots:

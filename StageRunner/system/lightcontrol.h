@@ -17,6 +17,7 @@ class FxSceneItem;
 class LightControl : public QObject
 {
 	Q_OBJECT
+
 public:
 	AppCentral *myApp;
 	LightLoopThreadInterface *lightLoopInterface;
@@ -33,6 +34,7 @@ public:
 	bool addFxListToControlLoop(const FxList *list);
 	bool sendChangedDmxData();
 	bool startFxSceneSimple(FxSceneItem *scene);
+	bool stopFxScene(FxSceneItem *scene);
 	bool setSceneActive(FxSceneItem *scene);
 	bool setSceneIdle(FxSceneItem * scene);
 
@@ -40,9 +42,11 @@ private:
 	void init();
 
 signals:
+	void sceneChanged(FxSceneItem *scene);
+	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
 
 public slots:
-	void onSceneStatusChanged(FxSceneItem *scene, qint32 status);
+	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
 
 };
 

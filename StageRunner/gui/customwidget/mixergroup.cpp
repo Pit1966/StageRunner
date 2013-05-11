@@ -72,3 +72,24 @@ void MixerGroup::on_mixer_moved(int val, int id)
 		emit mixerMoved(val, id);
 	}
 }
+
+
+void MixerGroup::notifyChangedDmxUniverse(int universe, const QByteArray &dmxValues)
+{
+	for (int t=0;t<mixerlist.size(); t++) {
+		MixerChannel *mixer = mixerlist.at(t);
+		if (mixer->dmxUniverse() == universe) {
+			int target_value = quint8(dmxValues[mixer->dmxChannel()]) * mixer->maximum() / 255;
+			mixer->setRefValue(target_value);
+			mixer->update();
+		}
+	}
+}
+
+void MixerGroup::setRefSliderColorIndex(int colidx)
+{
+	for (int t=0;t<mixerlist.size(); t++) {
+		MixerChannel *mixer = mixerlist.at(t);
+		mixer->setRefSliderColorIndex(colidx);
+	}
+}

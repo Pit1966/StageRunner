@@ -1,15 +1,17 @@
 #include "config.h"
 #include "stagerunnermainwin.h"
-#include "system/commandsystem.h"
-#include "appcontrol/appcentral.h"
-#include "system/audiocontrol.h"
-#include "fx/fxlist.h"
-#include "appcontrol/project.h"
-#include "appcontrol/usersettings.h"
+#include "commandsystem.h"
+#include "appcentral.h"
+#include "audiocontrol.h"
+#include "lightcontrol.h"
+#include "fxlist.h"
+#include "project.h"
+#include "usersettings.h"
 #include "thirdparty/widget/qsynthdialpeppinostyle.h"
 #include "thirdparty/widget/qsynthdialclassicstyle.h"
-#include "gui/setupwidget.h"
-#include "gui/fxitempropertywidget.h"
+#include "setupwidget.h"
+#include "fxitempropertywidget.h"
+#include "scenestatuswidget.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -54,6 +56,7 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
 	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
 
+
 	// Audio Control Panel <-> Audio Control
 	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
@@ -61,6 +64,9 @@ void StageRunnerMainWin::initConnects()
 
 	// DMX Direct Control
 	connect(dmxDirectWidget,SIGNAL(mixerMoved(int,int)),mainapp,SLOT(testSetDmxChannel(int,int)));
+
+	// Light Control -> SceneStatusWidget
+	connect(mainapp->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
 
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
@@ -72,14 +78,26 @@ void StageRunnerMainWin::initConnects()
 
 void StageRunnerMainWin::setup_gui_docks()
 {
+	setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
+	setDockNestingEnabled(true);
+
 	fxitem_editor_dock = new QDockWidget(this);
-	fxItemEditor = new FxItemPropertyWidget(this);
+	fxItemEditor = new FxItemPropertyWidget();
 
 	fxitem_editor_dock->setObjectName("Fx Editor");
 	fxitem_editor_dock->setWindowTitle("Fx Editor");
 	fxitem_editor_dock->setWidget(fxItemEditor);
 	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-	this->addDockWidget(Qt::LeftDockWidgetArea,fxitem_editor_dock);
+	this->addDockWidget(Qt::TopDockWidgetArea,fxitem_editor_dock);
+
+	scene_status_dock = new QDockWidget(this);
+	sceneStatusDisplay = new SceneStatusWidget();
+
+	scene_status_dock->setObjectName("Scene Status Display");
+	scene_status_dock->setWindowTitle("Scene Status Display");
+	scene_status_dock->setWidget(sceneStatusDisplay);
+	scene_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	this->addDockWidget(Qt::RightDockWidgetArea,scene_status_dock);
 
 }
 

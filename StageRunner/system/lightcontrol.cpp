@@ -30,8 +30,8 @@ bool LightControl::setLightLoopEnabled(bool state)
 	if (state) {
 		ok = lightLoopInterface->startThread();
 		if (ok) {
-			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneStatusChanged(FxSceneItem*,qint32))
-				,this,SLOT(onSceneStatusChanged(FxSceneItem*,qint32)));
+			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneStatusChanged(FxSceneItem*,quint32))
+				,this,SLOT(onSceneStatusChanged(FxSceneItem*,quint32)));
 		}
 
 	} else {
@@ -77,6 +77,7 @@ bool LightControl::sendChangedDmxData()
 		if (dmxOutputChanged[t]) {
 			for (int i=0; i<plugins.size(); i++) {
 				plugins.at(i)->writeUniverse(t,dmxOutputValues[t]);
+				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
 			}
 			dmxOutputChanged[t] = false;
@@ -109,6 +110,11 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 	}
 
 	return active;
+}
+
+bool LightControl::stopFxScene(FxSceneItem *scene)
+{
+	return scene->initSceneCommand(CMD_SCENE_FADEOUT);
 }
 
 /**
@@ -154,9 +160,11 @@ void LightControl::init()
 
 }
 
-void LightControl::onSceneStatusChanged(FxSceneItem *scene, qint32 status)
+void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 {
 	qDebug() << "Scene" << scene->name() << "status: active:" << (status & SCENE_ACTIVE)
 			 << "stage:" << (status & SCENE_STAGE)
 			 << "live:" << (status & SCENE_LIVE);
+
+	emit sceneChanged(scene);
 }

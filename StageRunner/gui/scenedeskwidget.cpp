@@ -13,25 +13,32 @@ SceneDeskWidget::SceneDeskWidget(QWidget *parent) :
 {
 	cur_fx = 0;
 	cur_fxscene = 0;
-	scene_is_live_f = false;
+	init ();
 	setupUi(this);
-
-	setAttribute(Qt::WA_DeleteOnClose);
+	init_gui();
 }
 
 SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 	: QWidget(parent)
 {
+	init();
 	setupUi(this);
 	setFxScene(scene);
-
-	setAttribute(Qt::WA_DeleteOnClose);
+	init_gui();
 }
 
 SceneDeskWidget::~SceneDeskWidget()
 {
 	DEBUGTEXT("Desk destroyed");
 }
+
+void SceneDeskWidget::init_gui()
+{
+	setAttribute(Qt::WA_DeleteOnClose);
+
+	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
+}
+
 
 bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 {
@@ -51,15 +58,23 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			MixerChannel *fader = faderWidget->appendMixer();
 			// We will need the Id to determine which DmxChannel an incoming fader signal belongs to
 			fader->setId(t);
+			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel);
 			fader->setRange(0,dmx->targetFullValue);
 			fader->setValue(dmx->targetValue);
 
 			// and of course we need a slot to react on slider movement
 			connect(fader,SIGNAL(mixerMoved(int,int)),this,SLOT(set_mixer_val_on_moved(int,int)));
+			// and we have to update the indicators for outside DMX level changes
+			// connect(this,SIGNAL(dmxValueWantsUpdate(int,int,int)),fader,SLOT(notifyChangedDmxChannel(int,int,int)));
 		}
 	}
 
 	return true;
+}
+
+void SceneDeskWidget::init()
+{
+	scene_is_live_f = false;
 }
 
 void SceneDeskWidget::closeEvent(QCloseEvent *)
@@ -67,6 +82,20 @@ void SceneDeskWidget::closeEvent(QCloseEvent *)
 	on_liveCheck_clicked(false);
 	DEBUGTEXT("Desk CloseEvent");
 
+}
+
+void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxValues)
+{
+	faderWidget->notifyChangedDmxUniverse(universe,dmxValues);
+
+	if (!FxItem::exists(cur_fxscene)) return;
+
+//	for (int t=0;t<cur_fxscene->tubeCount(); t++) {
+//		DmxChannel *dmx = cur_fxscene->tubes.at(t);
+//		if (dmx->dmxUniverse == universe) {
+//			emit dmxValueWantsUpdate(universe,dmx->dmxChannel,quint8(dmxValues[dmx->dmxChannel]));
+//		}
+//	}
 }
 
 void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
@@ -92,7 +121,10 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 	}
 
 
+	cur_fxscene->setLive(checked);
+
 	if (checked) {
+		faderWidget->setRefSliderColorIndex(1);
 		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
 			tube->curValue = tube->targetValue;
@@ -100,11 +132,11 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
 
 	} else {
+		faderWidget->setRefSliderColorIndex(0);
 		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
 			tube->curValue = 0;
 		}
-		AppCentral::instance()->unitLight->setSceneIdle(cur_fxscene);
 	}
 
 }

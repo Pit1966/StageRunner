@@ -26,6 +26,8 @@ signals:
 	void mixerMoved(int val, int id);
 
 public slots:
+	void notifyChangedDmxUniverse(int universe, const QByteArray & dmxValues);
+	void setRefSliderColorIndex(int colidx);
 
 private slots:
 	void on_mixer_moved(int val, int id);

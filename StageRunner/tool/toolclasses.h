@@ -38,9 +38,15 @@ public:
 	}
 
 	~MutexQHash() {
+#if QT_VERSION < 0x050000
+		if (lockCount > 0) {
+			DEBUGERROR("MutexQHash is locked %d times while deleting: '%s'"
+					   ,int(lockCount), myName.toLocal8Bit().data());
+#else
 		if (lockCount.load()) {
 			DEBUGERROR("MutexQHash is locked %d times while deleting: '%s'"
 					   ,lockCount.load(), myName.toLocal8Bit().data());
+#endif
 		} else {
 			delete myLock;
 		}

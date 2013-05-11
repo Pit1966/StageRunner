@@ -22,12 +22,21 @@ public:
 	bool setFxScene(FxSceneItem *scene);
 
 private:
+	void init();
+	void init_gui();
 	void closeEvent(QCloseEvent *);
+
+public slots:
+	void notifyChangedUniverse(int universe, const QByteArray & dmxValues);
 
 private slots:
 	void set_mixer_val_on_moved(int val, int id);
 
 	void on_liveCheck_clicked(bool checked);
+
+signals:
+	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
+
 };
 
 #endif // SCENEDESKWIDGET_H

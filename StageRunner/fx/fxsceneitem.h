@@ -19,10 +19,10 @@ public:
 	VarSetList<DmxChannel*>tubes;
 
 protected:
-	qint32 myStatus;
+	quint32 myStatus;
 
 private:
-	qint32 my_last_status;
+	quint32 my_last_status;
 
 public:
 	FxSceneItem();
@@ -34,12 +34,14 @@ public:
 
 	bool initSceneCommand(CtrlCmd cmd);
 	bool loopFunction();
+	void setLive(bool state);
 	inline bool isActive() const {return myStatus & SCENE_ACTIVE;}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
 	inline bool isLive() const {return myStatus & SCENE_LIVE;}
 	inline bool isOnStage() const {return myStatus & SCENE_STAGE;}
+	inline bool isVisible() const {return myStatus & (SCENE_STAGE | SCENE_ACTIVE | SCENE_LIVE);}
 	bool statusHasChanged();
-	inline qint32 status() {return myStatus;}
+	inline quint32 status() {return myStatus;}
 
 private:
 	void init();

@@ -111,6 +111,15 @@ bool FxSceneItem::loopFunction()
 	return active;
 }
 
+void FxSceneItem::setLive(bool state)
+{
+	if (state) {
+		myStatus |= SCENE_LIVE;
+	} else {
+		myStatus &= ~SCENE_LIVE;
+	}
+}
+
 
 /**
  * @brief Check if SceneStatus has changed
