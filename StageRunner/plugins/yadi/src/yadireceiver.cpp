@@ -8,7 +8,6 @@
 #include <QMessageBox>
 
 #define DMX_HEADER_SIZE 4
-#define DEBUG 0
 
 YadiReceiver::YadiReceiver(YadiDevice *p_device, SerialWrapper * p_file)
 {
@@ -93,7 +92,7 @@ void YadiReceiver::run()
 					in += file->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
 				}
-				if (DEBUG) qDebug("YadiReceiver::run: read size: %d",in.size());
+				if (device->debug) qDebug("YadiReceiver::run: read size: %d",in.size());
 				if (in.size() != dmx.dmxDataSize) {
 					qDebug("YadiReceiver::run: read size: %d",in.size());
 				}
@@ -121,10 +120,11 @@ void YadiReceiver::run()
 						char val = in.at(t);
 						if (device->inUniverse[t] != val || emit_all) {
 							device->inUniverse[t] = val;
-							emit dmxInChannelChanged(device->inputId,t,(uchar)val);
+							emit dmxInDeviceChannelChanged(device->inputId,t,(uchar)val);
+							emit dmxInChannelChanged(t,(uchar)val);
 						}
 					}
-					if (DEBUG) qDebug()<< in.toHex();
+					if (device->debug > 4) qDebug() << "Line HEX in:" << in.toHex();
 					emit_all = false;
 				}
 			}
@@ -137,7 +137,7 @@ void YadiReceiver::run()
 		qDebug("YadiReceiver::run: exit DMXreceiver thread with failure");
 		emit exitReceiverWithFailure();
 	} else {
-		qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
+		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
 	}
 	cmd = IDLE;
 }
@@ -177,7 +177,7 @@ bool YadiReceiver::detectRxDmxPacketSize(int *packet_size)
 		device->currentDetectedDmxInPacketSize = stat.dmxFrameSize;
 		emit rxDmxPacketSizeReceived(stat.dmxFrameSize);
 	}
-	if (DEBUG) qDebug() << "YadiReceiver::getDetectedDmxFrameSize  detected DMX framesize" << stat.dmxFrameSize;
+	if (device->debug) qDebug() << "YadiReceiver::getDetectedDmxFrameSize  detected DMX framesize" << stat.dmxFrameSize;
 
 	return ok;
 }
@@ -200,7 +200,7 @@ bool YadiReceiver::detectRxDmxUniverseSize(int *max_universe_size, int *used_uni
 		device->usedDmxInChannels = stat.deviceUsedChannels;
 	}
 
-	qDebug() << "YadiReceiver::detectRxDmxUniverseSize: detected channels:"
+	if (device->debug) qDebug() << "YadiReceiver::detectRxDmxUniverseSize: detected channels:"
 			 << *max_universe_size << "; used channels" << *used_universe_size;
 	return ok;
 }
@@ -297,7 +297,7 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 			// Let's look at the size
 			dmxstat.type = DmxAnswer::DMX_DATA;
 			dmxstat.dmxDataSize = QString(in).toInt();
-			if (DEBUG) qDebug("answer: dmx data block -> size:%d",dmxstat.dmxDataSize);
+			if (device->debug > 4) qDebug("answer: dmx data block -> size:%d",dmxstat.dmxDataSize);
 			ok = true;
 		}
 		else if (msg) {
@@ -327,7 +327,7 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 					dmxStatus = dmxstat.dmxStatus;
 					emit dmxStatusReceived(dmxStatus);
 				}
-				if (DEBUG) qDebug("Status: %d",dmxstat.dmxStatus);
+				if (device->debug > 4) qDebug("answer: Status: %d",dmxstat.dmxStatus);
 			}
 			else {
 				dmxstat.type = DmxAnswer::UNKNOWN;
@@ -337,7 +337,7 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 		}
 		else {
 			// No data and no msg ??
-			qDebug("Neither message header nor data header received");
+			qDebug("%s: Neither message header nor data header received",Q_FUNC_INFO);
 			ok = false;
 			dmxstat.type = DmxAnswer::NONE;
 		}

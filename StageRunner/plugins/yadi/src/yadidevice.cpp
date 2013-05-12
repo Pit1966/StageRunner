@@ -1,7 +1,7 @@
 #include "yadidevice.h"
 #include "yadireceiver.h"
 #include "serialwrapper.h"
-
+#include "dmxmonitor.h"
 
 #include <QFile>
 #include <QSettings>
@@ -49,6 +49,9 @@ YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 YadiDevice::~YadiDevice()
 {
 	deActivateDevice();
+
+	closeDmxInMonitorWidget();
+	closeDmxOutMonitorWidget();
 }
 
 YadiDevice::YadiDevice(const YadiDevice &other)
@@ -243,6 +246,7 @@ void YadiDevice::saveConfig()
 	set.setValue("InputId",inputId);
 	set.setValue("OutputId",outputId);
 	set.setValue("UniverseMergeMode",universeMergeMode);
+	set.setValue("DebugLevel",debug);
 	set.endGroup();
 }
 
@@ -264,15 +268,16 @@ void YadiDevice::loadConfig()
 		inputId = set.value("InputId").toInt();
 		outputId = set.value("OutputId").toInt();
 		universeMergeMode = set.value("UniverseMergeMode").toInt();
+		debug = set.value("DebugLevel").toInt();
 	} else {
-		qDebug() << "No settings found for device" << deviceProductName;
+		qDebug() << Q_FUNC_INFO << " No settings found for device" << deviceProductName;
 	}
 	set.endGroup();
 }
 
 void YadiDevice::sendConfigToDevice()
 {
-	qDebug() << "YadiDevice::sendConfigToDevice";
+	if (debug) qDebug() << "YadiDevice::sendConfigToDevice";
 	/// @todo error checking!
 
 	if (openOutput()) {
@@ -292,8 +297,48 @@ void YadiDevice::sendConfigToDevice()
 	}
 }
 
+DmxMonitor *YadiDevice::openDmxInMonitorWidget()
+{
+	if (!dmxInMonWidget) {
+		dmxInMonWidget = new DmxMonitor;
+		dmxInMonWidget->setWindowTitle("DMX Input Monitor V0.1");
+		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
+		QObject::connect(input_thread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
+	}
+	return dmxInMonWidget;
+}
+
+DmxMonitor *YadiDevice::openDmxOutMonitorWidget()
+{
+	if (!dmxOutMonWidget) {
+		dmxOutMonWidget = new DmxMonitor;
+		dmxOutMonWidget->setWindowTitle("DMX Output Monitor V0.1");
+		dmxOutMonWidget->setChannelPeakBars(usedDmxOutChannels);
+	}
+	return dmxOutMonWidget;
+}
+
+void YadiDevice::closeDmxInMonitorWidget()
+{
+	if (dmxInMonWidget) {
+		dmxInMonWidget->close();
+		delete dmxInMonWidget;
+		dmxInMonWidget = 0;
+	}
+}
+
+void YadiDevice::closeDmxOutMonitorWidget()
+{
+	if (dmxOutMonWidget) {
+		dmxOutMonWidget->close();
+		delete dmxOutMonWidget;
+		dmxOutMonWidget = 0;
+	}
+}
+
 void YadiDevice::init()
 {
+	debug = 0;
 	deviceNodePresent = false;
 	maxDeviceDmxInChannels = 512;
 	maxDeviceDmxOutChannels = 512;
@@ -308,4 +353,6 @@ void YadiDevice::init()
 	inputId = 0;
 	universeMergeMode = 0;
 	settingsChanged = false;
+	dmxInMonWidget = 0;
+	dmxOutMonWidget = 0;
 }

@@ -77,7 +77,7 @@ bool Project::loadFromFile(const QString &path)
 				// have to initialize
 				if (curKey == "FxType") {
 					fx = fxList->addFx(curValue.toInt());
-					if (debug > 1) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->fxType());
+					if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->fxType());
 				}
 			}
 		}
@@ -88,7 +88,6 @@ bool Project::loadFromFile(const QString &path)
 	} else {
 		ok = false;
 	}
-	qDebug() << Q_FUNC_INFO << "Lines:" << line_number;
 
 	// FxSceneItem *scene = (FxSceneItem*)fxList->at(9);
 
@@ -113,6 +112,25 @@ bool Project::isModified()
 void Project::setModified(bool state)
 {
 	VarSet::setModified(state);
+}
+
+bool Project::postLoadProcessFxList()
+{
+	bool was_on_stage = false;
+	for (int t=0; t<fxList->size(); t++) {
+		FxItem *fx = fxList->at(t);
+		if (fx->fxType() == FX_SCENE) {
+			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+			/// @todo: Light restore on load funktioniert nicht
+			bool scene_was_on_stage = scene->postLoadInitTubes(false);
+			if (scene_was_on_stage) {
+				was_on_stage = true;
+				LOGTEXT(QObject::tr("Scene '%1' was on stage when currently loaded project was saved")
+						.arg(scene->name()));
+			}
+		}
+	}
+	return was_on_stage;
 }
 
 void Project::init()

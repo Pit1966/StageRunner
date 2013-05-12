@@ -105,6 +105,30 @@ void AppCentral::closePlugins()
 	pluginCentral->closePlugins();
 }
 
+DmxMonitor * AppCentral::openDmxInMonitor(int universe)
+{
+	QLCIOPlugin *plugin;
+	int input;
+	if ( pluginCentral->getPluginAndInputForDmxUniverse(universe,plugin,input) ) {
+		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
+			return plugin->openInputMonitor(input);
+		}
+	}
+	return 0;
+}
+
+DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
+{
+	QLCIOPlugin *plugin;
+	int output;
+	if ( pluginCentral->getPluginAndOutputForDmxUniverse(universe,plugin,output) ) {
+		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
+			return plugin->openOutputMonitor(output);
+		}
+	}
+	return 0;
+}
+
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 {
@@ -150,7 +174,7 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *cur_fx = fxlist->currentFx();
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
-	if (cur_fx) {
+	if (cur_fx && cur_fx != next_fx) {
 		executeFxCmd(cur_fx,CMD_FX_STOP);
 	}
 	if (next_fx) {

@@ -5,6 +5,7 @@
 
 class YadiDMXUSBOut;
 class YadiDevice;
+class DmxMonitor;
 
 class YadiConfigDialog : public QDialog, private Ui::YadiConfigDialog
 {
@@ -15,6 +16,7 @@ private:
 
 public:
 	explicit YadiConfigDialog(YadiDMXUSBOut *p_plugin = 0);
+	~YadiConfigDialog();
 	bool configChanged;					///< becomes true, if configuration changed so it has to be reported to QLC
 
 private slots:
@@ -25,6 +27,9 @@ private slots:
 	void on_transMaxOutChannelsSpin_valueChanged(int arg1);
 	void on_transMaxInChannelsSpin_valueChanged(int arg1);
 	void on_rxMaxInChannelsSpin_valueChanged(int arg1);
+	void on_showDmxInButton_clicked();
+	void on_showDmxOutButton_clicked();
+	void on_debugSpin_valueChanged(int arg1);
 };
 
 #endif // YADICONFIGDIALOG_H

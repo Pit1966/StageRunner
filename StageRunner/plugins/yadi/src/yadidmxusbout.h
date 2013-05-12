@@ -7,6 +7,7 @@
 
 class SerialWrapper;
 class YadiDevice;
+class DmxMonitor;
 
 class YadiDMXUSBOut : public QLCIOPlugin
 {
@@ -16,6 +17,8 @@ class YadiDMXUSBOut : public QLCIOPlugin
 #ifdef IS_QT5
 	Q_PLUGIN_METADATA(IID "de.stonechip.stagerunner.yadi" FILE "yadi.json")
 #endif
+public:
+	int debug;
 
 private:
 	QStringList output_devices;
@@ -44,16 +47,22 @@ public:
 	bool canConfigure();				///< @reimp
 	void configure();					///< @reimp
 
+	// StageRunner reimplemented functions
+	DmxMonitor *openOutputMonitor(quint32 output);
+	DmxMonitor *openInputMonitor(quint32 input);
+
 	inline QStringList outputDeviceList() {return output_devices;}
 	inline QStringList inputDeviceList() {return input_devices;}
 
 private:
 	void handle_output_error(quint32 output);
+	void update_output_monitor(quint32 output, const QByteArray& universe);
 
 signals:
 
 
 public slots:
+	void closeMonitorByInstancePointer(DmxMonitor *instance);
 	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
 
 };

@@ -14,6 +14,7 @@ class UserSettings;
 class FxItem;
 class FxList;
 class IOPluginCentral;
+class DmxMonitor;
 
 
 class AppCentral : public QObject
@@ -54,6 +55,8 @@ public:
 	void loadPlugins();
 	void openPlugins();
 	void closePlugins();
+	DmxMonitor *openDmxInMonitor(int universe);
+	DmxMonitor *openDmxOutMonitor(int universe);
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd);

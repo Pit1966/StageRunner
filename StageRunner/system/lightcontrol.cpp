@@ -35,8 +35,8 @@ bool LightControl::setLightLoopEnabled(bool state)
 		}
 
 	} else {
-		ok = lightLoopInterface->stopThread();
 		lightLoopInterface->getLightLoopInstance()->disconnect();
+		ok = lightLoopInterface->stopThread();
 	}
 	return ok;
 }

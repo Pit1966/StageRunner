@@ -69,6 +69,10 @@ private slots:
 
 	void on_stopMainLoopButton_clicked();
 
+	void on_actionDMX_Input_triggered();
+
+	void on_actionDMX_Output_triggered();
+
 private:
 	void init();
 	void setup_gui_docks();

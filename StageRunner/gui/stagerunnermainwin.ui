@@ -215,9 +215,17 @@
     </property>
     <addaction name="actionSetup"/>
    </widget>
+   <widget class="QMenu" name="menuMonitor">
+    <property name="title">
+     <string>Monitor</string>
+    </property>
+    <addaction name="actionDMX_Input"/>
+    <addaction name="actionDMX_Output"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuConfiguration"/>
+   <addaction name="menuMonitor"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -272,6 +280,16 @@
   <action name="actionExit_StageRunner">
    <property name="text">
     <string>Exit StageRunner</string>
+   </property>
+  </action>
+  <action name="actionDMX_Input">
+   <property name="text">
+    <string>DMX Input</string>
+   </property>
+  </action>
+  <action name="actionDMX_Output">
+   <property name="text">
+    <string>DMX Output</string>
    </property>
   </action>
  </widget>

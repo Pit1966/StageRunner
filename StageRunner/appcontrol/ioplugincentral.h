@@ -29,6 +29,9 @@ public:
 	 */
 	static QString sysPluginDir();
 
+	bool getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & output);
+	bool getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & input);
+
 
 signals:
 

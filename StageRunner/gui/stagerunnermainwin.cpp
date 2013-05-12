@@ -108,6 +108,7 @@ void StageRunnerMainWin::restore_window()
 	if (set.contains("MainWinGeometry")) {
 		restoreGeometry(set.value("MainWinGeometry").toByteArray());
 		restoreState(set.value("MainWinDocks").toByteArray());
+		resize(set.value("MainWinSize").toSize());
 	}
 }
 
@@ -168,6 +169,7 @@ void StageRunnerMainWin::initAppDefaults()
 
 	if (mainapp->userSettings->pLastProjectLoadPath.size()) {
 		mainapp->project->loadFromFile(mainapp->userSettings->pLastProjectLoadPath);
+		mainapp->project->postLoadProcessFxList();
 		fxListWidget->setFxList(mainapp->project->fxList);
 		copyProjectSettingsToGui();
 	}
@@ -217,6 +219,8 @@ void StageRunnerMainWin::on_actionSave_Project_triggered()
 
 void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 {
+	actionEdit_Mode->setChecked(false);
+
 	QString path = QFileDialog::getSaveFileName(this,tr("Choose Project save path")
 												,mainapp->userSettings->pLastProjectSavePath);
 	if (path.size()) {
@@ -244,9 +248,8 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 		clearProject();
 
 		mainapp->userSettings->pLastProjectLoadPath = path;
-		debug = 3;
 		mainapp->project->loadFromFile(path);
-		debug = 0;
+		mainapp->project->postLoadProcessFxList();
 
 		fxListWidget->setFxList(mainapp->project->fxList);
 		copyProjectSettingsToGui();
@@ -267,7 +270,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == 6) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
-		qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
+		if (debug > 2) qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
 		switch (key) {
 		case Qt::Key_Shift:
 			shiftPressedFlag = true;
@@ -318,6 +321,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	QSettings set;
 	set.beginGroup("GuiSettings");
 	set.setValue("MainWinGeometry",saveGeometry());
+	set.setValue("MainWinSize",size());
 	set.setValue("MainWinDocks",saveState());
 	QMainWindow::closeEvent(event);
 }
@@ -396,4 +400,18 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 	wait.start();
 	while (wait.elapsed() < 3000) ;;
 	qDebug() << "Mainloop is back";
+}
+
+void StageRunnerMainWin::on_actionDMX_Input_triggered()
+{
+	QWidget * mon = reinterpret_cast<QWidget *>(mainapp->openDmxInMonitor(0));
+	mon->show();
+	mon->raise();
+}
+
+void StageRunnerMainWin::on_actionDMX_Output_triggered()
+{
+	QWidget * mon = reinterpret_cast<QWidget *>(mainapp->openDmxOutMonitor(0));
+	mon->show();
+	mon->raise();
 }

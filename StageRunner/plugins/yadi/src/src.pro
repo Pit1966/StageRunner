@@ -29,7 +29,8 @@ HEADERS += \
 	yadidevice.h \
 	yadidevicemanager.h \
 	yadiconfigdialog.h \
-	yadireceiver.h
+	yadireceiver.h \
+    dmxmonitor.h
 
 SOURCES += \
 	yadidmxusbout.cpp \
@@ -37,7 +38,8 @@ SOURCES += \
 	yadidevice.cpp \
 	yadidevicemanager.cpp \
 	yadiconfigdialog.cpp \
-	yadireceiver.cpp
+	yadireceiver.cpp \
+    dmxmonitor.cpp
 
 OTHER_FILES += yadi.json
 

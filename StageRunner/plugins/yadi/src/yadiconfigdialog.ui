@@ -14,7 +14,7 @@
    <string>YADI DMX Configuration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="0" colspan="2">
+   <item row="5" column="0" colspan="2">
     <widget class="QGroupBox" name="transceiverGroup">
      <property name="title">
       <string>Transceiver</string>
@@ -99,15 +99,8 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QComboBox" name="selectDeviceCombo"/>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="rescanDevLabel">
-     <property name="text">
-      <string>Search for new devices</string>
-     </property>
-    </widget>
+   <item row="1" column="0" colspan="3">
+    <widget class="QTextEdit" name="textEdit"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="selectDeviceLabel">
@@ -116,37 +109,20 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QTextEdit" name="textEdit"/>
-   </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="rescanDevButton">
-     <property name="text">
-      <string>Rescan Devices</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
+   <item row="6" column="2">
     <widget class="QPushButton" name="closeButton">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="5" column="2">
     <widget class="QGroupBox" name="receiverGroup">
      <property name="title">
       <string>Receiver</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Max DMX Input Channels</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QSpinBox" name="rxMaxInChannelsSpin">
         <property name="minimum">
          <number>4</number>
@@ -159,7 +135,48 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Max DMX Input Channels</string>
+        </property>
+       </widget>
+      </item>
      </layout>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="showDmxInButton">
+     <property name="text">
+      <string>Show DMX Input Monitor</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QComboBox" name="selectDeviceCombo"/>
+   </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="showDmxOutButton">
+     <property name="text">
+      <string>Show DMX Output Monitor</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QSpinBox" name="debugSpin"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="rescanDevButton">
+     <property name="text">
+      <string>Rescan Devices</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLabel" name="debugLabel">
+     <property name="text">
+      <string>Debug</string>
+     </property>
     </widget>
    </item>
   </layout>

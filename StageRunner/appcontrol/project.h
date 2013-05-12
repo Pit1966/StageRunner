@@ -31,6 +31,8 @@ public:
 	bool isModified();
 	void setModified(bool state);
 
+	bool postLoadProcessFxList();
+
 private:
 	void init();
 };

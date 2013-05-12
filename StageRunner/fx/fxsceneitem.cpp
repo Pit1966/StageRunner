@@ -1,5 +1,7 @@
 #include "fxsceneitem.h"
 #include "dmxchannel.h"
+#include "lightcontrol.h"
+#include "appcentral.h"
 
 FxSceneItem::FxSceneItem()
 {
@@ -66,6 +68,7 @@ bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
 		return false;
 	}
 
+	qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
 
 	// Iterate over all tubes and set parameters
@@ -134,6 +137,33 @@ bool FxSceneItem::statusHasChanged()
 		return true;
 	}
 	return false;
+}
+
+bool FxSceneItem::postLoadInitTubes(bool restore_light)
+{
+	bool now_on_stage = false;
+	bool was_on_stage = false;
+
+	for (int t=0; t<tubeCount(); t++) {
+		DmxChannel *tube = tubes.at(t);
+		if (tube->curValue > 0) {
+			was_on_stage = true;
+			if (restore_light) {
+				now_on_stage = true;
+				// tube->curValue = 0;
+			} else {
+				tube->curValue = 0;
+				tube->dmxValue = 0;
+			}
+		}
+	}
+	if (now_on_stage) {
+		qDebug("Post process loaded project -> Bring Scene to stage");
+		// initSceneCommand(CMD_SCENE_FADEIN);
+		AppCentral::instance()->unitLight->setSceneActive(this);
+	}
+
+	return was_on_stage;
 }
 
 void FxSceneItem::init()

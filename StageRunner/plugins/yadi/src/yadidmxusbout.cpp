@@ -4,6 +4,7 @@
 #include "yadidevicemanager.h"
 #include "yadiconfigdialog.h"
 #include "yadireceiver.h"
+#include "dmxmonitor.h"
 
 #include <QDebug>
 #include <QTime>
@@ -20,12 +21,12 @@ YadiDMXUSBOut::~YadiDMXUSBOut()
 	// are hold static in memory
 	YadiDeviceManager::clearYadiDevices();
 
-	qDebug("~YadiDMXUSBOut");
+	if (debug) qDebug("~YadiDMXUSBOut");
 }
 
 void YadiDMXUSBOut::init()
 {
-	qDebug("YadiDMXUSBOut::init");
+	debug = 0;
 
 	write_universe_debug_out = true;
 	findDevices();
@@ -34,6 +35,7 @@ void YadiDMXUSBOut::init()
 	for (int t=0; t<YadiDeviceManager::devices(); t++) {
 		YadiDeviceManager::deviceAt(t)->loadConfig();
 	}
+	if (debug) qDebug("YadiDMXUSBOut::init");
 }
 
 void YadiDMXUSBOut::findDevices()
@@ -56,7 +58,7 @@ void YadiDMXUSBOut::findDevices()
 		if (!output_devices.contains(device->devNodePath)) {
 			if (device->capabilities&YadiDevice::FL_OUTPUT_UNIVERSE) {
 				output_devices.append(device->devNodePath);
-				qDebug() << "YadiDMXUSBOut::Added Output Device: " << device->deviceProductName << device->devNodePath;
+				if (debug) qDebug() << "YadiDMXUSBOut::Added Output Device: " << device->deviceProductName << device->devNodePath;
 			}
 		}
 	}
@@ -76,7 +78,7 @@ void YadiDMXUSBOut::findDevices()
 		if (!input_devices.contains(device->devNodePath)) {
 			if (device->capabilities&YadiDevice::FL_INPUT_UNIVERSE) {
 				input_devices.append(device->devNodePath);
-				qDebug() << "YadiDMXUSBOut::Added input Device: " << device->deviceProductName << device->devNodePath;
+				if (debug) qDebug() << "YadiDMXUSBOut::Added input Device: " << device->deviceProductName << device->devNodePath;
 			}
 		}
 	}
@@ -101,6 +103,7 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 			ok = false;
 		}
 		if (ok) {
+			if (debug) qDebug("YadiDMXUSBOut::openOutput(%d) successful",output);
 		} else {
 			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
 		}
@@ -112,7 +115,7 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 
 void YadiDMXUSBOut::closeOutput(quint32 output)
 {
-	qDebug("YadiDMXUSBOut::closeOutput(%d)",output);
+	if (debug) qDebug("YadiDMXUSBOut::closeOutput(%d)",output);
 
 	if ((int)output < output_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
@@ -126,7 +129,7 @@ void YadiDMXUSBOut::closeOutput(quint32 output)
 
 int YadiDMXUSBOut::capabilities() const
 {
-	return QLCIOPlugin::Output | QLCIOPlugin::Input;
+	return QLCIOPlugin::Output | QLCIOPlugin::Input | QLCIOPlugin::Monitor;
 }
 
 QStringList YadiDMXUSBOut::outputs()
@@ -209,7 +212,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		} else {
 			yadi->outUniverse = universe;
 		}
-		// qDebug("out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,universe.size(),out[1],out[2]);
+		if (debug > 2) qDebug("out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,universe.size(),out[1],out[2]);
 	} else {
 		for (int t=0; t<hi_changed_channel; t++) {
 			if (universe.at(t) != yadi->outUniverse.at(t) || yadi->outputSendAllData) {
@@ -220,7 +223,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 				dat += QString::number((quint8)universe.at(t));
 				dat += "\n";
 
-				// qDebug() << t << dat;
+				if (debug > 3) qDebug() << t << dat;
 				int bytes = yadi->write(dat.toLocal8Bit().data());
 				if (bytes != dat.size()) {
 					handle_output_error(output);
@@ -228,8 +231,9 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 				}
 			}
 		}
-		// qDebug("out single %dms",stop.elapsed());
+		if (debug > 2) qDebug("out single %dms",stop.elapsed());
 	}
+	update_output_monitor(output,universe);
 }
 
 QString YadiDMXUSBOut::outputInfo(quint32 output)
@@ -283,7 +287,7 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 
 void YadiDMXUSBOut::openInput(quint32 input)
 {
-	qDebug("YadiDMXUSBOut::openInput(%d)",input);
+	if (debug) qDebug("YadiDMXUSBOut::openInput(%d)",input);
 
 	if ((int)input < input_devices.size()) {
 		bool ok;
@@ -295,7 +299,7 @@ void YadiDMXUSBOut::openInput(quint32 input)
 			ok = false;
 		}
 		if (ok) {
-			connect(yadi->inputThread(),SIGNAL(dmxInChannelChanged(quint32,quint32,uchar))
+			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)));
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure()),this,SIGNAL(configurationChanged()));
 		} else {
@@ -306,7 +310,7 @@ void YadiDMXUSBOut::openInput(quint32 input)
 
 void YadiDMXUSBOut::closeInput(quint32 input)
 {
-	qDebug("YadiDMXUSBOut::closeInput(%d)",input);
+	if (debug) qDebug("YadiDMXUSBOut::closeInput(%d)",input);
 
 	if ((int)input < input_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
@@ -408,6 +412,26 @@ void YadiDMXUSBOut::configure()
 	}
 }
 
+DmxMonitor *YadiDMXUSBOut::openOutputMonitor(quint32 output)
+{
+	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
+	if (yadi) {
+		return yadi->openDmxOutMonitorWidget();
+	} else {
+		return 0;
+	}
+}
+
+DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
+{
+	YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
+	if (yadi) {
+		return yadi->openDmxInMonitorWidget();
+	} else {
+		return 0;
+	}
+}
+
 void YadiDMXUSBOut::handle_output_error(quint32 output)
 {
 	qWarning("Yadi DMX plugin: Communication error occured");
@@ -428,11 +452,47 @@ void YadiDMXUSBOut::handle_output_error(quint32 output)
 	}
 }
 
+void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &universe)
+{
+
+	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
+	if (!yadi) return;
+	DmxMonitor *mon = yadi->dmxOutMonWidget;
+
+	if (mon) {
+		for (int t=0; t<mon->visibleBars(); t++) {
+			mon->setValueInBar(t,uchar(universe[t]));
+		}
+	}
+}
+
+void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
+{
+	if (!instance) return;
+
+
+	foreach(QString devname, input_devices) {
+		YadiDevice * yadi = YadiDeviceManager::getDevice(devname,YadiDevice::FL_INPUT_UNIVERSE);
+		if(yadi->dmxInMonWidget == instance) {
+			yadi->closeDmxInMonitorWidget();
+			if (debug) qDebug("Delete DMX In Monitor");
+		}
+	}
+
+	foreach(QString devname, output_devices) {
+		YadiDevice * yadi = YadiDeviceManager::getDevice(devname,YadiDevice::FL_OUTPUT_UNIVERSE);
+		if(yadi->dmxOutMonWidget == instance) {
+			yadi->closeDmxInMonitorWidget();
+			if (debug) qDebug("Delete DMX Out Monitor");
+		}
+	}
+}
+
 void YadiDMXUSBOut::propagateChangedInput(quint32 input, quint32 channel, uchar value)
 {
 	emit valueChanged(input,channel,value);
 
-	qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
+	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
 }
 
 /****************************************************************************

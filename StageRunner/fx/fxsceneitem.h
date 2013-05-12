@@ -42,6 +42,7 @@ public:
 	inline bool isVisible() const {return myStatus & (SCENE_STAGE | SCENE_ACTIVE | SCENE_LIVE);}
 	bool statusHasChanged();
 	inline quint32 status() {return myStatus;}
+	bool postLoadInitTubes(bool restore_light);
 
 private:
 	void init();

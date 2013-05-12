@@ -5,6 +5,7 @@
 
 class YadiReceiver;
 class SerialWrapper;
+class DmxMonitor;
 
 class YadiDevice
 {
@@ -13,9 +14,11 @@ public:
 		FL_CLEAR = 0,
 		FL_OUTPUT_UNIVERSE = 1<<0,
 		FL_INPUT_UNIVERSE = 1<<1,
+		FL_HAS_MONITOR = 1<<2,
 
 		FL_INOUT_UNIVERSE = FL_OUTPUT_UNIVERSE + FL_INPUT_UNIVERSE
 	};
+	int debug;
 
 	QByteArray outUniverse;
 	QByteArray inUniverse;
@@ -41,6 +44,8 @@ public:
 	quint32 outputId;
 
 	bool settingsChanged;				///< becomes true, if settings for device changed and will be written by QSettings later
+	DmxMonitor *dmxInMonWidget;			///< A Pointer to a widget that allows the monitoring of input/output DMX data
+	DmxMonitor *dmxOutMonWidget;
 
 private:
 	SerialWrapper *file;
@@ -74,8 +79,14 @@ public:
 	void loadConfig();
 	void sendConfigToDevice();
 
+	DmxMonitor *openDmxInMonitorWidget();
+	DmxMonitor *openDmxOutMonitorWidget();
+	void closeDmxInMonitorWidget();
+	void closeDmxOutMonitorWidget();
+
 private:
 	void init();
+
 
 };
 

@@ -43,7 +43,8 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		QString path(dir.absoluteFilePath(it.next()));
 		// and load plugin
 		QPluginLoader load(path, this);
-		QLCIOPlugin *plugin = qobject_cast<QLCIOPlugin*> (load.instance());
+		QObject *obj = load.instance();
+		QLCIOPlugin *plugin = qobject_cast<QLCIOPlugin*> (obj);
 		if (plugin) {
 			// Check if plugin is already loaded
 			if (0 == getQLCPluginByName(plugin->name())) {
@@ -75,12 +76,29 @@ bool IOPluginCentral::openPlugins()
 
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		int cap = plugin->capabilities();
+		QString capstr;
+		if (cap & QLCIOPlugin::Output)
+			capstr += tr(" Output");
+		if (cap & QLCIOPlugin::Input)
+			capstr += tr(" Input");
+
+		LOGTEXT(tr("Open Plugin '%1' with capabilities: %2").arg(plugin->name(),capstr));
+
 		QStringList outputs = plugin->outputs();
 		for (int o=0; o<outputs.size(); o++) {
-			LOGTEXT(tr("Open Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
+			LOGTEXT(tr("   Open Output: %1").arg(outputs.at(o)));
 			plugin->openOutput(o);
 			one_opened = true;
 		}
+
+		QStringList inputs = plugin->inputs();
+		for (int o=0; o<inputs.size(); o++) {
+			LOGTEXT(tr("   Open Input: %1").arg(inputs.at(o)));
+			plugin->openInput(o);
+			one_opened = true;
+		}
+
 	}
 	return one_opened;
 }
@@ -109,4 +127,38 @@ QString IOPluginCentral::sysPluginDir()
 #endif
 
 	return dir;
+}
+
+bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int &output)
+{
+	plugin = 0;
+	output = 0;
+
+	foreach(QLCIOPlugin *plugin_it, qlcPlugins()) {
+		if (plugin_it->capabilities() & QLCIOPlugin::Output) {
+			/// @implement me: something like plugin->handlesUniverse(unviverse)
+			if (universe == 0) {
+				plugin = plugin_it;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int &input)
+{
+	plugin = 0;
+	input = 0;
+
+	foreach(QLCIOPlugin *plugin_it, qlcPlugins()) {
+		if (plugin_it->capabilities() & QLCIOPlugin::Input) {
+			/// @implement me: something like plugin->handlesUniverse(unviverse)
+			if (universe == 0) {
+				plugin = plugin_it;
+			}
+			return true;
+		}
+	}
+	return false;
 }

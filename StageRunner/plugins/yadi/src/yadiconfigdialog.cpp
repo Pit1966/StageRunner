@@ -4,11 +4,12 @@
 #include "yadidmxusbout.h"
 #include "yadidevicemanager.h"
 #include "serialwrapper.h"
+#include "dmxmonitor.h"
 
 #include <QDebug>
 
-YadiConfigDialog::YadiConfigDialog(YadiDMXUSBOut *p_plugin) :
-	QDialog()
+YadiConfigDialog::YadiConfigDialog(YadiDMXUSBOut *p_plugin)
+	: QDialog()
 {
 	plugin = p_plugin;
 	configChanged = false;
@@ -18,7 +19,10 @@ YadiConfigDialog::YadiConfigDialog(YadiDMXUSBOut *p_plugin) :
 	transceiverGroup->hide();
 	receiverGroup->hide();
 	show_current_device_list();
+}
 
+YadiConfigDialog::~YadiConfigDialog()
+{
 }
 
 void YadiConfigDialog::on_rescanDevButton_clicked()
@@ -71,12 +75,14 @@ void YadiConfigDialog::on_selectDeviceCombo_currentIndexChanged(int index)
 	if ( (c_yadi->capabilities & (YadiDevice::FL_INPUT_UNIVERSE | YadiDevice::FL_OUTPUT_UNIVERSE))
 			== (YadiDevice::FL_INPUT_UNIVERSE | YadiDevice::FL_OUTPUT_UNIVERSE)) {
 		transceiverGroup->show();
+		showDmxOutButton->show();
 		transMergeModeCombo->setCurrentIndex(c_yadi->universeMergeMode);
 		transMaxInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
 		transMaxOutChannelsSpin->setValue(c_yadi->usedDmxOutChannels);
 	}
 	else if ( c_yadi->capabilities & YadiDevice::FL_INPUT_UNIVERSE ) {
 		receiverGroup->show();
+		showDmxOutButton->hide();
 		rxMaxInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
 	}
 
@@ -146,4 +152,39 @@ void YadiConfigDialog::on_rxMaxInChannelsSpin_valueChanged(int arg1)
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}
 	}
+}
+
+void YadiConfigDialog::on_showDmxInButton_clicked()
+{
+	if (!c_yadi) return;
+
+	DmxMonitor *mon = c_yadi->dmxInMonWidget;
+	if (!mon) {
+		mon = c_yadi->openDmxInMonitorWidget();
+		connect(mon,SIGNAL(monitorClosed(DmxMonitor*)),plugin,SLOT(closeMonitorByInstancePointer(DmxMonitor*)));
+	}
+	mon->show();
+	mon->raise();
+}
+
+void YadiConfigDialog::on_showDmxOutButton_clicked()
+{
+	if (!c_yadi) return;
+
+	DmxMonitor *mon = c_yadi->dmxOutMonWidget;
+	if (!mon) {
+		mon = c_yadi->openDmxOutMonitorWidget();
+		connect(mon,SIGNAL(monitorClosed(DmxMonitor*)),plugin,SLOT(closeMonitorByInstancePointer(DmxMonitor*)));
+	}
+	mon->show();
+	mon->raise();
+}
+
+void YadiConfigDialog::on_debugSpin_valueChanged(int arg1)
+{
+	plugin->debug = arg1;
+
+	if (!c_yadi) return;
+	c_yadi->debug = arg1;
+
 }
