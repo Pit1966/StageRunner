@@ -1,6 +1,6 @@
 #include "fxitem.h"
 
-QList<const FxItem*>*FxItem::global_fx_list = 0;
+QList<FxItem*>*FxItem::global_fx_list = 0;
 
 
 FxItem::FxItem()
@@ -10,7 +10,7 @@ FxItem::FxItem()
 	// hold a backup pointer to every effect in a global list
 	if (!global_fx_list) {
 		// create that list if not happend before
-		global_fx_list = new QList<const FxItem*>;
+		global_fx_list = new QList<FxItem*>;
 	}
 	global_fx_list->append(this);
 
@@ -40,7 +40,7 @@ FxItem::~FxItem()
 	}
 }
 
-bool FxItem::exists(const FxItem *item)
+bool FxItem::exists(FxItem *item)
 {
 	return global_fx_list->contains(item);
 }

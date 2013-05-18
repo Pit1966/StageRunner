@@ -47,6 +47,9 @@ public:
 
 	void stopAllFxAudio();
 	void fadeoutAllFxAudio();
+
+	void lightBlack(qint32 time_ms = 0);
+
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
 	inline bool isEditMode() {return edit_mode_f;}
@@ -63,6 +66,8 @@ public slots:
 	void executeNextFx(int listID);
 
 	void testSetDmxChannel(int val, int channel);
+	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
+
 
 };
 

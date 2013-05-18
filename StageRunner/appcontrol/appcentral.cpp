@@ -55,6 +55,13 @@ void AppCentral::fadeoutAllFxAudio()
 	unitAudio->fadeoutAllFxAudio();
 }
 
+void AppCentral::lightBlack(qint32 time_ms)
+{
+	int num = unitLight->black(time_ms);
+	LOGTEXT(tr("BLACK: Fade %1 scenes to level 0 in %2s")
+			.arg(num).arg(float(time_ms)/1000));
+}
+
 int AppCentral::registerFxList(FxList *fxlist)
 {
 	if (fxlist->regId() > 0) {
@@ -192,6 +199,24 @@ void AppCentral::testSetDmxChannel(int val, int channel)
 	}
 }
 
+/**
+ * @brief Process Signal from input channel
+ * @param universe The universe number
+ * @param channel The channel in the universe that has changed
+ * @param value The actual value of the changed channel
+ *
+ * This slot usualy is called when a DMX interface raises a signal
+ */
+void AppCentral::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
+{
+	/// @implement me: Here we have to provide the selection for different receivers for the signal.
+ /// e.g. an Audio Volume slot
+ /// For now we forward the signal to the light unit
+	unitLight->onInputUniverseChannelChanged(universe,channel,value);
+
+}
+
+
 AppCentral::AppCentral()
 {
 	init();
@@ -224,5 +249,8 @@ void AppCentral::init()
 
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+
+
+	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)));
 
 }

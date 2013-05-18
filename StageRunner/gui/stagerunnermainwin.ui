@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>888</width>
-    <height>712</height>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
       <widget class="FxListWidget" name="fxListWidget" native="true"/>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="iconSize">
         <size>
@@ -58,6 +58,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="LightControlWidget" name="groupBox">
+           <property name="title">
+            <string>Light Control</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="logTab">
@@ -85,16 +92,6 @@
             </widget>
            </item>
           </layout>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>DMX Direct</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="MixerGroup" name="dmxDirectWidget" native="true"/>
          </item>
         </layout>
        </widget>
@@ -295,12 +292,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MixerGroup</class>
-   <extends>QWidget</extends>
-   <header>customwidget/mixergroup.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>FxListWidget</class>
    <extends>QWidget</extends>
    <header>gui/fxlistwidget.h</header>
@@ -316,6 +307,12 @@
    <class>SequenceControlWidget</class>
    <extends>QGroupBox</extends>
    <header>gui/sequencecontrolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LightControlWidget</class>
+   <extends>QGroupBox</extends>
+   <header>gui/lightcontrolwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

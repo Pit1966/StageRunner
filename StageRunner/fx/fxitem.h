@@ -19,7 +19,7 @@ enum FxType {
 class FxItem : public VarSet
 {
 private:
-	static QList<const FxItem*>*global_fx_list;
+	static QList<FxItem*>*global_fx_list;
 
 
 protected:
@@ -34,7 +34,8 @@ protected:
 public:
 	FxItem();
 	~FxItem();
-	static bool exists(const FxItem *item);
+	static bool exists(FxItem *item);
+	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
 
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}

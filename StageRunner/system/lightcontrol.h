@@ -37,6 +37,7 @@ public:
 	bool stopFxScene(FxSceneItem *scene);
 	bool setSceneActive(FxSceneItem *scene);
 	bool setSceneIdle(FxSceneItem * scene);
+	qint32 black(qint32 time_ms);
 
 private:
 	void init();
@@ -47,6 +48,7 @@ signals:
 
 public slots:
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
+	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
 
 };
 

@@ -90,6 +90,47 @@ bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
 	return active;
 }
 
+
+/**
+ * @brief Fade a Scene to explicit value
+ * @param dmxval Target Value (0 to 255: is 0% to 100%)
+ * @param time_ms Reaction time in ms;
+ * @return true, if scene is active for the moment
+ */
+bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
+{
+	bool active = false;
+	bool onstage = false;
+
+	// Iterate over all tubes and set parameters
+	for (int t=0; t<tubeCount(); t++) {
+		DmxChannel *tube = tubes.at(t);
+		if (tube->dmxType == DMX_INTENSITY) {
+			qint32 target_value = tube->targetValue * dmxval / 255;
+			if (tube->initFadeCmd(CMD_SCENE_FADETO,time_ms,target_value)) {
+				active = true;
+				if (target_value > 0) {
+					onstage = true;
+				}
+			}
+		}
+	}
+
+	if (active) {
+		myStatus |= SCENE_ACTIVE;
+	} else {
+		myStatus &= ~SCENE_ACTIVE;
+	}
+
+	if (onstage) {
+		myStatus |= SCENE_STAGE;
+	} else {
+		myStatus &= ~SCENE_STAGE;
+	}
+
+	return active;
+}
+
 /**
  * @brief Execute Scene
  * @return true: if at least one channel is active in the scene
@@ -175,6 +216,8 @@ void FxSceneItem::init()
 
 	addExistingVar(defaultFadeInTime,"DefFadeInTime");
 	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
+	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
+	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
 

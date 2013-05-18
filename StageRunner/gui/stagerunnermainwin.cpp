@@ -62,9 +62,6 @@ void StageRunnerMainWin::initConnects()
 	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
 
-	// DMX Direct Control
-	connect(dmxDirectWidget,SIGNAL(mixerMoved(int,int)),mainapp,SLOT(testSetDmxChannel(int,int)));
-
 	// Light Control -> SceneStatusWidget
 	connect(mainapp->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
 
@@ -174,8 +171,6 @@ void StageRunnerMainWin::initAppDefaults()
 		copyProjectSettingsToGui();
 	}
 
-	dmxDirectWidget->setMixerCount(24);
-	dmxDirectWidget->setRange(0,MAX_DMX_FADER_RANGE);
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()

@@ -149,6 +149,26 @@ bool LightControl::setSceneIdle(FxSceneItem *scene)
 	return true;
 }
 
+/**
+ * @brief BLACK Command. Fade all scenes to zero level.
+ * @param time_ms
+ * @return Amount of scenes that were on stage before black
+ */
+qint32 LightControl::black(qint32 time_ms)
+{
+	int num = 0;
+	foreach (FxItem * fx, FxItem::globalFxList()) {
+		if (fx->fxType() == FX_SCENE) {
+			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+			if (scene->directFadeToDmx(0,time_ms)) {
+				num++;
+			}
+			scene->setLive(false);
+		}
+	}
+	return num;
+}
+
 void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -167,4 +187,19 @@ void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 			 << "live:" << (status & SCENE_LIVE);
 
 	emit sceneChanged(scene);
+}
+
+void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
+{
+	foreach (FxItem * fx, FxItem::globalFxList()) {
+		if (fx->fxType() == FX_SCENE) {
+			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+			if (scene->hookedToInputUniverse == qint32(universe) && scene->hookedToInputDmxChannel == qint32(channel)) {
+				qDebug("Direct Fade Scene: %s to %d",scene->name().toLocal8Bit().data(),value);
+				if (scene->directFadeToDmx(value,200)) {
+					setSceneActive(scene);
+				}
+			}
+		}
+	}
 }

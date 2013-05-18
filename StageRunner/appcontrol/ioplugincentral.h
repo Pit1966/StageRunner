@@ -31,11 +31,20 @@ public:
 
 	bool getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & output);
 	bool getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & input);
+	bool getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const;
+	bool getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const;
 
 
 signals:
+	void universeValueChanged(quint32 universe, quint32 channel, uchar value);
+
+private slots:
+	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
 
 public slots:
+
+
+
 
 };
 

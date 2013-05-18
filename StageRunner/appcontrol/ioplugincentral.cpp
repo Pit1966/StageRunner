@@ -97,6 +97,8 @@ bool IOPluginCentral::openPlugins()
 			LOGTEXT(tr("   Open Input: %1").arg(inputs.at(o)));
 			plugin->openInput(o);
 			one_opened = true;
+			// Lets connect to inputChanged Signal
+			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)));
 		}
 
 	}
@@ -111,6 +113,7 @@ void IOPluginCentral::closePlugins()
 		for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
 			plugin->closeOutput(o);
+			plugin->disconnect();
 		}
 	}
 }
@@ -161,4 +164,51 @@ bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin 
 		}
 	}
 	return false;
+}
+
+bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const
+{
+	if (qlcPlugins().contains(plugin)) {
+		/// @implement me:
+		if (input == 0) {
+			universe = 0;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const
+{
+	if (qlcPlugins().contains(plugin)) {
+		/// @implement me:
+		if (output == 0) {
+			universe = 0;
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * @brief Handle "valueChanged" Signal from plugins
+ * @param input
+ * @param channel
+ * @param value
+ *
+ * This function is the interface from input plugins to stagerunner application
+ * The function determines the plugin that has emitted the signal and maps the input number
+ * to the configured universe. Than the univeresChannelChanged Signal will be emitted
+ *
+ */
+void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar value)
+{
+	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
+	if(sendby) {
+		int universe;
+		if (getInputUniverseForPlugin(sendby,input,universe)) {
+			emit universeValueChanged(universe,channel,value);
+			if (debug > 4) DEBUGTEXT("%s: Value changed in universe %d -> ch:%d=%d",universe,channel,value);
+		}
+	}
 }

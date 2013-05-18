@@ -69,6 +69,11 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 		}
 	}
 
+	// Set additional information widgets;
+	hookedUniverseSpin->setValue(cur_fxscene->hookedToInputUniverse+1);
+	hookedChannelSpin->setValue(cur_fxscene->hookedToInputDmxChannel+1);
+
+
 	return true;
 }
 
@@ -138,5 +143,22 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 			tube->curValue = 0;
 		}
 	}
+
+}
+
+void SceneDeskWidget::on_hookedUniverseSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fxscene)) return;
+
+	cur_fxscene->hookedToInputUniverse = arg1-1;
+
+
+}
+
+void SceneDeskWidget::on_hookedChannelSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fxscene)) return;
+
+	cur_fxscene->hookedToInputDmxChannel = arg1-1;
 
 }

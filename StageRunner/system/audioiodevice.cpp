@@ -209,6 +209,9 @@ void AudioIODevice::start()
 	run_time.start();
 
 #ifdef IS_QT5
+	// Now start reading and decoding of sound file. Signal "bufferReady" will be
+	// emitted when an audio portion is decoded. Audio data will be processed in
+	// process_decoder_buffer
 	decoding_finished_f = false;
 	audio_decoder->start();
 #endif
