@@ -62,16 +62,29 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 	if (serial_handle) {
 		CloseHandle(serial_handle);
 	}
+	COMMTIMEOUTS ct;
 
 	serial_handle = CreateFileA( device_node.toLocal8Bit().data(),
 							   GENERIC_READ | GENERIC_WRITE,
 							   0,
 							   0,
 							   OPEN_EXISTING,
-							   0,
+							   FILE_ATTRIBUTE_DEVICE,
 							   0 );
 	if (serial_handle != INVALID_HANDLE_VALUE) {
 		ok = true;
+
+		SetupComm(serial_handle, 1024, 1024);
+
+		// Set Timeout for nonblocking access to serial device
+		memset(&ct,0,sizeof(COMMTIMEOUTS));
+		ct.ReadIntervalTimeout = MAXDWORD;
+		ct.ReadTotalTimeoutMultiplier = 0;
+		ct.ReadTotalTimeoutConstant = 0;
+		ct.WriteTotalTimeoutMultiplier = 10;
+		ct.WriteTotalTimeoutConstant = 5;
+		SetCommTimeouts(serial_handle,&ct);
+
 		error_num = 0;
 	} else {
 		error_num = GetLastError();

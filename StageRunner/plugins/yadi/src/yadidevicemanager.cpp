@@ -42,21 +42,20 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 			QString product;
 			qDebug() << "Connection to" << ser.deviceNode() << " established";
 			char send[] = "v";
-			char rec[100];
-			ser.writeSerial(send,1);
+			int ret = ser.writeSerial(send,1);
 			QTime wait;
 			wait.restart();
 			while (wait.elapsed() < 200) ;;
-			bool wait_loop = 0;
-			while ( wait_loop++ < 3 ) {
+			int wait_loop = 0;
+			while ( wait_loop < 5 ) {
 				QByteArray rec = ser.readSerial(40);
-				qDebug() << rec;
 				if (rec.size() < 1) break;
 
 				if (rec.contains("Stonechip")) {
 					if (rec.contains("Transceiver")) {
 						product = "Stonechip DMX Transceiver";
 						found_output_device = true;
+						found_input_device = true;
 					}
 					else if (rec.contains("Sender")) {
 						product = "Stonechip DMX Sender";
@@ -70,6 +69,7 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 				}
 				wait.restart();
 				while (wait.elapsed() < 30) ;;
+				wait_loop++;
 			}
 			qDebug() << "Found Input:" << found_input_device << "Output:" << found_output_device;
 			if (found_input_device || found_output_device) {

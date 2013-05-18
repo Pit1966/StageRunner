@@ -2,7 +2,7 @@
 
 #include <QPainter>
 #include <QDebug>
-#include <QDBusConnection>
+// #include <QDBusConnection>
 
 DmxMonitor::DmxMonitor(QWidget *parent) :
 	QWidget(parent)

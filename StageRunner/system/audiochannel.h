@@ -65,7 +65,6 @@ private slots:
 	void on_fade_out_finished();
 	void on_volset_timer_finished();
 
-
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 	void vuLevelChanged(int slotnum, int left, int right);
