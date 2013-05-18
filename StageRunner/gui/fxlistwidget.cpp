@@ -131,7 +131,6 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 
 void FxListWidget::refreshList()
 {
-	qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
 	}

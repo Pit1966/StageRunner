@@ -197,7 +197,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 	}
 
 	if (changed_channels > 8 || hi_changed_channel < 50) {
-//		for (int t=0; t<512;t++) {
+//		for (int t=0; t<12;t++) {
 //			if (universe.at(t) != yadi->outUniverse.at(t)) {
 //				qDebug("chan %d: %d->%d",t,quint8(yadi->outUniverse.at(t)),quint8(universe.at(t)));
 //			}

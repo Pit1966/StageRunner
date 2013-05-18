@@ -117,21 +117,23 @@ void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 {
 	// qDebug("AudioControl::audioCtrlReceiver Ctrl Msg received: %d",msg.ctrlCmd);
+	emit audioThreadCtrlMsgEmitted(msg);
 
-	switch (msg.ctrlCmd) {
-	case CMD_AUDIO_STOP:
-		stopFxAudio(msg.slotNumber);
-		break;
-	case CMD_AUDIO_START:
-		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
-		break;
-	case CMD_AUDIO_CHANGE_VOL:
-		audioChannels[msg.slotNumber]->setVolume(msg.volume);
-		break;
-	default:
-		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
-		break;
-	}
+
+//	switch (msg.ctrlCmd) {
+//	case CMD_AUDIO_STOP:
+//		stopFxAudio(msg.slotNumber);
+//		break;
+//	case CMD_AUDIO_START:
+//		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
+//		break;
+//	case CMD_AUDIO_CHANGE_VOL:
+//		audioChannels[msg.slotNumber]->setVolume(msg.volume);
+//		break;
+//	default:
+//		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
+//		break;
+//	}
 }
 
 void AudioControl::setMasterVolume(int vol)

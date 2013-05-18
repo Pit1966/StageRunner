@@ -55,7 +55,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 	// qDebug("readData %lli",maxlen);
 	if (maxlen>avail) {
 		if (decoding_finished_f) {
-			qDebug("maxlen %lli, avail %lli",maxlen,avail);
+			// qDebug("maxlen %lli, avail %lli",maxlen,avail);
 			emit readReady();
 			return 0;
 		}

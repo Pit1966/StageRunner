@@ -78,7 +78,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
-			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->name().toLatin1().data(),run_time.elapsed());
+			if (debug > 1) DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->name().toLatin1().data(),run_time.elapsed());
 			ok = true;
 			run_time.start();
 			current_fx = fxa;
