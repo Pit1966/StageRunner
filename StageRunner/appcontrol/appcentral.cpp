@@ -95,11 +95,7 @@ FxList *AppCentral::getRegisteredFxList(int id)
 
 void AppCentral::loadPlugins()
 {
-#ifdef WIN32
-	pluginCentral->loadQLCPlugins("../plugins");
-#else
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
-#endif
 }
 
 void AppCentral::openPlugins()
@@ -187,6 +183,24 @@ void AppCentral::executeNextFx(int listID)
 	if (next_fx) {
 		executeFxCmd(next_fx,CMD_FX_START);
 	}
+}
+
+void AppCentral::moveToFollowerFx(int listID)
+{
+	if (debug) DEBUGTEXT("Move to follower FX in Sequence for list Id: %d",listID);
+	FxList *fxlist = getRegisteredFxList(listID);
+	if (!fxlist) return;
+
+	fxlist->setNextFx(fxlist->findSequenceFollower());
+}
+
+void AppCentral::moveToForeRunnerFx(int listID)
+{
+	if (debug) DEBUGTEXT("Move to previous FX in Sequence for list Id: %d",listID);
+	FxList *fxlist = getRegisteredFxList(listID);
+	if (!fxlist) return;
+
+	fxlist->setNextFx(fxlist->findSequenceForerunner());
 }
 
 void AppCentral::testSetDmxChannel(int val, int channel)

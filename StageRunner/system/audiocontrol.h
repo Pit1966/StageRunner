@@ -3,7 +3,7 @@
 
 #include "commandsystem.h"
 
-#include <QObject>
+#include <QThread>
 #include <QList>
 
 using namespace AUDIO;
@@ -12,21 +12,25 @@ class AudioSlot;
 class FxAudioItem;
 class AppCentral;
 
-class AudioControl : public QObject
+class AudioControl : public QThread
 {
 	Q_OBJECT
+
 public:
 	AppCentral *myApp;
 
-private:
-	QList<AudioSlot*> audio_channels;
-	int master_volume;
+protected:
+	QList<AudioSlot*> audioChannels;
+	int masterVolume;
 
 public:
 	AudioControl(AppCentral *app_central);
 	~AudioControl();
 
 	void getAudioDevices();
+
+private:
+	void run();
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa);
@@ -42,6 +46,7 @@ public slots:
 
 private:
 	void init();
+	void initFromThread();
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

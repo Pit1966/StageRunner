@@ -45,3 +45,14 @@ void SequenceControlWidget::on_masterVolDial_sliderMoved(int position)
 {
 	appcentral->unitAudio->setMasterVolume(position);
 }
+
+
+void SequenceControlWidget::on_moveToNextButton_clicked()
+{
+	appcentral->moveToFollowerFx(1);
+}
+
+void SequenceControlWidget::on_moveToPrevButton_clicked()
+{
+	appcentral->moveToForeRunnerFx(1);
+}

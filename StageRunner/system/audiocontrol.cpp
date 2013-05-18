@@ -10,17 +10,24 @@
 
 
 AudioControl::AudioControl(AppCentral *app_central)
-	: QObject()
+	: QThread()
 	,myApp(app_central)
 {
 	init();
 	getAudioDevices();
+
+	// Audio Thread starten
+	start();
+	if (!isRunning()) {
+		DEBUGERROR("%s: Could not start audio control thread",Q_FUNC_INFO);
+	}
 }
 
 AudioControl::~AudioControl()
 {
-	while (!audio_channels.isEmpty()) {
-		delete audio_channels.takeFirst();
+	if (isRunning()) {
+		quit();
+		wait(500);
 	}
 }
 
@@ -28,12 +35,26 @@ void AudioControl::getAudioDevices()
 {
 }
 
+void AudioControl::run()
+{
+	initFromThread();
+	LOGTEXT(tr("Audio control is running"));
+
+	exec();
+
+	while (!audioChannels.isEmpty()) {
+		delete audioChannels.takeFirst();
+	}
+
+	LOGTEXT(tr("Audio control finished"));
+}
+
 bool AudioControl::startFxAudio(FxAudioItem *fxa)
 {
 	bool ok = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audio_channels[t]->status() < AUDIO_INIT) {
-			ok = audio_channels[t]->startFxAudio(fxa);
+		if (audioChannels[t]->status() < AUDIO_INIT) {
+			ok = audioChannels[t]->startFxAudio(fxa);
 			break;
 		}
 	}
@@ -44,28 +65,28 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa)
 void AudioControl::stopAllFxAudio()
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audio_channels[t]->stopFxAudio();
+		audioChannels[t]->stopFxAudio();
 	}
 }
 
 void AudioControl::stopFxAudio(int slot)
 {
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audio_channels[slot]->stopFxAudio();
+		audioChannels[slot]->stopFxAudio();
 	}
 }
 
 void AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audio_channels[t]->fadeoutFxAudio(time_ms);
+		audioChannels[t]->fadeoutFxAudio(time_ms);
 	}
 }
 
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 {
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audio_channels[slot]->fadeoutFxAudio(time_ms);
+		audioChannels[slot]->fadeoutFxAudio(time_ms);
 	}
 }
 
@@ -87,7 +108,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
-		audio_channels[msg.slotNumber]->setVolume(msg.volume);
+		audioChannels[msg.slotNumber]->setVolume(msg.volume);
 		break;
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
@@ -103,9 +124,9 @@ void AudioControl::setMasterVolume(int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	master_volume = vol;
+	masterVolume = vol;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audio_channels[t]->setMasterVolume(vol);
+		audioChannels[t]->setMasterVolume(vol);
 	}
 }
 
@@ -118,16 +139,21 @@ void AudioControl::setVolume(int slot, int vol)
 		vol = MAX_VOLUME;
 	}
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audio_channels[slot]->setVolume(vol);
+		audioChannels[slot]->setVolume(vol);
 	}
 }
 
 void AudioControl::init()
 {
-	master_volume = MAX_VOLUME;
+	setObjectName("Audio Control");
+	masterVolume = MAX_VOLUME;
+}
+
+void AudioControl::initFromThread()
+{
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		AudioSlot *slot = new AudioSlot(this);
-		audio_channels.append(slot);
+		audioChannels.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SIGNAL(vuLevelChanged(int,int,int)));

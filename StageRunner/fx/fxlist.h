@@ -56,7 +56,8 @@ public:
 	void setModified(bool state);
 
 	FxItem * addFx(int fxtype, int option = -1);
-	FxItem *findSequenceFollower(FxItem *curfx);
+	FxItem *findSequenceFollower(FxItem *curfx = 0);
+	FxItem *findSequenceForerunner(FxItem *curfx = 0);
 
 signals:
 	void fxNextChanged(FxItem *nextfx);

@@ -195,7 +195,7 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 			if (scene->hookedToInputUniverse == qint32(universe) && scene->hookedToInputDmxChannel == qint32(channel)) {
-				qDebug("Direct Fade Scene: %s to %d",scene->name().toLocal8Bit().data(),value);
+				// qDebug("Direct Fade Scene: %s to %d",scene->name().toLocal8Bit().data(),value);
 				if (scene->directFadeToDmx(value,200)) {
 					setSceneActive(scene);
 				}

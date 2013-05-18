@@ -221,6 +221,7 @@ void AudioIODevice::start()
 
 void AudioIODevice::stop()
 {
+	decoding_finished_f = true;
 	close();
 }
 

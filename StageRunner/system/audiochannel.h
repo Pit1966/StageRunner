@@ -34,7 +34,7 @@ private:
 	QFile *audio_file;
 
 	AudioStatus run_status;
-	FxAudioItem *current_fx;								///< The current/last Fx loaded into this audio slot
+	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot
 
 
 	QTimer volset_timer;

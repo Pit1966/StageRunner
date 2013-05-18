@@ -67,8 +67,17 @@ FxItem *FxList::getFxByKeyCode(ushort keycode) const
 	return 0;
 }
 
+/**
+ * @brief Find the follower of an arbitrary FX entry in the list
+ * @param curfx Pointer to the FxItem the follower is search for or NULL
+ * @return Pointer to FxItem or 0, if there is no follower cause list is at tail
+ *
+ * If curfx parameter is NULL the current nextFx() Pointer is taken as search begin
+ */
 FxItem *FxList::findSequenceFollower(FxItem *curfx)
 {
+	if (!curfx) curfx = fx_next;
+
 	FxItem *followfx = 0;
 	int idx_cur = fx_list.indexOf(curfx);
 	if (idx_cur >= 0) {
@@ -78,6 +87,25 @@ FxItem *FxList::findSequenceFollower(FxItem *curfx)
 		}
 	}
 	return followfx;
+}
+
+/**
+ * @brief Find the Predecessor (Forerunner) of an arbitrary FX entry in the list
+ * @param curfx Pointer to the FxItem the Predecessor is search for or NULL
+ * @return Pointer to FxItem or 0, if there is no Predecessor cause list is at head
+ *
+ * If curfx parameter is NULL the current nextFx() Pointer is taken as search begin
+ */
+FxItem *FxList::findSequenceForerunner(FxItem *curfx)
+{
+	if (!curfx) curfx = fx_next;
+
+	FxItem *prevfx = 0;
+	int idx_cur = fx_list.indexOf(curfx);
+	if (idx_cur > 0) {
+		prevfx = fx_list.at(idx_cur-1);
+	}
+	return prevfx;
 }
 
 bool FxList::addFxAudioSimple(const QString &path, int pos)

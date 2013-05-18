@@ -9,6 +9,7 @@ LightLoopThreadInterface::LightLoopThreadInterface(LightControl &unit_light)
 	, lightControlRef(unit_light)
 {
 	lightLoop = 0;
+	setObjectName("Light Loop");
 }
 
 LightLoopThreadInterface::~LightLoopThreadInterface()

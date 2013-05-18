@@ -41,6 +41,9 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 	while (it.hasNext()) {
 		// determine complete Path
 		QString path(dir.absoluteFilePath(it.next()));
+		QString suf = QFileInfo(path).suffix().toLower();
+		if (suf != "so" && suf != "dll") continue;
+
 		// and load plugin
 		QPluginLoader load(path, this);
 		QObject *obj = load.instance();
@@ -121,11 +124,12 @@ void IOPluginCentral::closePlugins()
 QString IOPluginCentral::sysPluginDir()
 {
 	QString dir;
-
-#ifdef __APPLE__
+#ifdef WIN32
+	dir = "../plugins";
+#elif __APPLE__
 	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
 								   .arg(PLUGINDIR));
-#else
+#elif unix
 	dir = PLUGINDIR;
 #endif
 

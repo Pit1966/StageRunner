@@ -18,6 +18,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	fxTable->setSelectionMode(QAbstractItemView::SingleSelection);
 	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
 	fxTable->setDropIndicatorShown(true);
+	fxTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	// fxTable->viewport()->acceptDrops();
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
@@ -150,7 +151,6 @@ void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 
 	if (fx) {
-		qDebug() << "clicked:" << fx->name() << "ColType:" << myitem->columnType;
 		myfxlist->setNextFx(fx);
 		if (cur_selected_item != fx) {
 			cur_selected_item = fx;
@@ -165,15 +165,24 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
 	FxItem *fx = myitem->linkedFxItem;
+	bool editmode = AppCentral::instance()->isEditMode();
 
 	if (fx) {
-		if (fx->fxType() == FX_SCENE) {
-			open_scence_desk(static_cast<FxSceneItem*>(fx));
-			return;
-		}
-		qDebug() << "double clicked:" << fx->name() << "ColType:" << myitem->columnType;
-		if (!AppCentral::instance()->isEditMode()) {
-			emit fxCmdActivated(fx,CMD_FX_START);
+		switch (fx->fxType()) {
+		case FX_SCENE:
+			if (editmode) {
+				open_scence_desk(static_cast<FxSceneItem*>(fx));
+			} else {
+				emit fxCmdActivated(fx, CMD_FX_START);
+				selectFx(fx);
+			}
+			break;
+		case FX_AUDIO:
+			if (!editmode) {
+				emit fxCmdActivated(fx,CMD_FX_START);
+				selectFx(fx);
+			}
+			break;
 		}
 	}
 }

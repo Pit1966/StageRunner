@@ -12,11 +12,12 @@ int main(int argc, char *argv[])
 	app.setApplicationName(APP_NAME);
 	app.setOrganizationName(APP_ORG_STRING);
 
+	logThread = new Log;
+	logThread->initLog(0);
 
 	AppCentral *myapp = AppCentral::instance();
 	StageRunnerMainWin *mywin = new StageRunnerMainWin(myapp);
 
-	logThread = new Log;
 	logThread->initLog(mywin->logWidget);
 
 	// Init GUI

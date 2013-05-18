@@ -161,9 +161,8 @@ void AudioSlot::setMasterVolume(int vol)
 
 void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 {
-	qDebug("new audio output state: %d",state);
 	AudioStatus current_state = run_status;
-	if (state == QAudio::StoppedState) {
+	if (state == QAudio::StoppedState && !audio_io->isDecodingFinished()) {
 		DEBUGERROR("Audio is in Stopped State -> This might be an buffer underrun for an audio channel");
 	}
 

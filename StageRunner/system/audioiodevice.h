@@ -47,6 +47,8 @@ private:
 	double frame_energy_peak;
 	double sample_peak;
 
+public:
+	inline bool isDecodingFinished() {return decoding_finished_f;}
 
 public slots:
 	void start();

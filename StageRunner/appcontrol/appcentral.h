@@ -64,6 +64,8 @@ public:
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd);
 	void executeNextFx(int listID);
+	void moveToFollowerFx(int listID);
+	void moveToForeRunnerFx(int listID);
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
