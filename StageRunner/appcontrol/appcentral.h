@@ -16,6 +16,8 @@ class FxList;
 class IOPluginCentral;
 class DmxMonitor;
 
+using namespace AUDIO;
+using namespace LIGHT;
 
 class AppCentral : public QObject
 {
@@ -69,6 +71,9 @@ public slots:
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
+
+signals:
+	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 
 
 };

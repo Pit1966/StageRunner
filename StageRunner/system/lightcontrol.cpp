@@ -182,7 +182,7 @@ void LightControl::init()
 
 void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 {
-	qDebug() << "Scene" << scene->name() << "status: active:" << (status & SCENE_ACTIVE)
+	if (debug > 1) qDebug() << "Scene" << scene->name() << "status: active:" << (status & SCENE_ACTIVE)
 			 << "stage:" << (status & SCENE_STAGE)
 			 << "live:" << (status & SCENE_LIVE);
 

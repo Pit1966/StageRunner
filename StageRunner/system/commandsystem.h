@@ -1,6 +1,8 @@
 #ifndef COMMANDSYSTEM_H
 #define COMMANDSYSTEM_H
 
+class FxAudioItem;
+
 enum CtrlCmd {
 	CMD_NONE = 0,
 	CMD_AUDIO_START = 1,
@@ -39,6 +41,7 @@ public:
 	AudioStatus currentAudioStatus;
 	int volume;
 	int fadetime;
+	FxAudioItem *fxAudio;
 
 public:
 	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_IDLE)
@@ -47,6 +50,16 @@ public:
 		, currentAudioStatus(status)
 		, volume(-1)
 		, fadetime(-1)
+		, fxAudio(0)
+	{}
+
+	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT)
+		: slotNumber(slotnum)
+		, ctrlCmd(cmd)
+		, currentAudioStatus(AUDIO_IDLE)
+		, volume(-1)
+		, fadetime(-1)
+		, fxAudio(fxaudio)
 	{}
 };
 

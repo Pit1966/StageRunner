@@ -68,7 +68,7 @@ bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
 		return false;
 	}
 
-	qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
+	// qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
 
 	// Iterate over all tubes and set parameters

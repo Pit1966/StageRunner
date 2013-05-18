@@ -53,6 +53,7 @@ public:
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int time_ms);
 	void setVolume(int vol);
+	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
 
 	inline AudioStatus status() {return run_status;}
@@ -64,6 +65,9 @@ private slots:
 	void on_fade_out_frame_changed(qreal value);
 	void on_fade_out_finished();
 	void on_volset_timer_finished();
+
+public slots:
+	void audioCtrlReceiver(AudioCtrlMsg msg);
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

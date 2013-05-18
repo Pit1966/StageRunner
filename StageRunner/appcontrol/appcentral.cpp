@@ -264,7 +264,11 @@ void AppCentral::init()
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 
-
+	// Do some connects
 	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)));
+
+	// AppCentral -> AudioControl Thread (unitAudio)
+	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+
 
 }

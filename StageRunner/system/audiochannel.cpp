@@ -226,3 +226,34 @@ void AudioSlot::on_volset_timer_finished()
 	LOGTEXT(volset_text);
 }
 
+void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
+{
+	// Test if Message is for me
+	if (msg.slotNumber != slotNumber) return;
+
+	switch (msg.ctrlCmd) {
+	case CMD_AUDIO_STOP:
+		stopFxAudio();
+		break;
+	case CMD_AUDIO_START:
+		if (FxItem::exists(msg.fxAudio)) {
+			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel :%d"
+									 ,Q_FUNC_INFO,msg.slotNumber+1);
+			startFxAudio(msg.fxAudio);
+		} else {
+			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
+		}
+		break;
+	case CMD_AUDIO_CHANGE_VOL:
+		setVolume(msg.volume);
+		break;
+	case CMD_AUDIO_FADEOUT:
+		fadeoutFxAudio(msg.fadetime);
+		break;
+	default:
+		DEBUGERROR("%s: Unsupported command received: %d",Q_FUNC_INFO,msg.ctrlCmd);
+		break;
+	}
+
+}
+

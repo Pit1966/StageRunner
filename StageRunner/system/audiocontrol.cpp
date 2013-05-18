@@ -1,8 +1,8 @@
 #include "audiocontrol.h"
-#include "../config.h"
-#include "../system/log.h"
+#include "config.h"
+#include "log.h"
 #include "audiochannel.h"
-#include "appcontrol/appcentral.h"
+#include "appcentral.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -49,12 +49,23 @@ void AudioControl::run()
 	LOGTEXT(tr("Audio control finished"));
 }
 
+void AudioControl::vu_level_changed_receiver(int slotnum, int left, int right)
+{
+	if (slotnum < 0 || slotnum >= audioChannels.size()) return;
+
+	int vol = audioChannels.at(slotnum)->volume();
+	emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
+}
+
 bool AudioControl::startFxAudio(FxAudioItem *fxa)
 {
 	bool ok = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
-			ok = audioChannels[t]->startFxAudio(fxa);
+			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START);
+			emit audioThreadCtrlMsgEmitted(msg);
+			ok = true;
+			// ok = audioChannels[t]->startFxAudio(fxa);
 			break;
 		}
 	}
@@ -65,13 +76,16 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa)
 void AudioControl::stopAllFxAudio()
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audioChannels[t]->stopFxAudio();
+		stopFxAudio(t);
 	}
 }
 
 void AudioControl::stopFxAudio(int slot)
 {
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		// We send this via Message to communicate with the thread
+		AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
+		// emit audioThreadCtrlMsgEmitted(msg);
 		audioChannels[slot]->stopFxAudio();
 	}
 }
@@ -79,7 +93,11 @@ void AudioControl::stopFxAudio(int slot)
 void AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audioChannels[t]->fadeoutFxAudio(time_ms);
+		// This is a private message to my audio thread
+		AudioCtrlMsg msg(t,CMD_AUDIO_FADEOUT);
+		msg.fadetime = time_ms;
+		emit audioThreadCtrlMsgEmitted(msg);
+		// audioChannels[t]->fadeoutFxAudio(time_ms);
 	}
 }
 
@@ -156,6 +174,8 @@ void AudioControl::initFromThread()
 		audioChannels.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
-		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SIGNAL(vuLevelChanged(int,int,int)));
+		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SLOT(vu_level_changed_receiver(int,int,int)));
+		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+
 	}
 }

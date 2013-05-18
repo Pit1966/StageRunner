@@ -32,6 +32,9 @@ public:
 private:
 	void run();
 
+private slots:
+	void vu_level_changed_receiver(int slotnum, int left, int right);
+
 public slots:
 	bool startFxAudio(FxAudioItem *fxa);
 	void stopAllFxAudio();
@@ -50,6 +53,7 @@ private:
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
+	void audioThreadCtrlMsgEmitted(AudioCtrlMsg msg);
 	void vuLevelChanged(int slotnum, int left, int right);
 };
 

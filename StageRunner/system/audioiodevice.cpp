@@ -193,6 +193,7 @@ void AudioIODevice::calc_vu_level(const char *data, int size)
 	//	qDebug("left:%lli right:%lli",left/frames,right/frames);
 	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
 
+
 	emit vuLevelChanged(left/frames, right/frames);
 }
 
