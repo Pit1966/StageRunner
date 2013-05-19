@@ -75,7 +75,8 @@ SOURCES += \
     ../appcontrol/lightloop.cpp \
     ../appcontrol/lightloopthreadinterface.cpp \
     ../gui/scenestatuswidget.cpp \
-    ../gui/lightcontrolwidget.cpp
+    ../gui/lightcontrolwidget.cpp \
+    ../tool/qtstatictools.cpp
 
 HEADERS  += \
 	../config.h \
@@ -121,7 +122,8 @@ HEADERS  += \
     ../appcontrol/lightloopthreadinterface.h \
     ../appcontrol/lightloop.h \
     ../gui/scenestatuswidget.h \
-    ../gui/lightcontrolwidget.h
+    ../gui/lightcontrolwidget.h \
+    ../tool/qtstatictools.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

@@ -33,7 +33,9 @@ AudioSlot::AudioSlot(AudioControl *parent)
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
-	audio_output->setBufferSize(parent->myApp->userSettings->pAudioBufferSize * 1000);
+	if (parent->myApp->userSettings->pAudioBufferSize > 90) {
+		audio_output->setBufferSize(parent->myApp->userSettings->pAudioBufferSize);
+	}
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
@@ -104,10 +106,17 @@ bool AudioSlot::stopFxAudio()
 
 	if (run_status != AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
-		audio_output->stop();
 		audio_io->stop();
+		audio_output->stop();
 
 		return true;
+	} else {
+		if (audio_io->isOpen()) {
+			LOGERROR(tr("Stop Audio playing in slot %1: But audio channel is idle").arg(slotNumber+1));
+			audio_output->stop();
+			audio_io->stop();
+		}
+		return false;
 	}
 
 	return false;
@@ -121,9 +130,7 @@ bool AudioSlot::fadeoutFxAudio(int time_ms)
 	if (!FxItem::exists(current_fx)) return false;
 
 	// Set Fadeout time
-#ifdef IS_QT5
-	fade_out_initial_vol = audio_output->volume() * MAX_VOLUME;
-#endif
+	fade_out_initial_vol = current_volume;
 	fadeout_timeline.setDuration(time_ms);
 
 	// and start the time line ticker
@@ -203,6 +210,8 @@ void AudioSlot::on_fade_out_frame_changed(qreal value)
 	// calculate new volume from timeline value
 	qreal new_volume = fade_out_initial_vol;
 	new_volume -= value * fade_out_initial_vol;
+	// some rounding before cast to interger
+	new_volume += 0.5f;
 
 	// set volume in audio output
 	setVolume(new_volume);

@@ -85,25 +85,25 @@ void AudioControl::stopFxAudio(int slot)
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
 		// We send this via Message to communicate with the thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
-		// emit audioThreadCtrlMsgEmitted(msg);
-		audioChannels[slot]->stopFxAudio();
+		emit audioThreadCtrlMsgEmitted(msg);
+		// audioChannels[slot]->stopFxAudio();
 	}
 }
 
 void AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		// This is a private message to my audio thread
-		AudioCtrlMsg msg(t,CMD_AUDIO_FADEOUT);
-		msg.fadetime = time_ms;
-		emit audioThreadCtrlMsgEmitted(msg);
-		// audioChannels[t]->fadeoutFxAudio(time_ms);
+		fadeoutFxAudio(t,time_ms);
 	}
 }
 
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 {
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		// This is a private message to my audio thread
+		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+		msg.fadetime = time_ms;
+		// emit audioThreadCtrlMsgEmitted(msg);
 		audioChannels[slot]->fadeoutFxAudio(time_ms);
 	}
 }

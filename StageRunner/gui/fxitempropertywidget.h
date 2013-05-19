@@ -26,12 +26,9 @@ private slots:
 	void on_initialVolDial_sliderMoved(int position);
 	void on_nameEdit_textEdited(const QString &arg1);
 	void on_keyEdit_textEdited(const QString &arg1);
-
 	void on_faderCountEdit_textEdited(const QString &arg1);
 	void on_audioFilePathEdit_doubleClicked();
-
 	void on_fadeInTimeEdit_textEdited(const QString &arg1);
-
 	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
 
 signals:

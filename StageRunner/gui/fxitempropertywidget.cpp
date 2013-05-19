@@ -87,8 +87,9 @@ void FxItemPropertyWidget::on_nameEdit_textEdited(const QString &arg1)
 void FxItemPropertyWidget::on_keyEdit_textEdited(const QString &arg1)
 {
 	if (FxItem::exists(cur_fx)) {
-		if (arg1.size()) {
-			cur_fx->setKeyCode(arg1.at(0).toUpper().unicode());
+		QString norm = arg1.trimmed().toUpper();
+		if (norm.size()) {
+			cur_fx->setKeyCode(norm.at(0).unicode());
 		} else {
 			cur_fx->setKeyCode(0);
 		}

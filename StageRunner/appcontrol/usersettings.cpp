@@ -21,7 +21,7 @@ void UserSettings::init()
 	addExistingVar(pLastAudioFxImportPath,"LastAudioFxImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
-	addExistingVar(pAudioBufferSize,"AudioBufferSize",1,200,10);
+	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,5000);
 //				   ,QObject::tr("Audio buffer size for audio playback in the audio slots"));
 	addExistingVar(debug,"DebugLevel");
 }

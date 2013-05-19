@@ -93,6 +93,14 @@ FxList *AppCentral::getRegisteredFxList(int id)
 	return 0;
 }
 
+void AppCentral::setEditMode(bool state)
+{
+	if (state != edit_mode_f) {
+		edit_mode_f = state;
+		emit editModeChanged(state);
+	}
+}
+
 void AppCentral::loadPlugins()
 {
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());

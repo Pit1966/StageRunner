@@ -12,6 +12,7 @@
 #include "setupwidget.h"
 #include "fxitempropertywidget.h"
 #include "scenestatuswidget.h"
+#include "qtstatictools.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -20,18 +21,19 @@
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	QMainWindow(0)
 {
-	mainapp = myapp;
+	appCentral = myapp;
 
 	init();
 
-
-
 	setupUi(this);
+	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
 
 	updateButtonStyles();
 
 	debugLevelSpin->setValue(debug);
+
+
 
 	// For external access
 	logWidget = logEdit;
@@ -46,11 +48,14 @@ StageRunnerMainWin::~StageRunnerMainWin()
 
 void StageRunnerMainWin::initConnects()
 {
+	// AppCentral <-> Mainwin
+	connect(appCentral,SIGNAL(editModeChanged(bool)),actionEdit_Mode,SLOT(setChecked(bool)));
+
 	// FxListWidget (Liste der Effekte im Mainwin)
-	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),mainapp,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
+	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
-	connect(mainapp->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
+	connect(appCentral->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 
 	// FxListWidget <-> Fx Editor (Dock Widget)
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
@@ -58,12 +63,12 @@ void StageRunnerMainWin::initConnects()
 
 
 	// Audio Control Panel <-> Audio Control
-	connect(mainapp->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),mainapp->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	connect(mainapp->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
+	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),appCentral->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(appCentral->unitAudio,SIGNAL(vuLevelChanged(int,int,int)),audioCtrlGroup,SLOT(setVuMeterLevel(int,int,int)));
 
 	// Light Control -> SceneStatusWidget
-	connect(mainapp->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
+	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
 
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
@@ -136,10 +141,10 @@ void StageRunnerMainWin::updateButtonStyles()
 void StageRunnerMainWin::clearProject()
 {
 	// Clear Project and project member
-	mainapp->clearProject();
+	appCentral->clearProject();
 
 	// Clear Fx list in GUI
-	fxListWidget->setFxList(mainapp->project->fxList);
+	fxListWidget->setFxList(appCentral->project->fxList);
 }
 
 void StageRunnerMainWin::init()
@@ -164,10 +169,10 @@ void StageRunnerMainWin::initAppDefaults()
 {
 	restore_window();
 
-	if (mainapp->userSettings->pLastProjectLoadPath.size()) {
-		mainapp->project->loadFromFile(mainapp->userSettings->pLastProjectLoadPath);
-		mainapp->project->postLoadProcessFxList();
-		fxListWidget->setFxList(mainapp->project->fxList);
+	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
+		appCentral->project->loadFromFile(appCentral->userSettings->pLastProjectLoadPath);
+		appCentral->project->postLoadProcessFxList();
+		fxListWidget->setFxList(appCentral->project->fxList);
 		copyProjectSettingsToGui();
 	}
 
@@ -175,23 +180,23 @@ void StageRunnerMainWin::initAppDefaults()
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
 {
-	mainapp->project->pAutoProceedSequence = fxListWidget->fxList()->autoProceedSequence();
+	appCentral->project->pAutoProceedSequence = fxListWidget->fxList()->autoProceedSequence();
 }
 
 void StageRunnerMainWin::copyProjectSettingsToGui()
 {
-	fxListWidget->setAutoProceedSequence( mainapp->project->pAutoProceedSequence );
+	fxListWidget->setAutoProceedSequence( appCentral->project->pAutoProceedSequence );
 }
 
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
 {
-	FxList *fxlist = mainapp->project->fxList;
+	FxList *fxlist = appCentral->project->fxList;
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Audio File")
-												,mainapp->userSettings->pLastAudioFxImportPath);
+												,appCentral->userSettings->pLastAudioFxImportPath);
 
 	if (path.size()) {
-		mainapp->userSettings->pLastAudioFxImportPath = path;
+		appCentral->userSettings->pLastAudioFxImportPath = path;
 		fxlist->addFxAudioSimple(path);
 	}
 	fxListWidget->setFxList(fxlist);
@@ -199,7 +204,7 @@ void StageRunnerMainWin::on_addAudioFxButton_clicked()
 
 void StageRunnerMainWin::on_actionSave_Project_triggered()
 {
-	Project * pro = mainapp->project;
+	Project * pro = appCentral->project;
 
 	if (pro->curProjectFilePath.size()) {
 		if (pro->saveToFile(pro->curProjectFilePath)) {
@@ -214,17 +219,15 @@ void StageRunnerMainWin::on_actionSave_Project_triggered()
 
 void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 {
-	actionEdit_Mode->setChecked(false);
-
 	QString path = QFileDialog::getSaveFileName(this,tr("Choose Project save path")
-												,mainapp->userSettings->pLastProjectSavePath);
+												,appCentral->userSettings->pLastProjectSavePath);
 	if (path.size()) {
 		if (path.right(4).toLower() != ".srp") {
 			path += ".srp";
 		}
-		mainapp->userSettings->pLastProjectSavePath = path;
+		appCentral->userSettings->pLastProjectSavePath = path;
 		copyGuiSettingsToProject();
-		if (mainapp->project->saveToFile(path)) {
+		if (appCentral->project->saveToFile(path)) {
 			POPUPINFOMSG(Q_FUNC_INFO,tr("Project successfully saved!"));
 		} else {
 			POPUPERRORMSG(Q_FUNC_INFO,tr("Could not save project!"));
@@ -237,16 +240,16 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 {
 
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Project")
-												,mainapp->userSettings->pLastProjectLoadPath
+												,appCentral->userSettings->pLastProjectLoadPath
 												,tr("StageRunner projects (*.srp);;All files (*)"));
 	if (path.size()) {
 		clearProject();
 
-		mainapp->userSettings->pLastProjectLoadPath = path;
-		mainapp->project->loadFromFile(path);
-		mainapp->project->postLoadProcessFxList();
+		appCentral->userSettings->pLastProjectLoadPath = path;
+		appCentral->project->loadFromFile(path);
+		appCentral->project->postLoadProcessFxList();
 
-		fxListWidget->setFxList(mainapp->project->fxList);
+		fxListWidget->setFxList(appCentral->project->fxList);
 		copyProjectSettingsToGui();
 		/// @todo Error handling
 	}
@@ -262,31 +265,46 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 {
 	if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
 
+	QString winname;
+	if (QApplication::activeWindow()) {
+		winname = QApplication::activeWindow()->objectName();
+	}
+	QString focusname;
+	if (QApplication::focusWidget()) {
+		focusname = QApplication::focusWidget()->objectName();
+	}
+	// qDebug("focus:%s",focusname.toLatin1().data());
+	if (winname != "StageRunnerMainwin" || focusname == "commentEdit") {
+		return qApp->eventFilter(obj, event);
+	}
+
+
 	if (event->type() == 6) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
 		if (debug > 2) qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
+		qDebug() << "Key new:" << QtStaticTools::keyToString(key);
 		switch (key) {
 		case Qt::Key_Shift:
 			shiftPressedFlag = true;
 			break;
 		case Qt::Key_Space:
-			mainapp->fadeoutAllFxAudio();
+			appCentral->fadeoutAllFxAudio();
 			break;
 		case Qt::Key_Escape:
-			mainapp->stopAllFxAudio();
+			appCentral->stopAllFxAudio();
 			break;
 		case Qt::Key_Delete:
-			mainapp->project->fxList->deleteFx(mainapp->project->fxList->nextFx());
+			appCentral->project->fxList->deleteFx(appCentral->project->fxList->nextFx());
 			break;
 
 		default:
 			{
 				QString key = ev->text().toUpper();
 				if (key.size()) {
-					FxItem *fx = mainapp->project->fxList->getFxByKeyCode(key.at(0).unicode());
+					FxItem *fx = appCentral->project->fxList->getFxByKeyCode(key.at(0).unicode());
 					if (fx) {
-						mainapp->executeFxCmd(fx, CMD_AUDIO_START);
+						appCentral->executeFxCmd(fx, CMD_FX_START);
 						// fxListWidget->selectFx(fx);
 					}
 				}
@@ -306,7 +324,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 {
-	if (mainapp->project->isModified()) {
+	if (appCentral->project->isModified()) {
 		int ret = QMessageBox::question(this,tr("Attention")
 										,tr("Project is modified!\n\nDo you want to save it now?"));
 		if (ret == QMessageBox::Yes) {
@@ -351,7 +369,7 @@ void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 
 	if (path.size()) {
 		qDebug() << path;
-		FxList *fxlist = mainapp->project->fxList;
+		FxList *fxlist = appCentral->project->fxList;
 		fxlist->addFxAudioSimple(path,pos);
 		fxListWidget->setFxList(fxlist);
 	}
@@ -360,12 +378,12 @@ void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
 
 void StageRunnerMainWin::on_actionEdit_Mode_toggled(bool arg1)
 {
-	AppCentral::instance()->setEditMode(arg1);
+	appCentral->setEditMode(arg1);
 }
 
 void StageRunnerMainWin::on_actionSetup_triggered()
 {
-	SetupWidget setup(mainapp);
+	SetupWidget setup(appCentral);
 	setup.show();
 	setup.exec();
 
@@ -379,7 +397,7 @@ void StageRunnerMainWin::on_actionExit_StageRunner_triggered()
 
 void StageRunnerMainWin::on_addFxSceneButton_clicked()
 {
-	mainapp->project->fxList->addFxScene(12);
+	appCentral->project->fxList->addFxScene(12);
 	fxListWidget->refreshList();
 }
 
@@ -399,14 +417,14 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 
 void StageRunnerMainWin::on_actionDMX_Input_triggered()
 {
-	QWidget * mon = reinterpret_cast<QWidget *>(mainapp->openDmxInMonitor(0));
+	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxInMonitor(0));
 	mon->show();
 	mon->raise();
 }
 
 void StageRunnerMainWin::on_actionDMX_Output_triggered()
 {
-	QWidget * mon = reinterpret_cast<QWidget *>(mainapp->openDmxOutMonitor(0));
+	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxOutMonitor(0));
 	mon->show();
 	mon->raise();
 }

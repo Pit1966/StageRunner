@@ -222,13 +222,20 @@ void AudioIODevice::start()
 
 void AudioIODevice::stop()
 {
+#ifdef IS_QT5
 	decoding_finished_f = true;
+	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
+		audio_decoder->stop();
+	}
+#endif
 	close();
 }
 
 void AudioIODevice::process_decoder_buffer()
 {
 #ifdef IS_QT5
+	if (!isOpen()) return;
+
 	QAudioBuffer audiobuf = audio_decoder->read();
 	// AudioFormat form = audiobuf.format();
 	const char *data = audiobuf.constData<char>();

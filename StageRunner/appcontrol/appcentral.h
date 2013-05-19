@@ -55,7 +55,7 @@ public:
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
 	inline bool isEditMode() {return edit_mode_f;}
-	inline void setEditMode(bool state) {edit_mode_f = state;}
+	void setEditMode(bool state);
 
 	void loadPlugins();
 	void openPlugins();
@@ -74,6 +74,7 @@ public slots:
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
+	void editModeChanged(bool state);
 
 
 };

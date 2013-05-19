@@ -18,7 +18,7 @@ class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
 	Q_OBJECT
 private:
-	AppCentral *mainapp;
+	AppCentral *appCentral;
 	QErrorMessage *msg_dialog;
 	QDockWidget *fxitem_editor_dock;
 	QDockWidget *scene_status_dock;
@@ -60,17 +60,11 @@ private slots:
 	void on_actionEdit_Mode_toggled(bool arg1);
 	void on_actionSetup_triggered();
 	void on_actionSave_Project_triggered();
-
 	void on_actionExit_StageRunner_triggered();
-
 	void on_addFxSceneButton_clicked();
-
 	void on_debugLevelSpin_valueChanged(int arg1);
-
 	void on_stopMainLoopButton_clicked();
-
 	void on_actionDMX_Input_triggered();
-
 	void on_actionDMX_Output_triggered();
 
 private:
