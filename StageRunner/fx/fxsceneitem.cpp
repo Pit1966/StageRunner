@@ -143,7 +143,9 @@ bool FxSceneItem::loopFunction()
 	bool active = false;
 
 	for (int t=0; t<tubeCount(); t++) {
-		active |= tubes.at(t)->loopFunction();
+		bool a = tubes.at(t)->loopFunction();
+		// if (a) qDebug() << "channel" << t << tubes.at(t)->curValue;
+		active |= a;
 	}
 
 	if (active) {

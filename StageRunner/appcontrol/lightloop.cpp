@@ -75,7 +75,7 @@ void LightLoop::processPendingEvents()
 	foreach (FxSceneItem * sceneitem, scenes) {
 		// Fill channel data into temp dmx data and determine if scene is still active
 		if (!processFxSceneItem(sceneitem)) {
-			qDebug("Scene not active %s",sceneitem->name().toLocal8Bit().data());
+			if (debug > 1) DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());
 			inactive_scenes.append(sceneitem);
 		}
 		if (sceneitem->statusHasChanged()) {
@@ -118,7 +118,10 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		int channel = tube->dmxChannel;
 		int universe = tube->dmxUniverse;
 		tube->dmxValue = tube->curValue * 255 / tube->targetFullValue;
-		if (tube->dmxValue > quint16(dmxtout[universe].at(channel)) ) {
+//		if (tube->dmxValue > 0) {
+//			qDebug() << "channel " << tube->dmxChannel << "dmx" << tube->dmxValue << "universe" << tube->dmxUniverse;
+//		}
+		if (tube->dmxValue > quint8(dmxtout[universe].at(channel)) ) {
 			dmxtout[universe][channel] = tube->dmxValue;
 		}
 	}

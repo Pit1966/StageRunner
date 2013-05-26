@@ -71,6 +71,7 @@ bool LightControl::addFxListToControlLoop(const FxList *list)
 
 bool LightControl::sendChangedDmxData()
 {
+	/// @implement me: Plugin <-> output <-> universe Zuordnung
 	bool sent = false;
 	QList<QLCIOPlugin*>plugins = myApp->pluginCentral->qlcPlugins();
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {

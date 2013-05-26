@@ -145,7 +145,7 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 
 void FxListWidget::refreshList()
 {
-	// qDebug("FxListWidget refresh");
+	qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
 	}
