@@ -21,6 +21,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_decoder = new QAudioDecoder;
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
+	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 
 #endif
 }
@@ -103,7 +104,7 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 
 	if (debug) {
 		qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
-			   ,samplerate,channels,samplesize,codec.toLatin1().data());
+			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
 	}
 
 }
@@ -199,7 +200,10 @@ void AudioIODevice::calc_vu_level(const char *data, int size)
 
 void AudioIODevice::start()
 {
-	open(QIODevice::ReadOnly);
+	if (!open(QIODevice::ReadOnly)) {
+		DEBUGERROR("Could not open Audio IO device");
+		return;
+	}
 
 	audio_buffer_count = 0;
 	audio_buffer->clear();
@@ -254,4 +258,13 @@ void AudioIODevice::on_decoding_finished()
 	if (debug) qDebug("Audio decoding finished");
 }
 
+
+#ifdef IS_QT5
+void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
+{
+	DEBUGERROR("An error occurred while decoding audio: %s (error: %d)"
+			  ,audio_decoder->errorString().toLocal8Bit().data(),error);
+	LOGERROR(tr("Failed file was: %1").arg(audio_decoder->sourceFilename()));
+}
+#endif
 

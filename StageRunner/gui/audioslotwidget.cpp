@@ -1,6 +1,7 @@
 #include "audioslotwidget.h"
 #include "audiocontrolwidget.h"
-#include "../config.h"
+#include "config.h"
+#include "fxaudioitem.h"
 
 #include <QDebug>
 
@@ -93,6 +94,9 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 			break;
 		default:
 			setPlayState(true);
+			if (msg.fxAudio) {
+				setTitle(msg.fxAudio->name());
+			}
 			break;
 		}
 		if (msg.volume >= 0) slotVolumeDial->setValue(msg.volume);

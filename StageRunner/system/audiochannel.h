@@ -55,6 +55,7 @@ public:
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
+	FxAudioItem *currentFxAudio() {return current_fx;}
 
 	inline AudioStatus status() {return run_status;}
 

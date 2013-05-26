@@ -4,8 +4,10 @@
 #include "fxsceneitem.h"
 #include "appcontrol/usersettings.h"
 #include "appcontrol/appcentral.h"
+#include "qtstatictools.h"
 
 #include <QFileDialog>
+#include <QFileInfo>
 
 FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	QWidget(parent)
@@ -16,6 +18,8 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 
 	setupUi(this);
 	setWindowTitle("Fx Editor");
+
+	keyEdit->setSingleKeyEditEnabled(true);
 }
 
 bool FxItemPropertyWidget::setFxItem(FxItem *fx)
@@ -28,12 +32,12 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 
 	nameEdit->setText(fx->name());
 	idEdit->setText(QString::number(fx->id()));
-	keyEdit->setText(QChar(fx->keyCode()));
+	keyEdit->setText(QtStaticTools::keyToString(fx->keyCode()));
 
 	if (fx->fxType() == FX_AUDIO) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
-		audioFilePathEdit->setText(cur_fxa->fileName());
+		audioFilePathEdit->setText(cur_fxa->filePath());
 		audioGroup->setVisible(true);
 	} else {
 		cur_fxa = 0;
@@ -63,6 +67,14 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	return true;
 }
 
+void FxItemPropertyWidget::setEditable(bool state)
+{
+	QList<PsLineEdit*>childs = findChildren<PsLineEdit*>();
+	foreach(PsLineEdit* edit, childs) {
+		edit->setEditable(state);
+	}
+}
+
 
 void FxItemPropertyWidget::on_initialVolDial_sliderMoved(int position)
 {
@@ -88,8 +100,10 @@ void FxItemPropertyWidget::on_keyEdit_textEdited(const QString &arg1)
 {
 	if (FxItem::exists(cur_fx)) {
 		QString norm = arg1.trimmed().toUpper();
+		if (norm != arg1) keyEdit->setText(norm);
+
 		if (norm.size()) {
-			cur_fx->setKeyCode(norm.at(0).unicode());
+			cur_fx->setKeyCode(QtStaticTools::stringToKey(norm));
 		} else {
 			cur_fx->setKeyCode(0);
 		}
@@ -120,7 +134,7 @@ void FxItemPropertyWidget::on_audioFilePathEdit_doubleClicked()
 		if (FxItem::exists(cur_fxa)) {
 			cur_fxa->setFilePath(path);
 			cur_fxa->setModified(true);
-			audioFilePathEdit->setText(cur_fxa->fileName());
+			audioFilePathEdit->setText(cur_fxa->filePath());
 			emit modified();
 		}
 	}
@@ -157,4 +171,17 @@ void FxItemPropertyWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 	}
 	cur_fxs->setModified(true);
 	emit modified();
+}
+
+void FxItemPropertyWidget::on_keyClearButton_clicked()
+{
+	keyEdit->clear();
+
+	if (!FxItem::exists(cur_fx)) return;
+
+	if (cur_fx->keyCode()) {
+		cur_fx->setKeyCode(0);
+		cur_fx->setModified(true);
+		emit modified();
+	}
 }

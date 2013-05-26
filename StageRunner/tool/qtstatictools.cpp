@@ -7,7 +7,7 @@ QtStaticTools::QtStaticTools()
 {
 }
 
-uint QtStaticTools::stringToKey(const QString &str)
+int QtStaticTools::stringToKey(const QString &str)
 {
 	QKeySequence seq(str);
 	uint keyCode = 0;
@@ -19,9 +19,9 @@ uint QtStaticTools::stringToKey(const QString &str)
 	return keyCode;
 }
 
-QString QtStaticTools::keyToString(uint key1)
+QString QtStaticTools::keyToString(int key1, int modifier)
 {
-	QKeySequence seq(key1);
+	QKeySequence seq(key1 + modifier);
 
 	return seq.toString();
 }

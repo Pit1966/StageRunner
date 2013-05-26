@@ -56,6 +56,7 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
 	connect(appCentral->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
+	connect(appCentral,SIGNAL(editModeChanged(bool)),fxListWidget,SLOT(setEditable(bool)));
 
 	// FxListWidget <-> Fx Editor (Dock Widget)
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
@@ -85,6 +86,8 @@ void StageRunnerMainWin::setup_gui_docks()
 
 	fxitem_editor_dock = new QDockWidget(this);
 	fxItemEditor = new FxItemPropertyWidget();
+	connect(appCentral,SIGNAL(editModeChanged(bool)),fxItemEditor,SLOT(setEditable(bool)));
+	fxItemEditor->setEditable(false);
 
 	fxitem_editor_dock->setObjectName("Fx Editor");
 	fxitem_editor_dock->setWindowTitle("Fx Editor");
@@ -149,7 +152,7 @@ void StageRunnerMainWin::clearProject()
 
 void StageRunnerMainWin::init()
 {
-	shiftPressedFlag = false;
+	activeKeyModifiers = 0;
 	dialWidgetStyle = 0;
 
 	msg_dialog = new QErrorMessage(this);
@@ -282,11 +285,12 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == 6) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
-		if (debug > 2) qDebug() << "Key pressed" << key << " " << "string:" << ev->text()<< obj->objectName();
-		qDebug() << "Key new:" << QtStaticTools::keyToString(key);
 		switch (key) {
 		case Qt::Key_Shift:
-			shiftPressedFlag = true;
+			activeKeyModifiers |= Qt::SHIFT;
+			break;
+		case Qt::Key_Control:
+			activeKeyModifiers |= Qt::CTRL;
 			break;
 		case Qt::Key_Space:
 			appCentral->fadeoutAllFxAudio();
@@ -299,25 +303,34 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 
 		default:
-			{
-				QString key = ev->text().toUpper();
-				if (key.size()) {
-					FxItem *fx = appCentral->project->fxList->getFxByKeyCode(key.at(0).unicode());
-					if (fx) {
-						appCentral->executeFxCmd(fx, CMD_FX_START);
-						// fxListWidget->selectFx(fx);
-					}
+			if (key) {
+				FxItem *fx = appCentral->project->fxList->getFxByKeyCode(key + activeKeyModifiers);
+				if (fx) {
+					appCentral->executeFxCmd(fx, CMD_FX_START);
+					// fxListWidget->selectFx(fx);
 				}
 			}
 			break;
 		}
 
+		DEBUGTEXT("Key pressed: #%d -> '%s'"
+				  ,key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
+
 		return true;
 	}
 	if (event->type() == 7) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
-		if (ev->key() == Qt::Key_Shift) shiftPressedFlag = false;
-		// qDebug() << "keyup" << ev->key() << " " << obj->objectName();
+
+		switch (ev->key()) {
+		case Qt::Key_Shift:
+			activeKeyModifiers &= ~Qt::SHIFT;
+			break;
+		case Qt::Key_Control:
+			activeKeyModifiers &= ~Qt::CTRL;
+			break;
+		default:
+			break;
+		}
 	}
 	return qApp->eventFilter(obj, event);
 }

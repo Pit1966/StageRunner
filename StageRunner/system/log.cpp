@@ -276,7 +276,7 @@ void Log::appendDebugText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		qstrcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLocal8Bit().data());
 	}
 
 	va_list varg_p;
@@ -295,7 +295,7 @@ void Log::appendDevelText(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		qstrcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLocal8Bit().data());
 	}
 
 	va_list varg_p;
@@ -314,7 +314,7 @@ void Log::appendDebugError(const char *str,...)
 	char temp[1000];
 	int pn = thread.size();
 	if (pn) {
-		qstrcpy(temp,thread.toLatin1().data());
+		qstrcpy(temp,thread.toLocal8Bit().data());
 	}
 
 	va_list varg_p;

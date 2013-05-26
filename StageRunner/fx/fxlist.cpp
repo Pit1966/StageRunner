@@ -57,7 +57,7 @@ FxItem *FxList::stepToSequenceNext()
 	return fx_current;
 }
 
-FxItem *FxList::getFxByKeyCode(ushort keycode) const
+FxItem *FxList::getFxByKeyCode(int keycode) const
 {
 	QListIterator<FxItem*> it(fx_list);
 	while (it.hasNext()) {

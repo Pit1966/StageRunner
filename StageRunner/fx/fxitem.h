@@ -43,8 +43,8 @@ public:
 	inline int id() const {return myId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
-	inline void setKeyCode(ushort code) {myKey = code;}
-	inline ushort keyCode() const {return myKey;}
+	void setKeyCode(int code);
+	inline int keyCode() const {return myKey;}
 
 
 private:

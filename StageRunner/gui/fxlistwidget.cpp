@@ -1,9 +1,12 @@
 #include "fxlistwidget.h"
-#include "fx/fxlist.h"
-#include "fx/fxitem.h"
+#include "fxlist.h"
+#include "fxitem.h"
 #include "fxsceneitem.h"
-#include "appcontrol/appcentral.h"
+#include "appcentral.h"
 #include "scenedeskwidget.h"
+#include "qtstatictools.h"
+#include "customwidget/pslineedit.h"
+#include "fxlistwidgetitem.h"
 
 #include <QDebug>
 
@@ -57,30 +60,29 @@ void FxListWidget::setFxList(FxList *fxlist)
 		FxItem *fx = fxlist->at(t);
 		FxListWidgetItem *item;
 
-		QChar key;
-		if (fx->keyCode() > 0) {
-			key = fx->keyCode();
-		} else {
-			key = ' ';
+
+		QString key;
+		if (fx->keyCode() != Qt::Key_Space) {
+			key = QtStaticTools::keyToString(fx->keyCode());
 		}
-		item = new FxListWidgetItem(fx,key);
-		item->setFont(key_font);
-		item->columnType = FxListWidgetItem::CT_KEY;
-		fxTable->setItem(t,col++,item);
 
-		item = new FxListWidgetItem(fx,fx->name());
-		item->columnType = FxListWidgetItem::CT_NAME;
-		fxTable->setItem(t,col++,item);
+		item = new_fxlistwidgetitem(fx,key,FxListWidgetItem::CT_KEY);
+		item->itemEdit->setSingleKeyEditEnabled(true);
+		item->itemEdit->setFont(key_font);
+		item->setMaximumWidth(50);
+		fxTable->setCellWidget(t,col++,item);
 
-		item = new FxListWidgetItem(fx,QString::number(fx->fxType()));
-		item->columnType = FxListWidgetItem::CT_FX_TYPE;
-		fxTable->setItem(t,col++,item);
+		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
+		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+		fxTable->setCellWidget(t,col++,item);
 
-		item = new FxListWidgetItem(fx,QString::number(fx->id()));
-		item->columnType = FxListWidgetItem::CT_ID;
-		fxTable->setItem(t,col++,item);
+		item = new_fxlistwidgetitem(fx,QString::number(fx->fxType()),FxListWidgetItem::CT_FX_TYPE);
+		item->setNeverEditable(true);
+		fxTable->setCellWidget(t,col++,item);
 
-
+		item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
+		item->setNeverEditable(true);
+		fxTable->setCellWidget(t,col++,item);
 	}
 	fxTable->resizeColumnsToContents();
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
@@ -99,7 +101,7 @@ void FxListWidget::selectFx(FxItem *fx)
 	bool found = false;
 	int row=0;
 	while (fx && row < fxTable->rowCount() && !found) {
-		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->item(row,0);
+		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->cellWidget(row,0);
 		if (item->linkedFxItem == fx) {
 			fxTable->clearSelection();
 			fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),true);
@@ -119,6 +121,7 @@ void FxListWidget::selectFx(FxItem *fx)
 void FxListWidget::init()
 {
 	is_modified_f = false;
+	is_editable_f = false;
 	cur_selected_item = 0;
 }
 
@@ -129,62 +132,43 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 	desk->show();
 }
 
+FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
+{
+	FxListWidgetItem * item = new FxListWidgetItem(fx,text,static_cast<FxListWidgetItem::ColumnType>(coltype));
+	connect(item,SIGNAL(itemClicked(FxListWidgetItem*)),this,SLOT(if_fxitemwidget_clicked(FxListWidgetItem*)));
+	connect(item,SIGNAL(itemDoubleClicked(FxListWidgetItem*)),this,SLOT(if_fxitemwidget_doubleclicked(FxListWidgetItem*)));
+	connect(item,SIGNAL(itemTextEdited(FxListWidgetItem*,QString)),this,SLOT(if_fxitemwidget_edited(FxListWidgetItem*,QString)));
+	connect(this,SIGNAL(editableChanged(bool)),item,SLOT(setEditable(bool)));
+
+	return item;
+}
+
 void FxListWidget::refreshList()
 {
-	qDebug("FxListWidget refresh");
+	// qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
 	}
 }
 
-FxListWidgetItem::FxListWidgetItem(FxItem *fxitem, const QString &text)
-	: QTableWidgetItem(text)
+void FxListWidget::setEditable(bool state)
 {
-	columnType = CT_UNDEF;
-	linkedFxItem = fxitem;
-
+	if (state != is_editable_f) {
+		is_editable_f = state;
+		emit editableChanged(state);
+	}
 }
 
 void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
-	FxItem *fx = myitem->linkedFxItem;
-
-	if (fx) {
-		myfxlist->setNextFx(fx);
-		if (cur_selected_item != fx) {
-			cur_selected_item = fx;
-			emit fxItemSelected(fx);
-		}
-	} else {
-		myfxlist->setNextFx(0);
-	}
+	if_fxitemwidget_clicked(myitem);
 }
 
 void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
-	FxItem *fx = myitem->linkedFxItem;
-	bool editmode = AppCentral::instance()->isEditMode();
-
-	if (fx) {
-		switch (fx->fxType()) {
-		case FX_SCENE:
-			if (editmode) {
-				open_scence_desk(static_cast<FxSceneItem*>(fx));
-			} else {
-				emit fxCmdActivated(fx, CMD_FX_START);
-				selectFx(fx);
-			}
-			break;
-		case FX_AUDIO:
-			if (!editmode) {
-				emit fxCmdActivated(fx,CMD_FX_START);
-				selectFx(fx);
-			}
-			break;
-		}
-	}
+	if_fxitemwidget_doubleclicked(myitem);
 }
 
 void FxListWidget::moveRowFromTo(int srcrow, int destrow)
@@ -217,25 +201,114 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 	FxItem *fx = myitem->linkedFxItem;
 	switch (myitem->columnType) {
 	case FxListWidgetItem::CT_NAME:
-		fx->setName(myitem->text());
+		fx->setName(myitem->itemText);
 		emit listModified();
 		break;
 	case FxListWidgetItem::CT_KEY:
 		{
-			ushort old_code = fx->keyCode();
-			ushort code = 0;
+			int old_code = fx->keyCode();
+			int code = 0;
 			QString text = myitem->text();
 			if (text.size()) {
-				code = text.at(0).toUpper().unicode();
+				code = QtStaticTools::stringToKey(text);
 			}
 			if (old_code != code) {
 				fx->setKeyCode(code);
 				emit listModified();
 			}
-			myitem->setText(QString(QChar(code)));
+			myitem->itemEdit->setText(QtStaticTools::keyToString(code));
 		}
 	default:
 		break;
 	}
 }
 
+void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
+{
+	if (!listitem) return;
+
+	// qDebug("FxListWidget -> clicke -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
+	FxItem *fx = listitem->linkedFxItem;
+	if (!FxItem::exists(fx)) return;
+
+	switch (listitem->columnType) {
+	case FxListWidgetItem::CT_KEY:
+	case FxListWidgetItem::CT_NAME:
+		myfxlist->setNextFx(fx);
+		if (cur_selected_item != fx) {
+			cur_selected_item = fx;
+			emit fxItemSelected(fx);
+		}
+		break;
+	default:
+		qDebug("Click on this column not implemented yet");
+
+	}
+}
+
+void FxListWidget::column_name_double_clicked(FxItem *fx)
+{
+	switch (fx->fxType()) {
+	case FX_SCENE:
+		selectFx(fx);
+		emit fxCmdActivated(fx, CMD_FX_START);
+		break;
+	case FX_AUDIO:
+		selectFx(fx);
+		emit fxCmdActivated(fx,CMD_FX_START);
+		break;
+	}
+}
+
+void FxListWidget::column_type_double_clicked(FxItem *fx)
+{
+	switch (fx->fxType()) {
+	case FX_SCENE:
+		open_scence_desk(static_cast<FxSceneItem*>(fx));
+		break;
+	case FX_AUDIO:
+		selectFx(fx);
+		emit fxCmdActivated(fx,CMD_FX_START);
+		break;
+	}
+}
+
+
+
+void FxListWidget::if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem)
+{
+	if (!listitem) return;
+
+	FxItem *fx = listitem->linkedFxItem;
+	bool editmode = AppCentral::instance()->isEditMode();
+
+	if (fx) {
+		switch(listitem->columnType) {
+		case FxListWidgetItem::CT_NAME:
+			return column_name_double_clicked(fx);
+		case FxListWidgetItem::CT_FX_TYPE:
+			return column_type_double_clicked(fx);
+		default:
+			break;
+		}
+	}
+
+}
+
+void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QString &text)
+{
+	FxItem *fx = listitem->linkedFxItem;
+	if (!FxItem::exists(fx)) return;
+
+	switch(listitem->columnType) {
+	case FxListWidgetItem::CT_NAME:
+		fx->setName(text);
+		fx->setModified(true);
+		break;
+	case FxListWidgetItem::CT_KEY:
+		break;
+	default:
+		fx->setKeyCode(QtStaticTools::stringToKey(text));
+		break;
+	}
+}

@@ -60,11 +60,12 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
 			.arg(fxa->name()).arg(slotNumber+1));
 
+	current_fx = fxa;
 	run_status = AUDIO_INIT;
 	run_time.start();
 
-	// Emit Control Msg to send Status of Volume
-	AudioCtrlMsg msg(slotNumber);
+	// Emit Control Msg to send Status of Volume and Name
+	AudioCtrlMsg msg(fxa,slotNumber);
 	msg.volume = fxa->initialVolume;
 	emit audioCtrlMsgEmitted(msg);
 
@@ -80,13 +81,14 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
-			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->name().toLatin1().data(),run_time.elapsed());
+			DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)",fxa->name().toLocal8Bit().data(),run_time.elapsed());
 			ok = true;
 			run_time.start();
 			current_fx = fxa;
 		}
 		else if (run_status == AUDIO_ERROR) {
-			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLatin1().data());
+			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLocal8Bit().data());
+			current_fx = 0;
 			break;
 		}
 
@@ -187,15 +189,16 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 	}
 
 	if (current_state != run_status) {
-		// qDebug("emit status: %d %d",run_status, slotNumber);
+		// qDebug("emit status: %d %d %p",run_status, slotNumber, current_fx);
 		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
+		msg.fxAudio = current_fx;
 		emit audioCtrlMsgEmitted(msg);
 	}
 }
 
 void AudioSlot::on_audio_io_read_ready()
 {
-	qDebug("Audio io ready read");
+	// qDebug("Audio io ready read");
 	audio_output->stop();
 	audio_io->stop();
 }

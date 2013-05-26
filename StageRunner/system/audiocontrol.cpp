@@ -73,6 +73,19 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa)
 	return ok;
 }
 
+bool AudioControl::restartFxAudioInSlot(int slotnum)
+{
+	if (slotnum < 0 || slotnum >= audioChannels.size()) return false;
+
+	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
+		FxAudioItem *fxa = audioChannels[slotnum]->currentFxAudio();
+		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START);
+		emit audioThreadCtrlMsgEmitted(msg);
+		return true;
+	}
+	return false;
+}
+
 void AudioControl::stopAllFxAudio()
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
@@ -124,6 +137,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		break;
 	case CMD_AUDIO_START:
 		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
+		restartFxAudioInSlot(msg.slotNumber);
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		audioChannels[msg.slotNumber]->setVolume(msg.volume);

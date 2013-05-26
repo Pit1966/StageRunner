@@ -10,27 +10,7 @@
 class FxList;
 class FxItem;
 class FxSceneItem;
-
-
-class FxListWidgetItem : public QTableWidgetItem
-{
-public:
-	enum ColumnType {
-		CT_UNDEF,
-		CT_NAME,
-		CT_ID,
-		CT_KEY,
-		CT_FX_TYPE
-	};
-
-	FxItem *linkedFxItem;
-	ColumnType columnType;
-
-public:
-	FxListWidgetItem(FxItem *fxitem, const QString &text);
-
-};
-
+class FxListWidgetItem;
 
 
 class FxListWidget : public QWidget, private Ui::FxListWidget
@@ -39,6 +19,7 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 
 private:
 	bool is_modified_f;
+	bool is_editable_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 
@@ -47,6 +28,7 @@ public:
 	void setFxList(FxList *fxlist);
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
+	inline bool isEditable() {return is_editable_f;}
 
 public slots:
 	void selectFx(FxItem *fx);
@@ -55,9 +37,13 @@ public slots:
 private:
 	void init();
 	void open_scence_desk(FxSceneItem *fx);
+	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
+	void column_name_double_clicked(FxItem *fx);
+	void column_type_double_clicked(FxItem *fx);
 
 public slots:
 	void refreshList();
+	void setEditable(bool state);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);
@@ -66,13 +52,16 @@ private slots:
 	void on_autoProceedCheck_clicked(bool checked);
 
 	void on_fxTable_itemChanged(QTableWidgetItem *item);
+	void if_fxitemwidget_clicked(FxListWidgetItem *listitem);
+	void if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem);
+	void if_fxitemwidget_edited(FxListWidgetItem *listitem, const QString &text);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);
 	void fxItemSelected(FxItem *);
 	void dropEventReceived(QString text, int row);
 	void listModified();
-
+	void editableChanged(bool state);
 };
 
 #endif // FXLISTWIDGET_H

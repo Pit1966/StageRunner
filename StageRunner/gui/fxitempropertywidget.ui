@@ -45,6 +45,41 @@
       <string>Fx</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item row="2" column="1">
+       <widget class="PsLineEdit" name="keyEdit">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="maxLength">
+         <number>10</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="nameLabel">
         <property name="text">
@@ -52,15 +87,28 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
+       <widget class="QLabel" name="keyLabel">
+        <property name="text">
+         <string>Key:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="idLabel">
         <property name="text">
          <string>Id:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="idEdit">
+      <item row="3" column="1">
+       <widget class="PsLineEdit" name="idEdit">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
           <width>50</width>
@@ -72,36 +120,21 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="keyLabel">
+      <item row="2" column="2">
+       <widget class="QPushButton" name="keyClearButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Key:</string>
+         <string>Clear</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="PsLineEdit" name="keyEdit">
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="maxLength">
-         <number>2</number>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="3">
-       <widget class="QLineEdit" name="nameEdit"/>
+      <item row="1" column="0" colspan="3">
+       <widget class="PsLineEdit" name="nameEdit"/>
       </item>
      </layout>
     </widget>
@@ -112,26 +145,20 @@
       <string>Audio</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Initial
-Volume</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item row="0" column="1">
        <widget class="PsLineEdit" name="audioFilePathEdit"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="audioFilePathLabel">
-        <property name="text">
-         <string>File path:</string>
-        </property>
-       </widget>
       </item>
       <item row="1" column="1">
        <widget class="qsynthKnob" name="initialVolDial">
@@ -152,6 +179,24 @@ Volume</string>
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="audioFilePathLabel">
+        <property name="text">
+         <string>File path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Initial
+Volume</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -161,11 +206,23 @@ Volume</string>
       <string>Scene</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="fadeInTimeEdit"/>
+       <widget class="PsLineEdit" name="fadeInTimeEdit"/>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="faderCountEdit"/>
+       <widget class="PsLineEdit" name="faderCountEdit"/>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="faderCountLabel">
@@ -179,7 +236,7 @@ count</string>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="fadeOutTimeEdit"/>
+       <widget class="PsLineEdit" name="fadeOutTimeEdit"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="fadeInTimeLabel">
@@ -215,14 +272,14 @@ count</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>qsynthKnob</class>
-   <extends>QDial</extends>
-   <header>thirdparty/widget/qsynthknob.h</header>
-  </customwidget>
-  <customwidget>
    <class>PsLineEdit</class>
    <extends>QLineEdit</extends>
    <header>customwidget/pslineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qsynthKnob</class>
+   <extends>QDial</extends>
+   <header>thirdparty/widget/qsynthknob.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

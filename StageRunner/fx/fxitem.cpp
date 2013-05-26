@@ -45,6 +45,13 @@ bool FxItem::exists(FxItem *item)
 	return global_fx_list->contains(item);
 }
 
+void FxItem::setKeyCode(int code)
+{
+	if (code == Qt::Key_Escape || code == Qt::Key_Backspace)
+		code = 0;
+	myKey = code;
+}
+
 void FxItem::init(qint32 id)
 {
 	// qDebug("init id: %d",id);

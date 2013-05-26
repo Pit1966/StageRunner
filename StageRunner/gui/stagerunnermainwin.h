@@ -29,7 +29,7 @@ public:
 	FxItemPropertyWidget *fxItemEditor;
 	SceneStatusWidget *sceneStatusDisplay;
 
-	bool shiftPressedFlag;
+	int activeKeyModifiers;
 
 public:
 	StageRunnerMainWin(AppCentral * myapp);

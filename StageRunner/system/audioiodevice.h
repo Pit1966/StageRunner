@@ -57,6 +57,9 @@ public slots:
 private slots:
 	void process_decoder_buffer();
 	void on_decoding_finished();
+#ifdef IS_QT5
+	void if_error_occurred(QAudioDecoder::Error error);
+#endif
 
 signals:
 	void readReady();

@@ -21,6 +21,7 @@ public:
 
 public slots:
 	bool setFxItem(FxItem *fx);
+	void setEditable(bool state);
 
 private slots:
 	void on_initialVolDial_sliderMoved(int position);
@@ -30,6 +31,8 @@ private slots:
 	void on_audioFilePathEdit_doubleClicked();
 	void on_fadeInTimeEdit_textEdited(const QString &arg1);
 	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
+
+	void on_keyClearButton_clicked();
 
 signals:
 	void modified();

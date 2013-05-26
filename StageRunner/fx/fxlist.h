@@ -41,7 +41,7 @@ public:
 	inline FxItem * currentFx() {return fx_current;}
 	void setNextFx(FxItem *nfx);
 	FxItem * stepToSequenceNext();
-	FxItem * getFxByKeyCode(ushort keycode) const;
+	FxItem * getFxByKeyCode(int keycode) const;
 
 	inline int regId() const {return regid;}
 	inline void setRegId(int new_id) {regid = new_id;}
