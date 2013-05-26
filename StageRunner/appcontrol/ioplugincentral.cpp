@@ -2,17 +2,20 @@
 #include "log.h"
 #include "qlcioplugin.h"
 #include "config.h"
+#include "pluginmapping.h"
 
 #include <QDir>
 #include <QPluginLoader>
 
 IOPluginCentral::IOPluginCentral(QObject *parent) :
 	QObject(parent)
+  , pluginMapping(new PluginMapping())
 {
 }
 
 IOPluginCentral::~IOPluginCentral()
 {
+	delete pluginMapping;
 }
 
 QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
@@ -71,6 +74,32 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		}
 
 	}
+
+	updatePluginMappingInformation();
+}
+
+bool IOPluginCentral::updatePluginMappingInformation()
+{
+	pluginMapping->pluginConfigName = "Default Plugin Config";
+
+	int count = 0;
+
+	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
+		QString plugin_name = plugin->name();
+		QStringList outputs = plugin->outputs();
+		QStringList inputs = plugin->inputs();
+
+		for (int t=0; t<outputs.size(); t++) {
+			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,outputs.at(t));
+			qDebug() << (++count) << lineconf->pLineName;
+		}
+		for (int t=0; t<inputs.size(); t++) {
+			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,inputs.at(t));
+			qDebug() << (++count) << lineconf->pLineName;
+		}
+	}
+
+	return true;
 }
 
 bool IOPluginCentral::openPlugins()

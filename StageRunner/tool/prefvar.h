@@ -42,7 +42,9 @@ public:
 		USER_CONFIG,			///< Wird in "./config" in der USER Sektion gespeichert
 		PROJECT,				///< Globale Triggereinstellung
 		FX_ITEM,
-		DMX_CHANNEL
+		DMX_CHANNEL,
+		PLUGIN_MAPPING,
+		PLUGIN_CONFIG
 	};
 
 	/**

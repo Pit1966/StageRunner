@@ -6,10 +6,13 @@
 #include <QString>
 
 class QLCIOPlugin;
+class PluginMapping;
 
 class IOPluginCentral : public QObject
 {
 	Q_OBJECT
+public:
+	PluginMapping *pluginMapping;					///< This VarSet holds the configuration of plugins and DMX universe mapping
 
 private:
 	QList<QLCIOPlugin*>qlc_plugins;					///< A list of loaded QLCIOPlugin type plugins
@@ -20,6 +23,7 @@ public:
 
 	QLCIOPlugin * getQLCPluginByName(const QString & name);
 	void loadQLCPlugins(const QString & dir_str);
+	bool updatePluginMappingInformation();
 	bool openPlugins();
 	void closePlugins();
 	const QList<QLCIOPlugin*> & qlcPlugins() const {return qlc_plugins;}

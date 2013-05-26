@@ -77,7 +77,8 @@ SOURCES += \
     ../gui/scenestatuswidget.cpp \
     ../gui/lightcontrolwidget.cpp \
     ../tool/qtstatictools.cpp \
-    ../gui/fxlistwidgetitem.cpp
+    ../gui/fxlistwidgetitem.cpp \
+    ../appcontrol/pluginmapping.cpp
 
 HEADERS  += \
 	../config.h \
@@ -125,7 +126,8 @@ HEADERS  += \
     ../gui/scenestatuswidget.h \
     ../gui/lightcontrolwidget.h \
     ../tool/qtstatictools.h \
-    ../gui/fxlistwidgetitem.h
+    ../gui/fxlistwidgetitem.h \
+    ../appcontrol/pluginmapping.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -189,3 +191,5 @@ win32 {
 	conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
 	conf.commands += @echo $$LITERAL_HASH endif >> $$CONFIGFILE
 }
+
+OTHER_FILES +=

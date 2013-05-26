@@ -280,7 +280,7 @@ void FxListWidget::if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem)
 	if (!listitem) return;
 
 	FxItem *fx = listitem->linkedFxItem;
-	bool editmode = AppCentral::instance()->isEditMode();
+	// bool editmode = AppCentral::instance()->isEditMode();
 
 	if (fx) {
 		switch(listitem->columnType) {

@@ -159,7 +159,10 @@ public:
 	 * @param output
 	 * @return
 	 */
-	virtual DmxMonitor *openOutputMonitor(quint32 output) = 0;
+	virtual DmxMonitor *openOutputMonitor(quint32 output) {
+		Q_UNUSED(output)
+		return 0;
+	}
 
 	/*************************************************************************
 	 * Inputs
@@ -213,7 +216,11 @@ public:
 	 * @param output
 	 * @return
 	 */
-	virtual DmxMonitor *openInputMonitor(quint32 input) = 0;
+	virtual DmxMonitor *openInputMonitor(quint32 input)
+	{
+		Q_UNUSED(input)
+		return 0;
+	}
 
 signals:
 	/**
