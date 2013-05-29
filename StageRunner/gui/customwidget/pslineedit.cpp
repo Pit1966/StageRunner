@@ -9,6 +9,7 @@ PsLineEdit::PsLineEdit(QWidget *parent) :
 	current_key = 0;
 	current_modifier = 0;
 	prop_editable = true;
+	prop_minimized = false;
 }
 
 void PsLineEdit::setSingleKeyEditEnabled(bool state)
@@ -26,6 +27,35 @@ void PsLineEdit::setEditable(bool state)
 			setStyleSheet("background-color: #e0ffe0");
 		}
 	}
+}
+
+void PsLineEdit::setMinimized(bool state)
+{
+	prop_minimized = state;
+}
+
+QSize PsLineEdit::sizeHint() const
+{
+	if (!prop_minimized)
+		return QLineEdit::sizeHint();
+
+	ensurePolished();
+	QFontMetrics fm(font());
+	int h = qMax(fm.height(), 10);
+	int w = fm.width(text()) + 8;
+	return QSize(w,h);
+}
+
+QSize PsLineEdit::minimumSizeHint() const
+{
+	if (!prop_minimized)
+		return QLineEdit::minimumSizeHint();
+
+	ensurePolished();
+	QFontMetrics fm(font());
+	int h = qMax(fm.height(), 10);
+	int w = fm.boundingRect(text()).width();
+	return QSize(w,h);
 }
 
 void PsLineEdit::mousePressEvent(QMouseEvent *event)

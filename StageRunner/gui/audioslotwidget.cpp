@@ -21,6 +21,7 @@ AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)
 	setupUi(this);
 	init_gui();
 
+	// We don't really need this connects (it is done via controlCommand)
 	connect(this,SIGNAL(playClicked(int)),widget,SIGNAL(playClicked(int)));
 	connect(this,SIGNAL(stopClicked(int)),widget,SIGNAL(stopClicked(int)));
 	connect(this,SIGNAL(volumeChanged(int,int)),widget,SIGNAL(volumeChanged(int,int)));
@@ -71,6 +72,16 @@ void AudioSlotWidget::on_slotVolumeDial_sliderMoved(int position)
 	msg.volume = position;
 	emit audioCtrlCmdEmitted(msg);
 	emit volumeChanged(slotNumber,position);
+}
+
+void AudioSlotWidget::on_slotVolumeDial_doubleClicked()
+{
+	AudioCtrlMsg msg;
+
+	msg.ctrlCmd = CMD_AUDIO_FADEOUT;
+	msg.slotNumber = slotNumber;
+	msg.fadetime = 5000;
+	emit audioCtrlCmdEmitted(msg);
 }
 
 void AudioSlotWidget::setPlayState(bool state)

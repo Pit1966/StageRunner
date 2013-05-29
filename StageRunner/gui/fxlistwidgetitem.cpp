@@ -17,6 +17,8 @@ FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType c
 	connect(itemEdit,SIGNAL(clicked()),this,SLOT(if_edit_item_clicked()));
 	connect(itemEdit,SIGNAL(doubleClicked()),this,SLOT(if_edit_item_doubleclicked()));
 	connect(itemEdit,SIGNAL(textEdited(QString)),this,SLOT(if_edit_item_edited(QString)));
+
+	connect(itemLabel,SIGNAL(doubleClicked()),this,SLOT(if_label_item_doubleclicked()));
 }
 
 void FxListWidgetItem::setText(const QString &txt)
@@ -62,5 +64,10 @@ void FxListWidgetItem::if_edit_item_doubleclicked()
 void FxListWidgetItem::if_edit_item_edited(const QString &text)
 {
 	emit itemTextEdited(this, text);
+}
+
+void FxListWidgetItem::if_label_item_doubleclicked()
+{
+	emit itemDoubleClicked(this);
 }
 

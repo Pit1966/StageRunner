@@ -3,7 +3,7 @@
 /****************************************************************************
    Copyright (C) 2005-2009, rncbc aka Rui Nuno Capela. All rights reserved.
 
-   This widget is based on a design by Thorsten Wilms, 
+   This widget is based on a design by Thorsten Wilms,
    implemented by Chris Cannam in Rosegarden,
    adapted for QSynth by Pedro Lopez-Cabanillas
 
@@ -76,6 +76,8 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent *pMouseEvent);
 	virtual void wheelEvent(QWheelEvent *pWheelEvent);
 
+	virtual void mouseDoubleClickEvent(QMouseEvent *pMouseEvent);
+
 private:
 
 	// Default (mid) value.
@@ -90,6 +92,9 @@ private:
 
 	// Just for more precission on the movement
 	float m_fLastDragValue;
+
+signals:
+	void doubleClicked();
 };
 
 

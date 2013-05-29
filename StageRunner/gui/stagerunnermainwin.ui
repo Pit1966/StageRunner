@@ -96,6 +96,10 @@
         </layout>
        </widget>
        <widget class="QWidget" name="develTab">
+        <attribute name="icon">
+         <iconset resource="../gfx_ressource.qrc">
+          <normaloff>:/gfx/icons/mode_edit.png</normaloff>:/gfx/icons/mode_edit.png</iconset>
+        </attribute>
         <attribute name="title">
          <string>Development</string>
         </attribute>

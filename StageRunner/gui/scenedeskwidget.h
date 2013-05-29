@@ -31,11 +31,8 @@ public slots:
 
 private slots:
 	void set_mixer_val_on_moved(int val, int id);
-
 	void on_liveCheck_clicked(bool checked);
-
 	void on_hookedUniverseSpin_valueChanged(int arg1);
-
 	void on_hookedChannelSpin_valueChanged(int arg1);
 
 signals:

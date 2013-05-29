@@ -37,20 +37,22 @@ PluginMapping::PluginMapping()
 
 PluginMapping::~PluginMapping()
 {
+	delete defaultLineConfig;
 }
 
 bool PluginMapping::saveToDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
 			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APP_NAME);
-	return fileSave(path);
+	return fileSave(path,false,true);
 }
 
 bool PluginMapping::loadFromDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
 			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APP_NAME);
-	return fileLoad(path);
+	bool ok = fileLoad(path);
+	return ok;
 }
 
 PluginConfig *PluginMapping::getCreatePluginLineConfig(const QString &plugin_name, const QString &line_name)
@@ -75,9 +77,12 @@ PluginConfig *PluginMapping::getCreatePluginLineConfig(const QString &plugin_nam
 
 void PluginMapping::init()
 {
+	defaultLineConfig = new PluginConfig;
+
 	setClass(PrefVarCore::PLUGIN_MAPPING,"Plugin mapping");
 	setDescription("This VarSet holds the configuration for discovered plugins");
 
 	addExistingVar(pluginConfigName,"PluginConfigName");
+	addExistingVar(*defaultLineConfig,"PluginConfigDummy");
 	addExistingVarSetList(pluginLineConfigs,"PluginLineConfigs",PrefVarCore::PLUGIN_CONFIG);
 }

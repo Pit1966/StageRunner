@@ -9,6 +9,7 @@
 #include "fxlistwidgetitem.h"
 
 #include <QDebug>
+#include <QLineEdit>
 
 
 FxListWidget::FxListWidget(QWidget *parent) :
@@ -67,17 +68,32 @@ void FxListWidget::setFxList(FxList *fxlist)
 		}
 
 		item = new_fxlistwidgetitem(fx,key,FxListWidgetItem::CT_KEY);
+		item->itemEdit->setMinimized(true);
 		item->itemEdit->setSingleKeyEditEnabled(true);
 		item->itemEdit->setFont(key_font);
-		item->setMaximumWidth(50);
+		item->itemEdit->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+		// item->setMaximumWidth(60);
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
 		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		fxTable->setCellWidget(t,col++,item);
 
-		item = new_fxlistwidgetitem(fx,QString::number(fx->fxType()),FxListWidgetItem::CT_FX_TYPE);
+		item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
 		item->setNeverEditable(true);
+		item->itemLabel->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
+			break;
+		case FX_SCENE:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/scene_mixer.png"));
+			break;
+		default:
+			break;
+		}
+		item->itemEdit->hide();
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
@@ -85,6 +101,8 @@ void FxListWidget::setFxList(FxList *fxlist)
 		fxTable->setCellWidget(t,col++,item);
 	}
 	fxTable->resizeColumnsToContents();
+	// fxTable->horizontalHeader()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+	fxTable->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 }
 
@@ -129,6 +147,7 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 {
 
 	SceneDeskWidget *desk = new SceneDeskWidget(fx);
+
 	desk->show();
 }
 

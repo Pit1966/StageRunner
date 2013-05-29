@@ -139,6 +139,10 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
 		restartFxAudioInSlot(msg.slotNumber);
 		break;
+	case CMD_AUDIO_FADEOUT:
+		LOGTEXT(tr("Fade out Audio Fx in slot %1").arg(msg.slotNumber+1));
+		fadeoutFxAudio(msg.slotNumber,msg.fadetime);
+		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		audioChannels[msg.slotNumber]->setVolume(msg.volume);
 		break;

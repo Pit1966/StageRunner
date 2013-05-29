@@ -39,5 +39,8 @@
         <file>gfx/customwidget/slider_button_active.png</file>
         <file>gfx/customwidget/slider_back_brush.png</file>
         <file>gfx/customwidget/slider_back_active.png</file>
+        <file>gfx/icons/audio_speaker.png</file>
+        <file>gfx/icons/audio_speaker_grey.png</file>
+        <file>gfx/icons/scene_mixer.png</file>
     </qresource>
 </RCC>

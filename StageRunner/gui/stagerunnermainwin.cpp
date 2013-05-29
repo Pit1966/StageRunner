@@ -431,13 +431,23 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 void StageRunnerMainWin::on_actionDMX_Input_triggered()
 {
 	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxInMonitor(0));
-	mon->show();
-	mon->raise();
+	if (mon) {
+		mon->show();
+		mon->raise();
+	} else {
+		QMessageBox::warning(this,tr("System message")
+							 ,tr("No input universe detected"));
+	}
 }
 
 void StageRunnerMainWin::on_actionDMX_Output_triggered()
 {
 	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxOutMonitor(0));
-	mon->show();
-	mon->raise();
+	if (mon) {
+		mon->show();
+		mon->raise();
+	} else {
+		QMessageBox::warning(this,tr("System message")
+							 ,tr("No output universe detected"));
+	}
 }

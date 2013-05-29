@@ -19,6 +19,8 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	my_universe = -1;
 	my_dmx_channel = -1;
 
+	prop_channel_shown_f = false;
+
 	knob_scaled_xsize = 0;
 	knob_scaled_ysize = 0;
 	knob_xoffset = 0;
@@ -161,11 +163,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	// Draw the reference value;
 	QPen pen;
-	if (refSliderColorIndex == 1) {
-		pen.setColor(Qt::red);
-	} else {
-		pen.setColor(Qt::blue);
-	}
+	pen.setColor(Qt::darkGreen);
 	if (width() < 20) {
 		pen.setWidth(1);
 	}
@@ -179,6 +177,25 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	int y1 = lo_pos_percent * height();
 	int y2 = y1 - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
 	p.drawLine(width()/2, y1, width()/2, y2);
+
+	if (refSliderColorIndex == 1) {
+		pen.setColor(Qt::red);
+		p.setPen(pen);
+		y2 = y1 - float(value()) / float(maximum()) * pos_range_percent * height();
+		p.drawLine(width()/2, y1, width()/2, y2);
+	}
+
+	// Draw Channelinfo if desired
+	if (prop_channel_shown_f) {
+		QFont font(p.font());
+		font.setFixedPitch(true);
+		font.setItalic(true);
+		font.setBold(true);
+		p.setFont(font);
+		p.setPen(Qt::white);
+		QRect bound(QPoint(0,y1),QPoint(width(),height()));
+		p.drawText(bound,QString::number(my_dmx_channel+1),QTextOption(Qt::AlignHCenter | Qt::AlignVCenter));
+	}
 
 	// Draw the knob
 	y = lo_pos_percent * height();

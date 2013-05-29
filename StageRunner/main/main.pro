@@ -78,7 +78,8 @@ SOURCES += \
     ../gui/lightcontrolwidget.cpp \
     ../tool/qtstatictools.cpp \
     ../gui/fxlistwidgetitem.cpp \
-    ../appcontrol/pluginmapping.cpp
+    ../appcontrol/pluginmapping.cpp \
+    ../gui/customwidget/pslabel.cpp
 
 HEADERS  += \
 	../config.h \
@@ -127,7 +128,8 @@ HEADERS  += \
     ../gui/lightcontrolwidget.h \
     ../tool/qtstatictools.h \
     ../gui/fxlistwidgetitem.h \
-    ../appcontrol/pluginmapping.h
+    ../appcontrol/pluginmapping.h \
+    ../gui/customwidget/pslabel.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

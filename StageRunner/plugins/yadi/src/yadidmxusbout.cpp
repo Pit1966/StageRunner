@@ -139,9 +139,11 @@ QStringList YadiDMXUSBOut::outputs()
 		YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(t),YadiDevice::FL_OUTPUT_UNIVERSE);
 		if (!yadi)
 			continue;
-		QString name = yadi->deviceProductName;
-		name += ": ";
+		QString name = "TX:";
 		name += yadi->devNodePath;
+		name += ":";
+		name += yadi->deviceProductName;
+		name += "(" + yadi->deviceSerial + ")";
 		if (!yadi->deviceNodePresent) {
 			name += " !!!";
 		}
@@ -330,9 +332,11 @@ QStringList YadiDMXUSBOut::inputs()
 		YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(t),YadiDevice::FL_INPUT_UNIVERSE);
 		if (!yadi)
 			continue;
-		QString name = yadi->deviceProductName;
-		name += ": ";
+		QString name = "RX:";
 		name += yadi->devNodePath;
+		name += ":";
+		name += yadi->deviceProductName;
+		name += "(" + yadi->deviceSerial +")";
 		if (!yadi->deviceNodePresent) {
 			name += " !!!";
 		}

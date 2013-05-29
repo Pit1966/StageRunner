@@ -10,6 +10,7 @@
 #include "ioplugincentral.h"
 #include "qlcioplugin.h"
 #include "lightcontrol.h"
+#include "pluginmapping.h"
 
 using namespace AUDIO;
 
@@ -103,7 +104,15 @@ void AppCentral::setEditMode(bool state)
 
 void AppCentral::loadPlugins()
 {
+	// Load Plugin Configuration and DMX Mapping
+	int old_debug = debug;
+	debug = 3;
+	pluginCentral->pluginMapping->loadFromDefaultFile();
+	debug = old_debug;
+	// Load the Plugins
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
+
+	pluginCentral->updatePluginMappingInformation();
 }
 
 void AppCentral::openPlugins()

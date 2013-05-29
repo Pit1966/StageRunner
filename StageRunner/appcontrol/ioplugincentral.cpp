@@ -74,8 +74,6 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		}
 
 	}
-
-	updatePluginMappingInformation();
 }
 
 bool IOPluginCentral::updatePluginMappingInformation()
@@ -91,11 +89,11 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 		for (int t=0; t<outputs.size(); t++) {
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,outputs.at(t));
-			qDebug() << (++count) << lineconf->pLineName;
+			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 		}
 		for (int t=0; t<inputs.size(); t++) {
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,inputs.at(t));
-			qDebug() << (++count) << lineconf->pLineName;
+			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 		}
 	}
 

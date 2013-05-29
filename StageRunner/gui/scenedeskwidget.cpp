@@ -43,6 +43,7 @@ void SceneDeskWidget::init_gui()
 bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 {
 	faderWidget->clear();
+	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
 	// First we save the pointer to the scene;
 	cur_fx = scene;
@@ -61,6 +62,11 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel);
 			fader->setRange(0,dmx->targetFullValue);
 			fader->setValue(dmx->targetValue);
+			fader->setChannelShown(true);
+
+			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
+			ref_val = ref_val * dmx->targetFullValue / 255;
+			fader->setRefValue(ref_val);
 
 			// and of course we need a slot to react on slider movement
 			connect(fader,SIGNAL(mixerMoved(int,int)),this,SLOT(set_mixer_val_on_moved(int,int)));
@@ -88,6 +94,7 @@ void SceneDeskWidget::closeEvent(QCloseEvent *)
 	DEBUGTEXT("Desk CloseEvent");
 
 }
+
 
 void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxValues)
 {
@@ -138,9 +145,11 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 
 	} else {
 		faderWidget->setRefSliderColorIndex(0);
-		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-			DmxChannel *tube = cur_fxscene->tubes.at(t);
-			tube->curValue = 0;
+		if (!cur_fxscene->isOnStage()) {
+			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+				DmxChannel *tube = cur_fxscene->tubes.at(t);
+				tube->curValue = 0;
+			}
 		}
 	}
 

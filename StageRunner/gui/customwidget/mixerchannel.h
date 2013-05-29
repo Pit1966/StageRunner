@@ -9,10 +9,16 @@
 class MixerChannel : public QAbstractSlider
 {
 	Q_OBJECT
+public:
+	Q_PROPERTY(bool channelShown READ channelShown WRITE setChannelShown)
+
+
 private:
 	int my_id;						///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
 	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
 	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
+
+	bool prop_channel_shown_f;
 
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
@@ -58,6 +64,8 @@ public:
 	void setValues(int val, int refval);
 	void setRefValue(int val, int colidx = -1);
 	int refValue();
+	inline void setChannelShown(bool state) {prop_channel_shown_f = state;}
+	inline bool channelShown() const {return prop_channel_shown_f;}
 
 private:
 	void mousePressEvent(QMouseEvent *event);

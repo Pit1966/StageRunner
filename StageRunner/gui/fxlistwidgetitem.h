@@ -39,6 +39,7 @@ private slots:
 	void if_edit_item_doubleclicked();
 	void if_edit_item_edited(const QString & text);
 
+	void if_label_item_doubleclicked();
 signals:
 	void itemClicked(FxListWidgetItem *);
 	void itemDoubleClicked(FxListWidgetItem *);

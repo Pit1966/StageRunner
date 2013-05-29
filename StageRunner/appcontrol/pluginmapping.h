@@ -26,6 +26,7 @@ public:
 	~PluginMapping();
 
 	pstring pluginConfigName;
+	PluginConfig *defaultLineConfig;
 	VarSetList<PluginConfig*>pluginLineConfigs;
 
 	bool saveToDefaultFile();

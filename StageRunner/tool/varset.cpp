@@ -3,9 +3,10 @@
 #include "config.h"
 #include "database.h"
 #include "dbquery.h"
-#include "system/log.h"
+#include "log.h"
 
 #include "dmxchannel.h"
+#include "pluginmapping.h"
 
 #include <QSettings>
 
@@ -114,7 +115,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 
 	QString line = read.readLine();
 	(*p_line_number)++;
-	if (debug > 2) qDebug() << "line" << *p_line_number << "level:" << child_level;
+	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level;
 
 
 	if (line.size() > 2 && !line.startsWith("#")) {
@@ -164,23 +165,38 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 			}
 
 			if (varset) {
+				/// @todo Here we have to implement new code for each new VarSet-Class to load it in a list
 				if (curChildActive) {
 					if (1 || !curChildItemFound) {
 						curChildItemFound = true;
 						curChildItemClass = b1;
 						if (debug > 2) qDebug() << "Found Child Item with class name:" << b1 << "list num:" << b3;
 
-						// Liste finden
+						// Liste finden (This means: finding the address of the VarSetList)
 						for (int t=0; t<varset->var_list.size(); t++) {
 							PrefVarCore *var = varset->var_list.at(t);
 							if (var->myname == curChildListName) {
+								/// implement new VarSetList Types here
 								if (var->myclass == PrefVarCore::DMX_CHANNEL) {
 									VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
 									DmxChannel *item = new DmxChannel;
 									varsetlist->append(item);
-									return item->analyzeLoop(read,item,child_level+1,p_line_number);
+									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+										return -1;
+									} else {
+										return 0;
+									}
 								}
-
+								else if (var->myclass == PrefVarCore::PLUGIN_CONFIG) {
+									VarSetList<PluginConfig*> *varsetlist = reinterpret_cast<VarSetList<PluginConfig*>*>(var->p_refvar);
+									PluginConfig *item = new PluginConfig;
+									varsetlist->append(item);
+									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+										return -1;
+									} else {
+										return 0;
+									}
+								}
 							}
 						}
 					}

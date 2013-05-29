@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>338</width>
-    <height>23</height>
+    <width>182</width>
+    <height>25</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -30,7 +36,7 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QLabel" name="itemLabel">
+    <widget class="PsLabel" name="itemLabel">
      <property name="text">
       <string>Dummy</string>
      </property>
@@ -38,6 +44,12 @@
    </item>
    <item>
     <widget class="PsLineEdit" name="itemEdit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="frame">
       <bool>false</bool>
      </property>
@@ -50,6 +62,11 @@
    <class>PsLineEdit</class>
    <extends>QLineEdit</extends>
    <header>customwidget/pslineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PsLabel</class>
+   <extends>QLabel</extends>
+   <header>customwidget/pslabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

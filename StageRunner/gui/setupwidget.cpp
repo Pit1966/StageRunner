@@ -108,6 +108,10 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 	int row = 0;
 	for (int t=0; t<outnames.size(); t++) {
 		QTableWidgetItem *item;
+		// Get current configuration of Plugin and Output-Line from pluginCentral
+		PluginConfig *conf = 0;
+		if (cur_plugin_map)
+			conf = cur_plugin_map->getCreatePluginLineConfig(plugin->name(),outnames.at(t));
 
 		item = new QTableWidgetItem(tr("DMX Output"));
 		dmxMappingTable->setItem(row,0,item);
@@ -118,6 +122,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
+		if (conf) spin->setValue(conf->pUniverse);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
@@ -129,6 +134,9 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 
 	for (int t=0; t<innames.size(); t++) {
 		QTableWidgetItem *item;
+		PluginConfig *conf = 0;
+		if (cur_plugin_map)
+			conf = myapp->pluginCentral->pluginMapping->getCreatePluginLineConfig(plugin->name(),innames.at(t));
 
 		item = new QTableWidgetItem(tr("DMX Input"));
 		dmxMappingTable->setItem(row,0,item);
@@ -139,6 +147,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
+		if (conf) spin->setValue(conf->pUniverse);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
