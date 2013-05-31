@@ -10,6 +10,7 @@ PsLineEdit::PsLineEdit(QWidget *parent) :
 	current_modifier = 0;
 	prop_editable = true;
 	prop_minimized = false;
+	prop_events_shared = false;
 }
 
 void PsLineEdit::setSingleKeyEditEnabled(bool state)
@@ -60,15 +61,24 @@ QSize PsLineEdit::minimumSizeHint() const
 
 void PsLineEdit::mousePressEvent(QMouseEvent *event)
 {
-	Q_UNUSED(event);
 	// qDebug("PsLineEdit -> click");
 	emit clicked();
+
+	if (prop_events_shared)
+		event->ignore();
 }
 
 void PsLineEdit::mouseDoubleClickEvent(QMouseEvent *event)
 {
-	Q_UNUSED(event);
 	emit doubleClicked();
+	if (prop_events_shared)
+		event->ignore();
+}
+
+void PsLineEdit::mouseMoveEvent(QMouseEvent *event)
+{
+	if (prop_events_shared)
+		event->ignore();
 }
 
 void PsLineEdit::keyPressEvent(QKeyEvent *event)

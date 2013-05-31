@@ -11,6 +11,8 @@ class MixerChannel : public QAbstractSlider
 	Q_OBJECT
 public:
 	Q_PROPERTY(bool channelShown READ channelShown WRITE setChannelShown)
+	Q_PROPERTY(bool selectable READ isSelectable WRITE setSelectable)
+	Q_PROPERTY(bool selected READ isSelected WRITE setSelected)
 
 
 private:
@@ -19,6 +21,8 @@ private:
 	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
 
 	bool prop_channel_shown_f;
+	bool prop_selectable_f;
+	bool prop_selected_f;
 
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
@@ -49,6 +53,7 @@ private:
 protected:
 	int refSliderColorIndex;
 	QAbstractSlider refSlider;
+	int currentButton;				///< Current pressed mouse button
 
 public:
 	MixerChannel(QWidget *parent = 0);
@@ -56,8 +61,8 @@ public:
 	inline void setId(int id) {my_id = id;}
 	inline int id() {return my_id;}
 	inline void setDmxId(int universe, int dmx_channel) {my_universe = universe; my_dmx_channel = dmx_channel;}
-	inline int dmxUniverse() {return my_universe;}
-	inline int dmxChannel() {return my_dmx_channel;}
+	inline int dmxUniverse() const {return my_universe;}
+	inline int dmxChannel() const {return my_dmx_channel;}
 	void setRange(int min, int max);
 	void setMinimum(int min);
 	void setMaximum(int max);
@@ -66,6 +71,13 @@ public:
 	int refValue();
 	inline void setChannelShown(bool state) {prop_channel_shown_f = state;}
 	inline bool channelShown() const {return prop_channel_shown_f;}
+	void setSelected(bool state);
+	inline bool isSelected() const {return prop_selected_f;}
+	void setSelectable(bool state);
+	inline bool isSelectable() const {return prop_selectable_f;}
+	inline QSize backgroundSize() const {return org_pix_back.size();}
+	inline int backGroundWidth() const {return org_pix_back.size().width();}
+	inline int backGroundHeight() const {return org_pix_back.size().height();}
 
 private:
 	void mousePressEvent(QMouseEvent *event);
@@ -84,6 +96,9 @@ public slots:
 
 signals:
 	void mixerMoved(int val, int id);
+	void clicked();
+	void rightClicked();
+	void mixerSelected(bool state, int id);
 
 public slots:
 

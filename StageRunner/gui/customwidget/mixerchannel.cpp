@@ -20,6 +20,8 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	my_dmx_channel = -1;
 
 	prop_channel_shown_f = false;
+	prop_selectable_f = false;
+	prop_selected_f = false;
 
 	knob_scaled_xsize = 0;
 	knob_scaled_ysize = 0;
@@ -31,6 +33,7 @@ MixerChannel::MixerChannel(QWidget *parent) :
 	do_paint_f = false;
 
 	click_value = 0;
+	currentButton = 0;
 
 
 	lo_pos_percent = float(LO_POS_PERCENT) / 100;
@@ -91,6 +94,23 @@ int MixerChannel::refValue()
 	return refSlider.value();
 }
 
+void MixerChannel::setSelected(bool state)
+{
+	if (prop_selected_f != state) {
+		prop_selected_f = state;
+		update();
+		emit mixerSelected(state,int(my_id));
+	}
+}
+
+void MixerChannel::setSelectable(bool state)
+{
+	prop_selectable_f = state;
+	if (!state) {
+		prop_selected_f = false;
+	}
+}
+
 void MixerChannel::mousePressEvent(QMouseEvent *event)
 {
 	if (knob_rect.contains(event->pos() )) {
@@ -102,6 +122,16 @@ void MixerChannel::mousePressEvent(QMouseEvent *event)
 	} else {
 		knob_selected_f = false;
 	}
+
+	currentButton = event->button();
+
+	if (currentButton == Qt::LeftButton) {
+		emit clicked();
+	}
+	else if (currentButton == Qt::RightButton) {
+		emit rightClicked();
+	}
+
 }
 
 void MixerChannel::mouseMoveEvent(QMouseEvent *event)
@@ -128,7 +158,15 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 void MixerChannel::mouseReleaseEvent(QMouseEvent *event)
 {
 	Q_UNUSED(event);
-	knob_selected_f = false;
+	if (!knob_selected_f) {
+		if (prop_selectable_f) {
+			setSelected(!prop_selected_f);
+		}
+	} else {
+		knob_selected_f = false;
+	}
+	currentButton = 0;
+
 	update();
 }
 
@@ -150,6 +188,16 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawPixmap(event->rect(),org_pix_back);
 	}
 
+	// If Selected draw a box if selected
+	if (prop_selected_f) {
+		QBrush brush(Qt::SolidPattern);
+		brush.setColor(QColor(0,50,0,40));
+		p.setPen(Qt::NoPen);
+		p.setBrush(brush);
+		p.drawRect(0,0,width(),height());
+	}
+
+
 	int y;
 	int scales = 11;
 	int linelen = width() / 3;
@@ -161,30 +209,32 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawLine(width()-linelen,y,width(),y);
 	}
 
-	// Draw the reference value;
-	QPen pen;
-	pen.setColor(Qt::darkGreen);
-	if (width() < 20) {
-		pen.setWidth(1);
-	}
-	else if (width() < 30) {
-		pen.setWidth(2);
-	}
-	else {
-		pen.setWidth(3);
-	}
-	p.setPen(pen);
 	int y1 = lo_pos_percent * height();
-	int y2 = y1 - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
-	p.drawLine(width()/2, y1, width()/2, y2);
 
-	if (refSliderColorIndex == 1) {
-		pen.setColor(Qt::red);
+	// Draw the reference value;
+	if (refSlider.value()) {
+		QPen pen;
+		pen.setColor(Qt::darkGreen);
+		if (width() < 20) {
+			pen.setWidth(1);
+		}
+		else if (width() < 30) {
+			pen.setWidth(2);
+		}
+		else {
+			pen.setWidth(3);
+		}
 		p.setPen(pen);
-		y2 = y1 - float(value()) / float(maximum()) * pos_range_percent * height();
+		int y2 = y1 - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
 		p.drawLine(width()/2, y1, width()/2, y2);
-	}
 
+		if (refSliderColorIndex == 1) {
+			pen.setColor(Qt::red);
+			p.setPen(pen);
+			y2 = y1 - float(value()) / float(maximum()) * pos_range_percent * height();
+			p.drawLine(width()/2, y1, width()/2, y2);
+		}
+	}
 	// Draw Channelinfo if desired
 	if (prop_channel_shown_f) {
 		QFont font(p.font());

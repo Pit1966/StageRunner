@@ -9,6 +9,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QSpinBox>
+#include <QMessageBox>
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	: QDialog(parent)
@@ -35,6 +36,7 @@ void SetupWidget::init()
 {
 	cur_selected_qlc_plugin = 0;
 	cur_plugin_map = 0;
+	update_plugin_mapping_f = false;
 }
 
 void SetupWidget::copy_settings_to_gui()
@@ -53,6 +55,9 @@ void SetupWidget::copy_gui_to_settings()
 void SetupWidget::on_okButton_clicked()
 {
 	copy_gui_to_settings();
+	if (update_plugin_mapping_f) {
+		myapp->pluginCentral->updatePluginMappingInformation();
+	}
 	accept();
 }
 
@@ -98,10 +103,10 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 	QStringList outnames = plugin->outputs();
 	QStringList innames = plugin->inputs();
 	dmxMappingTable->setRowCount(outnames.size() + innames.size());
-	dmxMappingTable->setColumnCount(3);
+	dmxMappingTable->setColumnCount(4);
 
 	QStringList header;
-	header << tr("Line") << tr("DMX Universe") << tr("Name");
+	header << tr("Line") << tr("DMX Universe") << tr("Name") << tr("Response Time");
 	dmxMappingTable->setHorizontalHeaderLabels(header);
 	dmxMappingTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -122,12 +127,22 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
-		if (conf) spin->setValue(conf->pUniverse);
+		if (conf) spin->setValue(conf->pUniverse+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
 		item = new QTableWidgetItem(outnames.at(t));
 		dmxMappingTable->setItem(row,2,item);
+
+		spin = new QSpinBox();
+		spin->setRange(0,5000);
+		spin->setSuffix(tr("ms"));
+		spin->setFrame(false);
+		spin->setProperty("plugin",plugin->name());
+		spin->setProperty("line",outnames.at(t));
+		if (conf) spin->setValue(conf->pResponseTime);
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_responsetime_changed(int)));
+		dmxMappingTable->setCellWidget(row,3,spin);
 
 		row++;
 	}
@@ -147,12 +162,22 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
-		if (conf) spin->setValue(conf->pUniverse);
+		if (conf) spin->setValue(conf->pUniverse+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
 		item = new QTableWidgetItem(innames.at(t));
 		dmxMappingTable->setItem(row,2,item);
+
+		spin = new QSpinBox();
+		spin->setRange(0,5000);
+		spin->setSuffix(tr("ms"));
+		spin->setFrame(false);
+		spin->setProperty("plugin",plugin->name());
+		spin->setProperty("line",innames.at(t));
+		if (conf) spin->setValue(conf->pResponseTime);
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_responsetime_changed(int)));
+		dmxMappingTable->setCellWidget(row,3,spin);
 
 		row++;
 	}
@@ -168,7 +193,11 @@ void SetupWidget::on_configurePluginButton_clicked()
 
 void SetupWidget::on_saveDmxConfigButton_clicked()
 {
-	AppCentral::instance()->pluginCentral->pluginMapping->saveToDefaultFile();
+	if (AppCentral::instance()->pluginCentral->pluginMapping->saveToDefaultFile()) {
+		QMessageBox::information(this,tr("DMX Configuration")
+								 ,tr("DMX Plugin Configuration successfully saved!"));
+		LOGTEXT(tr("DMX Plugin Configuration successfully saved!"));
+	}
 }
 
 void SetupWidget::if_pluginline_universe_changed(int val)
@@ -178,6 +207,19 @@ void SetupWidget::if_pluginline_universe_changed(int val)
 
 	if (cur_plugin_map) {
 		PluginConfig *lineconf = cur_plugin_map->getCreatePluginLineConfig(plugin_name,plugin_line);
-		lineconf->pUniverse = val;
+		lineconf->pUniverse = val-1;
+		update_plugin_mapping_f = true;
+	}
+}
+
+void SetupWidget::if_pluginline_responsetime_changed(int val)
+{
+	QString plugin_name = sender()->property("plugin").toString();
+	QString plugin_line = sender()->property("line").toString();
+
+	if (cur_plugin_map) {
+		PluginConfig *lineconf = cur_plugin_map->getCreatePluginLineConfig(plugin_name,plugin_line);
+		lineconf->pResponseTime = val;
+		update_plugin_mapping_f = true;
 	}
 }

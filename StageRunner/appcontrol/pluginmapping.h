@@ -4,15 +4,23 @@
 #include "varset.h"
 #include "varsetlist.h"
 
+class QLCIOPlugin;
+
 class PluginConfig : public VarSet
 {
 public:
-	PluginConfig();
-	~PluginConfig();
-
 	pstring pPluginName;
 	pstring pLineName;
 	pint32 pUniverse;
+	pint32 pResponseTime;					///< This is the fade delay time for incoming DMX Data when it is forwarded to a scene
+
+	QLCIOPlugin *plugin;
+	int deviceNumber;
+	int deviceIoType;
+
+public:
+	PluginConfig();
+	~PluginConfig();
 
 private:
 	void init();

@@ -9,9 +9,12 @@ class PTableWidget : public QTableWidget
 private:
 	int drag_start_row;
 	int drag_dest_row;
+	int drag_temp_row;
 
 public:
 	PTableWidget(QWidget *parent = 0);
+	void clearDragAndDropAction();
+	void clear();
 
 private:
 	void dragEnterEvent(QDragEnterEvent *event);

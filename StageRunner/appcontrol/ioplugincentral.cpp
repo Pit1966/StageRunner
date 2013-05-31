@@ -82,6 +82,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 	int count = 0;
 
+	// Discover plugin lines (input/outputs) and update configuration for each
 	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
 		QString plugin_name = plugin->name();
 		QStringList outputs = plugin->outputs();
@@ -89,12 +90,56 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 		for (int t=0; t<outputs.size(); t++) {
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,outputs.at(t));
+			lineconf->plugin = plugin;
+			lineconf->deviceNumber = t;
+			lineconf->deviceIoType = QLCIOPlugin::Output;
 			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 		}
 		for (int t=0; t<inputs.size(); t++) {
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,inputs.at(t));
+			lineconf->plugin = plugin;
+			lineconf->deviceNumber = t;
+			lineconf->deviceIoType = QLCIOPlugin::Input;
 			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 		}
+	}
+
+	// Clear current fast access tables
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		fastMapInUniverse[t].plugin = 0;
+		fastMapOutUniverse[t].plugin = 0;
+	}
+
+	// Create fast access tables for universe to plugin mapping
+	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
+		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
+		int univ = lineconf->pUniverse;
+
+		if (lineconf->deviceIoType == QLCIOPlugin::Output) {
+			if (fastMapOutUniverse[univ].plugin) {
+				POPUPERRORMSG(tr("Plugin Settings")
+							  ,tr("Output universe %1 is assigned to multiple plugin lines -> this is not implemted yet")
+						 .arg(univ+1));
+			} else {
+				fastMapOutUniverse[univ].deviceUniverse = univ;
+				fastMapOutUniverse[univ].plugin = lineconf->plugin;
+				fastMapOutUniverse[univ].deviceNumber = lineconf->deviceNumber;
+				fastMapOutUniverse[univ].responseTime = lineconf->pResponseTime;
+			}
+		}
+		else if (lineconf->deviceIoType == QLCIOPlugin::Input) {
+			if (fastMapInUniverse[univ].plugin) {
+				POPUPERRORMSG(tr("Plugin Settings")
+							  ,tr("Input universe %1 is assigned to multiple plugin lines -> this is not implemented yet")
+						 .arg(univ+1));
+			} else {
+				fastMapInUniverse[univ].deviceUniverse = univ;
+				fastMapInUniverse[univ].plugin = lineconf->plugin;
+				fastMapInUniverse[univ].deviceNumber = lineconf->deviceNumber;
+				fastMapInUniverse[univ].responseTime = lineconf->pResponseTime;
+			}
+		}
+
 	}
 
 	return true;
@@ -165,44 +210,36 @@ QString IOPluginCentral::sysPluginDir()
 
 bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int &output)
 {
-	plugin = 0;
-	output = 0;
-
-	foreach(QLCIOPlugin *plugin_it, qlcPlugins()) {
-		if (plugin_it->capabilities() & QLCIOPlugin::Output) {
-			/// @implement me: something like plugin->handlesUniverse(unviverse)
-			if (universe == 0) {
-				plugin = plugin_it;
-			}
-			return true;
-		}
+	if (fastMapOutUniverse[universe].plugin) {
+		plugin = fastMapOutUniverse[universe].plugin;
+		output = fastMapOutUniverse[universe].deviceNumber;
+		return true;
+	} else {
+		plugin = 0;
+		output = 0;
+		return false;
 	}
-	return false;
 }
 
 bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int &input)
 {
-	plugin = 0;
-	input = 0;
-
-	foreach(QLCIOPlugin *plugin_it, qlcPlugins()) {
-		if (plugin_it->capabilities() & QLCIOPlugin::Input) {
-			/// @implement me: something like plugin->handlesUniverse(unviverse)
-			if (universe == 0) {
-				plugin = plugin_it;
-			}
-			return true;
-		}
+	if (fastMapInUniverse[universe].plugin) {
+		plugin = fastMapInUniverse[universe].plugin;
+		input = fastMapInUniverse[universe].deviceNumber;
+		return true;
+	} else {
+		plugin = 0;
+		input = 0;
+		return false;
 	}
-	return false;
 }
 
 bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const
 {
-	if (qlcPlugins().contains(plugin)) {
-		/// @implement me:
-		if (input == 0) {
-			universe = 0;
+	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
+		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
+		if (lineconf->plugin == plugin && lineconf->deviceNumber == input && lineconf->deviceIoType == QLCIOPlugin::Input) {
+			universe = lineconf->pUniverse;
 			return true;
 		}
 	}
@@ -211,10 +248,10 @@ bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, 
 
 bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const
 {
-	if (qlcPlugins().contains(plugin)) {
-		/// @implement me:
-		if (output == 0) {
-			universe = 0;
+	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
+		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
+		if (lineconf->plugin == plugin && lineconf->deviceNumber == output && lineconf->deviceIoType == QLCIOPlugin::Output) {
+			universe = lineconf->pUniverse;
 			return true;
 		}
 	}

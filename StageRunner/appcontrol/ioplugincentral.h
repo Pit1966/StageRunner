@@ -5,6 +5,8 @@
 #include <QList>
 #include <QString>
 
+#include "config.h"
+
 class QLCIOPlugin;
 class PluginMapping;
 
@@ -12,10 +14,29 @@ class IOPluginCentral : public QObject
 {
 	Q_OBJECT
 public:
-	PluginMapping *pluginMapping;					///< This VarSet holds the configuration of plugins and DMX universe mapping
+
+	class PluginEntry {
+	public:
+		QLCIOPlugin * plugin;						///< Pointer to loaded Plugin
+		int deviceNumber;							///< The output/input number from plugin for the universe
+		int deviceUniverse;
+		int responseTime;
+	public:
+		PluginEntry()
+			: plugin(0)
+			,deviceNumber(0)
+			,deviceUniverse(0)
+			,responseTime(0)
+		{
+		}
+	};
+
+	PluginMapping *pluginMapping;						///< This VarSet holds the configuration of plugins and DMX universe mapping
+	PluginEntry fastMapOutUniverse[MAX_DMX_UNIVERSE];	///< Array that connects output universe Number to configured Plugin and Output
+	PluginEntry fastMapInUniverse[MAX_DMX_UNIVERSE];	///< Array that connects input universe Number to configured Plugin and Output
 
 private:
-	QList<QLCIOPlugin*>qlc_plugins;					///< A list of loaded QLCIOPlugin type plugins
+	QList<QLCIOPlugin*>qlc_plugins;						///< A list of loaded QLCIOPlugin type plugins
 
 public:
 	explicit IOPluginCentral(QObject *parent = 0);

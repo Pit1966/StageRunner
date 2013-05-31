@@ -192,12 +192,15 @@ void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 
 void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
 {
+	if (universe >= MAX_DMX_UNIVERSE) return;
+
 	foreach (FxItem * fx, FxItem::globalFxList()) {
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 			if (scene->hookedToInputUniverse == qint32(universe) && scene->hookedToInputDmxChannel == qint32(channel)) {
-				// qDebug("Direct Fade Scene: %s to %d",scene->name().toLocal8Bit().data(),value);
-				if (scene->directFadeToDmx(value,200)) {
+				int response_time = myApp->pluginCentral->fastMapInUniverse[universe].responseTime;
+				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
+				if (scene->directFadeToDmx(value,response_time)) {
 					setSceneActive(scene);
 				}
 			}

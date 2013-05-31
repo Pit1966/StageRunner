@@ -74,10 +74,14 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->itemEdit->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
 		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
 		// item->setMaximumWidth(60);
+		item->myRow = t;
+		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
 		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+		item->myRow = t;
+		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
@@ -94,10 +98,14 @@ void FxListWidget::setFxList(FxList *fxlist)
 			break;
 		}
 		item->itemEdit->hide();
+		item->myRow = t;
+		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
 		item->setNeverEditable(true);
+		item->myRow = t;
+		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 	}
 	fxTable->resizeColumnsToContents();
@@ -325,9 +333,9 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 		fx->setModified(true);
 		break;
 	case FxListWidgetItem::CT_KEY:
+		fx->setKeyCode(QtStaticTools::stringToKey(text));
 		break;
 	default:
-		fx->setKeyCode(QtStaticTools::stringToKey(text));
 		break;
 	}
 }

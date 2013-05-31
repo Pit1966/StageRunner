@@ -79,7 +79,8 @@ SOURCES += \
     ../tool/qtstatictools.cpp \
     ../gui/fxlistwidgetitem.cpp \
     ../appcontrol/pluginmapping.cpp \
-    ../gui/customwidget/pslabel.cpp
+    ../gui/customwidget/pslabel.cpp \
+    ../gui/customwidget/extmimedata.cpp
 
 HEADERS  += \
 	../config.h \
@@ -129,7 +130,8 @@ HEADERS  += \
     ../tool/qtstatictools.h \
     ../gui/fxlistwidgetitem.h \
     ../appcontrol/pluginmapping.h \
-    ../gui/customwidget/pslabel.h
+    ../gui/customwidget/pslabel.h \
+    ../gui/customwidget/extmimedata.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

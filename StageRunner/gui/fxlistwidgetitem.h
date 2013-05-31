@@ -20,26 +20,44 @@ public:
 	FxItem *linkedFxItem;
 	QString itemText;
 	ColumnType columnType;
+
+	int myRow;
+	int myColumn;
+
 private:
 	bool is_editable_f;
 	bool is_never_editable_f;
+	int current_button;
+	QPoint drag_begin_pos;
 
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
+	FxListWidgetItem(const FxListWidgetItem & other);
+	~FxListWidgetItem();
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
+
+private:
+	void init();
+
+protected:
+	void mousePressEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *);
+	void mouseMoveEvent(QMouseEvent *event);
+
 
 public slots:
 	void setEditable(bool state);
 	void setNeverEditable(bool state);
 
+
 private slots:
 	void if_edit_item_clicked();
 	void if_edit_item_doubleclicked();
 	void if_edit_item_edited(const QString & text);
-
 	void if_label_item_doubleclicked();
+
 signals:
 	void itemClicked(FxListWidgetItem *);
 	void itemDoubleClicked(FxListWidgetItem *);

@@ -15,6 +15,8 @@ private:
 	QLCIOPlugin * cur_selected_qlc_plugin;
 	PluginMapping *cur_plugin_map;
 
+	bool update_plugin_mapping_f;					///< Flag that decides if PluginMapping should be adjusted on Setup Dialog close
+
 public:
 	SetupWidget(AppCentral *app_central, QWidget *parent = 0);
 
@@ -32,6 +34,7 @@ private slots:
 	void on_saveDmxConfigButton_clicked();
 
 	void if_pluginline_universe_changed(int val);
+	void if_pluginline_responsetime_changed(int val);
 };
 
 #endif // SETUPWIDGET_H

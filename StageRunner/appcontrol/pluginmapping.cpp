@@ -14,12 +14,17 @@ PluginConfig::~PluginConfig()
 
 void PluginConfig::init()
 {
+	plugin = 0;
+	deviceNumber = 0;
+	deviceIoType = 0;
+
 	setClass(PrefVarCore::PLUGIN_CONFIG,"Plugin config");
 	setDescription("This VarSet holds the configuration for an input or output of a plugin");
 
 	addExistingVar(pPluginName,"PluginName");
 	addExistingVar(pLineName,"LineName");
 	addExistingVar(pUniverse,"Universe");
+	addExistingVar(pResponseTime,"ResponseTime");
 }
 
 
