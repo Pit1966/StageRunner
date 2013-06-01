@@ -115,6 +115,9 @@ bool IOPluginCentral::updatePluginMappingInformation()
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		int univ = lineconf->pUniverse;
 
+		if (!lineconf->pIsUsed || univ < 0 || univ >= MAX_DMX_UNIVERSE)
+			continue;
+
 		if (lineconf->deviceIoType == QLCIOPlugin::Output) {
 			if (fastMapOutUniverse[univ].plugin) {
 				POPUPERRORMSG(tr("Plugin Settings")
@@ -147,6 +150,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 bool IOPluginCentral::openPlugins()
 {
+	/// @todo: implement Plugin Enable/Disable Flag in Config
 	bool one_opened = false;
 
 	for (int t=0; t<qlc_plugins.size(); t++) {
@@ -162,17 +166,29 @@ bool IOPluginCentral::openPlugins()
 
 		QStringList outputs = plugin->outputs();
 		for (int o=0; o<outputs.size(); o++) {
-			LOGTEXT(tr("   Open Output: %1").arg(outputs.at(o)));
-			plugin->openOutput(o);
-			one_opened = true;
+			int universe;
+			getOutputUniverseForPlugin(plugin,o,universe);
+			if (universe < 0) {
+				LOGTEXT(tr("   Output %1 not used").arg(outputs.at(o)));
+			} else {
+				LOGTEXT(tr("   <font color=darkgreen>Open Output: %1</font>").arg(outputs.at(o)));
+				plugin->openOutput(o);
+				one_opened = true;
+			}
 		}
 
 		QStringList inputs = plugin->inputs();
-		for (int o=0; o<inputs.size(); o++) {
-			LOGTEXT(tr("   Open Input: %1").arg(inputs.at(o)));
-			plugin->openInput(o);
-			one_opened = true;
-			// Lets connect to inputChanged Signal
+		for (int i=0; i<inputs.size(); i++) {
+			int universe;
+			getInputUniverseForPlugin(plugin,i,universe);
+			if (universe < 0) {
+				LOGTEXT(tr("   Input %1 not used").arg(inputs.at(i)));
+			} else {
+				LOGTEXT(tr("   <font color=darkgreen>Open Input: %1</font>").arg(inputs.at(i)));
+				plugin->openInput(i);
+				one_opened = true;
+				// Lets connect to inputChanged Signal
+			}
 			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)));
 		}
 
@@ -234,27 +250,51 @@ bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin 
 	}
 }
 
+/**
+ * @brief Finds the Input Universe number for an input number of a plugin
+ * @param plugin Pointer to QLCIOPlugin instance to search in
+ * @param input The desired input number
+ * @param universe This is a return by reference parameter. The variable will get the universe number or -1 if not enabled
+ * @return false, if input was not found;
+ */
 bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const
 {
 	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == input && lineconf->deviceIoType == QLCIOPlugin::Input) {
-			universe = lineconf->pUniverse;
+			if (lineconf->pIsUsed) {
+				universe = lineconf->pUniverse;
+			} else {
+				universe = -1;
+			}
 			return true;
 		}
 	}
+	universe = -1;
 	return false;
 }
 
+/**
+* @brief Finds the output Universe number for an input number of a plugin
+* @param plugin Pointer to QLCIOPlugin instance to search in
+* @param output The desired output number
+* @param universe This is a return by reference parameter. The variable will get the universe number or -1 if not enabled
+* @return false, if output was not found;
+*/
 bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const
 {
 	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == output && lineconf->deviceIoType == QLCIOPlugin::Output) {
-			universe = lineconf->pUniverse;
+			if (lineconf->pIsUsed) {
+				universe = lineconf->pUniverse;
+			} else {
+				universe = -1;
+			}
 			return true;
 		}
 	}
+	universe = -1;
 	return false;
 }
 
@@ -275,8 +315,12 @@ void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar 
 	if(sendby) {
 		int universe;
 		if (getInputUniverseForPlugin(sendby,input,universe)) {
-			emit universeValueChanged(universe,channel,value);
-			if (debug > 4) DEBUGTEXT("%s: Value changed in universe %d -> ch:%d=%d",universe,channel,value);
+			if (universe < 0) {
+				if (debug > 4) DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
+			} else {
+				emit universeValueChanged(universe,channel,value);
+				if (debug > 4) DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",universe+1,channel,value);
+			}
 		}
 	}
 }

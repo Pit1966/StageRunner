@@ -1,10 +1,8 @@
 #include "fxlistwidgetitem.h"
 #include "customwidget/pslineedit.h"
-#include "customwidget/extmimedata.h"
 #include "fxitem.h"
 
 #include <QMouseEvent>
-#include <QDrag>
 
 FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype) :
 	QWidget()
@@ -78,26 +76,9 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
 	QPoint dist = event->pos() - drag_begin_pos;
 
 	if (current_button == Qt::LeftButton && dist.manhattanLength() > 10) {
+		emit draged(this);
+		current_button = 0;
 
-		FxListWidgetItem *temp = new FxListWidgetItem(*this);
-		temp->setObjectName("TestTest");
-
-		ExtDrag *drag = new ExtDrag(temp,true);
-		ExtMimeData *mdata = new ExtMimeData();
-		QPixmap pixmap(size());
-		render(&pixmap);
-
-		mdata->fxListWidgetItem = this;
-		mdata->setText(this->linkedFxItem->name());
-		mdata->tableRow = myRow;
-		mdata->tableCol = myColumn;
-		drag->setMimeData(mdata);
-		drag->setPixmap(pixmap);
-		drag->setHotSpot(drag_begin_pos);
-		Qt::DropAction dropaction = drag->exec();
-		qDebug("DropAction: %d", dropaction);
-
-		// temp->deleteLater();
 	}
 }
 

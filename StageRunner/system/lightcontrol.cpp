@@ -73,11 +73,13 @@ bool LightControl::sendChangedDmxData()
 {
 	/// @implement me: Plugin <-> output <-> universe Zuordnung
 	bool sent = false;
-	QList<QLCIOPlugin*>plugins = myApp->pluginCentral->qlcPlugins();
+
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		if (dmxOutputChanged[t]) {
-			for (int i=0; i<plugins.size(); i++) {
-				plugins.at(i)->writeUniverse(t,dmxOutputValues[t]);
+			QLCIOPlugin *plugin;
+			int output;
+			if (myApp->pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
+				plugin->writeUniverse(t,dmxOutputValues[t]);
 				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
 			}

@@ -1,4 +1,5 @@
 #include "mixerchannel.h"
+#include "customwidget/extmimedata.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -121,6 +122,7 @@ void MixerChannel::mousePressEvent(QMouseEvent *event)
 		update();
 	} else {
 		knob_selected_f = false;
+		drag_begin_pos = event->pos();
 	}
 
 	currentButton = event->button();
@@ -147,11 +149,27 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 		}
 		update();
 	} else {
+
 		knob_over_f = knob_rect.contains(event->pos());
 		if (knob_over_f != was_in) {
 			was_in = knob_over_f;
 			update();
 		}
+		if ( currentButton == Qt::LeftButton && (event->pos()-drag_begin_pos).manhattanLength() > 10) {
+			QDrag *drag = new QDrag(this);
+			ExtMimeData *mdata = new ExtMimeData();
+			QPixmap pixmap(size());
+			render(&pixmap);
+
+			mdata->setText(QString::number(my_id));
+			drag->setMimeData(mdata);
+			drag->setPixmap(pixmap);
+			drag->setHotSpot(drag_begin_pos);
+			Qt::DropAction dropaction = drag->exec();
+			qDebug("DropAction: %d", dropaction);
+			currentButton = 0;
+		}
+
 	}
 }
 

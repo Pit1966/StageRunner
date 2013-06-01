@@ -25,16 +25,4 @@ public slots:
 };
 
 
-class ExtDrag : public QDrag
-{
-private:
-	QWidget * drag_source;
-	bool delete_drag_source_f;
-public:
-	ExtDrag(QWidget *dragSource, bool deleteDragSource = false);
-	~ExtDrag();
-
-
-};
-
 #endif // EXTMIMEDATA_H

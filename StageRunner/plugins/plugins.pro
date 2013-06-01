@@ -4,4 +4,4 @@ TEMPLATE = subdirs
 
 SUBDIRS += yadi
 SUBDIRS += enttecdmxusb
-
+SUBDIRS += midi

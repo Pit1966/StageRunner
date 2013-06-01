@@ -7,9 +7,12 @@
 #include "qtstatictools.h"
 #include "customwidget/pslineedit.h"
 #include "fxlistwidgetitem.h"
+#include "customwidget/extmimedata.h"
 
 #include <QDebug>
 #include <QLineEdit>
+#include <QDrag>
+#include <QPainter>
 
 
 FxListWidget::FxListWidget(QWidget *parent) :
@@ -122,6 +125,20 @@ void FxListWidget::setAutoProceedSequence(bool state)
 	}
 }
 
+QList<FxListWidgetItem *> FxListWidget::getItemListForRow(int row)
+{
+	QList<FxListWidgetItem*>list;
+	if (row >=0 && row < fxTable->rowCount()) {
+		for (int col=0; col<fxTable->columnCount(); col++) {
+			FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,col));
+			if (item) {
+				list.append(item);
+			}
+		}
+	}
+	return list;
+}
+
 void FxListWidget::selectFx(FxItem *fx)
 {
 	bool found = false;
@@ -141,6 +158,53 @@ void FxListWidget::selectFx(FxItem *fx)
 	}
 	if (!found) {
 		emit fxItemSelected(0);
+	}
+}
+
+void FxListWidget::initRowDrag(FxListWidgetItem *item)
+{
+	QDrag *drag = new QDrag(parentWidget());
+	ExtMimeData *mdata = new ExtMimeData();
+	mdata->fxListWidgetItem = item;
+	mdata->setText(item->linkedFxItem->name());
+	mdata->tableRow = item->myRow;
+	mdata->tableCol = item->myColumn;
+
+	QPixmap pixmap(size().width(), item->height());
+
+	QList<FxListWidgetItem*>items = getItemListForRow(item->myRow);
+	int w = 0;
+	int hotspot_w = 0;
+	if (items.size() < 3) {
+		pixmap.fill(Qt::white);
+		item->render(&pixmap);
+	} else {
+		pixmap.fill(QColor(0,0,0,0));
+		for (int i=0; i<3; i++) {
+			items.at(i)->render(&pixmap,QPoint(w,0));
+			if (item == items.at(i)) {
+				hotspot_w = w;
+			}
+			w += items.at(i)->width();
+		}
+	}
+
+	QPainter p;
+	p.begin(&pixmap);
+	p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+	p.fillRect(pixmap.rect(), QColor(0, 0, 0, 140));
+	p.end();
+
+	drag->setMimeData(mdata);
+	drag->setPixmap(pixmap);
+	drag->setHotSpot(item->dragBeginPos() + QPoint(hotspot_w,0));
+
+	fxTable->removeRow(item->myRow);
+
+	Qt::DropAction dropaction = drag->exec();
+	qDebug("dropaction: %d",dropaction);
+	if (dropaction != Qt::MoveAction) {
+		refreshList();
 	}
 }
 
@@ -166,6 +230,7 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 	connect(item,SIGNAL(itemDoubleClicked(FxListWidgetItem*)),this,SLOT(if_fxitemwidget_doubleclicked(FxListWidgetItem*)));
 	connect(item,SIGNAL(itemTextEdited(FxListWidgetItem*,QString)),this,SLOT(if_fxitemwidget_edited(FxListWidgetItem*,QString)));
 	connect(this,SIGNAL(editableChanged(bool)),item,SLOT(setEditable(bool)));
+	connect(item,SIGNAL(draged(FxListWidgetItem*)),this,SLOT(initRowDrag(FxListWidgetItem*)),Qt::QueuedConnection);
 
 	return item;
 }
@@ -339,3 +404,4 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 		break;
 	}
 }
+

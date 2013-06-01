@@ -90,7 +90,7 @@ public:
 	/** Plugin's I/O capabilities
 	 * Attention! The capabilities are extended in compare to original QLCIOplugin
 	 */
-	enum Capability { Output = 0x1, Input = 0x2 , Monitor = 0x4};
+	enum Capability { Output = 0x1, Input = 0x2 , Feedback = 0x4 , Monitor = 0x1000};
 
 	/**
 	 * Get plugin capabilities as an OR'ed bitmask
@@ -210,6 +210,8 @@ public:
 	 *              expected. Otherwise provides information for the plugin
 	 */
 	virtual QString inputInfo(quint32 input) = 0;
+
+	virtual void sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString& key = 0) = 0;
 
 	/**
 	 * @brief openInputMonitor - Extended function for StageRunner Version of plugin

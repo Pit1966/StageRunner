@@ -10,6 +10,7 @@
 #include <QListWidgetItem>
 #include <QSpinBox>
 #include <QMessageBox>
+#include <QCheckBox>
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	: QDialog(parent)
@@ -118,15 +119,21 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		if (cur_plugin_map)
 			conf = cur_plugin_map->getCreatePluginLineConfig(plugin->name(),outnames.at(t));
 
-		item = new QTableWidgetItem(tr("DMX Output"));
+		item = new QTableWidgetItem(tr("Output"));
+		if (conf && conf->pIsUsed) {
+			item->setIcon(QIcon(":/gfx/icons/ledgreen.png"));
+		} else {
+			item->setIcon(QIcon(":/gfx/icons/ledred.png"));
+		}
 		dmxMappingTable->setItem(row,0,item);
 
 		QSpinBox *spin = new QSpinBox();
-		spin->setRange(1,MAX_DMX_UNIVERSE);
+		spin->setRange(0,MAX_DMX_UNIVERSE);
 		spin->setPrefix(tr("universe:"));
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
+		spin->setProperty("tableRow",row);
 		if (conf) spin->setValue(conf->pUniverse+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
@@ -153,15 +160,21 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		if (cur_plugin_map)
 			conf = myapp->pluginCentral->pluginMapping->getCreatePluginLineConfig(plugin->name(),innames.at(t));
 
-		item = new QTableWidgetItem(tr("DMX Input"));
+		item = new QTableWidgetItem(tr("Input"));
+		if (conf && conf->pIsUsed) {
+			item->setIcon(QIcon(":/gfx/icons/ledgreen.png"));
+		} else {
+			item->setIcon(QIcon(":/gfx/icons/ledred.png"));
+		}
 		dmxMappingTable->setItem(row,0,item);
 
 		QSpinBox *spin = new QSpinBox();
-		spin->setRange(1,MAX_DMX_UNIVERSE);
+		spin->setRange(0,MAX_DMX_UNIVERSE);
 		spin->setPrefix(tr("universe:"));
 		spin->setFrame(false);
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
+		spin->setProperty("tableRow",row);
 		if (conf) spin->setValue(conf->pUniverse+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
@@ -207,9 +220,26 @@ void SetupWidget::if_pluginline_universe_changed(int val)
 
 	if (cur_plugin_map) {
 		PluginConfig *lineconf = cur_plugin_map->getCreatePluginLineConfig(plugin_name,plugin_line);
-		lineconf->pUniverse = val-1;
+		if (val > 0) {
+			lineconf->pUniverse = val-1;
+			lineconf->pIsUsed = true;
+		} else {
+			lineconf->pIsUsed = false;
+		}
 		update_plugin_mapping_f = true;
+
+
+		int row = sender()->property("tableRow").toInt();
+		QTableWidgetItem * item = dmxMappingTable->item(row,0);
+		if (item) {
+			if (lineconf->pIsUsed) {
+				item->setIcon(QIcon(":/gfx/icons/ledgreen.png"));
+			} else {
+				item->setIcon(QIcon(":/gfx/icons/ledred.png"));
+			}
+		}
 	}
+
 }
 
 void SetupWidget::if_pluginline_responsetime_changed(int val)

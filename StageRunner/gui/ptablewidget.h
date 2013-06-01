@@ -19,6 +19,7 @@ public:
 private:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
+	void dragLeaveEvent(QDragLeaveEvent *event);
 
 
 signals:

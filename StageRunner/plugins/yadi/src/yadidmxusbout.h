@@ -43,9 +43,11 @@ public:
 	void closeInput(quint32 input);		///< @reimp
 	QStringList inputs();				///< @reimp
 	QString inputInfo(quint32 input);	///< @reimp
+	void sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString& key = 0);
 
 	bool canConfigure();				///< @reimp
 	void configure();					///< @reimp
+
 
 	// StageRunner reimplemented functions
 	DmxMonitor *openOutputMonitor(quint32 output);

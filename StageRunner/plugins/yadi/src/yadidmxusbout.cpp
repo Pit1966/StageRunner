@@ -394,6 +394,14 @@ QString YadiDMXUSBOut::inputInfo(quint32 input)
 
 }
 
+void YadiDMXUSBOut::sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString &key)
+{
+	Q_UNUSED(inputLine);
+	Q_UNUSED(channel);
+	Q_UNUSED(value);
+	Q_UNUSED(key);
+}
+
 bool YadiDMXUSBOut::canConfigure()
 {
 	return true;

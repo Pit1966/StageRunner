@@ -29,10 +29,11 @@ public:
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
 	inline bool isEditable() {return is_editable_f;}
+	QList<FxListWidgetItem*> getItemListForRow(int row);
 
 public slots:
 	void selectFx(FxItem *fx);
-
+	void initRowDrag(FxListWidgetItem *item);
 
 private:
 	void init();

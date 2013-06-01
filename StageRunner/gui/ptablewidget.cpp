@@ -5,6 +5,8 @@
 #include <QMimeData>
 #include <QDebug>
 #include <QModelIndex>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
 
 PTableWidget::PTableWidget(QWidget *parent) :
 	QTableWidget(parent)
@@ -40,19 +42,23 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
 		drag_start_row = extmime->tableRow;
-		if (drag_temp_row < 0) {
-			if (uint(drag_start_row) < uint(rowCount()))
-				removeRow(drag_start_row);
-		} else {
-			if (uint(drag_temp_row) < uint(rowCount()))
-				removeRow(drag_temp_row);
-		}
+
 		insertRow(current_row);
 		drag_temp_row = current_row;
 
 	} else {
 		event->setDropAction(Qt::CopyAction);
 		event->accept();
+	}
+}
+
+void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
+{
+	qDebug("dragLeaveEvent");
+
+	if (drag_temp_row >= 0) {
+		removeRow(drag_temp_row);
+		drag_temp_row = -1;
 	}
 }
 
@@ -79,3 +85,4 @@ void PTableWidget::dropEvent(QDropEvent *event)
 
 	drag_temp_row = -1;
 }
+

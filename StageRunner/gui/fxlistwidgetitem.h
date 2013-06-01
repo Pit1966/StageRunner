@@ -37,6 +37,7 @@ public:
 	~FxListWidgetItem();
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
+	QPoint dragBeginPos() const {return drag_begin_pos;}
 
 private:
 	void init();
@@ -62,6 +63,7 @@ signals:
 	void itemClicked(FxListWidgetItem *);
 	void itemDoubleClicked(FxListWidgetItem *);
 	void itemTextEdited(FxListWidgetItem *, const QString &);
+	void draged(FxListWidgetItem * item);
 
 };
 

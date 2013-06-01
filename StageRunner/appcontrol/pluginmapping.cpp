@@ -23,6 +23,7 @@ void PluginConfig::init()
 
 	addExistingVar(pPluginName,"PluginName");
 	addExistingVar(pLineName,"LineName");
+	addExistingVar(pIsUsed,"LineUsed",false);
 	addExistingVar(pUniverse,"Universe");
 	addExistingVar(pResponseTime,"ResponseTime");
 }

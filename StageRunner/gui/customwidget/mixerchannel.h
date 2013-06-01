@@ -49,6 +49,7 @@ private:
 	QPoint click_position;			///< Mouseposition when clicked in Widget
 	int click_value;				///< Value when mouse clicked in widget
 	QSize minimum_size_hint;
+	QPoint drag_begin_pos;
 
 protected:
 	int refSliderColorIndex;

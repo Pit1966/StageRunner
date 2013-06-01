@@ -1,8 +1,8 @@
 /*
   Q Light Controller
-  enttecdmxusb.h
+  midiplugin.h
 
-  Copyright (C) Heikki Junnila
+  Copyright (c) Heikki Junnila
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -16,31 +16,39 @@
 
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,$
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#ifndef ENTTECDMXUSB_H
-#define ENTTECDMXUSB_H
+#ifndef MIDIPLUGIN_H
+#define MIDIPLUGIN_H
+
+#include <QStringList>
+#include <QList>
 
 #include "qlcioplugin.h"
 
-class EnttecDMXUSBWidget;
+class ConfigureMIDIPlugin;
+class MidiOutputDevice;
+class MidiInputDevice;
+class MidiEnumerator;
+class QString;
 
-class EnttecDMXUSB : public QLCIOPlugin
+class MidiPlugin : public QLCIOPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(QLCIOPlugin)
 #ifdef IS_QT5
-	Q_PLUGIN_METADATA(IID "de.stonechip.stagerunner.enttecdmxusb" FILE "enttecdmxusb.json")
+	Q_PLUGIN_METADATA(IID "de.stonechip.stagerunner.midiplugin" FILE "midiplugin.json")
 #endif
 
-	/************************************************************************
+	friend class ConfigureMidiPlugin;
+
+	/*************************************************************************
 	 * Initialization
-	 ************************************************************************/
+	 *************************************************************************/
 public:
-	EnttecDMXUSB();
 	/** @reimp */
-	~EnttecDMXUSB();
+	~MidiPlugin();
 
 	/** @reimp */
 	void init();
@@ -51,15 +59,15 @@ public:
 	/** @reimp */
 	int capabilities() const;
 
-	/** Find out what kinds of widgets there are currently connected */
-	bool rescanWidgets();
+	/** @reimp */
+	QString pluginInfo();
 
-	/** Get currently connected widgets (input & output) */
-	QList <EnttecDMXUSBWidget*> widgets() const;
+private:
+	MidiEnumerator* m_enumerator;
 
-	/************************************************************************
+	/*************************************************************************
 	 * Outputs
-	 ************************************************************************/
+	 *************************************************************************/
 public:
 	/** @reimp */
 	void openOutput(quint32 output);
@@ -77,7 +85,8 @@ public:
 	void writeUniverse(quint32 output, const QByteArray& universe);
 
 private:
-	QList <EnttecDMXUSBWidget*> m_outputs;
+	/** Get an output device by its output index */
+	MidiOutputDevice* outputDevice(quint32 output) const;
 
 	/*************************************************************************
 	 * Inputs
@@ -96,15 +105,19 @@ public:
 	QString inputInfo(quint32 input);
 
 	/** @reimp */
-	void sendFeedBack(quint32 input, quint32 channel, uchar value, const QString &key)
-	{ Q_UNUSED(input); Q_UNUSED(channel); Q_UNUSED(value); Q_UNUSED(key)}
+	void sendFeedBack(quint32 output, quint32 channel, uchar value, const QString& key);
 
 private:
-	QList <EnttecDMXUSBWidget*> m_inputs;
+	/** Get an output device by its output index */
+	MidiInputDevice* inputDevice(quint32 input) const;
 
-	/********************************************************************
+private slots:
+	/** Catch MIDI input device valueChanged signals */
+	void slotValueChanged(const QVariant& uid, ushort channel, uchar value);
+
+	/*************************************************************************
 	 * Configuration
-	 ********************************************************************/
+	 *************************************************************************/
 public:
 	/** @reimp */
 	void configure();

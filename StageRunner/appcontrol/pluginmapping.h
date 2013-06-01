@@ -11,6 +11,7 @@ class PluginConfig : public VarSet
 public:
 	pstring pPluginName;
 	pstring pLineName;
+	pbool pIsUsed;
 	pint32 pUniverse;
 	pint32 pResponseTime;					///< This is the fade delay time for incoming DMX Data when it is forwarded to a scene
 

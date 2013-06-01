@@ -42,5 +42,8 @@
         <file>gfx/icons/audio_speaker.png</file>
         <file>gfx/icons/audio_speaker_grey.png</file>
         <file>gfx/icons/scene_mixer.png</file>
+        <file>gfx/icons/ledgreen.png</file>
+        <file>gfx/icons/ledred.png</file>
+        <file>gfx/icons/ledyellow.png</file>
     </qresource>
 </RCC>
