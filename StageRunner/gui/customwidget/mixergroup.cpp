@@ -1,5 +1,6 @@
 #include "mixergroup.h"
 #include "mixerchannel.h"
+#include "extmimedata.h"
 
 #include <QHBoxLayout>
 #include <QDebug>
@@ -10,11 +11,16 @@ MixerGroup::MixerGroup(QWidget *parent) :
 {
 	default_min = 0;
 	default_max = 100;
+	temp_drag_move_idx = -1;
+	temp_drag_start_move_idx = -1;
+	temp_drag_widget = 0;
 
-	QHBoxLayout * mixerlayout = new QHBoxLayout;
+	mixerlayout = new QHBoxLayout;
 	mixerlayout->setSpacing(0);
 	mixerlayout->setMargin(0);
 	setLayout(mixerlayout);
+
+	setAcceptDrops(true);
 
 	setMixerCount(12);
 }
@@ -51,8 +57,9 @@ MixerChannel *MixerGroup::appendMixer()
 	mixer->setRange(default_min,default_max);
 	mixer->setSelectable(true);
 	mixerlist.append(mixer);
-	layout()->addWidget(mixer);
-	connect(mixer,SIGNAL(mixerMoved(int,int)),this,SLOT(on_mixer_moved(int,int)));
+	mixerlayout->addWidget(mixer);
+	mixer->setObjectName(QString::number(mixer->id()));
+	connect(mixer,SIGNAL(mixerSliderMoved(int,int)),this,SLOT(on_mixer_moved(int,int)));
 	connect(mixer,SIGNAL(mixerSelected(bool,int)),this,SLOT(on_mixer_selected(bool,int)));
 
 	int right_margin = width() - mixerlist.size() * mixer->backGroundWidth();
@@ -143,10 +150,139 @@ void MixerGroup::resizeEvent(QResizeEvent *event)
 	}
 }
 
+void MixerGroup::dragEnterEvent(QDragEnterEvent *event)
+{
+	const QMimeData * mime = event->mimeData();
+	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
+
+//	QObject * src = event->source();
+	if (extmime && extmime->mixerChannel) {
+		MixerChannel *movwid = extmime->mixerChannel;
+
+//		qDebug("Drag enter event Mime:'%s': ObjectName:%s, row:%d, col:%d "
+//			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
+		event->setDropAction(Qt::MoveAction);
+		event->accept();
+
+		// Be sure that drag is not initiated and remove the draged MixerChannel from layout
+		if (temp_drag_move_idx < 0) {
+			// Find layout item under mouse cursor
+			for (int i=0; i<mixerlayout->count(); i++) {
+				if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->pos())) {
+					temp_drag_move_idx = i;
+					break;
+				}
+			}
+
+			int drag_idx = mixerlayout->indexOf(movwid);
+			temp_drag_widget = movwid;
+			temp_drag_widget->hide();
+
+			// This removes the current layout item at mouse position
+			mixerlayout->takeAt(drag_idx);
+
+			QWidget *wid = new QWidget(this);
+			wid->setAutoFillBackground(true);
+			wid->setMinimumWidth(movwid->width());
+			wid->setMaximumWidth(movwid->width());
+			wid->setObjectName("filler");
+			mixerlayout->insertWidget(temp_drag_move_idx,wid);
+
+			// This is to prevent original drag start position when reentering after dragLeaveEvent
+			if (temp_drag_start_move_idx <0 ) {
+				temp_drag_start_move_idx = temp_drag_move_idx;
+			}
+		}
+	} else {
+		event->ignore();
+	}
+}
+
+void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
+{
+	const QMimeData * mime = event->mimeData();
+	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
+
+	QObject * src = event->source();
+	if (extmime && extmime->mixerChannel) {
+		MixerChannel *movwid = extmime->mixerChannel;
+		// search Widget (hopefully a MixerChannel) under mouse cursor
+		for (int i=0; i<mixerlayout->count(); i++) {
+			if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->pos())) {
+				if (temp_drag_move_idx != i) {
+					if (temp_drag_move_idx >= 0) {
+						QLayoutItem *fillitem;
+						QLayoutItem *overitem;
+
+						if (temp_drag_move_idx < i) {
+							overitem = mixerlayout->takeAt(i);
+							fillitem = mixerlayout->takeAt(temp_drag_move_idx);
+							mixerlayout->insertItem(temp_drag_move_idx,overitem);
+							mixerlayout->insertItem(i,fillitem);
+						} else {
+							fillitem = mixerlayout->takeAt(temp_drag_move_idx);
+							overitem = mixerlayout->takeAt(i);
+							mixerlayout->insertItem(i,fillitem);
+							mixerlayout->insertItem(temp_drag_move_idx,overitem);
+						}
+
+
+					} else {
+						qDebug() << "Widget not Found!!";
+					}
+
+					temp_drag_move_idx = i;
+				}
+				return;
+			}
+		}
+	}
+}
+
+void MixerGroup::dragLeaveEvent(QDragLeaveEvent *event)
+{
+	if (temp_drag_move_idx >= 0) {
+		QLayoutItem *item = mixerlayout->takeAt(temp_drag_move_idx);
+		delete item->widget();
+		delete item;
+		temp_drag_move_idx = -1;
+	}
+	if (temp_drag_start_move_idx) {
+		if (temp_drag_widget) {
+			mixerlayout->insertWidget(temp_drag_start_move_idx,temp_drag_widget);
+			temp_drag_widget->show();
+		}
+	}
+}
+
+void MixerGroup::dropEvent(QDropEvent *event)
+{
+	if (temp_drag_move_idx >= 0) {
+		QLayoutItem *item = mixerlayout->takeAt(temp_drag_move_idx);
+		delete item->widget();
+		delete item;
+
+		if (temp_drag_start_move_idx) {
+			if (temp_drag_widget) {
+				mixerlayout->insertWidget(temp_drag_move_idx,temp_drag_widget);
+				temp_drag_widget->show();
+				temp_drag_widget = 0;
+			}
+			if (temp_drag_move_idx != temp_drag_start_move_idx) {
+				emit mixerDraged(temp_drag_start_move_idx,temp_drag_move_idx);
+			}
+		}
+
+		temp_drag_move_idx = -1;
+	}
+
+	temp_drag_start_move_idx = -1;
+}
+
 void MixerGroup::on_mixer_moved(int val, int id)
 {
 	if (id >= 0) {
-		emit mixerMoved(val, id);
+		emit mixerSliderMoved(val, id);
 	}
 }
 

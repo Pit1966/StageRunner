@@ -53,6 +53,7 @@ MixerChannel::MixerChannel(QWidget *parent) :
 
 MixerChannel::~MixerChannel()
 {
+	// qDebug("destroy mixer: %d", my_dmx_channel+1);
 }
 
 void MixerChannel::setRange(int min, int max)
@@ -145,7 +146,7 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 		if (new_value != value()) {
 			setValue( new_value );
 			emit sliderMoved(value());
-			emit mixerMoved(value(),int(my_id));
+			emit mixerSliderMoved(value(),int(my_id));
 		}
 		update();
 	} else {
@@ -161,12 +162,13 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 			QPixmap pixmap(size());
 			render(&pixmap);
 
-			mdata->setText(QString::number(my_id));
+			mdata->setText(QString("Mixer Id: %1").arg(id()));
+			mdata->mixerChannel = this;
 			drag->setMimeData(mdata);
 			drag->setPixmap(pixmap);
 			drag->setHotSpot(drag_begin_pos);
 			Qt::DropAction dropaction = drag->exec();
-			qDebug("DropAction: %d", dropaction);
+
 			currentButton = 0;
 		}
 

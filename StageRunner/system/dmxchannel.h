@@ -36,6 +36,10 @@ public:
 	qint32 targetFullValue;				///< The maximum value this channel can be set to (default 10000)
 	qint32 targetValue;					///< 100% Output value target in a scene (0 - targetFullValue) The dmx Output will be scaled to this
 	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
+	qint32 deskPositionIndex;			///< The Index the Channel will be positioned in the DeskSceneWidget
+
+	int tempTubeListIdx;
+	int tempDeskPosIdx;
 
 protected:
 	// These Vars are mainly for animation/fading control in the scenes

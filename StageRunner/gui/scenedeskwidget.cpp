@@ -42,6 +42,7 @@ void SceneDeskWidget::init_gui()
 
 	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
 	connect(faderWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
+	connect(faderWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
 }
 
 
@@ -58,15 +59,42 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 
 	if (!FxItem::exists(scene)) return false;
 
+	QList<DmxChannel*>sort;
 	for (int t=0; t<scene->tubes.size(); t++) {
-		DmxChannel *dmx = scene->tubes.at(t);
+		sort.append(0);
+	}
+
+	for (int t=0; t<scene->tubes.size(); t++) {
+		DmxChannel *tube = scene->tubes.at(t);
+		if (tube->deskPositionIndex >= 0) {
+			tube->tempTubeListIdx = t;
+			sort[tube->deskPositionIndex] = tube;
+		}
+	}
+
+	int posindex = 0;
+	for (int t=0; t<scene->tubes.size(); t++) {
+		DmxChannel *tube = scene->tubes.at(t);
+		if (tube->deskPositionIndex < 0) {
+			tube->tempTubeListIdx = t;
+			while (sort.at(posindex) != 0) {
+				posindex++;
+			}
+			sort[posindex] = tube;
+		}
+	}
+
+
+	for (int t=0; t<sort.size(); t++) {
+		DmxChannel *dmx = sort.at(t);
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
 			// Create a new Mixer an fill in relevant data
 			MixerChannel *fader = faderWidget->appendMixer();
 			// We will need the Id to determine which DmxChannel an incoming fader signal belongs to
 			// We have to keep the Id of the mixer channel in sync with Tubes list index!
-			fader->setId(t);
+			fader->setId(dmx->tempTubeListIdx);
+			dmx->tempDeskPosIdx = t;
 			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel);
 			fader->setRange(0,dmx->targetFullValue);
 			fader->setValue(dmx->targetValue);
@@ -77,7 +105,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			fader->setRefValue(ref_val);
 
 			// and of course we need a slot to react on slider movement
-			connect(fader,SIGNAL(mixerMoved(int,int)),this,SLOT(set_mixer_val_on_moved(int,int)));
+			connect(fader,SIGNAL(mixerSliderMoved(int,int)),this,SLOT(set_mixer_val_on_moved(int,int)));
 			// and we have to update the indicators for outside DMX level changes
 			// connect(this,SIGNAL(dmxValueWantsUpdate(int,int,int)),fader,SLOT(notifyChangedDmxChannel(int,int,int)));
 		}
@@ -243,6 +271,33 @@ void SceneDeskWidget::on_hookedChannelSpin_valueChanged(int arg1)
 	if (!FxItem::exists(cur_fxscene)) return;
 
 	cur_fxscene->hookedToInputDmxChannel = arg1-1;
+
+}
+
+void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
+{
+	if (!FxItem::exists(cur_fxscene)) return;
+
+	qDebug("Mixer moved from position %d to %d",fromIdx,toIdx);
+	DmxChannel *from_tube = 0;
+	DmxChannel *to_tube = 0;
+	for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+		DmxChannel *tube = cur_fxscene->tubes.at(t);
+		if (tube->tempDeskPosIdx == fromIdx) {
+			from_tube = tube;
+		}
+		if (tube->tempDeskPosIdx == toIdx) {
+			to_tube = tube;
+		}
+	}
+
+	if (from_tube && to_tube) {
+		from_tube->deskPositionIndex = toIdx;
+		from_tube->tempDeskPosIdx = toIdx;
+		to_tube->deskPositionIndex = fromIdx;
+		to_tube->tempDeskPosIdx = fromIdx;
+		cur_fxscene->setModified(true);
+	}
 
 }
 

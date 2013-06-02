@@ -52,6 +52,7 @@ private slots:
 	void on_liveCheck_clicked(bool checked);
 	void on_hookedUniverseSpin_valueChanged(int arg1);
 	void on_hookedChannelSpin_valueChanged(int arg1);
+	void if_mixerDraged(int fromIdx, int toIdx);
 
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

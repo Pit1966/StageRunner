@@ -116,6 +116,8 @@ bool DmxChannel::loopFunction()
 
 void DmxChannel::init()
 {
+	tempDeskPosIdx = 0;
+	tempTubeListIdx = 0;
 	fadeStartValue = 0;
 	fadeTargetValue = 0;
 	fadeValue = 0;
@@ -133,4 +135,5 @@ void DmxChannel::init()
 	addExistingVar(targetFullValue,"TargetFullValue",255,100000,10000);
 	addExistingVar(targetValue,"TargetValue",0,100000,0);
 	addExistingVar(deskVisibleFlag,"DeskVisible",true);
+	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
 }

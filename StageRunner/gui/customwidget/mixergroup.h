@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QList>
+#include <QHBoxLayout>
 
 class MixerChannel;
 
@@ -13,12 +14,17 @@ public:
 	Q_PROPERTY(bool multiSelectEnabled READ isMultiSelectEnabled WRITE setMultiSelectEnabled)
 
 private:
+	QHBoxLayout *mixerlayout;
 	QList<MixerChannel*>mixerlist;			///< List with pointers to MixerChannel instances
 	QList<MixerChannel*>selected_mixer;
 	int default_min;						///< Default minimum value used for new Mixer
 	int default_max;						///< Default maximum value user for new Mixer
 
 	bool prop_multiselect_f;				///< If true, multiple mixer can be selected at the same time
+
+	int temp_drag_start_move_idx;
+	int temp_drag_move_idx;
+	QWidget *temp_drag_widget;
 
 public:
 	explicit MixerGroup(QWidget *parent = 0);
@@ -37,6 +43,10 @@ public:
 
 protected:
 	void resizeEvent(QResizeEvent *event);
+	void dragEnterEvent(QDragEnterEvent *event);
+	void dragMoveEvent(QDragMoveEvent *event);
+	void dragLeaveEvent(QDragLeaveEvent *event);
+	void dropEvent(QDropEvent *event);
 
 public slots:
 	void notifyChangedDmxUniverse(int universe, const QByteArray & dmxValues);
@@ -47,8 +57,10 @@ private slots:
 	void on_mixer_selected(bool state, int id);
 
 signals:
-	void mixerMoved(int val, int id);
+	void mixerSliderMoved(int val, int id);
 	void mixerSelected(bool state, int id);
+	void mixerDraged(int fromIndex, int toIndex);
+
 };
 
 #endif // MIXERGROUP_H

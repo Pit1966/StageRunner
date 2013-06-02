@@ -96,7 +96,7 @@ public slots:
 	void setRefSliderColorIndex(int colidx);
 
 signals:
-	void mixerMoved(int val, int id);
+	void mixerSliderMoved(int val, int id);
 	void clicked();
 	void rightClicked();
 	void mixerSelected(bool state, int id);

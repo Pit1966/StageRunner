@@ -6,12 +6,14 @@
 #include <QDrag>
 
 class FxListWidgetItem;
+class MixerChannel;
 
 class ExtMimeData : public QMimeData
 {
 	Q_OBJECT
 public:
 	FxListWidgetItem *fxListWidgetItem;
+	MixerChannel *mixerChannel;
 	int tableRow;
 	int tableCol;
 
