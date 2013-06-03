@@ -292,10 +292,19 @@ void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 	}
 
 	if (from_tube && to_tube) {
-		from_tube->deskPositionIndex = toIdx;
 		from_tube->tempDeskPosIdx = toIdx;
-		to_tube->deskPositionIndex = fromIdx;
+		if (from_tube->tempTubeListIdx == toIdx) {
+			from_tube->deskPositionIndex = -1;
+		} else {
+			from_tube->deskPositionIndex = toIdx;
+		}
+
 		to_tube->tempDeskPosIdx = fromIdx;
+		if (to_tube->tempTubeListIdx == fromIdx) {
+			to_tube->deskPositionIndex = -1;
+		} else {
+			to_tube->deskPositionIndex = fromIdx;
+		}\
 		cur_fxscene->setModified(true);
 	}
 

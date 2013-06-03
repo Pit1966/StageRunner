@@ -262,7 +262,7 @@ void MixerGroup::dropEvent(QDropEvent *event)
 		delete item->widget();
 		delete item;
 
-		if (temp_drag_start_move_idx) {
+		if (temp_drag_start_move_idx >= 0) {
 			if (temp_drag_widget) {
 				mixerlayout->insertWidget(temp_drag_move_idx,temp_drag_widget);
 				temp_drag_widget->show();
