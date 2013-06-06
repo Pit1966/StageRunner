@@ -23,13 +23,14 @@ MixerGroup::MixerGroup(QWidget *parent) :
 	setAcceptDrops(true);
 
 	setMixerCount(12);
+
 }
 
 /**
  * @brief Set Number of Mixers to be displayed
  * @param number
  *
- * This function deletes all current mixers if there numbe is lower
+ * This function deletes all current mixers if there number is lower
  * than new one
  */
 void MixerGroup::setMixerCount(int number)

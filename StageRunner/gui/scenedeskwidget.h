@@ -54,6 +54,10 @@ private slots:
 	void on_hookedChannelSpin_valueChanged(int arg1);
 	void if_mixerDraged(int fromIdx, int toIdx);
 
+	void on_fadeInTimeEdit_textEdited(const QString &arg1);
+
+	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
+
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
 

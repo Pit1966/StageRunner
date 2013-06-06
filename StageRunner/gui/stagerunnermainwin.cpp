@@ -13,6 +13,7 @@
 #include "fxitempropertywidget.h"
 #include "scenestatuswidget.h"
 #include "qtstatictools.h"
+#include "style/lightdeskstyle.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -33,7 +34,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	debugLevelSpin->setValue(debug);
 
-
+	QApplication::setStyle(new LightDeskStyle);
 
 	// For external access
 	logWidget = logEdit;
@@ -124,7 +125,7 @@ void StageRunnerMainWin::updateButtonStyles()
 		delete dialWidgetStyle;
 	}
 
-	//dialWidgetStyle = new qsynthDialPeppinoStyle();
+	// dialWidgetStyle = new qsynthDialPeppinoStyle();
 	dialWidgetStyle = new qsynthDialClassicStyle();
 
 	QList<qsynthKnob *> all_dials = findChildren<qsynthKnob *>();

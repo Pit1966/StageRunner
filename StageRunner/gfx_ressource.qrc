@@ -45,5 +45,7 @@
         <file>gfx/icons/ledgreen.png</file>
         <file>gfx/icons/ledred.png</file>
         <file>gfx/icons/ledyellow.png</file>
+        <file>gfx/customwidget/desk_structure.png</file>
+        <file>gfx/customwidget/desk_structure_2.png</file>
     </qresource>
 </RCC>

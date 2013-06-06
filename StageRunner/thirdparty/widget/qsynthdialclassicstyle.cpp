@@ -74,8 +74,8 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 	int numTicks = 1 + (dial->maximum + ns - dial->minimum) / ns;
 	int size = dial->rect.width() < dial->rect.height() ? dial->rect.width() : dial->rect.height();
 	int scale = 1;
-	int width = size * scale;
-	int indent = (int)(width * 0.15 + 1);
+	int width = size * scale -1;
+	int indent = (int)(float(width) * 0.15 + 1);
 
 	QPalette pal = opt->palette;
 	QColor knobColor = pal.mid().color(); //pal.background().color();
@@ -149,9 +149,10 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 	// Scale shadow...
 
 	shadowAngle = 2160;
-	c = pal.dark().color();
+	c = pal.light().color();
 	for (int arc = 120; arc < 2880; arc += 240) {
 		pen.setColor(c);
+		pen.setWidth(2);
 		p->setPen(pen);
 		p->drawArc(scale/2, scale/2,
 				width-scale, width-scale, shadowAngle + arc, 240);

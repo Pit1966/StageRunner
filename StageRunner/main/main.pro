@@ -80,7 +80,8 @@ SOURCES += \
     ../gui/fxlistwidgetitem.cpp \
     ../appcontrol/pluginmapping.cpp \
     ../gui/customwidget/pslabel.cpp \
-    ../gui/customwidget/extmimedata.cpp
+    ../gui/customwidget/extmimedata.cpp \
+    ../gui/style/lightdeskstyle.cpp
 
 HEADERS  += \
 	../config.h \
@@ -131,7 +132,8 @@ HEADERS  += \
     ../gui/fxlistwidgetitem.h \
     ../appcontrol/pluginmapping.h \
     ../gui/customwidget/pslabel.h \
-    ../gui/customwidget/extmimedata.h
+    ../gui/customwidget/extmimedata.h \
+    ../gui/style/lightdeskstyle.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

@@ -178,7 +178,7 @@ void Log::do_append_log_text (const QString & txt, int level, quint32 type, bool
 		msg = "Devel ";
 		break;
 	default:
-		setColor(QColor(Qt::black));
+		setColor(QColor(Qt::gray));
 		msg = "Prog. ";
 		break;
 	}
@@ -576,7 +576,7 @@ void Log::process_line_for_log_output(QString & msg)
 		setColor(QColor(Qt::darkRed));
 	}
 	else {
-		setColor(QColor(Qt::black));
+		setColor(QColor(Qt::gray));
 	}
 
 }

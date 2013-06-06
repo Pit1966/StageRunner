@@ -41,8 +41,8 @@ void SceneDeskWidget::init_gui()
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
-	connect(faderWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
-	connect(faderWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
+	connect(faderAreaWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
+	connect(faderAreaWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
 }
 
 
@@ -50,7 +50,7 @@ void SceneDeskWidget::init_gui()
 bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 {
 	selected_tube_ids.clear();
-	faderWidget->clear();
+	faderAreaWidget->clear();
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
 	// First we save the pointer to the scene;
@@ -90,7 +90,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
 			// Create a new Mixer an fill in relevant data
-			MixerChannel *fader = faderWidget->appendMixer();
+			MixerChannel *fader = faderAreaWidget->appendMixer();
 			// We will need the Id to determine which DmxChannel an incoming fader signal belongs to
 			// We have to keep the Id of the mixer channel in sync with Tubes list index!
 			fader->setId(dmx->tempTubeListIdx);
@@ -122,13 +122,13 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 void SceneDeskWidget::setControlKey(bool state)
 {
 	ctrl_pressed_f = state;
-	faderWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
+	faderAreaWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
 }
 
 void SceneDeskWidget::setShiftKey(bool state)
 {
 	shift_pressed_f = state;
-	faderWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
+	faderAreaWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
 }
 
 DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
@@ -152,7 +152,7 @@ DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **dmxChannel)
 {
 	DmxChannel *tube = 0;
 	// First find the mixer at postion
-	MixerChannel *mixer = faderWidget->findMixerAtPos(faderWidget->mapFrom(this,pos));
+	MixerChannel *mixer = faderAreaWidget->findMixerAtPos(faderAreaWidget->mapFrom(this,pos));
 	if (dmxChannel) {
 		*dmxChannel = mixer;
 	}
@@ -179,7 +179,7 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 	} else {
 		selected_tube_ids.removeAll(id);
 	}
-	qDebug() << "tubes selected:" << selected_tube_ids;
+	// qDebug() << "tubes selected:" << selected_tube_ids;
 }
 
 void SceneDeskWidget::init()
@@ -200,7 +200,7 @@ void SceneDeskWidget::closeEvent(QCloseEvent *)
 
 void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxValues)
 {
-	faderWidget->notifyChangedDmxUniverse(universe,dmxValues);
+	faderAreaWidget->notifyChangedDmxUniverse(universe,dmxValues);
 
 	if (!FxItem::exists(cur_fxscene)) return;
 
@@ -238,7 +238,7 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 	cur_fxscene->setLive(checked);
 
 	if (checked) {
-		faderWidget->setRefSliderColorIndex(1);
+		faderAreaWidget->setRefSliderColorIndex(1);
 		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
 			tube->curValue = tube->targetValue;
@@ -246,7 +246,7 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
 
 	} else {
-		faderWidget->setRefSliderColorIndex(0);
+		faderAreaWidget->setRefSliderColorIndex(0);
 		if (!cur_fxscene->isOnStage()) {
 			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 				DmxChannel *tube = cur_fxscene->tubes.at(t);
@@ -355,7 +355,7 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 	cur_fxscene->setModified(true);
 
 	if (mixer) {
-		return faderWidget->removeMixer(mixer);
+		return faderAreaWidget->removeMixer(mixer);
 	}
 	return false;
 }
@@ -368,7 +368,7 @@ bool SceneDeskWidget::hideSelectedTubes()
 
 	for (int t=0; t<selected_tube_ids.size(); t++) {
 		int id = selected_tube_ids.at(t);
-		removed |= hideTube( cur_fxscene->tubes.at(id), faderWidget->getMixerById(id) );
+		removed |= hideTube( cur_fxscene->tubes.at(id), faderAreaWidget->getMixerById(id) );
 	}
 	selected_tube_ids.clear();
 
@@ -379,7 +379,7 @@ bool SceneDeskWidget::hideSelectedTubes()
 
 void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 {
-	QRect fadergroup(faderWidget->mapToGlobal(faderWidget->pos()),faderWidget->size());
+	QRect fadergroup(faderAreaWidget->mapToGlobal(faderAreaWidget->pos()),faderAreaWidget->size());
 	if (!fadergroup.contains(event->globalPos())) return;
 
 	QMenu menu(this);
@@ -411,3 +411,13 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	}
 }
 
+
+void SceneDeskWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
+{
+
+}
+
+void SceneDeskWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
+{
+
+}
