@@ -40,6 +40,7 @@ public slots:
 	bool restartFxAudioInSlot(int slotnum);
 	void stopAllFxAudio();
 	void stopFxAudio(int slot);
+	void stopFxAudio(FxAudioItem *fxa);
 	void fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 

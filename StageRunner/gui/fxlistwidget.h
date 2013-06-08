@@ -22,6 +22,7 @@ private:
 	bool is_editable_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
+	QList<int>selected_rows;
 
 public:
 	FxListWidget(QWidget *parent = 0);
@@ -31,10 +32,6 @@ public:
 	inline bool isEditable() {return is_editable_f;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
 
-public slots:
-	void selectFx(FxItem *fx);
-	void initRowDrag(FxListWidgetItem *item);
-
 private:
 	void init();
 	void open_scence_desk(FxSceneItem *fx);
@@ -43,8 +40,13 @@ private:
 	void column_type_double_clicked(FxItem *fx);
 
 public slots:
+	void selectFx(FxItem *fx);
+	void initRowDrag(FxListWidgetItem *item);
 	void refreshList();
 	void setEditable(bool state);
+	void setRowSelected(int row, bool state);
+	void setSingleRowSelected(int row);
+	void unselectRows();
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);

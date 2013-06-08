@@ -11,6 +11,8 @@ PsLineEdit::PsLineEdit(QWidget *parent) :
 	prop_editable = true;
 	prop_minimized = false;
 	prop_events_shared = false;
+	prop_warn_color = false;
+	org_palette = palette();
 }
 
 void PsLineEdit::setSingleKeyEditEnabled(bool state)
@@ -22,17 +24,31 @@ void PsLineEdit::setEditable(bool state)
 {
 	if (state != prop_editable) {
 		prop_editable = state;
-		if (state && !isReadOnly()) {
-			setStyleSheet("background-color: #ffe0e0");
-		} else {
-			setStyleSheet("background-color: #e0ffe0");
-		}
+		if (prop_warn_color) updateEditWarnColor();
 	}
+
+}
+
+void PsLineEdit::setDefaultPalette()
+{
+	setPalette(org_palette);
 }
 
 void PsLineEdit::setMinimized(bool state)
 {
 	prop_minimized = state;
+}
+
+void PsLineEdit::setWarnColor(bool state)
+{
+	if (state != prop_warn_color) {
+		prop_warn_color = state;
+		if (state) {
+			updateEditWarnColor();
+		} else {
+			setDefaultPalette();
+		}
+	}
 }
 
 QSize PsLineEdit::sizeHint() const
@@ -57,6 +73,29 @@ QSize PsLineEdit::minimumSizeHint() const
 	int h = qMax(fm.height(), 10);
 	int w = fm.boundingRect(text()).width();
 	return QSize(w,h);
+}
+
+void PsLineEdit::updateEditWarnColor()
+{
+	QPalette pal = palette();
+
+	if (prop_editable && !isReadOnly()) {
+		pal.setColor(QPalette::Text,Qt::blue);
+		pal.setColor(QPalette::Dark, QColor("#ef8896"));  // light red
+		pal.setColor(QPalette::Shadow,QColor("#910e1e"));  // dark red
+		pal.setColor(QPalette::Base, QColor("#c48b93"));  // middle red
+		pal.setColor(QPalette::Window, QColor("#ef8896"));  // light red
+		pal.setColor(QPalette::Light,QColor("#910e1e"));  // dark red
+	} else {
+		pal.setColor(QPalette::Text,Qt::blue);
+		pal.setColor(QPalette::Dark, QColor("#9fdaa2"));  // light green
+		pal.setColor(QPalette::Shadow,QColor("#374c38"));  // dark green
+		pal.setColor(QPalette::Base, QColor("#8bbf8d"));  // middle green
+		pal.setColor(QPalette::Window, QColor("#9fdaa2"));  // light green
+		pal.setColor(QPalette::Light,QColor("#374c38"));  // dark green
+	}
+
+	setPalette(pal);
 }
 
 void PsLineEdit::mousePressEvent(QMouseEvent *event)

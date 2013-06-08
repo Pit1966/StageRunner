@@ -15,13 +15,16 @@ private:
 	FxAudioItem *cur_fxa;				///< A convenience pointer to FxItem if it is an FxAudioItem (Type FX_AUDIO)
 	FxSceneItem *cur_fxs;				///< A cnnvenience pointer to FxItem if it is an FxSceneItem (Type FX_SCENE)
 
+	bool once_edit_f;
+
 public:
 	FxItemPropertyWidget(QWidget *parent = 0);
+	bool isOnceEdit() {return once_edit_f;}
 
 
 public slots:
 	bool setFxItem(FxItem *fx);
-	void setEditable(bool state);
+	void setEditable(bool state, bool once = false);
 
 private slots:
 	void on_initialVolDial_sliderMoved(int position);
@@ -31,9 +34,10 @@ private slots:
 	void on_audioFilePathEdit_doubleClicked();
 	void on_fadeInTimeEdit_textEdited(const QString &arg1);
 	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
-
 	void on_keyClearButton_clicked();
+	void on_editOnceButton_clicked();
 
+	void finish_edit();
 signals:
 	void modified();
 };

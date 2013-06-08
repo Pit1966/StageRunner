@@ -34,7 +34,9 @@ FxListWidget::FxListWidget(QWidget *parent) :
 void FxListWidget::setFxList(FxList *fxlist)
 {
 	cur_selected_item = 0;
+	selected_rows.clear();
 	fxTable->clear();
+
 	is_modified_f = true;
 	if (!fxlist) {
 		myfxlist = 0;
@@ -146,11 +148,10 @@ void FxListWidget::selectFx(FxItem *fx)
 	while (fx && row < fxTable->rowCount() && !found) {
 		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->cellWidget(row,0);
 		if (item->linkedFxItem == fx) {
-			fxTable->clearSelection();
-			fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),true);
 			found = true;
 			if (cur_selected_item != fx) {
 				cur_selected_item = fx;
+				setSingleRowSelected(item->myRow);
 				emit fxItemSelected(fx);
 			}
 		}
@@ -232,12 +233,13 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 	connect(this,SIGNAL(editableChanged(bool)),item,SLOT(setEditable(bool)));
 	connect(item,SIGNAL(draged(FxListWidgetItem*)),this,SLOT(initRowDrag(FxListWidgetItem*)),Qt::QueuedConnection);
 
+	item->setEditable(is_editable_f);
 	return item;
 }
 
 void FxListWidget::refreshList()
 {
-	qDebug("FxListWidget refresh");
+	// qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
 	}
@@ -246,8 +248,56 @@ void FxListWidget::refreshList()
 void FxListWidget::setEditable(bool state)
 {
 	if (state != is_editable_f) {
+		unselectRows();
 		is_editable_f = state;
 		emit editableChanged(state);
+	}
+}
+
+/**
+ * @brief Set selection status of specified row
+ * @param row The row number
+ * @param state true: select, false: unselect
+ */
+void FxListWidget::setRowSelected(int row, bool state)
+{
+	if (state) {
+		if (!selected_rows.contains(row)) {
+			selected_rows.append(row);
+			fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),true);
+		}
+	} else {
+		fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),false);
+		selected_rows.removeAll(row);
+	}
+
+	foreach(FxListWidgetItem* item, getItemListForRow(row)) {
+		item->setSelected(state);
+	}
+}
+
+void FxListWidget::setSingleRowSelected(int row)
+{
+	bool not_selected_yet = true;
+
+	foreach(int selrow, selected_rows) {
+		if (selrow != row) {
+			setRowSelected(selrow,false);
+		} else {
+			not_selected_yet = false;
+		}
+	}
+
+	if (not_selected_yet) setRowSelected(row,true);
+}
+
+/**
+ * @brief Unselect all rows
+ */
+void FxListWidget::unselectRows()
+{
+	while (selected_rows.size()) {
+		setRowSelected(selected_rows.takeFirst(),false);
 	}
 }
 
@@ -318,8 +368,7 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 {
 	if (!listitem) return;
-
-	// qDebug("FxListWidget -> clicke -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
+	qDebug("FxListWidget -> clicke -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
 
@@ -331,6 +380,10 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 			cur_selected_item = fx;
 			emit fxItemSelected(fx);
 		}
+		unselectRows();
+		setRowSelected(listitem->myRow,true);
+
+
 		break;
 	default:
 		qDebug("Click on this column not implemented yet");

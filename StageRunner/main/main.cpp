@@ -1,9 +1,10 @@
 #include <QApplication>
 
 #include "config.h"
-#include "appcontrol/appcentral.h"
-#include "gui/stagerunnermainwin.h"
-#include "system/log.h"
+#include "appcentral.h"
+#include "stagerunnermainwin.h"
+#include "usersettings.h"
+#include "log.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,11 +22,10 @@ int main(int argc, char *argv[])
 	logThread->initLog(mywin->logWidget);
 
 	// Init GUI
+	mywin->setApplicationGuiStyle(myapp->userSettings->pApplicationGuiStyle);
 	mywin->show();
 	mywin->initConnects();
 	mywin->initAppDefaults();
-
-
 
 	// Load Plugins
 	myapp->loadPlugins();

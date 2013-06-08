@@ -149,6 +149,10 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 			option->rect.getRect(&x, &y, &w, &h);
 			painter->setRenderHint(QPainter::Antialiasing, true);
 
+			if (widget->autoFillBackground()) {
+				painter->fillPath(roundRect,widget->palette().base());
+			}
+
 			int radius = 8;
 			int x1 = x;
 			int x2 = x + radius;

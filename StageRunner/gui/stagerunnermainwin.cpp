@@ -34,8 +34,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	debugLevelSpin->setValue(debug);
 
-	QApplication::setStyle(new LightDeskStyle);
-
 	// For external access
 	logWidget = logEdit;
 }
@@ -192,6 +190,12 @@ void StageRunnerMainWin::copyProjectSettingsToGui()
 	fxListWidget->setAutoProceedSequence( appCentral->project->pAutoProceedSequence );
 }
 
+void StageRunnerMainWin::setApplicationGuiStyle(const QString &style)
+{
+	if (style == "") {
+		QApplication::setStyle(new LightDeskStyle);
+	}
+}
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
 {
@@ -267,19 +271,32 @@ void StageRunnerMainWin::on_actionNew_Project_triggered()
 
 bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 {
-	if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
 
-	QString winname;
-	if (QApplication::activeWindow()) {
-		winname = QApplication::activeWindow()->objectName();
-	}
-	QString focusname;
-	if (QApplication::focusWidget()) {
-		focusname = QApplication::focusWidget()->objectName();
-	}
-	// qDebug("focus:%s",focusname.toLatin1().data());
-	if (winname != "StageRunnerMainwin" || focusname == "commentEdit") {
-		return qApp->eventFilter(obj, event);
+	if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
+
+		if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
+
+		QString widname;
+		if (QApplication::activeWindow()) {
+			widname = QApplication::activeWindow()->objectName();
+		}
+		QString focusname;
+		QString parentfocusname;
+		if (QApplication::focusWidget()) {
+			focusname = QApplication::focusWidget()->objectName();
+			QWidget *window = QApplication::focusWidget()->window();
+			if (window) {
+				parentfocusname = window->objectName();
+			}
+		}
+		// qDebug() << "focuswidget" << widname << "parentwid" << parentfocusname << "focusname" << focusname;
+
+		if (widname != "StageRunnerMainwin"
+				|| focusname == "commentEdit"
+				|| fxItemEditor->isOnceEdit())
+		{
+			return qApp->eventFilter(obj, event);
+		}
 	}
 
 
@@ -333,6 +350,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		}
 	}
+
 	return qApp->eventFilter(obj, event);
 }
 

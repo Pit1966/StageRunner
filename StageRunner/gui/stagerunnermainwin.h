@@ -42,6 +42,7 @@ public:
 	void initAppDefaults();
 	void copyGuiSettingsToProject();
 	void copyProjectSettingsToGui();
+	void setApplicationGuiStyle(const QString &style);
 
 private:
 	bool eventFilter(QObject *obj, QEvent *event);

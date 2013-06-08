@@ -6,6 +6,7 @@
 class UserSettings : public VarSet
 {
 public:
+	pstring pApplicationGuiStyle;
 	pstring pLastAudioFxImportPath;
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;

@@ -2,8 +2,8 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
-#include "appcontrol/usersettings.h"
-#include "appcontrol/appcentral.h"
+#include "usersettings.h"
+#include "appcentral.h"
 #include "qtstatictools.h"
 
 #include <QFileDialog>
@@ -16,10 +16,21 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	cur_fxa = 0;
 	cur_fxs = 0;
 
+	once_edit_f = false;
+
 	setupUi(this);
 	setWindowTitle("Fx Editor");
+	setObjectName("DockFxEditor");
 
 	keyEdit->setSingleKeyEditEnabled(true);
+
+	connect(nameEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(keyEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(faderCountEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(audioFilePathEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(fadeInTimeEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(fadeOutTimeEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+
 }
 
 bool FxItemPropertyWidget::setFxItem(FxItem *fx)
@@ -67,12 +78,14 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	return true;
 }
 
-void FxItemPropertyWidget::setEditable(bool state)
+void FxItemPropertyWidget::setEditable(bool state, bool once)
 {
 	QList<PsLineEdit*>childs = findChildren<PsLineEdit*>();
 	foreach(PsLineEdit* edit, childs) {
 		edit->setEditable(state);
+		edit->setWarnColor(true);
 	}
+	once_edit_f = once;
 }
 
 
@@ -184,4 +197,17 @@ void FxItemPropertyWidget::on_keyClearButton_clicked()
 		cur_fx->setModified(true);
 		emit modified();
 	}
+}
+
+void FxItemPropertyWidget::on_editOnceButton_clicked()
+{
+	if (AppCentral::instance()->isEditMode()) return;
+
+	setEditable(true,true);
+
+}
+
+void FxItemPropertyWidget::finish_edit()
+{
+	setEditable(false,false);
 }

@@ -103,6 +103,15 @@ void AudioControl::stopFxAudio(int slot)
 	}
 }
 
+void AudioControl::stopFxAudio(FxAudioItem *fxa)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentFxAudio() == fxa) {
+			stopFxAudio(t);
+		}
+	}
+}
+
 void AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {

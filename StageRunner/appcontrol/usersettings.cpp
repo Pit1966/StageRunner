@@ -18,6 +18,7 @@ void UserSettings::init()
 	setClass(PrefVarCore::USER_CONFIG,"UserSettings");
 	registerQSetGlobal("User and GUI settings for StageRunner Application");
 
+	addExistingVar(pApplicationGuiStyle,"ApplicationGuiStyle");
 	addExistingVar(pLastAudioFxImportPath,"LastAudioFxImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");

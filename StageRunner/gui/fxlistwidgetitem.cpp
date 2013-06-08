@@ -13,9 +13,9 @@ FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType c
   ,myColumn(-1)
   ,is_editable_f(false)
   ,is_never_editable_f(false)
+  ,is_selected_f(false)
 {
 	init();
-
 }
 
 FxListWidgetItem::FxListWidgetItem(const FxListWidgetItem &other) :
@@ -56,6 +56,10 @@ void FxListWidgetItem::init()
 	connect(itemEdit,SIGNAL(doubleClicked()),this,SLOT(if_edit_item_doubleclicked()));
 	connect(itemEdit,SIGNAL(textEdited(QString)),this,SLOT(if_edit_item_edited(QString)));
 	connect(itemLabel,SIGNAL(doubleClicked()),this,SLOT(if_label_item_doubleclicked()));
+
+	org_palette = palette();
+	select_help_palette = org_palette;
+	setAutoFillBackground(true);
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
@@ -87,13 +91,20 @@ void FxListWidgetItem::setEditable(bool state)
 	if (is_never_editable_f) state = false;
 
 	if (state != is_editable_f) {
+
 		is_editable_f = state;
 		itemEdit->setReadOnly(!state);
+		itemEdit->setWarnColor(state);
+		itemEdit->setEditable(state);
+
 		if (state) {
-			itemEdit->setStyleSheet("background-color: #ffe0e0");
+			QPalette pal = palette();
+			pal.setBrush(QPalette::Base, itemEdit->palette().base());
+			setPalette(pal);
 		} else {
-			itemEdit->setStyleSheet("");
+			setPalette(org_palette);
 		}
+		update();
 	}
 }
 
@@ -103,6 +114,22 @@ void FxListWidgetItem::setNeverEditable(bool state)
 		is_never_editable_f = state;
 		if (state) setEditable(false);
 	}
+}
+
+void FxListWidgetItem::setSelected(bool state)
+{
+	if (is_selected_f != state) {
+		is_selected_f = state;
+		if (state) {
+		QPalette pal = palette();
+		select_help_palette = pal;
+		pal.setBrush(QPalette::Base, Qt::darkGreen);
+		setPalette(pal);
+		} else {
+			setPalette(select_help_palette);
+		}
+	}
+
 }
 
 void FxListWidgetItem::if_edit_item_clicked()

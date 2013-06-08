@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>201</width>
+    <width>204</width>
     <height>791</height>
    </rect>
   </property>
@@ -222,7 +222,11 @@ Volume</string>
        <widget class="PsLineEdit" name="fadeInTimeEdit"/>
       </item>
       <item row="0" column="1">
-       <widget class="PsLineEdit" name="faderCountEdit"/>
+       <widget class="PsLineEdit" name="faderCountEdit">
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="faderCountLabel">
@@ -253,6 +257,13 @@ count</string>
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="editOnceButton">
+     <property name="text">
+      <string>Edit once</string>
+     </property>
     </widget>
    </item>
    <item>

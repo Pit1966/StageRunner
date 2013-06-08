@@ -17,7 +17,11 @@
    <item>
     <layout class="QHBoxLayout" name="ctrlButtonLayout">
      <item>
-      <widget class="qsynthKnob" name="masterVolDial"/>
+      <widget class="qsynthKnob" name="masterVolDial">
+       <property name="notchesVisible">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="moveToPrevButton">
@@ -115,8 +119,8 @@
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>0</red>
-              <green>140</green>
+              <red>25</red>
+              <green>255</green>
               <blue>0</blue>
              </color>
             </brush>
@@ -126,8 +130,8 @@
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>0</red>
-              <green>140</green>
+              <red>25</red>
+              <green>255</green>
               <blue>0</blue>
              </color>
             </brush>

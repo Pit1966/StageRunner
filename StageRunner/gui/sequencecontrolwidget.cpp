@@ -14,6 +14,7 @@ SequenceControlWidget::SequenceControlWidget(QWidget *parent) :
 	setupUi(this);
 	masterVolDial->setRange(0,MAX_VOLUME);
 	masterVolDial->setValue(MAX_VOLUME);
+	nextSequenceGroup->setAutoFillBackground(true);
 
 	appcentral = AppCentral::instance();
 }

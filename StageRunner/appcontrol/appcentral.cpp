@@ -160,6 +160,9 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 		case CMD_AUDIO_START:
 			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));
 			break;
+		case CMD_AUDIO_STOP:
+			unitAudio->stopFxAudio(reinterpret_cast<FxAudioItem*>(fx));
+			break;
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
 		}

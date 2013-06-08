@@ -27,8 +27,11 @@ public:
 private:
 	bool is_editable_f;
 	bool is_never_editable_f;
+	bool is_selected_f;
 	int current_button;
 	QPoint drag_begin_pos;
+	QPalette org_palette;
+	QPalette select_help_palette;
 
 
 public:
@@ -51,6 +54,7 @@ protected:
 public slots:
 	void setEditable(bool state);
 	void setNeverEditable(bool state);
+	void setSelected(bool state);
 
 
 private slots:

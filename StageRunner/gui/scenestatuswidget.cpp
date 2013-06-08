@@ -58,7 +58,7 @@ bool SceneStatusWidget::updateScene(FxSceneItem *scene)
 			item->setBackgroundColor(Qt::green);
 		}
 		else if (flags & SCENE_STAGE) {
-			item->setBackgroundColor(Qt::white);
+			item->setBackgroundColor(palette().base().color());
 		}
 		else if (flags & SCENE_LIVE) {
 			item->setBackgroundColor(Qt::red);
