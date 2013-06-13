@@ -220,6 +220,7 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 {
 
 	SceneDeskWidget *desk = new SceneDeskWidget(fx);
+	connect(desk,SIGNAL(modified()),this,SLOT(refreshList()));
 
 	desk->show();
 }

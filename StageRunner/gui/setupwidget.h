@@ -35,6 +35,12 @@ private slots:
 
 	void if_pluginline_universe_changed(int val);
 	void if_pluginline_responsetime_changed(int val);
+	void on_appStyleCombo_currentIndexChanged(const QString &arg1);
+	void on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1);
+
+signals:
+	void applicationStyleChanged(QString style);
+	void dialKnobStyleChanged(QString style);
 };
 
 #endif // SETUPWIDGET_H

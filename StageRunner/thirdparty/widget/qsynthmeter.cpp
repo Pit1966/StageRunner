@@ -151,6 +151,7 @@ void qsynthMeterValue::setValue ( float fValue )
 void qsynthMeterValue::peakReset (void)
 {
 	m_iPeak = 0;
+	update();
 }
 
 
@@ -227,9 +228,18 @@ void qsynthMeterValue::paintEvent ( QPaintEvent * )
 		painter.fillRect(0, 0, w, h, QWidget::palette().dark().color());
 	}
 
+	painter.setPen(QColor(150,150,150));
+	painter.drawLine(w-1,0,w-1,h);
+	painter.drawLine(0,h-1,w,h-1);
+	painter.setPen(QColor(32,32,32));
+	painter.drawLine(0,0,w,0);
+	painter.drawLine(0,0,0,h-1);
+
 #ifdef CONFIG_GRADIENT
-	painter.drawPixmap(0, h - m_iValue,
-		m_pMeter->pixmap(), 0, h - m_iValue, w, m_iValue);
+	if (m_iPeak) {
+		painter.drawPixmap(1, h - m_iValue,
+						   m_pMeter->pixmap(), 0, h - m_iValue, w - 3, m_iValue - 2);
+	}
 #else
 	y = m_iValue;
 
@@ -256,7 +266,9 @@ void qsynthMeterValue::paintEvent ( QPaintEvent * )
 #endif
 
 	painter.setPen(m_pMeter->color(m_iPeakColor));
-	painter.drawLine(0, h - m_iPeak, w, h - m_iPeak);
+	if (m_iPeak) {
+		painter.drawLine(1, h - m_iPeak-2, w - 2, h - m_iPeak-2);
+	}
 }
 
 
@@ -421,8 +433,8 @@ const QPixmap& qsynthMeter::pixmap (void) const
 
 void qsynthMeter::updatePixmap (void)
 {
-	int w = QWidget::width();
-	int h = QWidget::height();
+	int w = QWidget::width() - 2;
+	int h = QWidget::height() - 2;
 
 	QLinearGradient grad(0, 0, 0, h);
 	grad.setColorAt(0.2f, color(ColorOver));
@@ -449,7 +461,7 @@ void qsynthMeter::refresh (void)
 // Resize event handler.
 void qsynthMeter::resizeEvent ( QResizeEvent * )
 {
-	m_fScale = 0.85f * float(QWidget::height());
+	m_fScale = 0.85f * float(QWidget::height() - 4);
 
 	m_levels[Color0dB]  = iec_scale(  0.0f);
 	m_levels[Color3dB]  = iec_scale( -3.0f);

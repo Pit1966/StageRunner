@@ -11,6 +11,7 @@
 #include "qlcioplugin.h"
 #include "lightcontrol.h"
 #include "pluginmapping.h"
+#include "messagehub.h"
 
 using namespace AUDIO;
 
@@ -102,6 +103,20 @@ void AppCentral::setEditMode(bool state)
 	}
 }
 
+void AppCentral::setInputAssignMode(bool state)
+{
+	if (state != input_assign_mode_f) {
+		input_assign_mode_f = state;
+		emit inputAssignModeChanged(state);
+	}
+}
+
+void AppCentral::setInputAssignMode(FxItem *fx)
+{
+	setInputAssignMode(true);
+	input_assign_target_fxitem = fx;
+}
+
 void AppCentral::loadPlugins()
 {
 	// Load Plugin Configuration and DMX Mapping
@@ -144,6 +159,67 @@ DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
 		}
 	}
 	return 0;
+}
+
+void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value)
+{
+	Q_UNUSED(value);
+
+	static qint32 last_universe = -1;
+	static qint32 last_channel = -1;
+
+	if (universe == last_universe && channel == last_channel) return;
+	last_universe = universe;
+	last_channel = channel;
+
+	bool is_assigned = false;
+
+	FxItem *assign_target;
+	if (input_assign_target_fxitem) {
+		assign_target = input_assign_target_fxitem;
+	} else {
+		assign_target = current_selected_project_fx;
+	}
+
+
+	FxItem *fx;
+	foreach (fx, FxItem::globalFxList()) {
+		if (fx->isHookedToInput(universe, channel)) {
+			is_assigned = true;
+			break;
+		}
+	}
+
+	if (is_assigned) {
+		QString maintext = tr("Input is already assigned to scene");
+		QString sub = tr("Universe %1, Channel %2 is hooked to scene '%3'")
+				.arg(universe+1).arg(channel+1).arg(fx->name());
+
+		Ps::Button but = MessageHub::question(maintext,sub);
+		if (but & Ps::CONTINUE) {
+			is_assigned = false;
+			fx->hookToInput(-1,-1);
+		} else {
+			last_channel = -1;
+			last_universe = -1;
+		}
+	}
+
+	if (!is_assigned) {
+		if (FxItem::exists(assign_target)) {
+			assign_target->hookToInput(universe,channel);
+			assign_target->setModified(true);
+			LOGTEXT(tr("Universe %1, Channel %2 now hooked to scene '%3'")
+					.arg(universe+1).arg(channel+1).arg(assign_target->name()));
+			emit inputAssigned(assign_target);
+		} else {
+			emit inputAssigned(0);
+		}
+
+		if (input_assign_target_fxitem) {
+			setInputAssignMode(false);
+		}
+	}
 }
 
 
@@ -247,6 +323,11 @@ void AppCentral::onInputUniverseChannelChanged(quint32 universe, quint32 channel
 
 }
 
+void AppCentral::storeSelectedFxListWidgetFx(FxItem *item)
+{
+	current_selected_project_fx = item;
+}
+
 
 AppCentral::AppCentral()
 {
@@ -260,11 +341,17 @@ AppCentral::~AppCentral()
 	delete project;
 	delete unitLight;
 	delete unitAudio;
+
+	MessageHub::destroy();
 }
 
 void AppCentral::init()
 {
 	edit_mode_f = false;
+	input_assign_mode_f = false;
+	input_assign_target_fxitem = 0;
+
+	current_selected_project_fx = 0;
 
 	userSettings = new UserSettings;
 
@@ -274,12 +361,15 @@ void AppCentral::init()
 	pluginCentral = new IOPluginCentral;
 
 	int id = registerFxList(project->fxList);
-	qDebug("Registered Project FX list with Id:%d",id);
+	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);
 	unitLight->addFxListToControlLoop(project->fxList);
 
 
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+
+	// Load Message Rules
+	MessageHub::instance();
 
 	// Do some connects
 	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)));

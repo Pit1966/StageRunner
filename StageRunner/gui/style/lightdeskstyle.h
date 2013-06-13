@@ -7,6 +7,7 @@
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QPen>
+#include <QPixmap>
 #endif
 
 class LightDeskStyle : public QProxyStyle
@@ -17,8 +18,13 @@ protected:
 	static QPen penBevelDarkTrans;
 	static QPen penBevelLightTrans;
 
+	QPixmap pixButtonL;
+	QPixmap pixButtonM;
+	QPixmap pixButtonR;
+
 public:
 	LightDeskStyle(const QString &basekey = "windows");
+	~LightDeskStyle();
 
 	void polish(QPalette &pal);
 	// void polish(QWidget *widget);

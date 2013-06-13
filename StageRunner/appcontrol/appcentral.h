@@ -27,6 +27,10 @@ private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
 	bool edit_mode_f;
+	bool input_assign_mode_f;
+	FxItem * input_assign_target_fxitem;
+
+	FxItem * current_selected_project_fx;
 
 public:
 	AudioControl *unitAudio;
@@ -54,14 +58,19 @@ public:
 
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
-	inline bool isEditMode() {return edit_mode_f;}
+	inline bool isEditMode() const {return edit_mode_f;}
 	void setEditMode(bool state);
+	inline bool isInputAssignMode() const {return input_assign_mode_f;}
+	void setInputAssignMode(bool state);
+	void setInputAssignMode(FxItem *fx);
 
 	void loadPlugins();
 	void openPlugins();
 	void closePlugins();
 	DmxMonitor *openDmxInMonitor(int universe);
 	DmxMonitor *openDmxOutMonitor(int universe);
+
+	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd);
@@ -71,11 +80,13 @@ public slots:
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
+	void storeSelectedFxListWidgetFx(FxItem *item);
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 	void editModeChanged(bool state);
-
+	void inputAssignModeChanged(bool state);
+	void inputAssigned(FxItem *);
 
 };
 

@@ -81,7 +81,9 @@ SOURCES += \
     ../appcontrol/pluginmapping.cpp \
     ../gui/customwidget/pslabel.cpp \
     ../gui/customwidget/extmimedata.cpp \
-    ../gui/style/lightdeskstyle.cpp
+    ../gui/style/lightdeskstyle.cpp \
+    ../system/messagehub.cpp \
+    ../system/messagedialog.cpp
 
 HEADERS  += \
 	../config.h \
@@ -133,7 +135,9 @@ HEADERS  += \
     ../appcontrol/pluginmapping.h \
     ../gui/customwidget/pslabel.h \
     ../gui/customwidget/extmimedata.h \
-    ../gui/style/lightdeskstyle.h
+    ../gui/style/lightdeskstyle.h \
+    ../system/messagehub.h \
+    ../system/messagedialog.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -146,7 +150,8 @@ FORMS    += \
 	../gui/scenedeskwidget.ui \
     ../gui/scenestatuswidget.ui \
     ../gui/lightcontrolwidget.ui \
-    ../gui/fxlistwidgetitem.ui
+    ../gui/fxlistwidgetitem.ui \
+    ../system/messagedialog.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

@@ -31,6 +31,7 @@ public:
 	void setAutoProceedSequence(bool state);
 	inline bool isEditable() {return is_editable_f;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
+	FxItem *currentSelectedFxItem() const {return cur_selected_item;}
 
 private:
 	void init();

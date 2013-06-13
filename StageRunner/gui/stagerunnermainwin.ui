@@ -209,6 +209,7 @@
      <string>Edit</string>
     </property>
     <addaction name="actionEdit_Mode"/>
+    <addaction name="actionInput_Assign_Mode"/>
    </widget>
    <widget class="QMenu" name="menuConfiguration">
     <property name="title">
@@ -291,6 +292,14 @@
   <action name="actionDMX_Output">
    <property name="text">
     <string>DMX Output</string>
+   </property>
+  </action>
+  <action name="actionInput_Assign_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Input Assign Mode</string>
    </property>
   </action>
  </widget>

@@ -52,6 +52,17 @@ void FxItem::setKeyCode(int code)
 	myKey = code;
 }
 
+bool FxItem::isHookedToInput(qint32 universe, qint32 channel)
+{
+	return hookedToInputUniverse == universe && hookedToInputDmxChannel == channel;
+}
+
+void FxItem::hookToInput(qint32 universe, qint32 channel)
+{
+	hookedToInputUniverse = universe;
+	hookedToInputDmxChannel = channel;
+}
+
 void FxItem::init(qint32 id)
 {
 	// qDebug("init id: %d",id);
@@ -63,4 +74,7 @@ void FxItem::init(qint32 id)
 	addExistingVar(myFile,"FileName");
 	addExistingVar(myPath,"FilePath");
 	addExistingVar(myKey,"KeyCode");
+	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
+	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
+
 }

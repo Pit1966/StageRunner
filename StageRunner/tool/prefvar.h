@@ -40,11 +40,13 @@ public:
 		VAR_SET_CLASS,			///< Das ist die Default-Klasse für pVars, die in einem VarSet untergebracht sind
 		SYSTEM_CONFIG,			///< Die Variable enthält System-Einstellungen, die später auch in ".config" gespeichert werden
 		USER_CONFIG,			///< Wird in "./config" in der USER Sektion gespeichert
-		PROJECT,				///< Globale Triggereinstellung
+		PROJECT,
 		FX_ITEM,
 		DMX_CHANNEL,
 		PLUGIN_MAPPING,
-		PLUGIN_CONFIG
+		PLUGIN_CONFIG,
+		MESSAGE,
+		MESSAGE_HUB
 	};
 
 	/**

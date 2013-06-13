@@ -218,8 +218,6 @@ void FxSceneItem::init()
 
 	addExistingVar(defaultFadeInTime,"DefFadeInTime");
 	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
-	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
-	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
 

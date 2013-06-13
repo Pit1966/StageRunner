@@ -47,5 +47,11 @@
         <file>gfx/icons/ledyellow.png</file>
         <file>gfx/customwidget/desk_structure.png</file>
         <file>gfx/customwidget/desk_structure_2.png</file>
+        <file>gfx/customwidget/desk_knob_left.png</file>
+        <file>gfx/customwidget/desk_knob_mid.png</file>
+        <file>gfx/customwidget/desk_knob_right.png</file>
+        <file>gfx/customwidget/desk_button_large.png</file>
+        <file>gfx/customwidget/desk_button_mid.png</file>
+        <file>gfx/customwidget/desk_button_small.png</file>
     </qresource>
 </RCC>

@@ -8,10 +8,17 @@ QPen LightDeskStyle::penBevelDarkTrans = QPen(QColor(10,10,10,120),3);
 QPen LightDeskStyle::penBevelLightTrans = QPen(QColor(200,200,200,120),3);
 int LightDeskStyle::roundRadius = 8;
 
-
 LightDeskStyle::LightDeskStyle(const QString &basekey) :
 	QProxyStyle(QStyleFactory::create(basekey))
 {
+	pixButtonL = QPixmap(":/gfx/customwidget/desk_knob_left.png");
+	pixButtonM = QPixmap(":/gfx/customwidget/desk_knob_mid.png");
+	pixButtonR = QPixmap(":/gfx/customwidget/desk_knob_right.png");
+}
+
+LightDeskStyle::~LightDeskStyle()
+{
+	qDebug("LightDeskStyle destroyed");
 }
 
 void LightDeskStyle::polish(QPalette &pal)
@@ -65,14 +72,11 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 {
 
 	switch (element) {
-//	case PE_FrameButtonBevel:
 //	case PE_CustomBase:
 //	case PE_FrameFocusRect:
 //	case PE_FrameWindow:
 //	case PE_Widget:
-//	case PE_PanelButtonBevel:
 //	case PE_FrameTabBarBase:
-//	case PE_PanelButtonCommand:
 //	case PE_FrameDefaultButton:
 //	case PE_PanelButtonTool:
 //	case PE_FrameMenu:
@@ -82,6 +86,43 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 
 //	case PE_IndicatorTabTear:
 //	case PE_IndicatorTabClose:
+
+//	case PE_FrameButtonBevel:
+//	case PE_PanelButtonBevel:
+
+	case PE_FrameDefaultButton:
+	case PE_FrameFocusRect:
+		break;
+
+	case PE_PanelButtonCommand:
+		{
+			const QPushButton *but = qobject_cast<const QPushButton*>(widget);
+			if (but && but->text().isEmpty()) return;
+
+			painter->save();
+			QRect area = option->rect;
+
+			if (option->state & QStyle::State_HasFocus) {
+				painter->fillRect(area,QBrush(Qt::red));
+			} else {
+				painter->fillRect(area,QBrush(Qt::black));
+			}
+			if (!(option->state & QStyle::State_Raised)) {
+				area.setTopLeft(area.topLeft() + QPoint(1,1));
+				area.setBottomRight(area.bottomRight() + QPoint(0,1));
+			}
+
+			QRect area_m = QRect(area.topLeft() + QPoint(1,1),area.size()-QSize(10,2));
+			QRect area_l = QRect(area.topLeft() + QPoint(1,1),QSize(30,area.height()-2));
+			QRect area_r = QRect(area.topRight()- QPoint(30,-1),QSize(30,area.height()-2));
+
+			painter->drawPixmap(area_m,pixButtonM);
+			painter->drawPixmap(area_l,pixButtonL);
+			painter->drawPixmap(area_r,pixButtonR);
+
+			painter->restore();
+		}
+		break;
 
 	case PE_FrameTabWidget:
 		{
@@ -140,7 +181,7 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 			if (group) {
 				QFontMetrics fm(group->font());
 				QRect frect = fm.boundingRect(group->title());
-				textLength = frect.width();
+				textLength = frect.width() + 10;
 			}
 
 			QPainterPath roundRect = drawRoundBox(option->rect,false,textLength);
@@ -275,8 +316,8 @@ void LightDeskStyle::drawItemText(QPainter *painter, const QRect &rect, int flag
 		painter->save();
 		QFont font = painter->font();
 		QRect newrect(rect);
-		newrect.setX(rect.x()-6);
-		newrect.setWidth(rect.width()+5);
+		newrect.setX(rect.x());
+		newrect.setWidth(rect.width()+ 11);
 		font.setWeight(QFont::Bold);
 		painter->setFont(font);
 		painter->setClipping(false);

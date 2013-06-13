@@ -15,8 +15,6 @@ class FxSceneItem : public FxItem
 public:
 	qint32 defaultFadeInTime;
 	qint32 defaultFadeOutTime;
-	qint32 hookedToInputUniverse;
-	qint32 hookedToInputDmxChannel;
 	DmxChannel *sceneMaster;
 	VarSetList<DmxChannel*>tubes;
 

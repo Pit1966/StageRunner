@@ -36,13 +36,11 @@ public:
 	~StageRunnerMainWin();
 
 	void initConnects();
-	void updateButtonStyles();
 
 	void clearProject();
 	void initAppDefaults();
 	void copyGuiSettingsToProject();
 	void copyProjectSettingsToGui();
-	void setApplicationGuiStyle(const QString &style);
 
 private:
 	bool eventFilter(QObject *obj, QEvent *event);
@@ -51,6 +49,8 @@ private:
 public slots:
 	void showInfoMsg(QString where, QString text);
 	void showErrorMsg(QString where, QString text);
+	void setApplicationGuiStyle(QString style);
+	void updateButtonStyles(QString style = "");
 
 private slots:
 	void slot_addFxFile(QString path, int pos = -1);
@@ -67,6 +67,8 @@ private slots:
 	void on_stopMainLoopButton_clicked();
 	void on_actionDMX_Input_triggered();
 	void on_actionDMX_Output_triggered();
+
+	void on_actionInput_Assign_Mode_triggered(bool checked);
 
 private:
 	void init();

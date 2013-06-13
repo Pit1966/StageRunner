@@ -59,6 +59,7 @@ public:
 	FxItem *findSequenceFollower(FxItem *curfx = 0);
 	FxItem *findSequenceForerunner(FxItem *curfx = 0);
 
+	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 signals:
 	void fxNextChanged(FxItem *nextfx);
 	void fxListChanged();

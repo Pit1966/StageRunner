@@ -67,6 +67,17 @@ FxItem *FxList::getFxByKeyCode(int keycode) const
 	return 0;
 }
 
+QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
+{
+	QList<FxItem*>fxlist;
+	QListIterator<FxItem*> it(fx_list);
+	while (it.hasNext()) {
+		FxItem *fx = it.next();
+		if (fx->keyCode() == keycode) fxlist.append(fx);
+	}
+	return fxlist;
+}
+
 /**
  * @brief Find the follower of an arbitrary FX entry in the list
  * @param curfx Pointer to the FxItem the follower is search for or NULL

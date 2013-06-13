@@ -10,6 +10,8 @@ public:
 
 	static int stringToKey(const QString & str);
 	static QString keyToString(int key1, int modifier = 0);
+	static int timeStringToMS(const QString &str);
+	static QString msToTimeString(int ms);
 
 };
 

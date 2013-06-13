@@ -46,20 +46,25 @@ private:
 public slots:
 	void notifyChangedUniverse(int universe, const QByteArray & dmxValues);
 	void setTubeSelected(bool state, int id);
+	void setSceneEditable(bool state);
+	void setCurrentSceneLiveState(bool state);
 
 private slots:
+	void if_input_was_assigned(FxItem *fx);
 	void set_mixer_val_on_moved(int val, int id);
 	void on_liveCheck_clicked(bool checked);
 	void on_hookedUniverseSpin_valueChanged(int arg1);
 	void on_hookedChannelSpin_valueChanged(int arg1);
 	void if_mixerDraged(int fromIdx, int toIdx);
-
 	void on_fadeInTimeEdit_textEdited(const QString &arg1);
-
 	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
+	void on_editCheck_clicked(bool checked);
+	void on_sceneNameEdit_textEdited(const QString &arg1);
+	void on_autoHookButton_clicked();
 
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
+	void modified();
 
 };
 

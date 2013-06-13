@@ -4,6 +4,7 @@
 #include "dmxchannel.h"
 #include "appcentral.h"
 #include "lightcontrol.h"
+#include "qtstatictools.h"
 #include "customwidget/mixergroup.h"
 #include "customwidget/mixerchannel.h"
 
@@ -49,8 +50,10 @@ void SceneDeskWidget::init_gui()
 
 bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 {
+	setSceneEditable(false);
 	selected_tube_ids.clear();
 	faderAreaWidget->clear();
+
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
 	// First we save the pointer to the scene;
@@ -112,9 +115,12 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	}
 
 	// Set additional information widgets;
-	hookedUniverseSpin->setValue(cur_fxscene->hookedToInputUniverse+1);
-	hookedChannelSpin->setValue(cur_fxscene->hookedToInputDmxChannel+1);
-
+	sceneNameEdit->setText(cur_fxscene->name());
+	faderGroup->setTitle(cur_fxscene->name());
+	hookedUniverseSpin->setValue(cur_fxscene->hookedUniverse()+1);
+	hookedChannelSpin->setValue(cur_fxscene->hookedChannel()+1);
+	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->defaultFadeInTime));
+	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->defaultFadeOutTime));
 
 	return true;
 }
@@ -182,6 +188,55 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 	// qDebug() << "tubes selected:" << selected_tube_ids;
 }
 
+void SceneDeskWidget::setSceneEditable(bool state)
+{
+	QList<PsLineEdit*>childs = findChildren<PsLineEdit*>();
+	foreach(PsLineEdit* edit, childs) {
+		edit->setReadOnly(!state);
+		edit->setWarnColor(true);
+		edit->setEditable(state);
+	}
+
+	editCheck->setChecked(state);
+}
+
+void SceneDeskWidget::setCurrentSceneLiveState(bool state)
+{
+	if (!FxItem::exists(cur_fxscene)) return;
+	if (cur_fxscene->isLive() == state) return;
+
+	cur_fxscene->setLive(state);
+
+	if (state) {
+		faderAreaWidget->setRefSliderColorIndex(1);
+		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+			DmxChannel *tube = cur_fxscene->tubes.at(t);
+			tube->curValue = tube->targetValue;
+		}
+		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
+
+	} else {
+		faderAreaWidget->setRefSliderColorIndex(0);
+		if (!cur_fxscene->isOnStage()) {
+			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
+				DmxChannel *tube = cur_fxscene->tubes.at(t);
+				tube->curValue = 0;
+			}
+		}
+	}
+}
+
+void SceneDeskWidget::if_input_was_assigned(FxItem *fx)
+{
+	disconnect(AppCentral::instance(),SIGNAL(inputAssigned(FxItem*)),this,SLOT(if_input_was_assigned(FxItem*)));
+	if (fx == cur_fxscene) {
+		hookedUniverseSpin->setValue(cur_fxscene->hookedUniverse()+1);
+		hookedChannelSpin->setValue(cur_fxscene->hookedChannel()+1);
+	}
+	autoHookButton->clearFocus();
+	setSceneEditable(false);
+}
+
 void SceneDeskWidget::init()
 {
 	scene_is_live_f = false;
@@ -192,8 +247,8 @@ void SceneDeskWidget::init()
 
 void SceneDeskWidget::closeEvent(QCloseEvent *)
 {
-	on_liveCheck_clicked(false);
-	DEBUGTEXT("Desk CloseEvent");
+	setCurrentSceneLiveState(false);
+	DEBUGTEXT("Close scene desk");
 
 }
 
@@ -234,35 +289,15 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 		return;
 	}
 
-
-	cur_fxscene->setLive(checked);
-
-	if (checked) {
-		faderAreaWidget->setRefSliderColorIndex(1);
-		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-			DmxChannel *tube = cur_fxscene->tubes.at(t);
-			tube->curValue = tube->targetValue;
-		}
-		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
-
-	} else {
-		faderAreaWidget->setRefSliderColorIndex(0);
-		if (!cur_fxscene->isOnStage()) {
-			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-				DmxChannel *tube = cur_fxscene->tubes.at(t);
-				tube->curValue = 0;
-			}
-		}
-	}
-
+	setCurrentSceneLiveState(checked);
+	setSceneEditable(checked);
 }
 
 void SceneDeskWidget::on_hookedUniverseSpin_valueChanged(int arg1)
 {
 	if (!FxItem::exists(cur_fxscene)) return;
 
-	cur_fxscene->hookedToInputUniverse = arg1-1;
-
+	cur_fxscene->hookToUniverse(arg1-1);
 
 }
 
@@ -270,7 +305,7 @@ void SceneDeskWidget::on_hookedChannelSpin_valueChanged(int arg1)
 {
 	if (!FxItem::exists(cur_fxscene)) return;
 
-	cur_fxscene->hookedToInputDmxChannel = arg1-1;
+	cur_fxscene->hookToChannel(arg1-1);
 
 }
 
@@ -355,7 +390,10 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 	cur_fxscene->setModified(true);
 
 	if (mixer) {
-		return faderAreaWidget->removeMixer(mixer);
+		if (faderAreaWidget->removeMixer(mixer)) {
+			emit modified();
+			return true;
+		}
 	}
 	return false;
 }
@@ -407,6 +445,7 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	case 2:
 		cur_fxscene->setTubeCount(cur_fxscene->tubeCount()+1);
 		setFxScene(cur_fxscene);
+		emit modified();
 		break;
 	}
 }
@@ -414,10 +453,51 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void SceneDeskWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 {
+	if (!cur_fxscene) return;
+
+	int time_ms = QtStaticTools::timeStringToMS(arg1);
+	if (cur_fxscene->defaultFadeInTime != time_ms) {
+		cur_fxscene->defaultFadeInTime = time_ms;
+		cur_fxscene->setModified(true);
+		emit modified();
+	}
 
 }
 
 void SceneDeskWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 {
+	if (!cur_fxscene) return;
 
+	int time_ms = QtStaticTools::timeStringToMS(arg1);
+	if (cur_fxscene->defaultFadeOutTime != time_ms) {
+		cur_fxscene->defaultFadeOutTime = time_ms;
+		cur_fxscene->setModified(true);
+		emit modified();
+	}
+}
+
+void SceneDeskWidget::on_editCheck_clicked(bool checked)
+{
+	setSceneEditable(checked);
+}
+
+void SceneDeskWidget::on_sceneNameEdit_textEdited(const QString &arg1)
+{
+	if (!cur_fxscene) return;
+
+	cur_fxscene->setName(arg1);
+	faderGroup->setTitle(arg1);
+	cur_fxscene->setModified(true);
+	emit modified();
+}
+
+void SceneDeskWidget::on_autoHookButton_clicked()
+{
+	if (!editCheck->isChecked()) {
+		setSceneEditable(true);
+	}
+
+	// Set Input assign mode and wait for answer in if_input_was_assigned()
+	AppCentral::instance()->setInputAssignMode(cur_fxscene);
+	connect(AppCentral::instance(),SIGNAL(inputAssigned(FxItem*)),this,SLOT(if_input_was_assigned(FxItem*)));
 }

@@ -30,8 +30,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
 
-	updateButtonStyles();
-
 	debugLevelSpin->setValue(debug);
 
 	// For external access
@@ -49,18 +47,19 @@ void StageRunnerMainWin::initConnects()
 {
 	// AppCentral <-> Mainwin
 	connect(appCentral,SIGNAL(editModeChanged(bool)),actionEdit_Mode,SLOT(setChecked(bool)));
+	connect(appCentral,SIGNAL(inputAssignModeChanged(bool)),actionInput_Assign_Mode,SLOT(setChecked(bool)));
 
-	// FxListWidget (Liste der Effekte im Mainwin)
+	// Project FxListWidget (Liste der Effekte im Mainwin)
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
+	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
 	connect(appCentral->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxListWidget,SLOT(setEditable(bool)));
 
-	// FxListWidget <-> Fx Editor (Dock Widget)
+	// Project FxListWidget <-> Fx Editor (Dock Widget)
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
 	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
-
 
 	// Audio Control Panel <-> Audio Control
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
@@ -116,23 +115,30 @@ void StageRunnerMainWin::restore_window()
 	}
 }
 
-void StageRunnerMainWin::updateButtonStyles()
+void StageRunnerMainWin::updateButtonStyles(QString style)
 {
+	LOGTEXT(tr("Set dial knob style to '%1'").arg(style));
+
 	// Update Style of Dial knobs
 	if (dialWidgetStyle) {
 		delete dialWidgetStyle;
+		dialWidgetStyle = 0;
 	}
 
-	// dialWidgetStyle = new qsynthDialPeppinoStyle();
-	dialWidgetStyle = new qsynthDialClassicStyle();
+	if (style == "" || style == "QSynth Dial Classic") {
+		dialWidgetStyle = new qsynthDialClassicStyle();
+	}
+	else if (style == "QSynth Dial Peppino") {
+		dialWidgetStyle = new qsynthDialPeppinoStyle();
+	}
+
+	// if (!dialWidgetStyle) return;
 
 	QList<qsynthKnob *> all_dials = findChildren<qsynthKnob *>();
 	foreach(qsynthKnob* dial, all_dials) {
 		dial->setStyle(dialWidgetStyle);
 		dial->setDialMode(qsynthKnob::LinearMode);
 	}
-
-
 }
 
 /**
@@ -190,11 +196,19 @@ void StageRunnerMainWin::copyProjectSettingsToGui()
 	fxListWidget->setAutoProceedSequence( appCentral->project->pAutoProceedSequence );
 }
 
-void StageRunnerMainWin::setApplicationGuiStyle(const QString &style)
+void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 {
-	if (style == "") {
+	LOGTEXT(tr("Set Application GUI style to '%1'").arg(style));
+	if (style == "" || style == "LightDesk") {
 		QApplication::setStyle(new LightDeskStyle);
 	}
+	else if (style == "Default") {
+		QApplication::setStyle(0);
+	}
+	else {
+		QApplication::setStyle(QStyleFactory::create(style));
+	}
+
 }
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
@@ -322,9 +336,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 		default:
 			if (key) {
-				FxItem *fx = appCentral->project->fxList->getFxByKeyCode(key + activeKeyModifiers);
-				if (fx) {
-					appCentral->executeFxCmd(fx, CMD_FX_START);
+				QList<FxItem *>fxlist = appCentral->project->fxList->getFxListByKeyCode(key + activeKeyModifiers);
+				if (fxlist.size()) {
+					for (int t=0; t<fxlist.size(); t++) {
+						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START);
+					}
 					// fxListWidget->selectFx(fx);
 				}
 			}
@@ -416,6 +432,10 @@ void StageRunnerMainWin::on_actionEdit_Mode_toggled(bool arg1)
 void StageRunnerMainWin::on_actionSetup_triggered()
 {
 	SetupWidget setup(appCentral);
+	connect(&setup,SIGNAL(applicationStyleChanged(QString)),this,SLOT(setApplicationGuiStyle(QString)));
+	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateButtonStyles(QString)));
+
+
 	setup.show();
 	setup.exec();
 
@@ -469,4 +489,9 @@ void StageRunnerMainWin::on_actionDMX_Output_triggered()
 		QMessageBox::warning(this,tr("System message")
 							 ,tr("No output universe detected"));
 	}
+}
+
+void StageRunnerMainWin::on_actionInput_Assign_Mode_triggered(bool checked)
+{
+	appCentral->setInputAssignMode(checked);
 }

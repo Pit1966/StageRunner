@@ -7,8 +7,10 @@
 
 #include "dmxchannel.h"
 #include "pluginmapping.h"
+#include "messagehub.h"
 
 #include <QSettings>
+#include <QDebug>
 
 #ifdef _MSC_VER
 #define strdup _strdup
@@ -190,6 +192,16 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								else if (var->myclass == PrefVarCore::PLUGIN_CONFIG) {
 									VarSetList<PluginConfig*> *varsetlist = reinterpret_cast<VarSetList<PluginConfig*>*>(var->p_refvar);
 									PluginConfig *item = new PluginConfig;
+									varsetlist->append(item);
+									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+										return -1;
+									} else {
+										return 0;
+									}
+								}
+								else if (var->myclass == PrefVarCore::MESSAGE) {
+									VarSetList<VMsg*> *varsetlist = reinterpret_cast<VarSetList<VMsg*>*>(var->p_refvar);
+									VMsg *item = new VMsg;
 									varsetlist->append(item);
 									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
 										return -1;
@@ -1079,7 +1091,7 @@ void VarSet::add_to_registry(VarSet::RegVarItem* reg)
 {
 	var_registry->lockAppend(reg);
 	is_registered_f = true;
-	// qDebug() << "register" << "type:" << reg->type << myclassname << reg->coderComment << this  << var_registry->size() << instance_cnt;
+	qDebug() << "register" << "type:" << reg->type << myclassname << reg->coderComment << this  << var_registry->size();
 }
 
 /**

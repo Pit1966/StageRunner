@@ -192,14 +192,26 @@ void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 	emit sceneChanged(scene);
 }
 
+
+/**
+ * @brief Handler für reinkommende Inputsignale
+ * @param universe
+ * @param channel
+ * @param value
+ *
+ * Diese Funktion stellt die Verbindung einer Eingangsleitung mit einem FxSceneItem dar
+ */
 void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
 {
 	if (universe >= MAX_DMX_UNIVERSE) return;
 
+	if (myApp->isInputAssignMode())
+		return myApp->assignInputToSelectedFxItem(universe, channel, value);
+
 	foreach (FxItem * fx, FxItem::globalFxList()) {
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
-			if (scene->hookedToInputUniverse == qint32(universe) && scene->hookedToInputDmxChannel == qint32(channel)) {
+			if (scene->isHookedToInput(universe,channel)) {
 				int response_time = myApp->pluginCentral->fastMapInUniverse[universe].responseTime;
 				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
 				if (scene->directFadeToDmx(value,response_time)) {

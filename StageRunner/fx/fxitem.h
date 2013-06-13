@@ -30,6 +30,8 @@ protected:
 	QString myFile;
 	QString myPath;
 	qint32 myKey;
+	qint32 hookedToInputUniverse;
+	qint32 hookedToInputDmxChannel;
 
 public:
 	FxItem();
@@ -45,6 +47,13 @@ public:
 	inline const QString & fileName() const {return myFile;}
 	void setKeyCode(int code);
 	inline int keyCode() const {return myKey;}
+
+	bool isHookedToInput(qint32 universe, qint32 channel);
+	inline qint32 hookedUniverse() {return hookedToInputUniverse;}
+	inline qint32 hookedChannel() {return hookedToInputDmxChannel;}
+	void hookToInput(qint32 universe, qint32 channel);
+	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
+	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
 
 
 private:

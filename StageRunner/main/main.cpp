@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 
 	// Init GUI
 	mywin->setApplicationGuiStyle(myapp->userSettings->pApplicationGuiStyle);
+	mywin->updateButtonStyles(myapp->userSettings->pDialKnobStyle);
 	mywin->show();
 	mywin->initConnects();
 	mywin->initAppDefaults();

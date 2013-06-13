@@ -50,17 +50,14 @@
      <widget class="QGroupBox" name="faderGroup">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-        <horstretch>6</horstretch>
+        <horstretch>7</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Fader Group</string>
+       <string notr="true">Fader Group</string>
       </property>
       <property name="flat">
-       <bool>false</bool>
-      </property>
-      <property name="checkable">
        <bool>false</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -137,20 +134,28 @@
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="mainLayout">
        <item>
-        <widget class="QCheckBox" name="liveCheck">
-         <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="topMargin">
+          <number>0</number>
          </property>
-         <property name="text">
-          <string>live</string>
-         </property>
-         <property name="icon">
-          <iconset>
-           <activeoff>:/gfx/icons/audio_play.png</activeoff>
-           <activeon>:/gfx/icons/audio_rec.png</activeon>
-          </iconset>
-         </property>
-        </widget>
+         <item>
+          <widget class="QCheckBox" name="liveCheck">
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="text">
+            <string>LIVE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="editCheck">
+           <property name="text">
+            <string>EDIT</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QGroupBox" name="sceneGroup">
@@ -163,12 +168,12 @@
          <property name="title">
           <string>Scene</string>
          </property>
-         <layout class="QGridLayout" name="sceneGroupLayout">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
           <property name="leftMargin">
            <number>2</number>
           </property>
           <property name="topMargin">
-           <number>2</number>
+           <number>4</number>
           </property>
           <property name="rightMargin">
            <number>2</number>
@@ -176,10 +181,10 @@
           <property name="bottomMargin">
            <number>2</number>
           </property>
-          <property name="verticalSpacing">
-           <number>1</number>
-          </property>
-          <item row="0" column="0" colspan="2">
+          <item>
+           <widget class="PsLineEdit" name="sceneNameEdit"/>
+          </item>
+          <item>
            <widget class="QGroupBox" name="groupBox">
             <property name="title">
              <string>Hooked to</string>
@@ -201,7 +206,7 @@
               <number>2</number>
              </property>
              <property name="verticalSpacing">
-              <number>0</number>
+              <number>1</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="hookedUniverseLabel">
@@ -212,6 +217,12 @@
              </item>
              <item row="0" column="1">
               <widget class="QSpinBox" name="hookedUniverseSpin">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>2</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="frame">
                 <bool>false</bool>
                </property>
@@ -238,43 +249,6 @@
              </item>
              <item row="1" column="1">
               <widget class="QSpinBox" name="hookedChannelSpin">
-               <property name="palette">
-                <palette>
-                 <active>
-                  <colorrole role="Base">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>198</red>
-                     <green>198</green>
-                     <blue>198</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </active>
-                 <inactive>
-                  <colorrole role="Base">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>198</red>
-                     <green>198</green>
-                     <blue>198</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </inactive>
-                 <disabled>
-                  <colorrole role="Base">
-                   <brush brushstyle="SolidPattern">
-                    <color alpha="255">
-                     <red>255</red>
-                     <green>255</green>
-                     <blue>255</blue>
-                    </color>
-                   </brush>
-                  </colorrole>
-                 </disabled>
-                </palette>
-               </property>
                <property name="frame">
                 <bool>false</bool>
                </property>
@@ -283,35 +257,75 @@
                </property>
               </widget>
              </item>
+             <item row="0" column="2" rowspan="2">
+              <widget class="QPushButton" name="autoHookButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Auto</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="fadeInTimeLabel">
-            <property name="text">
-             <string>In time</string>
+          <item>
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string>Fade times</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="fadeOutTimeLabel">
-            <property name="text">
-             <string>Out time</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="PsLineEdit" name="fadeInTimeEdit">
-            <property name="frame">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="PsLineEdit" name="fadeOutTimeEdit">
-            <property name="frame">
-             <bool>false</bool>
-            </property>
+            <layout class="QGridLayout" name="gridLayout">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <property name="horizontalSpacing">
+              <number>2</number>
+             </property>
+             <property name="verticalSpacing">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="fadeInTimeLabel">
+               <property name="text">
+                <string>IN</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="PsLineEdit" name="fadeInTimeEdit">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="fadeOutTimeLabel">
+               <property name="text">
+                <string>OUT</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="PsLineEdit" name="fadeOutTimeEdit">
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -376,12 +390,6 @@
        </item>
        <item>
         <widget class="QPushButton" name="closeButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="text">
           <string>Close</string>
          </property>

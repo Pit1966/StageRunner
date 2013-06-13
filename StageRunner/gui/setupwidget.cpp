@@ -6,11 +6,17 @@
 #include "usersettings.h"
 #include "pluginmapping.h"
 
+#ifdef IS_QT5
+#include <QtWidgets>
+#else
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QSpinBox>
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QStyleFactory>
+#include <QComboBox>
+#endif
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	: QDialog(parent)
@@ -45,12 +51,25 @@ void SetupWidget::copy_settings_to_gui()
 	UserSettings *set = myapp->userSettings;
 
 	audioBufferSizeEdit->setText(QString::number(set->pAudioBufferSize));
+
+	// Styles
+	appStyleCombo->addItem("LightDesk");
+	appStyleCombo->addItem("Default");
+	appStyleCombo->addItems(QStyleFactory::keys());
+
+	dialKnobStyleCombo->addItem("Default");
+	dialKnobStyleCombo->addItem("QSynth Dial Classic");
+	dialKnobStyleCombo->addItem("QSynth Dial Peppino");
+
 }
 
 void SetupWidget::copy_gui_to_settings()
 {
 	UserSettings *set = myapp->userSettings;
 	set->pAudioBufferSize = audioBufferSizeEdit->text().toInt();
+
+	set->pApplicationGuiStyle = appStyleCombo->currentText();
+	set->pDialKnobStyle = dialKnobStyleCombo->currentText();
 }
 
 void SetupWidget::on_okButton_clicked()
@@ -252,4 +271,15 @@ void SetupWidget::if_pluginline_responsetime_changed(int val)
 		lineconf->pResponseTime = val;
 		update_plugin_mapping_f = true;
 	}
+}
+
+void SetupWidget::on_appStyleCombo_currentIndexChanged(const QString &arg1)
+{
+	emit applicationStyleChanged(arg1);
+
+}
+
+void SetupWidget::on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1)
+{
+	emit dialKnobStyleChanged(arg1);
 }
