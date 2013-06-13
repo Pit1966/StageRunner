@@ -73,6 +73,7 @@ private:
 
 	volatile RunCmd cmd;
 	QTime *time;
+	int receiver_loop_cnt;
 
 public:
 	YadiReceiver(YadiDevice *p_device, SerialWrapper * p_file);
@@ -88,6 +89,7 @@ public:
 private:
 	void init();
 	void run();
+	bool receiver_loop();
 
 signals:
 	void exitReceiverWithFailure();

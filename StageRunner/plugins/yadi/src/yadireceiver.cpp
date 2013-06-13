@@ -27,6 +27,7 @@ void YadiReceiver::init()
 	dmxStatus = 0;
 	cmd = IDLE;
 	time = new QTime;
+	receiver_loop_cnt = 0;
 }
 
 bool YadiReceiver::startRxDmx()
@@ -44,6 +45,37 @@ bool YadiReceiver::startRxDmx()
 
 
 void YadiReceiver::run()
+{
+
+	bool reloop = true;
+	bool ok = true;
+
+	while (reloop) {
+		receiver_loop_cnt++;
+		ok = receiver_loop();
+		if (ok) {
+			reloop = false;
+		} else {
+			if (receiver_loop_cnt++ < 20) {
+				qDebug("YadiReceiver::run: exit DMXreceiver thread with failure -> restart");
+				reloop = true;
+			} else {
+				reloop = false;
+			}
+		}
+	}
+
+	if (!ok) {
+		qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
+		emit exitReceiverWithFailure();
+	} else {
+		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
+	}
+
+	cmd = IDLE;
+}
+
+bool YadiReceiver::receiver_loop()
 {
 	bool ok = true;
 
@@ -80,6 +112,8 @@ void YadiReceiver::run()
 				ok = true;
 				// So we leave the receiver loop and check if the interface is still present.
 				break;
+			} else {
+				receiver_loop_cnt = 0;
 			}
 
 			if (dmx.type == DmxAnswer::DMX_DATA) {
@@ -88,7 +122,7 @@ void YadiReceiver::run()
 				wait.restart();
 
 				qint64 channels_to_read = dmx.dmxDataSize;
-				while (channels_to_read > 0 && wait.elapsed() < 1000) {
+				while (channels_to_read > 0 && wait.elapsed() < 1400) {
 					in += file->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
 				}
@@ -131,16 +165,11 @@ void YadiReceiver::run()
 
 		}
 		// end inner loop
-
 	}
-	if (!ok) {
-		qDebug("YadiReceiver::run: exit DMXreceiver thread with failure");
-		emit exitReceiverWithFailure();
-	} else {
-		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
-	}
-	cmd = IDLE;
+	return ok;
 }
+
+
 
 bool YadiReceiver::stopRxDmx()
 {
@@ -220,9 +249,9 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 
 	int time_to_wait;
 	if (dmxstat.type == DmxAnswer::NONE) {
-		time_to_wait = 600;
+		time_to_wait = 800;
 	} else {
-		time_to_wait = 1000;
+		time_to_wait = 1400;
 	}
 
 	QByteArray &in = dmxstat.answerBytes;
