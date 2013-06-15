@@ -12,6 +12,7 @@ public:
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
 	pint32 pAudioBufferSize;
+	pbool pNoInterfaceDmxFeedback;
 
 public:
 	UserSettings();

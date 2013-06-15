@@ -37,7 +37,6 @@ QAtomicInt VarSet::instance_cnt = 0;
 VarSet::VarSet()
 {
 	init();
-
 	myclass = PrefVarCore::VAR_SET_CLASS;
 	modified_f = false;
 
@@ -299,6 +298,7 @@ VarSet &VarSet::operator =(const VarSet &other)
 
 void VarSet::cloneFrom(const VarSet &other)
 {
+	qDebug() << "cloneFrom" << var_list.size() << other.var_list.size();
 	for (int t=0; t<other.var_list.size(); t++) {
 		const PrefVarCore *o = other.var_list.at(t);
 		int idx = find(o);

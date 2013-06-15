@@ -35,6 +35,7 @@ protected:
 
 public:
 	FxItem();
+	FxItem(const FxItem &o);
 	~FxItem();
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
@@ -55,9 +56,9 @@ public:
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
 
-
 private:
-	void init(qint32 id);
+	void init();
+	int init_generate_id();
 
 	friend class FxList;
 };

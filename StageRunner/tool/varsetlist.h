@@ -46,6 +46,10 @@ public:
 		return list.takeAt(i);
 	}
 
+	inline T takeFirst() {
+		return list.takeFirst();
+	}
+
 
 };
 

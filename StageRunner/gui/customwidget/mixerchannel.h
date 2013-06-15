@@ -19,6 +19,7 @@ private:
 	int my_id;						///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
 	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
 	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
+	QString label;
 
 	bool prop_channel_shown_f;
 	bool prop_selectable_f;
@@ -79,6 +80,7 @@ public:
 	inline QSize backgroundSize() const {return org_pix_back.size();}
 	inline int backGroundWidth() const {return org_pix_back.size().width();}
 	inline int backGroundHeight() const {return org_pix_back.size().height();}
+	inline const QString & labelText() const {return label;}
 
 private:
 	void mousePressEvent(QMouseEvent *event);
@@ -94,6 +96,7 @@ private:
 public slots:
 	void notifyChangedDmxChannel(int universe, int dmxchannel, int dmxvalue);
 	void setRefSliderColorIndex(int colidx);
+	void setLabelText(const QString & text);
 
 signals:
 	void mixerSliderMoved(int val, int id);

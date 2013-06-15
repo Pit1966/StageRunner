@@ -4,15 +4,47 @@
 #include "appcentral.h"
 
 FxSceneItem::FxSceneItem()
+	:FxItem()
+{
+	init();
+}
+
+FxSceneItem::FxSceneItem(const FxSceneItem &o)
+	: FxItem()
+{
+	init();
+
+	cloneFrom(o);
+
+	for (int t=0; t<o.tubes.size(); t++) {
+		DmxChannel *tube = new DmxChannel(*o.tubes.at(t));
+		tubes.append(tube);
+	}
+}
+
+void FxSceneItem::init()
 {
 	myFxType = FX_SCENE;
+	myStatus = SCENE_IDLE;
+	my_last_status = SCENE_IDLE;
+	wasBlacked = false;
 
-	init();
+	sceneMaster = new DmxChannel;
+
+	addExistingVar(defaultFadeInTime,"DefFadeInTime");
+	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
+	addExistingVar(*sceneMaster,"DmxChannelDummy");
+	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
+
 }
 
 FxSceneItem::~FxSceneItem()
 {
 	delete sceneMaster;
+
+	while (tubes.size()) {
+		delete tubes.takeFirst();
+	}
 }
 
 void FxSceneItem::createDefaultTubes(int tubecount)
@@ -43,30 +75,38 @@ void FxSceneItem::setTubeCount(int tubecount)
 	}
 }
 
-bool FxSceneItem::initSceneCommand(CtrlCmd cmd)
+bool FxSceneItem::initSceneCommand(CtrlCmd cmd, int cmdTime)
 {
 	int cmd_time = 0;
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
 		cmd_time = 0;
-		myStatus &= ~SCENE_STAGE;
+		if (myStatus & SCENE_STAGE) {
+			myStatus &= ~SCENE_STAGE;
+			wasBlacked = true;
+		}
 		break;
 	case CMD_SCENE_FADEIN:
 		cmd_time = defaultFadeInTime;
 		myStatus |= SCENE_STAGE;
+		wasBlacked = false;
 		break;
 	case CMD_SCENE_FADEOUT:
 		cmd_time = defaultFadeOutTime;
 		myStatus &= ~SCENE_STAGE;
+		wasBlacked = false;
 		break;
 	case CMD_SCENE_FADETO:
 		cmd_time = defaultFadeInTime;
 		myStatus |= SCENE_STAGE;
+		wasBlacked = false;
 		break;
 	default:
 		return false;
 	}
+
+	if (cmdTime) cmd_time = cmdTime;
 
 	// qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
@@ -166,6 +206,11 @@ void FxSceneItem::setLive(bool state)
 	}
 }
 
+void FxSceneItem::setBlacked(bool state)
+{
+	wasBlacked = state;
+}
+
 
 /**
  * @brief Check if SceneStatus has changed
@@ -209,16 +254,10 @@ bool FxSceneItem::postLoadInitTubes(bool restore_light)
 	return was_on_stage;
 }
 
-void FxSceneItem::init()
+DmxChannel *FxSceneItem::tube(int id)
 {
-	myStatus = SCENE_IDLE;
-	my_last_status = SCENE_IDLE;
+	if (id < 0 || id >= tubes.size()) return 0;
 
-	sceneMaster = new DmxChannel;
-
-	addExistingVar(defaultFadeInTime,"DefFadeInTime");
-	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
-	addExistingVar(*sceneMaster,"DmxChannelDummy");
-	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
-
+	return tubes.at(id);
 }
+

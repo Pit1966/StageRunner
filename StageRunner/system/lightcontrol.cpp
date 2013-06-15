@@ -9,6 +9,7 @@
 #include "fxlist.h"
 #include "qlcioplugin.h"
 #include "ioplugincentral.h"
+#include "usersettings.h"
 
 
 LightControl::LightControl(AppCentral *app_central)
@@ -82,6 +83,10 @@ bool LightControl::sendChangedDmxData()
 				plugin->writeUniverse(t,dmxOutputValues[t]);
 				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
+			} else {
+				if (myApp->userSettings->pNoInterfaceDmxFeedback) {
+					emit outputUniverseChanged(t,dmxOutputValues[t]);
+				}
 			}
 			dmxOutputChanged[t] = false;
 		}
@@ -163,9 +168,13 @@ qint32 LightControl::black(qint32 time_ms)
 	foreach (FxItem * fx, FxItem::globalFxList()) {
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
-			if (scene->directFadeToDmx(0,time_ms)) {
+			if (scene->initSceneCommand(CMD_SCENE_BLACK, time_ms)) {
 				num++;
 			}
+
+//			if (scene->directFadeToDmx(0,time_ms)) {
+//				num++;
+//			}
 			scene->setLive(false);
 		}
 	}
@@ -214,7 +223,14 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 			if (scene->isHookedToInput(universe,channel)) {
 				int response_time = myApp->pluginCentral->fastMapInUniverse[universe].responseTime;
 				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
-				if (scene->directFadeToDmx(value,response_time)) {
+
+				// This is to force the operator to draw the input slider to Null-Level, when a BLACK command was emitted
+				if (scene->isBlacked()) {
+					if (value < 10) {
+						scene->setBlacked(false);
+					}
+				}
+				else if (scene->directFadeToDmx(value,response_time)) {
 					setSceneActive(scene);
 				}
 			}

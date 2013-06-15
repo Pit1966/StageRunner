@@ -495,3 +495,10 @@ void StageRunnerMainWin::on_actionInput_Assign_Mode_triggered(bool checked)
 {
 	appCentral->setInputAssignMode(checked);
 }
+
+void StageRunnerMainWin::on_cloneSelectedSceneButton_clicked()
+{
+	appCentral->project->fxList->cloneSelectedSceneItem();
+	fxListWidget->refreshList();
+
+}

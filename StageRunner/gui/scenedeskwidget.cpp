@@ -182,8 +182,10 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 				selected_tube_ids.append(id);
 			}
 		}
+		copyTubeSettingsToGui(id);
 	} else {
 		selected_tube_ids.removeAll(id);
+		copyTubeSettingsToGui(-1);
 	}
 	// qDebug() << "tubes selected:" << selected_tube_ids;
 }
@@ -223,6 +225,18 @@ void SceneDeskWidget::setCurrentSceneLiveState(bool state)
 				tube->curValue = 0;
 			}
 		}
+	}
+}
+
+void SceneDeskWidget::copyTubeSettingsToGui(int id)
+{
+	if (!FxItem::exists(cur_fxscene)) return;
+
+	DmxChannel *tube = cur_fxscene->tube(id);
+	if (tube) {
+		tubeCommentEdit->setText(tube->labelText);
+	} else {
+		tubeCommentEdit->clear();
 	}
 }
 
@@ -413,6 +427,25 @@ bool SceneDeskWidget::hideSelectedTubes()
 	return removed;
 }
 
+int SceneDeskWidget::setLabelInSelectedTubes(const QString &text)
+{
+	if (!cur_fxscene) return -1;
+
+	int count = 0;
+
+	for (int t=0; t<selected_tube_ids.size(); t++) {
+		int id = selected_tube_ids.at(t);
+		MixerChannel *mix = faderAreaWidget->getMixerById(id);
+		if (mix && id < cur_fxscene->tubeCount()) {
+			mix->setLabelText(text);
+			cur_fxscene->tubes.at(id)->labelText = text;
+			count++;
+		}
+	}
+
+	return count;
+}
+
 
 
 void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
@@ -501,3 +534,9 @@ void SceneDeskWidget::on_autoHookButton_clicked()
 	AppCentral::instance()->setInputAssignMode(cur_fxscene);
 	connect(AppCentral::instance(),SIGNAL(inputAssigned(FxItem*)),this,SLOT(if_input_was_assigned(FxItem*)));
 }
+
+void SceneDeskWidget::on_tubeCommentEdit_textEdited(const QString &arg1)
+{
+	setLabelInSelectedTubes(arg1);
+}
+

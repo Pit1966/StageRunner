@@ -6,6 +6,35 @@ QList<FxItem*>*FxItem::global_fx_list = 0;
 FxItem::FxItem()
 	: VarSet()
 {
+	init();
+	myId = init_generate_id();
+}
+
+FxItem::FxItem(const FxItem &o)
+	: VarSet()
+{
+	init();
+
+	cloneFrom(o);
+	myId = init_generate_id();
+}
+
+void FxItem::init()
+{
+	setClass(PrefVarCore::FX_ITEM,"FxItem");
+
+	addExistingVar(myId,"FxId",0,10000,0);
+	addExistingVar(myFxType,"FxType",FX_NULL,FX_SIZE,FX_NULL);
+	addExistingVar(myName,"DisplayName");
+	addExistingVar(myFile,"FileName");
+	addExistingVar(myPath,"FilePath");
+	addExistingVar(myKey,"KeyCode");
+	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
+	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
+}
+
+int FxItem::init_generate_id()
+{
 	myId = 0;
 	// hold a backup pointer to every effect in a global list
 	if (!global_fx_list) {
@@ -22,9 +51,9 @@ FxItem::FxItem()
 			new_id = t_id + 1;
 	}
 
-	init(new_id);
-
+	return new_id;
 }
+
 
 FxItem::~FxItem()
 {
@@ -63,18 +92,4 @@ void FxItem::hookToInput(qint32 universe, qint32 channel)
 	hookedToInputDmxChannel = channel;
 }
 
-void FxItem::init(qint32 id)
-{
-	// qDebug("init id: %d",id);
-	setClass(PrefVarCore::FX_ITEM,"FxItem");
 
-	addExistingVar(myId,"FxId",0,10000,id);
-	addExistingVar(myFxType,"FxType",FX_NULL,FX_SIZE,FX_NULL);
-	addExistingVar(myName,"DisplayName");
-	addExistingVar(myFile,"FileName");
-	addExistingVar(myPath,"FilePath");
-	addExistingVar(myKey,"KeyCode");
-	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
-	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
-
-}

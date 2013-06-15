@@ -33,6 +33,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 
 void FxListWidget::setFxList(FxList *fxlist)
 {
+	qDebug() << "Set FxList";
 	cur_selected_item = 0;
 	selected_rows.clear();
 	fxTable->clear();
@@ -76,7 +77,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->itemEdit->setMinimized(true);
 		item->itemEdit->setSingleKeyEditEnabled(true);
 		item->itemEdit->setFont(key_font);
-		item->itemEdit->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
 		// item->setMaximumWidth(60);
 		item->myRow = t;

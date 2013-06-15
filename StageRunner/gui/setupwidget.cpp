@@ -53,14 +53,20 @@ void SetupWidget::copy_settings_to_gui()
 	audioBufferSizeEdit->setText(QString::number(set->pAudioBufferSize));
 
 	// Styles
+	int idx;
 	appStyleCombo->addItem("LightDesk");
 	appStyleCombo->addItem("Default");
 	appStyleCombo->addItems(QStyleFactory::keys());
+	idx = appStyleCombo->findText(set->pApplicationGuiStyle);
+	if (idx >= 0) appStyleCombo->setCurrentIndex(idx);
 
 	dialKnobStyleCombo->addItem("Default");
 	dialKnobStyleCombo->addItem("QSynth Dial Classic");
 	dialKnobStyleCombo->addItem("QSynth Dial Peppino");
+	idx = dialKnobStyleCombo->findText(set->pDialKnobStyle);
+	if (idx >= 0) dialKnobStyleCombo->setCurrentIndex(idx);
 
+	noInterfaceFeedbackCheck->setChecked(set->pNoInterfaceDmxFeedback);
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -70,6 +76,8 @@ void SetupWidget::copy_gui_to_settings()
 
 	set->pApplicationGuiStyle = appStyleCombo->currentText();
 	set->pDialKnobStyle = dialKnobStyleCombo->currentText();
+
+	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
 }
 
 void SetupWidget::on_okButton_clicked()

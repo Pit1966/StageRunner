@@ -124,8 +124,8 @@ protected:
 
 private:
 	void init();
-	virtual QVariant get_value() const {return QVariant();}
-	virtual void set_value(QVariant val) {Q_UNUSED(val)}
+	virtual QVariant get_value() const;
+	virtual void set_value(QVariant val);
 	virtual QVariant get_default() const {return QVariant();}
 
 	friend class VarSet;

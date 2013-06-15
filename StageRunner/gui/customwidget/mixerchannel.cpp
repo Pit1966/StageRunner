@@ -265,7 +265,19 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.setPen(Qt::white);
 		QRect bound(QPoint(0,y1),QPoint(width(),height()));
 		p.drawText(bound,QString::number(my_dmx_channel+1),QTextOption(Qt::AlignHCenter | Qt::AlignVCenter));
+
 	}
+	if (label.size()) {
+		QFont font(p.font());
+		font.setFixedPitch(true);
+		font.setItalic(false);
+		font.setBold(false);
+		p.setFont(font);
+		p.setPen(Qt::gray);
+		QRect bound(QPoint(0,y1),QPoint(width(),height()));
+		p.drawText(bound,label,QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
+	}
+
 
 	// Draw the knob
 	y = lo_pos_percent * height();
@@ -347,5 +359,13 @@ void MixerChannel::setRefSliderColorIndex(int colidx)
 			refSliderColorIndex = colidx;
 			update();
 		}
+	}
+}
+
+void MixerChannel::setLabelText(const QString &text)
+{
+	if (label != text) {
+		label = text;
+		update();
 	}
 }

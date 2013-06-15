@@ -76,7 +76,7 @@ private:
 public:
 	VarSet();
 	VarSet(const VarSet & other);
-	~VarSet();
+	virtual ~VarSet();
 
 	VarSet & operator= (const VarSet & other);
 	void cloneFrom(const VarSet &other);

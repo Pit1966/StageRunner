@@ -7,6 +7,61 @@ DmxChannel::DmxChannel()
 	init();
 }
 
+DmxChannel::DmxChannel(const DmxChannel &o)
+	: VarSet()
+{
+	tempDeskPosIdx = 0;
+	tempTubeListIdx = 0;
+	fadeStartValue = 0;
+	fadeTargetValue = 0;
+	fadeValue = 0;
+	fadeStep = 0;
+	curCmd = CMD_NONE;
+
+	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
+	setDescription("Output mapping from tube number to dmx channel and configuration");
+	addExistingVar(tube,"TubeNumber",0,1000,o.tube);
+	addExistingVar(dmxType,"DmxType",DMX_GENERIC,DMX_TYPES,o.dmxType);
+	addExistingVar(dmxUniverse,"DmxUniverse",0,3,o.dmxUniverse);
+	addExistingVar(dmxChannel,"DmxChannel",0,511,o.dmxChannel);
+	addExistingVar(dmxValue,"DmxValue",0,255,o.dmxValue);
+	addExistingVar(curValue,"Value",0,255,o.curValue);
+	addExistingVar(directValue,"Value",0,255,o.directValue);
+	addExistingVar(targetFullValue,"TargetFullValue",255,100000,o.targetFullValue);
+	addExistingVar(targetValue,"TargetValue",0,100000,o.targetValue);
+	addExistingVar(deskVisibleFlag,"DeskVisible",o.deskVisibleFlag);
+	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,o.deskPositionIndex);
+	addExistingVar(labelText,"LabelText",o.labelText);
+}
+
+
+void DmxChannel::init()
+{
+	tempDeskPosIdx = 0;
+	tempTubeListIdx = 0;
+	fadeStartValue = 0;
+	fadeTargetValue = 0;
+	fadeValue = 0;
+	fadeStep = 0;
+	curCmd = CMD_NONE;
+
+	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
+	setDescription("Output mapping from tube number to dmx channel and configuration");
+	addExistingVar(tube,"TubeNumber",0,1000,0);
+	addExistingVar(dmxType,"DmxType",DMX_GENERIC,DMX_TYPES,DMX_GENERIC);
+	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);
+	addExistingVar(dmxChannel,"DmxChannel",0,511,0);
+	addExistingVar(dmxValue,"DmxValue",0,255,0);
+	addExistingVar(curValue,"Value",0,255,0);
+	addExistingVar(directValue,"Value",0,255,0);
+	addExistingVar(targetFullValue,"TargetFullValue",255,100000,10000);
+	addExistingVar(targetValue,"TargetValue",0,100000,0);
+	addExistingVar(deskVisibleFlag,"DeskVisible",true);
+	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
+	addExistingVar(labelText,"LabelText");
+}
+
+
 DmxChannel::~DmxChannel()
 {
 }
@@ -114,26 +169,3 @@ bool DmxChannel::loopFunction()
 }
 
 
-void DmxChannel::init()
-{
-	tempDeskPosIdx = 0;
-	tempTubeListIdx = 0;
-	fadeStartValue = 0;
-	fadeTargetValue = 0;
-	fadeValue = 0;
-	fadeStep = 0;
-	curCmd = CMD_NONE;
-
-	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
-	setDescription("Output mapping from tube number to dmx channel and configuration");
-	addExistingVar(tube,"TubeNumber",0,1000,0);
-	addExistingVar(dmxType,"DmxType",DMX_GENERIC,DMX_TYPES,DMX_GENERIC);
-	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);
-	addExistingVar(dmxChannel,"DmxChannel",0,511,0);
-	addExistingVar(dmxValue,"DmxValue",0,255,0);
-	addExistingVar(curValue,"Value",0,255,0);
-	addExistingVar(targetFullValue,"TargetFullValue",255,100000,10000);
-	addExistingVar(targetValue,"TargetValue",0,100000,0);
-	addExistingVar(deskVisibleFlag,"DeskVisible",true);
-	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
-}

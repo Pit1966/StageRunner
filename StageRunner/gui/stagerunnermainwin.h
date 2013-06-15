@@ -70,6 +70,8 @@ private slots:
 
 	void on_actionInput_Assign_Mode_triggered(bool checked);
 
+	void on_cloneSelectedSceneButton_clicked();
+
 private:
 	void init();
 	void setup_gui_docks();

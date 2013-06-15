@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="dmxTab">
       <attribute name="title">
@@ -136,6 +136,13 @@
            <widget class="QComboBox" name="dialKnobStyleCombo"/>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="noInterfaceFeedbackCheck">
+         <property name="text">
+          <string>Enable DMX channel feedback for non existing interfaces</string>
+         </property>
         </widget>
        </item>
        <item>

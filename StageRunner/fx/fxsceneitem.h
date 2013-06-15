@@ -15,7 +15,7 @@ class FxSceneItem : public FxItem
 public:
 	qint32 defaultFadeInTime;
 	qint32 defaultFadeOutTime;
-	DmxChannel *sceneMaster;
+	DmxChannel *sceneMaster;				///< Not used
 	VarSetList<DmxChannel*>tubes;
 
 protected:
@@ -23,19 +23,24 @@ protected:
 
 private:
 	quint32 my_last_status;
+	bool wasBlacked;
 
 public:
 	FxSceneItem();
+	FxSceneItem(const FxSceneItem &o);
 	~FxSceneItem();
 
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
+	DmxChannel *tube(int id);
 
-	bool initSceneCommand(CtrlCmd cmd);
+	bool initSceneCommand(CtrlCmd cmd, int cmdTime = 0);
 	bool directFadeToDmx(qint32 dmxval, qint32 time_ms);
 	bool loopFunction();
 	void setLive(bool state);
+	void setBlacked(bool state);
+	bool isBlacked() const {return wasBlacked;}
 	inline bool isActive() const {return myStatus & SCENE_ACTIVE;}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
 	inline bool isLive() const {return myStatus & SCENE_LIVE;}

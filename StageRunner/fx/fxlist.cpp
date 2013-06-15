@@ -201,6 +201,17 @@ void FxList::setModified(bool state)
 	modified_f = state;
 }
 
+void FxList::cloneSelectedSceneItem()
+{
+	if (fx_next && fx_next->fxType() == FX_SCENE) {
+		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(fx_next);
+		FxSceneItem *new_scene = new FxSceneItem(*scene);
+		new_scene->refCount.ref();
+		fx_list.append(new_scene);
+		modified_f = true;
+	}
+}
+
 FxItem *FxList::addFx(int fxtype, int option)
 {
 	switch (fxtype) {

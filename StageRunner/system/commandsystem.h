@@ -70,7 +70,8 @@ enum SceneFlags {
 	SCENE_IDLE = 0,
 	SCENE_LIVE = 1<<0,
 	SCENE_ACTIVE = 1<<1,
-	SCENE_STAGE = 1<<2
+	SCENE_STAGE = 1<<2,
+	SCENE_DIRECT = 1<<3
 };
 }
 

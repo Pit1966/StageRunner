@@ -54,6 +54,7 @@ public:
 	bool deleteFx(FxItem *fx);
 	bool isModified() const;
 	void setModified(bool state);
+	void cloneSelectedSceneItem();
 
 	FxItem * addFx(int fxtype, int option = -1);
 	FxItem *findSequenceFollower(FxItem *curfx = 0);
