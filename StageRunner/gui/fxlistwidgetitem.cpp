@@ -3,6 +3,8 @@
 #include "fxitem.h"
 
 #include <QMouseEvent>
+#include <QPaintEvent>
+#include <QtWidgets>
 
 FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype) :
 	QWidget()
@@ -45,6 +47,7 @@ void FxListWidgetItem::setText(const QString &txt)
 void FxListWidgetItem::init()
 {
 	current_button = 0;
+	activation_indicator = 0;
 
 	setupUi(this);
 	itemLabel->clear();
@@ -58,8 +61,12 @@ void FxListWidgetItem::init()
 	connect(itemLabel,SIGNAL(doubleClicked()),this,SLOT(if_label_item_doubleclicked()));
 
 	org_palette = palette();
-	select_help_palette = org_palette;
-	setAutoFillBackground(true);
+	org_palette.setBrush(QPalette::Base,Qt::NoBrush);
+	setPalette(org_palette);
+
+	setAutoFillBackground(false);
+	itemEdit->setAutoFillBackground(false);
+	itemLabel->setAutoFillBackground(false);
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
@@ -84,6 +91,20 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
 		current_button = 0;
 
 	}
+}
+
+void FxListWidgetItem::paintEvent(QPaintEvent *event)
+{
+	if (activation_indicator) {
+		QPainter p(this);
+		p.setPen(Qt::red);
+		p.setBrush(Qt::red);
+		int w = event->rect().width();
+		int h = event->rect().height();
+		int wp = activation_indicator * w / 1000;
+		p.drawRect(0,h-4,wp,4);
+	}
+
 }
 
 void FxListWidgetItem::setEditable(bool state)
@@ -121,15 +142,20 @@ void FxListWidgetItem::setSelected(bool state)
 	if (is_selected_f != state) {
 		is_selected_f = state;
 		if (state) {
-		QPalette pal = palette();
-		select_help_palette = pal;
-		pal.setBrush(QPalette::Base, Qt::darkGreen);
-		setPalette(pal);
+
 		} else {
-			setPalette(select_help_palette);
+
 		}
 	}
 
+}
+
+void FxListWidgetItem::setActivationProgress(int perMille)
+{
+	if (perMille != activation_indicator) {
+		activation_indicator = perMille;
+		update();
+	}
 }
 
 void FxListWidgetItem::if_edit_item_clicked()

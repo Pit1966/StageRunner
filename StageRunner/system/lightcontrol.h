@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QByteArray>
 
+
 class AppCentral;
 class LightLoopThreadInterface;
 class FxList;
@@ -44,10 +45,12 @@ private:
 
 signals:
 	void sceneChanged(FxSceneItem *scene);
+	void sceneFadeChanged(FxSceneItem *scene, int perMille);
 	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
 
 public slots:
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
+	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMille);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
 
 };

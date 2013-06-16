@@ -86,11 +86,14 @@ bool AudioControl::restartFxAudioInSlot(int slotnum)
 	return false;
 }
 
-void AudioControl::stopAllFxAudio()
+bool AudioControl::stopAllFxAudio()
 {
+	bool was_running = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->status() != AUDIO_IDLE) was_running = true;
 		stopFxAudio(t);
 	}
+	return was_running;
 }
 
 void AudioControl::stopFxAudio(int slot)
@@ -112,11 +115,14 @@ void AudioControl::stopFxAudio(FxAudioItem *fxa)
 	}
 }
 
-void AudioControl::fadeoutAllFxAudio(int time_ms)
+bool AudioControl::fadeoutAllFxAudio(int time_ms)
 {
+	bool was_running = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->status() != AUDIO_IDLE) was_running = true;
 		fadeoutFxAudio(t,time_ms);
 	}
+	return was_running;
 }
 
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)

@@ -40,6 +40,7 @@ AudioSlot::AudioSlot(AudioControl *parent)
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
 	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)),Qt::QueuedConnection);
+	connect(audio_io,SIGNAL(audioDurationDetected(qint64)),this,SLOT(setAudioDurationMs(qint64)));
 
 	//Fadeout Timeline
 	connect(&fadeout_timeline,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_out_frame_changed(qreal)));
@@ -49,6 +50,10 @@ AudioSlot::AudioSlot(AudioControl *parent)
 
 AudioSlot::~AudioSlot()
 {
+	if (run_status != AUDIO_IDLE) {
+		stopFxAudio();
+	}
+
 	delete audio_output;
 	delete audio_io;
 }
@@ -105,7 +110,6 @@ bool AudioSlot::stopFxAudio()
 	}
 
 	emit vuLevelChanged(slotNumber,0,0);
-
 
 	if (run_status != AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
@@ -169,6 +173,30 @@ void AudioSlot::setMasterVolume(int vol)
 	}
 }
 
+FxAudioItem *AudioSlot::currentFxAudio()
+{
+	if (!FxItem::exists(current_fx)) {
+		return 0;
+	}
+	return current_fx;
+}
+
+void AudioSlot::emit_audio_play_progress()
+{
+	if (!FxItem::exists(current_fx)) return;
+
+	if (!current_fx->audioDuration || run_status != AUDIO_RUNNING) return;
+
+	int per_mille = run_time.elapsed() * 1000 / current_fx->audioDuration;
+
+	emit audioProgressChanged(slotNumber, current_fx, per_mille);
+
+	AudioCtrlMsg msg(current_fx,slotNumber);
+	msg.currentAudioStatus = run_status;
+	msg.progress = per_mille;
+	emit audioCtrlMsgEmitted(msg);
+}
+
 void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 {
 	AudioStatus current_state = run_status;
@@ -207,6 +235,7 @@ void AudioSlot::on_audio_io_read_ready()
 void AudioSlot::on_vulevel_changed(int left, int right)
 {
 	emit vuLevelChanged(slotNumber, left, right);
+	emit_audio_play_progress();
 }
 
 void AudioSlot::on_fade_out_frame_changed(qreal value)
@@ -270,3 +299,9 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 
 }
 
+void AudioSlot::setAudioDurationMs(qint64 ms)
+{
+	if (!FxItem::exists(current_fx)) return;
+
+	current_fx->audioDuration = ms;
+}

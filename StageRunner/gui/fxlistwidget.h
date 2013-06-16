@@ -12,6 +12,7 @@ class FxItem;
 class FxSceneItem;
 class FxListWidgetItem;
 
+typedef QList<FxListWidgetItem*> WidItemList;
 
 class FxListWidget : public QWidget, private Ui::FxListWidget
 {
@@ -31,6 +32,7 @@ public:
 	void setAutoProceedSequence(bool state);
 	inline bool isEditable() {return is_editable_f;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
+	int getRowThatContainsFxItem(FxItem *fx);
 	FxItem *currentSelectedFxItem() const {return cur_selected_item;}
 
 private:
@@ -48,6 +50,8 @@ public slots:
 	void setRowSelected(int row, bool state);
 	void setSingleRowSelected(int row);
 	void unselectRows();
+	void propagateSceneStatus(FxSceneItem *scene);
+	void propagateSceneFadeProgress(FxSceneItem *scene, int perMille);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);

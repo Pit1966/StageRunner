@@ -62,6 +62,7 @@ void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 	}
 }
 
+
 void PTableWidget::dropEvent(QDropEvent *event)
 {
 	const QMimeData * mime = event->mimeData();

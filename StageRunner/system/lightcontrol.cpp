@@ -33,6 +33,8 @@ bool LightControl::setLightLoopEnabled(bool state)
 		if (ok) {
 			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneStatusChanged(FxSceneItem*,quint32))
 				,this,SLOT(onSceneStatusChanged(FxSceneItem*,quint32)));
+			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneFadeProgressChanged(FxSceneItem*,int))
+				,this,SLOT(onSceneFadeProgressChanged(FxSceneItem*,int)));
 		}
 
 	} else {
@@ -108,13 +110,13 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 {
 	bool active;
 
-	if (!scene->isOnStage()) {
-		active = scene->initSceneCommand(CMD_SCENE_FADEIN);
+	if (!scene->isOnStageIntern()) {
+		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
 		if (active) {
 			setSceneActive(scene);
 		}
 	} else {
-		active = scene->initSceneCommand(CMD_SCENE_FADEOUT);
+		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
 	}
 
 	return active;
@@ -122,7 +124,7 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 
 bool LightControl::stopFxScene(FxSceneItem *scene)
 {
-	return scene->initSceneCommand(CMD_SCENE_FADEOUT);
+	return scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
 }
 
 /**
@@ -168,7 +170,10 @@ qint32 LightControl::black(qint32 time_ms)
 	foreach (FxItem * fx, FxItem::globalFxList()) {
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
-			if (scene->initSceneCommand(CMD_SCENE_BLACK, time_ms)) {
+			if (scene->initSceneCommand(MIX_INTERN,CMD_SCENE_BLACK, time_ms)) {
+				num++;
+			}
+			if (scene->initSceneCommand(MIX_EXTERN,CMD_SCENE_BLACK, time_ms)) {
 				num++;
 			}
 
@@ -189,16 +194,21 @@ void LightControl::init()
 		memset(dmxOutputValues[t].data(),0,512);
 	}
 	lightLoopInterface = new LightLoopThreadInterface(*this);
-
 }
 
 void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 {
-	if (debug > 1) qDebug() << "Scene" << scene->name() << "status: active:" << (status & SCENE_ACTIVE)
-			 << "stage:" << (status & SCENE_STAGE)
-			 << "live:" << (status & SCENE_LIVE);
+	if (debug > 1) qDebug() << "Scene" << scene->name() << "INTERN active:" << (status & SCENE_ACTIVE_INTERN)
+			 << "INTERN:" << (status & SCENE_STAGE_INTERN)
+			 << "LIVE:" << (status & SCENE_STAGE_LIVE)
+			 << "EXTERN active:" << (status & SCENE_ACTIVE_EXTERN) << "EXTERN:" << (status & SCENE_STAGE_EXTERN);
 
 	emit sceneChanged(scene);
+}
+
+void LightControl::onSceneFadeProgressChanged(FxSceneItem *scene, int perMille)
+{
+	emit sceneFadeChanged(scene, perMille);
 }
 
 
@@ -225,9 +235,9 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
 
 				// This is to force the operator to draw the input slider to Null-Level, when a BLACK command was emitted
-				if (scene->isBlacked()) {
+				if (scene->isBlacked(MIX_EXTERN)) {
 					if (value < 10) {
-						scene->setBlacked(false);
+						scene->setBlacked(MIX_EXTERN,false);
 					}
 				}
 				else if (scene->directFadeToDmx(value,response_time)) {

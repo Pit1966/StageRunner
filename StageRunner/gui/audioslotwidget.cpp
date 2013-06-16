@@ -102,11 +102,22 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 		case AUDIO_IDLE:
 		case AUDIO_ERROR:
 			setPlayState(false);
+			if (msg.fxAudio) {
+				setTitle(msg.fxAudio->name().left(5) + "...");
+			}
 			break;
 		default:
 			setPlayState(true);
 			if (msg.fxAudio) {
-				setTitle(msg.fxAudio->name());
+				// setTitle(msg.fxAudio->name());
+				slotPlayButton->setToolTip(msg.fxAudio->name());
+				slotStopButton->setToolTip(msg.fxAudio->name());
+			}
+			if (msg.progress >= 0) {
+				QString time = QString("%1.%2\%")
+						.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
+						.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
+				setTitle(time);
 			}
 			break;
 		}

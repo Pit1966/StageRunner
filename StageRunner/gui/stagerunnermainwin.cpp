@@ -69,6 +69,11 @@ void StageRunnerMainWin::initConnects()
 	// Light Control -> SceneStatusWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
 
+	// Light Control -> Project FxListWidget
+	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),fxListWidget,SLOT(propagateSceneStatus(FxSceneItem*)));
+	connect(appCentral->unitLight,SIGNAL(sceneFadeChanged(FxSceneItem*,int)),fxListWidget,SLOT(propagateSceneFadeProgress(FxSceneItem*,int)));
+
+
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
 	connect(logThread,SIGNAL(errorMsgReceived(QString,QString)),this,SLOT(showErrorMsg(QString,QString)));
@@ -379,6 +384,14 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 			on_actionSave_Project_triggered();
 		}
 	}
+
+	if (appCentral->unitAudio->fadeoutAllFxAudio(1000)) {
+		hide();
+		QTime wait;
+		wait.start();
+		while (wait.elapsed() < 1500) QApplication::processEvents();
+	}
+
 	QSettings set;
 	set.beginGroup("GuiSettings");
 	set.setValue("MainWinGeometry",saveGeometry());

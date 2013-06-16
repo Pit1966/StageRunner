@@ -41,6 +41,7 @@ public:
 	AudioStatus currentAudioStatus;
 	int volume;
 	int fadetime;
+	int progress;
 	FxAudioItem *fxAudio;
 
 public:
@@ -50,6 +51,7 @@ public:
 		, currentAudioStatus(status)
 		, volume(-1)
 		, fadetime(-1)
+		, progress(-1)
 		, fxAudio(0)
 	{}
 
@@ -59,6 +61,7 @@ public:
 		, currentAudioStatus(AUDIO_IDLE)
 		, volume(-1)
 		, fadetime(-1)
+		, progress(-1)
 		, fxAudio(fxaudio)
 	{}
 };
@@ -67,11 +70,14 @@ public:
 
 namespace LIGHT {
 enum SceneFlags {
-	SCENE_IDLE = 0,
-	SCENE_LIVE = 1<<0,
-	SCENE_ACTIVE = 1<<1,
-	SCENE_STAGE = 1<<2,
-	SCENE_DIRECT = 1<<3
+	// !!!! Do not change the shift indices  !!!
+	// Look FxSceneItem::initSceneCommand
+	SCENE_IDLE = 0,					///< Scene does nothing and is not on stage and not direct
+	SCENE_STAGE_LIVE = 1<<0,		///< Scene is live (Lightdesk is opened)
+	SCENE_STAGE_INTERN = 1<<1,		///< Scene is visible on stage controlled by application logic
+	SCENE_STAGE_EXTERN = 1<<2,		///< Scene is visible on stage controlled by input
+	SCENE_ACTIVE_INTERN = 1<<8,		///< Scene is fading at the moment
+	SCENE_ACTIVE_EXTERN = 1<<9		///< Scene is fading caused by direct input
 };
 }
 

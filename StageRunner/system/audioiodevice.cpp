@@ -22,6 +22,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
+	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
 
 #endif
 }
@@ -256,6 +257,13 @@ void AudioIODevice::on_decoding_finished()
 	decoding_finished_f = true;
 	LOGTEXT(tr("Decoding of audio file '%1' finished").arg(current_filename));
 	if (debug) qDebug("Audio decoding finished");
+}
+
+void AudioIODevice::if_audio_duration_changed(qint64 duration)
+{
+	if (duration > 0) {
+		emit audioDurationDetected(duration);
+	}
 }
 
 

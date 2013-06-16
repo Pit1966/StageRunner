@@ -5,6 +5,12 @@
 #include "varsetlist.h"
 #include "commandsystem.h"
 
+#ifndef MIX_LINES
+#define MIX_INTERN 0
+#define MIX_EXTERN 1
+#define MIX_LINES 2
+#endif
+
 class DmxChannel;
 class QWidget;
 
@@ -23,7 +29,7 @@ protected:
 
 private:
 	quint32 my_last_status;
-	bool wasBlacked;
+	bool wasBlacked[MIX_LINES];
 
 public:
 	FxSceneItem();
@@ -35,17 +41,18 @@ public:
 	inline int tubeCount() const {return tubes.size();}
 	DmxChannel *tube(int id);
 
-	bool initSceneCommand(CtrlCmd cmd, int cmdTime = 0);
+	bool initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime = 0);
 	bool directFadeToDmx(qint32 dmxval, qint32 time_ms);
 	bool loopFunction();
 	void setLive(bool state);
-	void setBlacked(bool state);
-	bool isBlacked() const {return wasBlacked;}
-	inline bool isActive() const {return myStatus & SCENE_ACTIVE;}
+	void setBlacked(int mixline, bool state);
+	bool isBlacked(int mixline) const {return wasBlacked[mixline];}
+	inline bool isActive() const {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
-	inline bool isLive() const {return myStatus & SCENE_LIVE;}
-	inline bool isOnStage() const {return myStatus & SCENE_STAGE;}
-	inline bool isVisible() const {return myStatus & (SCENE_STAGE | SCENE_ACTIVE | SCENE_LIVE);}
+	inline bool isLive() const {return myStatus & SCENE_STAGE_LIVE;}
+	inline bool isOnStageIntern() const {return myStatus & SCENE_STAGE_INTERN;}
+	inline bool isOnStageExtern() const {return myStatus & SCENE_STAGE_EXTERN;}
+	inline bool isVisible() const {return myStatus & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN | SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN | SCENE_STAGE_LIVE);}
 	bool statusHasChanged();
 	inline quint32 status() {return myStatus;}
 	bool postLoadInitTubes(bool restore_light);

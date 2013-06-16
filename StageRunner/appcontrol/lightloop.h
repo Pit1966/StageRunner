@@ -40,7 +40,7 @@ private:
 
 signals:
 	void sceneStatusChanged(FxSceneItem *scene, quint32 stat);
-
+	void sceneFadeProgressChanged(FxSceneItem *scene, int perMille);
 
 public slots:
 	void startProcessTimer();

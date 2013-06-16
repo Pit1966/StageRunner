@@ -2,6 +2,7 @@
 #define PTABLEWIDGET_H
 
 #include <QTableWidget>
+#include <QtWidgets>
 
 class PTableWidget : public QTableWidget
 {

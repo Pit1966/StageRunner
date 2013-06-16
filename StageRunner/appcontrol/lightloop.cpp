@@ -80,6 +80,8 @@ void LightLoop::processPendingEvents()
 		}
 		if (sceneitem->statusHasChanged()) {
 			emit sceneStatusChanged(sceneitem,sceneitem->status());
+		} else {
+
 		}
 	}
 //	QHashIterator<int,const FxSceneItem*> it(scenes);
@@ -107,6 +109,12 @@ void LightLoop::processPendingEvents()
 	}
 }
 
+
+/**
+ * @brief Process all Tubes (Channels) of a scene and calculate the corresponding output to DMX universe
+ * @param scene
+ * @return true, if Scene is visible.
+ */
 bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 {
 	// Now call the function that processes all active fades. If this functions returns
@@ -117,7 +125,12 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		DmxChannel *tube = scene->tubes.at(t);
 		int channel = tube->dmxChannel;
 		int universe = tube->dmxUniverse;
-		tube->dmxValue = tube->curValue * 255 / tube->targetFullValue;
+		int value = 0;
+		for (int i=0; i<MIX_LINES; i++) {
+			if (tube->curValue[i] > value) value = tube->curValue[i];
+		}
+
+		tube->dmxValue = value * 255 / tube->targetFullValue;
 //		if (tube->dmxValue > 0) {
 //			qDebug() << "channel " << tube->dmxChannel << "dmx" << tube->dmxValue << "universe" << tube->dmxUniverse;
 //		}
@@ -126,7 +139,8 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		}
 	}
 
-	int status =  scene->status() & (SCENE_LIVE | SCENE_STAGE | SCENE_ACTIVE);
-	return status;
+	emit sceneFadeProgressChanged(scene, scene->sceneMaster->curValue[MIX_INTERN]);
+
+	return scene->isVisible();
 }
 

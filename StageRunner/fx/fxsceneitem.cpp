@@ -27,9 +27,12 @@ void FxSceneItem::init()
 	myFxType = FX_SCENE;
 	myStatus = SCENE_IDLE;
 	my_last_status = SCENE_IDLE;
-	wasBlacked = false;
+	for (int t=0; t<MIX_LINES; t++) {
+		wasBlacked[t] = false;
+	}
 
 	sceneMaster = new DmxChannel;
+	sceneMaster->targetValue = 1000;
 
 	addExistingVar(defaultFadeInTime,"DefFadeInTime");
 	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
@@ -75,36 +78,40 @@ void FxSceneItem::setTubeCount(int tubecount)
 	}
 }
 
-bool FxSceneItem::initSceneCommand(CtrlCmd cmd, int cmdTime)
+bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 {
 	int cmd_time = 0;
+
+	quint32 STAGE_FLAG = 1<<(1 + mixline);
+	quint32 ACTIVE_FLAG = 1<<(8 + mixline);
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
 		cmd_time = 0;
-		if (myStatus & SCENE_STAGE) {
-			myStatus &= ~SCENE_STAGE;
-			wasBlacked = true;
+		if (myStatus & STAGE_FLAG) {
+			myStatus &= ~STAGE_FLAG;
+			wasBlacked[mixline] = true;
 		}
 		break;
 	case CMD_SCENE_FADEIN:
 		cmd_time = defaultFadeInTime;
-		myStatus |= SCENE_STAGE;
-		wasBlacked = false;
+		myStatus |= STAGE_FLAG;
+		wasBlacked[mixline] = false;
 		break;
 	case CMD_SCENE_FADEOUT:
 		cmd_time = defaultFadeOutTime;
-		myStatus &= ~SCENE_STAGE;
-		wasBlacked = false;
+		myStatus &= ~STAGE_FLAG;
+		wasBlacked[mixline] = false;
 		break;
 	case CMD_SCENE_FADETO:
 		cmd_time = defaultFadeInTime;
-		myStatus |= SCENE_STAGE;
-		wasBlacked = false;
+		myStatus |= STAGE_FLAG;
+		wasBlacked[mixline] = false;
 		break;
 	default:
 		return false;
 	}
+
 
 	if (cmdTime) cmd_time = cmdTime;
 
@@ -115,16 +122,19 @@ bool FxSceneItem::initSceneCommand(CtrlCmd cmd, int cmdTime)
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
 		if (tube->dmxType == DMX_INTENSITY) {
-			if (tube->initFadeCmd(cmd,cmd_time)) {
+			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
 				active = true;
 			}
 		}
 	}
 
+	// This is for Progress only
+	sceneMaster->initFadeCmd(mixline,cmd,cmd_time);
+
 	if (active) {
-		myStatus |= SCENE_ACTIVE;
+		myStatus |= ACTIVE_FLAG;
 	} else {
-		myStatus &= ~SCENE_ACTIVE;
+		myStatus &= ~ACTIVE_FLAG;
 	}
 
 	return active;
@@ -147,7 +157,7 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
 		DmxChannel *tube = tubes.at(t);
 		if (tube->dmxType == DMX_INTENSITY) {
 			qint32 target_value = tube->targetValue * dmxval / 255;
-			if (tube->initFadeCmd(CMD_SCENE_FADETO,time_ms,target_value)) {
+			if (tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO,time_ms,target_value)) {
 				active = true;
 				if (target_value > 0) {
 					onstage = true;
@@ -157,15 +167,15 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
 	}
 
 	if (active) {
-		myStatus |= SCENE_ACTIVE;
+		myStatus |= SCENE_ACTIVE_EXTERN;
 	} else {
-		myStatus &= ~SCENE_ACTIVE;
+		myStatus &= ~SCENE_ACTIVE_EXTERN;
 	}
 
 	if (onstage) {
-		myStatus |= SCENE_STAGE;
+		myStatus |= SCENE_STAGE_EXTERN;
 	} else {
-		myStatus &= ~SCENE_STAGE;
+		myStatus &= ~SCENE_STAGE_EXTERN;
 	}
 
 	return active;
@@ -180,35 +190,44 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
  */
 bool FxSceneItem::loopFunction()
 {
-	bool active = false;
+	bool active_auto = false;
+	bool active_direct = false;
 
 	for (int t=0; t<tubeCount(); t++) {
-		bool a = tubes.at(t)->loopFunction();
-		// if (a) qDebug() << "channel" << t << tubes.at(t)->curValue;
-		active |= a;
+		active_auto |= tubes.at(t)->loopFunction(MIX_INTERN);
+		active_direct |= tubes.at(t)->loopFunction(MIX_EXTERN);
 	}
 
-	if (active) {
-		myStatus |= SCENE_ACTIVE;
+	// This is for Progress indication
+	sceneMaster->loopFunction(MIX_INTERN);
+	sceneMaster->loopFunction(MIX_EXTERN);
+
+	if (active_auto) {
+		myStatus |= SCENE_ACTIVE_INTERN;
 	} else {
-		myStatus &= ~SCENE_ACTIVE;
+		myStatus &= ~SCENE_ACTIVE_INTERN;
+	}
+	if (active_direct) {
+		myStatus |= SCENE_ACTIVE_EXTERN;
+	} else {
+		myStatus &= ~SCENE_ACTIVE_EXTERN;
 	}
 
-	return active;
+	return active_auto || active_direct;
 }
 
 void FxSceneItem::setLive(bool state)
 {
 	if (state) {
-		myStatus |= SCENE_LIVE;
+		myStatus |= SCENE_STAGE_LIVE;
 	} else {
-		myStatus &= ~SCENE_LIVE;
+		myStatus &= ~SCENE_STAGE_LIVE;
 	}
 }
 
-void FxSceneItem::setBlacked(bool state)
+void FxSceneItem::setBlacked(int mixline, bool state)
 {
-	wasBlacked = state;
+	wasBlacked[mixline] = state;
 }
 
 
@@ -234,13 +253,15 @@ bool FxSceneItem::postLoadInitTubes(bool restore_light)
 
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		if (tube->curValue > 0) {
+		if (tube->curValue[MIX_INTERN] > 0 || tube->curValue[MIX_EXTERN] > 0) {
 			was_on_stage = true;
 			if (restore_light) {
 				now_on_stage = true;
 				// tube->curValue = 0;
 			} else {
-				tube->curValue = 0;
+				for (int i=0; i<MIX_LINES; i++) {
+					tube->curValue[i] = 0;
+				}
 				tube->dmxValue = 0;
 			}
 		}

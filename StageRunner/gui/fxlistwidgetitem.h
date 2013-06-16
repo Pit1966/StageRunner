@@ -29,10 +29,9 @@ private:
 	bool is_never_editable_f;
 	bool is_selected_f;
 	int current_button;
+	int activation_indicator;
 	QPoint drag_begin_pos;
 	QPalette org_palette;
-	QPalette select_help_palette;
-
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -49,13 +48,14 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *);
 	void mouseMoveEvent(QMouseEvent *event);
+	void paintEvent(QPaintEvent *event);
 
 
 public slots:
 	void setEditable(bool state);
 	void setNeverEditable(bool state);
 	void setSelected(bool state);
-
+	void setActivationProgress(int perMille);
 
 private slots:
 	void if_edit_item_clicked();

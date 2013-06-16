@@ -213,16 +213,16 @@ void SceneDeskWidget::setCurrentSceneLiveState(bool state)
 		faderAreaWidget->setRefSliderColorIndex(1);
 		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 			DmxChannel *tube = cur_fxscene->tubes.at(t);
-			tube->curValue = tube->targetValue;
+			tube->curValue[MIX_INTERN] = tube->targetValue;
 		}
 		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
 
 	} else {
 		faderAreaWidget->setRefSliderColorIndex(0);
-		if (!cur_fxscene->isOnStage()) {
+		if (!cur_fxscene->isOnStageIntern()) {
 			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
 				DmxChannel *tube = cur_fxscene->tubes.at(t);
-				tube->curValue = 0;
+				tube->curValue[MIX_INTERN] = 0;
 			}
 		}
 	}
@@ -290,7 +290,7 @@ void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 
 	cur_fxscene->tubes.at(id)->targetValue = val;
 	if (scene_is_live_f) {
-		cur_fxscene->tubes.at(id)->curValue = val;
+		cur_fxscene->tubes.at(id)->curValue[MIX_INTERN] = val;
 	}
 }
 

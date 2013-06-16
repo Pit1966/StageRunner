@@ -55,9 +55,12 @@ public:
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
-	FxAudioItem *currentFxAudio() {return current_fx;}
+	FxAudioItem *currentFxAudio();
 
 	inline AudioStatus status() {return run_status;}
+
+private:
+	void emit_audio_play_progress();
 
 private slots:
 	void on_audio_output_status_changed(QAudio::State state);
@@ -69,11 +72,12 @@ private slots:
 
 public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
+	void setAudioDurationMs(qint64 ms);
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
+	void audioProgressChanged(int slotnum, FxAudioItem *fxaudio, int perMille);
 	void vuLevelChanged(int slotnum, int left, int right);
-
 };
 
 #endif // AUDIOCHANNEL_H

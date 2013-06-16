@@ -26,6 +26,12 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
 	fxTable->setDropIndicatorShown(true);
 	fxTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	fxTable->setSelectionMode(QAbstractItemView::NoSelection);
+
+	QPalette pal = fxTable->palette();
+	pal.setBrush(QPalette::Highlight,Qt::darkGreen);
+	fxTable->setPalette(pal);
+
 	// fxTable->viewport()->acceptDrops();
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
@@ -130,7 +136,7 @@ void FxListWidget::setAutoProceedSequence(bool state)
 
 QList<FxListWidgetItem *> FxListWidget::getItemListForRow(int row)
 {
-	QList<FxListWidgetItem*>list;
+	WidItemList list;
 	if (row >=0 && row < fxTable->rowCount()) {
 		for (int col=0; col<fxTable->columnCount(); col++) {
 			FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,col));
@@ -140,6 +146,17 @@ QList<FxListWidgetItem *> FxListWidget::getItemListForRow(int row)
 		}
 	}
 	return list;
+}
+
+int FxListWidget::getRowThatContainsFxItem(FxItem *fx)
+{
+	for (int row=0; row < fxTable->rowCount(); row++) {
+		FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,0));
+		if (item && item->linkedFxItem == fx) {
+			return row;
+		}
+	}
+	return -1;
 }
 
 void FxListWidget::selectFx(FxItem *fx)
@@ -274,7 +291,7 @@ void FxListWidget::setRowSelected(int row, bool state)
 	}
 
 	foreach(FxListWidgetItem* item, getItemListForRow(row)) {
-		item->setSelected(state);
+		item->setSelected(state);			///ooo
 	}
 }
 
@@ -300,6 +317,43 @@ void FxListWidget::unselectRows()
 {
 	while (selected_rows.size()) {
 		setRowSelected(selected_rows.takeFirst(),false);
+	}
+}
+
+void FxListWidget::propagateSceneStatus(FxSceneItem *scene)
+{
+	int row = getRowThatContainsFxItem(scene);
+	WidItemList widlist = getItemListForRow(row);
+	if (widlist.size()) {
+		FxListWidgetItem *item = widlist.at(1);
+		if (scene->isActive()) {
+			item->setActivationProgress(1);
+		}
+		else if (scene->isVisible()) {
+			item->setActivationProgress(1000);
+		}
+		else {
+			item->setActivationProgress(0);
+		}
+	}
+
+}
+
+void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMille)
+{
+	int row = getRowThatContainsFxItem(scene);
+	WidItemList widlist = getItemListForRow(row);
+	if (widlist.size()) {
+		FxListWidgetItem *item = widlist.at(1);
+		if (scene->isActive()) {
+			item->setActivationProgress(perMille);
+		}
+		else if (scene->isVisible()) {
+			item->setActivationProgress(1000);
+		}
+		else {
+			item->setActivationProgress(0);
+		}
 	}
 }
 
@@ -370,7 +424,7 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 {
 	if (!listitem) return;
-	qDebug("FxListWidget -> clicke -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
+	qDebug("FxListWidget -> clicked -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
 

@@ -12,11 +12,13 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 {
 	tempDeskPosIdx = 0;
 	tempTubeListIdx = 0;
-	fadeStartValue = 0;
-	fadeTargetValue = 0;
-	fadeValue = 0;
-	fadeStep = 0;
-	curCmd = CMD_NONE;
+	for (int i=0; i<MIX_LINES; i++) {
+		fadeStartValue[i] = 0;
+		fadeTargetValue[i] = 0;
+		fadeValue[i] = 0;
+		fadeStep[i] = 0;
+		curCmd[i] = CMD_NONE;
+	}
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
 	setDescription("Output mapping from tube number to dmx channel and configuration");
@@ -25,8 +27,8 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 	addExistingVar(dmxUniverse,"DmxUniverse",0,3,o.dmxUniverse);
 	addExistingVar(dmxChannel,"DmxChannel",0,511,o.dmxChannel);
 	addExistingVar(dmxValue,"DmxValue",0,255,o.dmxValue);
-	addExistingVar(curValue,"Value",0,255,o.curValue);
-	addExistingVar(directValue,"Value",0,255,o.directValue);
+	addExistingVar(curValue[MIX_INTERN],"Value",0,255,o.curValue[MIX_INTERN]);
+	addExistingVar(curValue[MIX_EXTERN],"DirectValue",0,255,o.curValue[MIX_EXTERN]);
 	addExistingVar(targetFullValue,"TargetFullValue",255,100000,o.targetFullValue);
 	addExistingVar(targetValue,"TargetValue",0,100000,o.targetValue);
 	addExistingVar(deskVisibleFlag,"DeskVisible",o.deskVisibleFlag);
@@ -39,11 +41,13 @@ void DmxChannel::init()
 {
 	tempDeskPosIdx = 0;
 	tempTubeListIdx = 0;
-	fadeStartValue = 0;
-	fadeTargetValue = 0;
-	fadeValue = 0;
-	fadeStep = 0;
-	curCmd = CMD_NONE;
+	for (int i=0; i<MIX_LINES; i++) {
+		fadeStartValue[i] = 0;
+		fadeTargetValue[i] = 0;
+		fadeValue[i] = 0;
+		fadeStep[i] = 0;
+		curCmd[i] = CMD_NONE;
+	}
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
 	setDescription("Output mapping from tube number to dmx channel and configuration");
@@ -52,8 +56,8 @@ void DmxChannel::init()
 	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);
 	addExistingVar(dmxChannel,"DmxChannel",0,511,0);
 	addExistingVar(dmxValue,"DmxValue",0,255,0);
-	addExistingVar(curValue,"Value",0,255,0);
-	addExistingVar(directValue,"Value",0,255,0);
+	addExistingVar(curValue[MIX_INTERN],"Value",0,255,0);
+	addExistingVar(curValue[MIX_EXTERN],"DirectValue",0,255,0);
 	addExistingVar(targetFullValue,"TargetFullValue",255,100000,10000);
 	addExistingVar(targetValue,"TargetValue",0,100000,0);
 	addExistingVar(deskVisibleFlag,"DeskVisible",true);
@@ -75,28 +79,28 @@ DmxChannel::~DmxChannel()
  *
  * The Command will be saved in 'curCmd'
  */
-bool DmxChannel::initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value)
+bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 target_value)
 {
-	fadeStartValue = curValue;
-	fadeValue = curValue;
+	fadeStartValue[mixline] = curValue[mixline];
+	fadeValue[mixline] = curValue[mixline];
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
-		if (curValue == 0) return false;
-		fadeTargetValue = 0;
+		if (curValue[mixline] == 0) return false;
+		fadeTargetValue[mixline] = 0;
 		time_ms = 0;
 		break;
 	case CMD_SCENE_FADEIN:
-		if (curValue >= targetValue) return false;
-		fadeTargetValue = targetValue;
+		if (curValue[mixline] >= targetValue) return false;
+		fadeTargetValue[mixline] = targetValue;
 		break;
 	case CMD_SCENE_FADEOUT:
-		if (curValue <= 0) return false;
-		fadeTargetValue = 0;
+		if (curValue[mixline] <= 0) return false;
+		fadeTargetValue[mixline] = 0;
 		break;
 	case CMD_SCENE_FADETO:
-		if (curValue == target_value) return false;
-		fadeTargetValue = target_value;
+		if (curValue[mixline] == target_value) return false;
+		fadeTargetValue[mixline] = target_value;
 		break;
 	default:
 		return false;
@@ -106,12 +110,12 @@ bool DmxChannel::initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value)
 	// Calculate the fade step size as a function of the LightLoop time interval
 	qint32 steps = time_ms / LIGHT_LOOP_INTERVAL_MS;
 	if (steps < 1) {
-		fadeStep = fadeTargetValue - fadeStartValue;
+		fadeStep[mixline] = fadeTargetValue[mixline] - fadeStartValue[mixline];
 	} else {
-		fadeStep = (fadeTargetValue - fadeStartValue) / steps;
+		fadeStep[mixline] = (fadeTargetValue[mixline] - fadeStartValue[mixline]) / steps;
 	}
 
-	curCmd = cmd;
+	curCmd[mixline] = cmd;
 	return true;
 }
 
@@ -121,50 +125,55 @@ bool DmxChannel::initFadeCmd(CtrlCmd cmd, qint32 time_ms, qint32 target_value)
  *
  * loopFunction() should be called in the EventLoop
  */
-bool DmxChannel::loopFunction()
+bool DmxChannel::loopFunction(int mixline)
 {
-	if (curCmd == CMD_NONE) return false;
+	int i = mixline;
 
-	fadeValue += fadeStep;
-	curValue = fadeValue;
+	if (curCmd[i] == CMD_NONE) return false;
 
-	switch(curCmd) {
+	fadeValue[i] += fadeStep[i];
+	curValue[i] = fadeValue[i];
+
+	switch(curCmd[i]) {
 	case CMD_SCENE_BLACK:
-		if (fadeValue <= 0) {
-			curValue = 0;
-			curCmd = CMD_NONE;
+		if (fadeValue[i] <= 0) {
+			curValue[i] = 0;
+			curCmd[i] = CMD_NONE;
 			return false;
 		}
 		break;
 	case CMD_SCENE_FADEIN:
-		if (fadeValue >= fadeTargetValue) {
-			curValue = targetValue;
-			curCmd = CMD_NONE;
+		if (fadeValue[i] >= fadeTargetValue[i]) {
+			curValue[i] = targetValue;
+			curCmd[i] = CMD_NONE;
 			return false;
 		}
 		break;
 	case CMD_SCENE_FADEOUT:
-		if (fadeValue <= 0) {
-			curValue = 0;
-			curCmd = CMD_NONE;
+		if (fadeValue[i] <= 0) {
+			curValue[i] = 0;
+			curCmd[i] = CMD_NONE;
 			return false;
 		}
 		break;
 	case CMD_SCENE_FADETO:
-		if (fadeStep > 0 && fadeValue >= fadeTargetValue) {
-			curValue = fadeTargetValue;
-			curCmd = CMD_NONE;
+		if (fadeStep[i] > 0 && fadeValue[i] >= fadeTargetValue[i]) {
+			curValue[i] = fadeTargetValue[i];
+			curCmd[i] = CMD_NONE;
 			return false;
 		}
-		else if (fadeStep < 0 && fadeValue <= fadeTargetValue) {
-			curValue = fadeTargetValue;
-			curCmd = CMD_NONE;
+		else if (fadeStep[i] < 0 && fadeValue[i] <= fadeTargetValue[i]) {
+			curValue[i] = fadeTargetValue[i];
+			curCmd[i] = CMD_NONE;
 			return false;
 		}
 		break;
 	default:
 		return false;
 	}
+
+
+
 	return true;
 }
 

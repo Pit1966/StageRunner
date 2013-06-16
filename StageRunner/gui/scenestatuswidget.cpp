@@ -54,13 +54,13 @@ bool SceneStatusWidget::updateScene(FxSceneItem *scene)
 	SceneStatusListItem *item = scene_hash.value(scene);
 	if (item && scene) {
 		quint32 flags = scene->status();
-		if (flags & SCENE_ACTIVE) {
+		if (flags & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN)) {
 			item->setBackgroundColor(Qt::green);
 		}
-		else if (flags & SCENE_STAGE) {
+		else if (flags & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN)) {
 			item->setBackgroundColor(palette().base().color());
 		}
-		else if (flags & SCENE_LIVE) {
+		else if (flags & SCENE_STAGE_LIVE) {
 			item->setBackgroundColor(Qt::red);
 		}
 		else {

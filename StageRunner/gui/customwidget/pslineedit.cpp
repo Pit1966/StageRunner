@@ -94,8 +94,8 @@ void PsLineEdit::updateEditWarnColor()
 		pal.setColor(QPalette::Window, QColor("#9fdaa2"));  // light green
 		pal.setColor(QPalette::Light,QColor("#374c38"));  // dark green
 	}
-
 	setPalette(pal);
+
 }
 
 void PsLineEdit::mousePressEvent(QMouseEvent *event)

@@ -28,8 +28,10 @@ void FxAudioItem::setFilePath(const QString &path)
 
 void FxAudioItem::init()
 {
+
 	myFxType = FX_AUDIO;
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);
+	addExistingVar(audioDuration,"DurationMS");
 	// qDebug("init audio fx with id: %d",myId);
 }
