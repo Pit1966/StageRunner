@@ -12,16 +12,8 @@
 #include <QKeyEvent>
 #include <QMenu>
 
+QList<SceneDeskWidget*>SceneDeskWidget::scene_desk_list;
 
-SceneDeskWidget::SceneDeskWidget(QWidget *parent) :
-	QWidget(parent)
-{
-	cur_fx = 0;
-	cur_fxscene = 0;
-	init ();
-	setupUi(this);
-	init_gui();
-}
 
 SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 	: QWidget(parent)
@@ -34,6 +26,7 @@ SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 
 SceneDeskWidget::~SceneDeskWidget()
 {
+	scene_desk_list.removeOne(this);
 	DEBUGTEXT("Desk destroyed");
 }
 
@@ -540,3 +533,18 @@ void SceneDeskWidget::on_tubeCommentEdit_textEdited(const QString &arg1)
 	setLabelInSelectedTubes(arg1);
 }
 
+
+SceneDeskWidget * SceneDeskWidget::openSceneDesk(FxSceneItem *scene, QWidget *parent)
+{
+	foreach(SceneDeskWidget *desk, scene_desk_list) {
+		if (desk->cur_fxscene == scene) {
+			desk->setWindowState(desk->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
+			desk->raise();
+			desk->show();
+			return 0;
+		}
+	}
+
+	scene_desk_list.append( new SceneDeskWidget(scene,parent) );
+	return scene_desk_list.last();
+}

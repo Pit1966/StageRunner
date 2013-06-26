@@ -33,8 +33,8 @@ bool LightControl::setLightLoopEnabled(bool state)
 		if (ok) {
 			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneStatusChanged(FxSceneItem*,quint32))
 				,this,SLOT(onSceneStatusChanged(FxSceneItem*,quint32)));
-			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneFadeProgressChanged(FxSceneItem*,int))
-				,this,SLOT(onSceneFadeProgressChanged(FxSceneItem*,int)));
+			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneFadeProgressChanged(FxSceneItem*,int,int))
+				,this,SLOT(onSceneFadeProgressChanged(FxSceneItem*,int,int)));
 		}
 
 	} else {
@@ -206,9 +206,9 @@ void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 	emit sceneChanged(scene);
 }
 
-void LightControl::onSceneFadeProgressChanged(FxSceneItem *scene, int perMille)
+void LightControl::onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB)
 {
-	emit sceneFadeChanged(scene, perMille);
+	emit sceneFadeChanged(scene, perMilleA, perMilleB);
 }
 
 

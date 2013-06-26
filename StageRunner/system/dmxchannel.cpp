@@ -18,6 +18,7 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 		fadeValue[i] = 0;
 		fadeStep[i] = 0;
 		curCmd[i] = CMD_NONE;
+		curValueChanged[i] = false;
 	}
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
@@ -47,6 +48,7 @@ void DmxChannel::init()
 		fadeValue[i] = 0;
 		fadeStep[i] = 0;
 		curCmd[i] = CMD_NONE;
+		curValueChanged[i] = false;
 	}
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
@@ -132,7 +134,11 @@ bool DmxChannel::loopFunction(int mixline)
 	if (curCmd[i] == CMD_NONE) return false;
 
 	fadeValue[i] += fadeStep[i];
-	curValue[i] = fadeValue[i];
+	int val = fadeValue[i];
+	if (val != curValue[i]) {
+		curValue[i] = fadeValue[i];
+		curValueChanged[i] = true;
+	}
 
 	switch(curCmd[i]) {
 	case CMD_SCENE_BLACK:

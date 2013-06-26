@@ -45,12 +45,12 @@ private:
 
 signals:
 	void sceneChanged(FxSceneItem *scene);
-	void sceneFadeChanged(FxSceneItem *scene, int perMille);
+	void sceneFadeChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
 
 public slots:
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
-	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMille);
+	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
 
 };

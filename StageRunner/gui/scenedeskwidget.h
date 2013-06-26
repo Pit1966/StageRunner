@@ -11,6 +11,7 @@ class SceneDeskWidget : public QWidget, private Ui::SceneDeskWidget
 {
 	Q_OBJECT
 private:
+	static QList<SceneDeskWidget*>scene_desk_list;		//
 	FxSceneItem *cur_fxscene;
 	FxItem *cur_fx;
 
@@ -21,8 +22,7 @@ private:
 	bool shift_pressed_f;
 
 public:
-	SceneDeskWidget(QWidget *parent = 0);
-	SceneDeskWidget(FxSceneItem *scene, QWidget *parent = 0);
+	static SceneDeskWidget *openSceneDesk(FxSceneItem *scene, QWidget *parent = 0);
 	~SceneDeskWidget();
 	bool setFxScene(FxSceneItem *scene);
 	void setControlKey(bool state);
@@ -40,6 +40,7 @@ protected:
 	int setLabelInSelectedTubes(const QString &text);
 
 private:
+	SceneDeskWidget(FxSceneItem *scene, QWidget *parent = 0);
 	void init();
 	void init_gui();
 	void closeEvent(QCloseEvent *);

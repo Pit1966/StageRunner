@@ -27,7 +27,7 @@
       <widget class="FxListWidget" name="fxListWidget" native="true"/>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="iconSize">
         <size>

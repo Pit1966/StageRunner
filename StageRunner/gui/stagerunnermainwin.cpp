@@ -71,8 +71,10 @@ void StageRunnerMainWin::initConnects()
 
 	// Light Control -> Project FxListWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),fxListWidget,SLOT(propagateSceneStatus(FxSceneItem*)));
-	connect(appCentral->unitLight,SIGNAL(sceneFadeChanged(FxSceneItem*,int)),fxListWidget,SLOT(propagateSceneFadeProgress(FxSceneItem*,int)));
+	connect(appCentral->unitLight,SIGNAL(sceneFadeChanged(FxSceneItem*,int,int)),fxListWidget,SLOT(propagateSceneFadeProgress(FxSceneItem*,int,int)));
 
+	// Audio Control -> Project FxListWidget
+	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));
 
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));

@@ -2,6 +2,7 @@
 #include "fxlist.h"
 #include "fxitem.h"
 #include "fxsceneitem.h"
+#include "fxaudioitem.h"
 #include "appcentral.h"
 #include "scenedeskwidget.h"
 #include "qtstatictools.h"
@@ -237,10 +238,12 @@ void FxListWidget::init()
 void FxListWidget::open_scence_desk(FxSceneItem *fx)
 {
 
-	SceneDeskWidget *desk = new SceneDeskWidget(fx);
-	connect(desk,SIGNAL(modified()),this,SLOT(refreshList()));
+	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
 
-	desk->show();
+	if (desk) {
+		connect(desk,SIGNAL(modified()),this,SLOT(refreshList()));
+		desk->show();
+	}
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -322,37 +325,65 @@ void FxListWidget::unselectRows()
 
 void FxListWidget::propagateSceneStatus(FxSceneItem *scene)
 {
-	int row = getRowThatContainsFxItem(scene);
-	WidItemList widlist = getItemListForRow(row);
-	if (widlist.size()) {
-		FxListWidgetItem *item = widlist.at(1);
-		if (scene->isActive()) {
-			item->setActivationProgress(1);
-		}
-		else if (scene->isVisible()) {
-			item->setActivationProgress(1000);
-		}
-		else {
-			item->setActivationProgress(0);
-		}
-	}
+	Q_UNUSED(scene);
+//	int row = getRowThatContainsFxItem(scene);
+//	WidItemList widlist = getItemListForRow(row);
+//	if (widlist.size()) {
+//		FxListWidgetItem *item = widlist.at(1);
+//		if (scene->isActive()) {
+//			item->setActivationProgress(1,1);
+//		}
+//		else if (scene->isVisible()) {
+//			if (scene->isOnStageIntern())
+//				item->setActivationProgressA(1000);
+//			if (scene->isOnStageExtern())
+//				item->setActivationProgressB(1000);
+//		}
+//		else {
+//			item->setActivationProgress(0,0);
+//		}
+//	}
 
 }
 
-void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMille)
+void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB)
 {
 	int row = getRowThatContainsFxItem(scene);
 	WidItemList widlist = getItemListForRow(row);
 	if (widlist.size()) {
 		FxListWidgetItem *item = widlist.at(1);
 		if (scene->isActive()) {
-			item->setActivationProgress(perMille);
+			item->setActivationProgress(perMilleA,perMilleB);
 		}
 		else if (scene->isVisible()) {
-			item->setActivationProgress(1000);
+			if (scene->isOnStageIntern())
+				item->setActivationProgressA(1000);
 		}
 		else {
-			item->setActivationProgress(0);
+			item->setActivationProgress(0,0);
+		}
+	}
+}
+
+void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
+{
+	if (msg.ctrlCmd == CMD_STATUS_REPORT) {
+		int row = getRowThatContainsFxItem(msg.fxAudio);
+		WidItemList widlist = getItemListForRow(row);
+		if (widlist.size()) {
+			FxListWidgetItem *item = widlist.at(1);
+
+			switch (msg.currentAudioStatus) {
+			case AUDIO_IDLE:
+			case AUDIO_ERROR:
+				item->setActivationProgressA(0);
+				break;
+			default:
+				if (msg.progress >= 0) {
+					item->setActivationProgressA(msg.progress);
+				}
+				break;
+			}
 		}
 	}
 }

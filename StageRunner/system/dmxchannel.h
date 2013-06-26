@@ -38,7 +38,7 @@ public:
 	qint32 dmxUniverse;					///< DMX universe number
 	qint32 dmxChannel;					///< DMX channel the function uses
 	qint32 dmxValue;					///< current output value of this dmx channel (0-255)
-	qint32 curValue[2];					///< current output value (0 - targetFullRange) HTP with directValue
+	qint32 curValue[MIX_LINES];			///< current output value (0 - targetFullRange) HTP with directValue
 	qint32 targetFullValue;				///< The maximum value this channel can be set to (default 10000)
 	qint32 targetValue;					///< 100% Output value target in a scene (0 - targetFullValue) The dmx Output will be scaled to this
 	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
@@ -47,6 +47,7 @@ public:
 
 	int tempTubeListIdx;
 	int tempDeskPosIdx;
+	bool curValueChanged[MIX_LINES];
 
 protected:
 	// These Vars are mainly for animation/fading control in the scenes

@@ -139,7 +139,12 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		}
 	}
 
-	emit sceneFadeProgressChanged(scene, scene->sceneMaster->curValue[MIX_INTERN]);
+	DmxChannel *prog_chan = scene->sceneMaster;
+	if (prog_chan->curValueChanged[MIX_EXTERN] || prog_chan->curValueChanged[MIX_INTERN]) {
+		emit sceneFadeProgressChanged(scene, prog_chan->curValue[MIX_INTERN], prog_chan->curValue[MIX_EXTERN]);
+		prog_chan->curValueChanged[MIX_INTERN] = false;
+		prog_chan->curValueChanged[MIX_EXTERN] = false;
+	}
 
 	return scene->isVisible();
 }

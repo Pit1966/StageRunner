@@ -2,6 +2,7 @@
 #define FXLISTWIDGETITEM_H
 
 #include "ui_fxlistwidgetitem.h"
+#include "commandsystem.h"
 
 class FxItem;
 
@@ -29,9 +30,12 @@ private:
 	bool is_never_editable_f;
 	bool is_selected_f;
 	int current_button;
-	int activation_indicator;
+	int activation_indicator_a;
+	int activation_indicator_b;
 	QPoint drag_begin_pos;
 	QPalette org_palette;
+	QColor indicator_a_color;
+	QColor indicator_b_color;
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -55,7 +59,9 @@ public slots:
 	void setEditable(bool state);
 	void setNeverEditable(bool state);
 	void setSelected(bool state);
-	void setActivationProgress(int perMille);
+	void setActivationProgress(int perMilleA, int perMilleB);
+	void setActivationProgressB(int perMilleB);
+	void setActivationProgressA(int perMilleA);
 
 private slots:
 	void if_edit_item_clicked();

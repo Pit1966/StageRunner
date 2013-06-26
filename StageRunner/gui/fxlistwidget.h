@@ -2,7 +2,7 @@
 #define FXLISTWIDGET_H
 
 #include "ui_fxlistwidget.h"
-#include "system/commandsystem.h"
+#include "commandsystem.h"
 
 #include <QTableWidgetItem>
 #include <QTableWidget>
@@ -11,6 +11,8 @@ class FxList;
 class FxItem;
 class FxSceneItem;
 class FxListWidgetItem;
+
+using namespace AUDIO;
 
 typedef QList<FxListWidgetItem*> WidItemList;
 
@@ -51,7 +53,9 @@ public slots:
 	void setSingleRowSelected(int row);
 	void unselectRows();
 	void propagateSceneStatus(FxSceneItem *scene);
-	void propagateSceneFadeProgress(FxSceneItem *scene, int perMille);
+	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
+	void propagateAudioStatus(AudioCtrlMsg msg);
+
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);

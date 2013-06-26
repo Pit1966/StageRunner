@@ -165,6 +165,9 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
 			}
 		}
 	}
+	// This is for Progress only
+	sceneMaster->initFadeCmd(MIX_EXTERN,CMD_SCENE_FADETO,time_ms, 1000 * dmxval / 255);
+
 
 	if (active) {
 		myStatus |= SCENE_ACTIVE_EXTERN;
@@ -199,6 +202,7 @@ bool FxSceneItem::loopFunction()
 	}
 
 	// This is for Progress indication
+	// a Channel that is invisible in DMX Universe. Fade is done on activation from 0 to 1000
 	sceneMaster->loopFunction(MIX_INTERN);
 	sceneMaster->loopFunction(MIX_EXTERN);
 

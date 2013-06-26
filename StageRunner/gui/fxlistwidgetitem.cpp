@@ -47,7 +47,10 @@ void FxListWidgetItem::setText(const QString &txt)
 void FxListWidgetItem::init()
 {
 	current_button = 0;
-	activation_indicator = 0;
+	activation_indicator_a = 0;
+	activation_indicator_b = 0;
+	indicator_a_color = QColor(Qt::darkGreen);
+	indicator_b_color = QColor(Qt::darkRed);
 
 	setupUi(this);
 	itemLabel->clear();
@@ -95,14 +98,23 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
 
 void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
-	if (activation_indicator) {
+	if (activation_indicator_a) {
 		QPainter p(this);
-		p.setPen(Qt::red);
-		p.setBrush(Qt::red);
+		p.setPen(indicator_a_color);
+		p.setBrush(indicator_a_color);
 		int w = event->rect().width();
 		int h = event->rect().height();
-		int wp = activation_indicator * w / 1000;
-		p.drawRect(0,h-4,wp,4);
+		int wp = activation_indicator_a * w / 1000;
+		p.drawRect(0,h-2,wp,2);
+	}
+	if (activation_indicator_b) {
+		QPainter p(this);
+		p.setPen(indicator_b_color);
+		p.setBrush(indicator_b_color);
+		int w = event->rect().width();
+		int h = event->rect().height();
+		int wp = activation_indicator_b * w / 1000;
+		p.drawRect(0,h-5,wp,2);
 	}
 
 }
@@ -150,10 +162,24 @@ void FxListWidgetItem::setSelected(bool state)
 
 }
 
-void FxListWidgetItem::setActivationProgress(int perMille)
+void FxListWidgetItem::setActivationProgress(int perMilleA, int perMilleB)
 {
-	if (perMille != activation_indicator) {
-		activation_indicator = perMille;
+	setActivationProgressA(perMilleA);
+	setActivationProgressB(perMilleB);
+}
+
+void FxListWidgetItem::setActivationProgressB(int perMilleB)
+{
+	if (perMilleB != activation_indicator_b) {
+		activation_indicator_b = perMilleB;
+		update();
+	}
+}
+
+void FxListWidgetItem::setActivationProgressA(int perMilleA)
+{
+	if (perMilleA != activation_indicator_a) {
+		activation_indicator_a = perMilleA;
 		update();
 	}
 }
