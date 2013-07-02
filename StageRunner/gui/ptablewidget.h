@@ -11,11 +11,14 @@ private:
 	int drag_start_row;
 	int drag_dest_row;
 	int drag_temp_row;
+	int current_vert_scrollpos;
 
 public:
 	PTableWidget(QWidget *parent = 0);
 	void clearDragAndDropAction();
 	void clear();
+	void saveScrollPos();
+	void setOldScrollPos();
 
 private:
 	void dragEnterEvent(QDragEnterEvent *event);
@@ -28,6 +31,9 @@ signals:
 	void rowMovedFromTo(int srcrow, int destrow);
 
 public slots:
+
+private slots:
+	void if_scrolled_vertical(int val);
 
 };
 

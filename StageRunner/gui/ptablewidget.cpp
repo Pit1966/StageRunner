@@ -7,6 +7,9 @@
 #include <QModelIndex>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
+#ifdef IS_QT5
+#include <QtWidgets>
+#endif
 
 PTableWidget::PTableWidget(QWidget *parent) :
 	QTableWidget(parent)
@@ -14,6 +17,9 @@ PTableWidget::PTableWidget(QWidget *parent) :
 	drag_start_row = -1;
 	drag_dest_row = -1;
 	drag_temp_row = -1;
+	current_vert_scrollpos = 0;
+
+	connect(verticalScrollBar(),SIGNAL(valueChanged(int)),this,SLOT(if_scrolled_vertical(int)));
 }
 
 void PTableWidget::clearDragAndDropAction()
@@ -25,6 +31,16 @@ void PTableWidget::clear()
 {
 	clearDragAndDropAction();
 	QTableWidget::clear();
+}
+
+void PTableWidget::saveScrollPos()
+{
+	current_vert_scrollpos = verticalScrollBar()->value();
+}
+
+void PTableWidget::setOldScrollPos()
+{
+	verticalScrollBar()->setValue(current_vert_scrollpos);
 }
 
 void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
@@ -43,7 +59,9 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		event->accept();
 		drag_start_row = extmime->tableRow;
 
+		saveScrollPos();
 		insertRow(current_row);
+		setOldScrollPos();
 		drag_temp_row = current_row;
 
 	} else {
@@ -57,7 +75,9 @@ void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 	qDebug("dragLeaveEvent");
 
 	if (drag_temp_row >= 0) {
+		saveScrollPos();
 		removeRow(drag_temp_row);
+		setOldScrollPos();
 		drag_temp_row = -1;
 	}
 }
@@ -87,3 +107,8 @@ void PTableWidget::dropEvent(QDropEvent *event)
 	drag_temp_row = -1;
 }
 
+
+void PTableWidget::if_scrolled_vertical(int val)
+{
+	Q_UNUSED(val);
+}

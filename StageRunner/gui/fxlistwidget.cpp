@@ -219,7 +219,9 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	drag->setPixmap(pixmap);
 	drag->setHotSpot(item->dragBeginPos() + QPoint(hotspot_w,0));
 
+	fxTable->saveScrollPos();
 	fxTable->removeRow(item->myRow);
+	fxTable->setOldScrollPos();
 
 	Qt::DropAction dropaction = drag->exec();
 	qDebug("dropaction: %d",dropaction);
