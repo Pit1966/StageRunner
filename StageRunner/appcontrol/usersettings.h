@@ -12,6 +12,8 @@ public:
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
 	pint32 pAudioBufferSize;
+	pbool pProhibitAudioDoubleStart;
+	pint32 pAudioAllowReactivateTime;
 	pbool pNoInterfaceDmxFeedback;
 
 public:

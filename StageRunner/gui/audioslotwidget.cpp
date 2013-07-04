@@ -102,13 +102,13 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 		case AUDIO_IDLE:
 		case AUDIO_ERROR:
 			setPlayState(false);
-			if (msg.fxAudio) {
+			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
 				setTitle(msg.fxAudio->name().left(5) + "...");
 			}
 			break;
 		default:
 			setPlayState(true);
-			if (msg.fxAudio) {
+			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
 				// setTitle(msg.fxAudio->name());
 				slotPlayButton->setToolTip(msg.fxAudio->name());
 				slotStopButton->setToolTip(msg.fxAudio->name());

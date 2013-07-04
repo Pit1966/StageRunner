@@ -181,6 +181,18 @@ FxAudioItem *AudioSlot::currentFxAudio()
 	return current_fx;
 }
 
+/**
+ * @brief Get the playback position of current Audio Stream.
+ * @return Time in ms or -1 if there is no audio running
+ */
+int AudioSlot::currentRunTime()
+{
+	if (run_status == AUDIO_IDLE || !current_fx || !FxItem::exists(current_fx)) {
+		return -1;
+	}
+	return run_time.elapsed();
+}
+
 void AudioSlot::emit_audio_play_progress()
 {
 	if (!FxItem::exists(current_fx)) return;

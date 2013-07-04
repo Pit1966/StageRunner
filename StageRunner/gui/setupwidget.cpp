@@ -67,6 +67,8 @@ void SetupWidget::copy_settings_to_gui()
 	if (idx >= 0) dialKnobStyleCombo->setCurrentIndex(idx);
 
 	noInterfaceFeedbackCheck->setChecked(set->pNoInterfaceDmxFeedback);
+	prohibitAudioDoubleStartCheck->setChecked(set->pProhibitAudioDoubleStart);
+	reactivateAudioTimeSpin->setValue(set->pAudioAllowReactivateTime);
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -78,6 +80,8 @@ void SetupWidget::copy_gui_to_settings()
 	set->pDialKnobStyle = dialKnobStyleCombo->currentText();
 
 	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
+	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();
+	set->pAudioAllowReactivateTime = reactivateAudioTimeSpin->value();
 }
 
 void SetupWidget::on_okButton_clicked()

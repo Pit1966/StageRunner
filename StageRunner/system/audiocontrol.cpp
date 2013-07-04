@@ -3,6 +3,8 @@
 #include "log.h"
 #include "audiochannel.h"
 #include "appcentral.h"
+#include "usersettings.h"
+#include "fxaudioitem.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -60,12 +62,26 @@ void AudioControl::vu_level_changed_receiver(int slotnum, int left, int right)
 bool AudioControl::startFxAudio(FxAudioItem *fxa)
 {
 	bool ok = false;
+	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
+	if (myApp->userSettings->pProhibitAudioDoubleStart) {
+		for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+			if (audioChannels[t]->currentFxAudio() == fxa) {
+				// Ok, audio is already running -> Check the time
+				int cur_run_time = audioChannels[t]->currentRunTime();
+				if ( cur_run_time >= 0 && cur_run_time < myApp->userSettings->pAudioAllowReactivateTime) {
+					LOGERROR(tr("Audio Fx '%1' not started since it is already running on channel %2")
+							 .arg(fxa->name()).arg(t+1));
+					return false;
+				}
+			}
+		}
+	}
+
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
 			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START);
 			emit audioThreadCtrlMsgEmitted(msg);
 			ok = true;
-			// ok = audioChannels[t]->startFxAudio(fxa);
 			break;
 		}
 	}
