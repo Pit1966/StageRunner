@@ -47,11 +47,15 @@ private:
 	double frame_energy_peak;
 	double sample_peak;
 
+	int loop_target;
+	int loop_count;
+
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}
+	inline int currentLoop() const {return loop_count;}
 
 public slots:
-	void start();
+	void start(int loops = 1);
 	void stop();
 
 private slots:

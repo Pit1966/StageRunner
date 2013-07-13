@@ -8,6 +8,12 @@
 #include <QStyleFactory>
 #include <QPen>
 #include <QPixmap>
+#include <QDebug>
+#include <QTabWidget>
+#include <QPushButton>
+#include <QPainter>
+#include <QStyleOption>
+#include <QGroupBox>
 #endif
 
 class LightDeskStyle : public QProxyStyle

@@ -42,6 +42,8 @@ public:
 	int volume;
 	int fadetime;
 	int progress;
+	int loop;
+	int maxloop;
 	FxAudioItem *fxAudio;
 
 public:
@@ -52,6 +54,8 @@ public:
 		, volume(-1)
 		, fadetime(-1)
 		, progress(-1)
+		, loop(0)
+		, maxloop(0)
 		, fxAudio(0)
 	{}
 
@@ -62,6 +66,8 @@ public:
 		, volume(-1)
 		, fadetime(-1)
 		, progress(-1)
+		, loop(0)
+		, maxloop(0)
 		, fxAudio(fxaudio)
 	{}
 };

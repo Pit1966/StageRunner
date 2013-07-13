@@ -49,6 +49,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->setText(cur_fxa->filePath());
+		audioLoopsSpin->setValue(cur_fxa->loopTimes);
 		audioGroup->setVisible(true);
 	} else {
 		cur_fxa = 0;
@@ -201,4 +202,15 @@ void FxItemPropertyWidget::on_editOnceButton_clicked()
 void FxItemPropertyWidget::finish_edit()
 {
 	setEditable(false,false);
+}
+
+void FxItemPropertyWidget::on_audioLoopsSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	if (cur_fxa->loopTimes != arg1) {
+		cur_fxa->loopTimes = arg1;
+		cur_fxa->setModified(true);
+	}
+
 }

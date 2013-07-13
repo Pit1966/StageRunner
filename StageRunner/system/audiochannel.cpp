@@ -77,7 +77,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa)
 	// Set Filename of audio file
 	audio_io->setSourceFilename(fxa->filePath());
 	// Start decoding of audio file to default (pcm 44100, 2Ch, 16bit) format
-	audio_io->start();
+	audio_io->start(fxa->loopTimes);
 	// Feed Audio Device with decoded data and set initial Volume
 	setVolume(fxa->initialVolume);
 	audio_output->start(audio_io);
@@ -199,13 +199,19 @@ void AudioSlot::emit_audio_play_progress()
 
 	if (!current_fx->audioDuration || run_status != AUDIO_RUNNING) return;
 
-	int per_mille = run_time.elapsed() * 1000 / current_fx->audioDuration;
+	qint64 soundlen = current_fx->audioDuration;
+	int loop = audio_io->currentLoop();
+	int per_mille = (run_time.elapsed() - soundlen * loop) * 1000 / soundlen;
 
 	emit audioProgressChanged(slotNumber, current_fx, per_mille);
 
 	AudioCtrlMsg msg(current_fx,slotNumber);
 	msg.currentAudioStatus = run_status;
 	msg.progress = per_mille;
+	msg.loop = loop;
+	if (current_fx->loopTimes > 1) {
+		msg.maxloop = current_fx->loopTimes;
+	}
 	emit audioCtrlMsgEmitted(msg);
 }
 
@@ -234,6 +240,10 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
 		msg.fxAudio = current_fx;
 		emit audioCtrlMsgEmitted(msg);
+
+		if (run_status == AUDIO_IDLE) {
+			emit vuLevelChanged(slotNumber,0,0);
+		}
 	}
 }
 

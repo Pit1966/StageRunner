@@ -100,7 +100,7 @@ void qsynthKnob::mouseMoveEvent ( QMouseEvent *pMouseEvent )
 		return;
 
 	const QPoint& pos = pMouseEvent->pos();
-	int xdelta = pos.x() - m_posMouse.x();
+	// int xdelta = pos.x() - m_posMouse.x();
 	int ydelta = pos.y() - m_posMouse.y();
 	float fAngleDelta =  mouseAngle(pos) - mouseAngle(m_posMouse);
 
@@ -108,7 +108,7 @@ void qsynthKnob::mouseMoveEvent ( QMouseEvent *pMouseEvent )
 
 	switch (m_dialMode)	{
 	case LinearMode:
-		iNewValue = int(m_fLastDragValue) + xdelta - ydelta;
+		iNewValue = int(m_fLastDragValue) /*+ xdelta*/ - ydelta;
 		break;
 	case AngularMode:
 	default:

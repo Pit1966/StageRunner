@@ -9,6 +9,7 @@ public:
 	qint32 initialVolume;
 	qint32 currentVolume;
 	qint64 audioDuration;					///< Length of audio stream in ms (or 0, if unknown)
+	qint32 loopTimes;
 
 public:
 	FxAudioItem();

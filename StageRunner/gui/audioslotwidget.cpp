@@ -117,6 +117,9 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 				QString time = QString("%1.%2\%")
 						.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
 						.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
+				if (msg.maxloop > 0) {
+					time += QString(" L%1/%2").arg(msg.loop+1).arg(msg.maxloop);
+				}
 				setTitle(time);
 			}
 			break;

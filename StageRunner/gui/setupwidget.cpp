@@ -9,6 +9,8 @@
 #ifdef IS_QT5
 #include <QtWidgets>
 #else
+#define setSectionResizeMode setResizeMode
+
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QSpinBox>

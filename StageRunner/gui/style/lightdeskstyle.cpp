@@ -1,8 +1,5 @@
 #include "lightdeskstyle.h"
 
-#include <QDebug>
-#include <QTabWidget>
-
 /// Statics
 QPen LightDeskStyle::penBevelDarkTrans = QPen(QColor(10,10,10,120),3);
 QPen LightDeskStyle::penBevelLightTrans = QPen(QColor(200,200,200,120),3);

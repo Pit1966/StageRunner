@@ -2,7 +2,9 @@
 #define PTABLEWIDGET_H
 
 #include <QTableWidget>
+#ifdef IS_QT5
 #include <QtWidgets>
+#endif
 
 class PTableWidget : public QTableWidget
 {

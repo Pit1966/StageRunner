@@ -123,7 +123,11 @@ void FxListWidget::setFxList(FxList *fxlist)
 	}
 	fxTable->resizeColumnsToContents();
 	// fxTable->horizontalHeader()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+#ifdef IS_QT5
 	fxTable->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+#else
+	fxTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+#endif
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 }
 

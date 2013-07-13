@@ -2,9 +2,13 @@
 #include "customwidget/pslineedit.h"
 #include "fxitem.h"
 
+#ifdef IS_QT5
+#include <QtWidgets>
+#else
 #include <QMouseEvent>
 #include <QPaintEvent>
-#include <QtWidgets>
+#include <QPainter>
+#endif
 
 FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype) :
 	QWidget()
@@ -49,7 +53,7 @@ void FxListWidgetItem::init()
 	current_button = 0;
 	activation_indicator_a = 0;
 	activation_indicator_b = 0;
-	indicator_a_color = QColor(Qt::darkGreen);
+	indicator_a_color = QColor(QColor(220,180,0));   // orange
 	indicator_b_color = QColor(Qt::darkRed);
 
 	setupUi(this);

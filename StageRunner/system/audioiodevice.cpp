@@ -17,6 +17,9 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_format = new AudioFormat(format);
 	audio_buffer = new QByteArray;
 
+	loop_count = 0;
+	loop_target = 0;
+
 #ifdef IS_QT5
 	audio_decoder = new QAudioDecoder;
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
@@ -41,6 +44,18 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
 
+	if (avail == 0 && bytes_read > 0 && decoding_finished_f) {
+		loop_count++;
+		if (loop_count < loop_target || loop_target < 0) {
+			if (debug > 1) LOGTEXT(tr("Loop audio file '%1' -> Loop: %2").arg(current_filename).arg(loop_count));
+			bytes_read = 0;
+			avail = bytes_avail;
+		} else {
+			qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
+			emit readReady();
+			return 0;
+		}
+	}
 
 	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
 		if (run_time.elapsed() > 500) {
@@ -48,6 +63,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 			emit readReady();
 			return 0;
 		}
+		// This generates NULL level audio data
 		for (int t=0; t<maxlen; t++) {
 			data[t] = 0;
 		}
@@ -56,11 +72,6 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 	// qDebug("readData %lli",maxlen);
 	if (maxlen>avail) {
-		if (decoding_finished_f) {
-			// qDebug("maxlen %lli, avail %lli",maxlen,avail);
-			emit readReady();
-			return 0;
-		}
 		maxlen = avail;
 	}
 
@@ -199,8 +210,20 @@ void AudioIODevice::calc_vu_level(const char *data, int size)
 	emit vuLevelChanged(left/frames, right/frames);
 }
 
-void AudioIODevice::start()
+void AudioIODevice::start(int loops)
 {
+	if (loops < 0) {
+		loop_target = -1;
+	}
+	else if (loops > 0) {
+		loop_target = loops;
+	}
+	else {
+		loop_target = 1;
+	}
+	loop_count = 0;
+
+
 	if (!open(QIODevice::ReadOnly)) {
 		DEBUGERROR("Could not open Audio IO device");
 		return;

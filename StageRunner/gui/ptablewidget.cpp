@@ -7,9 +7,7 @@
 #include <QModelIndex>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
-#ifdef IS_QT5
-#include <QtWidgets>
-#endif
+#include <QScrollBar>
 
 PTableWidget::PTableWidget(QWidget *parent) :
 	QTableWidget(parent)

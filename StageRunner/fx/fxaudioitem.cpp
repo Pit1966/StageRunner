@@ -33,5 +33,6 @@ void FxAudioItem::init()
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(audioDuration,"DurationMS");
+	addExistingVar(loopTimes,"LoopTimes");
 	// qDebug("init audio fx with id: %d",myId);
 }

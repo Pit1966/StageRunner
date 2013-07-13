@@ -38,6 +38,8 @@ private slots:
 	void on_editOnceButton_clicked();
 
 	void finish_edit();
+	void on_audioLoopsSpin_valueChanged(int arg1);
+
 signals:
 	void modified();
 };

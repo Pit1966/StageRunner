@@ -266,6 +266,7 @@ public:
 	inline QString value() {return pvalue;}
 	inline int size() {return pvalue.size();}
 	inline operator QString () {return pvalue;}
+	inline bool operator == (const QString & str) {return pvalue == str;}
 	inline pstring & operator = (const QString val) {
 		if (pvalue != val) {pvalue=val;modified_f=true;}
 		return *this;
