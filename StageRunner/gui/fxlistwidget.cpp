@@ -9,6 +9,8 @@
 #include "customwidget/pslineedit.h"
 #include "fxlistwidgetitem.h"
 #include "customwidget/extmimedata.h"
+#include "fxplaylistitem.h"
+#include "fxplaylistwidget.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -106,6 +108,9 @@ void FxListWidget::setFxList(FxList *fxlist)
 			break;
 		case FX_SCENE:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/scene_mixer.png"));
+			break;
+		case FX_AUDIO_PLAYLIST:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/playlist.png"));
 			break;
 		default:
 			break;
@@ -250,6 +255,12 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 		connect(desk,SIGNAL(modified()),this,SLOT(refreshList()));
 		desk->show();
 	}
+}
+
+void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
+{
+	FxPlayListWidget *play = new FxPlayListWidget(fx);
+	play->show();
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -507,6 +518,10 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 	case FX_AUDIO:
 		selectFx(fx);
 		emit fxCmdActivated(fx,CMD_FX_START);
+		break;
+	case FX_AUDIO_PLAYLIST:
+		open_audio_list_widget(static_cast<FxPlayListItem*>(fx));
+
 		break;
 	}
 }

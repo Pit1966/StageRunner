@@ -167,7 +167,7 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 			drag->setMimeData(mdata);
 			drag->setPixmap(pixmap);
 			drag->setHotSpot(drag_begin_pos);
-			Qt::DropAction dropaction = drag->exec();
+			/*Qt::DropAction dropaction = */drag->exec();
 
 			currentButton = 0;
 		}

@@ -8,6 +8,7 @@
 #include "dmxchannel.h"
 #include "pluginmapping.h"
 #include "messagehub.h"
+#include "fxaudioitem.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -208,6 +209,16 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 										return 0;
 									}
 								}
+								else if (var->myclass == PrefVarCore::FX_AUDIO_ITEM) {
+									VarSetList<FxAudioItem*> *varsetlist = reinterpret_cast<VarSetList<FxAudioItem*>*>(var->p_refvar);
+									FxAudioItem *item = new FxAudioItem;
+									varsetlist->append(item);
+									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+										return -1;
+									} else {
+										return 0;
+									}
+								}
 							}
 						}
 					}
@@ -288,6 +299,10 @@ void VarSet::clearCurrentVars()
 	curProjectid.clear();
 	curKey.clear();
 	curValue.clear();
+	curChildActive = false;
+	curChildItemClass.clear();
+	curChildItemFound = false;
+	curChildListName.clear();
 }
 
 VarSet &VarSet::operator =(const VarSet &other)
@@ -716,7 +731,7 @@ QString VarSet::getPstring(const QString &name)
 	}
 }
 
-/// @todo: blödsinn, Objekt wird vor Rückgabe gelöscht
+/// @fixme: blödsinn, Objekt wird vor Rückgabe gelöscht
 char *VarSet::getPstringAscii(const QString &name)
 {
 	return getPstring(name).toLatin1().data();

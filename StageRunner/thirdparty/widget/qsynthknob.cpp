@@ -165,6 +165,7 @@ void qsynthKnob::wheelEvent ( QWheelEvent *pWheelEvent )
 
 void qsynthKnob::mouseDoubleClickEvent(QMouseEvent *pMouseEvent)
 {
+	Q_UNUSED(pMouseEvent);
 	emit doubleClicked();
 }
 

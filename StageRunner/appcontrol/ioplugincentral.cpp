@@ -76,6 +76,16 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 	}
 }
 
+void IOPluginCentral::unloadPlugins()
+{
+	QObjectList plugins = QPluginLoader::staticInstances();
+
+	for (int t=0; t<plugins.size(); t++) {
+		delete plugins.at(t);
+	}
+	qlc_plugins.clear();
+}
+
 bool IOPluginCentral::updatePluginMappingInformation()
 {
 	pluginMapping->pluginConfigName = "Default Plugin Config";
@@ -204,6 +214,12 @@ void IOPluginCentral::closePlugins()
 		for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
 			plugin->closeOutput(o);
+			plugin->disconnect();
+		}
+		QStringList inputs = plugin->inputs();
+		for (int i=0; i<inputs.size(); i++) {
+			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
+			plugin->closeInput(i);
 			plugin->disconnect();
 		}
 	}

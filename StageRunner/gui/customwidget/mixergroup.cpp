@@ -204,9 +204,9 @@ void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 
-	QObject * src = event->source();
+	// QObject * src = event->source();
 	if (extmime && extmime->mixerChannel) {
-		MixerChannel *movwid = extmime->mixerChannel;
+		// MixerChannel *movwid = extmime->mixerChannel;
 		// search Widget (hopefully a MixerChannel) under mouse cursor
 		for (int i=0; i<mixerlayout->count(); i++) {
 			if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->pos())) {
@@ -244,6 +244,7 @@ void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
 
 void MixerGroup::dragLeaveEvent(QDragLeaveEvent *event)
 {
+	Q_UNUSED(event);
 	if (temp_drag_move_idx >= 0) {
 		QLayoutItem *item = mixerlayout->takeAt(temp_drag_move_idx);
 		delete item->widget();
@@ -260,6 +261,7 @@ void MixerGroup::dragLeaveEvent(QDragLeaveEvent *event)
 
 void MixerGroup::dropEvent(QDropEvent *event)
 {
+	Q_UNUSED(event);
 	if (temp_drag_move_idx >= 0) {
 		QLayoutItem *item = mixerlayout->takeAt(temp_drag_move_idx);
 		delete item->widget();

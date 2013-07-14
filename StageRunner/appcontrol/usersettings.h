@@ -11,6 +11,7 @@ public:
 	pstring pLastAudioFxImportPath;
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
+	pstring pLastAudioTrackImportPath;
 	pint32 pAudioBufferSize;
 	pbool pProhibitAudioDoubleStart;
 	pint32 pAudioAllowReactivateTime;

@@ -14,6 +14,8 @@
 #include "scenestatuswidget.h"
 #include "qtstatictools.h"
 #include "style/lightdeskstyle.h"
+#include "fxitem.h"
+#include "fxplaylistitem.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -185,12 +187,13 @@ void StageRunnerMainWin::initAppDefaults()
 	restore_window();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
+		debug = 3;
 		appCentral->project->loadFromFile(appCentral->userSettings->pLastProjectLoadPath);
+		debug = 0;
 		appCentral->project->postLoadProcessFxList();
 		fxListWidget->setFxList(appCentral->project->fxList);
 		copyProjectSettingsToGui();
 	}
-
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
@@ -394,6 +397,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 		while (wait.elapsed() < 1500) QApplication::processEvents();
 	}
 
+
 	QSettings set;
 	set.beginGroup("GuiSettings");
 	set.setValue("MainWinGeometry",saveGeometry());
@@ -515,5 +519,25 @@ void StageRunnerMainWin::on_cloneSelectedSceneButton_clicked()
 {
 	appCentral->project->fxList->cloneSelectedSceneItem();
 	fxListWidget->refreshList();
+
+}
+
+void StageRunnerMainWin::on_addAudioPlayListButton_clicked()
+{
+	appCentral->project->fxList->addFxAudioPlayList();
+	fxListWidget->refreshList();
+}
+
+void StageRunnerMainWin::on_addAudioTrackButton_clicked()
+{
+	FxItem *fx = appCentral->project->fxList->nextFx();
+	if (!fx || fx->fxType() != FX_AUDIO_PLAYLIST) return;
+
+	QString path = QFileDialog::getOpenFileName(this,tr("Choose Audio Track")
+												,appCentral->userSettings->pLastAudioTrackImportPath);
+	if (path.size()) {
+		appCentral->userSettings->pLastAudioTrackImportPath = path;
+		static_cast<FxPlayListItem*>(fx)->addAudioTrack(path);
+	}
 
 }

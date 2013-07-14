@@ -1,6 +1,7 @@
 #include "fxlist.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "fxplaylistitem.h"
 
 #include <QMutableListIterator>
 
@@ -136,9 +137,22 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 bool FxList::addFxScene(int tubes)
 {
 	FxItem *fx = addFx(FX_SCENE,tubes);
-	fx->setName("New Scene");
+	if (fx) {
+		fx->setName("New Scene");
+		return true;
+	}
 
-	return true;
+	return false;
+}
+
+bool FxList::addFxAudioPlayList()
+{
+	FxItem *fx = addFx(FX_AUDIO_PLAYLIST);
+	if (fx) {
+		fx->setName("Audio play list");
+		return true;
+	}
+	return false;
 }
 
 void FxList::moveFromTo(int srcidx, int destidx)
@@ -233,6 +247,14 @@ FxItem *FxList::addFx(int fxtype, int option)
 			if (option >= 0) {
 				fx->createDefaultTubes(option);
 			}
+			return fx;
+		}
+	case FX_AUDIO_PLAYLIST:
+		{
+			FxPlayListItem *fx = new FxPlayListItem();
+			fx->refCount.ref();
+			fx_list.append(fx);
+			modified_f = true;
 			return fx;
 		}
 	default:

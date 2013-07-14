@@ -83,7 +83,10 @@ SOURCES += \
     ../gui/customwidget/extmimedata.cpp \
     ../gui/style/lightdeskstyle.cpp \
     ../system/messagehub.cpp \
-    ../system/messagedialog.cpp
+    ../system/messagedialog.cpp \
+    ../fx/fxplaylistitem.cpp \
+    ../gui/fxplaylistwidget.cpp \
+    ../gui/customwidget/pslistwidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -137,7 +140,10 @@ HEADERS  += \
     ../gui/customwidget/extmimedata.h \
     ../gui/style/lightdeskstyle.h \
     ../system/messagehub.h \
-    ../system/messagedialog.h
+    ../system/messagedialog.h \
+    ../fx/fxplaylistitem.h \
+    ../gui/fxplaylistwidget.h \
+    ../gui/customwidget/pslistwidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -151,7 +157,8 @@ FORMS    += \
     ../gui/scenestatuswidget.ui \
     ../gui/lightcontrolwidget.ui \
     ../gui/fxlistwidgetitem.ui \
-    ../system/messagedialog.ui
+    ../system/messagedialog.ui \
+    ../gui/fxplaylistwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

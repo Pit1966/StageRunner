@@ -11,6 +11,7 @@ class FxList;
 class FxItem;
 class FxSceneItem;
 class FxListWidgetItem;
+class FxPlayListItem;
 
 using namespace AUDIO;
 
@@ -40,6 +41,7 @@ public:
 private:
 	void init();
 	void open_scence_desk(FxSceneItem *fx);
+	void open_audio_list_widget(FxPlayListItem *fx);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);

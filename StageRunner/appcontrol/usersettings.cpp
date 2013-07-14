@@ -21,6 +21,7 @@ void UserSettings::init()
 	addExistingVar(pApplicationGuiStyle,"ApplicationGuiStyle");
 	addExistingVar(pDialKnobStyle,"DialKnobStyle");
 	addExistingVar(pLastAudioFxImportPath,"LastAudioFxImportPath");
+	addExistingVar(pLastAudioTrackImportPath,"LastAudioTrackImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
 	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,5000);

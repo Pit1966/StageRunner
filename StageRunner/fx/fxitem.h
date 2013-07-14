@@ -12,6 +12,7 @@ enum FxType {
 	FX_NULL,				// no fx type set
 	FX_AUDIO,				// is Audio Fx
 	FX_SCENE,				// is Light Scene
+	FX_AUDIO_PLAYLIST,		// is Audio Play List
 
 	FX_SIZE
 };

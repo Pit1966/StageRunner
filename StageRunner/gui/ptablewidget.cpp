@@ -70,6 +70,7 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 
 void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
+	Q_UNUSED(event);
 	qDebug("dragLeaveEvent");
 
 	if (drag_temp_row >= 0) {
