@@ -1,18 +1,23 @@
 #ifndef FXPLAYLISTITEM_H
 #define FXPLAYLISTITEM_H
 
+#include "fxitem.h"
 #include "fxaudioitem.h"
 #include "varsetlist.h"
+
+class FxList;
+
 
 class FxPlayListItem : public FxAudioItem
 {
 public:
-	VarSetList<FxAudioItem*>playList;
+	FxList *fxPlayList;
 
 public:
 	FxPlayListItem();
+	~FxPlayListItem();
 	bool addAudioTrack(const QString & path);
-	inline int size() {return playList.size();}
+	int size();
 
 private:
 	void init();

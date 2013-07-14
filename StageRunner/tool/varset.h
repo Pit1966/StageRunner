@@ -66,6 +66,7 @@ private:
 	bool is_registered_f;					///< VarSet ist mindestens einmal in var_registry vertreten
 	bool is_db_table_registered_f;			///< Ist mit registerDatabaseTable registriert worden
 	int function_count;						///< Zähler für spezielle Funktionsvariablen (Variablenname wird "function|{$function_count}")
+	bool cancel_file_analyze_on_empty_line;	///< Die Analyse eines VarSetFiles wird ohne Fehler abgebrochen, wenn eine Leerzeile auftaucht
 
 	// Varwaltung aller VarSets
 	static QAtomicInt instance_cnt;					///< Soviele VarSet Instanzen gibt es
@@ -168,6 +169,7 @@ public:
 
 	bool fileSave(const QString & path, bool append = false, bool empty_line = false);
 	bool fileLoad(const QString & path, bool *exists = 0);
+	void setFileLoadCancelOnEmptyLine(bool state) {cancel_file_analyze_on_empty_line = state;}
 
 	bool registerDatabaseGlobal(const QString &desc, int index = 1);
 	bool registerDatabaseTable(const QString &desc);

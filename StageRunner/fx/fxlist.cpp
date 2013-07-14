@@ -60,7 +60,7 @@ FxItem *FxList::stepToSequenceNext()
 
 FxItem *FxList::getFxByKeyCode(int keycode) const
 {
-	QListIterator<FxItem*> it(fx_list);
+	QListIterator<FxItem*> it(fx_list.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->keyCode() == keycode) return fx;
@@ -71,7 +71,7 @@ FxItem *FxList::getFxByKeyCode(int keycode) const
 QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
 {
 	QList<FxItem*>fxlist;
-	QListIterator<FxItem*> it(fx_list);
+	QListIterator<FxItem*> it(fx_list.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->keyCode() == keycode) fxlist.append(fx);
@@ -195,7 +195,7 @@ bool FxList::deleteFx(FxItem *fx)
 bool FxList::isModified() const
 {
 	bool modified = modified_f;
-	QListIterator<FxItem*> it(fx_list);
+	QListIterator<FxItem*> it(fx_list.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->isModified()) {
@@ -207,7 +207,7 @@ bool FxList::isModified() const
 
 void FxList::setModified(bool state)
 {
-	QMutableListIterator<FxItem*> it(fx_list);
+	QMutableListIterator<FxItem*> it(fx_list.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		fx->setModified(state);

@@ -53,7 +53,9 @@ bool Project::saveToFile(const QString &path)
 
 bool Project::loadFromFile(const QString &path)
 {
+	setFileLoadCancelOnEmptyLine(true);
 	bool ok = fileLoad(path);
+	setFileLoadCancelOnEmptyLine(false);
 
 	// Now try to load FxItem VarSets (with classname "FxItem")
 	clearCurrentVars();
@@ -66,18 +68,18 @@ bool Project::loadFromFile(const QString &path)
 			int child_level = 0;
 			int ret = analyzeLine(read,fx,child_level,&line_number);
 			if (ret < 0) {
-				qDebug() << "AnalyzeLine failed while searching for fxItem";
+				qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
 				ok = false;
 			}
 			// Wait for ClassName matching FxItem Type
-			if (curClassname == "FxItem") {
+			if (curClassname == "FxItem" && !curChildActive) {
 				// An opening bracket could mean a new instance will come
 				if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
 				// We have to wait for FxType to determine what kind of Fx we
 				// have to initialize
 				if (curKey == "FxType") {
 					fx = fxList->addFx(curValue.toInt());
-					if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list",fx->fxType());
+					if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list -> analyze sub class",fx->fxType());
 				}
 			}
 		}

@@ -100,6 +100,7 @@ void VarSet::init()
 	function_count = 0;
 	curChildActive = false;
 	curChildItemFound = false;
+	cancel_file_analyze_on_empty_line = false;
 
 }
 
@@ -109,7 +110,7 @@ void VarSet::init()
  * @param varset
  * @param child_level
  * @param p_line_number
- * @return 0: ok, -1: Fehler, 1: Child level kann verlassen werden
+ * @return 0: ok, -1: Fehler, 1: Child level kann verlassen werden, 2: Canceled, aber kein Fehler
  */
 int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
 {
@@ -117,8 +118,10 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 
 	QString line = read.readLine();
 	(*p_line_number)++;
-	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level;
+	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level << (varset?varset->className():QString());
 
+
+	if (line.size() < 2 && cancel_file_analyze_on_empty_line) return 2;
 
 	if (line.size() > 2 && !line.startsWith("#")) {
 		curKey = line.section('=',0,0).simplified();
@@ -131,6 +134,8 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 	QString & val = curValue;
 
 	if (curKey.startsWith('[')) {
+		// Analyzing a new sub class
+		// Line format: [class][id][index]
 		QString b1;
 		QString b2;
 		QString b3;
@@ -1035,6 +1040,7 @@ bool VarSet::fileLoad(const QString &path, bool *exists)
 	return ok;
 }
 
+
 int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
 {
 	while (!read.atEnd()) {
@@ -1042,6 +1048,10 @@ int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int 
 		if (ret < 0) {
 			qDebug() << Q_FUNC_INFO << "Exit with failure!";
 			return -1;
+		}
+		else if (ret == 2) {
+			if (debug > 2) qDebug() << Q_FUNC_INFO << "Canceled File analyzing due to empty line (This is no error)";
+			return 0;
 		}
 		else if (ret > 0) {
 			if (debug > 2) qDebug() << Q_FUNC_INFO << "Leave Child level" << child_level;

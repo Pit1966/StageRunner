@@ -259,8 +259,11 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 
 void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 {
-	FxPlayListWidget *play = new FxPlayListWidget(fx);
-	play->show();
+	// FxPlayListWidget *play = new FxPlayListWidget(fx);
+	// play->show();
+	FxListWidget *audiolist = new FxListWidget();
+	audiolist->setFxList(fx->fxPlayList);
+	audiolist->show();
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)

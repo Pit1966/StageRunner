@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QList>
 
+#include "varsetlist.h"
+
 
 class FxItem;
 
@@ -13,10 +15,10 @@ class FxList : public QObject
 private:
 	/**
 	 * Becomes the register Id when registered in appCentral
-	 * This Id is unique in the the system
+	 * This Id is unique in the system
 	 */
 	int regid;
-	QList<FxItem*>fx_list;
+	VarSetList<FxItem*>fx_list;
 	FxItem * fx_last;
 	FxItem * fx_next;
 	FxItem * fx_current;
@@ -30,6 +32,7 @@ public:
 
 	void clear();
 
+	inline VarSetList<FxItem*> & nativeFxList() {return fx_list;}
 	inline int size() const {return fx_list.size();}
 	inline void append(FxItem* fx) {fx_list.append(fx);}
 	inline void insert(int idx, FxItem* fx) {fx_list.insert(idx,fx);}
