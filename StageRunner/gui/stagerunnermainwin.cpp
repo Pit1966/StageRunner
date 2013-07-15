@@ -16,6 +16,7 @@
 #include "style/lightdeskstyle.h"
 #include "fxitem.h"
 #include "fxplaylistitem.h"
+#include "fxlistexecuter.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -187,9 +188,7 @@ void StageRunnerMainWin::initAppDefaults()
 	restore_window();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
-		debug = 3;
 		appCentral->project->loadFromFile(appCentral->userSettings->pLastProjectLoadPath);
-		debug = 0;
 		appCentral->project->postLoadProcessFxList();
 		fxListWidget->setFxList(appCentral->project->fxList);
 		copyProjectSettingsToGui();
@@ -540,4 +539,12 @@ void StageRunnerMainWin::on_addAudioTrackButton_clicked()
 		static_cast<FxPlayListItem*>(fx)->addAudioTrack(path);
 	}
 
+}
+
+void StageRunnerMainWin::on_executeAudioPlayListButton_clicked()
+{
+	FxItem *fx = appCentral->project->fxList->nextFx();
+	if (!fx || fx->fxType() != FX_AUDIO_PLAYLIST) return;
+
+	appCentral->unitAudio->startFxAudioPlayList( static_cast<FxPlayListItem*>(fx) );
 }

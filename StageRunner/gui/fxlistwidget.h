@@ -70,6 +70,8 @@ private slots:
 	void if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem);
 	void if_fxitemwidget_edited(FxListWidgetItem *listitem, const QString &text);
 
+	void drop_event_receiver(QString str, int row);
+
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);
 	void fxItemSelected(FxItem *);

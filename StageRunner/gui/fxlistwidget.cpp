@@ -37,12 +37,12 @@ FxListWidget::FxListWidget(QWidget *parent) :
 
 	// fxTable->viewport()->acceptDrops();
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
+	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SLOT(drop_event_receiver(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
 }
 
 void FxListWidget::setFxList(FxList *fxlist)
 {
-	qDebug() << "Set FxList";
 	cur_selected_item = 0;
 	selected_rows.clear();
 	fxTable->clear();
@@ -192,7 +192,7 @@ void FxListWidget::selectFx(FxItem *fx)
 
 void FxListWidget::initRowDrag(FxListWidgetItem *item)
 {
-	QDrag *drag = new QDrag(parentWidget());
+	QDrag *drag = new QDrag(this);
 	ExtMimeData *mdata = new ExtMimeData();
 	mdata->fxListWidgetItem = item;
 	mdata->setText(item->linkedFxItem->name());
@@ -261,9 +261,12 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 {
 	// FxPlayListWidget *play = new FxPlayListWidget(fx);
 	// play->show();
-	FxListWidget *audiolist = new FxListWidget();
-	audiolist->setFxList(fx->fxPlayList);
-	audiolist->show();
+	FxListWidget *playlistwid = new FxListWidget();
+	playlistwid->setFxList(fx->fxPlayList);
+	playlistwid->show();
+
+	connect(fx->fxPlayList,SIGNAL(fxNextChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
+	connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),fx->fxPlayList,SLOT(setNextFx(FxItem*)));
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -422,6 +425,7 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 
 void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 {
+	qDebug("FxListWidget: move row from: %d to %d",srcrow,destrow);
 	if (myfxlist) {
 		FxItem *cur = 0;
 		if (srcrow >= 0 && srcrow < myfxlist->size()) cur = myfxlist->at(srcrow);
@@ -509,6 +513,10 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 		selectFx(fx);
 		emit fxCmdActivated(fx,CMD_FX_START);
 		break;
+	case FX_AUDIO_PLAYLIST:
+		selectFx(fx);
+		emit fxCmdActivated(fx, CMD_FX_START);
+		break;
 	}
 }
 
@@ -567,5 +575,11 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 	default:
 		break;
 	}
+}
+
+void FxListWidget::drop_event_receiver(QString str, int row)
+{
+	qDebug() << "FxListWidget:: dropEvent received: " << str << row;
+
 }
 

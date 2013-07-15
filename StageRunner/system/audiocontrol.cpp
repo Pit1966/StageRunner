@@ -5,6 +5,8 @@
 #include "appcentral.h"
 #include "usersettings.h"
 #include "fxaudioitem.h"
+#include "fxplaylistitem.h"
+#include "fxlistexecuter.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -118,7 +120,6 @@ void AudioControl::stopFxAudio(int slot)
 		// We send this via Message to communicate with the thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
 		emit audioThreadCtrlMsgEmitted(msg);
-		// audioChannels[slot]->stopFxAudio();
 	}
 }
 
@@ -152,6 +153,22 @@ void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 	}
 }
 
+void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentFxAudio() == fxa) {
+			fadeoutFxAudio(t,time_ms);
+		}
+	}
+}
+
+/**
+ * @brief [SLOT] The signals from all audio slots will come in here.
+ * @param msg
+ *
+ * This slot is used to repeat the audio control messages from all existing audio slots (channels)
+ * So you do not habe to connect on each audio channel
+ */
 void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 {
 	// qDebug("AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded");
@@ -208,6 +225,21 @@ void AudioControl::setVolume(int slot, int vol)
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
 		audioChannels[slot]->setVolume(vol);
 	}
+}
+
+bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
+{
+	/// @todo: Instance must be deleted after use!!
+	FxListExecuter *fxexec = new FxListExecuter(myApp, fxplay->fxPlayList);
+	return fxexec->runExecuter();
+}
+
+bool AudioControl::stopFxAudioPlayList(FxPlayListItem *fxplay)
+{
+	/// @implement me
+
+
+	return true;
 }
 
 void AudioControl::init()

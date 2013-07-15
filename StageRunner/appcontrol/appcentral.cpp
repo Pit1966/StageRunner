@@ -255,6 +255,19 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for scene",cmd);
 		}
 		break;
+	case FX_AUDIO_PLAYLIST:
+		switch (cmd) {
+		case CMD_AUDIO_START:
+			unitAudio->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			break;
+		case CMD_AUDIO_STOP:
+			unitAudio->stopFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			break;
+		default:
+			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
+		}
+		break;
+
 	default:
 		break;
 	}

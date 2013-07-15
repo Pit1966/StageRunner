@@ -86,7 +86,8 @@ SOURCES += \
     ../system/messagedialog.cpp \
     ../fx/fxplaylistitem.cpp \
     ../gui/fxplaylistwidget.cpp \
-    ../gui/customwidget/pslistwidget.cpp
+    ../gui/customwidget/pslistwidget.cpp \
+    ../fx/fxlistexecuter.cpp
 
 HEADERS  += \
 	../config.h \
@@ -143,7 +144,8 @@ HEADERS  += \
     ../system/messagedialog.h \
     ../fx/fxplaylistitem.h \
     ../gui/fxplaylistwidget.h \
-    ../gui/customwidget/pslistwidget.h
+    ../gui/customwidget/pslistwidget.h \
+    ../fx/fxlistexecuter.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

@@ -49,6 +49,7 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 	QPoint dragpos = event->pos();
 	int current_row = indexAt(dragpos).row();
 
+	qDebug ("Drag enter event");
 	if (extmime && extmime->fxListWidgetItem) {
 		qDebug("Drag enter event Mime:'%s': ObjectName:%s, row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);

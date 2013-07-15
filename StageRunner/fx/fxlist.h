@@ -24,6 +24,7 @@ private:
 	FxItem * fx_current;
 
 	bool auto_proceed_f;
+	bool auto_run_f;
 	bool modified_f;
 
 public:
@@ -42,9 +43,9 @@ public:
 	inline FxItem * nextFx() {return fx_next;}
 	inline FxItem * lastFx() {return fx_last;}
 	inline FxItem * currentFx() {return fx_current;}
-	void setNextFx(FxItem *nfx);
 	FxItem * stepToSequenceNext();
 	FxItem * getFxByKeyCode(int keycode) const;
+	FxItem * getFxByListIndex(int idx) const;
 
 	inline int regId() const {return regid;}
 	inline void setRegId(int new_id) {regid = new_id;}
@@ -70,6 +71,7 @@ signals:
 	void fxListChanged();
 
 public slots:
+	void setNextFx(FxItem *nfx);
 
 };
 

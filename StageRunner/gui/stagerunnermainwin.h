@@ -73,6 +73,8 @@ private slots:
 
 	void on_addAudioTrackButton_clicked();
 
+	void on_executeAudioPlayListButton_clicked();
+
 private:
 	void init();
 	void setup_gui_docks();

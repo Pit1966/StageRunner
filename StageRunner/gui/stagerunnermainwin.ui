@@ -14,7 +14,7 @@
    <string>StageRunner (C) Stonechip Entertainment</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="../gfx_ressource.qrc">
     <normaloff>:/gfx/icons/audip_power.png</normaloff>:/gfx/icons/audip_power.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -37,7 +37,7 @@
        </property>
        <widget class="QWidget" name="controlTab">
         <attribute name="icon">
-         <iconset>
+         <iconset resource="../gfx_ressource.qrc">
           <normaloff>:/gfx/icons/audio_play.png</normaloff>:/gfx/icons/audio_play.png</iconset>
         </attribute>
         <attribute name="title">
@@ -69,7 +69,7 @@
        </widget>
        <widget class="QWidget" name="logTab">
         <attribute name="icon">
-         <iconset>
+         <iconset resource="../gfx_ressource.qrc">
           <normaloff>:/gfx/icons/mode_edit_list.png</normaloff>:/gfx/icons/mode_edit_list.png</iconset>
         </attribute>
         <attribute name="title">
@@ -97,7 +97,7 @@
        </widget>
        <widget class="QWidget" name="develTab">
         <attribute name="icon">
-         <iconset>
+         <iconset resource="../gfx_ressource.qrc">
           <normaloff>:/gfx/icons/mode_edit.png</normaloff>:/gfx/icons/mode_edit.png</iconset>
         </attribute>
         <attribute name="title">
@@ -199,6 +199,13 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="executeAudioPlayListButton">
+                <property name="text">
+                 <string>Execute</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -277,7 +284,7 @@
   </action>
   <action name="actionSave_Project_as">
    <property name="icon">
-    <iconset>
+    <iconset resource="../gfx_ressource.qrc">
      <normaloff>:/gfx/icons/media-floppy.png</normaloff>:/gfx/icons/media-floppy.png</iconset>
    </property>
    <property name="text">
@@ -357,7 +364,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../gfx_ressource.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>clearLogButton</sender>

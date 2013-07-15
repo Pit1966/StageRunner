@@ -12,6 +12,7 @@ FxList::FxList() :
 	fx_next = 0;
 	fx_current = 0;
 	auto_proceed_f = false;
+	auto_run_f = false;
 	regid = 0;
 	modified_f = false;
 }
@@ -39,7 +40,9 @@ void FxList::clear()
 
 void FxList::setNextFx(FxItem *nfx)
 {
+	qDebug("set nfx");
 	if (nfx != fx_next) {
+		qDebug("set nfx 2");
 		fx_next = nfx;
 		emit fxNextChanged(fx_next);
 	}
@@ -68,6 +71,19 @@ FxItem *FxList::getFxByKeyCode(int keycode) const
 	return 0;
 }
 
+FxItem *FxList::getFxByListIndex(int idx) const
+{
+	if (idx < fx_list.nativeList().size()) {
+		return fx_list.nativeList().at(idx);
+	}
+	return 0;
+}
+
+/**
+ * @brief Returns a list with FXs that contains the desired key code
+ * @param keycode
+ * @return QList<FxItem*> List of fx items that match the key code (maybe empty if code not found)
+ */
 QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
 {
 	QList<FxItem*>fxlist;

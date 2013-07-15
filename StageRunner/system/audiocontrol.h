@@ -11,6 +11,7 @@ using namespace AUDIO;
 class AudioSlot;
 class FxAudioItem;
 class AppCentral;
+class FxPlayListItem;
 
 class AudioControl : public QThread
 {
@@ -43,11 +44,14 @@ public slots:
 	void stopFxAudio(FxAudioItem *fxa);
 	bool fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
+	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
+	bool startFxAudioPlayList(FxPlayListItem *fxplay);
+	bool stopFxAudioPlayList(FxPlayListItem *fxplay);
 
 private:
 	void init();
