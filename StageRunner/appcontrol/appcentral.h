@@ -66,6 +66,7 @@ public:
 
 	void loadPlugins();
 	void openPlugins();
+	void reOpenPlugins();
 	void closePlugins();
 	DmxMonitor *openDmxInMonitor(int universe);
 	DmxMonitor *openDmxOutMonitor(int universe);

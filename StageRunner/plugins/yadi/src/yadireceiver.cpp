@@ -28,14 +28,17 @@ void YadiReceiver::init()
 	cmd = IDLE;
 	time = new QTime;
 	receiver_loop_cnt = 0;
+	inputNumber = 0;
 }
 
-bool YadiReceiver::startRxDmx()
+bool YadiReceiver::startRxDmx(int input)
 {
 	if (isRunning()) {
 		qDebug() << "YadiReceiver::startRxDmx failed -> Thread already running";
 		return false;
 	}
+
+	inputNumber = input;
 
 
 	// Thread starten
@@ -56,7 +59,7 @@ void YadiReceiver::run()
 		if (ok) {
 			reloop = false;
 		} else {
-			if (receiver_loop_cnt++ < 20) {
+			if (receiver_loop_cnt++ < 2) {
 				qDebug("YadiReceiver::run: exit DMXreceiver thread with failure -> restart");
 				reloop = true;
 			} else {
@@ -67,7 +70,7 @@ void YadiReceiver::run()
 
 	if (!ok) {
 		qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
-		emit exitReceiverWithFailure();
+		emit exitReceiverWithFailure(inputNumber);
 	} else {
 		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
 	}

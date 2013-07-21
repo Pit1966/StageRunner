@@ -8,11 +8,18 @@ MessageDialog::MessageDialog(QWidget *parent) :
 	doNotShowAgain = false;
 	pressedButton = NONE;
 
+	specialFunctionObj = 0;
+
 	setupUi(this);
 
 	noButton->hide();
 	yesButton->hide();
+	specialFunctionButton->hide();
 
+}
+
+MessageDialog::~MessageDialog()
+{
 }
 
 void MessageDialog::setMainText(const QString &text)
@@ -36,6 +43,24 @@ Ps::Button MessageDialog::execMessage(const QString &mainText, const QString &su
 	exec();
 
 	return pressedButton;
+}
+
+void MessageDialog::showMessage(const QString &mainText, const QString &subText)
+{
+	main_text = mainText;
+	sub_text = subText;
+	update_text();
+
+	setAttribute(Qt::WA_DeleteOnClose);
+
+	show();
+}
+
+void MessageDialog::connectSpecialFunction(QObject *target, const QString &func)
+{
+	specialFunctionObj = target;
+	specialFunction = func;
+	specialFunctionButton->show();
 }
 
 void MessageDialog::update_text()
@@ -76,4 +101,14 @@ void MessageDialog::on_continueButton_clicked()
 {
 	pressedButton = CONTINUE;
 	accept();
+}
+
+void MessageDialog::on_specialFunctionButton_clicked()
+{
+	if (!specialFunctionObj) return;
+
+
+	QMetaObject::invokeMethod(specialFunctionObj,specialFunction.toLocal8Bit().data());
+	accept();
+
 }

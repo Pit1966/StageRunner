@@ -120,6 +120,7 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 		qDebug("Can't create udev\n");
 		return globYadiDeviceList;
 	}
+	qDebug("YadiDeviceManager: devices:");
 
 	/* Create a list of the devices in the 'tty' subsystem. */
 	enumerate = udev_enumerate_new(udev);
@@ -216,6 +217,8 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 				else if (product.contains("Sender")) {
 					yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
 				}
+				qDebug("YadiDeviceManager: new device at: %s",yadi->devNodePath.toLocal8Bit().data());
+
 			}
 		}
 	}

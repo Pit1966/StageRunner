@@ -3,6 +3,7 @@
 #include "qlcioplugin.h"
 #include "config.h"
 #include "pluginmapping.h"
+#include "messagedialog.h"
 
 #include <QDir>
 #include <QPluginLoader>
@@ -60,6 +61,7 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 				qlc_plugins.append(plugin);
 
 				plugin->init();
+				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 
 			} else {
 				DEBUGERROR("'%s' QLC I/O plugin in %s is already loaded -> unload again"
@@ -90,6 +92,9 @@ bool IOPluginCentral::updatePluginMappingInformation()
 {
 	pluginMapping->pluginConfigName = "Default Plugin Config";
 
+	allInputNames.clear();
+	allOutputNames.clear();
+
 	int count = 0;
 
 	// Discover plugin lines (input/outputs) and update configuration for each
@@ -104,6 +109,9 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Output;
 			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
+
+			allOutputNames.append(outputs.at(t));
+
 		}
 		for (int t=0; t<inputs.size(); t++) {
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,inputs.at(t));
@@ -111,6 +119,9 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Input;
 			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
+
+			allInputNames.append(inputs.at(t));
+
 		}
 	}
 
@@ -197,8 +208,8 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   <font color=darkgreen>Open Input: %1</font>").arg(inputs.at(i)));
 				plugin->openInput(i);
 				one_opened = true;
-				// Lets connect to inputChanged Signal
 			}
+			// Lets connect to inputChanged Signal
 			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)));
 		}
 
@@ -223,6 +234,26 @@ void IOPluginCentral::closePlugins()
 			plugin->disconnect();
 		}
 	}
+}
+
+QStringList IOPluginCentral::getAllAvailableInputNames() const
+{
+	QStringList input_names;
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		input_names += plugin->inputs();
+	}
+	return input_names;
+}
+
+QStringList IOPluginCentral::getAllAvailableOutputNames() const
+{
+	QStringList output_names;
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		output_names += plugin->outputs();
+	}
+	return output_names;
 }
 
 QString IOPluginCentral::sysPluginDir()
@@ -339,4 +370,45 @@ void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar 
 			}
 		}
 	}
+}
+
+void IOPluginCentral::onPluginConfigurationChanged()
+{
+	qDebug("Plugin Configuration Changed: In plugin: %s",reinterpret_cast<QLCIOPlugin*>(sender())->name().toLocal8Bit().data());
+	QStringList vanished_inouts;
+
+	QStringList current_inputs = getAllAvailableInputNames();
+	qDebug() << current_inputs;
+	foreach(QString input, allInputNames) {
+		if (!current_inputs.contains(input)) {
+			vanished_inouts += input;
+		}
+	}
+
+	QStringList current_outputs = getAllAvailableOutputNames();
+	qDebug() << current_outputs;
+	foreach(QString output, allOutputNames) {
+		if (!current_outputs.contains(output)) {
+			vanished_inouts += output;
+		}
+	}
+
+	if (vanished_inouts.size()) {
+		MessageDialog *dialog = new MessageDialog;
+		QString maintext = tr("One or more Input or Output line(s) has vanished!\n");
+		QString subtext;
+		for (int t=0; t<vanished_inouts.size(); t++) {
+			subtext += QString("Line: %1\n").arg(vanished_inouts.at(t));
+		}
+		dialog->connectSpecialFunction(this,"reOpenPlugins");
+		dialog->showMessage(maintext,subtext);
+	}
+
+	updatePluginMappingInformation();
+}
+
+void IOPluginCentral::reOpenPlugins()
+{
+	openPlugins();
+	qDebug("IOPluginCentral::Plugins reopend");
 }

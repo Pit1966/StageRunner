@@ -75,6 +75,8 @@ private slots:
 
 	void on_executeAudioPlayListButton_clicked();
 
+	void on_actionInitialize_plugins_DMX_triggered();
+
 private:
 	void init();
 	void setup_gui_docks();

@@ -66,6 +66,8 @@ public:
 	void closeOutput();
 	bool openInput();
 	void closeInput();
+	void closeInOut();
+
 	QByteArray read(qint64 size);
 	qint64 read(char *buf, qint64 size);
 	qint64 write(const char * buf);

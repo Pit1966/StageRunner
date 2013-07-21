@@ -27,6 +27,13 @@
       <item>
        <widget class="QTextEdit" name="textEdit"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="specialFunctionButton">
+        <property name="text">
+         <string>Special Function</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

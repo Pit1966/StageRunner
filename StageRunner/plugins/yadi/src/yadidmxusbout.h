@@ -66,6 +66,7 @@ signals:
 public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
 	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
+	void inputDeviceFailed(int input);
 
 };
 

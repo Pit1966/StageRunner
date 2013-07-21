@@ -127,7 +127,13 @@ void AppCentral::loadPlugins()
 	pluginCentral->updatePluginMappingInformation();
 }
 
+
 void AppCentral::openPlugins()
+{
+	pluginCentral->openPlugins();
+}
+
+void AppCentral::reOpenPlugins()
 {
 	pluginCentral->openPlugins();
 }

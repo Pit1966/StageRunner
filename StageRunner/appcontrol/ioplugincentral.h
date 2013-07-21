@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 #include "config.h"
 
@@ -37,6 +38,8 @@ public:
 
 private:
 	QList<QLCIOPlugin*>qlc_plugins;						///< A list of loaded QLCIOPlugin type plugins
+	QStringList allInputNames;							///< A list witch contains all available inputs in every plugin
+	QStringList allOutputNames;							///< A list witch contains all available outputs in every plugin
 
 public:
 	explicit IOPluginCentral(QObject *parent = 0);
@@ -48,6 +51,8 @@ public:
 	bool updatePluginMappingInformation();
 	bool openPlugins();
 	void closePlugins();
+	QStringList getAllAvailableInputNames() const;
+	QStringList getAllAvailableOutputNames() const;
 	const QList<QLCIOPlugin*> & qlcPlugins() const {return qlc_plugins;}
 	/**
 	 * @brief Determine system default plugin directory path
@@ -66,6 +71,8 @@ signals:
 
 private slots:
 	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
+	void onPluginConfigurationChanged();
+	void reOpenPlugins();
 
 public slots:
 

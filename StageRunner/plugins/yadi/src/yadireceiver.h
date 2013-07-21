@@ -71,6 +71,8 @@ private:
 	YadiDevice *device;
 	SerialWrapper *file;
 
+	int inputNumber;
+
 	volatile RunCmd cmd;
 	QTime *time;
 	int receiver_loop_cnt;
@@ -79,7 +81,7 @@ public:
 	YadiReceiver(YadiDevice *p_device, SerialWrapper * p_file);
 	~YadiReceiver();
 
-	bool startRxDmx();
+	bool startRxDmx(int input);
 	bool stopRxDmx();
 	bool detectRxDmxPacketSize(int *packet_size);
 	bool detectRxDmxUniverseSize(int *max_universe_size, int *used_universe_size);
@@ -92,7 +94,7 @@ private:
 	bool receiver_loop();
 
 signals:
-	void exitReceiverWithFailure();
+	void exitReceiverWithFailure(int input);
 	void dmxPacketReceived(QString msg);
 	void dmxInDeviceChannelChanged(quint32 input, quint32 channel, uchar value);
 	void dmxInChannelChanged(quint32 channel, uchar value);

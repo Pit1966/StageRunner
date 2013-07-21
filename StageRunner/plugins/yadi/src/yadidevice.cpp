@@ -151,7 +151,7 @@ bool YadiDevice::openInput()
 	}
 
 	if (input_open_f && input_thread) {
-		input_thread->startRxDmx();
+		input_thread->startRxDmx(inputId);
 	}
 
 	return input_open_f;
@@ -168,6 +168,21 @@ void YadiDevice::closeInput()
 	}
 	input_open_f = false;
 }
+
+void YadiDevice::closeInOut()
+{
+	if (input_thread) {
+		input_thread->stopRxDmx();
+	}
+
+	if (file) {
+		file->closeSerial();
+	}
+	input_open_f = false;
+	output_open_f = false;
+
+}
+
 QByteArray YadiDevice::read(qint64 size)
 {
 	if (file) {

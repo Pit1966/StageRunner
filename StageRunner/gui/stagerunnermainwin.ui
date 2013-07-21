@@ -251,6 +251,7 @@
      <string>Configuration</string>
     </property>
     <addaction name="actionSetup"/>
+    <addaction name="actionInitialize_plugins_DMX"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">
@@ -335,6 +336,11 @@
    </property>
    <property name="text">
     <string>Auto Input Assign Mode</string>
+   </property>
+  </action>
+  <action name="actionInitialize_plugins_DMX">
+   <property name="text">
+    <string>Initialize plugins (DMX)</string>
    </property>
   </action>
  </widget>

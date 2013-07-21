@@ -303,7 +303,7 @@ void YadiDMXUSBOut::openInput(quint32 input)
 		if (ok) {
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)));
-			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure()),this,SIGNAL(configurationChanged()));
+			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)));
 		} else {
 			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
 		}
@@ -446,10 +446,11 @@ DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 
 void YadiDMXUSBOut::handle_output_error(quint32 output)
 {
-	qWarning("Yadi DMX plugin: Communication error occured");
+	qDebug("Yadi DMX plugin: Communication error occured. Output %d",output);
 
 	bool close_device = false;
 
+	/// @todo: to have an existing device node does not mean necessarely that the device is still connected
 	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
 	if (yadi) {
 		yadi->deviceNodePresent = false;
@@ -457,8 +458,7 @@ void YadiDMXUSBOut::handle_output_error(quint32 output)
 	}
 
 	if (close_device && yadi) {
-		yadi->closeOutput();
-		yadi->closeInput();
+		yadi->closeInOut();
 		qWarning("YadiDMXUSBOut::handle_output_error: Device '%s' closed",output_devices.at(output).toLocal8Bit().data());
 		emit configurationChanged();
 	}
@@ -505,6 +505,26 @@ void YadiDMXUSBOut::propagateChangedInput(quint32 input, quint32 channel, uchar 
 	emit valueChanged(input,channel,value);
 
 	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
+}
+
+void YadiDMXUSBOut::inputDeviceFailed(int input)
+{
+	qDebug("YadiDMXUSBOut::inputDeviceFailed(%d) failed!",input);
+
+	// coming to this point normaly means the device is not connected anymore
+	// So we close all devices to give the device nodes in /dev free
+
+	YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
+
+	if (yadi) {
+		qDebug("YadiDMXUSBOut::inputDeviceFailed: Close inputs and outputs");
+		yadi->closeInOut();
+	}
+
+	findDevices();
+
+	emit configurationChanged();
+
 }
 
 /****************************************************************************
