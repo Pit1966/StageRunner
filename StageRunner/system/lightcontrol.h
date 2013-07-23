@@ -47,6 +47,7 @@ signals:
 	void sceneChanged(FxSceneItem *scene);
 	void sceneFadeChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
+	void audioSlotVolChanged(int slot, int value);
 
 public slots:
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);

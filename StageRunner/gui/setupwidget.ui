@@ -81,7 +81,14 @@
        <string>Audio</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Audio buffer size (bytes)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
         <widget class="QLineEdit" name="audioBufferSizeEdit"/>
        </item>
        <item row="1" column="0">
@@ -91,26 +98,6 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Audio buffer size (bytes)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="1" column="1">
         <widget class="QLabel" name="reactivateAudioLabel">
          <property name="text">
@@ -118,7 +105,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="3">
+       <item row="1" column="2">
         <widget class="QSpinBox" name="reactivateAudioTimeSpin">
          <property name="maximum">
           <number>10000</number>
@@ -130,6 +117,103 @@
           <number>800</number>
          </property>
         </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1">
+         <property name="text">
+          <string>Map Channel 1 to DMX</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv1">
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx1">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1_2">
+         <property name="text">
+          <string>Map Channel 2 to DMX</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv2">
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx2">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1_3">
+         <property name="text">
+          <string>Map Channel 3 to DMX</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv3">
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx3">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1_4">
+         <property name="text">
+          <string>Map Channel 4 to DMX</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv4">
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx4">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

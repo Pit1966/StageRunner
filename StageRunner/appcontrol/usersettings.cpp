@@ -30,4 +30,9 @@ void UserSettings::init()
 	addExistingVar(pAudioAllowReactivateTime,"AudioAllowReactivationTime",0,10000,800);
 	addExistingVar(debug,"DebugLevel");
 	addExistingVar(pNoInterfaceDmxFeedback,"EnableNoInterfaceDmxFeedback");
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		addExistingVar(mapAudioToDmxUniv[t],QString("MapAudioToDmxUniv%1").arg(t+1));
+		addExistingVar(mapAudioToDmxChan[t],QString("MapAudioToDmxChan%1").arg(t+1));
+	}
 }

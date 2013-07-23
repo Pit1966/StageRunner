@@ -2,6 +2,7 @@
 #define USERSETTINGS_H
 
 #include "../tool/varset.h"
+#include "config.h"
 
 class UserSettings : public VarSet
 {
@@ -16,6 +17,9 @@ public:
 	pbool pProhibitAudioDoubleStart;
 	pint32 pAudioAllowReactivateTime;
 	pbool pNoInterfaceDmxFeedback;
+	qint32 mapAudioToDmxUniv[MAX_AUDIO_SLOTS];
+	qint32 mapAudioToDmxChan[MAX_AUDIO_SLOTS];
+
 
 public:
 	UserSettings();

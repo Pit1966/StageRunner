@@ -216,7 +216,7 @@ void LightControl::onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA,
  * @brief Handler für reinkommende Inputsignale
  * @param universe
  * @param channel
- * @param value
+ * @param value dmx-wert (0-255)
  *
  * Diese Funktion stellt die Verbindung einer Eingangsleitung mit einem FxSceneItem dar
  */
@@ -244,6 +244,14 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 					setSceneActive(scene);
 				}
 			}
+		}
+	}
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (myApp->userSettings->mapAudioToDmxUniv[t] == qint32(universe + 1)
+				&& myApp->userSettings->mapAudioToDmxChan[t] == qint32(channel + 1) ) {
+			emit audioSlotVolChanged(t, value);
+
 		}
 	}
 }

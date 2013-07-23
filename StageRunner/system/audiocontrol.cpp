@@ -227,6 +227,19 @@ void AudioControl::setVolume(int slot, int vol)
 	}
 }
 
+void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
+{
+	qDebug("Set Volume slot %d, %d",slot,vol);
+	vol = MAX_VOLUME * vol / 255;
+
+	AudioCtrlMsg msg;
+	msg.ctrlCmd = CMD_STATUS_REPORT;
+	msg.slotNumber = slot;
+	msg.volume = vol;
+	emit audioCtrlMsgEmitted(msg);
+	setVolume(slot,vol);
+}
+
 bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
 	/// @todo: Instance must be deleted after use!!

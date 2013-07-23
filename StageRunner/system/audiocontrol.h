@@ -50,8 +50,10 @@ public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
+	void setVolumeFromDmxLevel(int slot, int vol);
 	bool startFxAudioPlayList(FxPlayListItem *fxplay);
 	bool stopFxAudioPlayList(FxPlayListItem *fxplay);
+
 
 private:
 	void init();

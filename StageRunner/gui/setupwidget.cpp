@@ -71,6 +71,17 @@ void SetupWidget::copy_settings_to_gui()
 	noInterfaceFeedbackCheck->setChecked(set->pNoInterfaceDmxFeedback);
 	prohibitAudioDoubleStartCheck->setChecked(set->pProhibitAudioDoubleStart);
 	reactivateAudioTimeSpin->setValue(set->pAudioAllowReactivateTime);
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QSpinBox *spin_univ = this->findChild<QSpinBox*>(QString("mapAudioToUniv%1").arg(t+1));
+		QSpinBox *spin_chan = this->findChild<QSpinBox*>(QString("mapAudioToDmx%1").arg(t+1));
+		if (spin_univ) {
+			spin_univ->setValue(set->mapAudioToDmxUniv[t]);
+		}
+		if (spin_chan) {
+			spin_chan->setValue(set->mapAudioToDmxChan[t]);
+		}
+	}
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -84,6 +95,17 @@ void SetupWidget::copy_gui_to_settings()
 	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
 	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();
 	set->pAudioAllowReactivateTime = reactivateAudioTimeSpin->value();
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QSpinBox *spin_univ = this->findChild<QSpinBox*>(QString("mapAudioToUniv%1").arg(t+1));
+		QSpinBox *spin_chan = this->findChild<QSpinBox*>(QString("mapAudioToDmx%1").arg(t+1));
+		if (spin_univ) {
+			set->mapAudioToDmxUniv[t] = spin_univ->value();
+		}
+		if (spin_chan) {
+			set->mapAudioToDmxChan[t] = spin_chan->value();
+		}
+	}
 }
 
 void SetupWidget::on_okButton_clicked()
