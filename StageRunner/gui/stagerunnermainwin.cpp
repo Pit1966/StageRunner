@@ -560,3 +560,10 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 	appCentral->reOpenPlugins();
 
 }
+
+void StageRunnerMainWin::on_actionInfo_triggered()
+{
+	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment").arg(APP_NAME).arg(APP_VERSION);
+	QMessageBox::information(this,tr("About Info"),msg);
+
+}

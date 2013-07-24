@@ -77,6 +77,8 @@ private slots:
 
 	void on_actionInitialize_plugins_DMX_triggered();
 
+	void on_actionInfo_triggered();
+
 private:
 	void init();
 	void setup_gui_docks();

@@ -27,9 +27,12 @@ protected:
 private:
 	AudioStatus currentAudioStatus;
 
+	int playlist_initial_vol;
+
 public:
 	FxListExecuter(AppCentral * app_central, FxList *fx_list = 0);
 	void setFxList(FxList *fx_list);
+	void setPlayListInitialVolume(int vol);
 	bool runExecuter(int idx = -1);
 	bool runFxItem(FxItem *fx);
 

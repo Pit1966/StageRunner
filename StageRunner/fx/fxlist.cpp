@@ -40,9 +40,7 @@ void FxList::clear()
 
 void FxList::setNextFx(FxItem *nfx)
 {
-	qDebug("set nfx");
 	if (nfx != fx_next) {
-		qDebug("set nfx 2");
 		fx_next = nfx;
 		emit fxNextChanged(fx_next);
 	}

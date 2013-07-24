@@ -90,7 +90,7 @@ bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 ta
 	case CMD_SCENE_BLACK:
 		if (curValue[mixline] == 0) return false;
 		fadeTargetValue[mixline] = 0;
-		time_ms = 0;
+		// time_ms = 0;
 		break;
 	case CMD_SCENE_FADEIN:
 		if (curValue[mixline] >= targetValue) return false;

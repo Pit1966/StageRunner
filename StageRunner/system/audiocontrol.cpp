@@ -301,6 +301,7 @@ bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
 	/// @todo: Instance must be deleted after use!!
 	FxListExecuter *fxexec = new FxListExecuter(myApp, fxplay->fxPlayList);
+	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
 	return fxexec->runExecuter();
 }
 

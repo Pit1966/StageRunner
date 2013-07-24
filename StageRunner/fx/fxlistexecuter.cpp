@@ -19,6 +19,11 @@ void FxListExecuter::setFxList(FxList *fx_list)
 	fxList = fx_list;
 }
 
+void FxListExecuter::setPlayListInitialVolume(int vol)
+{
+	playlist_initial_vol = vol;
+}
+
 bool FxListExecuter::runExecuter(int idx)
 {
 	if (!fxList) return false;
@@ -50,7 +55,12 @@ bool FxListExecuter::runFxItem(FxItem *fx)
 
 	switch(fx->fxType()) {
 	case FX_AUDIO:
-		unitAudio->startFxAudio(static_cast<FxAudioItem*>(fx));
+		{
+			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+			if (playlist_initial_vol)
+				fxa->initialVolume = playlist_initial_vol;
+			unitAudio->startFxAudio(fxa);
+		}
 		break;
 	default:
 		break;
@@ -88,6 +98,7 @@ void FxListExecuter::init()
 {
 	curFx = 0;
 	currentAudioStatus = AUDIO_IDLE;
+	playlist_initial_vol = 0;
 
 	unitLight = myApp->unitLight;
 	unitAudio = myApp->unitAudio;

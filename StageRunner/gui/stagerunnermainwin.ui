@@ -267,10 +267,17 @@
     <addaction name="actionDMX_Input"/>
     <addaction name="actionDMX_Output"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionInfo"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuConfiguration"/>
    <addaction name="menuMonitor"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -348,6 +355,11 @@
   <action name="actionInitialize_plugins_DMX">
    <property name="text">
     <string>Initialize plugins (DMX)</string>
+   </property>
+  </action>
+  <action name="actionInfo">
+   <property name="text">
+    <string>Info</string>
    </property>
   </action>
  </widget>
