@@ -17,6 +17,8 @@ public:
 private slots:
 	void on_blackButton_clicked();
 
+	void on_fadeToBlackButton_clicked();
+
 private:
 	void init();
 

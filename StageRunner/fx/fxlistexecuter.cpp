@@ -74,7 +74,6 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 			qDebug("%s audio msg: CMD:%d, AudioStatus:%d",Q_FUNC_INFO,msg.ctrlCmd, msg.currentAudioStatus);
 			if (msg.currentAudioStatus == AUDIO_IDLE) {
 				runFxItem(fxList->findSequenceFollower(curFx));
-				curFx = 0;
 			}
 			currentAudioStatus = msg.currentAudioStatus;
 		}

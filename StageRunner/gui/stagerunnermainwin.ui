@@ -24,10 +24,17 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="FxListWidget" name="fxListWidget" native="true"/>
+      <widget class="FxListWidget" name="fxListWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="iconSize">
         <size>

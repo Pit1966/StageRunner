@@ -345,6 +345,9 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		case Qt::Key_Delete:
 			appCentral->project->fxList->deleteFx(appCentral->project->fxList->nextFx());
 			break;
+		case Qt::Key_Backspace:
+			appCentral->lightBlack(0);
+			break;
 
 		default:
 			if (key) {

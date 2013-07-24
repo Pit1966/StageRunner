@@ -2,6 +2,7 @@
 #define AUDIOCONTROL_H
 
 #include "commandsystem.h"
+#include "config.h"
 
 #include <QThread>
 #include <QList>
@@ -23,6 +24,17 @@ public:
 protected:
 	QList<AudioSlot*> audioChannels;
 	int masterVolume;
+
+private:
+	enum {
+		DMX_SLOT_UNDEF,
+		DMX_SLOT_IS_LOWER,
+		DMX_SLOT_IS_HIGHER,
+		DMX_SLOT_UP_CATCH,
+		DMX_SLOT_DOWN_CATCH
+	};
+	int dmx_audio_ctrl_status[MAX_AUDIO_SLOTS];
+	int dmx_audio_ctrl_last_vol[MAX_AUDIO_SLOTS];
 
 public:
 	AudioControl(AppCentral *app_central);
@@ -50,6 +62,7 @@ public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
+	int getVolume(int slot) const;
 	void setVolumeFromDmxLevel(int slot, int vol);
 	bool startFxAudioPlayList(FxPlayListItem *fxplay);
 	bool stopFxAudioPlayList(FxPlayListItem *fxplay);

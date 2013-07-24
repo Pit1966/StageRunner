@@ -18,3 +18,8 @@ void LightControlWidget::on_blackButton_clicked()
 	appcentral->lightBlack(0);
 
 }
+
+void LightControlWidget::on_fadeToBlackButton_clicked()
+{
+	appcentral->lightBlack(fadeSecondsSpin->value() * 1000);
+}

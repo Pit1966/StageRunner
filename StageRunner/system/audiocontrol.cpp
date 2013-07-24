@@ -81,6 +81,7 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa)
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
+			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START);
 			emit audioThreadCtrlMsgEmitted(msg);
 			ok = true;
@@ -96,6 +97,7 @@ bool AudioControl::restartFxAudioInSlot(int slotnum)
 	if (slotnum < 0 || slotnum >= audioChannels.size()) return false;
 
 	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
+		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		FxAudioItem *fxa = audioChannels[slotnum]->currentFxAudio();
 		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START);
 		emit audioThreadCtrlMsgEmitted(msg);
@@ -127,6 +129,7 @@ void AudioControl::stopFxAudio(FxAudioItem *fxa)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->currentFxAudio() == fxa) {
+			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 			stopFxAudio(t);
 		}
 	}
@@ -145,6 +148,8 @@ bool AudioControl::fadeoutAllFxAudio(int time_ms)
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 {
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+
 		// This is a private message to my audio thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
 		msg.fadetime = time_ms;
@@ -224,20 +229,72 @@ void AudioControl::setVolume(int slot, int vol)
 	}
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
 		audioChannels[slot]->setVolume(vol);
+		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+		dmx_audio_ctrl_last_vol[slot] = vol;
+	}
+}
+
+int AudioControl::getVolume(int slot) const
+{
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		return audioChannels[slot]->volume();
+	} else {
+		return 0;
 	}
 }
 
 void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 {
+	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
+
 	qDebug("Set Volume slot %d, %d",slot,vol);
 	vol = MAX_VOLUME * vol / 255;
+	int cvol = getVolume(slot);
+
+	int & ctrl = dmx_audio_ctrl_status[slot];
+	int & lvol = dmx_audio_ctrl_last_vol[slot];
+
+	if (vol > lvol) {
+		lvol = vol;
+		if (vol <= cvol || ctrl == DMX_SLOT_DOWN_CATCH) {
+			ctrl = DMX_SLOT_IS_LOWER;
+			return;
+		}
+		if (ctrl != DMX_SLOT_IS_LOWER && ctrl != DMX_SLOT_UP_CATCH) return;
+
+		ctrl = DMX_SLOT_UP_CATCH;
+	}
+	else if (vol < lvol) {
+		lvol = vol;
+
+		if (vol >= cvol || ctrl == DMX_SLOT_UP_CATCH) {
+			ctrl = DMX_SLOT_IS_HIGHER;
+			return;
+		}
+		if (ctrl != DMX_SLOT_IS_HIGHER && ctrl != DMX_SLOT_DOWN_CATCH) return;
+
+		ctrl = DMX_SLOT_DOWN_CATCH;
+	}
+	else {
+		return;
+	}
+
+
+	if (vol < 0) {
+		vol = 0;
+	}
+	else if (vol > MAX_VOLUME) {
+		vol = MAX_VOLUME;
+	}
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		audioChannels[slot]->setVolume(vol);
+	}
 
 	AudioCtrlMsg msg;
 	msg.ctrlCmd = CMD_STATUS_REPORT;
 	msg.slotNumber = slot;
 	msg.volume = vol;
 	emit audioCtrlMsgEmitted(msg);
-	setVolume(slot,vol);
 }
 
 bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
@@ -259,6 +316,10 @@ void AudioControl::init()
 {
 	setObjectName("Audio Control");
 	masterVolume = MAX_VOLUME;
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		dmx_audio_ctrl_last_vol[t] = 0;
+		dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
+	}
 }
 
 void AudioControl::initFromThread()
