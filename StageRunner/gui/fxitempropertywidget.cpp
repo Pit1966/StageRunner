@@ -51,22 +51,19 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		audioFilePathEdit->setText(cur_fxa->filePath());
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
 		audioGroup->setVisible(true);
-	} else {
-		cur_fxa = 0;
-		audioGroup->setVisible(false);
 	}
 
-	if (fx->fxType() == FX_AUDIO_PLAYLIST) {
+	else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->clear();
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
 		audioGroup->setVisible(true);
-	} else {
+	}
+	else {
 		cur_fxa = 0;
 		audioGroup->setVisible(false);
 	}
-
 
 	if (fx->fxType() == FX_SCENE) {
 		cur_fxs = static_cast<FxSceneItem*>(fx);

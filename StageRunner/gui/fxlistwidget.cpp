@@ -376,9 +376,12 @@ void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA,
 	if (widlist.size()) {
 		FxListWidgetItem *item = widlist.at(1);
 		if (scene->isActive()) {
+			// qDebug("propagateSceneFadeProgress is active");
 			item->setActivationProgress(perMilleA,perMilleB);
 		}
 		else if (scene->isVisible()) {
+			// qDebug("propagateSceneFadeProgress is visible");
+			item->setActivationProgress(perMilleA,perMilleB);
 			if (scene->isOnStageIntern())
 				item->setActivationProgressA(1000);
 		}
