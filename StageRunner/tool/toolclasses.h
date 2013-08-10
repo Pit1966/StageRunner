@@ -88,6 +88,13 @@ public:
 		return found;
 	}
 
+	const T value(const Key &key) {
+		myLock->lockForRead();
+		const T val = QHash<Key, T>::value(key);
+		myLock->unlock();
+		return val;
+	}
+
 	int lockRemove(const Key &key) {
 		int removed;
 		myLock->lockForWrite();
@@ -119,7 +126,9 @@ public:
 		co = 0;
 	}
 
-	MutexQList(const MutexQList & other) {
+	MutexQList(const MutexQList & other)
+		: QList<T>(other)
+	{
 		is_modified_f = false;
 		mutex = new QMutex();
 		lock_cnt = 0;

@@ -6,6 +6,7 @@
 #include <QtWidgets>
 #endif
 
+
 class PTableWidget : public QTableWidget
 {
 	Q_OBJECT
@@ -31,6 +32,7 @@ private:
 signals:
 	void dropEventReceived(QString text, int row);
 	void rowMovedFromTo(int srcrow, int destrow);
+	void rowClonedFrom(PTableWidget *originPTable, int srcRow, int destRow);
 
 public slots:
 

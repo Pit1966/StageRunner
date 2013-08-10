@@ -49,9 +49,8 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 	QPoint dragpos = event->pos();
 	int current_row = indexAt(dragpos).row();
 
-	qDebug ("Drag enter event");
 	if (extmime && extmime->fxListWidgetItem) {
-		qDebug("Drag enter event Mime:'%s': ObjectName:%s, row:%d, col:%d "
+		qDebug("PTableWidget::dragEnterEvent: Mime:'%s': ObjectName:%s, row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
 
 		event->setDropAction(Qt::MoveAction);
@@ -64,6 +63,7 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		drag_temp_row = current_row;
 
 	} else {
+		qDebug ("PTableWidget::dragEnterEvent: external");
 		event->setDropAction(Qt::CopyAction);
 		event->accept();
 	}
@@ -92,12 +92,20 @@ void PTableWidget::dropEvent(QDropEvent *event)
 	drag_dest_row = indexAt(droppos).row();
 
 	if (extmime && extmime->fxListWidgetItem) {
-		qDebug("Drop event Mime:'%s': from row:%d, col:%d "
+		// The DragObject is an fxListWidgetItem
+		qDebug("PTableWidget::dropEvent: Mime:'%s': from row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
-		qDebug("   Entry moved from row %d to %d",extmime->tableRow, drag_dest_row);
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
-		emit rowMovedFromTo(extmime->tableRow,drag_dest_row);
+		if (extmime->originPTableWidget != this) {
+			qDebug("PTableWidget::dropEvent: Received Row from foreign Widget");
+			if (extmime->originPTableWidget) {
+				emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row);
+			}
+		} else {
+			qDebug("   Entry moved from row %d to %d",extmime->tableRow, drag_dest_row);
+			emit rowMovedFromTo(extmime->tableRow,drag_dest_row);
+		}
 	} else {
 		event->setDropAction(Qt::CopyAction);
 		event->accept();

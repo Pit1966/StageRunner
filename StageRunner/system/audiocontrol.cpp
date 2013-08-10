@@ -6,7 +6,8 @@
 #include "usersettings.h"
 #include "fxaudioitem.h"
 #include "fxplaylistitem.h"
-#include "fxlistexecuter.h"
+#include "executer.h"
+#include "execcenter.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -61,11 +62,11 @@ void AudioControl::vu_level_changed_receiver(int slotnum, int left, int right)
 	emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
 }
 
-bool AudioControl::startFxAudio(FxAudioItem *fxa)
+bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
 	bool ok = false;
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
-	if (myApp->userSettings->pProhibitAudioDoubleStart) {
+	if (!exec && myApp->userSettings->pProhibitAudioDoubleStart) {
 		for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 			if (audioChannels[t]->currentFxAudio() == fxa) {
 				// Ok, audio is already running -> Check the time
@@ -82,7 +83,7 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa)
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
 			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
-			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START);
+			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START,exec);
 			emit audioThreadCtrlMsgEmitted(msg);
 			ok = true;
 			break;
@@ -121,6 +122,7 @@ void AudioControl::stopFxAudio(int slot)
 	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
 		// We send this via Message to communicate with the thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
+		msg.executer = audioChannels[slot]->currentExecuter();
 		emit audioThreadCtrlMsgEmitted(msg);
 	}
 }
@@ -153,6 +155,7 @@ void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 		// This is a private message to my audio thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
 		msg.fadetime = time_ms;
+		msg.executer = audioChannels[slot]->currentExecuter();
 		// emit audioThreadCtrlMsgEmitted(msg);
 		audioChannels[slot]->fadeoutFxAudio(time_ms);
 	}
@@ -162,6 +165,15 @@ void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->currentFxAudio() == fxa) {
+			fadeoutFxAudio(t,time_ms);
+		}
+	}
+}
+
+void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentExecuter() == exec) {
 			fadeoutFxAudio(t,time_ms);
 		}
 	}
@@ -299,8 +311,7 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 
 bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
-	/// @todo: Instance must be deleted after use!!
-	FxListExecuter *fxexec = new FxListExecuter(myApp, fxplay->fxPlayList);
+	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxplay->fxPlayList);
 	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
 	return fxexec->runExecuter();
 }

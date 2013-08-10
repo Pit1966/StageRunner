@@ -8,6 +8,7 @@
 #include "audiocontrol.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/usersettings.h"
+#include "executer.h"
 
 #include <QTime>
 #include <QApplication>
@@ -24,6 +25,7 @@ AudioSlot::AudioSlot(AudioControl *parent)
 	slotNumber = -1;
 	fade_out_initial_vol = 0;
 	current_fx = 0;
+	current_executer = 0;
 	master_volume = MAX_VOLUME;
 
 	// Vol Set Logging
@@ -58,20 +60,27 @@ AudioSlot::~AudioSlot()
 	delete audio_io;
 }
 
-bool AudioSlot::startFxAudio(FxAudioItem *fxa)
+bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer * exec)
 {
 	if (!audio_output) return false;
 
-	LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
-			.arg(fxa->name()).arg(slotNumber+1));
+	if (exec) {
+		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2 with Executer: %3")
+				.arg(fxa->name()).arg(slotNumber+1).arg(exec->getIdString()));
+	} else {
+		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
+				.arg(fxa->name()).arg(slotNumber+1));
+	}
 
 	current_fx = fxa;
+	current_executer = exec;
 	run_status = AUDIO_INIT;
 	run_time.start();
 
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fxa,slotNumber);
 	msg.volume = fxa->initialVolume;
+	msg.executer = exec;
 	emit audioCtrlMsgEmitted(msg);
 
 	// Set Filename of audio file
@@ -181,6 +190,15 @@ FxAudioItem *AudioSlot::currentFxAudio()
 	return current_fx;
 }
 
+Executer *AudioSlot::currentExecuter()
+{
+	if (current_fx) {
+		return current_executer;
+	} else {
+		return 0;
+	}
+}
+
 /**
  * @brief Get the playback position of current Audio Stream.
  * @return Time in ms or -1 if there is no audio running
@@ -209,6 +227,7 @@ void AudioSlot::emit_audio_play_progress()
 	msg.currentAudioStatus = run_status;
 	msg.progress = per_mille;
 	msg.loop = loop;
+	msg.executer = current_executer;
 	if (current_fx->loopTimes > 1) {
 		msg.maxloop = current_fx->loopTimes;
 	}
@@ -237,7 +256,7 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 
 	if (current_state != run_status) {
 		// qDebug("emit status: %d %d %p",run_status, slotNumber, current_fx);
-		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
+		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status,current_executer);
 		msg.fxAudio = current_fx;
 		emit audioCtrlMsgEmitted(msg);
 
@@ -272,7 +291,7 @@ void AudioSlot::on_fade_out_frame_changed(qreal value)
 	setVolume(new_volume);
 
 	// send message in order to update GUI
-	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status);
+	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status,current_executer);
 	msg.volume = new_volume;
 	emit audioCtrlMsgEmitted(msg);
 }
@@ -303,7 +322,7 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 		if (FxItem::exists(msg.fxAudio)) {
 			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel :%d"
 									 ,Q_FUNC_INFO,msg.slotNumber+1);
-			startFxAudio(msg.fxAudio);
+			startFxAudio(msg.fxAudio,msg.executer);
 		} else {
 			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
 		}

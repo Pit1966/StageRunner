@@ -62,6 +62,7 @@ private:
 	int init_generate_id();
 
 	friend class FxList;
+	friend class FxItemTool;
 };
 
 #endif // FXITEM_H

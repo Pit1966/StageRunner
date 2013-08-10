@@ -30,6 +30,7 @@ void FxPlayListWidget::closeEvent(QCloseEvent *)
 {
 }
 
+
 void FxPlayListWidget::on_closeButton_clicked()
 {
 	close();

@@ -13,6 +13,7 @@ class AudioSlot;
 class FxAudioItem;
 class AppCentral;
 class FxPlayListItem;
+class Executer;
 
 class AudioControl : public QThread
 {
@@ -49,7 +50,7 @@ private slots:
 	void vu_level_changed_receiver(int slotnum, int left, int right);
 
 public slots:
-	bool startFxAudio(FxAudioItem *fxa);
+	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
 	bool restartFxAudioInSlot(int slotnum);
 	bool stopAllFxAudio();
 	void stopFxAudio(int slot);
@@ -57,6 +58,7 @@ public slots:
 	bool fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
+	void fadeoutFxAudio(Executer *exec, int time_ms = 5000);
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);

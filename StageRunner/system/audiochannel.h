@@ -19,6 +19,7 @@ using namespace AUDIO;
 class FxAudioItem;
 class AudioIODevice;
 class AudioControl;
+class Executer;
 
 
 class AudioSlot : public QObject
@@ -35,6 +36,7 @@ private:
 
 	AudioStatus run_status;
 	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot
+	Executer *current_executer;						///< A Pointer to an Executor if the sound was started by one
 
 
 	QTimer volset_timer;
@@ -49,13 +51,14 @@ public:
 	AudioSlot(AudioControl *parent);
 	~AudioSlot();
 
-	bool startFxAudio(FxAudioItem * fxa);
+	bool startFxAudio(FxAudioItem * fxa, Executer *exec);
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int time_ms);
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
+	Executer *currentExecuter();
 	int currentRunTime();
 
 	inline AudioStatus status() {return run_status;}

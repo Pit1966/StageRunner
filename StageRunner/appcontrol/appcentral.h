@@ -15,6 +15,8 @@ class FxItem;
 class FxList;
 class IOPluginCentral;
 class DmxMonitor;
+class ExecCenter;
+class Executer;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -38,6 +40,7 @@ public:
 	Project *project;
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
+	ExecCenter *execCenter;
 
 private:
 	AppCentral();
@@ -74,7 +77,7 @@ public:
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
 
 public slots:
-	void executeFxCmd(FxItem *fx, CtrlCmd cmd);
+	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
 	void executeNextFx(int listID);
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);

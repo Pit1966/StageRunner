@@ -16,7 +16,7 @@
 #include "style/lightdeskstyle.h"
 #include "fxitem.h"
 #include "fxplaylistitem.h"
-#include "fxlistexecuter.h"
+#include "executer.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -53,7 +53,7 @@ void StageRunnerMainWin::initConnects()
 	connect(appCentral,SIGNAL(inputAssignModeChanged(bool)),actionInput_Assign_Mode,SLOT(setChecked(bool)));
 
 	// Project FxListWidget (Liste der Effekte im Mainwin)
-	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd)));
+	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd,Executer*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
@@ -354,7 +354,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 				QList<FxItem *>fxlist = appCentral->project->fxList->getFxListByKeyCode(key + activeKeyModifiers);
 				if (fxlist.size()) {
 					for (int t=0; t<fxlist.size(); t++) {
-						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START);
+						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, 0);
 					}
 					// fxListWidget->selectFx(fx);
 				}

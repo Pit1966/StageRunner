@@ -20,6 +20,7 @@ FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType c
   ,is_editable_f(false)
   ,is_never_editable_f(false)
   ,is_selected_f(false)
+  ,is_marked_f(false)
 {
 	init();
 }
@@ -55,6 +56,7 @@ void FxListWidgetItem::init()
 	activation_indicator_b = 0;
 	indicator_a_color = QColor(QColor(220,180,0));   // orange
 	indicator_b_color = QColor(Qt::darkRed);
+	marked_color = QColor(QColor(20,20,200,80));
 
 	setupUi(this);
 	itemLabel->clear();
@@ -102,6 +104,12 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
 
 void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
+	if (is_marked_f) {
+		QPainter p(this);
+		p.setPen(Qt::NoPen);
+		p.setBrush(marked_color);
+		p.drawRect(event->rect());
+	}
 	if (activation_indicator_a) {
 		QPainter p(this);
 		p.setPen(indicator_a_color);
@@ -157,13 +165,17 @@ void FxListWidgetItem::setSelected(bool state)
 {
 	if (is_selected_f != state) {
 		is_selected_f = state;
-		if (state) {
-
-		} else {
-
-		}
+		update();
 	}
 
+}
+
+void FxListWidgetItem::setMarked(bool state)
+{
+	if (state != is_marked_f) {
+		is_marked_f = state;
+		update();
+	}
 }
 
 void FxListWidgetItem::setActivationProgress(int perMilleA, int perMilleB)

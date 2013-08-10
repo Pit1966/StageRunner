@@ -57,6 +57,7 @@ public:
 	bool addFxAudioPlayList();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
+	bool contains(FxItem *fx);
 	bool isModified() const;
 	void setModified(bool state);
 	void cloneSelectedSceneItem();
@@ -69,9 +70,11 @@ public:
 signals:
 	void fxNextChanged(FxItem *nextfx);
 	void fxListChanged();
+	void fxCurrentChanged(FxItem *curfx, FxItem *oldcurfx);
 
 public slots:
 	void setNextFx(FxItem *nfx);
+	void setCurrentFx(FxItem *curfx);
 
 };
 

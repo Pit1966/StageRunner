@@ -87,7 +87,9 @@ SOURCES += \
     ../fx/fxplaylistitem.cpp \
     ../gui/fxplaylistwidget.cpp \
     ../gui/customwidget/pslistwidget.cpp \
-    ../fx/fxlistexecuter.cpp
+    ../fx/fxitemtool.cpp \
+    ../fx/execcenter.cpp \
+    ../fx/executer.cpp
 
 HEADERS  += \
 	../config.h \
@@ -145,7 +147,9 @@ HEADERS  += \
     ../fx/fxplaylistitem.h \
     ../gui/fxplaylistwidget.h \
     ../gui/customwidget/pslistwidget.h \
-    ../fx/fxlistexecuter.h
+    ../fx/fxitemtool.h \
+    ../fx/execcenter.h \
+    ../fx/executer.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

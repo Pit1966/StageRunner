@@ -12,6 +12,7 @@
 #include "lightcontrol.h"
 #include "pluginmapping.h"
 #include "messagehub.h"
+#include "execcenter.h"
 
 using namespace AUDIO;
 
@@ -229,7 +230,7 @@ void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, in
 }
 
 
-void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
+void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 {
 	if (!FxItem::exists(fx)) {
 		DEBUGERROR("Execute FX: FxItem not found in FX list");
@@ -240,7 +241,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd)
 	case FX_AUDIO:
 		switch (cmd) {
 		case CMD_AUDIO_START:
-			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx));
+			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx), exec);
 			break;
 		case CMD_AUDIO_STOP:
 			unitAudio->stopFxAudio(reinterpret_cast<FxAudioItem*>(fx));
@@ -290,10 +291,10 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
 	if (cur_fx && cur_fx != next_fx) {
-		executeFxCmd(cur_fx,CMD_FX_STOP);
+		executeFxCmd(cur_fx,CMD_FX_STOP,0);
 	}
 	if (next_fx) {
-		executeFxCmd(next_fx,CMD_FX_START);
+		executeFxCmd(next_fx,CMD_FX_START,0);
 	}
 }
 
@@ -355,6 +356,7 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
+	delete execCenter;
 	delete pluginCentral;
 	delete userSettings;
 	delete project;
@@ -378,6 +380,7 @@ void AppCentral::init()
 	unitLight = new LightControl(this);
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
+	execCenter = new ExecCenter(this);
 
 	int id = registerFxList(project->fxList);
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);

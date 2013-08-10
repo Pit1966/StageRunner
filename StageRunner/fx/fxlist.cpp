@@ -46,11 +46,24 @@ void FxList::setNextFx(FxItem *nfx)
 	}
 }
 
+void FxList::setCurrentFx(FxItem *curfx)
+{
+	if (!FxItem::exists(curfx)) curfx = 0;
+
+	if (fx_current != curfx) {
+		emit fxCurrentChanged(curfx, fx_current);
+		fx_current = curfx;
+	}
+}
+
 FxItem *FxList::stepToSequenceNext()
 {
 	if (!fx_next) return 0;
 	fx_last = fx_current;
-	fx_current = fx_next;
+	if (fx_current != fx_next) {
+		emit fxCurrentChanged(fx_next, fx_current);
+		fx_current = fx_next;
+	}
 
 	// Now check if auto proceed is selected and find next entry in list
 	if (auto_proceed_f) {
@@ -198,12 +211,24 @@ bool FxList::deleteFx(FxItem *fx)
 	if (del) {
 		if (fx == fx_next) fx_next = 0;
 		if (fx == fx_last) fx_last = 0;
-		if (fx == fx_current) fx_current = 0;
+		if (fx == fx_current) {
+			emit fxCurrentChanged(0,fx_current);
+			fx_current = 0;
+		}
 		delete fx;
 		emit fxListChanged();
 		modified_f = true;
 	}
 	return del;
+}
+
+bool FxList::contains(FxItem *fx)
+{
+	if (fx_list.indexOf(fx) < 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 bool FxList::isModified() const

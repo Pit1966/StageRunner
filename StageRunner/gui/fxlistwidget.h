@@ -3,6 +3,7 @@
 
 #include "ui_fxlistwidget.h"
 #include "commandsystem.h"
+#include "toolclasses.h"
 
 #include <QTableWidgetItem>
 #include <QTableWidget>
@@ -12,6 +13,7 @@ class FxItem;
 class FxSceneItem;
 class FxListWidgetItem;
 class FxPlayListItem;
+class Executer;
 
 using namespace AUDIO;
 
@@ -27,9 +29,11 @@ private:
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	QList<int>selected_rows;
+	static MutexQList<FxListWidget*>globalFxListWidgetList;
 
 public:
 	FxListWidget(QWidget *parent = 0);
+	~FxListWidget();
 	void setFxList(FxList *fxlist);
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
@@ -37,6 +41,11 @@ public:
 	QList<FxListWidgetItem*> getItemListForRow(int row);
 	int getRowThatContainsFxItem(FxItem *fx);
 	FxItem *currentSelectedFxItem() const {return cur_selected_item;}
+	FxItem *getFxItemAtRow(int row) const;
+
+	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
+	static FxListWidget * findFxListWidget(FxList *fxList);
+	static FxListWidget * getCreateFxListWidget(FxList *fxList, bool *created = 0);
 
 private:
 	void init();
@@ -48,6 +57,7 @@ private:
 
 public slots:
 	void selectFx(FxItem *fx);
+	void markFx(FxItem *fx);
 	void initRowDrag(FxListWidgetItem *item);
 	void refreshList();
 	void setEditable(bool state);
@@ -57,7 +67,7 @@ public slots:
 	void propagateSceneStatus(FxSceneItem *scene);
 	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void propagateAudioStatus(AudioCtrlMsg msg);
-
+	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);
@@ -73,7 +83,7 @@ private slots:
 	void drop_event_receiver(QString str, int row);
 
 signals:
-	void fxCmdActivated(FxItem *, CtrlCmd);
+	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);
 	void fxItemSelected(FxItem *);
 	void dropEventReceived(QString text, int row);
 	void listModified();

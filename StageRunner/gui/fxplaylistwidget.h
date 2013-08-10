@@ -16,11 +16,14 @@ public:
 	FxPlayListWidget(FxPlayListItem * play_list_item, QWidget *parent = 0);
 	void setFxPlayListItem(FxPlayListItem *fxplay);
 
+private:
+	void closeEvent(QCloseEvent *);
+
+
 private slots:
 	void on_closeButton_clicked();
 
-private:
-	void closeEvent(QCloseEvent *);
+
 };
 
 #endif // FXPLAYLISTWIDGET_H

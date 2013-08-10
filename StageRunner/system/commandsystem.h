@@ -2,6 +2,7 @@
 #define COMMANDSYSTEM_H
 
 class FxAudioItem;
+class Executer;
 
 enum CtrlCmd {
 	CMD_NONE = 0,
@@ -45,9 +46,10 @@ public:
 	int loop;
 	int maxloop;
 	FxAudioItem *fxAudio;
+	Executer *executer;
 
 public:
-	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_IDLE)
+	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_IDLE, Executer *exec = 0)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(status)
@@ -57,9 +59,10 @@ public:
 		, loop(0)
 		, maxloop(0)
 		, fxAudio(0)
+		, executer(exec)
 	{}
 
-	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT)
+	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, Executer *exec = 0)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(AUDIO_IDLE)
@@ -69,6 +72,7 @@ public:
 		, loop(0)
 		, maxloop(0)
 		, fxAudio(fxaudio)
+		, executer(exec)
 	{}
 };
 

@@ -29,6 +29,7 @@ private:
 	bool is_editable_f;
 	bool is_never_editable_f;
 	bool is_selected_f;
+	bool is_marked_f;
 	int current_button;
 	int activation_indicator_a;
 	int activation_indicator_b;
@@ -36,6 +37,7 @@ private:
 	QPalette org_palette;
 	QColor indicator_a_color;
 	QColor indicator_b_color;
+	QColor marked_color;
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -59,6 +61,7 @@ public slots:
 	void setEditable(bool state);
 	void setNeverEditable(bool state);
 	void setSelected(bool state);
+	void setMarked(bool state);
 	void setActivationProgress(int perMilleA, int perMilleB);
 	void setActivationProgressB(int perMilleB);
 	void setActivationProgressA(int perMilleA);

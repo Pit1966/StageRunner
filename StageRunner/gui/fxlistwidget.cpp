@@ -11,12 +11,15 @@
 #include "customwidget/extmimedata.h"
 #include "fxplaylistitem.h"
 #include "fxplaylistwidget.h"
+#include "fxitemtool.h"
 
 #include <QDebug>
 #include <QLineEdit>
 #include <QDrag>
 #include <QPainter>
 
+
+MutexQList<FxListWidget*>FxListWidget::globalFxListWidgetList;
 
 FxListWidget::FxListWidget(QWidget *parent) :
 	QWidget(parent)
@@ -35,10 +38,21 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	pal.setBrush(QPalette::Highlight,Qt::darkGreen);
 	fxTable->setPalette(pal);
 
+	// Push a pointer to this widget to the global Pointer list to keep track of all FxListWidgets
+	globalFxListWidgetList.lockAppend(this);
+
 	// fxTable->viewport()->acceptDrops();
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SLOT(drop_event_receiver(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
+	connect(fxTable,SIGNAL(rowClonedFrom(PTableWidget*,int,int)),this,SLOT(cloneRowFromPTable(PTableWidget*,int,int)),Qt::QueuedConnection);
+}
+
+FxListWidget::~FxListWidget()
+{
+	// Remove tracking information in global FxListWidget list
+	globalFxListWidgetList.removeOne(this);
+
 }
 
 void FxListWidget::setFxList(FxList *fxlist)
@@ -169,6 +183,81 @@ int FxListWidget::getRowThatContainsFxItem(FxItem *fx)
 	return -1;
 }
 
+FxItem *FxListWidget::getFxItemAtRow(int row) const
+{
+	if (row < 0 || row >= fxTable->rowCount()) return 0;
+	FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,0));
+
+	return item->linkedFxItem;
+}
+
+
+
+FxListWidget *FxListWidget::findFxListWidget(PTableWidget *tableWidget)
+{
+	FxListWidget *wid = 0;
+	globalFxListWidgetList.lock();
+	QListIterator<FxListWidget*>it(globalFxListWidgetList);
+	while (it.hasNext() && !wid) {
+		FxListWidget *cur = it.next();
+		if (cur->fxTable == tableWidget)
+			wid = cur;
+	}
+
+	globalFxListWidgetList.unlock();
+	return wid;
+}
+
+FxListWidget *FxListWidget::findFxListWidget(FxList *fxList)
+{
+	FxListWidget *wid = 0;
+	globalFxListWidgetList.lock();
+	QListIterator<FxListWidget*>it(globalFxListWidgetList);
+	while (it.hasNext() && !wid) {
+		FxListWidget *cur = it.next();
+		if (cur->myfxlist == fxList)
+			wid = cur;
+	}
+
+	globalFxListWidgetList.unlock();
+	return wid;
+
+}
+
+/**
+ * @brief Find a FxList instance in all FxListWidgets or create a new on
+ * @param fxList Pointer to searched FxList instance
+ * @param created Maybe a Pointer to bool that indicates if the widget was found or new created
+ * @return Pointer to FxListWidget containing the fxList
+ */
+FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, bool *created)
+{
+	// First Search for FxListWidget for a widget containing fxList
+	FxListWidget *wid = 0;
+	globalFxListWidgetList.lock();
+	QListIterator<FxListWidget*>it(globalFxListWidgetList);
+	while (it.hasNext() && !wid) {
+		FxListWidget *cur = it.next();
+		if (cur->myfxlist == fxList)
+			wid = cur;
+	}
+	globalFxListWidgetList.unlock();
+
+	// 2nd if we did not found the fxList we create a a new FxListWidget and assign the list to it
+	if (!wid) {
+		wid = new FxListWidget();
+		wid->setFxList(fxList);
+		if (created)
+			*created = true;
+	} else {
+		if (created)
+			*created = false;
+	}
+
+	// Now return the widget pointer
+	return wid;
+}
+
 void FxListWidget::selectFx(FxItem *fx)
 {
 	bool found = false;
@@ -190,11 +279,35 @@ void FxListWidget::selectFx(FxItem *fx)
 	}
 }
 
+void FxListWidget::markFx(FxItem *fx)
+{
+	qDebug("mark fx %s",fx?fx->name().toLocal8Bit().data():"empty");
+	int row=0;
+	while (row < fxTable->rowCount()) {
+		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->cellWidget(row,0);
+		WidItemList items = getItemListForRow(row);
+		bool mark = false;
+		if (item->linkedFxItem == fx) {
+			mark = true;
+		}
+
+		for (int i=0; i<items.size(); i++) {
+			items.at(i)->setMarked(mark);
+		}
+
+		row++;
+	}
+}
+
 void FxListWidget::initRowDrag(FxListWidgetItem *item)
 {
 	QDrag *drag = new QDrag(this);
+	// Now we create a spechial MimeData Object with Information for the origin of the fxListWidgetItem
 	ExtMimeData *mdata = new ExtMimeData();
 	mdata->fxListWidgetItem = item;
+	mdata->originFxListWidget = this;
+	mdata->originFxList = fxList();
+	mdata->originPTableWidget = fxTable;
 	mdata->setText(item->linkedFxItem->name());
 	mdata->tableRow = item->myRow;
 	mdata->tableCol = item->myColumn;
@@ -259,14 +372,16 @@ void FxListWidget::open_scence_desk(FxSceneItem *fx)
 
 void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 {
-	// FxPlayListWidget *play = new FxPlayListWidget(fx);
-	// play->show();
-	FxListWidget *playlistwid = new FxListWidget();
-	playlistwid->setFxList(fx->fxPlayList);
+	bool new_created;
+
+	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, &new_created);
 	playlistwid->show();
 
-	connect(fx->fxPlayList,SIGNAL(fxNextChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
-	connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),fx->fxPlayList,SLOT(setNextFx(FxItem*)));
+	if (new_created) {
+		connect(fx->fxPlayList,SIGNAL(fxNextChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
+		connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),fx->fxPlayList,SLOT(setNextFx(FxItem*)));
+		connect(fx->fxPlayList,SIGNAL(fxCurrentChanged(FxItem*,FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
+	}
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -414,6 +529,30 @@ void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
 	}
 }
 
+void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow)
+{
+	qDebug("%s clone row: %d to row: %d",Q_FUNC_INFO,srcRow, destRow);
+
+	FxListWidget *srcwidget = FxListWidget::findFxListWidget(srcPtable);
+	if (srcwidget) {
+		srcwidget->refreshList();
+
+		// FxItem *srcFx = srcwidget->getFxItemAtRow(srcRow);
+		FxItem *srcFx = srcwidget->fxList()->getFxByListIndex(srcRow);
+		if (!FxItem::exists(srcFx)) return;
+
+		FxItem *destFx = FxItemTool::cloneFxItem(srcFx);
+
+		if (destRow >= 0 && destRow < fxList()->size()) {
+			fxList()->insert(destRow,destFx);
+		} else {
+			fxList()->append(destFx);
+		}
+		refreshList();
+	}
+
+}
+
 void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
@@ -428,7 +567,7 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 
 void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 {
-	qDebug("FxListWidget: move row from: %d to %d",srcrow,destrow);
+	qDebug("FxListWidget::moveRowFromTo: %d to %d",srcrow,destrow);
 	if (myfxlist) {
 		FxItem *cur = 0;
 		if (srcrow >= 0 && srcrow < myfxlist->size()) cur = myfxlist->at(srcrow);
@@ -510,15 +649,15 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 	switch (fx->fxType()) {
 	case FX_SCENE:
 		selectFx(fx);
-		emit fxCmdActivated(fx, CMD_FX_START);
+		emit fxCmdActivated(fx, CMD_FX_START,0);
 		break;
 	case FX_AUDIO:
 		selectFx(fx);
-		emit fxCmdActivated(fx,CMD_FX_START);
+		emit fxCmdActivated(fx,CMD_FX_START,0);
 		break;
 	case FX_AUDIO_PLAYLIST:
 		selectFx(fx);
-		emit fxCmdActivated(fx, CMD_FX_START);
+		emit fxCmdActivated(fx, CMD_FX_START,0);
 		break;
 	}
 }
@@ -531,7 +670,7 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 		break;
 	case FX_AUDIO:
 		selectFx(fx);
-		emit fxCmdActivated(fx,CMD_FX_START);
+		emit fxCmdActivated(fx,CMD_FX_START,0);
 		break;
 	case FX_AUDIO_PLAYLIST:
 		open_audio_list_widget(static_cast<FxPlayListItem*>(fx));
