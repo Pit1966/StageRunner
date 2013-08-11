@@ -4,14 +4,16 @@ QList<FxItem*>*FxItem::global_fx_list = 0;
 
 
 FxItem::FxItem()
-	: VarSet()
+	: QObject()
+	, VarSet()
 {
 	init();
 	myId = init_generate_id();
 }
 
 FxItem::FxItem(const FxItem &o)
-	: VarSet()
+	: QObject()
+	, VarSet()
 {
 	init();
 

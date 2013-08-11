@@ -17,11 +17,41 @@ ExecCenter::~ExecCenter()
 
 }
 
+Executer *ExecCenter::findExecuter(const FxItem *fx)
+{
+	executerList.lock();
+	foreach (Executer * exec, executerList) {
+		if (exec->originFx() == fx) {
+			executerList.unlock();
+			return exec;
+		}
+	}
+	executerList.unlock();
+	return 0;
+}
+
+bool ExecCenter::exists(Executer *exec)
+{
+	return executerList.lockContains(exec);
+}
+
+void ExecCenter::lockDelete()
+{
+	delete_mutex.lock();
+}
+
+void ExecCenter::unlockDelete()
+{
+	delete_mutex.unlock();
+}
+
 FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist)
 {
 
 	FxListExecuter *exec = new FxListExecuter(myApp, fxlist);
 	executerList.lockAppend(exec);
+
+	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 
 	return exec;
 }
@@ -32,7 +62,6 @@ FxListExecuter *ExecCenter::getCreateFxListExecuter(FxList *fxlist)
 	if (!exec) {
 		return newFxListExecuter(fxlist);
 	}
-
 	return exec;
 }
 
@@ -50,4 +79,18 @@ FxListExecuter *ExecCenter::findFxListExecuter(FxList *fxlist)
 	}
 	executerList.unlock();
 	return 0;
+}
+
+FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
+{
+	return qobject_cast<FxListExecuter*>(findExecuter(fx));
+}
+
+void ExecCenter::deleteExecuter(Executer *exec)
+{
+	delete_mutex.lock();
+	if (executerList.lockRemoveOne(exec)) {
+		delete exec;
+	}
+	delete_mutex.unlock();
 }

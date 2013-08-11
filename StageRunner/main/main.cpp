@@ -5,6 +5,7 @@
 #include "stagerunnermainwin.h"
 #include "usersettings.h"
 #include "log.h"
+// #include "ioplugincentral.h"
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
 
 	// Clean up plugins
 	myapp->closePlugins();
+	// AppCentral::instance()->pluginCentral->unloadPlugins();
 
 	logThread->stopLog();
 	delete mywin;

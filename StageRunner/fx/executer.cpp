@@ -10,7 +10,15 @@
 
 Executer::Executer(AppCentral *app_central)
 	: myApp(app_central)
+	, originFxItem(0)
+	, curFx(0)
+	, nxtFx(0)
 {
+}
+
+Executer::~Executer()
+{
+	qDebug() << "Executer destroyed" << getIdString();
 
 }
 
@@ -67,6 +75,20 @@ bool FxListExecuter::runExecuter(int idx)
 
 bool FxListExecuter::runFxItem(FxItem *fx)
 {
+	if (!fx) {
+		if (curFx) {
+			curFx = 0;
+			emit currentFxChanged(0);
+			emit fxItemExecuted(0,0);
+		}
+		if (nxtFx) {
+			nxtFx = 0;
+			emit nextFxChanged(0);
+		}
+		emit deleteMe(this);
+		return false;
+	}
+
 	if (!fxList || !fxList->contains(fx)) {
 		DEBUGERROR("FxListExecuter: fxList not initialized or Fx not in list");
 		return false;
@@ -76,7 +98,11 @@ bool FxListExecuter::runFxItem(FxItem *fx)
 		unitAudio->fadeoutFxAudio(this);
 	}
 
-	curFx = fx;
+
+	if (curFx != fx) {
+		curFx = fx;
+		emit currentFxChanged(fx);
+	}
 
 	switch(fx->fxType()) {
 	case FX_AUDIO:
@@ -91,10 +117,27 @@ bool FxListExecuter::runFxItem(FxItem *fx)
 	default:
 		break;
 	}
-	fxList->setCurrentFx(fx);
-	fxList->setNextFx(fxList->findSequenceFollower(fx));
+
+
+	FxItem * next = fxList->findSequenceFollower(fx);
+	if (next != nxtFx) {
+		qDebug("emit nextFxChanged: %p",next);
+		nxtFx = next;
+		emit nextFxChanged(next);
+	}
 
 	return true;
+}
+
+void FxListExecuter::fadeEndExecuter()
+{
+	if (currentFx()) {
+		unitAudio->fadeoutFxAudio(this);
+		qDebug() << "fadeEnd" << currentFx()->name();
+	}
+	currentAudioStatus = AUDIO_IDLE;
+
+	runFxItem(0);
 }
 
 void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
@@ -108,12 +151,14 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 		qDebug("%s audio msg: CMD:%d, AudioStatus:%d, Executer: %p",Q_FUNC_INFO,msg.ctrlCmd, msg.currentAudioStatus, msg.executer);
 		curFx = 0;
 		currentAudioStatus = AUDIO_IDLE;
+
+		emit deleteMe(this);
 		break;
 	case CMD_STATUS_REPORT:
 		if (curFx == msg.fxAudio && msg.currentAudioStatus != currentAudioStatus) {
 			qDebug("%s audio msg: CMD:%d, AudioStatus:%d, Executer: %p",Q_FUNC_INFO,msg.ctrlCmd, msg.currentAudioStatus, msg.executer);
 			if (msg.currentAudioStatus == AUDIO_IDLE) {
-				runFxItem(fxList->findSequenceFollower(curFx));
+				runFxItem(nxtFx);
 			}
 			currentAudioStatus = msg.currentAudioStatus;
 		}
@@ -126,7 +171,6 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 
 void FxListExecuter::init()
 {
-	curFx = 0;
 	currentAudioStatus = AUDIO_IDLE;
 	playlist_initial_vol = 0;
 

@@ -19,14 +19,24 @@ class Executer : public QObject
 	Q_OBJECT
 protected:
 	AppCentral * myApp;
+	FxItem *originFxItem;						///<  This should be the FxItem that has initiated the executer or 0
+	FxItem *curFx;
+	FxItem *nxtFx;
 	QString idString;
 
 protected:
 	Executer(AppCentral * app_central);
+	~Executer();
 
 public:
 	void setIdString(const QString & str);
 	QString getIdString() const;
+	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
+	inline FxItem * originFx() const {return originFxItem;}
+	inline FxItem * currentFx() const {return curFx;}
+	inline FxItem * nextFx() const {return nxtFx;}
+
+	friend class ExecCenter;
 };
 
 
@@ -39,7 +49,6 @@ protected:
 	AudioControl *unitAudio;
 	LightControl *unitLight;
 
-	FxItem *curFx;
 
 private:
 	AudioStatus currentAudioStatus;
@@ -51,6 +60,7 @@ public:
 	void setPlayListInitialVolume(int vol);
 	bool runExecuter(int idx = -1);
 	bool runFxItem(FxItem *fx);
+	void fadeEndExecuter();
 
 protected:
 	FxListExecuter(AppCentral * app_central, FxList *fx_list);
@@ -66,7 +76,9 @@ private:
 
 signals:
 	void fxItemExecuted(FxItem *fx, Executer *exec);
-	void deleteMe();
+	void deleteMe(Executer *exec);
+	void currentFxChanged(FxItem *fx);
+	void nextFxChanged(FxItem *fx);
 
 	friend class ExecCenter;
 

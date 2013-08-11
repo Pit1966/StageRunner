@@ -1,6 +1,9 @@
 #include "fxplaylistitem.h"
 #include "fxlist.h"
 
+#include "appcentral.h"
+#include "audiocontrol.h"
+
 //#ifdef IS_QT5
 //#include <QtWidgets>
 //#endif
@@ -10,6 +13,7 @@ FxPlayListItem::FxPlayListItem()
 	: FxAudioItem()
 	, fxPlayList(new FxList)
 {
+
 	init();
 }
 
@@ -41,5 +45,16 @@ void FxPlayListItem::init()
 	myFxType = FX_AUDIO_PLAYLIST;
 
 	addExistingVarSetList(fxPlayList->nativeFxList(),"AudioPlayList",PrefVarCore::FX_AUDIO_ITEM);
+
+}
+
+void FxPlayListItem::continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec)
+{
+	Q_UNUSED(exec);
+
+	if (!FxItem::exists(fx) || fx->fxType() != FX_AUDIO) return;
+	FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
+
+	AppCentral::instance()->unitAudio->continueFxAudioPlayList(this,fxa);
 
 }

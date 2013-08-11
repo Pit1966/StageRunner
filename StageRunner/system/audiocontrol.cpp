@@ -8,6 +8,7 @@
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "execcenter.h"
+#include "fxlistwidget.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -311,9 +312,55 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 
 bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
+	if (!FxItem::exists(fxplay)) {
+		qDebug("FxPlayListItem not found in pool");
+		return false;
+	}
+
+	// First create an executer to process the playlist
 	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxplay->fxPlayList);
+	fxexec->setOriginFx(fxplay);
 	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
+
+	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
+	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
+	if (wid) {
+		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
+		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
+		if (wid->currentSelectedFxItem())
+			return fxexec->runFxItem(wid->currentSelectedFxItem());
+	}
+
 	return fxexec->runExecuter();
+}
+
+/**
+ * @brief Starts or continues the playback of a FxAudioPlayList
+ * @param fxplay A Pointer to the FxPlayListItem instance that contains the playlist
+ * @param fxaudio A valid Pointer to the FxAudioItem that should be started
+ * @return true, if successful
+ *
+ */
+bool AudioControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *fxaudio)
+{
+	// First try to find an existing Executer
+	FxListExecuter *cur_exe = myApp->execCenter->findFxListExecuter(fxplay);
+	if (cur_exe) {
+		cur_exe->fadeEndExecuter();
+	}
+
+	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxplay->fxPlayList);
+	fxexec->setOriginFx(fxplay);
+	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
+
+	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
+	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
+	if (wid) {
+		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
+		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
+	}
+
+	return fxexec->runFxItem(fxaudio);
 }
 
 bool AudioControl::stopFxAudioPlayList(FxPlayListItem *fxplay)

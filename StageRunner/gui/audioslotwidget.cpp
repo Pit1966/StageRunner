@@ -113,10 +113,6 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 				// setTitle(msg.fxAudio->name());
 				slotPlayButton->setToolTip(msg.fxAudio->name());
 				slotStopButton->setToolTip(msg.fxAudio->name());
-				if (msg.executer)
-					meterWidget->setToolTip(msg.executer->getIdString());
-				else
-					meterWidget->setToolTip("Direct started");
 			}
 			if (msg.progress >= 0) {
 				QString time = QString("%1.%2\%")

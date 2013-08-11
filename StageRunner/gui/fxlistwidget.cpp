@@ -12,6 +12,8 @@
 #include "fxplaylistitem.h"
 #include "fxplaylistwidget.h"
 #include "fxitemtool.h"
+#include "execcenter.h"
+#include "executer.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -260,6 +262,11 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, bool *created)
 
 void FxListWidget::selectFx(FxItem *fx)
 {
+	qDebug() << "selectFx" << fx;
+	if (!fx) {
+		unselectRows();
+	}
+
 	bool found = false;
 	int row=0;
 	while (fx && row < fxTable->rowCount() && !found) {
@@ -377,11 +384,17 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, &new_created);
 	playlistwid->show();
 
+	// Let us look if an executer is running on this FxPlayListItem
 	if (new_created) {
-		connect(fx->fxPlayList,SIGNAL(fxNextChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
-		connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),fx->fxPlayList,SLOT(setNextFx(FxItem*)));
-		connect(fx->fxPlayList,SIGNAL(fxCurrentChanged(FxItem*,FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
+		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
+		if (exe) {
+			playlistwid->markFx(exe->currentFx());
+			playlistwid->selectFx(exe->nextFx());
+		}
+		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
+		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),fx,SLOT(continuePlay(FxItem*,CtrlCmd,Executer*)));
 	}
+
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -459,6 +472,7 @@ void FxListWidget::unselectRows()
 	while (selected_rows.size()) {
 		setRowSelected(selected_rows.takeFirst(),false);
 	}
+	cur_selected_item = 0;
 }
 
 void FxListWidget::propagateSceneStatus(FxSceneItem *scene)
@@ -635,8 +649,7 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 		}
 		unselectRows();
 		setRowSelected(listitem->myRow,true);
-
-
+		cur_selected_item = listitem->linkedFxItem;
 		break;
 	default:
 		qDebug("Click on this column not implemented yet");

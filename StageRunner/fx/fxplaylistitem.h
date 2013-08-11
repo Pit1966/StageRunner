@@ -5,11 +5,14 @@
 #include "fxaudioitem.h"
 #include "varsetlist.h"
 
+#include <QObject>
+
 class FxList;
 
 
 class FxPlayListItem : public FxAudioItem
 {
+	Q_OBJECT
 public:
 	FxList *fxPlayList;
 
@@ -21,6 +24,9 @@ public:
 
 private:
 	void init();
+
+public slots:
+	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);
 };
 
 #endif // FXPLAYLISTITEM_H
