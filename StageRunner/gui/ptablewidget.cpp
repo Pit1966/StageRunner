@@ -8,6 +8,7 @@
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
 #include <QScrollBar>
+#include <QPoint>
 
 PTableWidget::PTableWidget(QWidget *parent) :
 	QTableWidget(parent)
@@ -53,7 +54,9 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		qDebug("PTableWidget::dragEnterEvent: Mime:'%s': ObjectName:%s, row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
 
-		event->setDropAction(Qt::MoveAction);
+		QPoint mouse = event->pos();
+		qDebug() << mouse;
+		// event->setDropAction(Qt::MoveAction);
 		event->accept();
 		drag_start_row = extmime->tableRow;
 
@@ -72,7 +75,7 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	Q_UNUSED(event);
-	qDebug("dragLeaveEvent");
+	qDebug("PTableWidget::dragLeaveEvent");
 
 	if (drag_temp_row >= 0) {
 		saveScrollPos();
@@ -95,12 +98,18 @@ void PTableWidget::dropEvent(QDropEvent *event)
 		// The DragObject is an fxListWidgetItem
 		qDebug("PTableWidget::dropEvent: Mime:'%s': from row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
+		qDebug() << "  Dropaction:" << event->dropAction();
+
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
 		if (extmime->originPTableWidget != this) {
 			qDebug("PTableWidget::dropEvent: Received Row from foreign Widget");
 			if (extmime->originPTableWidget) {
-				emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row);
+				if (event->pos().x() > width()/2) {
+					emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row, false);
+				} else {
+					emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row, true);
+				}
 			}
 		} else {
 			qDebug("   Entry moved from row %d to %d",extmime->tableRow, drag_dest_row);
@@ -109,7 +118,13 @@ void PTableWidget::dropEvent(QDropEvent *event)
 	} else {
 		event->setDropAction(Qt::CopyAction);
 		event->accept();
-		emit dropEventReceived(mime->text(),drag_dest_row);
+		QList<QUrl> urls = mime->urls();
+		int row = drag_dest_row;
+		for (int t=0; t<urls.size();t++) {
+			if (drag_dest_row >= 0)
+				row = drag_dest_row + t;
+			emit dropEventReceived(urls.at(t).toString(),row);
+		}
 	}
 
 	drag_temp_row = -1;

@@ -6,6 +6,7 @@
 #include <QList>
 #include <QObject>
 #include <QByteArray>
+#include <QWidget>
 
 class AudioControl;
 class LightControl;
@@ -17,6 +18,7 @@ class IOPluginCentral;
 class DmxMonitor;
 class ExecCenter;
 class Executer;
+class FxList;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -75,6 +77,8 @@ public:
 	DmxMonitor *openDmxOutMonitor(int universe);
 
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
+
+	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = 0, int row = -1);
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);

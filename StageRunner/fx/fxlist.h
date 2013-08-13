@@ -39,6 +39,7 @@ public:
 	inline void insert(int idx, FxItem* fx) {fx_list.insert(idx,fx);}
 	inline FxItem* at(int idx) const {return fx_list.at(idx);}
 	inline FxItem* takeAt(int idx) {return fx_list.takeAt(idx);}
+	inline bool removeOne(FxItem *fx) {return fx_list.removeOne(fx);}
 	inline FxItem & operator[] (int idx) {return *fx_list[idx];}
 	inline FxItem * nextFx() {return fx_next;}
 	inline FxItem * lastFx() {return fx_last;}

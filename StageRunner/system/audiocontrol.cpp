@@ -327,8 +327,9 @@ bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 	if (wid) {
 		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
 		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
-		if (wid->currentSelectedFxItem())
-			return fxexec->runFxItem(wid->currentSelectedFxItem());
+		if (wid->currentSelectedFxItem()) {
+			fxexec->setNextFx(wid->currentSelectedFxItem());
+		}
 	}
 
 	return fxexec->runExecuter();
@@ -360,7 +361,8 @@ bool AudioControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *
 		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
 	}
 
-	return fxexec->runFxItem(fxaudio);
+	fxexec->setNextFx(fxaudio);
+	return fxexec->runExecuter();
 }
 
 bool AudioControl::stopFxAudioPlayList(FxPlayListItem *fxplay)

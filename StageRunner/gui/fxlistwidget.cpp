@@ -3,7 +3,9 @@
 #include "fxitem.h"
 #include "fxsceneitem.h"
 #include "fxaudioitem.h"
+#include "fxitemobj.h"
 #include "appcentral.h"
+#include "usersettings.h"
 #include "scenedeskwidget.h"
 #include "qtstatictools.h"
 #include "customwidget/pslineedit.h"
@@ -14,6 +16,7 @@
 #include "fxitemtool.h"
 #include "execcenter.h"
 #include "executer.h"
+#include "qtstatictools.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -36,6 +39,8 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	fxTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	fxTable->setSelectionMode(QAbstractItemView::NoSelection);
 
+	// fxTable->setContextMenuPolicy(Qt::NoContextMenu);
+
 	QPalette pal = fxTable->palette();
 	pal.setBrush(QPalette::Highlight,Qt::darkGreen);
 	fxTable->setPalette(pal);
@@ -47,7 +52,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SIGNAL(dropEventReceived(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SLOT(drop_event_receiver(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
-	connect(fxTable,SIGNAL(rowClonedFrom(PTableWidget*,int,int)),this,SLOT(cloneRowFromPTable(PTableWidget*,int,int)),Qt::QueuedConnection);
+	connect(fxTable,SIGNAL(rowClonedFrom(PTableWidget*,int,int,bool)),this,SLOT(cloneRowFromPTable(PTableWidget*,int,int,bool)),Qt::QueuedConnection);
 }
 
 FxListWidget::~FxListWidget()
@@ -191,6 +196,35 @@ FxItem *FxListWidget::getFxItemAtRow(int row) const
 	FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,0));
 
 	return item->linkedFxItem;
+}
+
+void FxListWidget::setOriginFx(FxItem *fx)
+{
+	origin_fxitem = fx;
+
+	if (fx->fxType() == FX_AUDIO_PLAYLIST) {
+		FxPlayListItem *playfx = reinterpret_cast<FxPlayListItem*>(origin_fxitem);
+		QRect rect = QtStaticTools::stringToQRect(playfx->widgetPos);
+		if (!rect.isNull()) {
+			setGeometry(rect);
+		}
+	}
+}
+
+FxListWidgetItem *FxListWidget::getFxListItemAtPos(QPoint pos)
+{
+	pos = fxTable->mapFrom(this,pos);
+
+	FxListWidgetItem *fxitem = 0;
+	QTableWidgetItem *item = fxTable->itemAt(pos);
+	if (item) {
+		fxitem = reinterpret_cast<FxListWidgetItem *>(fxitem);
+		qDebug() << "found item" << fxitem->linkedFxItem->name();
+
+	} else {
+		qDebug() << "no item" << pos;
+	}
+	return fxitem;
 }
 
 
@@ -364,6 +398,16 @@ void FxListWidget::init()
 	is_modified_f = false;
 	is_editable_f = false;
 	cur_selected_item = 0;
+	cur_clicked_item = 0;
+	origin_fxitem = 0;
+}
+
+void FxListWidget::closeEvent(QCloseEvent *)
+{
+	if (origin_fxitem && origin_fxitem->fxType() == FX_AUDIO_PLAYLIST) {
+		FxPlayListItem *playfx = reinterpret_cast<FxPlayListItem*>(origin_fxitem);
+		playfx->widgetPos = QtStaticTools::qRectToString(geometry());
+	}
 }
 
 void FxListWidget::open_scence_desk(FxSceneItem *fx)
@@ -382,18 +426,21 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 	bool new_created;
 
 	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, &new_created);
-	playlistwid->show();
 
 	// Let us look if an executer is running on this FxPlayListItem
 	if (new_created) {
+		playlistwid->setOriginFx(fx);
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {
 			playlistwid->markFx(exe->currentFx());
 			playlistwid->selectFx(exe->nextFx());
 		}
 		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
-		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),fx,SLOT(continuePlay(FxItem*,CtrlCmd,Executer*)));
+		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
+				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
 	}
+
+	playlistwid->show();
 
 }
 
@@ -543,9 +590,9 @@ void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
 	}
 }
 
-void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow)
+void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc)
 {
-	qDebug("%s clone row: %d to row: %d",Q_FUNC_INFO,srcRow, destRow);
+	qDebug("%s clone row: %d to row: %d remove:%d",Q_FUNC_INFO,srcRow, destRow, removeSrc);
 
 	FxListWidget *srcwidget = FxListWidget::findFxListWidget(srcPtable);
 	if (srcwidget) {
@@ -555,7 +602,12 @@ void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int d
 		FxItem *srcFx = srcwidget->fxList()->getFxByListIndex(srcRow);
 		if (!FxItem::exists(srcFx)) return;
 
-		FxItem *destFx = FxItemTool::cloneFxItem(srcFx);
+		FxItem *destFx;
+		if (removeSrc) {
+			destFx = srcFx;
+		} else {
+			destFx = FxItemTool::cloneFxItem(srcFx);
+		}
 
 		if (destRow >= 0 && destRow < fxList()->size()) {
 			fxList()->insert(destRow,destFx);
@@ -563,6 +615,11 @@ void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int d
 			fxList()->append(destFx);
 		}
 		refreshList();
+
+		if (removeSrc) {
+			srcwidget->fxList()->removeOne(srcFx);
+			srcwidget->refreshList();
+		}
 	}
 
 }
@@ -655,6 +712,7 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 		qDebug("Click on this column not implemented yet");
 
 	}
+	cur_clicked_item = listitem;
 }
 
 void FxListWidget::column_name_double_clicked(FxItem *fx)
@@ -692,6 +750,59 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 	}
 }
 
+void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+	if (!cur_clicked_item) {
+		QMenu menu(this);
+		QAction *act;
+		act = menu.addAction(tr("Add Audio Fx"));
+		act->setObjectName("1");
+
+		act = menu.exec(event->globalPos());
+		if (!act) return;
+
+		switch (act->objectName().toInt()) {
+		case 1:
+			AppCentral::instance()->addFxAudioDialog(fxList(),this);
+			refreshList();
+			break;
+
+		default:
+			break;
+		}
+
+	} else {
+		QMenu menu(this);
+		QAction *act;
+		act = menu.addAction(tr("Unselect"));
+		act->setObjectName("2");
+		act = menu.addAction(tr("Add Audio Fx"));
+		act->setObjectName("3");
+		act = menu.addAction(tr("------------"));
+		act = menu.addAction(tr("Delete Fx"));
+		act->setObjectName("1");
+
+		act = menu.exec(event->globalPos());
+		if (!act) return;
+
+		switch (act->objectName().toInt()) {
+		case 1:
+			fxList()->deleteFx(cur_clicked_item->linkedFxItem);
+			break;
+		case 2:
+			setRowSelected(cur_clicked_item->myRow,false);
+			cur_clicked_item = 0;
+			break;
+		case 3:
+			AppCentral::instance()->addFxAudioDialog(fxList(),this,cur_clicked_item->myRow);
+			refreshList();
+			break;
+
+		default:
+			break;
+		}
+	}
+}
 
 
 void FxListWidget::if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem)
@@ -734,7 +845,17 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 
 void FxListWidget::drop_event_receiver(QString str, int row)
 {
-	qDebug() << "FxListWidget:: dropEvent received: " << str << row;
+	if (!str.startsWith("file://")) {
+		DEBUGERROR("Add Drag'n'Drop File: %s not valid",str.toLatin1().data());
+		return;
+	} else {
+		LOGTEXT(tr("Add Drag'n'Drop Fx: %1").arg(str));
+	}
 
+	QString path = str.mid(7);
+	if (path.size()) {
+		fxList()->addFxAudioSimple(path,row);
+		refreshList();
+	}
 }
 

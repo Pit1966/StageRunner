@@ -76,6 +76,10 @@ void FxListWidgetItem::init()
 	setAutoFillBackground(false);
 	itemEdit->setAutoFillBackground(false);
 	itemLabel->setAutoFillBackground(false);
+
+	itemEdit->setContextMenuPolicy(Qt::NoContextMenu);
+	itemLabel->setContextMenuPolicy(Qt::NoContextMenu);
+
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)

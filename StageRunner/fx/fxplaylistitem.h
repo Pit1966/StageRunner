@@ -5,28 +5,30 @@
 #include "fxaudioitem.h"
 #include "varsetlist.h"
 
-#include <QObject>
-
 class FxList;
+class FxItemObj;
 
 
 class FxPlayListItem : public FxAudioItem
 {
-	Q_OBJECT
 public:
+	pstring widgetPos;
 	FxList *fxPlayList;
+
+private:
+	FxItemObj *itemObj;
 
 public:
 	FxPlayListItem();
 	~FxPlayListItem();
 	bool addAudioTrack(const QString & path);
 	int size();
+	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);
+	inline FxItemObj * connector() {return itemObj;}
 
 private:
 	void init();
 
-public slots:
-	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);
 };
 
 #endif // FXPLAYLISTITEM_H

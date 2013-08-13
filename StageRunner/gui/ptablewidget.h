@@ -32,7 +32,7 @@ private:
 signals:
 	void dropEventReceived(QString text, int row);
 	void rowMovedFromTo(int srcrow, int destrow);
-	void rowClonedFrom(PTableWidget *originPTable, int srcRow, int destRow);
+	void rowClonedFrom(PTableWidget *originPTable, int srcRow, int destRow, bool removeSrc);
 
 public slots:
 

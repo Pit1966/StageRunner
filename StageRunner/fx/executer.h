@@ -59,11 +59,13 @@ public:
 	void setFxList(FxList *fx_list);
 	void setPlayListInitialVolume(int vol);
 	bool runExecuter(int idx = -1);
-	bool runFxItem(FxItem *fx);
 	void fadeEndExecuter();
+	void setNextFx(FxItem *fx);
 
 protected:
 	FxListExecuter(AppCentral * app_central, FxList *fx_list);
+	void setCurrentFx(FxItem *fx);
+	bool runFxItem(FxItem *fx);
 
 
 protected slots:

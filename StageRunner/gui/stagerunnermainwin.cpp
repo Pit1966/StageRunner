@@ -56,7 +56,6 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd,Executer*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
-	connect(fxListWidget,SIGNAL(dropEventReceived(QString,int)),this,SLOT(slot_addFxFile(QString,int)));
 	connect(appCentral->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxListWidget,SLOT(setEditable(bool)));
 
@@ -226,13 +225,7 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
 {
 	FxList *fxlist = appCentral->project->fxList;
-	QString path = QFileDialog::getOpenFileName(this,tr("Choose Audio File")
-												,appCentral->userSettings->pLastAudioFxImportPath);
-
-	if (path.size()) {
-		appCentral->userSettings->pLastAudioFxImportPath = path;
-		fxlist->addFxAudioSimple(path);
-	}
+	appCentral->addFxAudioDialog(fxlist,this);
 	fxListWidget->setFxList(fxlist);
 }
 
@@ -429,22 +422,6 @@ void StageRunnerMainWin::showErrorMsg(QString where, QString text)
 			.arg(text,where);
 	msg_dialog->setStyleSheet("color:red;");
 	msg_dialog->showMessage(text,where);
-}
-
-void StageRunnerMainWin::slot_addFxFile(QString path, int pos)
-{
-	if (!path.startsWith("file://")) {
-		DEBUGERROR("Add Drag'n'Drop File: %s not valid",path.toLatin1().data());
-		return;
-	}
-	path = path.mid(7);
-
-	if (path.size()) {
-		qDebug() << path;
-		FxList *fxlist = appCentral->project->fxList;
-		fxlist->addFxAudioSimple(path,pos);
-		fxListWidget->setFxList(fxlist);
-	}
 }
 
 

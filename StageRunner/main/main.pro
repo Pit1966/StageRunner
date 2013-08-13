@@ -89,7 +89,8 @@ SOURCES += \
     ../gui/customwidget/pslistwidget.cpp \
     ../fx/fxitemtool.cpp \
     ../fx/execcenter.cpp \
-    ../fx/executer.cpp
+    ../fx/executer.cpp \
+    ../fx/fxitemobj.cpp
 
 HEADERS  += \
 	../config.h \
@@ -149,7 +150,8 @@ HEADERS  += \
     ../gui/customwidget/pslistwidget.h \
     ../fx/fxitemtool.h \
     ../fx/execcenter.h \
-    ../fx/executer.h
+    ../fx/executer.h \
+    ../fx/fxitemobj.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

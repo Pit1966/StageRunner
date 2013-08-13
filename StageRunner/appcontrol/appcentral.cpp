@@ -14,6 +14,8 @@
 #include "messagehub.h"
 #include "execcenter.h"
 
+#include <QFileDialog>
+
 using namespace AUDIO;
 
 AppCentral *AppCentral::myinstance = 0;
@@ -229,6 +231,21 @@ void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, in
 	}
 }
 
+bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
+{
+	if (!fxlist) return false;
+
+	QString path = QFileDialog::getOpenFileName(widget,tr("Choose Audio File")
+												,userSettings->pLastAudioFxImportPath);
+
+	if (path.size()) {
+		userSettings->pLastAudioFxImportPath = path;
+		fxlist->addFxAudioSimple(path,row);
+		return true;
+	}
+	return false;
+}
+
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 {
@@ -389,6 +406,7 @@ void AppCentral::init()
 
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+	qRegisterMetaType<CtrlCmd>("CtrlCmd");
 
 	// Load Message Rules
 	MessageHub::instance();

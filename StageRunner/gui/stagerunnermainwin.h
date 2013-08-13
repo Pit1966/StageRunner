@@ -53,7 +53,6 @@ public slots:
 	void updateButtonStyles(QString style = "");
 
 private slots:
-	void slot_addFxFile(QString path, int pos = -1);
 	void on_addAudioFxButton_clicked();
 	void on_actionSave_Project_as_triggered();
 	void on_actionLoad_Project_triggered();

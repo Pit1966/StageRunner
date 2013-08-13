@@ -28,8 +28,11 @@ private:
 	bool is_editable_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
+	FxListWidgetItem* cur_clicked_item;
+	FxItem * origin_fxitem;
 	QList<int>selected_rows;
 	static MutexQList<FxListWidget*>globalFxListWidgetList;
+
 
 public:
 	FxListWidget(QWidget *parent = 0);
@@ -42,6 +45,8 @@ public:
 	int getRowThatContainsFxItem(FxItem *fx);
 	FxItem *currentSelectedFxItem() const {return cur_selected_item;}
 	FxItem *getFxItemAtRow(int row) const;
+	void setOriginFx(FxItem *fx);
+	FxListWidgetItem * getFxListItemAtPos(QPoint pos);
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
@@ -49,11 +54,13 @@ public:
 
 private:
 	void init();
+	void closeEvent(QCloseEvent *);
 	void open_scence_desk(FxSceneItem *fx);
 	void open_audio_list_widget(FxPlayListItem *fx);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);
+	void contextMenuEvent(QContextMenuEvent *event);
 
 public slots:
 	void selectFx(FxItem *fx);
@@ -67,7 +74,7 @@ public slots:
 	void propagateSceneStatus(FxSceneItem *scene);
 	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void propagateAudioStatus(AudioCtrlMsg msg);
-	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow);
+	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);

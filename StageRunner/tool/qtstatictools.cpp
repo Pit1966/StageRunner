@@ -3,6 +3,7 @@
 #include <QKeySequence>
 #include <QDebug>
 #include <QRegExp>
+#include <QStringList>
 
 QtStaticTools::QtStaticTools()
 {
@@ -51,4 +52,29 @@ QString QtStaticTools::msToTimeString(int ms)
 		time = QString("%1ms").arg(ms);
 	}
 	return time;
+}
+
+QString QtStaticTools::qRectToString(const QRect rect)
+{
+	QString rs = QString("%1:%2:%3:%4")
+			.arg(QString::number(rect.x())
+				 ,QString::number(rect.y())
+				 ,QString::number(rect.width())
+				 ,QString::number(rect.height()));
+	return rs;
+}
+
+QRect QtStaticTools::stringToQRect(const QString &rs)
+{
+	QRect rect;
+	QStringList parts = rs.split(QChar(':'));
+
+	if (parts.size() == 4) {
+		rect.setY(parts[1].toInt());
+		rect.setX(parts[0].toInt());
+		rect.setHeight(parts[3].toInt());
+		rect.setWidth(parts[2].toInt());
+	}
+
+	return rect;
 }
