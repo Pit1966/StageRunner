@@ -3,6 +3,7 @@
 #include "fxitem.h"
 #include "fxsceneitem.h"
 #include "fxaudioitem.h"
+#include "fxseqitem.h"
 #include "fxitemobj.h"
 #include "appcentral.h"
 #include "usersettings.h"
@@ -81,11 +82,22 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 	int rows = fxlist->size();
 
-	fxTable->setRowCount(rows);
-	fxTable->setColumnCount(3);
-
 	QStringList header;
-	header << tr("Key") << tr("Name") << tr("Function") << tr("Id");
+	header << tr("Key");
+
+	header << tr("Name") << tr("Function");
+
+	if (show_ids_f) {
+		header << tr("Id");
+	}
+	if (show_fadetimes_f) {
+		header << tr("FadeIN") << tr("FadeOUT");
+	}
+
+	fxTable->setRowCount(rows);
+	fxTable->setColumnCount(header.size());
+
+
 	fxTable->setHorizontalHeaderLabels(header);
 
 	QFont key_font;
@@ -107,17 +119,16 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->itemEdit->setMinimized(true);
 		item->itemEdit->setSingleKeyEditEnabled(true);
 		item->itemEdit->setFont(key_font);
-		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
-		// item->setMaximumWidth(60);
+		item->itemLabel->hide();
 		item->myRow = t;
 		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
-		item->itemEdit->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 		item->myRow = t;
 		item->myColumn = col;
+		item->itemLabel->hide();
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
@@ -133,6 +144,9 @@ void FxListWidget::setFxList(FxList *fxlist)
 		case FX_AUDIO_PLAYLIST:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/playlist.png"));
 			break;
+		case FX_SEQUENCE:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/sequence.png"));
+			break;
 		default:
 			break;
 		}
@@ -141,14 +155,32 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
-		item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
-		item->setNeverEditable(true);
-		item->myRow = t;
-		item->myColumn = col;
-		fxTable->setCellWidget(t,col++,item);
+		if (show_ids_f) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
+			item->setNeverEditable(true);
+			item->myRow = t;
+			item->myColumn = col;
+			fxTable->setCellWidget(t,col++,item);
+		}
+
+		if (show_fadetimes_f) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+
+			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeOutTime()),FxListWidgetItem::CT_FADEOUT_TIME);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+		}
 	}
 	fxTable->resizeColumnsToContents();
-	// fxTable->horizontalHeader()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+
 #ifdef IS_QT5
 	fxTable->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
 #else
@@ -213,18 +245,21 @@ void FxListWidget::setOriginFx(FxItem *fx)
 
 FxListWidgetItem *FxListWidget::getFxListItemAtPos(QPoint pos)
 {
-	pos = fxTable->mapFrom(this,pos);
-
-	FxListWidgetItem *fxitem = 0;
-	QTableWidgetItem *item = fxTable->itemAt(pos);
-	if (item) {
-		fxitem = reinterpret_cast<FxListWidgetItem *>(fxitem);
-		qDebug() << "found item" << fxitem->linkedFxItem->name();
-
-	} else {
-		qDebug() << "no item" << pos;
+	pos = fxTable->mapFromParent(pos);
+	if (fxTable->horizontalHeader()) {
+		pos.setY(pos.y()-fxTable->horizontalHeader()->height());
 	}
-	return fxitem;
+	if (fxTable->verticalHeader()) {
+		pos.setX(pos.x()-fxTable->verticalHeader()->width());
+	}
+	for (int col=0; col<fxTable->columnCount(); col++) {
+		for (int row=0; row<fxTable->rowCount(); row++) {
+			FxListWidgetItem *item = reinterpret_cast<FxListWidgetItem*>(fxTable->cellWidget(row,col));
+			if (item->geometry().contains(pos)) return item;
+		}
+	}
+
+	return 0;
 }
 
 
@@ -397,6 +432,8 @@ void FxListWidget::init()
 {
 	is_modified_f = false;
 	is_editable_f = false;
+	show_fadetimes_f = true;
+	show_ids_f = false;
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
 	origin_fxitem = 0;
@@ -442,6 +479,28 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 
 	playlistwid->show();
 
+}
+
+void FxListWidget::open_sequence_list_widget(FxSeqItem *fx)
+{
+	bool new_created;
+
+	FxListWidget *sequencewid = FxListWidget::getCreateFxListWidget(fx->seqList, &new_created);
+
+	// Let us look if an executer is running on this FxSequenceItem
+	if (new_created) {
+		sequencewid->setOriginFx(fx);
+		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
+		if (exe) {
+			sequencewid->markFx(exe->currentFx());
+			sequencewid->selectFx(exe->nextFx());
+		}
+		// This connect is for starting / forwarding the sequence by double click on an item in the sequence list
+//		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
+//				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+	}
+
+	sequencewid->show();
 }
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
@@ -745,14 +804,18 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 		break;
 	case FX_AUDIO_PLAYLIST:
 		open_audio_list_widget(static_cast<FxPlayListItem*>(fx));
-
+		break;
+	case FX_SEQUENCE:
+		open_sequence_list_widget(static_cast<FxSeqItem*>(fx));
 		break;
 	}
 }
 
 void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 {
-	if (!cur_clicked_item) {
+	FxListWidgetItem *item = getFxListItemAtPos(event->pos());
+
+	if (!item) {
 		QMenu menu(this);
 		QAction *act;
 		act = menu.addAction(tr("Add Audio Fx"));
@@ -772,10 +835,13 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		}
 
 	} else {
+		qDebug() << "context menu for Fx:" << item->linkedFxItem->name();
 		QMenu menu(this);
 		QAction *act;
 		act = menu.addAction(tr("Unselect"));
 		act->setObjectName("2");
+		act = menu.addAction(tr("Open Fx editor"));
+		act->setObjectName("4");
 		act = menu.addAction(tr("Add Audio Fx"));
 		act->setObjectName("3");
 		act = menu.addAction(tr("------------"));
@@ -787,15 +853,18 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 		switch (act->objectName().toInt()) {
 		case 1:
-			fxList()->deleteFx(cur_clicked_item->linkedFxItem);
+			fxList()->deleteFx(item->linkedFxItem);
 			break;
 		case 2:
-			setRowSelected(cur_clicked_item->myRow,false);
+			setRowSelected(item->myRow,false);
 			cur_clicked_item = 0;
 			break;
 		case 3:
-			AppCentral::instance()->addFxAudioDialog(fxList(),this,cur_clicked_item->myRow);
+			AppCentral::instance()->addFxAudioDialog(fxList(),this,item->myRow);
 			refreshList();
+			break;
+		case 4:
+			emit fxItemSelectedForEdit(item->linkedFxItem);
 			break;
 
 		default:

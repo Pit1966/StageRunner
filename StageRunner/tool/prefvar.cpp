@@ -8,8 +8,9 @@
 #include <QtGlobal>
 
 /// Statics für die Variablenverwaltung
-MutexQList<PrefVarCore *> *PrefVarCore::glob_var_list = 0;
 int PrefVarCore::instance_cnt = 0;
+MutexQList<PrefVarCore *> *PrefVarCore::glob_var_list = 0;
+MutexQHash<QString,PrefVarCore::VarClass> *PrefVarCore::classMapping = 0;
 
 
 // ---------------------------------------------------------------------------------------------
@@ -70,27 +71,77 @@ PrefVarCore::~PrefVarCore()
 		}
 		delete glob_var_list;
 		glob_var_list = 0;
+		delete classMapping;
+		classMapping = 0;
 	}
+}
+
+void PrefVarCore::registerVarClasses()
+{
+	if (classMapping) {
+		qFatal("%s: this function must called only once at programm start!",Q_FUNC_INFO);
+	}
+
+	classMapping = new MutexQHash<QString,VarClass>;
+
+	classMapping->insert("VC_NO_CLASS",NO_CLASS);
+	classMapping->insert("VC_VAR_SET_CLASS",VAR_SET_CLASS);
+	classMapping->insert("VC_SYSTEM_CONFIG",SYSTEM_CONFIG);
+	classMapping->insert("VC_USER_CONFIG",USER_CONFIG);
+	classMapping->insert("VC_PROJECT",PROJECT);
+	classMapping->insert("VC_FX_ITEM",FX_ITEM);
+	classMapping->insert("VC_DMX_CHANNEL",DMX_CHANNEL);
+	classMapping->insert("VC_PLUGIN_MAPPING",PLUGIN_MAPPING);
+	classMapping->insert("VC_PLUGIN_CONFIG",PLUGIN_CONFIG);
+	classMapping->insert("VC_MESSAGE",MESSAGE);
+	classMapping->insert("VC_MESSAGE_HUB",MESSAGE_HUB);
+	classMapping->insert("VC_FX_AUDIO_ITEM",FX_AUDIO_ITEM);
+	classMapping->insert("VC_FX_SCENE_ITEM",FX_SCENE_ITEM);
+	classMapping->insert("VC_FX_PLAYLIST_ITEM",FX_PLAYLIST_ITEM);
+	classMapping->insert("VC_FX_SEQUENCE",FX_SEQUENCE_ITEM);
+
+}
+
+PrefVarCore::VarClass PrefVarCore::getVarClass(const QString &className)
+{
+	if (!classMapping) {
+		qFatal("%s: No VarClasses registered",Q_FUNC_INFO);
+	}
+
+	if (classMapping->contains(className)) {
+		return classMapping->value(className);
+	} else {
+		return NO_CLASS;
+	}
+}
+
+QString PrefVarCore::getVarClassName(PrefVarCore::VarClass varClass)
+{
+	if (!classMapping) {
+		qFatal("%s: No VarClasses registered",Q_FUNC_INFO);
+	}
+
+	return classMapping->key(varClass);
 }
 
 void PrefVarCore::init()
 {
 	initialized_f = false;
 	p_refvar = 0;
-	myclass = NO_CLASS;
+	contextClass = NO_CLASS;
 	modified_f = false;
 	function = FUNC_NORMAL;
 }
 
 QVariant PrefVarCore::get_value() const
 {
-	if (debug) qDebug() << Q_FUNC_INFO << "'get_value' not implemented by" << myname << "class:" << myclassname;
+	if (debug) qDebug() << Q_FUNC_INFO << "'get_value' not implemented by" << myname;
 	return QVariant();
 }
 
 void PrefVarCore::set_value(QVariant val)
 {
-	if (debug) qDebug() << Q_FUNC_INFO << "'set_value' not implemented by" << myname << "class:" << myclassname << " set:" << val;
+	if (debug) qDebug() << Q_FUNC_INFO << "'set_value' not implemented by" << myname << " set:" << val;
 }
 
 bool PrefVarCore::writeToPrefGroup(QSettings * setting, const QString & group)
@@ -104,14 +155,14 @@ bool PrefVarCore::writeToPrefGroup(QSettings * setting, const QString & group)
 		ok = true;
 	}
 
-	if (myclass == NO_CLASS) {
+	if (contextClass == NO_CLASS) {
 		setting->beginGroup("System");
 		setting->setValue(myname,get_value());
 		setting->endGroup();
 		ok = true;
 	}
 
-	if (myclass == USER_CONFIG) {
+	if (contextClass == USER_CONFIG) {
 		setting->beginGroup("UserPrefs");
 		setting->setValue(myname,get_value());
 		setting->endGroup();
@@ -126,10 +177,10 @@ bool PrefVarCore::readFromPrefGroupSystem(QSettings * setting, const QString & g
 	if (group.size()) {
 		setting->beginGroup(group);
 	}
-	else if (myclass == NO_CLASS) {
+	else if (contextClass == NO_CLASS) {
 		setting->beginGroup("System");
 	}
-	else if (myclass == USER_CONFIG) {
+	else if (contextClass == USER_CONFIG) {
 		setting->beginGroup("UserPrefs");
 	}
 	else {
@@ -162,7 +213,7 @@ bool PrefVarCore::readAllFromPref()
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
 		// qDebug() << pvar->myname << pvar->myclass;
-		if (!pvar->parent_var_sets.size() && pvar->myclass == PrefVarCore::NO_CLASS) {
+		if (!pvar->parent_var_sets.size() && pvar->contextClass == PrefVarCore::NO_CLASS) {
 			pvar->readFromPrefGroupSystem(&set);
 		}
 	}
@@ -185,7 +236,7 @@ bool PrefVarCore::writeAllToPref()
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
 		// Wenn die Variable Teil eines VariablenSets ist, wird sie nicht in die Prefs gespeichert
-		if (!pvar->parent_var_sets.size() && pvar->myclass == PrefVarCore::NO_CLASS) {
+		if (!pvar->parent_var_sets.size() && pvar->contextClass == PrefVarCore::NO_CLASS) {
 			pvar->writeToPrefGroup(&set);
 		}
 	}
@@ -199,8 +250,7 @@ void PrefVarCore::cloneFrom(const PrefVarCore &other)
 	dispname = other.dispname;
 	description = other.description;
 	mytype = other.mytype;
-	myclass = other.myclass;
-	myclassname = other.myclassname;
+	contextClass = other.contextClass;
 	modified_f = false;
 }
 

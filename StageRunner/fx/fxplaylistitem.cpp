@@ -22,6 +22,7 @@ FxPlayListItem::FxPlayListItem()
 FxPlayListItem::~FxPlayListItem()
 {
 	delete fxPlayList;
+	delete itemObj;
 }
 
 bool FxPlayListItem::addAudioTrack(const QString &path)
@@ -45,6 +46,7 @@ void FxPlayListItem::init()
 	// Base initializing was done in FxAudioItem()
 
 	myFxType = FX_AUDIO_PLAYLIST;
+	myclass = PrefVarCore::FX_PLAYLIST_ITEM;
 
 	addExistingVar(widgetPos,"WidgetPos");
 	addExistingVarSetList(fxPlayList->nativeFxList(),"AudioPlayList",PrefVarCore::FX_AUDIO_ITEM);

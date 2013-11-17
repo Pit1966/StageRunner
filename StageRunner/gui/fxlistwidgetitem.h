@@ -15,7 +15,9 @@ public:
 		CT_NAME,
 		CT_ID,
 		CT_KEY,
-		CT_FX_TYPE
+		CT_FX_TYPE,
+		CT_FADEIN_TIME,
+		CT_FADEOUT_TIME
 	};
 
 	FxItem *linkedFxItem;
@@ -46,6 +48,9 @@ public:
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
 	QPoint dragBeginPos() const {return drag_begin_pos;}
+	QSize sizeHint();
+	QSize minimumSizeHint();
+
 
 private:
 	void init();

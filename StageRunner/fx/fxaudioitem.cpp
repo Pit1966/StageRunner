@@ -26,10 +26,32 @@ void FxAudioItem::setFilePath(const QString &path)
 	myFile = fi.fileName();
 }
 
+qint32 FxAudioItem::fadeInTime()
+{
+	return 0;
+}
+
+void FxAudioItem::setFadeInTime(qint32)
+{
+
+}
+
+qint32 FxAudioItem::fadeOutTime()
+{
+	return 0;
+}
+
+void FxAudioItem::setFadeOutTime(qint32)
+{
+
+}
+
 void FxAudioItem::init()
 {
 
 	myFxType = FX_AUDIO;
+	myclass = PrefVarCore::FX_AUDIO_ITEM;
+
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(audioDuration,"DurationMS");

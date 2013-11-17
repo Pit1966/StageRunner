@@ -36,6 +36,11 @@ public:
 	FxSceneItem(const FxSceneItem &o);
 	~FxSceneItem();
 
+	qint32 fadeInTime();
+	void setFadeInTime(qint32 val);
+	qint32 fadeOutTime();
+	void setFadeOutTime(qint32 val);
+
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}

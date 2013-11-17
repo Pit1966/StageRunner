@@ -34,7 +34,7 @@
       </widget>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="iconSize">
         <size>
@@ -123,7 +123,7 @@
             <property name="verticalSpacing">
              <number>6</number>
             </property>
-            <item row="5" column="0">
+            <item row="7" column="0">
              <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -149,45 +149,7 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Debug level</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="debugLevelSpin"/>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <widget class="QPushButton" name="cloneSelectedSceneButton">
-              <property name="text">
-               <string>Clone Selected Scene FX</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QPushButton" name="stopMainLoopButton">
-              <property name="text">
-               <string>Stop main loop for 3 seconds</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QPushButton" name="addFxSceneButton">
-              <property name="text">
-               <string>Add Scene Fx</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
+            <item row="5" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <property name="topMargin">
                <number>0</number>
@@ -214,6 +176,51 @@
                </widget>
               </item>
              </layout>
+            </item>
+            <item row="9" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Debug level</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="debugLevelSpin"/>
+              </item>
+             </layout>
+            </item>
+            <item row="3" column="0">
+             <widget class="QPushButton" name="cloneSelectedSceneButton">
+              <property name="text">
+               <string>Clone Selected Scene FX</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QPushButton" name="stopMainLoopButton">
+              <property name="text">
+               <string>Stop main loop for 3 seconds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="addFxSceneButton">
+              <property name="text">
+               <string>Add Scene Fx</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="addFxSeqButton">
+              <property name="text">
+               <string>Add Fx Sequence</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

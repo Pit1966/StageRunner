@@ -51,6 +51,7 @@ public slots:
 	void showErrorMsg(QString where, QString text);
 	void setApplicationGuiStyle(QString style);
 	void updateButtonStyles(QString style = "");
+	void openFxPropertyEditor(FxItem *item);
 
 private slots:
 	void on_addAudioFxButton_clicked();
@@ -69,14 +70,12 @@ private slots:
 	void on_actionInput_Assign_Mode_triggered(bool checked);
 	void on_cloneSelectedSceneButton_clicked();
 	void on_addAudioPlayListButton_clicked();
-
 	void on_addAudioTrackButton_clicked();
-
 	void on_executeAudioPlayListButton_clicked();
-
 	void on_actionInitialize_plugins_DMX_triggered();
-
 	void on_actionInfo_triggered();
+
+	void on_addFxSeqButton_clicked();
 
 private:
 	void init();

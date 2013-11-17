@@ -21,6 +21,7 @@
 
 #include <QSettings>
 #include "mididevice.h"
+#include "../../../config.h"
 
 #define SETTINGS_MIDICHANNEL "midiplugin/%1/midichannel"
 #define SETTINGS_MODE "midiplugin/%1/mode"
@@ -33,28 +34,29 @@
  ****************************************************************************/
 
 MidiDevice::MidiDevice(const QVariant& uid, const QString& name, QObject* parent)
-    : QObject(parent)
-    , m_uid(uid)
-    , m_name(name)
-    , m_midiChannel(0)
-    , m_mode(ControlChange)
+	: QObject(parent)
+	, m_uid(uid)
+	, m_name(name)
+	, m_midiChannel(0)
+	, m_mode(ControlChange)
 {
-    loadSettings();
+	loadSettings();
 }
 
 MidiDevice::~MidiDevice()
 {
-    saveSettings();
+#pragma message("save Settings disabled for MidiDevice")
+	// saveSettings();
 }
 
 QVariant MidiDevice::uid() const
 {
-    return m_uid;
+	return m_uid;
 }
 
 QString MidiDevice::name() const
 {
-    return m_name;
+	return m_name;
 }
 
 /****************************************************************************
@@ -63,12 +65,12 @@ QString MidiDevice::name() const
 
 void MidiDevice::setMidiChannel(int channel)
 {
-    m_midiChannel = channel;
+	m_midiChannel = channel;
 }
 
 int MidiDevice::midiChannel() const
 {
-    return m_midiChannel;
+	return m_midiChannel;
 }
 
 /****************************************************************************
@@ -77,34 +79,34 @@ int MidiDevice::midiChannel() const
 
 void MidiDevice::setMode(MidiDevice::Mode mode)
 {
-    m_mode = mode;
+	m_mode = mode;
 }
 
 MidiDevice::Mode MidiDevice::mode() const
 {
-    return m_mode;
+	return m_mode;
 }
 
 QString MidiDevice::modeToString(Mode mode)
 {
-    switch (mode)
-    {
-    default:
-    case ControlChange:
-        return QString(CONTROL_CHANGE);
-        break;
-    case Note:
-        return QString(NOTE_VELOCITY);
-        break;
-    }
+	switch (mode)
+	{
+	default:
+	case ControlChange:
+		return QString(CONTROL_CHANGE);
+		break;
+	case Note:
+		return QString(NOTE_VELOCITY);
+		break;
+	}
 }
 
 MidiDevice::Mode MidiDevice::stringToMode(const QString& mode)
 {
    if (mode == QString(NOTE_VELOCITY))
-        return Note;
-    else
-        return ControlChange;
+		return Note;
+	else
+		return ControlChange;
 }
 
 /****************************************************************************
@@ -113,30 +115,31 @@ MidiDevice::Mode MidiDevice::stringToMode(const QString& mode)
 
 void MidiDevice::loadSettings()
 {
-    QSettings settings;
+	QSettings settings(APP_ORG_STRING,QString("%1_QLCMidiPlugin").arg(APP_NAME));
 
-    QString key = QString(SETTINGS_MIDICHANNEL).arg(uid().toString());
-    QVariant value = settings.value(key);
-    if (value.isValid() == true)
-        setMidiChannel(value.toInt());
-    else
-        setMidiChannel(0);
+	QString key = QString(SETTINGS_MIDICHANNEL).arg(uid().toString());
+	QVariant value = settings.value(key);
+	if (value.isValid() == true)
+		setMidiChannel(value.toInt());
+	else
+		setMidiChannel(0);
 
-    key = QString(SETTINGS_MODE).arg(uid().toString());
-    value = settings.value(key);
-    if (value.isValid() == true)
-        setMode(stringToMode(value.toString()));
-    else
-        setMode(ControlChange);
+	key = QString(SETTINGS_MODE).arg(uid().toString());
+	value = settings.value(key);
+	if (value.isValid() == true)
+		setMode(stringToMode(value.toString()));
+	else
+		setMode(ControlChange);
 }
 
 void MidiDevice::saveSettings() const
 {
-    QSettings settings;
+	qDebug("MidiDevice Save settings");
+	QSettings settings(APP_ORG_STRING,QString("%1_QLCMidiPlugin").arg(APP_NAME));
 
-    QString key = QString(SETTINGS_MIDICHANNEL).arg(uid().toString());
-    settings.setValue(key, midiChannel());
+	QString key = QString(SETTINGS_MIDICHANNEL).arg(uid().toString());
+	settings.setValue(key, midiChannel());
 
-    key = QString(SETTINGS_MODE).arg(uid().toString());
-    settings.setValue(key, MidiDevice::modeToString(mode()));
+	key = QString(SETTINGS_MODE).arg(uid().toString());
+	settings.setValue(key, MidiDevice::modeToString(mode()));
 }

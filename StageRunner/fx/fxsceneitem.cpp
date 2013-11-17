@@ -25,6 +25,7 @@ FxSceneItem::FxSceneItem(const FxSceneItem &o)
 void FxSceneItem::init()
 {
 	myFxType = FX_SCENE;
+	myclass = PrefVarCore::FX_SCENE_ITEM;
 	myStatus = SCENE_IDLE;
 	my_last_status = SCENE_IDLE;
 	for (int t=0; t<MIX_LINES; t++) {
@@ -48,6 +49,26 @@ FxSceneItem::~FxSceneItem()
 	while (tubes.size()) {
 		delete tubes.takeFirst();
 	}
+}
+
+qint32 FxSceneItem::fadeInTime()
+{
+	return defaultFadeInTime;
+}
+
+void FxSceneItem::setFadeInTime(qint32 val)
+{
+	defaultFadeInTime = val;
+}
+
+qint32 FxSceneItem::fadeOutTime()
+{
+	return defaultFadeOutTime;
+}
+
+void FxSceneItem::setFadeOutTime(qint32 val)
+{
+	defaultFadeOutTime = val;
 }
 
 void FxSceneItem::createDefaultTubes(int tubecount)

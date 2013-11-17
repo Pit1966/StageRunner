@@ -2,6 +2,7 @@
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
 #include "fxplaylistitem.h"
+#include "fxseqitem.h"
 
 #include <QMutableListIterator>
 
@@ -182,6 +183,16 @@ bool FxList::addFxAudioPlayList()
 	return false;
 }
 
+bool FxList::addFxSequence()
+{
+	FxItem *fx = addFx(FX_SEQUENCE);
+	if (fx) {
+		fx->setName("FX Sequence");
+		return true;
+	}
+	return false;
+}
+
 void FxList::moveFromTo(int srcidx, int destidx)
 {
 	FxItem *xitem = 0;
@@ -291,6 +302,14 @@ FxItem *FxList::addFx(int fxtype, int option)
 	case FX_AUDIO_PLAYLIST:
 		{
 			FxPlayListItem *fx = new FxPlayListItem();
+			fx->refCount.ref();
+			fx_list.append(fx);
+			modified_f = true;
+			return fx;
+		}
+	case FX_SEQUENCE:
+		{
+			FxSeqItem *fx = new FxSeqItem();
 			fx->refCount.ref();
 			fx_list.append(fx);
 			modified_f = true;

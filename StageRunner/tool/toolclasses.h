@@ -343,6 +343,7 @@ public:
 
 
 
+
 #ifdef USE_SAFE_MUTEX
 
 class SafeMutexData
@@ -512,4 +513,23 @@ inline SafeMutexData::~SafeMutexData() {}
 #endif
 
 
+	
+class MutexQListLocker
+{
+private:
+	SafeMutex * mutexRef;
+
+public:
+	template <typename T> MutexQListLocker ( MutexQList<T> & list)
+		: mutexRef(list.mutex)
+	{
+
+	}
+	~MutexQListLocker()
+	{
+		mutexRef->unlock();
+	}
+};
+	
+	
 #endif //TOOLCLASSES_H

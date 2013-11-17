@@ -21,7 +21,6 @@ public:
 	FxItemPropertyWidget(QWidget *parent = 0);
 	bool isOnceEdit() {return once_edit_f;}
 
-
 public slots:
 	bool setFxItem(FxItem *fx);
 	void setEditable(bool state, bool once = false);

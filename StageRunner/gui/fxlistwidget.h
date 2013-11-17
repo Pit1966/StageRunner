@@ -13,6 +13,7 @@ class FxItem;
 class FxSceneItem;
 class FxListWidgetItem;
 class FxPlayListItem;
+class FxSeqItem;
 class Executer;
 
 using namespace AUDIO;
@@ -26,6 +27,8 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 private:
 	bool is_modified_f;
 	bool is_editable_f;
+	bool show_ids_f;
+	bool show_fadetimes_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	FxListWidgetItem* cur_clicked_item;
@@ -57,6 +60,7 @@ private:
 	void closeEvent(QCloseEvent *);
 	void open_scence_desk(FxSceneItem *fx);
 	void open_audio_list_widget(FxPlayListItem *fx);
+	void open_sequence_list_widget(FxSeqItem *fx);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);
@@ -92,6 +96,7 @@ private slots:
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);
 	void fxItemSelected(FxItem *);
+	void fxItemSelectedForEdit(FxItem *);
 	void dropEventReceived(QString text, int row);
 	void listModified();
 	void editableChanged(bool state);

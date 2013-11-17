@@ -47,7 +47,10 @@ public:
 		PLUGIN_CONFIG,
 		MESSAGE,
 		MESSAGE_HUB,
-		FX_AUDIO_ITEM
+		FX_AUDIO_ITEM,
+		FX_SCENE_ITEM,
+		FX_PLAYLIST_ITEM,
+		FX_SEQUENCE_ITEM
 	};
 
 	/**
@@ -65,8 +68,8 @@ protected:
 	QString dispname;			///< Anzeigename der Variable auf der Oberfläche
 	QString description;		///< Beschreibung der Variable
 	PrefVarType mytype;			///< Der Type der Variable
-	VarClass myclass;			///< Die Variablen Klasse (wo wird sie verwendet)
-	QString myclassname;		///< Noch ein Bezeichner für die Klasse
+	VarClass contextClass;		///< This is class context of the PrefVar instance. Could be a VarSet class that contains the instance.
+
 	bool initialized_f;			///< true, falls die Variable initialisiert wurde
 	bool modified_f;			///< Variable wurde modifiziert
 	Function function;			///< zeigt an, dass es sich um eine Funktionsvariable handelt
@@ -79,11 +82,17 @@ private:
 	QList<VarSet *> parent_var_sets;						///< Variable ist Member dieser Variablensätze, bzw. Objecte
 
 	static MutexQList<PrefVarCore *> *glob_var_list;		///< globale Liste mit allen Variablen
+	static MutexQHash<QString,VarClass> *classMapping;
 	static int instance_cnt;								///< Zähler über instanzierte Objekte
 
 public:
 	PrefVarCore(PrefVarType type, const QString & name = "");
 	~PrefVarCore();
+
+	static void registerVarClasses();
+	static VarClass getVarClass(const QString &className);
+	static QString getVarClassName(VarClass varClass);
+
 
 	inline bool isModified() {return modified_f;}
 	inline void setModified(bool state) {modified_f = state;}
@@ -104,8 +113,7 @@ public:
 	inline QVariant pValue() const {return get_value();}
 	inline QVariant pDefaultValue() const {return get_default();}
 	inline void pSetValue(QVariant val) {set_value(val);}
-	inline VarClass varClass() {return myclass;}
-	inline const QString & varClassName() {return myclassname;}
+	inline VarClass varClass() {return contextClass;}
 	/**
 	 * @brief Prüfen, ob Variable beim Laden aus File vorhanden war
 	 * @return true, falls Variablenname im File steht

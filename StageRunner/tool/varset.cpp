@@ -38,9 +38,9 @@ QAtomicInt VarSet::instance_cnt = 0;
 VarSet::VarSet()
 {
 	init();
+	// This is the base class, that should be changed in derived classes
 	myclass = PrefVarCore::VAR_SET_CLASS;
 	modified_f = false;
-
 }
 
 VarSet::VarSet(const VarSet &other)
@@ -135,11 +135,12 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 
 	if (curKey.startsWith('[')) {
 		// Analyzing a new sub class
-		// Line format: [class][id][index]
+		// Line format: [class[className]][id][index]
 		QString b1;
 		QString b2;
 		QString b3;
-		QStringList parts = key.split('[',QString::SkipEmptyParts);
+		QString b1a;
+		QStringList parts = key.split("][",QString::SkipEmptyParts);
 		switch (parts.size()) {
 		case 3:
 			curIndex = parts[2].remove(QChar(']')).trimmed();
@@ -150,7 +151,14 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 			b2 = curProjectid;
 			if (debug > 2) qDebug() << "VarSet:: Bracket Header 2:" << curProjectid;
 		case 1:
-			curClassname = parts[0].remove(QChar(']')).trimmed();
+			curClassname = parts[0].remove(QChar(']')).trimmed().mid(1);
+			if (curClassname.contains(QChar('['))) {
+				b1 = curClassname.section(QChar('['),0,0);
+				b1a = curClassname.section(QChar('['),1,1);
+				curClassname = b1;
+				qDebug() << b1a;
+			}
+
 			b1 = curClassname;
 			if (debug > 2) qDebug() << "VarSet:: Bracket Header 1:" << curClassname;
 
@@ -163,7 +171,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 					curChildItemClass.clear();
 					return 0;
 				} else {
-					if (debug > 2) qDebug() << "Child list parent end";
+					/*if (debug > 2)*/ qDebug() << "Child list parent end";
 					// End Recursion
 					read.seek(seek);
 					(*p_line_number)--;
@@ -184,7 +192,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							PrefVarCore *var = varset->var_list.at(t);
 							if (var->myname == curChildListName) {
 								/// implement new VarSetList Types here
-								if (var->myclass == PrefVarCore::DMX_CHANNEL) {
+								if (var->contextClass == PrefVarCore::DMX_CHANNEL) {
 									VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
 									DmxChannel *item = new DmxChannel;
 									varsetlist->append(item);
@@ -194,7 +202,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 										return 0;
 									}
 								}
-								else if (var->myclass == PrefVarCore::PLUGIN_CONFIG) {
+								else if (var->contextClass == PrefVarCore::PLUGIN_CONFIG) {
 									VarSetList<PluginConfig*> *varsetlist = reinterpret_cast<VarSetList<PluginConfig*>*>(var->p_refvar);
 									PluginConfig *item = new PluginConfig;
 									varsetlist->append(item);
@@ -204,7 +212,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 										return 0;
 									}
 								}
-								else if (var->myclass == PrefVarCore::MESSAGE) {
+								else if (var->contextClass == PrefVarCore::MESSAGE) {
 									VarSetList<VMsg*> *varsetlist = reinterpret_cast<VarSetList<VMsg*>*>(var->p_refvar);
 									VMsg *item = new VMsg;
 									varsetlist->append(item);
@@ -214,7 +222,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 										return 0;
 									}
 								}
-								else if (var->myclass == PrefVarCore::FX_AUDIO_ITEM) {
+								else if (var->contextClass == PrefVarCore::FX_AUDIO_ITEM) {
 									VarSetList<FxAudioItem*> *varsetlist = reinterpret_cast<VarSetList<FxAudioItem*>*>(var->p_refvar);
 									FxAudioItem *item = new FxAudioItem;
 									varsetlist->append(item);
@@ -223,6 +231,9 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 									} else {
 										return 0;
 									}
+								}
+								else if (var->contextClass == PrefVarCore::FX_ITEM) {
+
 								}
 							}
 						}
@@ -404,7 +415,7 @@ bool VarSet::addExistingVar(pint32 &var, const QString &name, qint32 p_min, qint
 
 	var.initPara(name, p_min, p_max, p_default, descrip);
 	var.parent_var_sets.append(this);
-	var.myclass = myclass;
+	var.contextClass = myclass;
 
 	return true;
 }
@@ -420,7 +431,7 @@ bool VarSet::addExistingVar(pint64 &var, const QString &name, qint64 p_min, qint
 
 	var.initPara(name, p_min, p_max, p_default, descrip);
 	var.parent_var_sets.append(this);
-	var.myclass = myclass;
+	var.contextClass = myclass;
 
 	return true;
 }
@@ -435,7 +446,7 @@ bool VarSet::addExistingVar(pstring &var, const QString & name, const QString & 
 
 	var.initPara(name, p_default, descrip);
 	var.parent_var_sets.append(this);
-	var.myclass = myclass;
+	var.contextClass = myclass;
 
 	return true;
 }
@@ -450,7 +461,7 @@ bool VarSet::addExistingVar(pbool &var, const QString &name, bool p_default, con
 
 	var.initPara(name, p_default, descrip);
 	var.parent_var_sets.append(this);
-	var.myclass = myclass;
+	var.contextClass = myclass;
 
 	return true;
 }
@@ -462,7 +473,7 @@ bool VarSet::addExistingVar(qint32 &var, const QString &name, qint32 p_min, qint
 	pint32 *newvar = new pint32;
 	newvar->initPara(name,p_min,p_max,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
+	newvar->contextClass = myclass;
 	newvar->p_refvar = (void*)&var;
 	var_list.lockAppend(newvar);
 
@@ -477,7 +488,7 @@ bool VarSet::addExistingVar(qint64 &var, const QString &name, qint64 p_min, qint
 	pint64 *newvar = new pint64;
 	newvar->initPara(name,p_min,p_max,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
+	newvar->contextClass = myclass;
 	newvar->p_refvar = (void*)&var;
 	var_list.lockAppend(newvar);
 
@@ -492,7 +503,7 @@ bool VarSet::addExistingVar(bool &var, const QString &name, bool p_default, cons
 	pbool *newvar = new pbool;
 	newvar->initPara(name,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
+	newvar->contextClass = myclass;
 	newvar->p_refvar = (void*)&var;
 	var_list.lockAppend(newvar);
 
@@ -507,7 +518,7 @@ bool VarSet::addExistingVar(QString & var, const QString &name, const QString &p
 	pstring *newvar = new pstring;
 	newvar->initPara(name,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
+	newvar->contextClass = myclass;
 	newvar->p_refvar = (void *) &var;
 	var_list.lockAppend(newvar);
 	// Default Wert in existierender Variable setzen
@@ -520,7 +531,7 @@ bool VarSet::addExistingVar(VarSet &var, const QString &name, const QString &des
 	if (exists(name)) return false;
 	PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET,name);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = var.myclass;
+	newvar->contextClass = var.myclass;
 	newvar->p_refvar = (void *) &var;
 	newvar->function = PrefVarCore::FUNC_VARSET;
 	newvar->description = descrip;
@@ -535,8 +546,7 @@ pint32 * VarSet::addDynamicPint32(const QString &name, qint32 p_min, qint32 p_ma
 	pint32 *newvar = new pint32;
 	newvar->initPara(name,p_min,p_max,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
-	newvar->myclassname = myclassname;
+	newvar->contextClass = myclass;
 	var_list.lockAppend(newvar);
 
 	return newvar;
@@ -548,8 +558,7 @@ pint64 * VarSet::addDynamicPint64(const QString &name, qint64 p_min, qint64 p_ma
 	pint64 *newvar = new pint64;
 	newvar->initPara(name,p_min,p_max,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
-	newvar->myclassname = myclass;
+	newvar->contextClass = myclass;
 	var_list.lockAppend(newvar);
 
 	return newvar;
@@ -561,8 +570,7 @@ pstring * VarSet::addDynamicPstring(const QString &name, const QString &p_defaul
 	pstring *newvar = new pstring;
 	newvar->initPara(name,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
-	newvar->myclassname = myclass;
+	newvar->contextClass = myclass;
 	var_list.lockAppend(newvar);
 
 	return newvar;
@@ -574,8 +582,7 @@ pbool * VarSet::addDynamicPbool(const QString &name, bool p_default, const QStri
 	pbool *newvar = new pbool;
 	newvar->initPara(name,p_default,descrip);
 	newvar->parent_var_sets.append(this);
-	newvar->myclass = myclass;
-	newvar->myclassname = myclassname;
+	newvar->contextClass = myclass;
 	var_list.lockAppend(newvar);
 
 	return newvar;
@@ -588,8 +595,7 @@ pstring *VarSet::addDynamicFunction(const QString &func_name, const QString &fun
 	pstring *newvar = new pstring;
 	newvar->initPara(varname, func_name, func_para);
 	newvar->function = PrefVarCore::FUNC_FUNCTION;
-	newvar->myclass = myclass;
-	newvar->myclassname = myclassname;
+	newvar->contextClass = myclass;
 	var_list.lockAppend(newvar);
 
 	return newvar;
@@ -675,7 +681,7 @@ int VarSet::find(const PrefVarCore *other)
 	int idx = 0;
 	while (!found && idx<var_list.size()) {
 		PrefVarCore * here = var_list.at(idx);
-		if (other->myclass == here->myclass && other->mytype == here->mytype && other->myname == here->myname) {
+		if (other->contextClass == here->contextClass && other->mytype == here->mytype && other->myname == here->myname) {
 			found = true;
 		} else {
 			idx++;
@@ -806,7 +812,7 @@ void VarSet::debugListVars()
 {
 	for (int t=0; t<var_list.size(); t++) {
 		PrefVarCore * varcore = var_list.at(t);
-		qDebug() << varcore->myname << varcore->mytype << varcore->myclass;
+		qDebug() << varcore->myname << varcore->mytype << varcore->contextClass;
 	}
 }
 
@@ -953,11 +959,20 @@ bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_e
 		for (int i=0; i<child_level; i++) {
 			write << "  ";
 		}
-		write << "[" << myclassname << "]";
+		write << "[" << myclassname << "[" << PrefVarCore::getVarClassName(myclass) << "]]";
 		if (db_vset_projectid > 0 || db_vset_index > 0) {
-			write << "[" << db_vset_projectid << "]";
+			if (db_vset_projectid > 0) {
+				write << "[" << db_vset_projectid << "]";
+			} else {
+				write << "[]";
+			}
 			if (db_vset_index > 0) {
 				write << "[" << db_vset_index << "]";
+			} else {
+				write << "[]";
+			}
+			if (myclass != PrefVarCore::NO_CLASS) {
+			// 	write << "[" << myclass << "]";
 			}
 		}
 		write << "\n";

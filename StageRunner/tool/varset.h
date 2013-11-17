@@ -52,10 +52,12 @@ protected:
 	bool curChildActive;
 	bool curChildItemFound;
 
+	// Essential vars
+	PrefVarCore::VarClass myclass;			///< Die Klasse des Sets, gibt an, wo die Variablen Verwendung finden
+	QString myclassname;					///< The class name string
+
 private:
 	MutexQList<PrefVarCore *>var_list;		///< Die Liste mit allen Variablen, die zu diesem Set gehören
-	PrefVarCore::VarClass myclass;			///< Die Klasse des Sets, gibt an, wo die Variablen Verwendung finden
-	QString myclassname;
 	QString name;							///< Der Name des Sets
 	QString description;					///< Beschreibung des Sets
 
@@ -116,7 +118,7 @@ public:
 			if (exists(name)) return false;
 			PrefVarCore *newvar = new PrefVarCore(PrefVarCore::VARSET_LIST,name);
 			newvar->parent_var_sets.append(this);
-			newvar->myclass = p_class;
+			newvar->contextClass = p_class;
 			newvar->p_refvar = (void *) &var;
 			newvar->function = PrefVarCore::FUNC_VARSET_LIST_HEADER;
 			var_list.lockAppend(newvar);

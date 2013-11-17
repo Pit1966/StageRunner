@@ -56,6 +56,7 @@ public:
 	bool addFxAudioSimple(const QString & path, int pos = -1);
 	bool addFxScene(int tubes = 1);
 	bool addFxAudioPlayList();
+	bool addFxSequence();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);

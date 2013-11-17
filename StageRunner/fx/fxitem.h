@@ -13,6 +13,7 @@ enum FxType {
 	FX_AUDIO,				// is Audio Fx
 	FX_SCENE,				// is Light Scene
 	FX_AUDIO_PLAYLIST,		// is Audio Play List
+	FX_SEQUENCE,			// is a Sequence of FxItems
 
 	FX_SIZE
 };
@@ -56,6 +57,11 @@ public:
 	void hookToInput(qint32 universe, qint32 channel);
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
+
+	virtual qint32 fadeInTime() = 0;
+	virtual void setFadeInTime(qint32 val) = 0;
+	virtual qint32 fadeOutTime() = 0;
+	virtual void setFadeOutTime(qint32 val) = 0;
 
 private:
 	void init();

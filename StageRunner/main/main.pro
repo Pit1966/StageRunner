@@ -90,7 +90,8 @@ SOURCES += \
     ../fx/fxitemtool.cpp \
     ../fx/execcenter.cpp \
     ../fx/executer.cpp \
-    ../fx/fxitemobj.cpp
+    ../fx/fxitemobj.cpp \
+    ../fx/fxseqitem.cpp
 
 HEADERS  += \
 	../config.h \
@@ -151,7 +152,8 @@ HEADERS  += \
     ../fx/fxitemtool.h \
     ../fx/execcenter.h \
     ../fx/executer.h \
-    ../fx/fxitemobj.h
+    ../fx/fxitemobj.h \
+    ../fx/fxseqitem.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

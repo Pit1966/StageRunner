@@ -49,6 +49,18 @@ void FxListWidgetItem::setText(const QString &txt)
 	itemEdit->setText(txt);
 }
 
+QSize FxListWidgetItem::sizeHint()
+{
+	qDebug("sizeHint");
+	return QSize(20,20);
+}
+
+QSize FxListWidgetItem::minimumSizeHint()
+{
+	qDebug("minimumSizeHint");
+	return QSize();
+}
+
 void FxListWidgetItem::init()
 {
 	current_button = 0;

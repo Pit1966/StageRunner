@@ -61,6 +61,7 @@ void StageRunnerMainWin::initConnects()
 
 	// Project FxListWidget <-> Fx Editor (Dock Widget)
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
+	connect(fxListWidget,SIGNAL(fxItemSelectedForEdit(FxItem*)),this,SLOT(openFxPropertyEditor(FxItem*)));
 	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
 
 	// Audio Control Panel <-> Audio Control
@@ -151,6 +152,13 @@ void StageRunnerMainWin::updateButtonStyles(QString style)
 		dial->setStyle(dialWidgetStyle);
 		dial->setDialMode(qsynthKnob::LinearMode);
 	}
+}
+
+void StageRunnerMainWin::openFxPropertyEditor(FxItem *item)
+{
+	fxitem_editor_dock->show();
+	fxItemEditor->setFxItem(item);
+	fxItemEditor->setEditable(true,true);
 }
 
 /**
@@ -510,6 +518,12 @@ void StageRunnerMainWin::on_addAudioPlayListButton_clicked()
 	fxListWidget->refreshList();
 }
 
+void StageRunnerMainWin::on_addFxSeqButton_clicked()
+{
+	appCentral->project->fxList->addFxSequence();
+	fxListWidget->refreshList();
+}
+
 void StageRunnerMainWin::on_addAudioTrackButton_clicked()
 {
 	FxItem *fx = appCentral->project->fxList->nextFx();
@@ -544,3 +558,4 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 	QMessageBox::information(this,tr("About Info"),msg);
 
 }
+

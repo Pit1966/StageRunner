@@ -9,6 +9,8 @@
 
 int main(int argc, char *argv[])
 {
+	PrefVarCore::registerVarClasses();
+
 	QApplication app(argc, argv);
 
 	app.setApplicationName(APP_NAME);
