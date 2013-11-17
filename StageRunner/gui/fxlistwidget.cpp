@@ -158,6 +158,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 		if (show_ids_f) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
 			item->setNeverEditable(true);
+			item->itemEdit->setMinimized(true);
 			item->myRow = t;
 			item->myColumn = col;
 			fxTable->setCellWidget(t,col++,item);
@@ -433,7 +434,7 @@ void FxListWidget::init()
 	is_modified_f = false;
 	is_editable_f = false;
 	show_fadetimes_f = true;
-	show_ids_f = false;
+	show_ids_f = true;
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
 	origin_fxitem = 0;

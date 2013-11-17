@@ -49,15 +49,15 @@ protected:
 	QString curValue;
 	QString curChildListName;
 	QString curChildItemClass;
+	QString curContextClassName;
 	bool curChildActive;
-	bool curChildItemFound;
 
 	// Essential vars
 	PrefVarCore::VarClass myclass;			///< Die Klasse des Sets, gibt an, wo die Variablen Verwendung finden
 	QString myclassname;					///< The class name string
+	MutexQList<PrefVarCore *>varList;		///< Die Liste mit allen Variablen, die zu diesem Set gehören
 
 private:
-	MutexQList<PrefVarCore *>var_list;		///< Die Liste mit allen Variablen, die zu diesem Set gehören
 	QString name;							///< Der Name des Sets
 	QString description;					///< Beschreibung des Sets
 
@@ -69,6 +69,7 @@ private:
 	bool is_db_table_registered_f;			///< Ist mit registerDatabaseTable registriert worden
 	int function_count;						///< Zähler für spezielle Funktionsvariablen (Variablenname wird "function|{$function_count}")
 	bool cancel_file_analyze_on_empty_line;	///< Die Analyse eines VarSetFiles wird ohne Fehler abgebrochen, wenn eine Leerzeile auftaucht
+	bool leave_child_level_on_empty_line;
 
 	// Varwaltung aller VarSets
 	static QAtomicInt instance_cnt;					///< Soviele VarSet Instanzen gibt es
@@ -121,7 +122,7 @@ public:
 			newvar->contextClass = p_class;
 			newvar->p_refvar = (void *) &var;
 			newvar->function = PrefVarCore::FUNC_VARSET_LIST_HEADER;
-			var_list.lockAppend(newvar);
+			varList.lockAppend(newvar);
 			return true;
 	}
 
@@ -133,7 +134,7 @@ public:
 	pbool * addDynamicPbool(const QString & name, bool p_default = false, const QString & descrip = "");
 	pstring * addDynamicFunction(const QString & func_name, const QString & func_para);
 
-	inline bool contains(PrefVarCore * varcore) {return var_list.lockContains(varcore);}
+	inline bool contains(PrefVarCore * varcore) {return varList.lockContains(varcore);}
 	bool removeOne(PrefVarCore * varcore);
 
 	bool exists(const QString & name);
@@ -154,7 +155,7 @@ public:
 	void setVar(const QString & name, qint64 val);
 	void setVar(const QString & name, const QString & str);
 
-	int elements() {return var_list.size();}
+	int elements() {return varList.size();}
 
 	/**
 	 * @brief setName Den Klassentyp und -namen des VarSets festlegen
@@ -204,6 +205,7 @@ private:
 	void clear_var_list();
 	void init();
 	bool file_save_append(QTextStream &write, int child_level, bool append_empty_line);
+	QString child_indent_str(int childLevel);
 
 };
 

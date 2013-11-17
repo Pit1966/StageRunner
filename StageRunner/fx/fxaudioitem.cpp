@@ -9,6 +9,13 @@ FxAudioItem::FxAudioItem()
 	init();
 }
 
+FxAudioItem::FxAudioItem(const FxAudioItem &o)
+	: FxItem()
+{
+	init();
+	cloneFrom(o);
+}
+
 FxAudioItem::FxAudioItem(const QString &path)
 	: FxItem()
 {
@@ -43,7 +50,6 @@ qint32 FxAudioItem::fadeOutTime()
 
 void FxAudioItem::setFadeOutTime(qint32)
 {
-
 }
 
 void FxAudioItem::init()

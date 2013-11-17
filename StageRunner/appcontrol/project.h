@@ -17,6 +17,7 @@ private:
 
 protected:
 	pint64 pProjectId;
+	pint32 pProjectFormat;
 	pstring pProjectName;
 	pstring pComment;
 

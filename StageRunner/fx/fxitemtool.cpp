@@ -21,6 +21,9 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 			FxAudioItem *new_fxaudio = new FxAudioItem(*fxaudio);
 			new_fxaudio->refCount.ref();
 			newFx = new_fxaudio;
+
+			new_fxaudio->setName(fxaudio->name() + "_cp");
+			new_fxaudio->setKeyCode(0);
 		}
 		break;
 	case FX_SCENE:
@@ -29,6 +32,9 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 			FxSceneItem *new_scene = new FxSceneItem(*scene);
 			new_scene->refCount.ref();
 			newFx = new_scene;
+
+			new_scene->setName(scene->name() + "_cp");
+			new_scene->setKeyCode(0);
 		}
 		break;
 	case FX_AUDIO_PLAYLIST:

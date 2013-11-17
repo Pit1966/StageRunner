@@ -1,4 +1,5 @@
 #include "project.h"
+#include "config.h"
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
@@ -23,26 +24,19 @@ void Project::clear()
 {
 	pProjectName = "Default Project";
 	pProjectId = QDateTime::currentDateTime().toTime_t();
+	pProjectFormat = 0;
 
 	if (fxList->size()) fxList->clear();
 }
 
 bool Project::saveToFile(const QString &path)
 {
+	pProjectFormat = PROJECT_FORMAT;
+
 	bool ok = fileSave(path, false, true);
 
 	if (ok) {
 		curProjectFilePath = path;
-		for (int t=0; t<fxList->size(); t++) {
-			FxItem *fx = fxList->at(t);
-			fx->setDatabaseReferences((qint64)pProjectId,t+1);
-			// append to previously saved file
-			ok = fx->fileSave(path, true, true);
-		}
-
-	}
-
-	if (ok) {
 		fxList->setModified(false);
 		setModified(false);
 	}
@@ -53,12 +47,14 @@ bool Project::saveToFile(const QString &path)
 
 bool Project::loadFromFile(const QString &path)
 {
-	setFileLoadCancelOnEmptyLine(true);
-	bool ok = fileLoad(path);
+	clearCurrentVars();
 	setFileLoadCancelOnEmptyLine(false);
 
+	bool ok = fileLoad(path);
+
+	if (pProjectFormat >= 2) return ok;
+
 	// Now try to load FxItem VarSets (with classname "FxItem")
-	clearCurrentVars();
 	QFile file(path);
 	FxItem *fx = 0;
 	int line_number = 0;
@@ -143,10 +139,11 @@ void Project::init()
 	setDescription("This VarSet holds configuration data for a single project");
 
 	addExistingVar(pProjectId,"ProjectId");
+	addExistingVar(pProjectFormat,"ProjectFormat");
 	addExistingVar(pProjectName,"ProjectName");
 	addExistingVar(pComment,"Comment");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 
+	addExistingVarSetList(fxList->nativeFxList(),"MainFxList",PrefVarCore::FX_ITEM);
 }
-
 

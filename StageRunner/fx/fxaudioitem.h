@@ -13,6 +13,7 @@ public:
 
 public:
 	FxAudioItem();
+	FxAudioItem(const FxAudioItem &o);
 	FxAudioItem(const QString &path);
 	void setFilePath(const QString &path);
 	qint32 fadeInTime();

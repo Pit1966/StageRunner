@@ -13,7 +13,6 @@ FxSceneItem::FxSceneItem(const FxSceneItem &o)
 	: FxItem()
 {
 	init();
-
 	cloneFrom(o);
 
 	for (int t=0; t<o.tubes.size(); t++) {

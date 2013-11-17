@@ -127,9 +127,10 @@ QString PrefVarCore::getVarClassName(PrefVarCore::VarClass varClass)
 void PrefVarCore::init()
 {
 	initialized_f = false;
+	modified_f = false;
+	doNotCopy = false;
 	p_refvar = 0;
 	contextClass = NO_CLASS;
-	modified_f = false;
 	function = FUNC_NORMAL;
 }
 

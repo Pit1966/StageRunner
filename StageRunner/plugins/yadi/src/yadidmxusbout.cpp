@@ -19,7 +19,8 @@ YadiDMXUSBOut::~YadiDMXUSBOut()
 {
 	// This removes the Device objects which
 	// are hold static in memory
-	YadiDeviceManager::clearYadiDevices();
+#pragma message("Add clearYadiDevices() again !!")
+	// YadiDeviceManager::clearYadiDevices();
 
 	if (debug) qDebug("~YadiDMXUSBOut");
 }

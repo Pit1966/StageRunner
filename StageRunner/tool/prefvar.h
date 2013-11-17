@@ -70,6 +70,7 @@ protected:
 	PrefVarType mytype;			///< Der Type der Variable
 	VarClass contextClass;		///< This is class context of the PrefVar instance. Could be a VarSet class that contains the instance.
 
+	bool doNotCopy;				///< If this flag is set the Var will not be copied if part of a VarSet
 	bool initialized_f;			///< true, falls die Variable initialisiert wurde
 	bool modified_f;			///< Variable wurde modifiziert
 	Function function;			///< zeigt an, dass es sich um eine Funktionsvariable handelt
@@ -93,6 +94,7 @@ public:
 	static VarClass getVarClass(const QString &className);
 	static QString getVarClassName(VarClass varClass);
 
+	inline void setDoNotCopy(bool state) {doNotCopy = state;}
 
 	inline bool isModified() {return modified_f;}
 	inline void setModified(bool state) {modified_f = state;}
