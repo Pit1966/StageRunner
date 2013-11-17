@@ -22,147 +22,147 @@
 #include <QtCore>
 
 #include "midiprotocol.h"
-#include "qlcmacros.h"
+// #include "qlcmacros.h"
 
 /****************************************************************************
  * MIDI conversion functions
  ****************************************************************************/
 
 bool QLCMIDIProtocol::midiToInput(uchar cmd, uchar data1, uchar data2,
-                                  uchar midiChannel, quint32* channel,
-                                  uchar* value)
+								  uchar midiChannel, quint32* channel,
+								  uchar* value)
 {
-    /* Check if cmd is a MIDI COMMAND byte */
-    if (!MIDI_IS_CMD(cmd))
-        return false;
+	/* Check if cmd is a MIDI COMMAND byte */
+	if (!MIDI_IS_CMD(cmd))
+		return false;
 
-    /** Use a special handler function for system common messages */
-    if (MIDI_IS_SYSCOMMON(cmd))
-        return midiSysCommonToInput(cmd, data1, data2, channel, value);
+	/** Use a special handler function for system common messages */
+	if (MIDI_IS_SYSCOMMON(cmd))
+		return midiSysCommonToInput(cmd, data1, data2, channel, value);
 
-    /* Check that the command came on the correct MIDI channel */
-    if (midiChannel <= 0xF && MIDI_CH(cmd) != midiChannel)
-        return false;
+	/* Check that the command came on the correct MIDI channel */
+	if (midiChannel <= 0xF && MIDI_CH(cmd) != midiChannel)
+		return false;
 
-    switch(MIDI_CMD(cmd))
-    {
-        case MIDI_NOTE_OFF:
-            *channel = CHANNEL_OFFSET_NOTE + quint32(data1);
-            *value = 0;
-            return true;
+	switch(MIDI_CMD(cmd))
+	{
+		case MIDI_NOTE_OFF:
+			*channel = CHANNEL_OFFSET_NOTE + quint32(data1);
+			*value = 0;
+			return true;
 
-        case MIDI_NOTE_ON:
-            *channel = CHANNEL_OFFSET_NOTE + quint32(data1);
-            *value = MIDI2DMX(data2);
-            return true;
+		case MIDI_NOTE_ON:
+			*channel = CHANNEL_OFFSET_NOTE + quint32(data1);
+			*value = MIDI2DMX(data2);
+			return true;
 
-        case MIDI_NOTE_AFTERTOUCH:
-            *channel = CHANNEL_OFFSET_NOTE_AFTERTOUCH + quint32(data1);
-            *value = MIDI2DMX(data2);
-            return true;
+		case MIDI_NOTE_AFTERTOUCH:
+			*channel = CHANNEL_OFFSET_NOTE_AFTERTOUCH + quint32(data1);
+			*value = MIDI2DMX(data2);
+			return true;
 
-        case MIDI_CONTROL_CHANGE:
-            *channel = CHANNEL_OFFSET_CONTROL_CHANGE + quint32(data1);
-            *value = MIDI2DMX(data2);
-            return true;
+		case MIDI_CONTROL_CHANGE:
+			*channel = CHANNEL_OFFSET_CONTROL_CHANGE + quint32(data1);
+			*value = MIDI2DMX(data2);
+			return true;
 
-        case MIDI_PROGRAM_CHANGE:
-            *channel = CHANNEL_OFFSET_PROGRAM_CHANGE;
-            *value = MIDI2DMX(data1);
-            return true;
+		case MIDI_PROGRAM_CHANGE:
+			*channel = CHANNEL_OFFSET_PROGRAM_CHANGE;
+			*value = MIDI2DMX(data1);
+			return true;
 
-        case MIDI_CHANNEL_AFTERTOUCH:
-            *channel = CHANNEL_OFFSET_CHANNEL_AFTERTOUCH;
-            *value = MIDI2DMX(data1);
-            return true;
+		case MIDI_CHANNEL_AFTERTOUCH:
+			*channel = CHANNEL_OFFSET_CHANNEL_AFTERTOUCH;
+			*value = MIDI2DMX(data1);
+			return true;
 
-        case MIDI_PITCH_WHEEL:
-            *channel = CHANNEL_OFFSET_PITCH_WHEEL;
-            *value = MIDI2DMX(data2);
-            return true;
+		case MIDI_PITCH_WHEEL:
+			*channel = CHANNEL_OFFSET_PITCH_WHEEL;
+			*value = MIDI2DMX(data2);
+			return true;
 
-        default:
-            return false;
-    }
+		default:
+			return false;
+	}
 }
 
 bool QLCMIDIProtocol::midiSysCommonToInput(uchar cmd, uchar data1, uchar data2,
-                                           quint32* channel, uchar* value)
+										   quint32* channel, uchar* value)
 {
-    Q_UNUSED(data1);
-    Q_UNUSED(data2);
+	Q_UNUSED(data1);
+	Q_UNUSED(data2);
 
-    switch (cmd)
-    {
-        case MIDI_BEATC_CLOCK:
-            *channel = CHANNEL_OFFSET_MBC;
-            *value = 127;
-            return true;
+	switch (cmd)
+	{
+		case MIDI_BEATC_CLOCK:
+			*channel = CHANNEL_OFFSET_MBC;
+			*value = 127;
+			return true;
 
-        default:
-            return false;
-    }
+		default:
+			return false;
+	}
 }
 
 bool QLCMIDIProtocol::feedbackToMidi(quint32 channel, uchar value,
-                                     uchar midiChannel, uchar* cmd,
-                                     uchar* data1, uchar* data2,
-                                     bool* data2Valid)
+									 uchar midiChannel, uchar* cmd,
+									 uchar* data1, uchar* data2,
+									 bool* data2Valid)
 {
-    if (channel >= CHANNEL_OFFSET_NOTE && channel <= CHANNEL_OFFSET_NOTE_MAX)
-    {
-        if (value == 0)
-            *cmd = MIDI_NOTE_OFF;
-        else
-            *cmd = MIDI_NOTE_ON;
-        *cmd |= midiChannel;
+	if (channel >= CHANNEL_OFFSET_NOTE && channel <= CHANNEL_OFFSET_NOTE_MAX)
+	{
+		if (value == 0)
+			*cmd = MIDI_NOTE_OFF;
+		else
+			*cmd = MIDI_NOTE_ON;
+		*cmd |= midiChannel;
 
-        *data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_NOTE);
-        *data2 = DMX2MIDI(value);
-        *data2Valid = true;
-    }
-    else if (/*channel >= CHANNEL_OFFSET_CONTROL_CHANGE &&*/
-             channel <= CHANNEL_OFFSET_CONTROL_CHANGE_MAX)
-    {
-        *cmd = MIDI_CONTROL_CHANGE | midiChannel;
-        *data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_CONTROL_CHANGE);
-        *data2 = DMX2MIDI(value);
-        *data2Valid = true;
-    }
-    else if (channel >= CHANNEL_OFFSET_NOTE_AFTERTOUCH &&
-             channel <= CHANNEL_OFFSET_NOTE_AFTERTOUCH_MAX)
-    {
-        *cmd = MIDI_NOTE_AFTERTOUCH | midiChannel;
-        *data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_NOTE_AFTERTOUCH);
-        *data2 = DMX2MIDI(value);
-        *data2Valid = true;
-    }
-    else if (channel == CHANNEL_OFFSET_CHANNEL_AFTERTOUCH)
-    {
-        *cmd = MIDI_CHANNEL_AFTERTOUCH | midiChannel;
-        *data1 = DMX2MIDI(value);
-        *data2Valid = false;
-    }
-    else if (channel == CHANNEL_OFFSET_PROGRAM_CHANGE)
-    {
-        *cmd = MIDI_PROGRAM_CHANGE | midiChannel;
-        *data1 = DMX2MIDI(value);
-        *data2Valid = false;
-    }
-    else if (channel == CHANNEL_OFFSET_PITCH_WHEEL)
-    {
-        *cmd = MIDI_PITCH_WHEEL | midiChannel;
-        *data1 = DMX2MIDI(value);
-        *data2Valid = false;
-    }
-    //else if (channel == MIDI_BEATC_CLOCK)
-    //{
-    //    Don't send feedback to MIDI clock
-    //}
-    else
-    {
-        return false;
-    }
+		*data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_NOTE);
+		*data2 = DMX2MIDI(value);
+		*data2Valid = true;
+	}
+	else if (/*channel >= CHANNEL_OFFSET_CONTROL_CHANGE &&*/
+			 channel <= CHANNEL_OFFSET_CONTROL_CHANGE_MAX)
+	{
+		*cmd = MIDI_CONTROL_CHANGE | midiChannel;
+		*data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_CONTROL_CHANGE);
+		*data2 = DMX2MIDI(value);
+		*data2Valid = true;
+	}
+	else if (channel >= CHANNEL_OFFSET_NOTE_AFTERTOUCH &&
+			 channel <= CHANNEL_OFFSET_NOTE_AFTERTOUCH_MAX)
+	{
+		*cmd = MIDI_NOTE_AFTERTOUCH | midiChannel;
+		*data1 = static_cast <uchar> (channel - CHANNEL_OFFSET_NOTE_AFTERTOUCH);
+		*data2 = DMX2MIDI(value);
+		*data2Valid = true;
+	}
+	else if (channel == CHANNEL_OFFSET_CHANNEL_AFTERTOUCH)
+	{
+		*cmd = MIDI_CHANNEL_AFTERTOUCH | midiChannel;
+		*data1 = DMX2MIDI(value);
+		*data2Valid = false;
+	}
+	else if (channel == CHANNEL_OFFSET_PROGRAM_CHANGE)
+	{
+		*cmd = MIDI_PROGRAM_CHANGE | midiChannel;
+		*data1 = DMX2MIDI(value);
+		*data2Valid = false;
+	}
+	else if (channel == CHANNEL_OFFSET_PITCH_WHEEL)
+	{
+		*cmd = MIDI_PITCH_WHEEL | midiChannel;
+		*data1 = DMX2MIDI(value);
+		*data2Valid = false;
+	}
+	//else if (channel == MIDI_BEATC_CLOCK)
+	//{
+	//    Don't send feedback to MIDI clock
+	//}
+	else
+	{
+		return false;
+	}
 
-    return true;
+	return true;
 }
