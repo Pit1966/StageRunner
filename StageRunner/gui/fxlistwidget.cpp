@@ -12,6 +12,7 @@
 #include "customwidget/pslineedit.h"
 #include "fxlistwidgetitem.h"
 #include "customwidget/extmimedata.h"
+#include "fxitempropertywidget.h"
 #include "fxplaylistitem.h"
 #include "fxplaylistwidget.h"
 #include "fxitemtool.h"
@@ -90,9 +91,23 @@ void FxListWidget::setFxList(FxList *fxlist)
 	if (show_ids_f) {
 		header << tr("Id");
 	}
-	if (show_fadetimes_f) {
-		header << tr("FadeIN") << tr("FadeOUT");
+
+	if (show_delays_f) {
+		header << tr("PreDelay");
 	}
+	if (show_fadetimes_f) {
+		header << tr("FadeIN");
+	}
+	if (show_delays_f) {
+		header << tr("Hold");
+	}
+	if (show_fadetimes_f) {
+		header << tr("FadeOUT");
+	}
+	if (show_delays_f) {
+		header << tr("PostDelay");
+	}
+
 
 	fxTable->setRowCount(rows);
 	fxTable->setColumnCount(header.size());
@@ -164,6 +179,15 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
+		if (show_delays_f) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->preDelay()),FxListWidgetItem::CT_PRE_DELAY);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+		}
+
 		if (show_fadetimes_f) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
 			item->myRow = t;
@@ -171,7 +195,18 @@ void FxListWidget::setFxList(FxList *fxlist)
 			item->itemEdit->setMinimized(true);
 			item->itemLabel->hide();
 			fxTable->setCellWidget(t,col++,item);
+		}
 
+		if (show_delays_f) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->holdTime()),FxListWidgetItem::CT_HOLD_TIME);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+		}
+
+		if (show_fadetimes_f) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeOutTime()),FxListWidgetItem::CT_FADEOUT_TIME);
 			item->myRow = t;
 			item->myColumn = col;
@@ -179,6 +214,16 @@ void FxListWidget::setFxList(FxList *fxlist)
 			item->itemLabel->hide();
 			fxTable->setCellWidget(t,col++,item);
 		}
+
+		if (show_delays_f) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->postDelay()),FxListWidgetItem::CT_POST_DELAY);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+		}
+
 	}
 	fxTable->resizeColumnsToContents();
 
@@ -188,6 +233,14 @@ void FxListWidget::setFxList(FxList *fxlist)
 	fxTable->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
 #endif
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
+	loopCheck->setChecked(fxlist->isLooped());
+	if (origin_fxitem) {
+		if (origin_fxitem->loopValue() > 0) {
+			loopCheck->setChecked(true);
+		} else {
+			loopCheck->setChecked(false);
+		}
+	}
 }
 
 void FxListWidget::setAutoProceedSequence(bool state)
@@ -195,6 +248,20 @@ void FxListWidget::setAutoProceedSequence(bool state)
 	if (myfxlist) {
 		autoProceedCheck->setChecked(state);
 		myfxlist->setAutoProceedSequence(state);
+	}
+}
+
+void FxListWidget::setLoop(int loops)
+{
+	if (myfxlist) {
+		if (loops > 0) {
+			loopCheck->setChecked(true);
+		} else {
+			loopCheck->setChecked(false);
+		}
+	}
+	if (origin_fxitem) {
+		origin_fxitem->setLoopValue(loops);
 	}
 }
 
@@ -302,7 +369,7 @@ FxListWidget *FxListWidget::findFxListWidget(FxList *fxList)
  * @param created Maybe a Pointer to bool that indicates if the widget was found or new created
  * @return Pointer to FxListWidget containing the fxList
  */
-FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, bool *created)
+FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created)
 {
 	// First Search for FxListWidget for a widget containing fxList
 	FxListWidget *wid = 0;
@@ -318,6 +385,7 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, bool *created)
 	// 2nd if we did not found the fxList we create a a new FxListWidget and assign the list to it
 	if (!wid) {
 		wid = new FxListWidget();
+		wid->setOriginFx(fxItem);
 		wid->setFxList(fxList);
 		if (created)
 			*created = true;
@@ -434,6 +502,7 @@ void FxListWidget::init()
 	is_modified_f = false;
 	is_editable_f = false;
 	show_fadetimes_f = true;
+	show_delays_f = true;
 	show_ids_f = true;
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
@@ -463,7 +532,7 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 {
 	bool new_created;
 
-	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, &new_created);
+	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, fx, &new_created);
 
 	// Let us look if an executer is running on this FxPlayListItem
 	if (new_created) {
@@ -486,7 +555,7 @@ void FxListWidget::open_sequence_list_widget(FxSeqItem *fx)
 {
 	bool new_created;
 
-	FxListWidget *sequencewid = FxListWidget::getCreateFxListWidget(fx->seqList, &new_created);
+	FxListWidget *sequencewid = FxListWidget::getCreateFxListWidget(fx->seqList, fx, &new_created);
 
 	// Let us look if an executer is running on this FxSequenceItem
 	if (new_created) {
@@ -721,6 +790,20 @@ void FxListWidget::on_autoProceedCheck_clicked(bool checked)
 	}
 }
 
+void FxListWidget::on_loopCheck_clicked(bool checked)
+{
+	if (myfxlist) {
+		myfxlist->setLoopList(checked);
+	}
+	if (origin_fxitem) {
+		if (checked) {
+			origin_fxitem->setLoopValue(100);
+		} else {
+			origin_fxitem->setLoopValue(0);
+		}
+	}
+}
+
 void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
@@ -790,6 +873,10 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 		selectFx(fx);
 		emit fxCmdActivated(fx, CMD_FX_START,0);
 		break;
+	case FX_SEQUENCE:
+		selectFx(fx);
+		emit fxCmdActivated(fx,CMD_FX_START,0);
+		break;
 	}
 }
 
@@ -821,6 +908,25 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		QAction *act;
 		act = menu.addAction(tr("Add Audio Fx"));
 		act->setObjectName("1");
+		if (isEditable()) {
+			act = menu.addAction(tr("Deactivate Edit Mode"));
+		} else {
+			act = menu.addAction(tr("Activate Edit Mode"));
+		}
+		act->setObjectName("2");
+		if (show_fadetimes_f) {
+			act = menu.addAction(tr("Hide fade time column"));
+		} else {
+			act = menu.addAction(tr("Show fade time column"));
+		}
+		act->setObjectName("3");
+		if (show_delays_f) {
+			act = menu.addAction(tr("Hide delay time column"));
+		} else {
+			act = menu.addAction(tr("Show delay time column"));
+		}
+		act->setObjectName("4");
+
 
 		act = menu.exec(event->globalPos());
 		if (!act) return;
@@ -830,13 +936,23 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			AppCentral::instance()->addFxAudioDialog(fxList(),this);
 			refreshList();
 			break;
+		case 2:
+			setEditable(!isEditable());
+			break;
+		case 3:
+			show_fadetimes_f = !show_fadetimes_f;
+			refreshList();
+			break;
+		case 4:
+			show_delays_f = !show_delays_f;
+			refreshList();
+			break;
 
 		default:
 			break;
 		}
 
 	} else {
-		qDebug() << "context menu for Fx:" << item->linkedFxItem->name();
 		QMenu menu(this);
 		QAction *act;
 		act = menu.addAction(tr("Unselect"));
@@ -865,7 +981,11 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			refreshList();
 			break;
 		case 4:
-			emit fxItemSelectedForEdit(item->linkedFxItem);
+			// emit fxItemSelectedForEdit(item->linkedFxItem);
+			{
+				FxItemPropertyWidget *editor = FxItemPropertyWidget::openFxPropertyEditor(item->linkedFxItem);
+				if (editor) connect(editor,SIGNAL(modified()),this,SLOT(refreshList()));
+			}
 			break;
 
 		default:
@@ -903,11 +1023,26 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 	switch(listitem->columnType) {
 	case FxListWidgetItem::CT_NAME:
 		fx->setName(text);
-		fx->setModified(true);
 		break;
 	case FxListWidgetItem::CT_KEY:
 		fx->setKeyCode(QtStaticTools::stringToKey(text));
 		break;
+	case FxListWidgetItem::CT_PRE_DELAY:
+		fx->setPreDelay(QtStaticTools::timeStringToMS(text));
+		break;
+	case FxListWidgetItem::CT_POST_DELAY:
+		fx->setPostDelay(QtStaticTools::timeStringToMS(text));
+		break;
+	case FxListWidgetItem::CT_FADEIN_TIME:
+		fx->setFadeInTime(QtStaticTools::timeStringToMS(text));
+		break;
+	case FxListWidgetItem::CT_FADEOUT_TIME:
+		fx->setFadeOutTime(QtStaticTools::timeStringToMS(text));
+		break;
+	case FxListWidgetItem::CT_HOLD_TIME:
+		fx->setHoldTime(QtStaticTools::timeStringToMS(text));
+		break;
+
 	default:
 		break;
 	}

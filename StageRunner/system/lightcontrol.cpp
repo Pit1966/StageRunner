@@ -35,6 +35,8 @@ bool LightControl::setLightLoopEnabled(bool state)
 				,this,SLOT(onSceneStatusChanged(FxSceneItem*,quint32)));
 			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneFadeProgressChanged(FxSceneItem*,int,int))
 				,this,SLOT(onSceneFadeProgressChanged(FxSceneItem*,int,int)));
+			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneCueReady(FxSceneItem*))
+					,this,SLOT(onSceneCueReady(FxSceneItem*)));
 		}
 
 	} else {
@@ -209,6 +211,11 @@ void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 void LightControl::onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB)
 {
 	emit sceneFadeChanged(scene, perMilleA, perMilleB);
+}
+
+void LightControl::onSceneCueReady(FxSceneItem *scene)
+{
+	emit sceneCueReady(scene);
 }
 
 

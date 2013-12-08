@@ -1,6 +1,7 @@
 #include "config.h"
 #include "appcentral.h"
 #include "audiocontrol.h"
+#include "fxcontrol.h"
 #include "fxlist.h"
 #include "fxitem.h"
 #include "fxaudioitem.h"
@@ -48,6 +49,11 @@ void AppCentral::clearProject()
 bool AppCentral::setLightLoopEnabled(bool state)
 {
 	return unitLight->setLightLoopEnabled(state);
+}
+
+bool AppCentral::setFxExecLoopEnabled(bool state)
+{
+	return unitFx->setExecLoopEnabled(state);
 }
 
 void AppCentral::stopAllFxAudio()
@@ -267,6 +273,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
 		}
 		break;
+
 	case FX_SCENE:
 		switch (cmd) {
 		case CMD_SCENE_START:
@@ -279,6 +286,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for scene",cmd);
 		}
 		break;
+
 	case FX_AUDIO_PLAYLIST:
 		switch (cmd) {
 		case CMD_AUDIO_START:
@@ -291,6 +299,17 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
 		}
 		break;
+
+	case FX_SEQUENCE:
+		switch (cmd) {
+		case CMD_FX_START:
+			unitFx->startFxSequence(reinterpret_cast<FxSeqItem*>(fx));
+			break;
+		case CMD_FX_STOP:
+			break;
+		default:
+			DEBUGERROR("Execute FX: Unimplemented Command: %d for sequence",cmd);
+		}
 
 	default:
 		break;
@@ -377,6 +396,7 @@ AppCentral::~AppCentral()
 	delete pluginCentral;
 	delete userSettings;
 	delete project;
+	delete unitFx;
 	delete unitLight;
 	delete unitAudio;
 
@@ -395,6 +415,7 @@ void AppCentral::init()
 
 	unitAudio = new AudioControl(this);
 	unitLight = new LightControl(this);
+	unitFx = new FxControl(this);
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
 	execCenter = new ExecCenter(this);

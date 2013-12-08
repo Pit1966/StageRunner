@@ -33,6 +33,20 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 
 }
 
+FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)
+{
+	if (!FxItem::exists(fx)) return 0;
+
+	FxItemPropertyWidget *itemEditor = new FxItemPropertyWidget();
+	itemEditor->setFxItem(fx);
+	itemEditor->setAttribute(Qt::WA_DeleteOnClose);
+	itemEditor->editOnceButton->hide();
+	itemEditor->show();
+
+	itemEditor->setEditable(true);
+	return itemEditor;
+}
+
 bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 {
 	if (!FxItem::exists(fx)) {
@@ -68,8 +82,8 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	if (fx->fxType() == FX_SCENE) {
 		cur_fxs = static_cast<FxSceneItem*>(fx);
 		faderCountEdit->setText(QString::number(cur_fxs->tubeCount()));
-		fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxs->defaultFadeInTime));
-		fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxs->defaultFadeOutTime));
+		fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxs->fadeInTime()));
+		fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxs->fadeOutTime()));
 
 		sceneGroup->setVisible(true);
 	} else {
@@ -165,8 +179,8 @@ void FxItemPropertyWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 	if (!FxItem::exists(cur_fxs)) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxs->defaultFadeInTime != time_ms) {
-		cur_fxs->defaultFadeInTime = time_ms;
+	if (cur_fxs->fadeInTime() != time_ms) {
+		cur_fxs->setFadeInTime(time_ms);
 		cur_fxs->setModified(true);
 		emit modified();
 	}
@@ -177,8 +191,8 @@ void FxItemPropertyWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 	if (!FxItem::exists(cur_fxs)) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxs->defaultFadeOutTime != time_ms) {
-		cur_fxs->defaultFadeOutTime = time_ms;
+	if (cur_fxs->fadeOutTime() != time_ms) {
+		cur_fxs->setFadeOutTime(time_ms);
 		cur_fxs->setModified(true);
 		emit modified();
 	}

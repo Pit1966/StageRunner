@@ -91,7 +91,10 @@ SOURCES += \
     ../fx/execcenter.cpp \
     ../fx/executer.cpp \
     ../fx/fxitemobj.cpp \
-    ../fx/fxseqitem.cpp
+    ../fx/fxseqitem.cpp \
+    ../system/fxcontrol.cpp \
+    ../appcontrol/execloopthreadinterface.cpp \
+    ../appcontrol/execloop.cpp
 
 HEADERS  += \
 	../config.h \
@@ -153,7 +156,10 @@ HEADERS  += \
     ../fx/execcenter.h \
     ../fx/executer.h \
     ../fx/fxitemobj.h \
-    ../fx/fxseqitem.h
+    ../fx/fxseqitem.h \
+    ../system/fxcontrol.h \
+    ../appcontrol/execloopthreadinterface.h \
+    ../appcontrol/execloop.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

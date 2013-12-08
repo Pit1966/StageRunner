@@ -30,6 +30,11 @@ void FxItem::init()
 	addExistingVar(myFile,"FileName");
 	addExistingVar(myPath,"FilePath");
 	addExistingVar(myKey,"KeyCode");
+	addExistingVar(defaultFadeInTime,"DefFadeInTime");
+	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
+	addExistingVar(defaultHoldTime,"DefHoldTime");
+	addExistingVar(defaultPreDelay,"DefPreDelay");
+	addExistingVar(defaultPostDelay,"DefPostDelay");
 	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
 	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 }
@@ -75,11 +80,22 @@ bool FxItem::exists(FxItem *item)
 	return global_fx_list->contains(item);
 }
 
+void FxItem::setName(const QString &name)
+{
+	if (name != myName) {
+		myName = name;
+		setModified(true);
+	}
+}
+
 void FxItem::setKeyCode(int code)
 {
 	if (code == Qt::Key_Escape || code == Qt::Key_Backspace)
 		code = 0;
-	myKey = code;
+	if (myKey != code) {
+		myKey = code;
+		setModified(true);
+	}
 }
 
 bool FxItem::isHookedToInput(qint32 universe, qint32 channel)
@@ -91,6 +107,46 @@ void FxItem::hookToInput(qint32 universe, qint32 channel)
 {
 	hookedToInputUniverse = universe;
 	hookedToInputDmxChannel = channel;
+}
+
+void FxItem::setFadeInTime(qint32 val)
+{
+	if (defaultFadeInTime != val) {
+		defaultFadeInTime = val;
+		setModified(true);
+	}
+}
+
+void FxItem::setFadeOutTime(qint32 val)
+{
+	if (defaultFadeOutTime != val) {
+		defaultFadeOutTime = val;
+		setModified(true);
+	}
+}
+
+void FxItem::setPreDelay(qint32 val)
+{
+	if (defaultPreDelay != val) {
+		defaultPreDelay = val;
+		setModified(true);
+	}
+}
+
+void FxItem::setPostDelay(qint32 val)
+{
+	if (defaultPostDelay != val) {
+		defaultPostDelay = val;
+		setModified(true);
+	}
+}
+
+void FxItem::setHoldTime(qint32 val)
+{
+	if (defaultHoldTime != val) {
+		defaultHoldTime = val;
+		setModified(true);
+	}
 }
 
 

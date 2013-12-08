@@ -24,6 +24,7 @@ private:
 	FxItem * fx_current;
 
 	bool auto_proceed_f;
+	bool loop_list_f;
 	bool auto_run_f;
 	bool modified_f;
 
@@ -47,11 +48,14 @@ public:
 	FxItem * stepToSequenceNext();
 	FxItem * getFxByKeyCode(int keycode) const;
 	FxItem * getFxByListIndex(int idx) const;
+	FxItem * getFirstFx() const {return getFxByListIndex(0);}
 
 	inline int regId() const {return regid;}
 	inline void setRegId(int new_id) {regid = new_id;}
 	inline void setAutoProceedSequence(bool state) {auto_proceed_f = state;}
 	inline bool autoProceedSequence() {return auto_proceed_f;}
+	inline void setLoopList(bool state) {loop_list_f = state;}
+	inline bool isLooped() const {return loop_list_f;}
 
 	bool addFxAudioSimple(const QString & path, int pos = -1);
 	bool addFxScene(int tubes = 1);

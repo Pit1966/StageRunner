@@ -38,10 +38,12 @@ void LightLoop::startProcessTimer()
 {
 	loop_timer.setInterval(10);
 	loop_timer.start();
+	loop_status = STAT_RUNNING;
 }
 
 void LightLoop::stopProcessTimer()
 {
+	loop_status = STAT_IDLE;
 	loop_timer.stop();
 }
 
@@ -78,17 +80,15 @@ void LightLoop::processPendingEvents()
 			if (debug > 1) DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());
 			inactive_scenes.append(sceneitem);
 		}
-		if (sceneitem->statusHasChanged()) {
+		if (sceneitem->getClearStatusHasChanged()) {
 			emit sceneStatusChanged(sceneitem,sceneitem->status());
-		} else {
-
 		}
+		if (sceneitem->getClearActiveHasChanged()) {
+			if (!sceneitem->isActive())
+				emit sceneCueReady(sceneitem);
+		}
+
 	}
-//	QHashIterator<int,const FxSceneItem*> it(scenes);
-//	while (it.hasNext()) {
-//		it.next();
-//		processFxSceneItem(it.value());
-//	}
 	scenes.unlock();
 
 	// For the dmx channel data array should contain valid dmx data for stage output
@@ -104,6 +104,7 @@ void LightLoop::processPendingEvents()
 
 	lightCtrlRef.sendChangedDmxData();
 
+	// Now check the list of inactive scenes. This removes NULL level scenes from list
 	foreach (FxSceneItem *sceneitem, inactive_scenes) {
 		lightCtrlRef.setSceneIdle(sceneitem);
 	}

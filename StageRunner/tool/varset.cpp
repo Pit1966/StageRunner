@@ -367,7 +367,7 @@ VarSet &VarSet::operator =(const VarSet &other)
 
 void VarSet::cloneFrom(const VarSet &other)
 {
-	qDebug() << "cloneFrom" << varList.size() << other.varList.size();
+	// qDebug() << "cloneFrom" << varList.size() << other.varList.size();
 	for (int t=0; t<other.varList.size(); t++) {
 		const PrefVarCore *o = other.varList.at(t);
 		if (o->doNotCopy)

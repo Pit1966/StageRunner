@@ -23,7 +23,7 @@ private:
 	volatile STATUS loop_status;
 	QElapsedTimer loop_time;
 	QTimer loop_timer;
-	qint32 loop_exec_target_time_ms;
+	qint64 loop_exec_target_time_ms;
 	bool first_process_event_f;
 
 	QByteArray dmxtout[MAX_DMX_UNIVERSE];
@@ -41,6 +41,7 @@ private:
 signals:
 	void sceneStatusChanged(FxSceneItem *scene, quint32 stat);
 	void sceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
+	void sceneCueReady(FxSceneItem *scene);
 
 public slots:
 	void startProcessTimer();

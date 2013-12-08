@@ -2,6 +2,8 @@
 
 #include "executer.h"
 #include "appcentral.h"
+#include "lightcontrol.h"
+#include "fxcontrol.h"
 
 ExecCenter::ExecCenter(AppCentral *app_central) :
 	QObject()
@@ -88,9 +90,11 @@ FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
 
 void ExecCenter::deleteExecuter(Executer *exec)
 {
+	// myApp->unitFx->activeFxExecuters.lock();
 	delete_mutex.lock();
 	if (executerList.lockRemoveOne(exec)) {
 		delete exec;
 	}
 	delete_mutex.unlock();
+	// myApp->unitFx->activeFxExecuters.unlock();
 }

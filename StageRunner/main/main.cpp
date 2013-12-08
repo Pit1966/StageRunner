@@ -37,11 +37,13 @@ int main(int argc, char *argv[])
 
 	// Start the world :-)
 	myapp->setLightLoopEnabled(true);
+	myapp->setFxExecLoopEnabled(true);
 
 	// and run
 	int ret =  app.exec();
 
 	// Stop the world
+	myapp->setFxExecLoopEnabled(false);
 	myapp->setLightLoopEnabled(false);
 
 	// Clean up plugins

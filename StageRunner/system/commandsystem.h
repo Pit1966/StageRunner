@@ -34,6 +34,14 @@ enum AudioStatus {
 	AUDIO_RUNNING
 };
 
+enum AudioSeqState {
+	AUDIO_OFF,
+	AUDIO_PRE_DELAY,
+	AUDIO_PLAYTIME,
+	AUDIO_FADEOUT,
+	AUDIO_POST_DELAY
+};
+
 
 class AudioCtrlMsg {
 public:
@@ -88,6 +96,15 @@ enum SceneFlags {
 	SCENE_STAGE_EXTERN = 1<<2,		///< Scene is visible on stage controlled by input
 	SCENE_ACTIVE_INTERN = 1<<8,		///< Scene is fading at the moment
 	SCENE_ACTIVE_EXTERN = 1<<9		///< Scene is fading caused by direct input
+};
+
+enum SceneSeqState {
+	SCENE_OFF,
+	SCENE_PRE_DELAY,
+	SCENE_FADE_IN,
+	SCENE_HOLD,
+	SCENE_FADE_OUT,
+	SCENE_POST_DELAY
 };
 }
 

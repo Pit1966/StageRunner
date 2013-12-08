@@ -3,6 +3,8 @@
 
 #include "fxitem.h"
 
+using namespace AUDIO;
+
 class FxAudioItem : public FxItem
 {
 public:
@@ -11,15 +13,18 @@ public:
 	qint64 audioDuration;					///< Length of audio stream in ms (or 0, if unknown)
 	qint32 loopTimes;
 
+protected:
+	AudioSeqState mySeqStatus;
+
 public:
 	FxAudioItem();
 	FxAudioItem(const FxAudioItem &o);
 	FxAudioItem(const QString &path);
 	void setFilePath(const QString &path);
-	qint32 fadeInTime();
-	void setFadeInTime(qint32);
-	qint32 fadeOutTime();
-	void setFadeOutTime(qint32);
+	AudioSeqState seqStatus() const {return mySeqStatus;}
+	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
+	qint32 loopValue() {return loopTimes;}
+	void setLoopValue(qint32 val) {loopTimes = val;}
 
 private:
 	void init();

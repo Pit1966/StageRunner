@@ -112,8 +112,8 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	faderGroup->setTitle(cur_fxscene->name());
 	hookedUniverseSpin->setValue(cur_fxscene->hookedUniverse()+1);
 	hookedChannelSpin->setValue(cur_fxscene->hookedChannel()+1);
-	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->defaultFadeInTime));
-	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->defaultFadeOutTime));
+	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->fadeInTime()));
+	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->fadeOutTime()));
 
 	return true;
 }
@@ -482,8 +482,8 @@ void SceneDeskWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 	if (!cur_fxscene) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxscene->defaultFadeInTime != time_ms) {
-		cur_fxscene->defaultFadeInTime = time_ms;
+	if (cur_fxscene->fadeInTime() != time_ms) {
+		cur_fxscene->setFadeInTime(time_ms);
 		cur_fxscene->setModified(true);
 		emit modified();
 	}
@@ -495,8 +495,8 @@ void SceneDeskWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 	if (!cur_fxscene) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxscene->defaultFadeOutTime != time_ms) {
-		cur_fxscene->defaultFadeOutTime = time_ms;
+	if (cur_fxscene->fadeOutTime() != time_ms) {
+		cur_fxscene->setFadeOutTime(time_ms);
 		cur_fxscene->setModified(true);
 		emit modified();
 	}

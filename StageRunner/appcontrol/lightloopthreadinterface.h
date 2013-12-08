@@ -7,14 +7,14 @@ class LightLoop;
 class FxList;
 class LightControl;
 
-template <class T> class MutexQList;
+// template <class T> class MutexQList;
 
 class LightLoopThreadInterface : public QThread
 {
 	Q_OBJECT
 private:
-	LightLoop * lightLoop;
 	LightControl & lightControlRef;
+	LightLoop * lightLoop;
 
 public:
 	LightLoopThreadInterface(LightControl & unit_light);

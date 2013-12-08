@@ -7,8 +7,8 @@
 LightLoopThreadInterface::LightLoopThreadInterface(LightControl &unit_light)
 	: QThread()
 	, lightControlRef(unit_light)
+	, lightLoop(0)
 {
-	lightLoop = 0;
 	setObjectName("Light Loop");
 }
 

@@ -11,6 +11,8 @@ class FxSeqItem : public FxItem
 public:
 	pstring widgetPos;
 	FxList *seqList;
+	qint32 loopTimes;
+
 
 private:
 	FxItemObj *itemObj;
@@ -23,7 +25,8 @@ public:
 	void setFadeInTime(qint32 val);
 	qint32 fadeOutTime();
 	void setFadeOutTime(qint32 val);
-
+	qint32 loopValue();
+	void setLoopValue(qint32 val);
 
 
 private:

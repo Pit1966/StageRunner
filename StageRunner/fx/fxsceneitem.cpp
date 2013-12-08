@@ -26,7 +26,10 @@ void FxSceneItem::init()
 	myFxType = FX_SCENE;
 	myclass = PrefVarCore::FX_SCENE_ITEM;
 	myStatus = SCENE_IDLE;
+	mySeqStatus = SCENE_OFF;
 	my_last_status = SCENE_IDLE;
+	my_last_active_flag = false;
+
 	for (int t=0; t<MIX_LINES; t++) {
 		wasBlacked[t] = false;
 	}
@@ -34,8 +37,6 @@ void FxSceneItem::init()
 	sceneMaster = new DmxChannel;
 	sceneMaster->targetValue = 1000;
 
-	addExistingVar(defaultFadeInTime,"DefFadeInTime");
-	addExistingVar(defaultFadeOutTime,"DefFadeOutTime");
 	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
 
@@ -50,24 +51,9 @@ FxSceneItem::~FxSceneItem()
 	}
 }
 
-qint32 FxSceneItem::fadeInTime()
+void FxSceneItem::setLoopValue(qint32 val)
 {
-	return defaultFadeInTime;
-}
-
-void FxSceneItem::setFadeInTime(qint32 val)
-{
-	defaultFadeInTime = val;
-}
-
-qint32 FxSceneItem::fadeOutTime()
-{
-	return defaultFadeOutTime;
-}
-
-void FxSceneItem::setFadeOutTime(qint32 val)
-{
-	defaultFadeOutTime = val;
+	Q_UNUSED(val);
 }
 
 void FxSceneItem::createDefaultTubes(int tubecount)
@@ -260,14 +246,46 @@ void FxSceneItem::setBlacked(int mixline, bool state)
  * @return true, if status is different from status of last function call
  *
  * You have to call this function regulary to keep track of status changes
+ * Note that a call to this function resets the hasChanged flag to false for subsequent calls
  */
-bool FxSceneItem::statusHasChanged()
+bool FxSceneItem::getClearStatusHasChanged()
 {
 	if (myStatus != my_last_status) {
 		my_last_status = myStatus;
 		return true;
 	}
 	return false;
+}
+
+bool FxSceneItem::getClearActiveHasChanged()
+{
+	bool active = isActive();
+	if (active != my_last_active_flag) {
+		my_last_active_flag = active;
+		return true;
+	}
+	return false;
+}
+
+QString FxSceneItem::statusString()
+{
+	QString str;
+	quint32 stat = myStatus;
+	if (stat & SCENE_STAGE_LIVE)
+		str += "LIVE ";
+	if (stat & SCENE_STAGE_INTERN)
+		str += "INT ";
+	if (stat & SCENE_ACTIVE_INTERN)
+		str += "act ";
+	if (stat & SCENE_STAGE_EXTERN)
+		str += "EXT ";
+	if (stat & SCENE_ACTIVE_EXTERN)
+		str += "act ";
+
+	if (str.size())
+		str.chop(1);
+
+	return str;
 }
 
 bool FxSceneItem::postLoadInitTubes(bool restore_light)

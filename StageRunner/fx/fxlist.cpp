@@ -13,6 +13,7 @@ FxList::FxList() :
 	fx_next = 0;
 	fx_current = 0;
 	auto_proceed_f = false;
+	loop_list_f = false;
 	auto_run_f = false;
 	regid = 0;
 	modified_f = false;

@@ -17,7 +17,10 @@ public:
 		CT_KEY,
 		CT_FX_TYPE,
 		CT_FADEIN_TIME,
-		CT_FADEOUT_TIME
+		CT_FADEOUT_TIME,
+		CT_PRE_DELAY,
+		CT_POST_DELAY,
+		CT_HOLD_TIME
 	};
 
 	FxItem *linkedFxItem;

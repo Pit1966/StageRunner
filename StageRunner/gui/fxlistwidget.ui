@@ -22,7 +22,14 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Audio Fx List</string>
+        <string>Fx List</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="loopCheck">
+       <property name="text">
+        <string>Loop</string>
        </property>
       </widget>
      </item>

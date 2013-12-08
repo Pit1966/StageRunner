@@ -29,6 +29,7 @@ private:
 	bool is_editable_f;
 	bool show_ids_f;
 	bool show_fadetimes_f;
+	bool show_delays_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	FxListWidgetItem* cur_clicked_item;
@@ -43,6 +44,7 @@ public:
 	void setFxList(FxList *fxlist);
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
+	void setLoop(int loops);
 	inline bool isEditable() {return is_editable_f;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
 	int getRowThatContainsFxItem(FxItem *fx);
@@ -53,7 +55,7 @@ public:
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
-	static FxListWidget * getCreateFxListWidget(FxList *fxList, bool *created = 0);
+	static FxListWidget * getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created = 0);
 
 private:
 	void init();
@@ -85,6 +87,7 @@ private slots:
 	void on_fxTable_itemDoubleClicked(QTableWidgetItem *item);
 	void moveRowFromTo(int srcrow, int destrow);
 	void on_autoProceedCheck_clicked(bool checked);
+	void on_loopCheck_clicked(bool checked);
 
 	void on_fxTable_itemChanged(QTableWidgetItem *item);
 	void if_fxitemwidget_clicked(FxListWidgetItem *listitem);

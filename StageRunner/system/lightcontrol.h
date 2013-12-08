@@ -46,12 +46,14 @@ private:
 signals:
 	void sceneChanged(FxSceneItem *scene);
 	void sceneFadeChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
+	void sceneCueReady(FxSceneItem *scene);
 	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
 	void audioSlotVolChanged(int slot, int value);
 
 public slots:
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
 	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
+	void onSceneCueReady(FxSceneItem *scene);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
 
 };

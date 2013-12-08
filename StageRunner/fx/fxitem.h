@@ -32,6 +32,11 @@ protected:
 	QString myFile;
 	QString myPath;
 	qint32 myKey;
+	qint32 defaultFadeInTime;
+	qint32 defaultFadeOutTime;
+	qint32 defaultHoldTime;
+	qint32 defaultPreDelay;
+	qint32 defaultPostDelay;
 	qint32 hookedToInputUniverse;
 	qint32 hookedToInputDmxChannel;
 
@@ -44,7 +49,7 @@ public:
 
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
-	inline void setName(const QString &name) {myName = name;}
+	void setName(const QString &name);
 	inline int id() const {return myId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
@@ -58,10 +63,18 @@ public:
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
 
-	virtual qint32 fadeInTime() = 0;
-	virtual void setFadeInTime(qint32 val) = 0;
-	virtual qint32 fadeOutTime() = 0;
-	virtual void setFadeOutTime(qint32 val) = 0;
+	virtual qint32 fadeInTime() {return defaultFadeInTime;}
+	virtual	void setFadeInTime(qint32 val);
+	virtual qint32 fadeOutTime() {return defaultFadeOutTime;}
+	virtual void setFadeOutTime(qint32 val);
+	virtual qint32 preDelay() {return defaultPreDelay;}
+	virtual void setPreDelay(qint32 val);
+	virtual qint32 postDelay() {return defaultPostDelay;}
+	virtual void setPostDelay(qint32 val);
+	virtual qint32 holdTime() {return defaultHoldTime;}
+	virtual void setHoldTime(qint32 val);
+	virtual qint32 loopValue() = 0;
+	virtual void setLoopValue(qint32 val) = 0;
 
 private:
 	void init();

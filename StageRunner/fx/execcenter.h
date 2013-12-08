@@ -25,6 +25,7 @@ private:
 public:
 	ExecCenter(AppCentral *app_central);
 	~ExecCenter();
+
 	Executer * findExecuter(const FxItem *fx);
 	bool exists(Executer *exec);
 	void lockDelete();

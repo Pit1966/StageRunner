@@ -40,10 +40,21 @@ void FxSeqItem::setFadeOutTime(qint32 val)
 	Q_UNUSED(val);
 }
 
+qint32 FxSeqItem::loopValue()
+{
+	return loopTimes;
+}
+
+void FxSeqItem::setLoopValue(qint32 val)
+{
+	loopTimes = val;
+}
+
 void FxSeqItem::init()
 {
 	myFxType = FX_SEQUENCE;
 	myclass = PrefVarCore::FX_SEQUENCE_ITEM;
 	addExistingVar(widgetPos,"seqWidgetPos");
+	addExistingVar(loopTimes,"LoopTimes");
 	addExistingVarSetList(seqList->nativeFxList(),"Sequence",PrefVarCore::FX_ITEM);
 }
