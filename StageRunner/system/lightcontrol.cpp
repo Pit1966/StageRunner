@@ -12,7 +12,7 @@
 #include "usersettings.h"
 
 
-LightControl::LightControl(AppCentral *app_central)
+LightControl::LightControl(AppCentral &app_central)
 	: QObject()
 	,myApp(app_central)
 {
@@ -83,12 +83,12 @@ bool LightControl::sendChangedDmxData()
 		if (dmxOutputChanged[t]) {
 			QLCIOPlugin *plugin;
 			int output;
-			if (myApp->pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
+			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
 				plugin->writeUniverse(t,dmxOutputValues[t]);
 				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
 			} else {
-				if (myApp->userSettings->pNoInterfaceDmxFeedback) {
+				if (myApp.userSettings->pNoInterfaceDmxFeedback) {
 					emit outputUniverseChanged(t,dmxOutputValues[t]);
 				}
 			}
@@ -231,14 +231,14 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 {
 	if (universe >= MAX_DMX_UNIVERSE) return;
 
-	if (myApp->isInputAssignMode())
-		return myApp->assignInputToSelectedFxItem(universe, channel, value);
+	if (myApp.isInputAssignMode())
+		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 
 	foreach (FxItem * fx, FxItem::globalFxList()) {
 		if (fx->fxType() == FX_SCENE) {
 			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 			if (scene->isHookedToInput(universe,channel)) {
-				int response_time = myApp->pluginCentral->fastMapInUniverse[universe].responseTime;
+				int response_time = myApp.pluginCentral->fastMapInUniverse[universe].responseTime;
 				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
 
 				// This is to force the operator to draw the input slider to Null-Level, when a BLACK command was emitted
@@ -255,8 +255,8 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 	}
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (myApp->userSettings->mapAudioToDmxUniv[t] == qint32(universe + 1)
-				&& myApp->userSettings->mapAudioToDmxChan[t] == qint32(channel + 1) ) {
+		if (myApp.userSettings->mapAudioToDmxUniv[t] == qint32(universe + 1)
+				&& myApp.userSettings->mapAudioToDmxChan[t] == qint32(channel + 1) ) {
 			emit audioSlotVolChanged(t, value);
 
 		}

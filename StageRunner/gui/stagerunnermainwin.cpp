@@ -539,14 +539,6 @@ void StageRunnerMainWin::on_addAudioTrackButton_clicked()
 
 }
 
-void StageRunnerMainWin::on_executeAudioPlayListButton_clicked()
-{
-	FxItem *fx = appCentral->project->fxList->nextFx();
-	if (!fx || fx->fxType() != FX_AUDIO_PLAYLIST) return;
-
-	appCentral->unitAudio->startFxAudioPlayList( static_cast<FxPlayListItem*>(fx) );
-}
-
 void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 {
 	appCentral->reOpenPlugins();

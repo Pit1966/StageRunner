@@ -5,10 +5,14 @@
 #include "lightcontrol.h"
 #include "fxcontrol.h"
 
-ExecCenter::ExecCenter(AppCentral *app_central) :
+#include <QTimer>
+
+ExecCenter::ExecCenter(AppCentral &app_central) :
 	QObject()
   ,myApp(app_central)
 {
+	remove_timer.setInterval(300);
+	connect(&remove_timer,SIGNAL(timeout()),this,SLOT(test_remove_queue()));
 }
 
 ExecCenter::~ExecCenter()
@@ -16,7 +20,6 @@ ExecCenter::~ExecCenter()
 	while(executerList.size()) {
 		delete executerList.lockTakeFirst();
 	}
-
 }
 
 Executer *ExecCenter::findExecuter(const FxItem *fx)
@@ -35,6 +38,27 @@ Executer *ExecCenter::findExecuter(const FxItem *fx)
 bool ExecCenter::exists(Executer *exec)
 {
 	return executerList.lockContains(exec);
+}
+
+bool ExecCenter::useExecuter(Executer *exec)
+{
+	QMutexLocker lock(&delete_mutex);
+	if (!executerList.lockContains(exec)) return false;
+
+	exec->use_cnt++;
+	return true;
+}
+
+void ExecCenter::freeExecuter(Executer *exec)
+{
+	QMutexLocker lock(&delete_mutex);
+	if (!executerList.lockContains(exec)) return;
+
+	exec->use_cnt--;
+	if (exec->use_cnt < 0) {
+		DEBUGERROR("Use counter for executer ran below zero !!");
+		exec->use_cnt = 0;
+	}
 }
 
 void ExecCenter::lockDelete()
@@ -88,13 +112,51 @@ FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
 	return qobject_cast<FxListExecuter*>(findExecuter(fx));
 }
 
+void ExecCenter::queueRemove(Executer *exec)
+{
+	removeQueue.lock();
+	if (!removeQueue.contains(exec)) {
+		removeQueue.append(exec);
+		remove_timer.start();
+	}
+	removeQueue.unlock();
+}
+
 void ExecCenter::deleteExecuter(Executer *exec)
 {
-	// myApp->unitFx->activeFxExecuters.lock();
-	delete_mutex.lock();
+	QMutexLocker lock(&delete_mutex);
+	if (!executerList.lockContains(exec)) {
+		DEBUGERROR("Executer does not exist when trying to remove");
+		return;
+	}
+	if (exec->use_cnt > 0) {
+		DEBUGERROR("Executer is in use when trying to remove -> try later");
+		queueRemove(exec);
+		return;
+	}
+
 	if (executerList.lockRemoveOne(exec)) {
 		delete exec;
 	}
-	delete_mutex.unlock();
-	// myApp->unitFx->activeFxExecuters.unlock();
+}
+
+void ExecCenter::test_remove_queue()
+{
+	removeQueue.lock();
+	QMutableListIterator<Executer*>it(removeQueue);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		delete_mutex.lock();
+		if (exec->use_cnt <= 0) {
+			if (executerList.lockRemoveOne(exec)) {
+				delete exec;
+				it.remove();
+				if (removeQueue.isEmpty()) {
+					remove_timer.stop();
+				}
+			}
+		}
+		delete_mutex.unlock();
+	}
+	removeQueue.unlock();
 }

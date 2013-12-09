@@ -36,8 +36,7 @@ private:
 
 	AudioStatus run_status;
 	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot
-	Executer *current_executer;						///< A Pointer to an Executor if the sound was started by one
-
+	Executer *current_executer;				///< A Pointer to an Executor if the sound was started by one
 
 	QTimer volset_timer;
 	QString volset_text;
@@ -58,7 +57,7 @@ public:
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
-	Executer *currentExecuter();
+	Executer * currentExecuter();
 	int currentRunTime();
 
 	inline AudioStatus status() {return run_status;}

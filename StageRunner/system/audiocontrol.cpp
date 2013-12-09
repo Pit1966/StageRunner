@@ -9,13 +9,14 @@
 #include "executer.h"
 #include "execcenter.h"
 #include "fxlistwidget.h"
+#include "fxcontrol.h"
 
 #include <QStringList>
 #include <QDebug>
 
 
 
-AudioControl::AudioControl(AppCentral *app_central)
+AudioControl::AudioControl(AppCentral &app_central)
 	: QThread()
 	,myApp(app_central)
 {
@@ -67,12 +68,12 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
 	bool ok = false;
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
-	if (!exec && myApp->userSettings->pProhibitAudioDoubleStart) {
+	if (!exec && myApp.userSettings->pProhibitAudioDoubleStart) {
 		for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 			if (audioChannels[t]->currentFxAudio() == fxa) {
 				// Ok, audio is already running -> Check the time
 				int cur_run_time = audioChannels[t]->currentRunTime();
-				if ( cur_run_time >= 0 && cur_run_time < myApp->userSettings->pAudioAllowReactivateTime) {
+				if ( cur_run_time >= 0 && cur_run_time < myApp.userSettings->pAudioAllowReactivateTime) {
 					LOGERROR(tr("Audio Fx '%1' not started since it is already running on channel %2")
 							 .arg(fxa->name()).arg(t+1));
 					return false;
@@ -317,22 +318,21 @@ bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 		return false;
 	}
 
-	// First create an executer to process the playlist
-	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxplay->fxPlayList);
-	fxexec->setOriginFx(fxplay);
-	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
+	// Get/create an executer to process the playlist and start it implicitely
+	FxListExecuter *exec = myApp.unitFx->startFxAudioPlayList(fxplay);
+	if (!exec) return false;
 
 	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
 	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
 	if (wid) {
-		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
-		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
+		connect(exec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
+		connect(exec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
 		if (wid->currentSelectedFxItem()) {
-			fxexec->setNextFx(wid->currentSelectedFxItem());
+			exec->setNextFx(wid->currentSelectedFxItem());
 		}
 	}
 
-	return fxexec->runExecuter();
+	return true;
 }
 
 /**
@@ -345,14 +345,13 @@ bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 bool AudioControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *fxaudio)
 {
 	// First try to find an existing Executer
-	FxListExecuter *cur_exe = myApp->execCenter->findFxListExecuter(fxplay);
+	FxListExecuter *cur_exe = myApp.execCenter->findFxListExecuter(fxplay);
 	if (cur_exe) {
-		cur_exe->fadeEndExecuter();
+		// cur_exe->fadeEndExecuter();
 	}
 
-	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxplay->fxPlayList);
+	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxplay->fxPlayList);
 	fxexec->setOriginFx(fxplay);
-	fxexec->setPlayListInitialVolume(fxplay->initialVolume);
 
 	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
 	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
@@ -360,14 +359,12 @@ bool AudioControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *
 		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
 		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
 	}
-
-	fxexec->setNextFx(fxaudio);
-	return fxexec->runExecuter();
+	/// @todo: implement me
 }
 
 bool AudioControl::stopFxAudioPlayList(FxPlayListItem *fxplay)
 {
-	/// @implement me
+	/// @todo: implement me
 
 
 	return true;

@@ -6,11 +6,12 @@
 #include "executer.h"
 #include "fxseqitem.h"
 #include "fxsceneitem.h"
+#include "fxplaylistitem.h"
 #include "execloop.h"
 #include "execloopthreadinterface.h"
 #include "toolclasses.h"
 
-FxControl::FxControl(AppCentral *appCentral) :
+FxControl::FxControl(AppCentral &appCentral) :
 	QObject()
   , myApp(appCentral)
 {
@@ -38,20 +39,36 @@ bool FxControl::setExecLoopEnabled(bool state)
 
 }
 
-bool FxControl::startFxSequence(FxSeqItem *fxseq)
+FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 {
 	if (!FxItem::exists(fxseq)) {
 		qDebug("FxSeqItem not found in pool");
-		return false;
+		return 0;
 	}
 
 	// Create an executor for the sequence
-	FxListExecuter *fxexec = myApp->execCenter->newFxListExecuter(fxseq->seqList);
+	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxseq->seqList);
 	fxexec->setOriginFx(fxseq);
 	// Give control for executer to FxControl loop
 	appendLoopExecuter(fxexec);
 
-	return true;
+	return fxexec;
+}
+
+FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)
+{
+	if (!FxItem::exists(fxplay)) {
+		qDebug("FxAudioPlayListItem not found in pool");
+		return 0;
+	}
+
+	// Create an executor for the sequence
+	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxplay->fxPlayList);
+	fxexec->setOriginFx(fxplay);
+	// Give control for executer to FxControl loop
+	appendLoopExecuter(fxexec);
+
+	return fxexec;
 }
 
 void FxControl::appendLoopExecuter(Executer *exec)

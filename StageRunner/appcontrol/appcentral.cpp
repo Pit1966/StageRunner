@@ -14,6 +14,7 @@
 #include "pluginmapping.h"
 #include "messagehub.h"
 #include "execcenter.h"
+#include "executer.h"
 
 #include <QFileDialog>
 
@@ -393,12 +394,12 @@ AppCentral::AppCentral()
 AppCentral::~AppCentral()
 {
 	delete execCenter;
-	delete pluginCentral;
-	delete userSettings;
-	delete project;
 	delete unitFx;
 	delete unitLight;
 	delete unitAudio;
+	delete pluginCentral;
+	delete project;
+	delete userSettings;
 
 	MessageHub::destroy();
 }
@@ -412,13 +413,12 @@ void AppCentral::init()
 	current_selected_project_fx = 0;
 
 	userSettings = new UserSettings;
-
-	unitAudio = new AudioControl(this);
-	unitLight = new LightControl(this);
-	unitFx = new FxControl(this);
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
-	execCenter = new ExecCenter(this);
+	unitAudio = new AudioControl(*this);
+	unitLight = new LightControl(*this);
+	unitFx = new FxControl(*this);
+	execCenter = new ExecCenter(*this);
 
 	int id = registerFxList(project->fxList);
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);
@@ -437,6 +437,5 @@ void AppCentral::init()
 
 	// AppCentral -> AudioControl Thread (unitAudio)
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-
 
 }

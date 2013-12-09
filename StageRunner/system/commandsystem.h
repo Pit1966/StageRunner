@@ -4,17 +4,19 @@
 class FxAudioItem;
 class Executer;
 
+
 enum CtrlCmd {
 	CMD_NONE = 0,
-	CMD_AUDIO_START = 1,
-	CMD_AUDIO_STOP = 2,
-	CMD_AUDIO_FADEIN = 3,
-	CMD_AUDIO_FADEOUT = 4,
-	CMD_AUDIO_CHANGE_VOL = 5,
-	CMD_SCENE_BLACK = 6,
-	CMD_SCENE_FADEIN = 7,
-	CMD_SCENE_FADEOUT = 8,
-	CMD_SCENE_FADETO = 9,
+	CMD_AUDIO_STATUS_CHANGED = 1,
+	CMD_AUDIO_START = 2,
+	CMD_AUDIO_STOP = 3,
+	CMD_AUDIO_FADEIN = 4,
+	CMD_AUDIO_FADEOUT = 5,
+	CMD_AUDIO_CHANGE_VOL = 6,
+	CMD_SCENE_BLACK = 7,
+	CMD_SCENE_FADEIN = 8,
+	CMD_SCENE_FADEOUT = 9,
+	CMD_SCENE_FADETO = 10,
 
 
 	CMD_STATUS_REPORT = CMD_NONE,
@@ -28,6 +30,7 @@ enum CtrlCmd {
 namespace AUDIO {
 
 enum AudioStatus {
+	AUDIO_NO_STATE,
 	AUDIO_IDLE,
 	AUDIO_ERROR,
 	AUDIO_INIT,
@@ -57,7 +60,7 @@ public:
 	Executer *executer;
 
 public:
-	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_IDLE, Executer *exec = 0)
+	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_NO_STATE, Executer *exec = 0)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(status)
@@ -73,7 +76,7 @@ public:
 	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, Executer *exec = 0)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
-		, currentAudioStatus(AUDIO_IDLE)
+		, currentAudioStatus(AUDIO_NO_STATE)
 		, volume(-1)
 		, fadetime(-1)
 		, progress(-1)

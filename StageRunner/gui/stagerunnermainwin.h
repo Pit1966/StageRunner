@@ -71,7 +71,6 @@ private slots:
 	void on_cloneSelectedSceneButton_clicked();
 	void on_addAudioPlayListButton_clicked();
 	void on_addAudioTrackButton_clicked();
-	void on_executeAudioPlayListButton_clicked();
 	void on_actionInitialize_plugins_DMX_triggered();
 	void on_actionInfo_triggered();
 

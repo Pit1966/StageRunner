@@ -14,13 +14,14 @@ class FxAudioItem;
 class AppCentral;
 class FxPlayListItem;
 class Executer;
+class FxControl;
 
 class AudioControl : public QThread
 {
 	Q_OBJECT
 
 public:
-	AppCentral *myApp;
+	AppCentral &myApp;
 
 protected:
 	QList<AudioSlot*> audioChannels;
@@ -38,7 +39,7 @@ private:
 	int dmx_audio_ctrl_last_vol[MAX_AUDIO_SLOTS];
 
 public:
-	AudioControl(AppCentral *app_central);
+	AudioControl(AppCentral &app_central);
 	~AudioControl();
 
 	void getAudioDevices();

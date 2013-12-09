@@ -27,7 +27,8 @@ public:
 	};
 
 protected:
-	AppCentral * myApp;
+	AppCentral &myApp;
+
 	FxItem *originFxItem;						///<  This should be the FxItem that has initiated the executer or 0
 	FxItem *curFx;
 	FxItem *nxtFx;
@@ -35,13 +36,17 @@ protected:
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
 	bool isInExecLoopFlag;						///< This indicates that the executer belongs to the FxExecLoop
+	bool isWaitingForAudio;
 
+private:
+	int use_cnt;								///< if this usage counter is > 0 the object should not been deleted
 
 protected:
-	Executer(AppCentral * app_central);
+	Executer(AppCentral &app_central);
 	~Executer();
 
 public:
+	inline int useCount() const {return use_cnt;}
 	void setIdString(const QString & str);
 	inline virtual TYPE type() {return EXEC_BASE;}
 	virtual bool processExecuter();
@@ -56,6 +61,7 @@ public:
 	inline FxItem * currentFx() const {return curFx;}
 	inline FxItem * nextFx() const {return nxtFx;}
 
+
 signals:
 	void deleteMe(Executer *exec);
 
@@ -69,33 +75,20 @@ class FxListExecuter : public Executer
 	Q_OBJECT
 protected:
 	FxList *fxList;
-	AudioControl *unitAudio;
-	LightControl *unitLight;
-	FxControl *unitFx;
 
 private:
 	AudioStatus currentAudioStatus;
-
-	int playlist_initial_vol;
 
 public:
 	inline TYPE type() {return EXEC_FXLIST;}
 	bool processExecuter();
 
 	void setFxList(FxList *fx_list);
-	void setPlayListInitialVolume(int vol);
-	bool runExecuter(int idx = -1);
-	void fadeEndExecuter();
 	void setNextFx(FxItem *fx);
 
 protected:
-	FxListExecuter(AppCentral * app_central, FxList *fx_list);
+	FxListExecuter(AppCentral & app_central, FxList *fx_list);
 	void setCurrentFx(FxItem *fx);
-
-	bool runFxItem(FxItem *fx);
-	bool runFxAudioItem(FxAudioItem *fxa);
-	bool runFxSceneItem(FxSceneItem *fxs);
-
 
 protected slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
@@ -108,7 +101,6 @@ private:
 	qint64 cue_fx(FxItem *fx);
 	qint64 cue_fx_scene(FxSceneItem *scene);
 	qint64 cue_fx_audio(FxAudioItem *audio);
-
 
 signals:
 	void fxItemExecuted(FxItem *fx, Executer *exec);

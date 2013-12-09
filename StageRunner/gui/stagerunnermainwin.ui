@@ -34,7 +34,7 @@
       </widget>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="iconSize">
         <size>
@@ -165,13 +165,6 @@
                <widget class="QPushButton" name="addAudioTrackButton">
                 <property name="text">
                  <string>Add Audio Track To Play List Fx</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="executeAudioPlayListButton">
-                <property name="text">
-                 <string>Execute</string>
                 </property>
                </widget>
               </item>

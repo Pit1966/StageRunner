@@ -353,11 +353,9 @@ QString Log::getCurrentThreadName()
  */
 void Log::setColor(const QColor &col)
 {
-	if (1/*col != color*/) { ///< @todo
-		if (!loggingEnabled) return;
-		emit newcolor(col);
-		color = col;
-	}
+	if (!loggingEnabled) return;
+	emit newcolor(col);
+	color = col;
 }
 
 /**

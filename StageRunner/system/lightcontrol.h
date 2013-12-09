@@ -20,7 +20,7 @@ class LightControl : public QObject
 	Q_OBJECT
 
 public:
-	AppCentral *myApp;
+	AppCentral &myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
 	MutexQHash<int,FxSceneItem*>activeScenes;
@@ -28,7 +28,7 @@ public:
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
 
 public:
-	LightControl(AppCentral *app_central);
+	LightControl(AppCentral &app_central);
 	~LightControl();
 
 	bool setLightLoopEnabled(bool state);

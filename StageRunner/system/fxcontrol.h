@@ -15,24 +15,24 @@ class FxPlayListItem;
 class FxExecLoop;
 class ExecLoopThreadInterface;
 class Executer;
-
+class FxListExecuter;
 
 class FxControl : public QObject
 {
 	Q_OBJECT
 public:
-	AppCentral *myApp;
+	AppCentral &myApp;
 	ExecLoopThreadInterface *execLoopInterface;
 
 	MutexQList<Executer*>activeFxExecuters;				///< a list of Executer objects that are processed by FxExecLoop
 
 public:
-	FxControl(AppCentral *appCentral);
+	FxControl(AppCentral &appCentral);
 	~FxControl();
 	bool setExecLoopEnabled(bool state);
 
-	bool startFxSequence(FxSeqItem *fxseq);
-
+	FxListExecuter * startFxSequence(FxSeqItem *fxseq);
+	FxListExecuter * startFxAudioPlayList(FxPlayListItem *fxplay);
 
 private:
 	void appendLoopExecuter(Executer* exec);

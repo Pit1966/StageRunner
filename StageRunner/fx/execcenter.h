@@ -2,6 +2,7 @@
 #define EXECCENTER_H
 
 #include <QObject>
+#include <QTimer>
 
 #include "toolclasses.h"
 
@@ -17,17 +18,22 @@ class ExecCenter : public QObject
 {
 	Q_OBJECT
 private:
-	AppCentral *myApp;
+	AppCentral &myApp;
 
 	MutexQList<Executer*>executerList;
+	MutexQList<Executer*>removeQueue;
 	QMutex delete_mutex;
+	QTimer remove_timer;
 
 public:
-	ExecCenter(AppCentral *app_central);
+	ExecCenter(AppCentral &app_central);
 	~ExecCenter();
 
 	Executer * findExecuter(const FxItem *fx);
 	bool exists(Executer *exec);
+	bool useExecuter(Executer *exec);
+	void freeExecuter(Executer *exec);
+
 	void lockDelete();
 	void unlockDelete();
 
@@ -36,10 +42,15 @@ public:
 	FxListExecuter * findFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
 
+	void queueRemove(Executer *exec);
+
 signals:
 
 public slots:
 	void deleteExecuter(Executer *exec);
+
+private slots:
+	void test_remove_queue();
 
 };
 

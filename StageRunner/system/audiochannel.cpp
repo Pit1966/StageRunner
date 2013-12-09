@@ -9,6 +9,7 @@
 #include "appcontrol/appcentral.h"
 #include "appcontrol/usersettings.h"
 #include "executer.h"
+#include "execcenter.h"
 
 #include <QTime>
 #include <QApplication>
@@ -35,8 +36,8 @@ AudioSlot::AudioSlot(AudioControl *parent)
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
-	if (parent->myApp->userSettings->pAudioBufferSize > 90) {
-		audio_output->setBufferSize(parent->myApp->userSettings->pAudioBufferSize);
+	if (parent->myApp.userSettings->pAudioBufferSize > 90) {
+		audio_output->setBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
@@ -60,14 +61,15 @@ AudioSlot::~AudioSlot()
 	delete audio_io;
 }
 
-bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer * exec)
+bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
 	if (!audio_output) return false;
 
-	if (exec) {
+	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
 		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2 with Executer: %3")
 				.arg(fxa->name()).arg(slotNumber+1).arg(exec->getIdString()));
 	} else {
+		exec = 0;
 		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
 				.arg(fxa->name()).arg(slotNumber+1));
 	}
@@ -108,6 +110,8 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer * exec)
 		}
 
 	}
+
+	if (exec) AppCentral::instance()->execCenter->freeExecuter(exec);
 
 	return ok;
 }
@@ -256,7 +260,7 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 
 	if (current_state != run_status) {
 		// qDebug("emit status: %d %d %p",run_status, slotNumber, current_fx);
-		AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status,current_executer);
+		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
 		msg.fxAudio = current_fx;
 		emit audioCtrlMsgEmitted(msg);
 

@@ -8,13 +8,15 @@
 #include "fxsceneitem.h"
 
 
-Executer::Executer(AppCentral *app_central)
+Executer::Executer(AppCentral &app_central)
 	: myApp(app_central)
 	, originFxItem(0)
 	, curFx(0)
 	, nxtFx(0)
 	, eventTargetTimeMs(0)
 	, isInExecLoopFlag(false)
+	, isWaitingForAudio(false)
+	, use_cnt(0)
 {
 	runTime.start();
 }
@@ -58,7 +60,7 @@ void Executer::destroyLater()
 }
 
 
-FxListExecuter::FxListExecuter(AppCentral *app_central, FxList *fx_list)
+FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 	: Executer(app_central)
 	, fxList(fx_list)
 {
@@ -101,8 +103,9 @@ bool FxListExecuter::processExecuter()
 
 	// Execute cues until cue time is not NULL or we have reached fxList end
 	while (fx && cue_time == 0) {
-		// Execute next CUE command in FxScene
+		// Execute next CUE command in FxScene and give me the estimated execution time in ms
 		cue_time = cue_fx(fx);
+		// if time < 0: fx is completely processed. Move to next
 		if (cue_time < 0) {
 			fx = move_to_next_fx();
 			if (fx) {
@@ -128,178 +131,50 @@ void FxListExecuter::setFxList(FxList *fx_list)
 	fxList = fx_list;
 }
 
-void FxListExecuter::setPlayListInitialVolume(int vol)
-{
-	playlist_initial_vol = vol;
-}
 
-bool FxListExecuter::runExecuter(int idx)
-{
-	if (!fxList) return false;
-
-	if (idx < 0) {
-		if (nxtFx) {
-			return runFxItem(nxtFx);
-		} else {
-			idx = 0;
-		}
-	}
-
-	if (idx >= fxList->size()) return false;
-
-	return runFxItem(fxList->getFxByListIndex(idx));
-}
-
-bool FxListExecuter::runFxItem(FxItem *fx)
-{
-	if (!fx) {
-		if (curFx) {
-			setCurrentFx(0);
-			emit fxItemExecuted(0,this);
-		}
-		if (nxtFx) {
-			setNextFx(0);
-		}
-		emit deleteMe(this);
-		return false;
-	}
-
-	if (!fxList || !fxList->contains(fx)) {
-		DEBUGERROR("FxListExecuter: fxList not initialized or Fx not in list");
-		return false;
-	}
-
-	if (curFx) {
-		switch(fx->fxType()) {
-		case FX_AUDIO:
-			unitAudio->fadeoutFxAudio(this);
-			break;
-		default:
-			break;
-		}
-	}
-
-	setCurrentFx(fx);
-
-	bool started = false;
-
-	switch(fx->fxType()) {
-	case FX_AUDIO:
-		started = runFxAudioItem(static_cast<FxAudioItem*>(fx));
-		break;
-	case FX_SCENE:
-		started = runFxSceneItem(static_cast<FxSceneItem*>(fx));
-		break;
-
-	default:
-		break;
-	}
-
-	FxItem * next = fxList->findSequenceFollower(fx);
-
-	setNextFx(next);
-
-	return started;
-}
-
-bool FxListExecuter::runFxAudioItem(FxAudioItem *fxa)
-{
-	bool started = false;
-
-	if (playlist_initial_vol) {
-		fxa->initialVolume = playlist_initial_vol;
-	}
-	if (unitAudio->startFxAudio(fxa, this)) {
-		emit fxItemExecuted(fxa,this);
-		started = true;
-	}
-
-	return started;
-}
-
-bool FxListExecuter::runFxSceneItem(FxSceneItem *fxs)
-{
-	bool started = false;
-
-	if (unitLight->startFxSceneSimple(fxs)) {
-		emit fxItemExecuted(fxs, this);
-		started = true;
-	}
-
-	return started;
-}
-
-void FxListExecuter::fadeEndExecuter()
-{
-	if (currentFx()) {
-		unitAudio->fadeoutFxAudio(this);
-	}
-	currentAudioStatus = AUDIO_IDLE;
-
-	// This ends the executer
-	runFxItem(0);
-}
 
 void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 {
-	if (isInExecLoopFlag) return;
-
-	if (msg.executer != this)
+	if (msg.executer != this || msg.ctrlCmd != CMD_AUDIO_STATUS_CHANGED)
 		return;		// Not for me
 
-	switch (msg.ctrlCmd) {
-	case CMD_AUDIO_STOP:
-	case CMD_AUDIO_FADEOUT:
-		qDebug("%s audio msg: CMD:%d, AudioStatus:%d, Executer: %p",Q_FUNC_INFO,msg.ctrlCmd, msg.currentAudioStatus, msg.executer);
-		setCurrentFx(0);
-		emit fxItemExecuted(0,this);
-		currentAudioStatus = AUDIO_IDLE;
-		emit deleteMe(this);
-		break;
+	qDebug("%s: Received audio msg: AudioStatus %d, AudioCmd %d"
+		   ,Q_FUNC_INFO,msg.currentAudioStatus,msg.ctrlCmd);
 
-	case CMD_STATUS_REPORT:
-		if (curFx == msg.fxAudio && msg.currentAudioStatus != currentAudioStatus) {
-			if (debug > 1) qDebug("%s audio msg: CMD:%d, AudioStatus:%d, Executer: %p",Q_FUNC_INFO,msg.ctrlCmd, msg.currentAudioStatus, msg.executer);
-			if (msg.currentAudioStatus == AUDIO_IDLE) {
-				runFxItem(nxtFx);
-			}
-			currentAudioStatus = msg.currentAudioStatus;
+	if (isWaitingForAudio) {
+		if (msg.currentAudioStatus == AUDIO_RUNNING) {
+			qDebug("   Wait for audio end");
 		}
-		break;
-
-	default:
-		break;
+		else if (msg.currentAudioStatus == AUDIO_IDLE) {
+			qDebug("   Audio now idle");
+			eventTargetTimeMs = runTime.elapsed();
+			isWaitingForAudio = false;
+		}
 	}
-
 }
 
 void FxListExecuter::lightCtrlReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter: Scene '%s' status changed to '%s'"
-		   , fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
+	qDebug("FxListExecuter(%x): Scene '%s' status changed to '%s'"
+		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
 
 void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter: Scene '%s' cue ended. Status: '%s'"
-		   , fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
+	qDebug("FxListExecuter(%x): Scene '%s' cue ended. Status: '%s'"
+		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
 
 void FxListExecuter::init()
 {
 	currentAudioStatus = AUDIO_IDLE;
-	playlist_initial_vol = 0;
 
-	unitLight = myApp->unitLight;
-	unitAudio = myApp->unitAudio;
-	unitFx = myApp->unitFx;
-
-	connect(unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	connect(unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	connect(unitLight,SIGNAL(sceneChanged(FxSceneItem*)),this,SLOT(lightCtrlReceiver(FxSceneItem*)),Qt::DirectConnection);
-	connect(unitLight,SIGNAL(sceneCueReady(FxSceneItem*)),this,SLOT(sceneCueReceiver(FxSceneItem*)),Qt::DirectConnection);
+	connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	// connect(myApp.unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(myApp.unitLight,SIGNAL(sceneChanged(FxSceneItem*)),this,SLOT(lightCtrlReceiver(FxSceneItem*)),Qt::DirectConnection);
+	connect(myApp.unitLight,SIGNAL(sceneCueReady(FxSceneItem*)),this,SLOT(sceneCueReceiver(FxSceneItem*)),Qt::DirectConnection);
 }
 
 /**
@@ -357,7 +232,7 @@ qint64 FxListExecuter::cue_fx_scene(FxSceneItem *scene)
 	case SCENE_PRE_DELAY:
 		cue_time = scene->fadeInTime();
 		if ( scene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEIN,cue_time) ) {
-			unitLight->setSceneActive(scene);
+			myApp.unitLight->setSceneActive(scene);
 		}
 		scene->setSeqStatus(SCENE_FADE_IN);
 		break;
@@ -392,13 +267,18 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 		audio->setSeqStatus(AUDIO_PRE_DELAY);
 		break;
 	case AUDIO_PRE_DELAY:
-		cue_time = audio->holdTime();
-		unitAudio->startFxAudio(audio,this);
+		if (audio->holdTime()) {
+			cue_time = audio->holdTime();
+		} else {
+			isWaitingForAudio = true;
+			cue_time = 1000000;
+		}
+		myApp.unitAudio->startFxAudio(audio,this);
 		audio->setSeqStatus(AUDIO_PLAYTIME);
 		break;
 	case AUDIO_PLAYTIME:
 		cue_time = audio->fadeOutTime();
-		unitAudio->fadeoutFxAudio(audio,cue_time);
+		myApp.unitAudio->fadeoutFxAudio(audio,cue_time);
 		audio->setSeqStatus(AUDIO_FADEOUT);
 		break;
 	case AUDIO_FADEOUT:
