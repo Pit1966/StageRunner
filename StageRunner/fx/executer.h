@@ -25,6 +25,12 @@ public:
 		EXEC_BASE,
 		EXEC_FXLIST
 	};
+	enum STATE {
+		EXEC_IDLE,
+		EXEC_RUNNING,
+		EXEC_PAUSED,
+		EXEC_DELETED
+	};
 
 protected:
 	AppCentral &myApp;
@@ -37,6 +43,7 @@ protected:
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
 	bool isInExecLoopFlag;						///< This indicates that the executer belongs to the FxExecLoop
 	bool isWaitingForAudio;
+	STATE myState;
 
 private:
 	int use_cnt;								///< if this usage counter is > 0 the object should not been deleted
@@ -49,12 +56,14 @@ public:
 	inline int useCount() const {return use_cnt;}
 	void setIdString(const QString & str);
 	inline virtual TYPE type() {return EXEC_BASE;}
+	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
 	void destroyLater();
-	inline void setExecLoopFlag(bool state) {isInExecLoopFlag = state;}
+	void setExecLoopFlag(bool state);
 	inline qint64 currentTargetTimeMs() {return eventTargetTimeMs;}
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
+	inline void setTargetTimeToCurrent() {eventTargetTimeMs = runTime.elapsed();}
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
@@ -64,6 +73,7 @@ public:
 
 signals:
 	void deleteMe(Executer *exec);
+	void changed(Executer *exec);
 
 	friend class ExecCenter;
 };

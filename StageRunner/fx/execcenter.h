@@ -45,13 +45,16 @@ public:
 	void queueRemove(Executer *exec);
 
 signals:
+	void executerCreated(Executer *);
+	void executerDeleted(Executer *);
+	void executerChanged(Executer *);
 
 public slots:
 	void deleteExecuter(Executer *exec);
 
 private slots:
 	void test_remove_queue();
-
+	void on_executer_changed(Executer *exec);
 };
 
 #endif // EXECCENTER_H

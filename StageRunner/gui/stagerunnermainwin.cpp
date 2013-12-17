@@ -4,6 +4,8 @@
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "lightcontrol.h"
+#include "fxcontrol.h"
+#include "execcenter.h"
 #include "fxlist.h"
 #include "project.h"
 #include "usersettings.h"
@@ -12,6 +14,7 @@
 #include "setupwidget.h"
 #include "fxitempropertywidget.h"
 #include "scenestatuswidget.h"
+#include "sequencestatuswidget.h"
 #include "qtstatictools.h"
 #include "style/lightdeskstyle.h"
 #include "fxitem.h"
@@ -83,6 +86,14 @@ void StageRunnerMainWin::initConnects()
 	// Audio Control -> Project FxListWidget
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));
 
+	// Fx Control -> SequenceStatusWidget
+	connect(appCentral->unitFx,SIGNAL(executerChanged(Executer*)),seqStatusDisplay,SLOT(propagateExecuter(Executer*)));
+
+	// ExecCenter -> SequenceStatusWidget
+	connect(appCentral->execCenter,SIGNAL(executerCreated(Executer*)),seqStatusDisplay,SLOT(insertExecuter(Executer*)));
+	connect(appCentral->execCenter,SIGNAL(executerDeleted(Executer*)),seqStatusDisplay,SLOT(scratchExecuter(Executer*)));
+	connect(appCentral->execCenter,SIGNAL(executerChanged(Executer*)),seqStatusDisplay,SLOT(propagateExecuter(Executer*)));
+
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
 	connect(logThread,SIGNAL(errorMsgReceived(QString,QString)),this,SLOT(showErrorMsg(QString,QString)));
@@ -109,12 +120,19 @@ void StageRunnerMainWin::setup_gui_docks()
 
 	scene_status_dock = new QDockWidget(this);
 	sceneStatusDisplay = new SceneStatusWidget();
-
 	scene_status_dock->setObjectName("Scene Status Display");
 	scene_status_dock->setWindowTitle("Scene Status Display");
 	scene_status_dock->setWidget(sceneStatusDisplay);
 	scene_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,scene_status_dock);
+
+	sequence_status_dock = new QDockWidget(this);
+	seqStatusDisplay = new SequenceStatusWidget();
+	sequence_status_dock->setObjectName("Sequence Status Display");
+	sequence_status_dock->setWindowTitle("Sequence Status Display");
+	sequence_status_dock->setWidget(seqStatusDisplay);
+	sequence_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	this->addDockWidget(Qt::RightDockWidgetArea,sequence_status_dock);
 
 }
 
@@ -184,6 +202,10 @@ void StageRunnerMainWin::init()
 	msg_dialog = new QErrorMessage(this);
 	fxitem_editor_dock = 0;
 	fxItemEditor = 0;
+	scene_status_dock = 0;
+	sceneStatusDisplay = 0;
+	sequence_status_dock = 0;
+	seqStatusDisplay = 0;
 }
 
 

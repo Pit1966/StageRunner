@@ -189,7 +189,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
 		spin->setProperty("tableRow",row);
-		if (conf) spin->setValue(conf->pUniverse+1);
+		if (conf) spin->setValue(int(conf->pUniverse)+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
@@ -230,7 +230,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
 		spin->setProperty("tableRow",row);
-		if (conf) spin->setValue(conf->pUniverse+1);
+		if (conf) spin->setValue(int(conf->pUniverse)+1);
 		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 

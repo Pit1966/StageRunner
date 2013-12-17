@@ -78,7 +78,9 @@ FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist)
 	executerList.lockAppend(exec);
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
+	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
 
+	emit executerCreated(exec);
 	return exec;
 }
 
@@ -137,6 +139,7 @@ void ExecCenter::deleteExecuter(Executer *exec)
 
 	if (executerList.lockRemoveOne(exec)) {
 		delete exec;
+		emit executerDeleted(exec);
 	}
 }
 
@@ -150,6 +153,7 @@ void ExecCenter::test_remove_queue()
 		if (exec->use_cnt <= 0) {
 			if (executerList.lockRemoveOne(exec)) {
 				delete exec;
+				emit executerDeleted(exec);
 				it.remove();
 				if (removeQueue.isEmpty()) {
 					remove_timer.stop();
@@ -159,4 +163,9 @@ void ExecCenter::test_remove_queue()
 		delete_mutex.unlock();
 	}
 	removeQueue.unlock();
+}
+
+void ExecCenter::on_executer_changed(Executer *exec)
+{
+	emit executerChanged(exec);
 }

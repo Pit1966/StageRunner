@@ -13,6 +13,7 @@ class FxItemPropertyWidget;
 class QDockWidget;
 class SceneStatusWidget;
 class FxSceneItem;
+class SequenceStatusWidget;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -22,12 +23,14 @@ private:
 	QErrorMessage *msg_dialog;
 	QDockWidget *fxitem_editor_dock;
 	QDockWidget *scene_status_dock;
+	QDockWidget *sequence_status_dock;
 
 public:
 	QStyle *dialWidgetStyle;
 	QTextEdit *logWidget;
 	FxItemPropertyWidget *fxItemEditor;
 	SceneStatusWidget *sceneStatusDisplay;
+	SequenceStatusWidget *seqStatusDisplay;
 
 	int activeKeyModifiers;
 

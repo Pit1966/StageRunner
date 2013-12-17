@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SequenceStatusWidget</class>
+ <widget class="QWidget" name="SequenceStatusWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>433</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="execHashSizeLabel">
+       <property name="text">
+        <string>ExecuterHashSize</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="execHashSizeNum">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fxHashSizeLabel">
+       <property name="text">
+        <string>FxHashSize</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fxHashSizeNum">
+       <property name="text">
+        <string>---</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QListWidget" name="seqListWidget"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

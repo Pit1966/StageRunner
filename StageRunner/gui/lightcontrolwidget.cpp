@@ -15,11 +15,12 @@ void LightControlWidget::init()
 
 void LightControlWidget::on_blackButton_clicked()
 {
+	appcentral->sequenceStop();
 	appcentral->lightBlack(0);
-
 }
 
 void LightControlWidget::on_fadeToBlackButton_clicked()
 {
+	appcentral->sequenceStop();
 	appcentral->lightBlack(fadeSecondsSpin->value() * 1000);
 }

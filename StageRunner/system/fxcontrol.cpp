@@ -55,6 +55,34 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 	return fxexec;
 }
 
+bool FxControl::stopFxSequence(FxSeqItem *fxseq)
+{
+
+}
+
+
+/**
+ * @brief Stop executing of all running FxSeqItems
+ * @return Number of stopped sequences
+ *
+ *  This does not affect the fade state of the scenes and running audio.
+ */
+int FxControl::stopAllFxSequence()
+{
+	int count = 0;
+	activeFxExecuters.lock();
+	QMutableListIterator<Executer*>it(activeFxExecuters);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (!exec->state() != Executer::EXEC_DELETED) {
+			count++;
+			exec->destroyLater();
+		}
+	}
+	activeFxExecuters.unlock();
+	return count;
+}
+
 FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
 	if (!FxItem::exists(fxplay)) {

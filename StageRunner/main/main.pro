@@ -94,7 +94,8 @@ SOURCES += \
     ../fx/fxseqitem.cpp \
     ../system/fxcontrol.cpp \
     ../appcontrol/execloopthreadinterface.cpp \
-    ../appcontrol/execloop.cpp
+    ../appcontrol/execloop.cpp \
+    ../gui/sequencestatuswidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -159,7 +160,8 @@ HEADERS  += \
     ../fx/fxseqitem.h \
     ../system/fxcontrol.h \
     ../appcontrol/execloopthreadinterface.h \
-    ../appcontrol/execloop.h
+    ../appcontrol/execloop.h \
+    ../gui/sequencestatuswidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -174,7 +176,8 @@ FORMS    += \
     ../gui/lightcontrolwidget.ui \
     ../gui/fxlistwidgetitem.ui \
     ../system/messagedialog.ui \
-    ../gui/fxplaylistwidget.ui
+    ../gui/fxplaylistwidget.ui \
+    ../gui/sequencestatuswidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

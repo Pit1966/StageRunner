@@ -32,12 +32,15 @@ public:
 	bool setExecLoopEnabled(bool state);
 
 	FxListExecuter * startFxSequence(FxSeqItem *fxseq);
+	bool stopFxSequence(FxSeqItem *fxseq);
+	int stopAllFxSequence();
 	FxListExecuter * startFxAudioPlayList(FxPlayListItem *fxplay);
 
 private:
 	void appendLoopExecuter(Executer* exec);
 
 signals:
+	void executerChanged(Executer *exec);
 
 public slots:
 

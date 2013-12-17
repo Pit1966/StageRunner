@@ -16,6 +16,7 @@ Executer::Executer(AppCentral &app_central)
 	, eventTargetTimeMs(0)
 	, isInExecLoopFlag(false)
 	, isWaitingForAudio(false)
+	, myState(EXEC_IDLE)
 	, use_cnt(0)
 {
 	runTime.start();
@@ -56,7 +57,20 @@ QString Executer::getIdString() const
  */
 void Executer::destroyLater()
 {
-	emit deleteMe(this);
+	if (myState != EXEC_DELETED) {
+		myState = EXEC_DELETED;
+		emit deleteMe(this);
+	}
+}
+
+void Executer::setExecLoopFlag(bool state)
+{
+	isInExecLoopFlag = state;
+	if (state) {
+		myState = EXEC_RUNNING;
+	} else {
+		myState = EXEC_IDLE;
+	}
 }
 
 
@@ -155,14 +169,14 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 
 void FxListExecuter::lightCtrlReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter(%x): Scene '%s' status changed to '%s'"
+	qDebug("FxListExecuter(%p): Scene '%s' status changed to '%s'"
 		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
 
 void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter(%x): Scene '%s' cue ended. Status: '%s'"
+	qDebug("FxListExecuter(%p): Scene '%s' cue ended. Status: '%s'"
 		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
@@ -205,14 +219,21 @@ qint64 FxListExecuter::cue_fx(FxItem *fx)
 {
 	if (!FxItem::exists(fx)) return -1;
 
+	qint64 cue_time = 0;
+
 	switch (fx->fxType()) {
 	case FX_SCENE:
-		return cue_fx_scene(reinterpret_cast<FxSceneItem*>(fx));
+		cue_time = cue_fx_scene(reinterpret_cast<FxSceneItem*>(fx));
+		break;
 	case FX_AUDIO:
-		return cue_fx_audio(reinterpret_cast<FxAudioItem*>(fx));
+		cue_time = cue_fx_audio(reinterpret_cast<FxAudioItem*>(fx));
+		break;
 	default:
 		return 0;
 	}
+
+	emit changed(this);
+	return cue_time;
 }
 
 /**
@@ -231,9 +252,10 @@ qint64 FxListExecuter::cue_fx_scene(FxSceneItem *scene)
 		break;
 	case SCENE_PRE_DELAY:
 		cue_time = scene->fadeInTime();
-		if ( scene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEIN,cue_time) ) {
-			myApp.unitLight->setSceneActive(scene);
+		if ( ! scene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEIN,cue_time) ) {
+			LOGERROR(tr("FxScene: %1 is already active").arg(scene->name()));
 		}
+		myApp.unitLight->setSceneActive(scene);
 		scene->setSeqStatus(SCENE_FADE_IN);
 		break;
 	case SCENE_FADE_IN:

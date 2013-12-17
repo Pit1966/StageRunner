@@ -83,7 +83,13 @@ void FxSceneItem::setTubeCount(int tubecount)
 		tubes.append(dmx);
 	}
 }
-
+/**
+ * @brief Init command for FxScene
+ * @param mixline MIX_INTERN, MIX_EXTERN to distinguish between manualy fades and automatic fades
+ * @param cmd The command that should be performed (@see CtrlCmd)
+ * @param cmdTime The command time parameter in ms (e.g. 1000ms for CMD_SCENE_FADEIN)
+ * @return true, if scene becomes activ. false, if scene has already the desired stage and levels
+ */
 bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 {
 	int cmd_time = 0;

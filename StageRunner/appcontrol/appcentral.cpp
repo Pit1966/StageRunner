@@ -74,6 +74,20 @@ void AppCentral::lightBlack(qint32 time_ms)
 			.arg(num).arg(float(time_ms)/1000));
 }
 
+/**
+ * @brief Stop all or dedicated sequence
+ * @param fxseq Pointer to FxSequence item or 0, if all Sequences should be stopped
+ */
+void AppCentral::sequenceStop(FxItem *fxseq)
+{
+	if (fxseq) {
+		if (fxseq->fxType() == FX_SEQUENCE)
+			unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fxseq));
+	} else {
+		unitFx->stopAllFxSequence();
+	}
+}
+
 int AppCentral::registerFxList(FxList *fxlist)
 {
 	if (fxlist->regId() > 0) {

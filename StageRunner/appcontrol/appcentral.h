@@ -63,6 +63,7 @@ public:
 	void fadeoutAllFxAudio();
 
 	void lightBlack(qint32 time_ms = 0);
+	void sequenceStop(FxItem *fxseq = 0);
 
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
