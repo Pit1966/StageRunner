@@ -5,6 +5,7 @@
 #include "stagerunnermainwin.h"
 #include "usersettings.h"
 #include "log.h"
+
 // #include "ioplugincentral.h"
 
 int main(int argc, char *argv[])

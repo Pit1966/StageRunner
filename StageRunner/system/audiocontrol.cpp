@@ -10,9 +10,14 @@
 #include "execcenter.h"
 #include "fxlistwidget.h"
 #include "fxcontrol.h"
+#include "audioformat.h"
 
 #include <QStringList>
 #include <QDebug>
+
+#ifdef IS_QT5
+#include <QAudioDeviceInfo>
+#endif
 
 
 
@@ -40,6 +45,19 @@ AudioControl::~AudioControl()
 
 void AudioControl::getAudioDevices()
 {
+	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	for (int t=0; t<devList.size(); t++) {
+		QAudioDeviceInfo &dev = devList[t];
+		LOGTEXT(tr("Audio Device: %1").arg(dev.deviceName()));
+	}
+	LOGTEXT(tr("<font color=darkgreen>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
+
+	QAudioDeviceInfo def_dev(QAudioDeviceInfo::defaultOutputDevice());
+	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
+		LOGTEXT(tr("<font color=green>Default format supported</font>"));
+	} else {
+		LOGTEXT(tr("<font color=red>Default audio format not supported by audio device"));
+	}
 }
 
 void AudioControl::run()

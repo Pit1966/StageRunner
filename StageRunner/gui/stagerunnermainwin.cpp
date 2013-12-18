@@ -226,6 +226,10 @@ void StageRunnerMainWin::initAppDefaults()
 		fxListWidget->setFxList(appCentral->project->fxList);
 		copyProjectSettingsToGui();
 	}
+
+	// Test Audio Features
+	appCentral->unitAudio->getAudioDevices();
+
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
