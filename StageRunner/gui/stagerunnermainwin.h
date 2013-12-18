@@ -79,6 +79,8 @@ private slots:
 
 	void on_addFxSeqButton_clicked();
 
+	void on_actionExperimental_audio_mode_triggered(bool checked);
+
 private:
 	void init();
 	void setup_gui_docks();

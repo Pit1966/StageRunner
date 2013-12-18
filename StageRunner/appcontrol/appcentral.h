@@ -32,6 +32,7 @@ private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
 	bool edit_mode_f;
+	bool experimental_audio_f;
 	bool input_assign_mode_f;
 	FxItem * input_assign_target_fxitem;
 
@@ -68,6 +69,7 @@ public:
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
 	inline bool isEditMode() const {return edit_mode_f;}
+	inline bool isExperimentalAudio() const {return experimental_audio_f;}
 	inline bool isInputAssignMode() const {return input_assign_mode_f;}
 	void setInputAssignMode(bool state);
 	void setInputAssignMode(FxItem *fx);
@@ -89,6 +91,7 @@ public slots:
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);
+	void setExperimentalAudio(bool state);
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);

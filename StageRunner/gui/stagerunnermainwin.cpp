@@ -574,3 +574,9 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 
 }
 
+
+void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
+{
+	appCentral->setExperimentalAudio(true);
+
+}

@@ -15,6 +15,7 @@
 #include <QApplication>
 #ifdef IS_QT5
 #include <QMediaContent>
+#include <QMediaPlayer>
 #endif
 
 AudioSlot::AudioSlot(AudioControl *parent)
@@ -28,6 +29,7 @@ AudioSlot::AudioSlot(AudioControl *parent)
 	current_fx = 0;
 	current_executer = 0;
 	master_volume = MAX_VOLUME;
+	is_experimental_audio_f = false;
 
 	// Vol Set Logging
 	volset_timer.setSingleShot(true);
@@ -63,6 +65,11 @@ AudioSlot::~AudioSlot()
 
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
+	if (AppCentral::instance()->isExperimentalAudio())
+		return startExperimentalAudio(fxa,exec);
+
+	is_experimental_audio_f = false;
+
 	if (!audio_output) return false;
 
 	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
@@ -114,6 +121,19 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec)
 	if (exec) AppCentral::instance()->execCenter->freeExecuter(exec);
 
 	return ok;
+}
+
+bool AudioSlot::startExperimentalAudio(FxAudioItem *fxa, Executer *exec)
+{
+	is_experimental_audio_f = true;
+
+	QMediaPlayer *player = new QMediaPlayer;
+	player->setMedia(QUrl::fromLocalFile(fxa->filePath()));
+	player->setVolume(fxa->initialVolume * 100 / MAX_VOLUME);
+	player->play();
+	LOGTEXT(tr("Play experimental audio: %1 (%2)").arg(fxa->filePath()).arg(player->errorString()));
+
+
 }
 
 bool AudioSlot::stopFxAudio()

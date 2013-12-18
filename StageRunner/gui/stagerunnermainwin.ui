@@ -259,6 +259,7 @@
     </property>
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
+    <addaction name="actionExperimental_audio_mode"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">
@@ -360,6 +361,14 @@
   <action name="actionInfo">
    <property name="text">
     <string>Info</string>
+   </property>
+  </action>
+  <action name="actionExperimental_audio_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Experimental audio mode</string>
    </property>
   </action>
  </widget>

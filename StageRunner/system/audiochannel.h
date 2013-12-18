@@ -46,11 +46,14 @@ private:
 	int current_volume;								///< Volume the audio slot is set to
 	int master_volume;								///< This is Master Volume
 
+	bool is_experimental_audio_f;
+
 public:
 	AudioSlot(AudioControl *parent);
 	~AudioSlot();
 
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec);
+	bool startExperimentalAudio(FxAudioItem *fxa, Executer *exec);
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int time_ms);
 	void setVolume(int vol);

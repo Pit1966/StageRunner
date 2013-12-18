@@ -127,6 +127,13 @@ void AppCentral::setEditMode(bool state)
 	}
 }
 
+void AppCentral::setExperimentalAudio(bool state)
+{
+	if (state != experimental_audio_f) {
+		experimental_audio_f = state;
+	}
+}
+
 void AppCentral::setInputAssignMode(bool state)
 {
 	if (state != input_assign_mode_f) {
@@ -421,6 +428,7 @@ AppCentral::~AppCentral()
 void AppCentral::init()
 {
 	edit_mode_f = false;
+	experimental_audio_f = false;
 	input_assign_mode_f = false;
 	input_assign_target_fxitem = 0;
 
