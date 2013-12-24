@@ -1,9 +1,10 @@
 #include "execcenter.h"
-
+#include "log.h"
 #include "executer.h"
 #include "appcentral.h"
 #include "lightcontrol.h"
 #include "fxcontrol.h"
+#include "fxitem.h"
 
 #include <QTimer>
 
@@ -11,6 +12,9 @@ ExecCenter::ExecCenter(AppCentral &app_central) :
 	QObject()
   ,myApp(app_central)
 {
+	executerList.setName("ExecCenter::executerList");
+	removeQueue.setName("ExecCenter::removeQueue");
+
 	remove_timer.setInterval(300);
 	connect(&remove_timer,SIGNAL(timeout()),this,SLOT(test_remove_queue()));
 }
@@ -42,40 +46,52 @@ bool ExecCenter::exists(Executer *exec)
 
 bool ExecCenter::useExecuter(Executer *exec)
 {
-	QMutexLocker lock(&delete_mutex);
-	if (!executerList.lockContains(exec)) return false;
-
-	exec->use_cnt++;
-	return true;
-}
-
-void ExecCenter::freeExecuter(Executer *exec)
-{
-	QMutexLocker lock(&delete_mutex);
-	if (!executerList.lockContains(exec)) return;
-
-	exec->use_cnt--;
-	if (exec->use_cnt < 0) {
-		DEBUGERROR("Use counter for executer ran below zero !!");
-		exec->use_cnt = 0;
+	bool ok = true;
+	executerList.lock();
+	if (!executerList.contains(exec)) {
+		ok = false;
+	} else {
+		exec->use_cnt++;
 	}
+	executerList.unlock();
+	return ok;
 }
 
-void ExecCenter::lockDelete()
+bool ExecCenter::freeExecuter(Executer *exec)
 {
-	delete_mutex.lock();
+	bool ok = true;
+	executerList.lock();
+	if (!executerList.contains(exec)) {
+		ok = false;
+	} else {
+		exec->use_cnt--;
+		if (exec->use_cnt < 0) {
+			DEBUGERROR("Use counter for executer ran below zero !!");
+			exec->use_cnt = 0;
+		}
+	}
+	executerList.unlock();
+
+	return ok;
 }
 
-void ExecCenter::unlockDelete()
+MutexQList<Executer *> &ExecCenter::lockAndGetExecuterList()
 {
-	delete_mutex.unlock();
+	executerList.lock();
+	return executerList;
 }
 
-FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist)
+void ExecCenter::unlockExecuterList()
+{
+	executerList.unlock();
+}
+
+FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist, FxItem *fxitem)
 {
 
 	FxListExecuter *exec = new FxListExecuter(myApp, fxlist);
 	executerList.lockAppend(exec);
+	exec->setOriginFx(fxitem);
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
@@ -88,7 +104,7 @@ FxListExecuter *ExecCenter::getCreateFxListExecuter(FxList *fxlist)
 {
 	FxListExecuter *exec = findFxListExecuter(fxlist);
 	if (!exec) {
-		return newFxListExecuter(fxlist);
+		return newFxListExecuter(fxlist, 0);
 	}
 	return exec;
 }
@@ -124,20 +140,43 @@ void ExecCenter::queueRemove(Executer *exec)
 	removeQueue.unlock();
 }
 
+void ExecCenter::deleteAllFxPlaylistExecuters()
+{
+	executerList.lock();
+	foreach (Executer * exec, executerList) {
+		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
+			deleteExecuter(exec);
+		}
+	}
+	executerList.unlock();
+}
+
+void ExecCenter::pauseAllFxPlaylistExecuters()
+{
+	executerList.lock();
+	foreach (Executer * exec, executerList) {
+		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
+			exec->setPaused(true);
+		}
+	}
+	executerList.unlock();
+}
+
 void ExecCenter::deleteExecuter(Executer *exec)
 {
-	QMutexLocker lock(&delete_mutex);
-	if (!executerList.lockContains(exec)) {
+	MutexQListLocker listlock(executerList);
+	if (!executerList.contains(exec)) {
 		DEBUGERROR("Executer does not exist when trying to remove");
 		return;
 	}
+
 	if (exec->use_cnt > 0) {
 		DEBUGERROR("Executer is in use when trying to remove -> try later");
 		queueRemove(exec);
 		return;
 	}
 
-	if (executerList.lockRemoveOne(exec)) {
+	if (executerList.removeOne(exec)) {
 		delete exec;
 		emit executerDeleted(exec);
 	}
@@ -149,7 +188,7 @@ void ExecCenter::test_remove_queue()
 	QMutableListIterator<Executer*>it(removeQueue);
 	while (it.hasNext()) {
 		Executer *exec = it.next();
-		delete_mutex.lock();
+		executerList.lock();
 		if (exec->use_cnt <= 0) {
 			if (executerList.lockRemoveOne(exec)) {
 				delete exec;
@@ -160,7 +199,7 @@ void ExecCenter::test_remove_queue()
 				}
 			}
 		}
-		delete_mutex.unlock();
+		executerList.unlock();
 	}
 	removeQueue.unlock();
 }

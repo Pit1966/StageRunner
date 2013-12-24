@@ -1,0 +1,27 @@
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes.dex : \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtApplication.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$3$1$1.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$2.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$3$1.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$1.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$6.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtApplication$InvokeResult.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$4.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$5.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/qt5/android/bindings/QtActivity$3.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/BuildConfig.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/R$array.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/R.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/R$string.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/R$layout.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/qtproject/example/stagerunner/R$attr.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub$Proxy.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistro.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistroCallback.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub$Proxy.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub.class \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/dexedLibs/QtAndroid-bundled-2c5eb0743bcbd686868b8a42521530a8.jar \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/dexedLibs/QtAndroidAccessibility-bundled-47c0b707ac8914e1ae4c00ac5225f40e.jar \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/dexedLibs/QtMultimedia-bundled-d61cc53474f5bc9164f8b82894ab262d.jar \

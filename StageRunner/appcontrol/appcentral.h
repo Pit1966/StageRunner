@@ -39,6 +39,7 @@ private:
 	FxItem * current_selected_project_fx;
 
 public:
+	QObject *mainWinObj;
 	AudioControl *unitAudio;
 	LightControl *unitLight;
 	FxControl *unitFx;

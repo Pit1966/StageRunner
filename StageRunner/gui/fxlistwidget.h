@@ -27,9 +27,6 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 private:
 	bool is_modified_f;
 	bool is_editable_f;
-	bool show_ids_f;
-	bool show_fadetimes_f;
-	bool show_delays_f;
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	FxListWidgetItem* cur_clicked_item;

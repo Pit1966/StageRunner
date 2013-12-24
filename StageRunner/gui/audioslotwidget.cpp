@@ -97,7 +97,7 @@ void AudioSlotWidget::setPlayState(bool state)
 void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 {
 	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
-	if (msg.ctrlCmd == CMD_STATUS_REPORT) {
+	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
 		case AUDIO_IDLE:

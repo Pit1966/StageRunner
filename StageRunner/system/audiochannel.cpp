@@ -127,13 +127,16 @@ bool AudioSlot::startExperimentalAudio(FxAudioItem *fxa, Executer *exec)
 {
 	is_experimental_audio_f = true;
 
+	current_fx = fxa;
+	current_executer = exec;
+
 	QMediaPlayer *player = new QMediaPlayer;
 	player->setMedia(QUrl::fromLocalFile(fxa->filePath()));
 	player->setVolume(fxa->initialVolume * 100 / MAX_VOLUME);
 	player->play();
 	LOGTEXT(tr("Play experimental audio: %1 (%2)").arg(fxa->filePath()).arg(player->errorString()));
 
-
+	return true;
 }
 
 bool AudioSlot::stopFxAudio()
@@ -282,11 +285,13 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 		// qDebug("emit status: %d %d %p",run_status, slotNumber, current_fx);
 		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
 		msg.fxAudio = current_fx;
-		emit audioCtrlMsgEmitted(msg);
 
 		if (run_status == AUDIO_IDLE) {
 			emit vuLevelChanged(slotNumber,0,0);
+			emit audioProgressChanged(slotNumber,current_fx,0);
+			msg.progress = 0;
 		}
+		emit audioCtrlMsgEmitted(msg);
 	}
 }
 

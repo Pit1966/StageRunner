@@ -63,6 +63,7 @@ public:
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
 
+	virtual void initForSequence() {;}
 	virtual qint32 fadeInTime() {return defaultFadeInTime;}
 	virtual	void setFadeInTime(qint32 val);
 	virtual qint32 fadeOutTime() {return defaultFadeOutTime;}

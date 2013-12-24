@@ -56,5 +56,12 @@ void FxSeqItem::init()
 	myclass = PrefVarCore::FX_SEQUENCE_ITEM;
 	addExistingVar(widgetPos,"seqWidgetPos");
 	addExistingVar(loopTimes,"LoopTimes");
+	addExistingVar(seqList->showColumnIdFlag,"FxListShowId");
+	addExistingVar(seqList->showColumnPredelayFlag,"FxListShowPreDelay");
+	addExistingVar(seqList->showColumnFadeinFlag,"FxListShowFadeInTime");
+	addExistingVar(seqList->showColumnHoldFlag,"FxListShowHoldTime");
+	addExistingVar(seqList->showColumnFadeoutFlag,"FxListShowFadeOutTime");
+	addExistingVar(seqList->showColumnPostdelayFlag,"FxListShowPostDelay");
+
 	addExistingVarSetList(seqList->nativeFxList(),"Sequence",PrefVarCore::FX_ITEM);
 }

@@ -4,6 +4,7 @@
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "fxitemobj.h"
+#include "fxcontrol.h"
 
 //#ifdef IS_QT5
 //#include <QtWidgets>
@@ -61,7 +62,7 @@ void FxPlayListItem::continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec)
 
 	switch (cmd) {
 	case CMD_AUDIO_START:
-		AppCentral::instance()->unitAudio->continueFxAudioPlayList(this,fxa);
+		AppCentral::instance()->unitFx->continueFxAudioPlayList(this,fxa);
 		break;
 	default:
 		break;

@@ -6,6 +6,7 @@
 
 #include <QMutableListIterator>
 
+
 FxList::FxList() :
 	QObject()
 {
@@ -17,6 +18,13 @@ FxList::FxList() :
 	auto_run_f = false;
 	regid = 0;
 	modified_f = false;
+
+	showColumnFadeinFlag = false;
+	showColumnFadeoutFlag = false;
+	showColumnIdFlag = false;
+	showColumnHoldFlag = false;
+	showColumnPredelayFlag = false;
+	showColumnPostdelayFlag = false;
 }
 
 FxList::~FxList()

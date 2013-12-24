@@ -1,4 +1,5 @@
 #include "config.h"
+#include "log.h"
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "fxcontrol.h"
@@ -59,11 +60,15 @@ bool AppCentral::setFxExecLoopEnabled(bool state)
 
 void AppCentral::stopAllFxAudio()
 {
+	//execCenter->deleteAllFxPlaylistExecuters();
+	execCenter->pauseAllFxPlaylistExecuters();
 	unitAudio->stopAllFxAudio();
 }
 
 void AppCentral::fadeoutAllFxAudio()
 {
+	//execCenter->deleteAllFxPlaylistExecuters();
+	execCenter->pauseAllFxPlaylistExecuters();
 	unitAudio->fadeoutAllFxAudio();
 }
 
@@ -312,10 +317,10 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 	case FX_AUDIO_PLAYLIST:
 		switch (cmd) {
 		case CMD_AUDIO_START:
-			unitAudio->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			unitFx->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
 			break;
 		case CMD_AUDIO_STOP:
-			unitAudio->stopFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			// unitAudio->stopFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
 			break;
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
@@ -414,8 +419,8 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
-	delete execCenter;
 	delete unitFx;
+	delete execCenter;
 	delete unitLight;
 	delete unitAudio;
 	delete pluginCentral;
@@ -434,13 +439,14 @@ void AppCentral::init()
 
 	current_selected_project_fx = 0;
 
+	mainWinObj = 0;
 	userSettings = new UserSettings;
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
 	unitAudio = new AudioControl(*this);
 	unitLight = new LightControl(*this);
-	unitFx = new FxControl(*this);
 	execCenter = new ExecCenter(*this);
+	unitFx = new FxControl(*this, *execCenter);
 
 	int id = registerFxList(project->fxList);
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);

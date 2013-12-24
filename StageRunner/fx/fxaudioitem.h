@@ -25,6 +25,7 @@ public:
 	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
 	qint32 loopValue() {return loopTimes;}
 	void setLoopValue(qint32 val) {loopTimes = val;}
+	void initForSequence();
 
 private:
 	void init();

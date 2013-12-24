@@ -1,4 +1,5 @@
 #include "config.h"
+#include "log.h"
 #include "stagerunnermainwin.h"
 #include "commandsystem.h"
 #include "appcentral.h"
@@ -20,6 +21,7 @@
 #include "fxitem.h"
 #include "fxplaylistitem.h"
 #include "executer.h"
+#include "fxlistwidget.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -40,6 +42,10 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	// For external access
 	logWidget = logEdit;
+	if (myapp->mainWinObj) {
+		DEBUGERROR("There seems to be one than one StageRunnerMainWin instance!");
+	}
+	myapp->mainWinObj = this;
 }
 
 StageRunnerMainWin::~StageRunnerMainWin()
@@ -327,6 +333,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 {
 
 	if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
+		// qDebug("KeyEvent %s",obj->objectName().toLocal8Bit().data());
 
 		if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
 
@@ -345,10 +352,23 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		}
 		// qDebug() << "focuswidget" << widname << "parentwid" << parentfocusname << "focusname" << focusname;
 
-		if (widname != "StageRunnerMainwin"
-				|| focusname == "commentEdit"
-				|| fxItemEditor->isOnceEdit())
-		{
+		bool isNormal = true;
+		if (widname == "FxListWidget") {
+			FxListWidget *wid = qobject_cast<FxListWidget*>(obj);
+			if (wid && !wid->isEditable()) {
+				isNormal = false;
+			}
+		}
+		else if (widname == "StageRunnerMainwin") {
+			if (focusname != "commentEdit"
+					&& !fxItemEditor->isOnceEdit())
+			{
+				isNormal = false;
+			}
+		}
+
+
+		if (isNormal) {
 			return qApp->eventFilter(obj, event);
 		}
 	}
@@ -390,7 +410,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		}
 
-		DEBUGTEXT("Key pressed: #%d -> '%s'"
+		if (debug) DEBUGTEXT("Key pressed: #%d -> '%s'"
 				  ,key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
 
 		return true;

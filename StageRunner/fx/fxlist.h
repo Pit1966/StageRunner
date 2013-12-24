@@ -29,6 +29,14 @@ private:
 	bool modified_f;
 
 public:
+	bool showColumnFadeinFlag;
+	bool showColumnFadeoutFlag;
+	bool showColumnIdFlag;
+	bool showColumnHoldFlag;
+	bool showColumnPredelayFlag;
+	bool showColumnPostdelayFlag;
+
+public:
 	FxList();
 	~FxList();
 
@@ -73,6 +81,7 @@ public:
 	FxItem *findSequenceForerunner(FxItem *curfx = 0);
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
+
 signals:
 	void fxNextChanged(FxItem *nextfx);
 	void fxListChanged();

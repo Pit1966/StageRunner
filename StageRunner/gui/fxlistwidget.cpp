@@ -1,4 +1,5 @@
 #include "fxlistwidget.h"
+#include "log.h"
 #include "fxlist.h"
 #include "fxitem.h"
 #include "fxsceneitem.h"
@@ -24,6 +25,7 @@
 #include <QLineEdit>
 #include <QDrag>
 #include <QPainter>
+#include <QKeyEvent>
 
 
 MutexQList<FxListWidget*>FxListWidget::globalFxListWidgetList;
@@ -55,6 +57,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	connect(fxTable,SIGNAL(dropEventReceived(QString,int)),this,SLOT(drop_event_receiver(QString,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowClonedFrom(PTableWidget*,int,int,bool)),this,SLOT(cloneRowFromPTable(PTableWidget*,int,int,bool)),Qt::QueuedConnection);
+
 }
 
 FxListWidget::~FxListWidget()
@@ -88,23 +91,23 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 	header << tr("Name") << tr("Function");
 
-	if (show_ids_f) {
+	if (fxlist->showColumnIdFlag) {
 		header << tr("Id");
 	}
 
-	if (show_delays_f) {
+	if (fxlist->showColumnPredelayFlag) {
 		header << tr("PreDelay");
 	}
-	if (show_fadetimes_f) {
+	if (fxlist->showColumnFadeinFlag) {
 		header << tr("FadeIN");
 	}
-	if (show_delays_f) {
+	if (fxlist->showColumnHoldFlag) {
 		header << tr("Hold");
 	}
-	if (show_fadetimes_f) {
+	if (fxlist->showColumnFadeoutFlag) {
 		header << tr("FadeOUT");
 	}
-	if (show_delays_f) {
+	if (fxlist->showColumnPostdelayFlag) {
 		header << tr("PostDelay");
 	}
 
@@ -170,7 +173,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->myColumn = col;
 		fxTable->setCellWidget(t,col++,item);
 
-		if (show_ids_f) {
+		if (fxlist->showColumnIdFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
 			item->setNeverEditable(true);
 			item->itemEdit->setMinimized(true);
@@ -179,7 +182,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
-		if (show_delays_f) {
+		if (fxlist->showColumnPredelayFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->preDelay()),FxListWidgetItem::CT_PRE_DELAY);
 			item->myRow = t;
 			item->myColumn = col;
@@ -188,7 +191,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
-		if (show_fadetimes_f) {
+		if (fxlist->showColumnFadeinFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
 			item->myRow = t;
 			item->myColumn = col;
@@ -197,7 +200,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
-		if (show_delays_f) {
+		if (fxlist->showColumnHoldFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->holdTime()),FxListWidgetItem::CT_HOLD_TIME);
 			item->myRow = t;
 			item->myColumn = col;
@@ -206,7 +209,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
-		if (show_fadetimes_f) {
+		if (fxlist->showColumnFadeoutFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeOutTime()),FxListWidgetItem::CT_FADEOUT_TIME);
 			item->myRow = t;
 			item->myColumn = col;
@@ -215,7 +218,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 			fxTable->setCellWidget(t,col++,item);
 		}
 
-		if (show_delays_f) {
+		if (fxlist->showColumnPostdelayFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->postDelay()),FxListWidgetItem::CT_POST_DELAY);
 			item->myRow = t;
 			item->myColumn = col;
@@ -501,9 +504,6 @@ void FxListWidget::init()
 {
 	is_modified_f = false;
 	is_editable_f = false;
-	show_fadetimes_f = true;
-	show_delays_f = true;
-	show_ids_f = true;
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
 	origin_fxitem = 0;
@@ -536,11 +536,12 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 
 	// Let us look if an executer is running on this FxPlayListItem
 	if (new_created) {
-		playlistwid->setOriginFx(fx);
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {
 			playlistwid->markFx(exe->currentFx());
 			playlistwid->selectFx(exe->nextFx());
+			connect(exe,SIGNAL(currentFxChanged(FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
+			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
 		}
 		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
 		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
@@ -698,7 +699,7 @@ void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA,
 
 void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
 {
-	if (msg.ctrlCmd == CMD_STATUS_REPORT) {
+	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		int row = getRowThatContainsFxItem(msg.fxAudio);
 		WidItemList widlist = getItemListForRow(row);
 		if (widlist.size()) {
@@ -904,6 +905,9 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 	FxListWidgetItem *item = getFxListItemAtPos(event->pos());
 
 	if (!item) {
+		FxList *fxl = fxList();
+		if (!fxl) return;
+
 		QMenu menu(this);
 		QAction *act;
 		act = menu.addAction(tr("Add Audio Fx"));
@@ -914,18 +918,43 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Activate Edit Mode"));
 		}
 		act->setObjectName("2");
-		if (show_fadetimes_f) {
-			act = menu.addAction(tr("Hide fade time column"));
+
+		if (fxList()->showColumnIdFlag) {
+			act = menu.addAction(tr("Hide ID Column"));
 		} else {
-			act = menu.addAction(tr("Show fade time column"));
+			act = menu.addAction(tr("Show ID Column"));
 		}
 		act->setObjectName("3");
-		if (show_delays_f) {
-			act = menu.addAction(tr("Hide delay time column"));
+		if (fxList()->showColumnPredelayFlag) {
+			act = menu.addAction(tr("Hide PreDelay Column"));
 		} else {
-			act = menu.addAction(tr("Show delay time column"));
+			act = menu.addAction(tr("Show PreDelay Column"));
 		}
 		act->setObjectName("4");
+		if (fxList()->showColumnFadeinFlag) {
+			act = menu.addAction(tr("Hide FadeIN time column"));
+		} else {
+			act = menu.addAction(tr("Show FadeIN time column"));
+		}
+		act->setObjectName("5");
+		if (fxList()->showColumnHoldFlag) {
+			act = menu.addAction(tr("Hide Hold time Column"));
+		} else {
+			act = menu.addAction(tr("Show Hold time Column"));
+		}
+		act->setObjectName("6");
+		if (fxList()->showColumnFadeoutFlag) {
+			act = menu.addAction(tr("Hide FadeOut time column"));
+		} else {
+			act = menu.addAction(tr("Show FadeOut time column"));
+		}
+		act->setObjectName("7");
+		if (fxList()->showColumnPostdelayFlag) {
+			act = menu.addAction(tr("Hide PostDelay column"));
+		} else {
+			act = menu.addAction(tr("Show PostDelay column"));
+		}
+		act->setObjectName("8");
 
 
 		act = menu.exec(event->globalPos());
@@ -940,11 +969,27 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			setEditable(!isEditable());
 			break;
 		case 3:
-			show_fadetimes_f = !show_fadetimes_f;
+			fxl->showColumnIdFlag = !fxl->showColumnIdFlag;
 			refreshList();
 			break;
 		case 4:
-			show_delays_f = !show_delays_f;
+			fxl->showColumnPredelayFlag = !fxl->showColumnPredelayFlag;
+			refreshList();
+			break;
+		case 5:
+			fxl->showColumnFadeinFlag = !fxl->showColumnFadeinFlag;
+			refreshList();
+			break;
+		case 6:
+			fxl->showColumnHoldFlag = !fxl->showColumnHoldFlag;
+			refreshList();
+			break;
+		case 7:
+			fxl->showColumnFadeoutFlag = !fxl->showColumnFadeoutFlag;
+			refreshList();
+			break;
+		case 8:
+			fxl->showColumnPostdelayFlag = !fxl->showColumnPostdelayFlag;
 			refreshList();
 			break;
 

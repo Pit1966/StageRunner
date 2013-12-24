@@ -1,5 +1,6 @@
 #include "setupwidget.h"
 #include "config.h"
+#include "log.h"
 #include "appcentral.h"
 #include "ioplugincentral.h"
 #include "plugins/interfaces/qlcioplugin.h"

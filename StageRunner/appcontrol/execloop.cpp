@@ -37,29 +37,32 @@ void FxExecLoop::init()
 
 void FxExecLoop::processPendingEvents()
 {
-	static int cnt = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = fxContrlRef.execCenter.lockAndGetExecuterList();
 
-	fxContrlRef.activeFxExecuters.lock();
-
-	QMutableListIterator<Executer*> it(fxContrlRef.activeFxExecuters);
+	QMutableListIterator<Executer*> it(execlist);
 	while (it.hasNext()) {
 		Executer *exec = it.next();
-		switch (exec->state()) {
-		case Executer::EXEC_PAUSED:
-			exec->setTargetTimeToCurrent();
-			break;
-		case Executer::EXEC_RUNNING:
-			if (exec->processTimeReached()) {
-				bool active = exec->processExecuter();
-				if (!active) {
-					it.remove();
-					exec->destroyLater();
+		if (exec->isRunning()) {
+			switch (exec->state()) {
+			case Executer::EXEC_PAUSED:
+				exec->setTargetTimeToCurrent();
+				break;
+			case Executer::EXEC_RUNNING:
+				if (exec->processTimeReached()) {
+					bool active = exec->processExecuter();
+					if (!active) {
+						it.remove();
+						exec->destroyLater();
+					}
 				}
+				break;
+			default:
+				break;
 			}
-		default:
-			break;
 		}
 	}
 
-	fxContrlRef.activeFxExecuters.unlock();
+	// Don't forget to unlock the executer list
+	fxContrlRef.execCenter.unlockExecuterList();
 }

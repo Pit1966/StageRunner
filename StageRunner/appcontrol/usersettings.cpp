@@ -1,4 +1,5 @@
 #include "usersettings.h"
+#include "log.h"
 
 UserSettings::UserSettings()
 	: VarSet()

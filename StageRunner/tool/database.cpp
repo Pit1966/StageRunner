@@ -12,6 +12,7 @@
 #include "database.h"
 #include "toolclasses.h"
 #include "varset.h"
+#include "log.h"
 
 #include <string.h>
 #include <QMessageBox>

@@ -329,64 +329,6 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 	emit audioCtrlMsgEmitted(msg);
 }
 
-bool AudioControl::startFxAudioPlayList(FxPlayListItem *fxplay)
-{
-	if (!FxItem::exists(fxplay)) {
-		qDebug("FxPlayListItem not found in pool");
-		return false;
-	}
-
-	// Get/create an executer to process the playlist and start it implicitely
-	FxListExecuter *exec = myApp.unitFx->startFxAudioPlayList(fxplay);
-	if (!exec) return false;
-
-	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
-	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
-	if (wid) {
-		connect(exec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
-		connect(exec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
-		if (wid->currentSelectedFxItem()) {
-			exec->setNextFx(wid->currentSelectedFxItem());
-		}
-	}
-
-	return true;
-}
-
-/**
- * @brief Starts or continues the playback of a FxAudioPlayList
- * @param fxplay A Pointer to the FxPlayListItem instance that contains the playlist
- * @param fxaudio A valid Pointer to the FxAudioItem that should be started
- * @return true, if successful
- *
- */
-bool AudioControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *fxaudio)
-{
-	// First try to find an existing Executer
-	FxListExecuter *cur_exe = myApp.execCenter->findFxListExecuter(fxplay);
-	if (cur_exe) {
-		// cur_exe->fadeEndExecuter();
-	}
-
-	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxplay->fxPlayList);
-	fxexec->setOriginFx(fxplay);
-
-	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
-	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
-	if (wid) {
-		connect(fxexec,SIGNAL(fxItemExecuted(FxItem*,Executer*)),wid,SLOT(markFx(FxItem*)));
-		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
-	}
-	/// @todo: implement me
-}
-
-bool AudioControl::stopFxAudioPlayList(FxPlayListItem *fxplay)
-{
-	/// @todo: implement me
-
-
-	return true;
-}
 
 void AudioControl::init()
 {

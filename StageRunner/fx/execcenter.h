@@ -22,7 +22,6 @@ private:
 
 	MutexQList<Executer*>executerList;
 	MutexQList<Executer*>removeQueue;
-	QMutex delete_mutex;
 	QTimer remove_timer;
 
 public:
@@ -32,17 +31,21 @@ public:
 	Executer * findExecuter(const FxItem *fx);
 	bool exists(Executer *exec);
 	bool useExecuter(Executer *exec);
-	void freeExecuter(Executer *exec);
+	bool freeExecuter(Executer *exec);
 
-	void lockDelete();
-	void unlockDelete();
+	inline MutexQList<Executer*> & executerListRef() {return executerList;}
+	MutexQList<Executer*> & lockAndGetExecuterList();
+	void unlockExecuterList();
 
-	FxListExecuter * newFxListExecuter(FxList *fxlist);
+	FxListExecuter * newFxListExecuter(FxList *fxlist, FxItem *fxitem);
 	FxListExecuter * getCreateFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
 
 	void queueRemove(Executer *exec);
+
+	void deleteAllFxPlaylistExecuters();
+	void pauseAllFxPlaylistExecuters();
 
 signals:
 	void executerCreated(Executer *);

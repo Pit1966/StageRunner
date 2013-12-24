@@ -1,20 +1,16 @@
-/** @file toolclasses.h */
-/***************************************************************************
-
-***************************************************************************/
 #ifndef TOOLCLASSES_H
 #define TOOLCLASSES_H
 
 #include <QList>
 #include <QMutex>
-#include <QString>
 #include <QHash>
 #include <QReadWriteLock>
-#include <QAtomicInt>
+#include <QString>
 
-#include "log.h"
 
-// #define USE_SAFE_MUTEX
+/**
+	@author QASS GmbH <steinmeyer@qass.net>
+*/
 
 template <class Key, class T> class MutexQHash : public QHash <Key, T>
 {
@@ -28,23 +24,23 @@ private:
 
 public:
 	MutexQHash()
-		: myLock(new QReadWriteLock())
+		: myLock(new QReadWriteLock(QReadWriteLock::Recursive))
 	{
 	}
 	MutexQHash(const MutexQHash & other)
 		: QHash<Key, T>(other)
-		,myLock(new QReadWriteLock)
+		,myLock(new QReadWriteLock(QReadWriteLock::Recursive))
 	{
 	}
 
 	~MutexQHash() {
 #if QT_VERSION < 0x050000
 		if (lockCount > 0) {
-			DEBUGERROR("MutexQHash is locked %d times while deleting: '%s'"
+			qDebug("MutexQHash is locked %d times while deleting: '%s'"
 					   ,int(lockCount), myName.toLocal8Bit().data());
 #else
 		if (lockCount.load()) {
-			DEBUGERROR("MutexQHash is locked %d times while deleting: '%s'"
+			qDebug("MutexQHash is locked %d times while deleting: '%s'"
 					   ,lockCount.load(), myName.toLocal8Bit().data());
 #endif
 		} else {
@@ -111,26 +107,18 @@ public:
 
 
 
+
 /***************************************************************************
 
 ***************************************************************************/
+
 
 template <class T> class MutexQList : public QList <T>
 {
 public:
 	MutexQList() {
 		is_modified_f = false;
-		mutex = new QMutex();
-		lock_cnt = 0;
-		ci = 0;
-		co = 0;
-	}
-
-	MutexQList(const MutexQList & other)
-		: QList<T>(other)
-	{
-		is_modified_f = false;
-		mutex = new QMutex();
+		mutex = new QMutex(QMutex::Recursive);
 		lock_cnt = 0;
 		ci = 0;
 		co = 0;
@@ -138,24 +126,34 @@ public:
 
 	~MutexQList() {
 		if (lock_cnt > 0) {
-			DEBUGERROR("MutexQList is locked while deleting: '%s'"
-					   ,name.toLatin1().data());
+			qDebug("MutexQList is locked while deleting: '%s'"
+					   ,name.toLocal8Bit().data());
 		} else {
 			delete mutex;
 		}
 	}
 
+	MutexQList(const MutexQList & other)
+		: QList<T>() {
+		is_modified_f = false;
+		mutex = new QMutex(QMutex::Recursive);
+		lock_cnt = 0;
+		ci = 0;
+		co = 0;
+		this->QList<T>::operator=(other);
+	}
+
 	MutexQList<T> & operator =(const MutexQList & other) {
 		this->QList<T>::operator=(other);
-		is_modified_f = other.is_modified_f;
-
+		is_modified_f = true;
 		return *this;
 	}
 
 private:
-	QMutex * mutex;							///< Mutex, mit dessen Hilfe die Liste gelockt wird
-	bool is_modified_f;						///< Liste ist modifiziert
-	QString name;							///< Listenname
+
+	QMutex * mutex;						///< Mutex, mit dessen Hilfe die Liste gelockt wird
+	bool is_modified_f;					///< Liste ist modifiziert
+	QString name;						///< Listenname
 	int lock_cnt;
 	int ci,co;
 
@@ -163,42 +161,23 @@ public:
 	inline int lockCnt() {return lock_cnt;}
 
 	inline void lock() {
-		if (lock_cnt > 0) {
-			if (lock_cnt > 0) {
-				DEVELTEXT("MutexQList lock:: maybe DOUBLE-LOCK! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toLatin1().data());
-				if (mutex->tryLock()) {
-					lock_cnt++;
-					DEVELTEXT("Lock it after TryLock");
-				} else {
-					DEBUGERROR("Did not lock it again!!");
-				}
-				return;
-			}
-		}
 		mutex->lock();
 		lock_cnt++;
 	}
 
 	inline void unlock() {
 		if (lock_cnt < 1) {
-			DEVELTEXT("MutexQList unlock:: NOT_LOCKED! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toLatin1().data());
+			qDebug("MutexQList unlock:: NOT_LOCKED! lockcnt:%d: %p '%s'"
+					  ,lock_cnt,this,name.toLocal8Bit().data());
 		} else {
 			lock_cnt--;
 			mutex->unlock();
 		}
-//		if (name == "ProjectProcessList") {
-//			qDebug("__out %d",co++);
-//		}
 	}
 
 	inline bool tryLock(int timeout) {
 		if (mutex->tryLock(timeout)) {
 			lock_cnt++;
-//			if (name == "ProjectProcessList") {
-//				qDebug("__try_in %d",ci++);
-//			}
 			return true;
 		} else {
 			return false;
@@ -207,25 +186,8 @@ public:
 	}
 
 	inline bool tryLock() {
-		if (lock_cnt > 0) {
-			if (lock_cnt > 0) {
-				DEVELTEXT("MutexQList tryLock:: maybe DOUBLE-LOCK! lockcnt:%d: %p '%s'"
-					  ,lock_cnt,this,name.toLatin1().data());
-				if (mutex->tryLock()) {
-					lock_cnt++;
-					DEVELTEXT("Lock it after TryLock");
-					return true;
-				} else {
-					DEBUGERROR("Did not lock it again!!");
-					return false;
-				}
-			}
-		}
 		if (mutex->tryLock()) {
 			lock_cnt++;
-//			if (name == "ProjectProcessList") {
-//				qDebug("__try_in %d",ci++);
-//			}
 			return true;
 		} else {
 			return false;
@@ -338,198 +300,25 @@ public:
 
 	void setName(const QString & n) {name = n;}
 
+	friend class MutexQListLocker;
+
 };
 
-
-
-
-
-#ifdef USE_SAFE_MUTEX
-
-class SafeMutexData
-{
-	public:
-		QAtomicInt contenders;
-		const uint recursive : 1;
-		uint reserved : 31;
-	protected:
-		SafeMutexData(QMutex::RecursionMode mode);
-		~SafeMutexData();
-};
-
-
-/**
- * \brief SafeMutex: QMutex-Wrapper  mit sicherem unlock
- * (QMutex verhält sich bei unlock auf nicht gelockte Threads undefiniert)
- *
- */
-class SafeMutex
-{
-	friend class QWaitCondition;
-	friend class QWaitConditionPrivate;
-
-public:
-	explicit SafeMutex(QMutex::RecursionMode mode = QMutex::NonRecursive);
-	~SafeMutex();
-
-	void lock();     //### Qt5: make inline;
-	inline void lockInline();
-	bool tryLock();  //### Qt5: make inline;
-	bool tryLock(int timeout);
-	inline bool tryLockInline();
-	void unlock();     //### Qt5: make inline;
-	inline void unlockInline();
-
-private:
-	void lockInternal();
-	void unlockInternal();
-	Q_DISABLE_COPY(SafeMutex)
-
-	SafeMutexData *d;
-};
-
-
-#ifdef QT_NO_DEBUG
-inline void SafeMutex::unlockInline()
-{
-	if (d->recursive) {
-		unlock();
-	} else if (!d->contenders.testAndSetRelease(1, 0)) {
-		unlockInternal();
-	}
-}
-
-inline bool SafeMutex::tryLockInline()
-{
-	if (d->recursive) {
-		return tryLock();
-	} else {
-		return d->contenders.testAndSetAcquire(0, 1);
-	}
-}
-
-inline void SafeMutex::lockInline()
-{
-	if (d->recursive) {
-		lock();
-	} else if(!tryLockInline()) {
-		lockInternal();
-	}
-}
-#else // QT_NO_DEBUG
-//in debug we do not use inline calls in order to allow debugging tools
-// to hook the mutex locking functions.
-inline void SafeMutex::unlockInline() { unlock(); }
-inline bool SafeMutex::tryLockInline() { return tryLock(); }
-inline void SafeMutex::lockInline() { lock(); }
-#endif // QT_NO_DEBUG
-
-/**
- * \brief SafeMutexLocker: QMutexLocker-Wrapper für SafeMutex Instanzen
- * akzeptiert ein SafeMutex als Constructor-Parameter und lockt implizit beim
- * Erzeugen bzw. unlockt implizit beim Zerstören
- *
- */
-class SafeMutexLocker
-{
-public:
-	inline explicit SafeMutexLocker(SafeMutex *m)
-	{
-		Q_ASSERT_X((reinterpret_cast<quintptr>(m) & quintptr(1u)) == quintptr(0),
-				   "SafeMutexLocker", "QMutex pointer is misaligned");
-		if (m) {
-			m->lockInline();
-			val = reinterpret_cast<quintptr>(m) | quintptr(1u);
-		} else {
-			val = 0;
-		}
-	}
-	inline ~SafeMutexLocker() { unlock(); }
-
-	inline void unlock()
-	{
-		if ((val & quintptr(1u)) == quintptr(1u)) {
-			val &= ~quintptr(1u);
-			mutex()->unlockInline();
-		}
-	}
-
-	inline void relock()
-	{
-		if (val) {
-			if ((val & quintptr(1u)) == quintptr(0u)) {
-				mutex()->lockInline();
-				val |= quintptr(1u);
-			}
-		}
-	}
-
-	inline SafeMutex *mutex() const
-	{
-		return reinterpret_cast<SafeMutex*>(val & ~quintptr(1u));
-	}
-
-private:
-	Q_DISABLE_COPY(SafeMutexLocker)
-
-	quintptr val;
-};
-
-class SafeMutexPrivate : public SafeMutexData {
-public:
-	SafeMutexPrivate(QMutex::RecursionMode mode);
-	~SafeMutexPrivate();
-
-	bool wait(int timeout = -1);
-	void wakeUp();
-
-	// 1ms = 1000000ns
-	enum { MaximumSpinTimeThreshold = 1000000 };
-	volatile qint64 maximumSpinTime;
-	volatile qint64 averageWaitTime;
-	Qt::HANDLE owner;
-	uint count;
-
-#if defined(Q_OS_UNIX) && !defined(Q_OS_LINUX) && !defined(Q_OS_SYMBIAN)
-	volatile bool wakeup;
-	pthread_mutex_t mutex;
-	pthread_cond_t cond;
-#elif defined(Q_OS_WIN32) || defined(Q_OS_WINCE)
-	HANDLE event;
-#elif defined(Q_OS_SYMBIAN)
-	RSemaphore lock;
-#endif
-};
-
-inline SafeMutexData::SafeMutexData(QMutex::RecursionMode mode)
-	: recursive(mode == QMutex::Recursive)
-{}
-
-inline SafeMutexData::~SafeMutexData() {}
-
-#else										// USE_SAFE_MUTEX
-	typedef QMutex SafeMutex;
-	typedef QMutexLocker SafeMutexLocker;
-#endif
-
-
-	
 class MutexQListLocker
 {
 private:
-	SafeMutex * mutexRef;
+	QMutex * mutexRef;
 
 public:
 	template <typename T> MutexQListLocker ( MutexQList<T> & list)
 		: mutexRef(list.mutex)
 	{
-
+		mutexRef->lock();
 	}
 	~MutexQListLocker()
 	{
 		mutexRef->unlock();
 	}
 };
-	
-	
+
 #endif //TOOLCLASSES_H

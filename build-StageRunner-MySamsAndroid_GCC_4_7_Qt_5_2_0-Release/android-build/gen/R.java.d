@@ -1,0 +1,24 @@
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/gen/org/qtproject/example/stagerunner/R.java \
+ : /home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-de/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values/libs.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-fr/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-nl/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-el/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-id/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-et/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-ru/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/layout/splash.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-pt-rBR/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-nb/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-ro/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-pl/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-fa/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-ja/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-it/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-zh-rTW/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-ms/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-es/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-rs/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/res/values-zh-rCN/strings.xml \
+/home/peter/work/petercoding/git_stagerunner/build-StageRunner-MySamsAndroid_GCC_4_7_Qt_5_2_0-Release/android-build/bin/AndroidManifest.xml \

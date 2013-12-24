@@ -19,7 +19,7 @@ AudioFormat::AudioFormat(const QAudioFormat &other)
 AudioFormat AudioFormat::defaultFormat()
 {
 	AudioFormat format;
-	format.setSampleRate(44100);
+	format.setSampleRate(48000);
 	format.setChannelCount(2);
 	format.setSampleType(QAudioFormat::SignedInt);
 	format.setSampleSize(16);

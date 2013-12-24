@@ -17,7 +17,7 @@
 extern Log *logThread;
 extern QThread * main_thread;
 
-SafeMutex DBquery::glob_mutex;
+QMutex DBquery::glob_mutex;
 int DBquery::dbquery_cnt = 0;
 QThread * DBquery::current_thread = 0;
 QList <DBquery *> DBquery::dbquery_list;

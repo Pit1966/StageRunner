@@ -41,7 +41,6 @@ protected:
 	QString idString;
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
-	bool isInExecLoopFlag;						///< This indicates that the executer belongs to the FxExecLoop
 	bool isWaitingForAudio;
 	STATE myState;
 
@@ -59,7 +58,10 @@ public:
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
 	void destroyLater();
-	void setExecLoopFlag(bool state);
+	bool activateProcessing();
+	bool deactivateProcessing();
+	bool setPaused(bool state);
+	inline bool isRunning() const {return (myState == EXEC_RUNNING);}
 	inline qint64 currentTargetTimeMs() {return eventTargetTimeMs;}
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
@@ -69,11 +71,14 @@ public:
 	inline FxItem * originFx() const {return originFxItem;}
 	inline FxItem * currentFx() const {return curFx;}
 	inline FxItem * nextFx() const {return nxtFx;}
+	FxAudioItem * currentFxAudio();
 
 
 signals:
 	void deleteMe(Executer *exec);
 	void changed(Executer *exec);
+	void currentFxChanged(FxItem *fx);
+	void nextFxChanged(FxItem *fx);
 
 	friend class ExecCenter;
 };
@@ -95,10 +100,10 @@ public:
 
 	void setFxList(FxList *fx_list);
 	void setNextFx(FxItem *fx);
+	void setCurrentFx(FxItem *fx);
 
 protected:
 	FxListExecuter(AppCentral & app_central, FxList *fx_list);
-	void setCurrentFx(FxItem *fx);
 
 protected slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
@@ -112,10 +117,6 @@ private:
 	qint64 cue_fx_scene(FxSceneItem *scene);
 	qint64 cue_fx_audio(FxAudioItem *audio);
 
-signals:
-	void fxItemExecuted(FxItem *fx, Executer *exec);
-	void currentFxChanged(FxItem *fx);
-	void nextFxChanged(FxItem *fx);
 
 	friend class ExecCenter;
 

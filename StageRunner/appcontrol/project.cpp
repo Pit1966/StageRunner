@@ -1,5 +1,6 @@
 #include "project.h"
 #include "config.h"
+#include "log.h"
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
@@ -143,6 +144,13 @@ void Project::init()
 	addExistingVar(pProjectName,"ProjectName");
 	addExistingVar(pComment,"Comment");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
+	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
+	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");
+	addExistingVar(fxList->showColumnFadeinFlag,"FxListShowFadeInTime");
+	addExistingVar(fxList->showColumnHoldFlag,"FxListShowHoldTime");
+	addExistingVar(fxList->showColumnFadeoutFlag,"FxListShowFadeOutTime");
+	addExistingVar(fxList->showColumnPostdelayFlag,"FxListShowPostDelay");
+
 
 	addExistingVarSetList(fxList->nativeFxList(),"MainFxList",PrefVarCore::FX_ITEM);
 }

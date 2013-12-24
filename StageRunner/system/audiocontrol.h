@@ -67,10 +67,6 @@ public slots:
 	void setVolume(int slot, int vol);
 	int getVolume(int slot) const;
 	void setVolumeFromDmxLevel(int slot, int vol);
-	bool startFxAudioPlayList(FxPlayListItem *fxplay);
-	bool continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *fxaudio);
-	bool stopFxAudioPlayList(FxPlayListItem *fxplay);
-
 
 private:
 	void init();

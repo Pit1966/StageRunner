@@ -1,4 +1,5 @@
 #include "executer.h"
+#include "log.h"
 #include "fxlist.h"
 #include "appcentral.h"
 #include "audiocontrol.h"
@@ -14,7 +15,6 @@ Executer::Executer(AppCentral &app_central)
 	, curFx(0)
 	, nxtFx(0)
 	, eventTargetTimeMs(0)
-	, isInExecLoopFlag(false)
 	, isWaitingForAudio(false)
 	, myState(EXEC_IDLE)
 	, use_cnt(0)
@@ -52,6 +52,15 @@ QString Executer::getIdString() const
 	}
 }
 
+FxAudioItem *Executer::currentFxAudio()
+{
+	if (curFx && curFx->fxType() == FX_AUDIO) {
+		return reinterpret_cast<FxAudioItem*>(curFx);
+	} else {
+		return 0;
+	}
+}
+
 /**
  * @brief Executer::destroyExecuterLater
  */
@@ -63,15 +72,57 @@ void Executer::destroyLater()
 	}
 }
 
-void Executer::setExecLoopFlag(bool state)
+bool Executer::activateProcessing()
 {
-	isInExecLoopFlag = state;
-	if (state) {
+	if (myState == EXEC_IDLE) {
 		myState = EXEC_RUNNING;
-	} else {
-		myState = EXEC_IDLE;
+		return true;
 	}
+	else if (myState == EXEC_RUNNING || myState == EXEC_PAUSED) {
+		return true;
+	}
+
+	return false;
 }
+
+bool Executer::deactivateProcessing()
+{
+	switch (myState) {
+	case EXEC_RUNNING:
+	case EXEC_PAUSED:
+		myState = EXEC_IDLE;
+		return true;
+	case EXEC_DELETED:
+		return false;
+	case EXEC_IDLE:
+		return false;
+	}
+	return false;
+}
+
+bool Executer::setPaused(bool state)
+{
+	switch (myState) {
+	case EXEC_RUNNING:
+		if (state) {
+			myState = EXEC_PAUSED;
+			emit changed(this);
+			return true;
+		}
+		break;
+	case EXEC_PAUSED:
+		if (!state) {
+			myState = EXEC_RUNNING;
+			emit changed(this);
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
 
 
 FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
@@ -84,8 +135,12 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 void FxListExecuter::setCurrentFx(FxItem *fx)
 {
 	if (fx != curFx) {
+		if (fx) {
+			fx->initForSequence();
+		}
 		curFx = fx;
 		emit currentFxChanged(fx);
+		setNextFx(0);
 	}
 }
 
@@ -103,6 +158,7 @@ void FxListExecuter::setNextFx(FxItem *fx)
  */
 bool FxListExecuter::processExecuter()
 {
+	if (myState == EXEC_IDLE) return false;
 	if (eventTargetTimeMs > runTime.elapsed()) return false;
 
 	FxItem *fx = 0;
@@ -199,9 +255,13 @@ FxItem *FxListExecuter::move_to_next_fx()
 {
 	// Find the following FX in fxList of the current active or set the first FX in fxList as current
 	FxItem * next = 0;
-	if (!curFx) {
+	if (nxtFx && FxItem::exists(nxtFx)) {
+		next = nxtFx;
+	}
+	else if (!curFx) {
 		next = fxList->getFirstFx();
-	} else {
+	}
+	else {
 		next = fxList->findSequenceFollower(curFx);
 	}
 

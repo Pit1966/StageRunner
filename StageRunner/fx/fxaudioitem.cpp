@@ -33,6 +33,11 @@ void FxAudioItem::setFilePath(const QString &path)
 	myFile = fi.fileName();
 }
 
+void FxAudioItem::initForSequence()
+{
+	mySeqStatus = AUDIO_OFF;
+}
+
 void FxAudioItem::init()
 {
 

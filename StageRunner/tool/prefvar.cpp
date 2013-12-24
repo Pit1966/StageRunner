@@ -2,6 +2,7 @@
 
 #include "prefvar.h"
 #include "varset.h"
+#include "log.h"
 #include "../config.h"
 
 #include <QSettings>

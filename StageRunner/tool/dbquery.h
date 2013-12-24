@@ -58,7 +58,7 @@ private:
 	QStringList field_list;
 	QList<QVariant>idx_val_list;
 	QStringList idx_field_list;
-	static SafeMutex glob_mutex;
+	static QMutex glob_mutex;
 	static QThread * current_thread;
 	static int dbquery_cnt;             ///< Zähler für Anzahl der DBquery Objekte
 	static QList <DBquery *> dbquery_list;
