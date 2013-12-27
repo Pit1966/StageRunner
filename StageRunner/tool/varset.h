@@ -171,7 +171,7 @@ public:
 	bool readFromPref();
 
 	bool fileSave(const QString & path, bool append = false, bool empty_line = false);
-	bool fileLoad(const QString & path, bool *exists = 0);
+	bool fileLoad(const QString & path, bool *exists = 0, int *lineNumber = 0, QString *lineCopy = 0);
 	void setFileLoadCancelOnEmptyLine(bool state) {cancel_file_analyze_on_empty_line = state;}
 
 	bool registerDatabaseGlobal(const QString &desc, int index = 1);
@@ -196,8 +196,8 @@ public:
 	static inline bool isVarSet() {return true;}
 
 protected:
-	int analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number);
-	int analyzeLine(QTextStream &read, VarSet *varset, int child_level, int * p_line_number);
+	int analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number, QString *lineCopy);
+	int analyzeLine(QTextStream &read, VarSet *varset, int child_level, int * p_line_number, QString *lineCopy);
 	void clearCurrentVars();
 
 private:

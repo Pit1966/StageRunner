@@ -545,6 +545,16 @@ SceneDeskWidget * SceneDeskWidget::openSceneDesk(FxSceneItem *scene, QWidget *pa
 		}
 	}
 
-	scene_desk_list.append( new SceneDeskWidget(scene,parent) );
-	return scene_desk_list.last();
+	SceneDeskWidget *scenedesk = new SceneDeskWidget(scene,parent);
+	scene_desk_list.append( scenedesk );
+
+	scenedesk->setWindowIcon(QPixmap(":/gfx/icons/scene_mixer.png"));
+	return scenedesk;
+}
+
+void SceneDeskWidget::destroyAllSceneDesks()
+{
+	while (!scene_desk_list.isEmpty()) {
+		delete scene_desk_list.takeFirst();
+	}
 }

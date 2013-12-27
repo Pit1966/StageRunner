@@ -35,6 +35,7 @@ private:
 	bool is_never_editable_f;
 	bool is_selected_f;
 	bool is_marked_f;
+
 	int current_button;
 	int activation_indicator_a;
 	int activation_indicator_b;
@@ -43,6 +44,8 @@ private:
 	QColor indicator_a_color;
 	QColor indicator_b_color;
 	QColor marked_color;
+
+	bool seek_mode_f;
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -85,7 +88,7 @@ signals:
 	void itemDoubleClicked(FxListWidgetItem *);
 	void itemTextEdited(FxListWidgetItem *, const QString &);
 	void draged(FxListWidgetItem * item);
-
+	void seekToPerMille(FxListWidgetItem * item, int perMille);
 };
 
 #endif // FXLISTWIDGETITEM_H

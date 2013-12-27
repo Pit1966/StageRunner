@@ -14,6 +14,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	bytes_read = 0;
 	frame_energy_peak = 0;
 	sample_peak = 0;
+	audio_error = AUDIO::AUDIO_ERR_NONE;
 	audio_format = new AudioFormat(format);
 	audio_buffer = new QByteArray;
 
@@ -44,6 +45,27 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
 
+	if (avail < 0) {
+		if (run_time.elapsed() > 500 && bytes_avail == 0) {
+			audio_error = AUDIO::AUDIO_ERR_TIMEOUT;
+			DEBUGERROR("No data available from audio IODevice after 500ms -> Cancel");
+			emit readReady();
+			return 0;
+		}
+		else if (run_time.elapsed() > 10000) {
+			audio_error = AUDIO::AUDIO_ERR_TIMEOUT;
+			DEBUGERROR("Seek failed! Not enough data available from audio IODevice after 10s -> Cancel");
+			emit readReady();
+			return 0;
+		}
+		// This generates NULL level audio data
+		for (int t=0; t<maxlen; t++) {
+			data[t] = 0;
+		}
+		return maxlen;
+	}
+
+	// Check for regular end of playing
 	if (avail == 0 && bytes_read > 0 && decoding_finished_f) {
 		loop_count++;
 		if (loop_count < loop_target || loop_target < 0) {
@@ -51,7 +73,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 			bytes_read = 0;
 			avail = bytes_avail;
 		} else {
-			qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
+			if (debug > 2) qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
 			emit readReady();
 			return 0;
 		}
@@ -59,6 +81,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 	if (avail == 0 && bytes_read == 0 && !decoding_finished_f) {
 		if (run_time.elapsed() > 500) {
+			audio_error = AUDIO::AUDIO_ERR_TIMEOUT;
 			DEBUGERROR("No data available from audio IODevice after 500ms -> Cancel");
 			emit readReady();
 			return 0;
@@ -210,6 +233,41 @@ void AudioIODevice::calc_vu_level(const char *data, int size)
 	emit vuLevelChanged(left/frames, right/frames);
 }
 
+
+qint64 AudioIODevice::currentPlayPosMs() const
+{
+	return audio_format->durationForBytes(bytes_read) / 1000;
+
+	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+		return 0;
+	} else {
+	}
+}
+
+qint64 AudioIODevice::currentPlayPosUs() const
+{
+	return audio_format->durationForBytes(bytes_read);
+
+	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+		return 0;
+	} else {
+	}
+}
+
+bool AudioIODevice::seekPlayPosMs(qint64 posMs)
+{
+	bool seekok = true;
+
+	qint64 seekpos = audio_format->bytesForDuration(posMs * 1000);
+	if (seekpos > bytes_avail && bytes_read != 0) {
+		bytes_read = bytes_avail;
+		seekok = false;
+	} else {
+		bytes_read = seekpos;
+	}
+	return seekok;
+}
+
 void AudioIODevice::start(int loops)
 {
 	if (loops < 0) {
@@ -229,6 +287,7 @@ void AudioIODevice::start(int loops)
 		return;
 	}
 
+	audio_error = AUDIO::AUDIO_ERR_NONE;
 	audio_buffer_count = 0;
 	audio_buffer->clear();
 	bytes_read = 0;
@@ -278,7 +337,8 @@ void AudioIODevice::process_decoder_buffer()
 void AudioIODevice::on_decoding_finished()
 {
 	decoding_finished_f = true;
-	LOGTEXT(tr("Decoding of audio file '%1' finished").arg(current_filename));
+	LOGTEXT(tr("Decoding of audio file '%1' finished (<font color=green>%2ms</font>")
+			.arg(current_filename).arg(run_time.elapsed()));
 	if (debug) qDebug("Audio decoding finished");
 }
 
@@ -296,6 +356,7 @@ void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 	DEBUGERROR("An error occurred while decoding audio: %s (error: %d)"
 			  ,audio_decoder->errorString().toLocal8Bit().data(),error);
 	LOGERROR(tr("Failed file was: %1").arg(audio_decoder->sourceFilename()));
+	audio_error = AUDIO::AUDIO_ERR_DECODER;
 }
 #endif
 

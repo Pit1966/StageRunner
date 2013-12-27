@@ -33,7 +33,10 @@ public:
 
 	FxListExecuter * startFxSequence(FxSeqItem *fxseq);
 	bool stopFxSequence(FxSeqItem *fxseq);
-	int stopAllFxSequence();
+	int stopAllFxSequences();
+	bool pauseFxPlaylist(FxPlayListItem *fxplay);
+	int pauseAllFxPlaylist();
+	int stopAllFxPlaylists();
 
 
 public slots:

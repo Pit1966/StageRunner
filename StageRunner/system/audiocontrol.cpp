@@ -11,6 +11,7 @@
 #include "fxlistwidget.h"
 #include "fxcontrol.h"
 #include "audioformat.h"
+#include "fxlist.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -113,6 +114,24 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 	return ok;
 }
 
+bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs)
+{
+	bool ok = false;
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->status() < AUDIO_INIT) {
+			if (atMs >= 0) {
+				fxa->setSeekPosition(atMs);
+			}
+			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
+			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START_AT,exec);
+			emit audioThreadCtrlMsgEmitted(msg);
+			ok = true;
+			break;
+		}
+	}
+	return ok;
+}
+
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
 	if (slotnum < 0 || slotnum >= audioChannels.size()) return false;
@@ -157,6 +176,13 @@ void AudioControl::stopFxAudio(FxAudioItem *fxa)
 	}
 }
 
+void AudioControl::storeCurrentSeekPositions()
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		audioChannels[t]->storeCurrentSeekPos();
+	}
+}
+
 bool AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	bool was_running = false;
@@ -173,11 +199,12 @@ void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 
 		// This is a private message to my audio thread
-		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
-		msg.fadetime = time_ms;
-		msg.executer = audioChannels[slot]->currentExecuter();
-		// emit audioThreadCtrlMsgEmitted(msg);
-		audioChannels[slot]->fadeoutFxAudio(time_ms);
+		//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+		//		msg.fadetime = time_ms;
+		//		msg.executer = audioChannels[slot]->currentExecuter();
+		//		emit audioThreadCtrlMsgEmitted(msg);
+
+		audioChannels[slot]->fadeoutFxAudio(0,time_ms);
 	}
 }
 
@@ -197,6 +224,34 @@ void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
 			fadeoutFxAudio(t,time_ms);
 		}
 	}
+}
+
+bool AudioControl::seekPosPerMilleFxAudio(int slot, int perMille)
+{
+	bool seek = false;
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+
+		// dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+		// This is a private message to my audio thread
+		//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+		//		msg.fadetime = time_ms;
+		//		msg.executer = audioChannels[slot]->currentExecuter();
+		// emit audioThreadCtrlMsgEmitted(msg);
+
+		seek = audioChannels[slot]->seekPosPerMille(perMille);
+	}
+	return seek;
+}
+
+bool AudioControl::seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille)
+{
+	bool seek = false;
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentFxAudio() == fxa) {
+			seek = audioChannels[t]->seekPosPerMille(perMille);
+		}
+	}
+	return seek;
 }
 
 /**
@@ -230,6 +285,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		audioChannels[msg.slotNumber]->setVolume(msg.volume);
+		setVolumeInFx(msg.slotNumber,msg.volume);
 		break;
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
@@ -263,6 +319,26 @@ void AudioControl::setVolume(int slot, int vol)
 		audioChannels[slot]->setVolume(vol);
 		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 		dmx_audio_ctrl_last_vol[slot] = vol;
+	}
+}
+
+void AudioControl::setVolumeInFx(int slot, int vol)
+{
+	if (vol < 0) {
+		vol = 0;
+	}
+	else if (vol > MAX_VOLUME) {
+		vol = MAX_VOLUME;
+	}
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		FxItem *fx = audioChannels[slot]->currentFxAudio();
+		if (fx && fx->parentFxList() && fx->parentFxList()->parentFx()) {
+			FxItem *parentFx = fx->parentFxList()->parentFx();
+			if (parentFx->fxType() == FX_AUDIO_PLAYLIST) {
+				reinterpret_cast<FxPlayListItem*>(parentFx)->initialVolume = vol;
+				qDebug("Set volume in parentFx %s to %d",parentFx->name().toLocal8Bit().data(),vol);
+			}
+		}
 	}
 }
 

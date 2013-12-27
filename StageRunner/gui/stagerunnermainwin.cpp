@@ -1,4 +1,5 @@
 #include "config.h"
+#include "version.h"
 #include "log.h"
 #include "stagerunnermainwin.h"
 #include "commandsystem.h"
@@ -22,6 +23,7 @@
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "fxlistwidget.h"
+#include "scenedeskwidget.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -65,7 +67,7 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd,Executer*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
-	connect(appCentral->project->fxList,SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
+	connect(appCentral->project->mainFxList(),SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxListWidget,SLOT(setEditable(bool)));
 
 	// Project FxListWidget <-> Fx Editor (Dock Widget)
@@ -122,7 +124,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	fxitem_editor_dock->setWindowTitle("Fx Editor");
 	fxitem_editor_dock->setWidget(fxItemEditor);
 	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-	this->addDockWidget(Qt::TopDockWidgetArea,fxitem_editor_dock);
+	this->addDockWidget(Qt::RightDockWidgetArea,fxitem_editor_dock);
 
 	scene_status_dock = new QDockWidget(this);
 	sceneStatusDisplay = new SceneStatusWidget();
@@ -197,7 +199,7 @@ void StageRunnerMainWin::clearProject()
 	appCentral->clearProject();
 
 	// Clear Fx list in GUI
-	fxListWidget->setFxList(appCentral->project->fxList);
+	fxListWidget->setFxList(appCentral->project->mainFxList());
 }
 
 void StageRunnerMainWin::init()
@@ -227,10 +229,18 @@ void StageRunnerMainWin::initAppDefaults()
 	restore_window();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
-		appCentral->project->loadFromFile(appCentral->userSettings->pLastProjectLoadPath);
-		appCentral->project->postLoadProcessFxList();
-		fxListWidget->setFxList(appCentral->project->fxList);
-		copyProjectSettingsToGui();
+		Project *pro = appCentral->project;
+		if (pro->loadFromFile(appCentral->userSettings->pLastProjectLoadPath)) {
+			pro->postLoadProcessFxList();
+			fxListWidget->setFxList(pro->mainFxList());
+			copyProjectSettingsToGui();
+			pro->curProjectFilePath = appCentral->userSettings->pLastProjectLoadPath;
+		} else {
+			QMessageBox::critical(this,tr("Load error")
+								  ,tr("An error occured while loading file:\n\n%1\n%2:%3")
+								  .arg(appCentral->userSettings->pLastProjectLoadPath)
+								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
+		}
 	}
 
 	// Test Audio Features
@@ -265,7 +275,7 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
 {
-	FxList *fxlist = appCentral->project->fxList;
+	FxList *fxlist = appCentral->project->mainFxList();
 	appCentral->addFxAudioDialog(fxlist,this);
 	fxListWidget->setFxList(fxlist);
 }
@@ -314,12 +324,18 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 		clearProject();
 
 		appCentral->userSettings->pLastProjectLoadPath = path;
-		appCentral->project->loadFromFile(path);
-		appCentral->project->postLoadProcessFxList();
+		Project *pro = appCentral->project;
+		if ( !pro->loadFromFile(path) ) {
+			QMessageBox::critical(this,tr("Load error")
+								  ,tr("An error occured while loading file:\n\n%1\n\n%2:%3")
+								  .arg(appCentral->userSettings->pLastProjectLoadPath)
+								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
+		} else {
+			pro->postLoadProcessFxList();
 
-		fxListWidget->setFxList(appCentral->project->fxList);
-		copyProjectSettingsToGui();
-		/// @todo Error handling
+			fxListWidget->setFxList(pro->mainFxList());
+			copyProjectSettingsToGui();
+		}
 	}
 }
 
@@ -385,13 +401,15 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			activeKeyModifiers |= Qt::CTRL;
 			break;
 		case Qt::Key_Space:
+			appCentral->unitAudio->storeCurrentSeekPositions();
 			appCentral->fadeoutAllFxAudio();
 			break;
 		case Qt::Key_Escape:
+			appCentral->unitAudio->storeCurrentSeekPositions();
 			appCentral->stopAllFxAudio();
 			break;
 		case Qt::Key_Delete:
-			appCentral->project->fxList->deleteFx(appCentral->project->fxList->nextFx());
+			appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());
 			break;
 		case Qt::Key_Backspace:
 			appCentral->lightBlack(0);
@@ -399,7 +417,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 		default:
 			if (key) {
-				QList<FxItem *>fxlist = appCentral->project->fxList->getFxListByKeyCode(key + activeKeyModifiers);
+				QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
 				if (fxlist.size()) {
 					for (int t=0; t<fxlist.size(); t++) {
 						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, 0);
@@ -442,6 +460,8 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 			on_actionSave_Project_triggered();
 		}
 	}
+	// This stops and removes all running sequences
+	appCentral->stopAllSequencesAndPlaylists();
 
 	if (appCentral->unitAudio->fadeoutAllFxAudio(1000)) {
 		hide();
@@ -457,7 +477,12 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	set.setValue("MainWinSize",size());
 	set.setValue("MainWinDocks",saveState());
 	QMainWindow::closeEvent(event);
+
+	FxListWidget::destroyAllFxListWidgets();
+	SceneDeskWidget::destroyAllSceneDesks();
+
 }
+
 
 
 
@@ -505,7 +530,7 @@ void StageRunnerMainWin::on_actionExit_StageRunner_triggered()
 
 void StageRunnerMainWin::on_addFxSceneButton_clicked()
 {
-	appCentral->project->fxList->addFxScene(12);
+	appCentral->project->mainFxList()->addFxScene(12);
 	fxListWidget->refreshList();
 }
 
@@ -554,26 +579,26 @@ void StageRunnerMainWin::on_actionInput_Assign_Mode_triggered(bool checked)
 
 void StageRunnerMainWin::on_cloneSelectedSceneButton_clicked()
 {
-	appCentral->project->fxList->cloneSelectedSceneItem();
+	appCentral->project->mainFxList()->cloneSelectedSceneItem();
 	fxListWidget->refreshList();
 
 }
 
 void StageRunnerMainWin::on_addAudioPlayListButton_clicked()
 {
-	appCentral->project->fxList->addFxAudioPlayList();
+	appCentral->project->mainFxList()->addFxAudioPlayList();
 	fxListWidget->refreshList();
 }
 
 void StageRunnerMainWin::on_addFxSeqButton_clicked()
 {
-	appCentral->project->fxList->addFxSequence();
+	appCentral->project->mainFxList()->addFxSequence();
 	fxListWidget->refreshList();
 }
 
 void StageRunnerMainWin::on_addAudioTrackButton_clicked()
 {
-	FxItem *fx = appCentral->project->fxList->nextFx();
+	FxItem *fx = appCentral->project->mainFxList()->nextFx();
 	if (!fx || fx->fxType() != FX_AUDIO_PLAYLIST) return;
 
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Audio Track")
@@ -593,7 +618,10 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 
 void StageRunnerMainWin::on_actionInfo_triggered()
 {
-	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment").arg(APP_NAME).arg(APP_VERSION);
+	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment\n\n").arg(APP_NAME).arg(APP_VERSION);
+	msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
+	msg += QString("Build date: %1\n").arg(BUILD_DATE);
+	msg += QString("Build path: %1\n").arg(BUILD_PATH);
 	QMessageBox::information(this,tr("About Info"),msg);
 
 }

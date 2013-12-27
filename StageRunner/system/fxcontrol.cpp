@@ -12,6 +12,8 @@
 #include "toolclasses.h"
 #include "fxlistwidget.h"
 #include "audiocontrol.h"
+#include "fxlistwidgetitem.h"
+#include "fxlist.h"
 
 FxControl::FxControl(AppCentral &appCentral, ExecCenter &exec_center) :
 	QObject()
@@ -61,7 +63,8 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 
 bool FxControl::stopFxSequence(FxSeqItem *fxseq)
 {
-
+	/// @todo implement me
+	return true;
 }
 
 
@@ -71,7 +74,7 @@ bool FxControl::stopFxSequence(FxSeqItem *fxseq)
  *
  *  This does not affect the fade state of the scenes and running audio.
  */
-int FxControl::stopAllFxSequence()
+int FxControl::stopAllFxSequences()
 {
 	int count = 0;
 	// This fetches a reference to the executer list and locks it!!
@@ -80,9 +83,11 @@ int FxControl::stopAllFxSequence()
 	QMutableListIterator<Executer*>it(execlist);
 	while (it.hasNext()) {
 		Executer *exec = it.next();
-		if (!exec->state() != Executer::EXEC_DELETED) {
-			count++;
-			exec->destroyLater();
+		if (exec->originFx() && exec->originFx()->fxType() == FX_SEQUENCE) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				count++;
+				exec->destroyLater();
+			}
 		}
 	}
 
@@ -91,11 +96,59 @@ int FxControl::stopAllFxSequence()
 	return count;
 }
 
+bool FxControl::pauseFxPlaylist(FxPlayListItem *fxplay)
+{
+	/// @todo implement me
+
+	return true;
+}
+
+int FxControl::pauseAllFxPlaylist()
+{
+	int count = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
+			exec->setPaused(true);
+			count++;
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return count;
+}
+
+int FxControl::stopAllFxPlaylists()
+{
+	int count = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
+			exec->setPaused(true);
+			if (exec->state() != Executer::EXEC_DELETED) {
+				exec->destroyLater();
+				count++;
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return count;
+
+}
+
 FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {
-	if (execCenter.findExecuter(fxplay))
-		return 0;
-
 	return continueFxAudioPlayList(fxplay,0);
 }
 
@@ -120,16 +173,36 @@ FxListExecuter *FxControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAud
 		exe = myApp.execCenter->newFxListExecuter(fxplay->fxPlayList, fxplay);
 		exe->setCurrentFx(fxaudio);
 	} else {
-		myApp.unitAudio->fadeoutFxAudio(exe,1000);
-		// exe->setCurrentFx(0);
-		exe->setNextFx(fxaudio);
+		if (exe->isRunning()) {
+			myApp.unitAudio->fadeoutFxAudio(exe,1000);
+			exe->setNextFx(fxaudio);
+		} else {
+			if (!fxaudio) {
+				if (!exe->nextFx()) {
+					// continue play at last position
+					exe->setNextFx(exe->currentFx());
+				}
+			} else {
+				exe->setNextFx(fxaudio);
+			}
+			exe->setPaused(false);
+		}
+	}
+	// Determine what the FxListWidget Window is where the FxPlayListItem lives in
+	FxList *fxlist = fxplay->parentFxList();
+	FxListWidget *wid = FxListWidget::findFxListWidget(fxlist);
+	if (wid) {
+		FxListWidgetItem *listitem = wid->getFxListWidgetItemFor(fxplay);
+		connect(exe,SIGNAL(playListProgressChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
 	}
 
 	// Maybe there is a FxListWidget window opened. Than we can do some monitoring
-	FxListWidget *wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
+	wid = FxListWidget::findFxListWidget(fxplay->fxPlayList);
 	if (wid) {
-		connect(exe,SIGNAL(currentFxChanged(FxItem*)),wid,SLOT(markFx(FxItem*)));
-		connect(exe,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)));
+		connect(exe,SIGNAL(currentFxChanged(FxItem*)),wid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
+		connect(exe,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
+		connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),wid,SLOT(propagateAudioStatus(AudioCtrlMsg)),Qt::UniqueConnection);
+		connect(wid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)),Qt::UniqueConnection);
 	}
 
 	exe->activateProcessing();

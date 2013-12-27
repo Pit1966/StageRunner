@@ -32,7 +32,6 @@ DEFINES += IS_QT5
 
 lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
-# INCLUDEPATH += D:\work\PeterCoding\git_StageRunner\StageRunner
 
 SOURCES += \
 	main.cpp \
@@ -72,30 +71,30 @@ SOURCES += \
 	../gui/scenedeskwidget.cpp \
 	../gui/customwidget/pslineedit.cpp \
 	../system/lightcontrol.cpp \
-    ../appcontrol/lightloop.cpp \
-    ../appcontrol/lightloopthreadinterface.cpp \
-    ../gui/scenestatuswidget.cpp \
-    ../gui/lightcontrolwidget.cpp \
-    ../tool/qtstatictools.cpp \
-    ../gui/fxlistwidgetitem.cpp \
-    ../appcontrol/pluginmapping.cpp \
-    ../gui/customwidget/pslabel.cpp \
-    ../gui/customwidget/extmimedata.cpp \
-    ../gui/style/lightdeskstyle.cpp \
-    ../system/messagehub.cpp \
-    ../system/messagedialog.cpp \
-    ../fx/fxplaylistitem.cpp \
-    ../gui/fxplaylistwidget.cpp \
-    ../gui/customwidget/pslistwidget.cpp \
-    ../fx/fxitemtool.cpp \
-    ../fx/execcenter.cpp \
-    ../fx/executer.cpp \
-    ../fx/fxitemobj.cpp \
-    ../fx/fxseqitem.cpp \
-    ../system/fxcontrol.cpp \
-    ../appcontrol/execloopthreadinterface.cpp \
-    ../appcontrol/execloop.cpp \
-    ../gui/sequencestatuswidget.cpp
+	../appcontrol/lightloop.cpp \
+	../appcontrol/lightloopthreadinterface.cpp \
+	../gui/scenestatuswidget.cpp \
+	../gui/lightcontrolwidget.cpp \
+	../tool/qtstatictools.cpp \
+	../gui/fxlistwidgetitem.cpp \
+	../appcontrol/pluginmapping.cpp \
+	../gui/customwidget/pslabel.cpp \
+	../gui/customwidget/extmimedata.cpp \
+	../gui/style/lightdeskstyle.cpp \
+	../system/messagehub.cpp \
+	../system/messagedialog.cpp \
+	../fx/fxplaylistitem.cpp \
+	../gui/fxplaylistwidget.cpp \
+	../gui/customwidget/pslistwidget.cpp \
+	../fx/fxitemtool.cpp \
+	../fx/execcenter.cpp \
+	../fx/executer.cpp \
+	../fx/fxitemobj.cpp \
+	../fx/fxseqitem.cpp \
+	../system/fxcontrol.cpp \
+	../appcontrol/execloopthreadinterface.cpp \
+	../appcontrol/execloop.cpp \
+	../gui/sequencestatuswidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -138,30 +137,30 @@ HEADERS  += \
 	../gui/scenedeskwidget.h \
 	../gui/customwidget/pslineedit.h \
 	../system/lightcontrol.h \
-    ../appcontrol/lightloopthreadinterface.h \
-    ../appcontrol/lightloop.h \
-    ../gui/scenestatuswidget.h \
-    ../gui/lightcontrolwidget.h \
-    ../tool/qtstatictools.h \
-    ../gui/fxlistwidgetitem.h \
-    ../appcontrol/pluginmapping.h \
-    ../gui/customwidget/pslabel.h \
-    ../gui/customwidget/extmimedata.h \
-    ../gui/style/lightdeskstyle.h \
-    ../system/messagehub.h \
-    ../system/messagedialog.h \
-    ../fx/fxplaylistitem.h \
-    ../gui/fxplaylistwidget.h \
-    ../gui/customwidget/pslistwidget.h \
-    ../fx/fxitemtool.h \
-    ../fx/execcenter.h \
-    ../fx/executer.h \
-    ../fx/fxitemobj.h \
-    ../fx/fxseqitem.h \
-    ../system/fxcontrol.h \
-    ../appcontrol/execloopthreadinterface.h \
-    ../appcontrol/execloop.h \
-    ../gui/sequencestatuswidget.h
+	../appcontrol/lightloopthreadinterface.h \
+	../appcontrol/lightloop.h \
+	../gui/scenestatuswidget.h \
+	../gui/lightcontrolwidget.h \
+	../tool/qtstatictools.h \
+	../gui/fxlistwidgetitem.h \
+	../appcontrol/pluginmapping.h \
+	../gui/customwidget/pslabel.h \
+	../gui/customwidget/extmimedata.h \
+	../gui/style/lightdeskstyle.h \
+	../system/messagehub.h \
+	../system/messagedialog.h \
+	../fx/fxplaylistitem.h \
+	../gui/fxplaylistwidget.h \
+	../gui/customwidget/pslistwidget.h \
+	../fx/fxitemtool.h \
+	../fx/execcenter.h \
+	../fx/executer.h \
+	../fx/fxitemobj.h \
+	../fx/fxseqitem.h \
+	../system/fxcontrol.h \
+	../appcontrol/execloopthreadinterface.h \
+	../appcontrol/execloop.h \
+	../gui/sequencestatuswidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -172,12 +171,12 @@ FORMS    += \
 	../gui/setupwidget.ui \
 	../gui/fxitempropertywidget.ui \
 	../gui/scenedeskwidget.ui \
-    ../gui/scenestatuswidget.ui \
-    ../gui/lightcontrolwidget.ui \
-    ../gui/fxlistwidgetitem.ui \
-    ../system/messagedialog.ui \
-    ../gui/fxplaylistwidget.ui \
-    ../gui/sequencestatuswidget.ui
+	../gui/scenestatuswidget.ui \
+	../gui/lightcontrolwidget.ui \
+	../gui/fxlistwidgetitem.ui \
+	../system/messagedialog.ui \
+	../gui/fxplaylistwidget.ui \
+	../gui/sequencestatuswidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc
@@ -186,6 +185,17 @@ RESOURCES += \
 # Installation
 target.path = $$INSTALLROOT/$$BINDIR
 INSTALLS   += target
+
+
+#############################################################################
+# version.h
+#############################################################################
+	GIT_VERSION = $$system($$quote(git describe))
+	GIT_TIMESTAMP = $$system($$quote(git log -n 1 --format=format:"%at"))
+
+	QMAKE_SUBSTITUTES += $$PWD/version.h.in
+
+
 
 #############################################################################
 # configrev.h generation
@@ -229,4 +239,5 @@ win32 {
 	conf.commands += @echo $$LITERAL_HASH endif >> $$CONFIGFILE
 }
 
-OTHER_FILES +=
+OTHER_FILES += \
+    version.h.in

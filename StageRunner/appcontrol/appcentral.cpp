@@ -58,19 +58,35 @@ bool AppCentral::setFxExecLoopEnabled(bool state)
 	return unitFx->setExecLoopEnabled(state);
 }
 
+/**
+ * @brief Stop all Audio FXs and set running FxAudioPlaylists into pause mode
+ */
 void AppCentral::stopAllFxAudio()
 {
-	//execCenter->deleteAllFxPlaylistExecuters();
-	execCenter->pauseAllFxPlaylistExecuters();
+	unitFx->pauseAllFxPlaylist();
 	unitAudio->stopAllFxAudio();
 }
 
+/**
+ * @brief Fadeout all Audio FXs and set running FxAudioPlaylists into pause mode
+ *
+ * The fadeouttime is the default time that can be configured in setup
+ */
 void AppCentral::fadeoutAllFxAudio()
 {
-	//execCenter->deleteAllFxPlaylistExecuters();
-	execCenter->pauseAllFxPlaylistExecuters();
+	unitFx->pauseAllFxPlaylist();
 	unitAudio->fadeoutAllFxAudio();
 }
+
+/**
+ * @brief Stop all running audio playlists and all running sequences
+ */
+void AppCentral::stopAllSequencesAndPlaylists()
+{
+	unitFx->stopAllFxPlaylists();
+	unitFx->stopAllFxSequences();
+}
+
 
 void AppCentral::lightBlack(qint32 time_ms)
 {
@@ -89,7 +105,7 @@ void AppCentral::sequenceStop(FxItem *fxseq)
 		if (fxseq->fxType() == FX_SEQUENCE)
 			unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fxseq));
 	} else {
-		unitFx->stopAllFxSequence();
+		unitFx->stopAllFxSequences();
 	}
 }
 
@@ -293,6 +309,9 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 		case CMD_AUDIO_START:
 			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx), exec);
 			break;
+		case CMD_AUDIO_START_AT:
+			unitAudio->startFxAudioAt(reinterpret_cast<FxAudioItem*>(fx), exec);
+			break;
 		case CMD_AUDIO_STOP:
 			unitAudio->stopFxAudio(reinterpret_cast<FxAudioItem*>(fx));
 			break;
@@ -317,6 +336,10 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 	case FX_AUDIO_PLAYLIST:
 		switch (cmd) {
 		case CMD_AUDIO_START:
+			unitFx->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			break;
+		case CMD_AUDIO_START_AT:
+			DEBUGERROR("Execute FX: FX_AUDIO_PLAYLIST START AT not implemented: %d for audio",cmd);
 			unitFx->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
 			break;
 		case CMD_AUDIO_STOP:
@@ -448,9 +471,9 @@ void AppCentral::init()
 	execCenter = new ExecCenter(*this);
 	unitFx = new FxControl(*this, *execCenter);
 
-	int id = registerFxList(project->fxList);
+	int id = registerFxList(project->mainFxList());
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);
-	unitLight->addFxListToControlLoop(project->fxList);
+	unitLight->addFxListToControlLoop(project->mainFxList());
 
 
 

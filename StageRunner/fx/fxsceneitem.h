@@ -13,6 +13,7 @@
 
 class DmxChannel;
 class QWidget;
+class FxList;
 
 using namespace LIGHT;
 
@@ -32,12 +33,13 @@ private:
 	bool wasBlacked[MIX_LINES];
 
 public:
-	FxSceneItem();
+	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
 	~FxSceneItem();
 
 	qint32 loopValue() {return 0;}
 	void setLoopValue(qint32 val);
+	void resetFx();
 
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);

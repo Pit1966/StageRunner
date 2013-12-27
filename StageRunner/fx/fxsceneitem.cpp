@@ -3,14 +3,14 @@
 #include "lightcontrol.h"
 #include "appcentral.h"
 
-FxSceneItem::FxSceneItem()
-	:FxItem()
+FxSceneItem::FxSceneItem(FxList *fxList)
+	:FxItem(fxList)
 {
 	init();
 }
 
 FxSceneItem::FxSceneItem(const FxSceneItem &o)
-	: FxItem()
+	: FxItem(o.myParentFxList)
 {
 	init();
 	cloneFrom(o);
@@ -54,6 +54,11 @@ FxSceneItem::~FxSceneItem()
 void FxSceneItem::setLoopValue(qint32 val)
 {
 	Q_UNUSED(val);
+}
+
+void FxSceneItem::resetFx()
+{
+	mySeqStatus = SCENE_OFF;
 }
 
 void FxSceneItem::createDefaultTubes(int tubecount)

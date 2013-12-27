@@ -63,6 +63,7 @@ public:
 
 	void stopAllFxAudio();
 	void fadeoutAllFxAudio();
+	void stopAllSequencesAndPlaylists();
 
 	void lightBlack(qint32 time_ms = 0);
 	void sequenceStop(FxItem *fxseq = 0);

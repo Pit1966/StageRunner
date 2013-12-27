@@ -115,11 +115,12 @@ void VarSet::init()
  * @param p_line_number
  * @return 0: ok, -1: Fehler, 1: Child level kann verlassen werden, 2: Canceled, aber kein Fehler
  */
-int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
+int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int *p_line_number, QString *lineCopy)
 {
 	int seek = read.pos();
 
 	QString line = read.readLine();
+	if (lineCopy) *lineCopy = line;
 	(*p_line_number)++;
 	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level << (varset?varset->className():QString());
 
@@ -210,7 +211,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
 								DmxChannel *item = new DmxChannel;
 								varsetlist->append(item);
-								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;
 								} else {
 									return 0;
@@ -220,7 +221,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								VarSetList<PluginConfig*> *varsetlist = reinterpret_cast<VarSetList<PluginConfig*>*>(var->p_refvar);
 								PluginConfig *item = new PluginConfig;
 								varsetlist->append(item);
-								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;
 								} else {
 									return 0;
@@ -230,7 +231,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								VarSetList<VMsg*> *varsetlist = reinterpret_cast<VarSetList<VMsg*>*>(var->p_refvar);
 								VMsg *item = new VMsg;
 								varsetlist->append(item);
-								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;
 								} else {
 									return 0;
@@ -238,9 +239,9 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							}
 							else if (var->contextClass == PrefVarCore::FX_AUDIO_ITEM) {
 								VarSetList<FxAudioItem*> *varsetlist = reinterpret_cast<VarSetList<FxAudioItem*>*>(var->p_refvar);
-								FxAudioItem *item = new FxAudioItem;
+								FxAudioItem *item = new FxAudioItem(0);
 								varsetlist->append(item);
-								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;
 								} else {
 									return 0;
@@ -252,23 +253,23 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								PrefVarCore::VarClass contextclass = PrefVarCore::getVarClass(curContextClassName);
 								switch (contextclass) {
 								case PrefVarCore::FX_AUDIO_ITEM:
-									item = new FxAudioItem;
+									item = new FxAudioItem(0);
 									break;
 								case PrefVarCore::FX_SCENE_ITEM:
-									item = new FxSceneItem;
+									item = new FxSceneItem(0);
 									break;
 								case PrefVarCore::FX_PLAYLIST_ITEM:
-									item = new FxPlayListItem;
+									item = new FxPlayListItem(0);
 									break;
 								case PrefVarCore::FX_SEQUENCE_ITEM:
-									item = new FxSeqItem;
+									item = new FxSeqItem(0);
 									break;
 								default:
 									break;
 								}
 								if (item) {
 									varsetlist->append(item);
-									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number)) {
+									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 										return -1;
 									} else {
 										return 0;
@@ -287,7 +288,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							if (targetset->myclassname == b1) {
 								if (debug > 2) qDebug() << "Found bracket1 as myclassname:" << b1;
 								targetset->leave_child_level_on_empty_line = true;
-								if (-1 ==  targetset->analyzeLoop(read,targetset,child_level+1, p_line_number)) {
+								if (-1 ==  targetset->analyzeLoop(read,targetset,child_level+1, p_line_number,lineCopy)) {
 									return -1;
 								} else {
 									return 0;
@@ -1078,7 +1079,7 @@ QString VarSet::child_indent_str(int childLevel)
  * @param exists Pointer auf Bool Variable, in der abgefragt werden kann, ob Datei überhaupt existiert hat (oder 0, falls nicht gewünscht)
  * @return true, falls ok;
  */
-bool VarSet::fileLoad(const QString &path, bool *exists)
+bool VarSet::fileLoad(const QString &path, bool *exists, int *lineNumber, QString *lineCopy)
 {
 	clearCurrentVars();
 
@@ -1088,25 +1089,29 @@ bool VarSet::fileLoad(const QString &path, bool *exists)
 
 	bool ok = true;
 	int line_number = 0;
+
 	QFile file(path);
 	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
 		QTextStream read(&file);
 		int child_level = 0;
-		int ret = analyzeLoop(read,this,child_level,&line_number);
+		int ret = analyzeLoop(read,this,child_level,&line_number,lineCopy);
 		if (ret < 0) ok = false;
 		file.close();
 	} else {
 		ok = false;
+	}
+	if (lineNumber) {
+		*lineNumber = line_number;
 	}
 
 	return ok;
 }
 
 
-int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number)
+int VarSet::analyzeLoop(QTextStream &read, VarSet *varset, int child_level, int *p_line_number, QString *lineCopy)
 {
 	while (!read.atEnd()) {
-		int ret = analyzeLine(read, varset, child_level,p_line_number);
+		int ret = analyzeLine(read, varset, child_level,p_line_number,lineCopy);
 		if (ret < 0) {
 			qDebug() << Q_FUNC_INFO << "Exit with failure!";
 			return -1;

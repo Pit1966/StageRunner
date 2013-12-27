@@ -5,6 +5,7 @@
 #include "lightcontrol.h"
 #include "fxcontrol.h"
 #include "fxitem.h"
+#include "fxlist.h"
 
 #include <QTimer>
 
@@ -92,6 +93,7 @@ FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist, FxItem *fxitem)
 	FxListExecuter *exec = new FxListExecuter(myApp, fxlist);
 	executerList.lockAppend(exec);
 	exec->setOriginFx(fxitem);
+	if (fxlist) fxlist->resetFxItemsForNewExecuter();
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
@@ -140,33 +142,11 @@ void ExecCenter::queueRemove(Executer *exec)
 	removeQueue.unlock();
 }
 
-void ExecCenter::deleteAllFxPlaylistExecuters()
-{
-	executerList.lock();
-	foreach (Executer * exec, executerList) {
-		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
-			deleteExecuter(exec);
-		}
-	}
-	executerList.unlock();
-}
-
-void ExecCenter::pauseAllFxPlaylistExecuters()
-{
-	executerList.lock();
-	foreach (Executer * exec, executerList) {
-		if (exec->originFx() && exec->originFx()->fxType() == FX_AUDIO_PLAYLIST) {
-			exec->setPaused(true);
-		}
-	}
-	executerList.unlock();
-}
-
 void ExecCenter::deleteExecuter(Executer *exec)
 {
 	MutexQListLocker listlock(executerList);
 	if (!executerList.contains(exec)) {
-		DEBUGERROR("Executer does not exist when trying to remove");
+		DEBUGERROR("Executer does not exist when trying to remove: %p",exec);
 		return;
 	}
 

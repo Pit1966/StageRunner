@@ -41,8 +41,10 @@ private:
 	QTimer volset_timer;
 	QString volset_text;
 	QTime run_time;
-	QTimeLine fadeout_timeline;
-	int fade_out_initial_vol;						///< The Volume the fadeout starts with
+	QTimeLine fade_timeline;
+	AudioFadeMode fade_mode;
+	int fade_initial_vol;							///< The Volume the fadeout/in starts with
+	int fade_target_vol;
 	int current_volume;								///< Volume the audio slot is set to
 	int master_volume;								///< This is Master Volume
 
@@ -52,16 +54,20 @@ public:
 	AudioSlot(AudioControl *parent);
 	~AudioSlot();
 
-	bool startFxAudio(FxAudioItem * fxa, Executer *exec);
+	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0);
 	bool startExperimentalAudio(FxAudioItem *fxa, Executer *exec);
 	bool stopFxAudio();
-	bool fadeoutFxAudio(int time_ms);
+	bool fadeoutFxAudio(int targetVolume, int time_ms);
+	bool fadeinFxAudio(int targetVolume, int time_ms);
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
 	Executer * currentExecuter();
 	int currentRunTime();
+	bool seekPosMs(qint64 ms);
+	bool seekPosPerMille(int perMille);
+	void storeCurrentSeekPos();
 
 	inline AudioStatus status() {return run_status;}
 
@@ -72,8 +78,8 @@ private slots:
 	void on_audio_output_status_changed(QAudio::State state);
 	void on_audio_io_read_ready();
 	void on_vulevel_changed(int left, int right);
-	void on_fade_out_frame_changed(qreal value);
-	void on_fade_out_finished();
+	void on_fade_frame_changed(qreal value);
+	void on_fade_finished();
 	void on_volset_timer_finished();
 
 public slots:

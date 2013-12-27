@@ -34,6 +34,8 @@ FxListWidgetItem::FxListWidgetItem(const FxListWidgetItem &other) :
   ,myColumn(other.myColumn)
   ,is_editable_f(other.is_editable_f)
   ,is_never_editable_f(other.is_never_editable_f)
+  ,is_selected_f(false)
+  ,is_marked_f(false)
 {
 	init();
 	itemEdit->setReadOnly(other.itemEdit->isReadOnly());
@@ -70,6 +72,8 @@ void FxListWidgetItem::init()
 	indicator_b_color = QColor(Qt::darkRed);
 	marked_color = QColor(QColor(20,20,200,80));
 
+	seek_mode_f = false;
+
 	setupUi(this);
 	itemLabel->clear();
 	itemEdit->setText(itemText);
@@ -100,27 +104,48 @@ void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
 	if (current_button == Qt::LeftButton) {
 		drag_begin_pos = event->pos();
 	}
+	else if (current_button == Qt::MidButton) {
+		seek_mode_f = true;
+	}
 }
 
 void FxListWidgetItem::mouseReleaseEvent(QMouseEvent *)
 {
 	current_button = 0;
+	seek_mode_f = false;
 }
 
 void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
 {
 	QPoint dist = event->pos() - drag_begin_pos;
 
-	if (current_button == Qt::LeftButton && dist.manhattanLength() > 10) {
+	if (seek_mode_f) {
+		int pMille = 1000 * event->x() / width();
+		if (pMille < 0) {
+			emit seekToPerMille(this,0);
+		}
+		else if (pMille > 1000) {
+			emit seekToPerMille(this,1000);
+		}
+		else {
+			emit seekToPerMille(this,pMille);
+		}
+	}
+	else if (current_button == Qt::LeftButton && dist.manhattanLength() > 10) {
 		emit draged(this);
 		current_button = 0;
-
 	}
 }
 
 void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
 	if (is_marked_f) {
+		QPainter p(this);
+		p.setPen(Qt::NoPen);
+		p.setBrush(marked_color);
+		p.drawRect(event->rect());
+	}
+	else if (linkedFxItem->playedRandom()) {
 		QPainter p(this);
 		p.setPen(Qt::NoPen);
 		p.setBrush(marked_color);

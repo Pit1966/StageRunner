@@ -44,9 +44,6 @@ public:
 
 	void queueRemove(Executer *exec);
 
-	void deleteAllFxPlaylistExecuters();
-	void pauseAllFxPlaylistExecuters();
-
 signals:
 	void executerCreated(Executer *);
 	void executerDeleted(Executer *);

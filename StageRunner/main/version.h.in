@@ -1,0 +1,11 @@
+#define GIT_APP_MAJOR    $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\1")
+#define GIT_APP_MINOR        $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\2")
+#define GIT_APP_PATCH        $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\3")
+#define GIT_APP_BUILD         $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\4")
+#define GIT_APP_VERSION_GIT   $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\"\\1.\\2.\\3.\\4\"")
+#define GIT_APP_VERSION_RC   $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\1,\\2,\\3,\\4")
+#define GIT_APP_REVISION     $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\"\\5\"")
+#define GIT_APP_TIME         $$GIT_TIMESTAMP
+#define BUILD_PATH			\"$$system($$quote(pwd))\"
+#define BUILD_DATE			\"$$system(date +"%d.%m.%Y\ %k:%M")\"
+

@@ -1,9 +1,10 @@
 #include "sequencecontrolwidget.h"
 
-#include "appcontrol/appcentral.h"
-#include "fx/fxitem.h"
+#include "appcentral.h"
+#include "fxitem.h"
 #include "config.h"
-#include "system/audiocontrol.h"
+#include "fxcontrol.h"
+#include "audiocontrol.h"
 
 #include <QKeyEvent>
 
@@ -39,7 +40,9 @@ void SequenceControlWidget::on_ctrlPlayButton_clicked()
 
 void SequenceControlWidget::on_ctrlStopButton_clicked()
 {
-	appcentral->stopAllFxAudio();
+	appcentral->unitFx->stopAllFxPlaylists();
+	appcentral->unitFx->stopAllFxSequences();
+	appcentral->unitAudio->stopAllFxAudio();
 }
 
 void SequenceControlWidget::on_masterVolDial_sliderMoved(int position)

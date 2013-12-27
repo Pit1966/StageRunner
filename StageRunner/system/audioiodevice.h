@@ -2,6 +2,7 @@
 #define AUDIOIODEVICE_H
 
 #include "audioformat.h"
+#include "commandsystem.h"
 
 #include <QIODevice>
 #include <QTime>
@@ -34,6 +35,7 @@ private:
 private:
 	QString current_filename;
 	QTime run_time;
+	AUDIO::AudioErrorType audio_error;
 
 	AudioFormat *audio_format;
 #ifdef IS_QT5
@@ -47,12 +49,16 @@ private:
 	double frame_energy_peak;
 	double sample_peak;
 
-	int loop_target;
-	int loop_count;
+	int loop_target;							// How many loops of the sound to play
+	int loop_count;								// Amount of loops the sound has been played already
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}
 	inline int currentLoop() const {return loop_count;}
+	qint64 currentPlayPosMs() const;
+	qint64 currentPlayPosUs() const;
+	bool seekPlayPosMs(qint64 posMs);
+	inline AUDIO::AudioErrorType audioError() const {return audio_error;}
 
 public slots:
 	void start(int loops = 1);

@@ -20,6 +20,7 @@
 #include "execcenter.h"
 #include "executer.h"
 #include "qtstatictools.h"
+#include "audiocontrol.h"
 
 #include <QDebug>
 #include <QLineEdit>
@@ -36,6 +37,8 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	init();
 
 	setupUi(this);
+	setStandAlone(false);
+
 	fxTable->setDragEnabled(true);
 	fxTable->setSelectionMode(QAbstractItemView::SingleSelection);
 	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
@@ -125,6 +128,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 	for (int t=0; t<rows; t++) {
 		int col = 0;
 		FxItem *fx = fxlist->at(t);
+		FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
 		FxListWidgetItem *item;
 
 
@@ -148,6 +152,22 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->myColumn = col;
 		item->itemLabel->hide();
 		fxTable->setCellWidget(t,col++,item);
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			if (fxa->seekPosPerMille() > 0) {
+				item->setActivationProgressA(fxa->seekPosPerMille());
+				qDebug() << "seek pos" << fxa->seekPosPerMille();
+			}
+			break;
+		case FX_SCENE:
+			break;
+		case FX_AUDIO_PLAYLIST:
+			break;
+		case FX_SEQUENCE:
+			break;
+		default:
+			break;
+		}
 
 		item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
 		item->setNeverEditable(true);
@@ -237,13 +257,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 #endif
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 	loopCheck->setChecked(fxlist->isLooped());
-	if (origin_fxitem) {
-		if (origin_fxitem->loopValue() > 0) {
-			loopCheck->setChecked(true);
-		} else {
-			loopCheck->setChecked(false);
-		}
-	}
+	randomCheckBox->setChecked(fxlist->isRandomized());
 }
 
 void FxListWidget::setAutoProceedSequence(bool state)
@@ -333,6 +347,27 @@ FxListWidgetItem *FxListWidget::getFxListItemAtPos(QPoint pos)
 	return 0;
 }
 
+FxListWidgetItem *FxListWidget::getFxListWidgetItemFor(FxItem *fx)
+{
+	for (int row=0; row < fxTable->rowCount(); row++) {
+		FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,1));
+		if (item && item->linkedFxItem == fx) {
+			return item;
+		}
+	}
+	return 0;
+}
+
+void FxListWidget::setStandAlone(bool state)
+{
+	closeButton->setHidden(!state);
+	titleLabel->setHidden(!state);
+	loopCheck->setHidden(!state);
+	autoProceedCheck->setHidden(state);
+	randomCheckBox->setHidden(!state);
+	is_standalone_f = state;
+}
+
 
 
 FxListWidget *FxListWidget::findFxListWidget(PTableWidget *tableWidget)
@@ -390,6 +425,15 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, FxItem *fxItem
 		wid = new FxListWidget();
 		wid->setOriginFx(fxItem);
 		wid->setFxList(fxList);
+		wid->setStandAlone(true);
+		wid->setWindowTitle(fxItem->name());
+		if (fxItem->fxType() == FX_AUDIO_PLAYLIST) {
+			wid->setWindowIcon(QPixmap(":/gfx/icons/playlist.png"));
+		}
+		else if (fxItem->fxType() == FX_SEQUENCE) {
+			wid->setWindowIcon(QPixmap(":/gfx/icons/sequence.png"));
+		}
+
 		if (created)
 			*created = true;
 	} else {
@@ -401,9 +445,19 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, FxItem *fxItem
 	return wid;
 }
 
+void FxListWidget::destroyAllFxListWidgets()
+{
+	for (int t=globalFxListWidgetList.size()-1; t>=0; t--) {
+		FxListWidget *wid = globalFxListWidgetList.at(t);
+		if (wid->isStandAlone()) {
+			wid->close();
+			delete globalFxListWidgetList.takeAt(t);
+		}
+	}
+}
+
 void FxListWidget::selectFx(FxItem *fx)
 {
-	qDebug() << "selectFx" << fx;
 	if (!fx) {
 		unselectRows();
 	}
@@ -542,13 +596,19 @@ void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
 			playlistwid->selectFx(exe->nextFx());
 			connect(exe,SIGNAL(currentFxChanged(FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
 			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
+			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
+			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
 		}
 		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
 		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
 				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+	} else {
+		playlistwid->refreshList();
 	}
 
+	update();
 	playlistwid->show();
+	playlistwid->update();
 
 }
 
@@ -582,6 +642,7 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 	connect(item,SIGNAL(itemTextEdited(FxListWidgetItem*,QString)),this,SLOT(if_fxitemwidget_edited(FxListWidgetItem*,QString)));
 	connect(this,SIGNAL(editableChanged(bool)),item,SLOT(setEditable(bool)));
 	connect(item,SIGNAL(draged(FxListWidgetItem*)),this,SLOT(initRowDrag(FxListWidgetItem*)),Qt::QueuedConnection);
+	connect(item,SIGNAL(seekToPerMille(FxListWidgetItem*,int)),this,SLOT(if_fxitemwidget_seeked(FxListWidgetItem*,int)),Qt::QueuedConnection);
 
 	item->setEditable(is_editable_f);
 	return item;
@@ -795,15 +856,23 @@ void FxListWidget::on_loopCheck_clicked(bool checked)
 {
 	if (myfxlist) {
 		myfxlist->setLoopList(checked);
-	}
-	if (origin_fxitem) {
 		if (checked) {
-			origin_fxitem->setLoopValue(100);
+			myfxlist->setLoopTimes(1000);
+			myfxlist->setLoopList(true);
 		} else {
-			origin_fxitem->setLoopValue(0);
+			myfxlist->setLoopTimes(1);
+			myfxlist->setLoopList(false);
 		}
 	}
 }
+
+void FxListWidget::on_randomCheckBox_clicked(bool checked)
+{
+	if (myfxlist) {
+		myfxlist->setRandomized(checked);
+	}
+}
+
 
 void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 {
@@ -836,7 +905,7 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 {
 	if (!listitem) return;
-	qDebug("FxListWidget -> clicked -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
+	// qDebug("FxListWidget -> clicked -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
 
@@ -903,6 +972,8 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 {
 	FxListWidgetItem *item = getFxListItemAtPos(event->pos());
+	// int x = event->x();
+	int y = event->y();
 
 	if (!item) {
 		FxList *fxl = fxList();
@@ -910,59 +981,88 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 		QMenu menu(this);
 		QAction *act;
-		act = menu.addAction(tr("Add Audio Fx"));
-		act->setObjectName("1");
-		if (isEditable()) {
-			act = menu.addAction(tr("Deactivate Edit Mode"));
-		} else {
-			act = menu.addAction(tr("Activate Edit Mode"));
-		}
-		act->setObjectName("2");
 
-		if (fxList()->showColumnIdFlag) {
-			act = menu.addAction(tr("Hide ID Column"));
-		} else {
-			act = menu.addAction(tr("Show ID Column"));
+		if (y > 40) {
+			act = menu.addAction(tr("Add Audio Fx"));
+			act->setObjectName("20");
+
+			act = menu.addAction(tr("New Audio Playlist"));
+			act->setObjectName("21");
+
+			act = menu.addAction(tr("New Scene"));
+			act->setObjectName("22");
+
+			act = menu.addAction(tr("New Sequence"));
+			act->setObjectName("23");
+
+
+			act = menu.addAction("--------------------");
+			if (isEditable()) {
+				act = menu.addAction(tr("Deactivate Edit Mode"));
+			} else {
+				act = menu.addAction(tr("Activate Edit Mode"));
+			}
+			act->setObjectName("2");
 		}
-		act->setObjectName("3");
-		if (fxList()->showColumnPredelayFlag) {
-			act = menu.addAction(tr("Hide PreDelay Column"));
-		} else {
-			act = menu.addAction(tr("Show PreDelay Column"));
+
+		if (y < 40) {
+			if (fxList()->showColumnIdFlag) {
+				act = menu.addAction(tr("Hide ID Column"));
+			} else {
+				act = menu.addAction(tr("Show ID Column"));
+			}
+			act->setObjectName("3");
+			if (fxList()->showColumnPredelayFlag) {
+				act = menu.addAction(tr("Hide PreDelay Column"));
+			} else {
+				act = menu.addAction(tr("Show PreDelay Column"));
+			}
+			act->setObjectName("4");
+			if (fxList()->showColumnFadeinFlag) {
+				act = menu.addAction(tr("Hide FadeIN time column"));
+			} else {
+				act = menu.addAction(tr("Show FadeIN time column"));
+			}
+			act->setObjectName("5");
+			if (fxList()->showColumnHoldFlag) {
+				act = menu.addAction(tr("Hide Hold time Column"));
+			} else {
+				act = menu.addAction(tr("Show Hold time Column"));
+			}
+			act->setObjectName("6");
+			if (fxList()->showColumnFadeoutFlag) {
+				act = menu.addAction(tr("Hide FadeOut time column"));
+			} else {
+				act = menu.addAction(tr("Show FadeOut time column"));
+			}
+			act->setObjectName("7");
+			if (fxList()->showColumnPostdelayFlag) {
+				act = menu.addAction(tr("Hide PostDelay column"));
+			} else {
+				act = menu.addAction(tr("Show PostDelay column"));
+			}
+			act->setObjectName("8");
 		}
-		act->setObjectName("4");
-		if (fxList()->showColumnFadeinFlag) {
-			act = menu.addAction(tr("Hide FadeIN time column"));
-		} else {
-			act = menu.addAction(tr("Show FadeIN time column"));
-		}
-		act->setObjectName("5");
-		if (fxList()->showColumnHoldFlag) {
-			act = menu.addAction(tr("Hide Hold time Column"));
-		} else {
-			act = menu.addAction(tr("Show Hold time Column"));
-		}
-		act->setObjectName("6");
-		if (fxList()->showColumnFadeoutFlag) {
-			act = menu.addAction(tr("Hide FadeOut time column"));
-		} else {
-			act = menu.addAction(tr("Show FadeOut time column"));
-		}
-		act->setObjectName("7");
-		if (fxList()->showColumnPostdelayFlag) {
-			act = menu.addAction(tr("Hide PostDelay column"));
-		} else {
-			act = menu.addAction(tr("Show PostDelay column"));
-		}
-		act->setObjectName("8");
 
 
 		act = menu.exec(event->globalPos());
 		if (!act) return;
 
 		switch (act->objectName().toInt()) {
-		case 1:
+		case 20:
 			AppCentral::instance()->addFxAudioDialog(fxList(),this);
+			refreshList();
+			break;
+		case 21:
+			fxList()->addFxAudioPlayList();
+			refreshList();
+			break;
+		case 22:
+			fxList()->addFxScene(28);
+			refreshList();
+			break;
+		case 23:
+			fxList()->addFxSequence();
 			refreshList();
 			break;
 		case 2:
@@ -1091,6 +1191,37 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 	default:
 		break;
 	}
+}
+
+void FxListWidget::if_fxitemwidget_seeked(FxListWidgetItem *listitem, int perMille)
+{
+	FxItem *fx = listitem->linkedFxItem;
+	if (!FxItem::exists(fx)) return;
+
+	switch(listitem->columnType) {
+	case FxListWidgetItem::CT_NAME:
+		if (fx->fxType() == FX_AUDIO) {
+			/// @todo: Do this via AudioCmd Message
+			AppCentral::instance()->unitAudio->seekPosPerMilleFxAudio(reinterpret_cast<FxAudioItem*>(fx),perMille);
+		}
+		break;
+	case FxListWidgetItem::CT_KEY:
+		break;
+	case FxListWidgetItem::CT_PRE_DELAY:
+		break;
+	case FxListWidgetItem::CT_POST_DELAY:
+		break;
+	case FxListWidgetItem::CT_FADEIN_TIME:
+		break;
+	case FxListWidgetItem::CT_FADEOUT_TIME:
+		break;
+	case FxListWidgetItem::CT_HOLD_TIME:
+		break;
+
+	default:
+		break;
+	}
+
 }
 
 void FxListWidget::drop_event_receiver(QString str, int row)

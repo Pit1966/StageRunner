@@ -23,6 +23,10 @@ Project::~Project()
 
 void Project::clear()
 {
+	loadErrorFileNotExisting = false;
+	loadErrorLineNumber = 0;
+	loadErrorLineString.clear();
+
 	pProjectName = "Default Project";
 	pProjectId = QDateTime::currentDateTime().toTime_t();
 	pProjectFormat = 0;
@@ -48,22 +52,34 @@ bool Project::saveToFile(const QString &path)
 
 bool Project::loadFromFile(const QString &path)
 {
+	int line_number = 0;
+	QString line_copy;
+	bool file_exists;
+
 	clearCurrentVars();
 	setFileLoadCancelOnEmptyLine(false);
 
-	bool ok = fileLoad(path);
+	bool ok = fileLoad(path,&file_exists,&line_number,&line_copy);
 
-	if (pProjectFormat >= 2) return ok;
+	if (pProjectFormat >= 2) {
+		if (!ok) {
+			loadErrorLineNumber = line_number;
+			loadErrorLineString = line_copy;
+			loadErrorFileNotExisting = !file_exists;
+		} else {
+			setModified(false);
+		}
+		return ok;
+	}
 
 	// Now try to load FxItem VarSets (with classname "FxItem")
 	QFile file(path);
 	FxItem *fx = 0;
-	int line_number = 0;
 	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
 		QTextStream read(&file);
 		while (!read.atEnd() && ok) {
 			int child_level = 0;
-			int ret = analyzeLine(read,fx,child_level,&line_number);
+			int ret = analyzeLine(read,fx,child_level,&line_number,&line_copy);
 			if (ret < 0) {
 				qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
 				ok = false;
@@ -86,6 +102,7 @@ bool Project::loadFromFile(const QString &path)
 		setModified(false);
 	} else {
 		ok = false;
+		loadErrorLineNumber = line_number;
 	}
 
 	// FxSceneItem *scene = (FxSceneItem*)fxList->at(9);
@@ -115,6 +132,8 @@ void Project::setModified(bool state)
 
 bool Project::postLoadProcessFxList()
 {
+	fxList->postLoadProcess();
+
 	bool was_on_stage = false;
 	for (int t=0; t<fxList->size(); t++) {
 		FxItem *fx = fxList->at(t);

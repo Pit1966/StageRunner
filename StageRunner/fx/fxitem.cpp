@@ -1,10 +1,13 @@
 #include "fxitem.h"
+#include "fxlist.h"
 
 QList<FxItem*>*FxItem::global_fx_list = 0;
 
 
-FxItem::FxItem()
+FxItem::FxItem(FxList *fxList)
 	: VarSet()
+	, myParentFxList(fxList)
+	, playedInRandomList(false)
 {
 	init();
 	myId = init_generate_id();
@@ -12,6 +15,8 @@ FxItem::FxItem()
 
 FxItem::FxItem(const FxItem &o)
 	: VarSet()
+	, myParentFxList(0)
+	, playedInRandomList(false)
 {
 	init();
 

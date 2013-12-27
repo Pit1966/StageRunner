@@ -70,7 +70,6 @@ bool SequenceStatusWidget::appendExecuter(Executer *exec)
 	WRITELOCK;
 	FxItem *fx = exec->originFx();
 	// if (fx && fx->fxType() != FX_SEQUENCE) return false;
-	qDebug("appendExecuter: %p",exec);
 
 	QString name;
 

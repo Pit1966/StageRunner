@@ -11,12 +11,11 @@
 //#endif
 
 
-FxPlayListItem::FxPlayListItem()
-	: FxAudioItem()
-	, fxPlayList(new FxList)
+FxPlayListItem::FxPlayListItem(FxList *fxList)
+	: FxAudioItem(fxList)
+	, fxPlayList(new FxList(this))
 	, itemObj(new FxItemObj(this))
 {
-
 	init();
 }
 
@@ -26,9 +25,29 @@ FxPlayListItem::~FxPlayListItem()
 	delete itemObj;
 }
 
+void FxPlayListItem::setLoopValue(qint32 val)
+{
+	loopTimes = val;
+}
+
+qint32 FxPlayListItem::loopValue()
+{
+	return loopTimes;
+}
+
+bool FxPlayListItem::isRandomized()
+{
+	return fxPlayList->myRandomizedFlag;
+}
+
+void FxPlayListItem::setRandomized(bool state)
+{
+	fxPlayList->myRandomizedFlag = state;
+}
+
 bool FxPlayListItem::addAudioTrack(const QString &path)
 {
-	FxAudioItem *fxa = new FxAudioItem(path);
+	FxAudioItem *fxa = new FxAudioItem(path,fxPlayList);
 	if (fxa) {
 		fxPlayList->append(fxa);
 		return true;
@@ -50,6 +69,10 @@ void FxPlayListItem::init()
 	myclass = PrefVarCore::FX_PLAYLIST_ITEM;
 
 	addExistingVar(widgetPos,"WidgetPos");
+	addExistingVar(fxPlayList->myLoopFlag,"ListIsLooped");
+	addExistingVar(fxPlayList->myLoopTimes,"LoopTimes");
+	addExistingVar(fxPlayList->myRandomizedFlag,"RandomizedList");
+	addExistingVar(fxPlayList->myAutoProceedFlag,"AutoProceedList");
 	addExistingVarSetList(fxPlayList->nativeFxList(),"AudioPlayList",PrefVarCore::FX_AUDIO_ITEM);
 }
 

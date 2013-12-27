@@ -23,6 +23,8 @@ private:
 
 public:
 	static SceneDeskWidget *openSceneDesk(FxSceneItem *scene, QWidget *parent = 0);
+	static void destroyAllSceneDesks();
+
 	~SceneDeskWidget();
 	bool setFxScene(FxSceneItem *scene);
 	void setControlKey(bool state);

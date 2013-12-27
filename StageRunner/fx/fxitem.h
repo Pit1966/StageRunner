@@ -18,6 +18,8 @@ enum FxType {
 	FX_SIZE
 };
 
+class FxList;
+
 class FxItem : public VarSet
 {
 private:
@@ -40,12 +42,19 @@ protected:
 	qint32 hookedToInputUniverse;
 	qint32 hookedToInputDmxChannel;
 
+	FxList *myParentFxList;
+	bool playedInRandomList;
+
 public:
-	FxItem();
+	FxItem(FxList *fxList);
 	FxItem(const FxItem &o);
 	~FxItem();
+
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
+
+	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
+	inline FxList * parentFxList() const {return myParentFxList;}
 
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
@@ -62,6 +71,7 @@ public:
 	void hookToInput(qint32 universe, qint32 channel);
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
+	inline bool playedRandom() const {return playedInRandomList;}
 
 	virtual void initForSequence() {;}
 	virtual qint32 fadeInTime() {return defaultFadeInTime;}
@@ -76,6 +86,9 @@ public:
 	virtual void setHoldTime(qint32 val);
 	virtual qint32 loopValue() = 0;
 	virtual void setLoopValue(qint32 val) = 0;
+	virtual bool isRandomized() {return false;}
+	virtual void setRandomized(bool state) {Q_UNUSED(state);}
+	virtual void resetFx() = 0;
 
 private:
 	void init();

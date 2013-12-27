@@ -52,19 +52,24 @@ private slots:
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
+	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	bool stopAllFxAudio();
 	void stopFxAudio(int slot);
 	void stopFxAudio(FxAudioItem *fxa);
+	void storeCurrentSeekPositions();
 	bool fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
 	void fadeoutFxAudio(Executer *exec, int time_ms = 5000);
+	bool seekPosPerMilleFxAudio(int slot, int perMille);
+	bool seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille);
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
+	void setVolumeInFx(int slot, int vol);
 	int getVolume(int slot) const;
 	void setVolumeFromDmxLevel(int slot, int vol);
 

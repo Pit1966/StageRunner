@@ -36,8 +36,6 @@ protected:
 	AppCentral &myApp;
 
 	FxItem *originFxItem;						///<  This should be the FxItem that has initiated the executer or 0
-	FxItem *curFx;
-	FxItem *nxtFx;
 	QString idString;
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
@@ -57,6 +55,7 @@ public:
 	inline virtual TYPE type() {return EXEC_BASE;}
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
+
 	void destroyLater();
 	bool activateProcessing();
 	bool deactivateProcessing();
@@ -69,16 +68,10 @@ public:
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
-	inline FxItem * currentFx() const {return curFx;}
-	inline FxItem * nextFx() const {return nxtFx;}
-	FxAudioItem * currentFxAudio();
-
 
 signals:
 	void deleteMe(Executer *exec);
 	void changed(Executer *exec);
-	void currentFxChanged(FxItem *fx);
-	void nextFxChanged(FxItem *fx);
 
 	friend class ExecCenter;
 };
@@ -90,9 +83,11 @@ class FxListExecuter : public Executer
 	Q_OBJECT
 protected:
 	FxList *fxList;
+	FxItem *curFx;
+	FxItem *nxtFx;
 
 private:
-	AudioStatus currentAudioStatus;
+	int playbackProgress;
 
 public:
 	inline TYPE type() {return EXEC_FXLIST;}
@@ -100,10 +95,14 @@ public:
 
 	void setFxList(FxList *fx_list);
 	void setNextFx(FxItem *fx);
+	inline FxItem * nextFx() const {return nxtFx;}
 	void setCurrentFx(FxItem *fx);
+	inline FxItem * currentFx() const {return curFx;}
+	FxAudioItem * currentFxAudio();
 
 protected:
 	FxListExecuter(AppCentral & app_central, FxList *fx_list);
+	~FxListExecuter();
 
 protected slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
@@ -117,6 +116,13 @@ private:
 	qint64 cue_fx_scene(FxSceneItem *scene);
 	qint64 cue_fx_audio(FxAudioItem *audio);
 
+public slots:
+	void selectNextFx(FxItem *fx);
+
+signals:
+	void currentFxChanged(FxItem *fx);
+	void nextFxChanged(FxItem *fx);
+	void playListProgressChanged(int audioProgressMille, int playlistProgressMille);
 
 	friend class ExecCenter;
 

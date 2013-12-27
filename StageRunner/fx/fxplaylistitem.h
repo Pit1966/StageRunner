@@ -19,8 +19,15 @@ private:
 	FxItemObj *itemObj;
 
 public:
-	FxPlayListItem();
+	FxPlayListItem(FxList *fxList);
 	~FxPlayListItem();
+
+	void setLoopValue(qint32 val);
+	qint32 loopValue();
+	bool isRandomized();
+	void setRandomized(bool state);
+
+
 	bool addAudioTrack(const QString & path);
 	int size();
 	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);

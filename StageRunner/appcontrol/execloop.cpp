@@ -52,7 +52,6 @@ void FxExecLoop::processPendingEvents()
 				if (exec->processTimeReached()) {
 					bool active = exec->processExecuter();
 					if (!active) {
-						it.remove();
 						exec->destroyLater();
 					}
 				}

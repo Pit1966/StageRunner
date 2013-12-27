@@ -27,6 +27,8 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 private:
 	bool is_modified_f;
 	bool is_editable_f;
+	bool is_standalone_f;
+
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	FxListWidgetItem* cur_clicked_item;
@@ -49,10 +51,14 @@ public:
 	FxItem *getFxItemAtRow(int row) const;
 	void setOriginFx(FxItem *fx);
 	FxListWidgetItem * getFxListItemAtPos(QPoint pos);
+	FxListWidgetItem * getFxListWidgetItemFor(FxItem *fx);
+	void setStandAlone(bool state);
+	inline bool isStandAlone() const {return is_standalone_f;}
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
 	static FxListWidget * getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created = 0);
+	static void destroyAllFxListWidgets();
 
 private:
 	void init();
@@ -90,8 +96,11 @@ private slots:
 	void if_fxitemwidget_clicked(FxListWidgetItem *listitem);
 	void if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem);
 	void if_fxitemwidget_edited(FxListWidgetItem *listitem, const QString &text);
+	void if_fxitemwidget_seeked(FxListWidgetItem *listitem, int perMille);
 
 	void drop_event_receiver(QString str, int row);
+
+	void on_randomCheckBox_clicked(bool checked);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);

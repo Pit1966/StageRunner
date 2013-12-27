@@ -5,19 +5,23 @@
 #include "fxseqitem.h"
 
 #include <QMutableListIterator>
+#include <QDateTime>
 
 
-FxList::FxList() :
+FxList::FxList(FxItem *parentFx) :
 	QObject()
 {
 	fx_last = 0;
 	fx_next = 0;
 	fx_current = 0;
-	auto_proceed_f = false;
-	loop_list_f = false;
+	fx_parent = parentFx;
+	myAutoProceedFlag = false;
+	myLoopFlag = false;
 	auto_run_f = false;
 	regid = 0;
 	modified_f = false;
+	myRandomizedFlag = false;
+	myLoopTimes = 1;
 
 	showColumnFadeinFlag = false;
 	showColumnFadeoutFlag = false;
@@ -76,7 +80,7 @@ FxItem *FxList::stepToSequenceNext()
 	}
 
 	// Now check if auto proceed is selected and find next entry in list
-	if (auto_proceed_f) {
+	if (myAutoProceedFlag) {
 		setNextFx( findSequenceFollower(fx_current) );
 	}
 	return fx_current;
@@ -100,6 +104,16 @@ FxItem *FxList::getFxByListIndex(int idx) const
 	return 0;
 }
 
+int FxList::loopTimes() const
+{
+	return myLoopTimes;
+}
+
+void FxList::setLoopTimes(int loops)
+{
+	myLoopTimes = loops;
+}
+
 /**
  * @brief Returns a list with FXs that contains the desired key code
  * @param keycode
@@ -114,6 +128,28 @@ QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
 		if (fx->keyCode() == keycode) fxlist.append(fx);
 	}
 	return fxlist;
+}
+
+/**
+ * @brief Process FxList after Load from File
+ *
+ * This sets the parentFxList Pointer for any mamber of the list
+ */
+void FxList::postLoadProcess()
+{
+	for (int t=0; t<fx_list.size(); t++) {
+		FxItem *fx = fx_list.at(t);
+		fx->setParentFxList(this);
+		switch (fx->fxType()) {
+		case FX_AUDIO_PLAYLIST:
+			reinterpret_cast<FxPlayListItem*>(fx)->fxPlayList->postLoadProcess();
+			break;
+		case FX_SEQUENCE:
+			reinterpret_cast<FxSeqItem*>(fx)->seqList->postLoadProcess();
+		default:
+			break;
+		}
+	}
 }
 
 /**
@@ -157,9 +193,34 @@ FxItem *FxList::findSequenceForerunner(FxItem *curfx)
 	return prevfx;
 }
 
+FxItem *FxList::findSequenceRandomFxItem()
+{
+	int cnt = fx_list.size();
+	FxItem *fx = 0;
+	qsrand(QDateTime::currentDateTime().toTime_t());
+	int tries = 0;
+	while (!fx && tries++ < 1000) {
+		int rnd = double(qrand()) * cnt / RAND_MAX;
+		if (!fx_list.at(rnd)->playedInRandomList) {
+			fx = fx_list.at(rnd);
+			fx->playedInRandomList = true;
+		}
+	}
+
+	int i = 0;
+	while (!fx && i<cnt) {
+		if (!fx_list.at(i)->playedInRandomList) {
+			fx = fx_list.at(i);
+			fx->playedInRandomList = true;
+		}
+		i++;
+	}
+	return fx;
+}
+
 bool FxList::addFxAudioSimple(const QString &path, int pos)
 {
-	FxAudioItem *fx = new FxAudioItem(path);
+	FxAudioItem *fx = new FxAudioItem(path,this);
 	fx->refCount.ref();
 	if (pos < 0 || pos >= fx_list.size()) {
 		fx_list.append(fx);
@@ -285,12 +346,34 @@ void FxList::cloneSelectedSceneItem()
 	}
 }
 
+
+/**
+ * @brief Reset the members of the list for (sequence) start
+ * @param skipFx If not NULL this FxItem will be skip in initializing (usefull for countinue)
+ */
+void FxList::resetFxItems(FxItem *skipFx)
+{
+	for (int t=0; t<fx_list.size(); t++) {
+		if (fx_list.at(t) != skipFx) {
+			fx_list.at(t)->resetFx();
+		}
+	}
+}
+
+void FxList::resetFxItemsForNewExecuter()
+{
+	for (int t=0; t<fx_list.size(); t++) {
+		FxItem *fx = fx_list.at(t);
+		fx->playedInRandomList = false;
+	}
+}
+
 FxItem *FxList::addFx(int fxtype, int option)
 {
 	switch (fxtype) {
 	case FX_AUDIO:
 		{
-			FxAudioItem *fx = new FxAudioItem();
+			FxAudioItem *fx = new FxAudioItem(this);
 			fx->refCount.ref();
 			fx_list.append(fx);
 			modified_f = true;
@@ -299,7 +382,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 		break;
 	case FX_SCENE:
 		{
-			FxSceneItem *fx = new FxSceneItem();
+			FxSceneItem *fx = new FxSceneItem(this);
 			fx->refCount.ref();
 			fx_list.append(fx);
 			modified_f = true;
@@ -310,7 +393,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 		}
 	case FX_AUDIO_PLAYLIST:
 		{
-			FxPlayListItem *fx = new FxPlayListItem();
+			FxPlayListItem *fx = new FxPlayListItem(this);
 			fx->refCount.ref();
 			fx_list.append(fx);
 			modified_f = true;
@@ -318,7 +401,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 		}
 	case FX_SEQUENCE:
 		{
-			FxSeqItem *fx = new FxSeqItem();
+			FxSeqItem *fx = new FxSeqItem(this);
 			fx->refCount.ref();
 			fx_list.append(fx);
 			modified_f = true;

@@ -12,8 +12,6 @@
 Executer::Executer(AppCentral &app_central)
 	: myApp(app_central)
 	, originFxItem(0)
-	, curFx(0)
-	, nxtFx(0)
 	, eventTargetTimeMs(0)
 	, isWaitingForAudio(false)
 	, myState(EXEC_IDLE)
@@ -24,7 +22,7 @@ Executer::Executer(AppCentral &app_central)
 
 Executer::~Executer()
 {
-	qDebug() << "Executer destroyed" << getIdString();
+	// qDebug() << "Executer destroyed" << getIdString();
 }
 
 void Executer::setIdString(const QString &str)
@@ -49,15 +47,6 @@ QString Executer::getIdString() const
 		return QString("0x%1").arg(quint64(this));
 	} else {
 		return idString;
-	}
-}
-
-FxAudioItem *Executer::currentFxAudio()
-{
-	if (curFx && curFx->fxType() == FX_AUDIO) {
-		return reinterpret_cast<FxAudioItem*>(curFx);
-	} else {
-		return 0;
 	}
 }
 
@@ -128,8 +117,15 @@ bool Executer::setPaused(bool state)
 FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 	: Executer(app_central)
 	, fxList(fx_list)
+	, curFx(0)
+	, nxtFx(0)
 {
 	init();
+}
+
+FxListExecuter::~FxListExecuter()
+{
+	emit playListProgressChanged(0,0);
 }
 
 void FxListExecuter::setCurrentFx(FxItem *fx)
@@ -149,6 +145,15 @@ void FxListExecuter::setNextFx(FxItem *fx)
 	if (fx != nxtFx) {
 		nxtFx = fx;
 		emit nextFxChanged(fx);
+	}
+}
+
+FxAudioItem * FxListExecuter::currentFxAudio()
+{
+	if (curFx && curFx->fxType() == FX_AUDIO) {
+		return reinterpret_cast<FxAudioItem*>(curFx);
+	} else {
+		return 0;
 	}
 }
 
@@ -205,20 +210,39 @@ void FxListExecuter::setFxList(FxList *fx_list)
 
 void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 {
-	if (msg.executer != this || msg.ctrlCmd != CMD_AUDIO_STATUS_CHANGED)
+	if (msg.executer != this)
 		return;		// Not for me
 
-	qDebug("%s: Received audio msg: AudioStatus %d, AudioCmd %d"
-		   ,Q_FUNC_INFO,msg.currentAudioStatus,msg.ctrlCmd);
-
-	if (isWaitingForAudio) {
-		if (msg.currentAudioStatus == AUDIO_RUNNING) {
-			qDebug("   Wait for audio end");
+//	qDebug("%s: Received audio msg: AudioStatus %d, AudioCmd %d"
+//		   ,Q_FUNC_INFO,msg.currentAudioStatus,msg.ctrlCmd);
+	if (msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
+		if (isWaitingForAudio) {
+			if (msg.currentAudioStatus == AUDIO_RUNNING) {
+				qDebug("   Wait for audio end");
+			}
+			else if (msg.currentAudioStatus == AUDIO_IDLE) {
+				qDebug("   Audio now idle");
+				eventTargetTimeMs = runTime.elapsed();
+				isWaitingForAudio = false;
+			}
+			else if (msg.currentAudioStatus == AUDIO_ERROR) {
+				DEBUGERROR("An error occured in sequence executer while waiting for audio '%s'"
+						   ,msg.fxAudio->name().toLocal8Bit().data());
+				if (curFx && curFx->fxType() == FX_AUDIO) {
+					FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(curFx);
+					fxa->setSeqStatus(AUDIO_OFF);
+					fxa->resetFx();
+					setNextFx(0);
+				}
+				move_to_next_fx();
+				isWaitingForAudio = false;
+				eventTargetTimeMs = runTime.elapsed();
+			}
 		}
-		else if (msg.currentAudioStatus == AUDIO_IDLE) {
-			qDebug("   Audio now idle");
-			eventTargetTimeMs = runTime.elapsed();
-			isWaitingForAudio = false;
+	}
+	else if (msg.ctrlCmd == CMD_STATUS_REPORT) {
+		if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
+			emit playListProgressChanged(playbackProgress, msg.progress);
 		}
 	}
 }
@@ -239,7 +263,7 @@ void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 
 void FxListExecuter::init()
 {
-	currentAudioStatus = AUDIO_IDLE;
+	playbackProgress = 0;
 
 	connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	// connect(myApp.unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
@@ -257,12 +281,28 @@ FxItem *FxListExecuter::move_to_next_fx()
 	FxItem * next = 0;
 	if (nxtFx && FxItem::exists(nxtFx)) {
 		next = nxtFx;
+		fxList->resetFxItems(nxtFx);
+		setNextFx(0);
+	}
+	else if (fxList->isRandomized()) {
+		next = fxList->findSequenceRandomFxItem();
 	}
 	else if (!curFx) {
 		next = fxList->getFirstFx();
+		if (next) next->resetFx();
 	}
 	else {
 		next = fxList->findSequenceFollower(curFx);
+		if (next) next->resetFx();
+	}
+
+	if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
+		int pos = 0;
+		while (pos < fxList->size() && fxList->at(pos) != next) {
+			pos++;
+		}
+		playbackProgress = pos * 1000 / fxList->size();
+		emit playListProgressChanged(playbackProgress,0);
 	}
 
 	setCurrentFx(next);
@@ -355,7 +395,8 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 			isWaitingForAudio = true;
 			cue_time = 1000000;
 		}
-		myApp.unitAudio->startFxAudio(audio,this);
+		// myApp.unitAudio->startFxAudio(audio,this);
+		myApp.unitAudio->startFxAudioAt(audio,this);
 		audio->setSeqStatus(AUDIO_PLAYTIME);
 		break;
 	case AUDIO_PLAYTIME:
@@ -374,4 +415,10 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 	}
 
 	return cue_time;
+}
+
+void FxListExecuter::selectNextFx(FxItem *fx)
+{
+	qDebug("set Next Fx %s",fx?fx->name().toLocal8Bit().data():"NULL");
+	setNextFx(fx);
 }
