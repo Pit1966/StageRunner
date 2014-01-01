@@ -23,9 +23,61 @@ DEL_FILE      = rm -f
 SYMLINK       = ln -f -s
 DEL_DIR       = rmdir
 MOVE          = mv -f
-SUBTARGETS    = 
+SUBTARGETS    =  \
+		sub-yadi \
+		sub-enttecdmxusb
 
 
+sub-yadi-qmake_all:  FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
+	cd yadi/ && $(MAKE) -f Makefile qmake_all
+sub-yadi: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile
+sub-yadi-make_first: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-yadi-all: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-yadi-clean: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-yadi-distclean: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-yadi-install_subtargets: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-yadi-uninstall_subtargets: FORCE
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
+sub-enttecdmxusb-qmake_all:  FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
+	cd enttecdmxusb/ && $(MAKE) -f Makefile qmake_all
+sub-enttecdmxusb: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile
+sub-enttecdmxusb-make_first: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-enttecdmxusb-all: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-enttecdmxusb-clean: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-enttecdmxusb-distclean: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-enttecdmxusb-install_subtargets: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-enttecdmxusb-uninstall_subtargets: FORCE
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 
 Makefile: ../../StageRunner/plugins/plugins.pro ../../../../../Qt5/5.2.0/gcc_64/mkspecs/linux-g++/qmake.conf ../../../../../Qt5/5.2.0/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../../Qt5/5.2.0/gcc_64/mkspecs/common/shell-unix.conf \
@@ -231,17 +283,23 @@ Makefile: ../../StageRunner/plugins/plugins.pro ../../../../../Qt5/5.2.0/gcc_64/
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ../../StageRunner/plugins/plugins.pro
 
-qmake_all: FORCE
+qmake_all: sub-yadi-qmake_all sub-enttecdmxusb-qmake_all FORCE
 
-make_first: FORCE
-all: FORCE
-clean: FORCE
-distclean: FORCE
+make_first: sub-yadi-make_first sub-enttecdmxusb-make_first FORCE
+all: sub-yadi-all sub-enttecdmxusb-all FORCE
+clean: sub-yadi-clean sub-enttecdmxusb-clean FORCE
+distclean: sub-yadi-distclean sub-enttecdmxusb-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: FORCE
-uninstall_subtargets: FORCE
+install_subtargets: sub-yadi-install_subtargets sub-enttecdmxusb-install_subtargets FORCE
+uninstall_subtargets: sub-yadi-uninstall_subtargets sub-enttecdmxusb-uninstall_subtargets FORCE
 
-check:
+sub-yadi-check:
+	@test -d yadi/ || mkdir -p yadi/
+	cd yadi/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/yadi/yadi.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
+sub-enttecdmxusb-check:
+	@test -d enttecdmxusb/ || mkdir -p enttecdmxusb/
+	cd enttecdmxusb/ && ( test -e Makefile || $(QMAKE) /home/peter/work/petercoding/git_stagerunner/StageRunner/plugins/enttecdmxusb/enttecdmxusb.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
+check: sub-yadi-check sub-enttecdmxusb-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

@@ -17,6 +17,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "gui/ptablewidget.h"
@@ -28,9 +29,11 @@ class Ui_FxListWidget
 public:
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout;
-    QLabel *label;
+    QLabel *titleLabel;
     QCheckBox *loopCheck;
+    QCheckBox *randomCheckBox;
     QCheckBox *autoProceedCheck;
+    QPushButton *closeButton;
     PTableWidget *fxTable;
 
     void setupUi(QWidget *FxListWidget)
@@ -43,20 +46,45 @@ public:
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(-1, 0, -1, -1);
-        label = new QLabel(FxListWidget);
-        label->setObjectName(QStringLiteral("label"));
+        titleLabel = new QLabel(FxListWidget);
+        titleLabel->setObjectName(QStringLiteral("titleLabel"));
+        QFont font;
+        font.setPointSize(10);
+        font.setBold(true);
+        font.setWeight(75);
+        titleLabel->setFont(font);
 
-        horizontalLayout->addWidget(label);
+        horizontalLayout->addWidget(titleLabel);
 
         loopCheck = new QCheckBox(FxListWidget);
         loopCheck->setObjectName(QStringLiteral("loopCheck"));
+        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(loopCheck->sizePolicy().hasHeightForWidth());
+        loopCheck->setSizePolicy(sizePolicy);
 
         horizontalLayout->addWidget(loopCheck);
+
+        randomCheckBox = new QCheckBox(FxListWidget);
+        randomCheckBox->setObjectName(QStringLiteral("randomCheckBox"));
+
+        horizontalLayout->addWidget(randomCheckBox);
 
         autoProceedCheck = new QCheckBox(FxListWidget);
         autoProceedCheck->setObjectName(QStringLiteral("autoProceedCheck"));
 
         horizontalLayout->addWidget(autoProceedCheck);
+
+        closeButton = new QPushButton(FxListWidget);
+        closeButton->setObjectName(QStringLiteral("closeButton"));
+        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(closeButton->sizePolicy().hasHeightForWidth());
+        closeButton->setSizePolicy(sizePolicy1);
+
+        horizontalLayout->addWidget(closeButton);
 
 
         verticalLayout->addLayout(horizontalLayout);
@@ -68,6 +96,7 @@ public:
 
 
         retranslateUi(FxListWidget);
+        QObject::connect(closeButton, SIGNAL(clicked()), FxListWidget, SLOT(close()));
 
         QMetaObject::connectSlotsByName(FxListWidget);
     } // setupUi
@@ -75,9 +104,11 @@ public:
     void retranslateUi(QWidget *FxListWidget)
     {
         FxListWidget->setWindowTitle(QApplication::translate("FxListWidget", "FxList", 0));
-        label->setText(QApplication::translate("FxListWidget", "Fx List", 0));
+        titleLabel->setText(QApplication::translate("FxListWidget", "Fx List", 0));
         loopCheck->setText(QApplication::translate("FxListWidget", "Loop", 0));
-        autoProceedCheck->setText(QApplication::translate("FxListWidget", "Auto proceed Sequence", 0));
+        randomCheckBox->setText(QApplication::translate("FxListWidget", "Random", 0));
+        autoProceedCheck->setText(QApplication::translate("FxListWidget", "Auto proceed", 0));
+        closeButton->setText(QApplication::translate("FxListWidget", "Close", 0));
     } // retranslateUi
 
 };
