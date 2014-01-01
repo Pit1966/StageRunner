@@ -145,6 +145,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->itemLabel->hide();
 		item->myRow = t;
 		item->myColumn = col;
+
 		fxTable->setCellWidget(t,col++,item);
 
 		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
@@ -154,10 +155,10 @@ void FxListWidget::setFxList(FxList *fxlist)
 		fxTable->setCellWidget(t,col++,item);
 		switch (fx->fxType()) {
 		case FX_AUDIO:
-			if (fxa->seekPosPerMille() > 0) {
-				item->setActivationProgressA(fxa->seekPosPerMille());
-				qDebug() << "seek pos" << fxa->seekPosPerMille();
-			}
+//			if (fxa->seekPosPerMille() > 0) {
+//				item->setActivationProgressA(fxa->seekPosPerMille());
+//				qDebug() << "seek pos" << fxa->seekPosPerMille();
+//			}
 			break;
 		case FX_SCENE:
 			break;
