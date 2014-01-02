@@ -140,6 +140,11 @@ FxList *AppCentral::getRegisteredFxList(int id)
 	return 0;
 }
 
+bool AppCentral::isExperimentalAudio() const
+{
+	return userSettings->pAltAudioEngine;
+}
+
 void AppCentral::setEditMode(bool state)
 {
 	if (state != edit_mode_f) {
@@ -150,8 +155,8 @@ void AppCentral::setEditMode(bool state)
 
 void AppCentral::setExperimentalAudio(bool state)
 {
-	if (state != experimental_audio_f) {
-		experimental_audio_f = state;
+	if (state != userSettings->pAltAudioEngine) {
+		userSettings->pAltAudioEngine = state;
 	}
 }
 
@@ -456,7 +461,6 @@ AppCentral::~AppCentral()
 void AppCentral::init()
 {
 	edit_mode_f = false;
-	experimental_audio_f = false;
 	input_assign_mode_f = false;
 	input_assign_target_fxitem = 0;
 

@@ -419,7 +419,7 @@ void AudioControl::init()
 void AudioControl::initFromThread()
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		AudioSlot *slot = new AudioSlot(this);
+		AudioSlot *slot = new AudioSlot(this,t);
 		audioChannels.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));

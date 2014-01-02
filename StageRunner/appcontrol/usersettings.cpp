@@ -36,4 +36,5 @@ void UserSettings::init()
 		addExistingVar(mapAudioToDmxUniv[t],QString("MapAudioToDmxUniv%1").arg(t+1));
 		addExistingVar(mapAudioToDmxChan[t],QString("MapAudioToDmxChan%1").arg(t+1));
 	}
+	addExistingVar(pAltAudioEngine,"AlternativeAudioEngine");
 }

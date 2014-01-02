@@ -55,5 +55,6 @@
         <file>gfx/customwidget/desk_button_small.png</file>
         <file>gfx/icons/playlist.png</file>
         <file>gfx/icons/sequence.png</file>
+        <file>gfx/icons/audio_repeat_22.png</file>
     </qresource>
 </RCC>

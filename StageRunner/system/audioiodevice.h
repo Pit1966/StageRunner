@@ -27,9 +27,9 @@ public:
 	bool setSourceFilename(const QString & filename);
 	void examineQAudioFormat(AudioFormat & form);
 	AudioFormat & audioFormat() const {return *audio_format;}
+	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
 
 private:
-	void calc_vu_level(const char *data, int size);
 
 
 private:

@@ -12,6 +12,7 @@
 #include "executer.h"
 #include "execcenter.h"
 #include "fxlist.h"
+#include "audioplayer.h"
 
 #include <QTime>
 #include <QApplication>
@@ -20,13 +21,13 @@
 #include <QMediaPlayer>
 #endif
 
-AudioSlot::AudioSlot(AudioControl *parent)
+AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	: QObject()
 {
 	audio_ctrl = parent;
 
 	run_status = AUDIO_IDLE;
-	slotNumber = -1;
+	slotNumber = pSlotNumber;
 	fade_initial_vol = 0;
 	fade_target_vol = 0;
 	current_fx = 0;
@@ -41,6 +42,8 @@ AudioSlot::AudioSlot(AudioControl *parent)
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
+	audio_player = new AudioPlayer(*this);
+	audio_player->setVolume(100);
 	if (parent->myApp.userSettings->pAudioBufferSize > 90) {
 		audio_output->setBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
@@ -54,6 +57,10 @@ AudioSlot::AudioSlot(AudioControl *parent)
 	connect(&fade_timeline,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_frame_changed(qreal)));
 	connect(&fade_timeline,SIGNAL(finished()),this,SLOT(on_fade_finished()));
 
+	// QMediaPlayer (experimental audio) connects
+	connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
+	connect(audio_player,SIGNAL(durationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
+
 }
 
 AudioSlot::~AudioSlot()
@@ -62,18 +69,21 @@ AudioSlot::~AudioSlot()
 		stopFxAudio();
 	}
 
+	delete audio_player;
 	delete audio_output;
 	delete audio_io;
 }
 
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs)
 {
-	if (AppCentral::instance()->isExperimentalAudio())
-		return startExperimentalAudio(fxa,exec);
+	if (AppCentral::instance()->isExperimentalAudio()) {
+		is_experimental_audio_f = true;
+		if (!audio_player) return false;
+	} else {
+		is_experimental_audio_f = false;
+		if (!audio_output) return false;
+	}
 
-	is_experimental_audio_f = false;
-
-	if (!audio_output) return false;
 
 	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
 		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2 with Executer: %3")
@@ -99,10 +109,6 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		}
 	}
 
-	// Set Filename of audio file
-	audio_io->setSourceFilename(fxa->filePath());
-	// Start decoding of audio file to default (pcm 48000, 2Ch, 16bit) format
-	audio_io->start(fxa->loopTimes);
 	// set initial Volume
 	if (fxa->fadeInTime() > 0) {
 		setVolume(0);
@@ -115,20 +121,47 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	else {
 		setVolume(targetVolume);
 	}
+
+	// Set Filename of audio file
+	if (is_experimental_audio_f) {
+		audio_player->setSourceFilename(fxa->filePath());
+	} else {
+		audio_io->setSourceFilename(fxa->filePath());
+		// Start decoding of audio file to default (pcm 48000, 2Ch, 16bit) format
+		audio_io->start(fxa->loopTimes);
+	}
+
+
 	// Set Audio Buffer Size
 	if (audio_ctrl->myApp.userSettings->pAudioBufferSize > 90) {
-		audio_output->setBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
+		if (!is_experimental_audio_f) {
+			audio_output->setBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
+		}
 	}
 
 	if (startPosMs < 0) {
-		audio_io->seekPlayPosMs(fxa->seekPosition());
+		if (is_experimental_audio_f) {
+			if (fxa->seekPosition() > 0)
+				audio_player->setPosition(fxa->seekPosition());
+		} else {
+			audio_io->seekPlayPosMs(fxa->seekPosition());
+		}
 		fxa->setSeekPosition(0);
 	} else {
-		audio_io->seekPlayPosMs(startPosMs);
+		if (is_experimental_audio_f) {
+			if (startPosMs > 0)
+				audio_player->setPosition(startPosMs);
+		} else {
+			audio_io->seekPlayPosMs(startPosMs);
+		}
 	}
 
 	// Feed audio device with decoded data
-	audio_output->start(audio_io);
+	if (is_experimental_audio_f) {
+		audio_player->start(fxa->loopTimes);
+	} else {
+		audio_output->start(audio_io);
+	}
 
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fxa,slotNumber);
@@ -140,8 +173,14 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
-			if (debug > 1) DEBUGTEXT("FxAudio started: '%s'' (%dms delayed)"
-									 ,fxa->name().toLocal8Bit().data(),run_time.elapsed());
+			float vol = 0;
+			if (is_experimental_audio_f) {
+				vol = audio_player->volume();
+			} else {
+				vol = audio_output->volume();
+			}
+			/*if (debug > 1) */DEBUGTEXT("FxAudio started: '%s'' (%dms delayed, vol: %f)"
+									 ,fxa->name().toLocal8Bit().data(),run_time.elapsed(),vol);
 			ok = true;
 			run_time.start();
 			current_fx = fxa;
@@ -159,22 +198,6 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	return ok;
 }
 
-bool AudioSlot::startExperimentalAudio(FxAudioItem *fxa, Executer *exec)
-{
-	is_experimental_audio_f = true;
-
-	current_fx = fxa;
-	current_executer = exec;
-
-	QMediaPlayer *player = new QMediaPlayer;
-	player->setMedia(QUrl::fromLocalFile(fxa->filePath()));
-	player->setVolume(fxa->initialVolume * 100 / MAX_VOLUME);
-	player->play();
-	LOGTEXT(tr("Play experimental audio: %1 (%2)").arg(fxa->filePath()).arg(player->errorString()));
-
-	return true;
-}
-
 bool AudioSlot::stopFxAudio()
 {
 	if (fade_timeline.state() == QTimeLine::Running) {
@@ -185,15 +208,23 @@ bool AudioSlot::stopFxAudio()
 
 	if (run_status != AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
-		audio_io->stop();
-		audio_output->stop();
+		if (is_experimental_audio_f) {
+			audio_player->stop();
+		} else {
+			audio_io->stop();
+			audio_output->stop();
+		}
 
 		return true;
 	} else {
 		if (audio_io->isOpen()) {
 			LOGERROR(tr("Stop Audio playing in slot %1: But audio channel is idle").arg(slotNumber+1));
-			audio_output->stop();
-			audio_io->stop();
+			if (is_experimental_audio_f) {
+				audio_player->stop();
+			} else {
+				audio_output->stop();
+				audio_io->stop();
+			}
 		}
 		return false;
 	}
@@ -204,7 +235,11 @@ bool AudioSlot::stopFxAudio()
 bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 {
 	// Fadeout only possible if audio is running
-	if (audio_output->state() != QAudio::ActiveState) return false;
+	if (is_experimental_audio_f) {
+		if (audio_player->state() != QMediaPlayer::PlayingState) return false;
+	} else {
+		if (audio_output->state() != QAudio::ActiveState) return false;
+	}
 
 	if (!FxItem::exists(current_fx)) return false;
 
@@ -247,15 +282,31 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 
 void AudioSlot::setVolume(int vol)
 {
-	if (!audio_output) return;
 
-	float level = (float)vol / MAX_VOLUME;
-	if (master_volume >= 0) {
-		level *= (float)master_volume / MAX_VOLUME;
+	float level;
+
+	if (is_experimental_audio_f) {
+		level = float(vol) * 100 / MAX_VOLUME;
+		if (master_volume >= 0) {
+			level *= (float)master_volume / MAX_VOLUME;
+		}
+	} else {
+		level = float(vol) / MAX_VOLUME;
+		if (master_volume >= 0) {
+			level *= (float)master_volume / MAX_VOLUME;
+		}
 	}
+
 #ifdef IS_QT5
-	audio_output->setVolume(level);
+	if (is_experimental_audio_f) {
+		if (!audio_player) return;
+		audio_player->setVolume(int(level));
+	} else {
+		if (!audio_output) return;
+		audio_output->setVolume(level);
+	}
 #endif
+
 	current_volume = vol;
 
 	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
@@ -306,9 +357,17 @@ void AudioSlot::emit_audio_play_progress()
 	if (!current_fx->audioDuration || run_status != AUDIO_RUNNING) return;
 
 	qint64 soundlen = current_fx->audioDuration;
-	int loop = audio_io->currentLoop();
-	// int per_mille = (run_time.elapsed() - soundlen * loop) * 1000 / soundlen;
-	int per_mille = audio_io->currentPlayPosUs() / soundlen;
+
+	int loop;
+	int per_mille;
+
+	if (is_experimental_audio_f) {
+		loop = audio_player->currentLoop();
+		per_mille = audio_player->currentPlayPosUs() / soundlen;
+	} else {
+		loop = audio_io->currentLoop();
+		per_mille = audio_io->currentPlayPosUs() / soundlen;
+	}
 
 	emit audioProgressChanged(slotNumber, current_fx, per_mille);
 
@@ -366,6 +425,53 @@ void AudioSlot::on_audio_io_read_ready()
 	// qDebug("Audio io ready read");
 	audio_output->stop();
 	audio_io->stop();
+}
+
+void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
+{
+	AudioStatus cur_status = run_status;
+
+	qDebug("Channel %d: Media Status changed: %d",slotNumber+1,status);
+
+	switch (status) {
+	case QMediaPlayer::UnknownMediaStatus:
+	case QMediaPlayer::NoMedia:
+		run_status = AUDIO_ERROR;
+		break;
+	case QMediaPlayer::LoadingMedia:
+		run_status = AUDIO_INIT;
+		break;
+	case QMediaPlayer::LoadedMedia:
+		run_status = AUDIO_IDLE;
+		break;
+	case QMediaPlayer::StalledMedia:
+		run_status = AUDIO_ERROR;
+		DEBUGERROR("Audio has stalled on channel %1. Buffer underrun?",slotNumber+1);
+		break;
+	case QMediaPlayer::BufferingMedia:
+	case QMediaPlayer::BufferedMedia:
+		run_status = AUDIO_RUNNING;
+		break;
+	case QMediaPlayer::EndOfMedia:
+		run_status = AUDIO_IDLE;
+		break;
+	case QMediaPlayer::InvalidMedia:
+		run_status = AUDIO_ERROR;
+		break;
+	}
+
+	if (cur_status != run_status) {
+		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
+		msg.fxAudio = current_fx;
+
+		if (run_status == AUDIO_IDLE) {
+			emit vuLevelChanged(slotNumber,0,0);
+			emit audioProgressChanged(slotNumber,current_fx,0);
+			msg.progress = 0;
+		}
+		emit audioCtrlMsgEmitted(msg);
+
+	}
 }
 
 void AudioSlot::on_vulevel_changed(int left, int right)

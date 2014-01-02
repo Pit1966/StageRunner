@@ -128,7 +128,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 	for (int t=0; t<rows; t++) {
 		int col = 0;
 		FxItem *fx = fxlist->at(t);
-		FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
+		// FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
 		FxListWidgetItem *item;
 
 
@@ -145,6 +145,10 @@ void FxListWidget::setFxList(FxList *fxlist)
 		item->itemLabel->hide();
 		item->myRow = t;
 		item->myColumn = col;
+		if (fx->loopValue() > 1) {
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_repeat_22.png"));
+			item->itemLabel->show();
+		}
 
 		fxTable->setCellWidget(t,col++,item);
 

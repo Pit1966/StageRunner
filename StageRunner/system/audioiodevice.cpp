@@ -101,7 +101,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 	memcpy(data, audio_buffer->data()+bytes_read, maxlen);
 	bytes_read += maxlen;
 
-	calc_vu_level(data,maxlen);
+	calcVuLevel(data,maxlen,*audio_format);
 
 	return maxlen;
 }
@@ -144,24 +144,22 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 
 }
 
-void AudioIODevice::calc_vu_level(const char *data, int size)
+void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat & audioFormat)
 {
-	if (!audio_format) return;
-
 	qint64 left = 0;
 	qint64 right = 0;
-	int channels = audio_format->channelCount();
+	int channels = audioFormat.channelCount();
 	int frames = size / channels;
 
 	if (frames == 0) return;
 
 
-	switch (audio_format->sampleType()) {
+	switch (audioFormat.sampleType()) {
 	case QAudioFormat::SignedInt:
 	case QAudioFormat::UnSignedInt:
 	{
 		qint64 energy[4] = {0,0,0,0};
-		switch (audio_format->sampleSize()) {
+		switch (audioFormat.sampleSize()) {
 		case 16:
 		{
 			const qint16 *dat = reinterpret_cast<const qint16*>(data);
@@ -192,7 +190,7 @@ void AudioIODevice::calc_vu_level(const char *data, int size)
 	case QAudioFormat::Float:
 	{
 		double energy[4] = {0,0,0,0};
-		switch (audio_format->sampleSize()) {
+		switch (audioFormat.sampleSize()) {
 		case 32:
 		{
 			const float *dat = reinterpret_cast<const float*>(data);

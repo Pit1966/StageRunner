@@ -94,7 +94,8 @@ SOURCES += \
 	../system/fxcontrol.cpp \
 	../appcontrol/execloopthreadinterface.cpp \
 	../appcontrol/execloop.cpp \
-	../gui/sequencestatuswidget.cpp
+	../gui/sequencestatuswidget.cpp \
+    ../system/audioplayer.cpp
 
 HEADERS  += \
 	../config.h \
@@ -160,7 +161,8 @@ HEADERS  += \
 	../system/fxcontrol.h \
 	../appcontrol/execloopthreadinterface.h \
 	../appcontrol/execloop.h \
-	../gui/sequencestatuswidget.h
+	../gui/sequencestatuswidget.h \
+    ../system/audioplayer.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

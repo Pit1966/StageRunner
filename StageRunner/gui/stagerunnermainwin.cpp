@@ -42,6 +42,8 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	debugLevelSpin->setValue(debug);
 
+	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
+
 	// For external access
 	logWidget = logEdit;
 	if (myapp->mainWinObj) {
@@ -629,6 +631,5 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 
 void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
 {
-	appCentral->setExperimentalAudio(true);
-
+	appCentral->setExperimentalAudio(checked);
 }

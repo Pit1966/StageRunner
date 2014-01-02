@@ -32,10 +32,8 @@ private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
 	bool edit_mode_f;
-	bool experimental_audio_f;
 	bool input_assign_mode_f;
 	FxItem * input_assign_target_fxitem;
-
 	FxItem * current_selected_project_fx;
 
 public:
@@ -71,7 +69,7 @@ public:
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
 	inline bool isEditMode() const {return edit_mode_f;}
-	inline bool isExperimentalAudio() const {return experimental_audio_f;}
+	bool isExperimentalAudio() const;
 	inline bool isInputAssignMode() const {return input_assign_mode_f;}
 	void setInputAssignMode(bool state);
 	void setInputAssignMode(FxItem *fx);

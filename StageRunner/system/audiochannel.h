@@ -13,6 +13,7 @@
 #include <QAudioOutput>
 #include <QFile>
 #include <QTimeLine>
+#include <QMediaPlayer>
 
 using namespace AUDIO;
 
@@ -20,10 +21,13 @@ class FxAudioItem;
 class AudioIODevice;
 class AudioControl;
 class Executer;
+class AudioPlayer;
 
 
 class AudioSlot : public QObject
 {
+	friend class AudioPlayer;
+
 	Q_OBJECT
 public:
 	int slotNumber;
@@ -32,6 +36,7 @@ private:
 	AudioControl *audio_ctrl;
 	AudioIODevice *audio_io;
 	QAudioOutput *audio_output;
+	AudioPlayer *audio_player;
 	QFile *audio_file;
 
 	AudioStatus run_status;
@@ -51,11 +56,10 @@ private:
 	bool is_experimental_audio_f;
 
 public:
-	AudioSlot(AudioControl *parent);
+	AudioSlot(AudioControl *parent, int pSlotNumber);
 	~AudioSlot();
 
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0);
-	bool startExperimentalAudio(FxAudioItem *fxa, Executer *exec);
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
@@ -75,8 +79,13 @@ private:
 	void emit_audio_play_progress();
 
 private slots:
+	// legacy audio slots
 	void on_audio_output_status_changed(QAudio::State state);
 	void on_audio_io_read_ready();
+	// qmediaplayer audio slots
+	void on_media_status_changed(QMediaPlayer::MediaStatus status);
+
+
 	void on_vulevel_changed(int left, int right);
 	void on_fade_frame_changed(qreal value);
 	void on_fade_finished();
