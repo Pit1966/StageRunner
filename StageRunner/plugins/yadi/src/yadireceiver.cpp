@@ -49,8 +49,6 @@ bool YadiReceiver::startRxDmx(int input)
 
 void YadiReceiver::run()
 {
-	return; //SIGHUP
-	qDebug("-------------------------------------------------------------------");
 	bool reloop = true;
 	bool ok = true;
 
@@ -60,7 +58,7 @@ void YadiReceiver::run()
 		if (ok) {
 			reloop = false;
 		} else {
-			if (receiver_loop_cnt++ < 2) {
+			if (receiver_loop_cnt++ < 10) {
 				qDebug("YadiReceiver::run: exit DMXreceiver thread with failure -> restart");
 				reloop = true;
 			} else {

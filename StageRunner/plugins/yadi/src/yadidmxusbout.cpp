@@ -550,10 +550,8 @@ void YadiDMXUSBOut::inputDeviceFailed(int input)
 
 	if (yadi) {
 		qDebug("YadiDMXUSBOut::inputDeviceFailed: Close inputs and outputs");
-		yadi->closeInOut();
+		yadi->closeInput();
 	}
-
-	findDevices(true);
 
 	emit configurationChanged();
 
