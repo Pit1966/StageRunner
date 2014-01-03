@@ -24,6 +24,7 @@ public:
 	AudioPlayer(AudioSlot &audioChannel);
 	bool setSourceFilename(const QString &path);
 	void start(int loops);
+	void stop();
 	inline int currentLoop() const {return loopCnt;}
 	qint64 currentPlayPosUs() const;
 	qint64 currentPlayPosMs() const;

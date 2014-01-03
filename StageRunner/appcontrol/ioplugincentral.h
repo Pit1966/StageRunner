@@ -50,6 +50,7 @@ public:
 	void unloadPlugins();
 	bool updatePluginMappingInformation();
 	bool openPlugins();
+	void reOpenPlugins();
 	void closePlugins();
 	QStringList getAllAvailableInputNames() const;
 	QStringList getAllAvailableOutputNames() const;
@@ -72,7 +73,6 @@ signals:
 private slots:
 	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
 	void onPluginConfigurationChanged();
-	void reOpenPlugins();
 
 public slots:
 

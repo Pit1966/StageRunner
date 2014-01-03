@@ -43,6 +43,12 @@ void AudioPlayer::start(int loops)
 
 }
 
+void AudioPlayer::stop()
+{
+	loopCnt = loopTarget;
+	QMediaPlayer::stop();
+}
+
 qint64 AudioPlayer::currentPlayPosUs() const
 {
 	return position() * 1000;
@@ -57,7 +63,6 @@ void AudioPlayer::setVolume(int vol)
 {
 	currentVolume = vol;
 	QMediaPlayer::setVolume(vol);
-	qDebug("setCurrentVol :%d",vol);
 }
 
 void AudioPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)

@@ -43,6 +43,7 @@ void SequenceControlWidget::on_ctrlStopButton_clicked()
 	appcentral->unitFx->stopAllFxPlaylists();
 	appcentral->unitFx->stopAllFxSequences();
 	appcentral->unitAudio->stopAllFxAudio();
+	appcentral->clearCurrentFx(1);
 }
 
 void SequenceControlWidget::on_masterVolDial_sliderMoved(int position)

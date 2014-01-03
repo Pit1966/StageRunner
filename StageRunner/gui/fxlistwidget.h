@@ -74,6 +74,7 @@ private:
 public slots:
 	void selectFx(FxItem *fx);
 	void markFx(FxItem *fx);
+	void setCurrentFx(FxItem *newfx, FxItem *oldfx);
 	void initRowDrag(FxListWidgetItem *item);
 	void refreshList();
 	void setEditable(bool state);

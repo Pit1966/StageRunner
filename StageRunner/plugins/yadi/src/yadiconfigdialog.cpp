@@ -7,6 +7,7 @@
 #include "dmxmonitor.h"
 
 #include <QDebug>
+#include <QMessageBox>
 
 YadiConfigDialog::YadiConfigDialog(YadiDMXUSBOut *p_plugin)
 	: QDialog()
@@ -28,9 +29,27 @@ YadiConfigDialog::~YadiConfigDialog()
 void YadiConfigDialog::on_rescanDevButton_clicked()
 {
 	textEdit->clear();
-	plugin->findDevices();
+
+	configChanged = plugin->findDevices(true);
 	show_current_device_list();
-	configChanged = true;
+
+	if (configChanged) {
+		int ret = QMessageBox::question(this
+							  ,tr("Yadi DMX config")
+							  ,tr("The device configuration has changed!\n\n"
+								  "Do you want to load last settings for found devices?")
+							  ,QMessageBox::Yes | QMessageBox::No);
+
+		if (ret == QMessageBox::Yes) {
+			// Load Settings
+			for (int t=0; t<YadiDeviceManager::devices(); t++) {
+				YadiDeviceManager::deviceAt(t)->loadConfig();
+			}
+			show_current_device_list();
+		}
+		emit plugin->configurationChanged();
+	}
+
 }
 
 void YadiConfigDialog::show_current_device_list()

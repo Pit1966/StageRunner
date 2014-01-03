@@ -488,7 +488,7 @@ void FxListWidget::selectFx(FxItem *fx)
 
 void FxListWidget::markFx(FxItem *fx)
 {
-	qDebug("mark fx %s",fx?fx->name().toLocal8Bit().data():"empty");
+	// qDebug("mark fx %s",fx?fx->name().toLocal8Bit().data():"empty");
 	int row=0;
 	while (row < fxTable->rowCount()) {
 		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->cellWidget(row,0);
@@ -504,6 +504,11 @@ void FxListWidget::markFx(FxItem *fx)
 
 		row++;
 	}
+}
+
+void FxListWidget::setCurrentFx(FxItem *newfx, FxItem *oldfx)
+{
+	markFx(newfx);
 }
 
 void FxListWidget::initRowDrag(FxListWidgetItem *item)

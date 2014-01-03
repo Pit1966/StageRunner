@@ -168,6 +168,8 @@ void AudioControl::stopFxAudio(int slot)
 
 void AudioControl::stopFxAudio(FxAudioItem *fxa)
 {
+	if (!fxa) return;
+
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->currentFxAudio() == fxa) {
 			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;

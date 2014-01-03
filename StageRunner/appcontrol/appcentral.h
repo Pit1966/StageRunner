@@ -88,6 +88,7 @@ public:
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
 	void executeNextFx(int listID);
+	void clearCurrentFx(int listID);
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);

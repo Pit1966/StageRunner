@@ -31,7 +31,7 @@ public:
 	~YadiDMXUSBOut();
 
 	void init();						///< @reimp
-	void findDevices();
+	bool findDevices(bool update = false);
 	QString name();						///< @reimp
 	int capabilities() const;			///< @reimp
 	void openOutput(quint32 output = 0);		///< @reimp

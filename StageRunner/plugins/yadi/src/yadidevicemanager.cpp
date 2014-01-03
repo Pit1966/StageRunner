@@ -28,8 +28,9 @@ YadiDevice *YadiDeviceManager::deviceAt(int idx)
 	}
 }
 
-QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
+int YadiDeviceManager::enumerateYadiDevices(bool update)
 {
+
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
@@ -118,7 +119,7 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 	udev = udev_new();
 	if (!udev) {
 		qDebug("Can't create udev\n");
-		return globYadiDeviceList;
+		return globYadiDeviceList.size();
 	}
 	qDebug("YadiDeviceManager: devices:");
 
@@ -204,15 +205,19 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 					yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE | YadiDevice::FL_OUTPUT_UNIVERSE;
 					yadi->maxDeviceDmxInChannels = 512;
 					yadi->maxDeviceDmxOutChannels = 512;
-					yadi->usedDmxOutChannels = 512;
-					yadi->usedDmxInChannels = 512;
+					if (!found || !update) {
+						yadi->usedDmxOutChannels = 512;
+						yadi->usedDmxInChannels = 512;
+					}
 				}
 				else if (product.contains("Receiver")) {
 					yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE;
 					yadi->usedDmxOutChannels = 0;
 					yadi->maxDeviceDmxOutChannels = 0;
-					yadi->usedDmxInChannels = 128;
-					yadi->maxDeviceDmxInChannels = 128;
+					if (!found || !update) {
+						yadi->usedDmxInChannels = 128;
+						yadi->maxDeviceDmxInChannels = 128;
+					}
 				}
 				else if (product.contains("Sender")) {
 					yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
@@ -248,7 +253,7 @@ QList<YadiDevice *> & YadiDeviceManager::enumerateYadiDevices()
 
 #endif
 
-	return globYadiDeviceList;
+	return globYadiDeviceList.size();
 }
 
 void YadiDeviceManager::clearYadiDevices()
@@ -269,16 +274,16 @@ YadiDevice *YadiDeviceManager::getDevice(const QString & dev_node, int cap)
 
 void YadiDeviceManager::updateYadiDevicesStatus()
 {
+	bool rescan = false;
+	enumerateYadiDevices(true);
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		YadiDevice *yadi = globYadiDeviceList.at(t);
-		if (! QFile::exists(yadi->devNodePath)) {
-			yadi->deviceNodePresent = false;
-			continue;
-		} else {
-			yadi->deviceNodePresent = true;
+		if (!yadi->deviceNodePresent && QFile::exists(yadi->devNodePath)) {
+			yadi->closeInOut();
+			rescan = true;
 		}
-
 	}
+	if (rescan) enumerateYadiDevices(true);
 }
 
 bool YadiDeviceManager::yadiDeviceLessThan(const YadiDevice *s1, const YadiDevice *s2)
@@ -288,4 +293,26 @@ bool YadiDeviceManager::yadiDeviceLessThan(const YadiDevice *s1, const YadiDevic
 	} else {
 		return false;
 	}
+}
+
+bool YadiDeviceManager::deviceNodeExists(const QString &devNode)
+{
+	bool exists = false;
+	for (int t=0; t<globYadiDeviceList.size(); t++) {
+		if (globYadiDeviceList.at(t)->devNodePath == devNode && globYadiDeviceList.at(t)->deviceNodePresent)
+			exists = true;
+	}
+	return exists;
+}
+
+bool YadiDeviceManager::removeDevice(const QString &devNode)
+{
+	bool removed = false;
+	for (int t=globYadiDeviceList.size()-1; t>=0; t--) {
+		if (globYadiDeviceList.at(t)->devNodePath == devNode) {
+			delete globYadiDeviceList.takeAt(t);
+			removed = true;
+		}
+	}
+	return removed;
 }

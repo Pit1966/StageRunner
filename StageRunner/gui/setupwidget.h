@@ -25,6 +25,7 @@ private:
 	void copy_settings_to_gui();
 	void copy_gui_to_settings();
 	void update_dmx_mapping_table(QLCIOPlugin *plugin);
+	void update_gui_plugin_info();
 
 private slots:
 	void on_okButton_clicked();

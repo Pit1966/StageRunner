@@ -62,6 +62,7 @@ YadiDevice::YadiDevice(const YadiDevice &other)
 
 bool YadiDevice::activateDevice()
 {
+	qDebug("Yadi: activate device");
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
 	if (file && file->deviceNode() != devNodePath) {
@@ -115,8 +116,10 @@ void YadiDevice::deActivateDevice()
 
 bool YadiDevice::openOutput()
 {
+	qDebug("Yadi: open output");
 	if (!file) {
-		activateDevice();
+		if (!activateDevice())
+			return false;
 	}
 
 	outputSendAllData = true;
@@ -141,7 +144,8 @@ void YadiDevice::closeOutput()
 bool YadiDevice::openInput()
 {
 	if (!file) {
-		activateDevice();
+		if (!activateDevice())
+			return false;
 	}
 
 	if (!file->isOpen()) {
@@ -274,7 +278,7 @@ void YadiDevice::loadConfig()
 
 	set.beginGroup(group);
 	if (set.contains("Capabilities")) {
-		qDebug() << "Load settings for device" << deviceProductName;
+		qDebug() << "Load settings for device" << group;
 		capabilities = set.value("Capabilities").toInt();
 		usedDmxInChannels = set.value("UsedDmxInChannels").toInt();
 		usedDmxOutChannels = set.value("UsedDmxOutChannels").toInt();
@@ -316,10 +320,17 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 {
 	if (!dmxInMonWidget) {
 		dmxInMonWidget = new DmxMonitor;
-		dmxInMonWidget->setWindowTitle("DMX Input Monitor V0.1");
+		dmxInMonWidget->setWindowTitle("DMX Input Monitor V0.2");
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 		QObject::connect(input_thread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
+	} else {
+		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 	}
+
+	for (int t=0; t<usedDmxInChannels; t++) {
+		dmxInMonWidget->setValueInBar(t,uchar(inUniverse[t]));
+	}
+
 	return dmxInMonWidget;
 }
 
@@ -327,9 +338,16 @@ DmxMonitor *YadiDevice::openDmxOutMonitorWidget()
 {
 	if (!dmxOutMonWidget) {
 		dmxOutMonWidget = new DmxMonitor;
-		dmxOutMonWidget->setWindowTitle("DMX Output Monitor V0.1");
+		dmxOutMonWidget->setWindowTitle("DMX Output Monitor V0.2");
+		dmxOutMonWidget->setChannelPeakBars(usedDmxOutChannels);
+	} else {
 		dmxOutMonWidget->setChannelPeakBars(usedDmxOutChannels);
 	}
+
+	for (int t=0; t<usedDmxOutChannels; t++) {
+		dmxOutMonWidget->setValueInBar(t,uchar(outUniverse[t]));
+	}
+
 	return dmxOutMonWidget;
 }
 

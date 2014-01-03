@@ -104,21 +104,26 @@ bool IOPluginCentral::updatePluginMappingInformation()
 		QStringList inputs = plugin->inputs();
 
 		for (int t=0; t<outputs.size(); t++) {
+			// Check if line is valid
+			if (outputs.at(t).endsWith("!!!"))
+				continue;
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,outputs.at(t));
 			lineconf->plugin = plugin;
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Output;
-			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
+			if (debug > 1) qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 
 			allOutputNames.append(outputs.at(t));
 
 		}
 		for (int t=0; t<inputs.size(); t++) {
+			if (inputs.at(t).endsWith("!!!"))
+				continue;
 			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin_name,inputs.at(t));
 			lineconf->plugin = plugin;
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Input;
-			qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
+			if (debug > 1) qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 
 			allInputNames.append(inputs.at(t));
 
@@ -210,7 +215,7 @@ bool IOPluginCentral::openPlugins()
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
-			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)));
+			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)),Qt::UniqueConnection);
 		}
 
 	}
@@ -374,22 +379,47 @@ void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar 
 
 void IOPluginCentral::onPluginConfigurationChanged()
 {
-	qDebug("Plugin Configuration Changed: In plugin: %s",reinterpret_cast<QLCIOPlugin*>(sender())->name().toLocal8Bit().data());
+	QByteArray pluginname = reinterpret_cast<QLCIOPlugin*>(sender())->name().toLocal8Bit();
+
+	qDebug("Plugin Configuration Changed: In plugin: %s",pluginname.data());
+
+	qDebug() << "Input plugin:" << getAllAvailableInputNames() << "allInputNames" << allInputNames;
+	qDebug() << "Output plugin:" << getAllAvailableOutputNames() << "allOutputNames" << allOutputNames;
+
 	QStringList vanished_inouts;
+	QStringList added_inouts;
 
 	QStringList current_inputs = getAllAvailableInputNames();
-	qDebug() << current_inputs;
 	foreach(QString input, allInputNames) {
 		if (!current_inputs.contains(input)) {
 			vanished_inouts += input;
+			DEBUGERROR("Plugin %s: Lost input %s",pluginname.data(),input.toLocal8Bit().data());
+		}
+	}
+	foreach (QString input, current_inputs) {
+		if (input.endsWith("!!!")) {
+			DEBUGERROR("Plugin %s: Input %s is offline",pluginname.data(),input.toLocal8Bit().data());
+		}
+		else if (!allInputNames.contains(input)) {
+			added_inouts += input;
+			DEBUGTEXT("Plugin %s: Input %s appeared",pluginname.data(),input.toLocal8Bit().data());
 		}
 	}
 
 	QStringList current_outputs = getAllAvailableOutputNames();
-	qDebug() << current_outputs;
 	foreach(QString output, allOutputNames) {
 		if (!current_outputs.contains(output)) {
 			vanished_inouts += output;
+			DEBUGERROR("Plugin %s: Lost output %s",pluginname.data(),output.toLocal8Bit().data());
+		}
+	}
+	foreach (QString output, current_outputs) {
+		if (output.endsWith("!!!")) {
+			DEBUGERROR("Plugin %s: Output %s is offline",pluginname.data(),output.toLocal8Bit().data());
+		}
+		else if (!allOutputNames.contains(output)) {
+			added_inouts += output;
+			DEBUGTEXT("Plugin %s: Output %s appeared",pluginname.data(),output.toLocal8Bit().data());
 		}
 	}
 
@@ -404,11 +434,29 @@ void IOPluginCentral::onPluginConfigurationChanged()
 		dialog->showMessage(maintext,subtext);
 	}
 
+	if (added_inouts.size()) {
+		openPlugins();
+//		MessageDialog *dialog = new MessageDialog;
+//		QString maintext = tr("One or more Input or Output line(s) has appeared!\n");
+//		QString subtext;
+//		for (int t=0; t<added_inouts.size(); t++) {
+//			subtext += QString("Line: %1\n").arg(added_inouts.at(t));
+//		}
+//		dialog->connectSpecialFunction(this,"reOpenPlugins");
+//		dialog->showMessage(maintext,subtext);
+	}
+
 	updatePluginMappingInformation();
 }
 
 void IOPluginCentral::reOpenPlugins()
 {
+	DEBUGTEXT("Reopen plugins");
+
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		plugin->init();
+	}
+
 	openPlugins();
-	qDebug("IOPluginCentral::Plugins reopend");
 }

@@ -70,6 +70,8 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(appCentral->project->mainFxList(),SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
+	connect(appCentral->project->mainFxList(),SIGNAL(fxCurrentChanged(FxItem*,FxItem*)),fxListWidget,SLOT(setCurrentFx(FxItem*,FxItem*)));
+
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxListWidget,SLOT(setEditable(bool)));
 
 	// Project FxListWidget <-> Fx Editor (Dock Widget)

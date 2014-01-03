@@ -125,12 +125,15 @@ void SetupWidget::on_cancelButton_clicked()
 
 void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 {
-	QString info;
-
 	cur_selected_qlc_plugin = myapp->pluginCentral->getQLCPluginByName(item->text());
-	if (cur_selected_qlc_plugin) {
-		configurePluginButton->setEnabled(true);
 
+	update_gui_plugin_info();
+}
+
+void SetupWidget::update_gui_plugin_info()
+{
+	if (cur_selected_qlc_plugin) {
+		QString info;
 		info += tr("<br><font color=blue>Available outputs</font><br>");
 		QStringList outputs = cur_selected_qlc_plugin->outputs();
 		for (int t=0; t<outputs.size(); t++) {
@@ -144,12 +147,12 @@ void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 		}
 
 		update_dmx_mapping_table(cur_selected_qlc_plugin);
-
-	}  else {
+		qlcPluginEdit->setHtml(info);
+		configurePluginButton->setEnabled(true);
+	} else {
+		qlcPluginEdit->clear();
 		configurePluginButton->setEnabled(false);
 	}
-
-	qlcPluginEdit->setHtml(info);
 }
 
 void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
@@ -257,6 +260,7 @@ void SetupWidget::on_configurePluginButton_clicked()
 {
 	if (cur_selected_qlc_plugin) {
 		cur_selected_qlc_plugin->configure();
+		update_gui_plugin_info();
 	}
 }
 

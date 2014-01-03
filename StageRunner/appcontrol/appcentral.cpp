@@ -192,7 +192,7 @@ void AppCentral::openPlugins()
 
 void AppCentral::reOpenPlugins()
 {
-	pluginCentral->openPlugins();
+	pluginCentral->reOpenPlugins();
 }
 
 void AppCentral::closePlugins()
@@ -348,7 +348,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			unitFx->startFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
 			break;
 		case CMD_AUDIO_STOP:
-			// unitAudio->stopFxAudioPlayList(reinterpret_cast<FxPlayListItem*>(fx));
+			unitFx->stopFxPlayList(reinterpret_cast<FxPlayListItem*>(fx));
 			break;
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
@@ -361,6 +361,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			unitFx->startFxSequence(reinterpret_cast<FxSeqItem*>(fx));
 			break;
 		case CMD_FX_STOP:
+			unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
 			break;
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for sequence",cmd);
@@ -387,6 +388,13 @@ void AppCentral::executeNextFx(int listID)
 	if (next_fx) {
 		executeFxCmd(next_fx,CMD_FX_START,0);
 	}
+}
+
+void AppCentral::clearCurrentFx(int listID)
+{
+	FxList *fxlist = getRegisteredFxList(listID);
+	if (!fxlist) return;
+	fxlist->setCurrentFx(0);
 }
 
 void AppCentral::moveToFollowerFx(int listID)

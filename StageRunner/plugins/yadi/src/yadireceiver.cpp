@@ -49,7 +49,8 @@ bool YadiReceiver::startRxDmx(int input)
 
 void YadiReceiver::run()
 {
-
+	return; //SIGHUP
+	qDebug("-------------------------------------------------------------------");
 	bool reloop = true;
 	bool ok = true;
 
@@ -129,7 +130,7 @@ bool YadiReceiver::receiver_loop()
 					in += file->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
 				}
-				if (device->debug) qDebug("YadiReceiver::run: read size: %d",in.size());
+				if (device->debug > 1) qDebug("YadiReceiver::run: read size: %d",in.size());
 				if (in.size() != dmx.dmxDataSize) {
 					qDebug("YadiReceiver::run: read size: %d",in.size());
 				}
@@ -275,6 +276,7 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 			char inchar;
 			qint64 bytes_read = file->readSerial(&inchar,1);
 			if (bytes_read < 1) {
+				msleep(5);
 				continue;
 			}
 

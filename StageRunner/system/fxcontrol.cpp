@@ -63,8 +63,31 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 
 bool FxControl::stopFxSequence(FxSeqItem *fxseq)
 {
-	/// @todo implement me
-	return true;
+	bool found = false;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->originFx() == fxseq && exec->type() == Executer::EXEC_FXLIST) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				found = true;
+				// Stop Sequence Current FxItem
+				FxItem *fx = reinterpret_cast<FxListExecuter*>(exec)->currentFx();
+				if (FxItem::exists(fx)) {
+					myApp.executeFxCmd(fx,CMD_FX_STOP,exec);
+				}
+				// Stop Sequence Executer
+				exec->setPaused(true);
+				exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return found;
 }
 
 
@@ -86,6 +109,7 @@ int FxControl::stopAllFxSequences()
 		if (exec->originFx() && exec->originFx()->fxType() == FX_SEQUENCE) {
 			if (exec->state() != Executer::EXEC_DELETED) {
 				count++;
+				exec->setPaused(true);
 				exec->destroyLater();
 			}
 		}
@@ -98,9 +122,61 @@ int FxControl::stopAllFxSequences()
 
 bool FxControl::pauseFxPlaylist(FxPlayListItem *fxplay)
 {
-	/// @todo implement me
+	if (!FxItem::exists(fxplay)) return false;
 
-	return true;
+	bool found = false;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext() && !found) {
+		Executer *exec = it.next();
+		if (exec->originFx() == fxplay) {
+			exec->setPaused(true);
+
+			found = true;
+			// Stop current Sound
+			if (exec->type() == Executer::EXEC_FXLIST) {
+				FxAudioItem *fxa = reinterpret_cast<FxListExecuter*>(exec)->currentFxAudio();
+				myApp.unitAudio->stopFxAudio(fxa);
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return found;
+}
+
+bool FxControl::stopFxPlayList(FxPlayListItem *fxplay)
+{
+	if (!FxItem::exists(fxplay)) return false;
+
+	bool found = false;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext() && !found) {
+		Executer *exec = it.next();
+		if (exec->originFx() == fxplay) {
+			found = true;
+			// Stop FxPlaylist (This stops and deletes the executer)
+			if (exec->state() != Executer::EXEC_DELETED) {
+				exec->setPaused(true);
+				exec->destroyLater();
+			}
+			// Stop current Sound
+			if (exec->type() == Executer::EXEC_FXLIST) {
+				FxAudioItem *fxa = reinterpret_cast<FxListExecuter*>(exec)->currentFxAudio();
+				myApp.unitAudio->stopFxAudio(fxa);
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return found;
 }
 
 int FxControl::pauseAllFxPlaylist()

@@ -431,7 +431,7 @@ void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
 {
 	AudioStatus cur_status = run_status;
 
-	qDebug("Channel %d: Media Status changed: %d",slotNumber+1,status);
+	if (debug > 1) qDebug("Channel %d: Media Status changed: %d",slotNumber+1,status);
 
 	switch (status) {
 	case QMediaPlayer::UnknownMediaStatus:

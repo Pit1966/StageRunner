@@ -35,6 +35,7 @@ public:
 	bool stopFxSequence(FxSeqItem *fxseq);
 	int stopAllFxSequences();
 	bool pauseFxPlaylist(FxPlayListItem *fxplay);
+	bool stopFxPlayList(FxPlayListItem *fxplay);
 	int pauseAllFxPlaylist();
 	int stopAllFxPlaylists();
 
