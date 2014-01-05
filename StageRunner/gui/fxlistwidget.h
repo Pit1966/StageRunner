@@ -58,14 +58,12 @@ public:
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
 	static FxListWidget * getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created = 0);
+	static FxListWidget * findParentFxListWidget(FxItem *fx);
 	static void destroyAllFxListWidgets();
 
 private:
 	void init();
 	void closeEvent(QCloseEvent *);
-	void open_scence_desk(FxSceneItem *fx);
-	void open_audio_list_widget(FxPlayListItem *fx);
-	void open_sequence_list_widget(FxSeqItem *fx);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);
@@ -107,6 +105,7 @@ signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);
 	void fxItemSelected(FxItem *);
 	void fxItemSelectedForEdit(FxItem *);
+	void fxTypeColumnDoubleClicked(FxItem *);
 	void dropEventReceived(QString text, int row);
 	void listModified();
 	void editableChanged(bool state);

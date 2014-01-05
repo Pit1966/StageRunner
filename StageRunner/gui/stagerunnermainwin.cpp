@@ -20,10 +20,13 @@
 #include "qtstatictools.h"
 #include "style/lightdeskstyle.h"
 #include "fxitem.h"
+#include "fxsceneitem.h"
+#include "fxseqitem.h"
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "fxlistwidget.h"
 #include "scenedeskwidget.h"
+#include "fxitemobj.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -77,6 +80,7 @@ void StageRunnerMainWin::initConnects()
 	// Project FxListWidget <-> Fx Editor (Dock Widget)
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelectedForEdit(FxItem*)),this,SLOT(openFxPropertyEditor(FxItem*)));
+	connect(fxListWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
 	connect(fxListWidget,SIGNAL(editableChanged(bool)),appCentral,SLOT(setEditMode(bool)));
 
@@ -260,6 +264,89 @@ void StageRunnerMainWin::copyGuiSettingsToProject()
 void StageRunnerMainWin::copyProjectSettingsToGui()
 {
 	fxListWidget->setAutoProceedSequence( appCentral->project->pAutoProceedSequence );
+}
+
+void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
+{
+	switch (fx->fxType()) {
+	case FX_SCENE:
+		openFxSceneItemPanel(static_cast<FxSceneItem*>(fx));
+		break;
+	case FX_AUDIO:
+		break;
+	case FX_AUDIO_PLAYLIST:
+		openFxPlayListItemPanel(static_cast<FxPlayListItem*>(fx));
+		break;
+	case FX_SEQUENCE:
+		openFxSeqItemPanel(static_cast<FxSeqItem*>(fx));
+		break;
+	}
+
+}
+
+void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
+{
+	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
+
+	if (desk) {
+		FxListWidget *parentWid = FxListWidget::findParentFxListWidget(fx);
+		if (parentWid) {
+			connect(desk,SIGNAL(modified()),parentWid,SLOT(refreshList()));
+		}
+		desk->show();
+	}
+}
+
+void StageRunnerMainWin::openFxPlayListItemPanel(FxPlayListItem *fx)
+{
+	bool new_created;
+
+	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, fx, &new_created);
+
+	// Let us look if an executer is running on this FxPlayListItem
+	if (new_created) {
+		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
+		if (exe) {
+			playlistwid->markFx(exe->currentFx());
+			playlistwid->selectFx(exe->nextFx());
+			connect(exe,SIGNAL(currentFxChanged(FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
+			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
+			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
+			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
+		}
+		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
+		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
+				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+	} else {
+		playlistwid->refreshList();
+	}
+
+	update();
+	playlistwid->show();
+	playlistwid->update();
+
+}
+
+void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
+{
+	bool new_created;
+
+	FxListWidget *sequencewid = FxListWidget::getCreateFxListWidget(fx->seqList, fx, &new_created);
+
+	// Let us look if an executer is running on this FxSequenceItem
+	if (new_created) {
+		sequencewid->setOriginFx(fx);
+		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
+		if (exe) {
+			sequencewid->markFx(exe->currentFx());
+			sequencewid->selectFx(exe->nextFx());
+		}
+		// This connect is for starting / forwarding the sequence by double click on an item in the sequence list
+//		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
+//				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+	}
+
+	sequencewid->show();
 }
 
 void StageRunnerMainWin::setApplicationGuiStyle(QString style)
@@ -634,4 +721,10 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
 {
 	appCentral->setExperimentalAudio(checked);
+}
+
+void StageRunnerMainWin::on_actionOpen_FxItem_triggered()
+{
+	if (fxListWidget->currentSelectedFxItem())
+		openFxItemPanel(fxListWidget->currentSelectedFxItem());
 }

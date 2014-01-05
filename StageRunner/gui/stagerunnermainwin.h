@@ -45,6 +45,11 @@ public:
 	void copyGuiSettingsToProject();
 	void copyProjectSettingsToGui();
 
+	void openFxSceneItemPanel(FxSceneItem *fx);
+	void openFxPlayListItemPanel(FxPlayListItem *fx);
+	void openFxSeqItemPanel(FxSeqItem *fx);
+
+
 private:
 	bool eventFilter(QObject *obj, QEvent *event);
 	void closeEvent(QCloseEvent *event);
@@ -55,6 +60,7 @@ public slots:
 	void setApplicationGuiStyle(QString style);
 	void updateButtonStyles(QString style = "");
 	void openFxPropertyEditor(FxItem *item);
+	void openFxItemPanel(FxItem *fx);
 
 private slots:
 	void on_addAudioFxButton_clicked();
@@ -76,10 +82,9 @@ private slots:
 	void on_addAudioTrackButton_clicked();
 	void on_actionInitialize_plugins_DMX_triggered();
 	void on_actionInfo_triggered();
-
 	void on_addFxSeqButton_clicked();
-
 	void on_actionExperimental_audio_mode_triggered(bool checked);
+	void on_actionOpen_FxItem_triggered();
 
 private:
 	void init();

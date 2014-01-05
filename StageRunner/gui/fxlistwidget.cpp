@@ -8,14 +8,12 @@
 #include "fxitemobj.h"
 #include "appcentral.h"
 #include "usersettings.h"
-#include "scenedeskwidget.h"
 #include "qtstatictools.h"
 #include "customwidget/pslineedit.h"
 #include "fxlistwidgetitem.h"
 #include "customwidget/extmimedata.h"
 #include "fxitempropertywidget.h"
 #include "fxplaylistitem.h"
-#include "fxplaylistwidget.h"
 #include "fxitemtool.h"
 #include "execcenter.h"
 #include "executer.h"
@@ -450,6 +448,15 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, FxItem *fxItem
 	return wid;
 }
 
+FxListWidget *FxListWidget::findParentFxListWidget(FxItem *fx)
+{
+	FxListWidget *wid = 0;
+	if (fx->parentFxList()) {
+		wid = findFxListWidget(fx->parentFxList());
+	}
+	return wid;
+}
+
 void FxListWidget::destroyAllFxListWidgets()
 {
 	for (int t=globalFxListWidgetList.size()-1; t>=0; t--) {
@@ -581,68 +588,6 @@ void FxListWidget::closeEvent(QCloseEvent *)
 	}
 }
 
-void FxListWidget::open_scence_desk(FxSceneItem *fx)
-{
-
-	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
-
-	if (desk) {
-		connect(desk,SIGNAL(modified()),this,SLOT(refreshList()));
-		desk->show();
-	}
-}
-
-void FxListWidget::open_audio_list_widget(FxPlayListItem *fx)
-{
-	bool new_created;
-
-	FxListWidget *playlistwid = FxListWidget::getCreateFxListWidget(fx->fxPlayList, fx, &new_created);
-
-	// Let us look if an executer is running on this FxPlayListItem
-	if (new_created) {
-		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
-		if (exe) {
-			playlistwid->markFx(exe->currentFx());
-			playlistwid->selectFx(exe->nextFx());
-			connect(exe,SIGNAL(currentFxChanged(FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
-			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
-			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
-			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
-		}
-		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
-		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
-				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
-	} else {
-		playlistwid->refreshList();
-	}
-
-	update();
-	playlistwid->show();
-	playlistwid->update();
-
-}
-
-void FxListWidget::open_sequence_list_widget(FxSeqItem *fx)
-{
-	bool new_created;
-
-	FxListWidget *sequencewid = FxListWidget::getCreateFxListWidget(fx->seqList, fx, &new_created);
-
-	// Let us look if an executer is running on this FxSequenceItem
-	if (new_created) {
-		sequencewid->setOriginFx(fx);
-		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
-		if (exe) {
-			sequencewid->markFx(exe->currentFx());
-			sequencewid->selectFx(exe->nextFx());
-		}
-		// This connect is for starting / forwarding the sequence by double click on an item in the sequence list
-//		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
-//				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
-	}
-
-	sequencewid->show();
-}
 
 FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &text, int coltype)
 {
@@ -962,21 +907,7 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 
 void FxListWidget::column_type_double_clicked(FxItem *fx)
 {
-	switch (fx->fxType()) {
-	case FX_SCENE:
-		open_scence_desk(static_cast<FxSceneItem*>(fx));
-		break;
-	case FX_AUDIO:
-		selectFx(fx);
-		emit fxCmdActivated(fx,CMD_FX_START,0);
-		break;
-	case FX_AUDIO_PLAYLIST:
-		open_audio_list_widget(static_cast<FxPlayListItem*>(fx));
-		break;
-	case FX_SEQUENCE:
-		open_sequence_list_widget(static_cast<FxSeqItem*>(fx));
-		break;
-	}
+	emit fxTypeColumnDoubleClicked(fx);
 }
 
 void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
