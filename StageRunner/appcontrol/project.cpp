@@ -52,6 +52,8 @@ bool Project::saveToFile(const QString &path)
 
 bool Project::loadFromFile(const QString &path)
 {
+	LOGTEXT(QObject::tr("<font color=green>Load project</font> '%1'").arg(path));
+
 	int line_number = 0;
 	QString line_copy;
 	bool file_exists;
@@ -130,26 +132,30 @@ void Project::setModified(bool state)
 	VarSet::setModified(state);
 }
 
-bool Project::postLoadProcessFxList()
+
+/**
+ * @brief Initialize all FxItems after loading a project
+ * @return
+ */
+void Project::postLoadProcessFxList()
 {
 	fxList->postLoadProcess();
-
-	bool was_on_stage = false;
-	for (int t=0; t<fxList->size(); t++) {
-		FxItem *fx = fxList->at(t);
-		if (fx->fxType() == FX_SCENE) {
-			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
-			/// @todo: Light restore on load funktioniert nicht
-			bool scene_was_on_stage = scene->postLoadInitTubes(false);
-			if (scene_was_on_stage) {
-				was_on_stage = true;
-				LOGTEXT(QObject::tr("Scene '%1' was on stage when currently loaded project was saved")
-						.arg(scene->name()));
-			}
-		}
-	}
-	return was_on_stage;
 }
+
+/**
+ * @brief Reset Scene output values after loading a project
+ * @return  true, a scene was on stage
+ *
+ * When saving the project at the same time all current scene (tubes) output values are stored as well.
+ * Loading this scenes will restore these states. That could cause problems on fading in the scene (cause
+ * it maybe already faded to the target values)
+ */
+bool Project::postLoadResetFxScenes()
+{
+	return fxList->postLoadResetScenes();
+}
+
+
 
 void Project::init()
 {

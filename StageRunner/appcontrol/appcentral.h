@@ -34,7 +34,7 @@ private:
 	bool edit_mode_f;
 	bool input_assign_mode_f;
 	FxItem * input_assign_target_fxitem;
-	FxItem * current_selected_project_fx;
+	FxItem * last_global_selected_fxitem;
 
 public:
 	QObject *mainWinObj;
@@ -82,8 +82,8 @@ public:
 	DmxMonitor *openDmxOutMonitor(int universe);
 
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
-
 	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = 0, int row = -1);
+	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
@@ -96,7 +96,7 @@ public slots:
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
-	void storeSelectedFxListWidgetFx(FxItem *item);
+	void setGlobalSelectedFx(FxItem *item);
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

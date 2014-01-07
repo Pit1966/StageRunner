@@ -36,6 +36,7 @@ private:
 	QList<int>selected_rows;
 	static MutexQList<FxListWidget*>globalFxListWidgetList;
 
+	int upper_context_menu_split;
 
 public:
 	FxListWidget(QWidget *parent = 0);
@@ -59,6 +60,7 @@ public:
 	static FxListWidget * findFxListWidget(FxList *fxList);
 	static FxListWidget * getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created = 0);
 	static FxListWidget * findParentFxListWidget(FxItem *fx);
+	static bool destroyFxListWidget(FxListWidget *wid);
 	static void destroyAllFxListWidgets();
 
 private:
@@ -83,6 +85,7 @@ public slots:
 	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void propagateAudioStatus(AudioCtrlMsg msg);
 	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc);
+	void onFxItemSelectedInChildWidget(FxItem *fx);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);
@@ -101,10 +104,15 @@ private slots:
 
 	void on_randomCheckBox_clicked(bool checked);
 
+	void on_closeButton_clicked();
+
+	void on_editButton_clicked(bool checked);
+
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);
 	void fxItemSelected(FxItem *);
 	void fxItemSelectedForEdit(FxItem *);
+	void fxItemSelectedInChildFxListWidget(FxItem *);
 	void fxTypeColumnDoubleClicked(FxItem *);
 	void dropEventReceived(QString text, int row);
 	void listModified();

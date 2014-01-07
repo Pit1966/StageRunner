@@ -12,8 +12,7 @@ class SceneDeskWidget : public QWidget, private Ui::SceneDeskWidget
 	Q_OBJECT
 private:
 	static QList<SceneDeskWidget*>scene_desk_list;		//
-	FxSceneItem *cur_fxscene;
-	FxItem *cur_fx;
+	FxSceneItem *origin_fxscene;
 
 	QList<int>selected_tube_ids;		//List of tube Ids currently selected in MixerGroup
 

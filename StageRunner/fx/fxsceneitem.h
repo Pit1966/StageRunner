@@ -24,6 +24,8 @@ public:
 	VarSetList<DmxChannel*>tubes;
 
 protected:
+
+	pstring widgetPos;
 	quint32 myStatus;
 	SceneSeqState mySeqStatus;
 
@@ -40,6 +42,8 @@ public:
 	qint32 loopValue() {return 0;}
 	void setLoopValue(qint32 val);
 	void resetFx();
+	QString widgetPosition() {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
 
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);

@@ -100,6 +100,7 @@ public:
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();
+	bool postLoadResetScenes();
 
 signals:
 	void fxNextChanged(FxItem *nextfx);

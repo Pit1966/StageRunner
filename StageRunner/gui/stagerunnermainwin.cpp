@@ -70,7 +70,8 @@ void StageRunnerMainWin::initConnects()
 
 	// Project FxListWidget (Liste der Effekte im Mainwin)
 	connect(fxListWidget,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*)),appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd,Executer*)));
-	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(storeSelectedFxListWidgetFx(FxItem*)));
+	connect(fxListWidget,SIGNAL(fxItemSelectedInChildFxListWidget(FxItem*)),appCentral,SLOT(setGlobalSelectedFx(FxItem*)));
+	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),appCentral,SLOT(setGlobalSelectedFx(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),seqCtrlGroup,SLOT(setNextFx(FxItem*)));
 	connect(appCentral->project->mainFxList(),SIGNAL(fxNextChanged(FxItem*)),fxListWidget,SLOT(selectFx(FxItem*)));
 	connect(appCentral->project->mainFxList(),SIGNAL(fxCurrentChanged(FxItem*,FxItem*)),fxListWidget,SLOT(setCurrentFx(FxItem*,FxItem*)));
@@ -238,16 +239,20 @@ void StageRunnerMainWin::initAppDefaults()
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
 		Project *pro = appCentral->project;
-		if (pro->loadFromFile(appCentral->userSettings->pLastProjectLoadPath)) {
+		QString propath = appCentral->userSettings->pLastProjectLoadPath;
+		if (pro->loadFromFile(propath)) {
 			pro->postLoadProcessFxList();
+			pro->postLoadResetFxScenes();
+
 			fxListWidget->setFxList(pro->mainFxList());
 			copyProjectSettingsToGui();
-			pro->curProjectFilePath = appCentral->userSettings->pLastProjectLoadPath;
+			setProjectName(propath);
 		} else {
 			QMessageBox::critical(this,tr("Load error")
 								  ,tr("An error occured while loading file:\n\n%1\n%2:%3")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
+			setProjectName("");
 		}
 	}
 
@@ -313,18 +318,27 @@ void StageRunnerMainWin::openFxPlayListItemPanel(FxPlayListItem *fx)
 			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
 			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
 			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
+
 		}
 		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
 		connect(playlistwid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
 				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+
+		// connect signals from new FxListWidget to parent FxListWidget
+		FxListWidget *parentFxListWidget = FxListWidget::findParentFxListWidget(fx);
+		if (parentFxListWidget) {
+			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),parentFxListWidget,SLOT(onFxItemSelectedInChildWidget(FxItem*)));
+		}
+
 	} else {
 		playlistwid->refreshList();
 	}
-
-	update();
-	playlistwid->show();
-	playlistwid->update();
-
+	if (playlistwid->isHidden()) {
+		playlistwid->show();
+		playlistwid->setOriginFx(fx);
+	} else {
+		playlistwid->raise();
+	}
 }
 
 void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
@@ -335,18 +349,45 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 
 	// Let us look if an executer is running on this FxSequenceItem
 	if (new_created) {
-		sequencewid->setOriginFx(fx);
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {
 			sequencewid->markFx(exe->currentFx());
 			sequencewid->selectFx(exe->nextFx());
 		}
+
+		// connect signals from new FxListWidget to parent FxListWidget
+		FxListWidget *parentFxListWidget = FxListWidget::findParentFxListWidget(fx);
+		if (parentFxListWidget) {
+			connect(sequencewid,SIGNAL(fxItemSelected(FxItem*)),parentFxListWidget,SLOT(onFxItemSelectedInChildWidget(FxItem*)));
+		}
+
 		// This connect is for starting / forwarding the sequence by double click on an item in the sequence list
 //		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
 //				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+	} else {
+		sequencewid->refreshList();
 	}
 
-	sequencewid->show();
+	if (sequencewid->isHidden()) {
+		sequencewid->show();
+		sequencewid->setOriginFx(fx);
+	} else {
+		sequencewid->raise();
+	}
+}
+
+void StageRunnerMainWin::setProjectName(const QString &path)
+{
+	QString title = QString("%1 %2 ").arg(APP_NAME,APP_VERSION);
+	if (path.isEmpty()) {
+		title += APP_PRODUCER;
+		appCentral->project->curProjectFilePath.clear();
+	} else {
+		title += "- ";
+		title += QFileInfo(path).baseName();
+		appCentral->project->curProjectFilePath = path;
+	}
+	QWidget::setWindowTitle(title);
 }
 
 void StageRunnerMainWin::setApplicationGuiStyle(QString style)
@@ -421,11 +462,14 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 								  ,tr("An error occured while loading file:\n\n%1\n\n%2:%3")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
+			setProjectName("");
 		} else {
 			pro->postLoadProcessFxList();
+			pro->postLoadResetFxScenes();
 
 			fxListWidget->setFxList(pro->mainFxList());
 			copyProjectSettingsToGui();
+			setProjectName(path);
 		}
 	}
 }
@@ -725,6 +769,6 @@ void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked
 
 void StageRunnerMainWin::on_actionOpen_FxItem_triggered()
 {
-	if (fxListWidget->currentSelectedFxItem())
-		openFxItemPanel(fxListWidget->currentSelectedFxItem());
+	if (appCentral->globalSelectedFx())
+		openFxItemPanel(appCentral->globalSelectedFx());
 }

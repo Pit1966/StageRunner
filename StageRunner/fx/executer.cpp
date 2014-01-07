@@ -8,6 +8,7 @@
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
 
+using namespace LIGHT;
 
 Executer::Executer(AppCentral &app_central)
 	: myApp(app_central)
@@ -249,14 +250,14 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 
 void FxListExecuter::lightCtrlReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter(%p): Scene '%s' status changed to '%s'"
+	if (debug > 1) qDebug("FxListExecuter(%p): Scene '%s' status changed to '%s'"
 		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
 
 void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 {
-	qDebug("FxListExecuter(%p): Scene '%s' cue ended. Status: '%s'"
+	if (debug > 1) qDebug("FxListExecuter(%p): Scene '%s' cue ended. Status: '%s'"
 		   , this, fxs->name().toLocal8Bit().data(), fxs->statusString().toLocal8Bit().data());
 
 }
@@ -348,6 +349,8 @@ qint64 FxListExecuter::cue_fx_scene(FxSceneItem *scene)
 	switch (scene->seqStatus()) {
 	case SCENE_OFF:
 		cue_time = scene->preDelay();
+		if (cue_time < 0)
+			cue_time = 0;
 		scene->setSeqStatus(SCENE_PRE_DELAY);
 		break;
 	case SCENE_PRE_DELAY:
@@ -421,4 +424,65 @@ void FxListExecuter::selectNextFx(FxItem *fx)
 {
 	qDebug("set Next Fx %s",fx?fx->name().toLocal8Bit().data():"NULL");
 	setNextFx(fx);
+}
+
+
+
+
+bool SceneExecuter::processExecuter()
+{
+	if (myState == EXEC_IDLE) return false;
+
+	bool active = true;
+	qint64 cue_time = 0;
+
+	while (active && cue_time == 0) {
+		switch (sceneState) {
+		case SCENE_OFF:
+			cue_time = curScene->preDelay();
+			sceneState = SCENE_PRE_DELAY;
+			if (cue_time < 0)
+				cue_time = 0;
+			break;
+		case SCENE_PRE_DELAY:
+			cue_time = curScene->fadeInTime();
+			if ( ! curScene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEIN,cue_time) ) {
+				LOGERROR(tr("FxScene: %1 is already active").arg(curScene->name()));
+			}
+			myApp.unitLight->setSceneActive(curScene);
+			sceneState = SCENE_FADE_IN;
+			break;
+		case SCENE_FADE_IN:
+			cue_time = curScene->holdTime();
+			sceneState = SCENE_HOLD;
+			break;
+		case SCENE_HOLD:
+			cue_time = curScene->fadeOutTime();
+			curScene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEOUT,cue_time);
+			sceneState = SCENE_FADE_OUT;
+			break;
+		case SCENE_FADE_OUT:
+			cue_time = curScene->postDelay();
+			sceneState = SCENE_POST_DELAY;
+			break;
+		case SCENE_POST_DELAY:
+		default:
+			cue_time = 0;
+			eventTargetTimeMs = runTime.elapsed();
+			sceneState = SCENE_OFF;
+			active = false;
+		}
+
+		eventTargetTimeMs += cue_time;
+	}
+
+	return active;
+}
+
+SceneExecuter::SceneExecuter(AppCentral &app_central, FxSceneItem *scene)
+	: Executer(app_central)
+	, curScene(scene)
+	, sceneState(LIGHT::SCENE_OFF)
+{
+
 }

@@ -13,6 +13,8 @@ class FxItem;
 class Executer;
 class FxListExecuter;
 class FxList;
+class FxSceneItem;
+class SceneExecuter;
 
 class ExecCenter : public QObject
 {
@@ -41,6 +43,8 @@ public:
 	FxListExecuter * getCreateFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
+
+	SceneExecuter * newSceneExecuter(FxSceneItem *scene);
 
 	void queueRemove(Executer *exec);
 

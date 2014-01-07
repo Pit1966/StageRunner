@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>StageRunner (C) Stonechip Entertainment</string>
+   <string notr="true">StageRunner (C) Stonechip Entertainment</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../gfx_ressource.qrc">
@@ -231,7 +231,7 @@
      <x>0</x>
      <y>0</y>
      <width>888</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

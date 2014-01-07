@@ -132,6 +132,18 @@ FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
 	return qobject_cast<FxListExecuter*>(findExecuter(fx));
 }
 
+SceneExecuter *ExecCenter::newSceneExecuter(FxSceneItem *scene)
+{
+	SceneExecuter *exec = new SceneExecuter(myApp,scene);
+	executerList.lockAppend(exec);
+
+	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
+	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
+
+	emit executerCreated(exec);
+	return exec;
+}
+
 void ExecCenter::queueRemove(Executer *exec)
 {
 	removeQueue.lock();

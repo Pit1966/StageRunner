@@ -66,6 +66,7 @@ FxListWidget::~FxListWidget()
 	// Remove tracking information in global FxListWidget list
 	globalFxListWidgetList.removeOne(this);
 
+	qDebug("FxListWidget destroyed");
 }
 
 void FxListWidget::setFxList(FxList *fxlist)
@@ -322,12 +323,10 @@ void FxListWidget::setOriginFx(FxItem *fx)
 {
 	origin_fxitem = fx;
 
-	if (fx->fxType() == FX_AUDIO_PLAYLIST) {
-		FxPlayListItem *playfx = reinterpret_cast<FxPlayListItem*>(origin_fxitem);
-		QRect rect = QtStaticTools::stringToQRect(playfx->widgetPos);
-		if (!rect.isNull()) {
-			setGeometry(rect);
-		}
+	QRect rect = QtStaticTools::stringToQRect(fx->widgetPosition());
+	if (!rect.isNull()) {
+		setGeometry(rect);
+		move(rect.topLeft());
 	}
 }
 
@@ -407,6 +406,7 @@ FxListWidget *FxListWidget::findFxListWidget(FxList *fxList)
 /**
  * @brief Find a FxList instance in all FxListWidgets or create a new on
  * @param fxList Pointer to searched FxList instance
+ * @param fxItem Pointer to fxItem that contains the list
  * @param created Maybe a Pointer to bool that indicates if the widget was found or new created
  * @return Pointer to FxListWidget containing the fxList
  */
@@ -455,6 +455,19 @@ FxListWidget *FxListWidget::findParentFxListWidget(FxItem *fx)
 		wid = findFxListWidget(fx->parentFxList());
 	}
 	return wid;
+}
+
+bool FxListWidget::destroyFxListWidget(FxListWidget *wid)
+{
+	for (int t=globalFxListWidgetList.size()-1; t>=0; t--) {
+		if (wid == globalFxListWidgetList.at(t)) {
+			if (wid->isStandAlone()) {
+				wid->setAttribute(Qt::WA_DeleteOnClose);
+				wid->close();
+				globalFxListWidgetList.removeAt(t);
+			}
+		}
+	}
 }
 
 void FxListWidget::destroyAllFxListWidgets()
@@ -515,6 +528,7 @@ void FxListWidget::markFx(FxItem *fx)
 
 void FxListWidget::setCurrentFx(FxItem *newfx, FxItem *oldfx)
 {
+	Q_UNUSED(oldfx);
 	markFx(newfx);
 }
 
@@ -578,13 +592,13 @@ void FxListWidget::init()
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
 	origin_fxitem = 0;
+	upper_context_menu_split = 60;
 }
 
 void FxListWidget::closeEvent(QCloseEvent *)
 {
-	if (origin_fxitem && origin_fxitem->fxType() == FX_AUDIO_PLAYLIST) {
-		FxPlayListItem *playfx = reinterpret_cast<FxPlayListItem*>(origin_fxitem);
-		playfx->widgetPos = QtStaticTools::qRectToString(geometry());
+	if (origin_fxitem) {
+		origin_fxitem->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
 	}
 }
 
@@ -617,6 +631,9 @@ void FxListWidget::setEditable(bool state)
 		unselectRows();
 		is_editable_f = state;
 		emit editableChanged(state);
+	}
+	if (state != editButton->isChecked()) {
+		editButton->setChecked(state);
 	}
 }
 
@@ -768,6 +785,12 @@ void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int d
 		}
 	}
 
+}
+
+void FxListWidget::onFxItemSelectedInChildWidget(FxItem *fx)
+{
+	if (debug) qDebug("Selected FxItem in Child: %s",fx?fx->name().toLocal8Bit().data():"NULL");
+	emit fxItemSelectedInChildFxListWidget(fx);
 }
 
 void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
@@ -923,7 +946,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		QMenu menu(this);
 		QAction *act;
 
-		if (y > 40) {
+		if (y > upper_context_menu_split) {
 			act = menu.addAction(tr("Add Audio Fx"));
 			act->setObjectName("20");
 
@@ -946,7 +969,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act->setObjectName("2");
 		}
 
-		if (y < 40) {
+		if (y < upper_context_menu_split) {
 			if (fxList()->showColumnIdFlag) {
 				act = menu.addAction(tr("Hide ID Column"));
 			} else {
@@ -1181,3 +1204,13 @@ void FxListWidget::drop_event_receiver(QString str, int row)
 	}
 }
 
+
+void FxListWidget::on_closeButton_clicked()
+{
+	FxListWidget::destroyFxListWidget(this);
+}
+
+void FxListWidget::on_editButton_clicked(bool checked)
+{
+	setEditable(checked);
+}

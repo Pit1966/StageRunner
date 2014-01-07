@@ -48,6 +48,7 @@ public:
 	void openFxSceneItemPanel(FxSceneItem *fx);
 	void openFxPlayListItemPanel(FxPlayListItem *fx);
 	void openFxSeqItemPanel(FxSeqItem *fx);
+	void setProjectName(const QString &path);
 
 
 private:

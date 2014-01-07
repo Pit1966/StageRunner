@@ -89,6 +89,8 @@ public:
 	virtual bool isRandomized() {return false;}
 	virtual void setRandomized(bool state) {Q_UNUSED(state);}
 	virtual void resetFx() = 0;
+	virtual QString widgetPosition() {return QString();}
+	virtual void setWidgetPosition(const QString &geometry) {Q_UNUSED(geometry);}
 
 private:
 	void init();

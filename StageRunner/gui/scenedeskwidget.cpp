@@ -50,8 +50,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
 	// First we save the pointer to the scene;
-	cur_fx = scene;
-	cur_fxscene = scene;
+	origin_fxscene = scene;
 
 	if (!FxItem::exists(scene)) return false;
 
@@ -108,12 +107,19 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	}
 
 	// Set additional information widgets;
-	sceneNameEdit->setText(cur_fxscene->name());
-	faderGroup->setTitle(cur_fxscene->name());
-	hookedUniverseSpin->setValue(cur_fxscene->hookedUniverse()+1);
-	hookedChannelSpin->setValue(cur_fxscene->hookedChannel()+1);
-	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->fadeInTime()));
-	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(cur_fxscene->fadeOutTime()));
+	sceneNameEdit->setText(origin_fxscene->name());
+	faderGroup->setTitle(origin_fxscene->name());
+	hookedUniverseSpin->setValue(origin_fxscene->hookedUniverse()+1);
+	hookedChannelSpin->setValue(origin_fxscene->hookedChannel()+1);
+	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(origin_fxscene->fadeInTime()));
+	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(origin_fxscene->fadeOutTime()));
+
+	QRect rect = QtStaticTools::stringToQRect(origin_fxscene->widgetPosition());
+	if (!rect.isNull()) {
+		setGeometry(rect);
+		move(rect.bottomLeft());
+	}
+
 
 	return true;
 }
@@ -132,8 +138,8 @@ void SceneDeskWidget::setShiftKey(bool state)
 
 DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
 {
-	for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-		DmxChannel *dmx = cur_fxscene->tubes.at(t);
+	for (int t=0; t<origin_fxscene->tubeCount(); t++) {
+		DmxChannel *dmx = origin_fxscene->tubes.at(t);
 		if (dmx->dmxChannel == mixer->dmxChannel() && dmx->dmxUniverse == mixer->dmxUniverse()) {
 			return dmx;
 		}
@@ -156,22 +162,22 @@ DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **dmxChannel)
 		*dmxChannel = mixer;
 	}
 
-	if (!cur_fxscene) return tube;
+	if (!origin_fxscene) return tube;
 
 	// Now get tube for MixerChannel Id in scene Tube list
-	if (mixer->id() >= 0 && mixer->id() < cur_fxscene->tubes.size()) {
-		tube = cur_fxscene->tubes.at(mixer->id());
+	if (mixer->id() >= 0 && mixer->id() < origin_fxscene->tubes.size()) {
+		tube = origin_fxscene->tubes.at(mixer->id());
 	}
 	return tube;
 }
 
 void SceneDeskWidget::setTubeSelected(bool state, int id)
 {
-	if (!cur_fxscene) return;
+	if (!origin_fxscene) return;
 
 	if (state) {
 		if (!selected_tube_ids.contains(id)) {
-			if (id >=0 && id < cur_fxscene->tubeCount()) {
+			if (id >=0 && id < origin_fxscene->tubeCount()) {
 				selected_tube_ids.append(id);
 			}
 		}
@@ -197,24 +203,24 @@ void SceneDeskWidget::setSceneEditable(bool state)
 
 void SceneDeskWidget::setCurrentSceneLiveState(bool state)
 {
-	if (!FxItem::exists(cur_fxscene)) return;
-	if (cur_fxscene->isLive() == state) return;
+	if (!FxItem::exists(origin_fxscene)) return;
+	if (origin_fxscene->isLive() == state) return;
 
-	cur_fxscene->setLive(state);
+	origin_fxscene->setLive(state);
 
 	if (state) {
 		faderAreaWidget->setRefSliderColorIndex(1);
-		for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-			DmxChannel *tube = cur_fxscene->tubes.at(t);
+		for (int t=0; t<origin_fxscene->tubeCount(); t++) {
+			DmxChannel *tube = origin_fxscene->tubes.at(t);
 			tube->curValue[MIX_INTERN] = tube->targetValue;
 		}
-		AppCentral::instance()->unitLight->setSceneActive(cur_fxscene);
+		AppCentral::instance()->unitLight->setSceneActive(origin_fxscene);
 
 	} else {
 		faderAreaWidget->setRefSliderColorIndex(0);
-		if (!cur_fxscene->isOnStageIntern()) {
-			for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-				DmxChannel *tube = cur_fxscene->tubes.at(t);
+		if (!origin_fxscene->isOnStageIntern()) {
+			for (int t=0; t<origin_fxscene->tubeCount(); t++) {
+				DmxChannel *tube = origin_fxscene->tubes.at(t);
 				tube->curValue[MIX_INTERN] = 0;
 			}
 		}
@@ -223,9 +229,9 @@ void SceneDeskWidget::setCurrentSceneLiveState(bool state)
 
 void SceneDeskWidget::copyTubeSettingsToGui(int id)
 {
-	if (!FxItem::exists(cur_fxscene)) return;
+	if (!FxItem::exists(origin_fxscene)) return;
 
-	DmxChannel *tube = cur_fxscene->tube(id);
+	DmxChannel *tube = origin_fxscene->tube(id);
 	if (tube) {
 		tubeCommentEdit->setText(tube->labelText);
 	} else {
@@ -236,9 +242,9 @@ void SceneDeskWidget::copyTubeSettingsToGui(int id)
 void SceneDeskWidget::if_input_was_assigned(FxItem *fx)
 {
 	disconnect(AppCentral::instance(),SIGNAL(inputAssigned(FxItem*)),this,SLOT(if_input_was_assigned(FxItem*)));
-	if (fx == cur_fxscene) {
-		hookedUniverseSpin->setValue(cur_fxscene->hookedUniverse()+1);
-		hookedChannelSpin->setValue(cur_fxscene->hookedChannel()+1);
+	if (fx == origin_fxscene) {
+		hookedUniverseSpin->setValue(origin_fxscene->hookedUniverse()+1);
+		hookedChannelSpin->setValue(origin_fxscene->hookedChannel()+1);
 	}
 	autoHookButton->clearFocus();
 	setSceneEditable(false);
@@ -255,8 +261,12 @@ void SceneDeskWidget::init()
 void SceneDeskWidget::closeEvent(QCloseEvent *)
 {
 	setCurrentSceneLiveState(false);
-	DEBUGTEXT("Close scene desk");
 
+	if (origin_fxscene) {
+		origin_fxscene->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
+	}
+
+	if (debug) DEBUGTEXT("Close scene desk");
 }
 
 
@@ -264,7 +274,7 @@ void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxV
 {
 	faderAreaWidget->notifyChangedDmxUniverse(universe,dmxValues);
 
-	if (!FxItem::exists(cur_fxscene)) return;
+	if (!FxItem::exists(origin_fxscene)) return;
 
 //	for (int t=0;t<cur_fxscene->tubeCount(); t++) {
 //		DmxChannel *dmx = cur_fxscene->tubes.at(t);
@@ -276,14 +286,14 @@ void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxV
 
 void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 {
-	if (!FxItem::exists(cur_fxscene)) {
+	if (!FxItem::exists(origin_fxscene)) {
 		DEBUGERROR("Scene in Desk does not exist anymore!");
 		return;
 	}
 
-	cur_fxscene->tubes.at(id)->targetValue = val;
+	origin_fxscene->tubes.at(id)->targetValue = val;
 	if (scene_is_live_f) {
-		cur_fxscene->tubes.at(id)->curValue[MIX_INTERN] = val;
+		origin_fxscene->tubes.at(id)->curValue[MIX_INTERN] = val;
 	}
 }
 
@@ -291,7 +301,7 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 {
 	scene_is_live_f = checked;
 
-	if (!FxItem::exists(cur_fxscene)) {
+	if (!FxItem::exists(origin_fxscene)) {
 		DEBUGERROR("Scene in Desk does not exist anymore!");
 		return;
 	}
@@ -302,29 +312,29 @@ void SceneDeskWidget::on_liveCheck_clicked(bool checked)
 
 void SceneDeskWidget::on_hookedUniverseSpin_valueChanged(int arg1)
 {
-	if (!FxItem::exists(cur_fxscene)) return;
+	if (!FxItem::exists(origin_fxscene)) return;
 
-	cur_fxscene->hookToUniverse(arg1-1);
+	origin_fxscene->hookToUniverse(arg1-1);
 
 }
 
 void SceneDeskWidget::on_hookedChannelSpin_valueChanged(int arg1)
 {
-	if (!FxItem::exists(cur_fxscene)) return;
+	if (!FxItem::exists(origin_fxscene)) return;
 
-	cur_fxscene->hookToChannel(arg1-1);
+	origin_fxscene->hookToChannel(arg1-1);
 
 }
 
 void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 {
-	if (!FxItem::exists(cur_fxscene)) return;
+	if (!FxItem::exists(origin_fxscene)) return;
 
 	qDebug("Mixer moved from position %d to %d",fromIdx,toIdx);
 	DmxChannel *from_tube = 0;
 	DmxChannel *to_tube = 0;
-	for (int t=0; t<cur_fxscene->tubeCount(); t++) {
-		DmxChannel *tube = cur_fxscene->tubes.at(t);
+	for (int t=0; t<origin_fxscene->tubeCount(); t++) {
+		DmxChannel *tube = origin_fxscene->tubes.at(t);
 		if (tube->tempDeskPosIdx == fromIdx) {
 			from_tube = tube;
 		}
@@ -347,7 +357,7 @@ void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 		} else {
 			to_tube->deskPositionIndex = fromIdx;
 		}\
-		cur_fxscene->setModified(true);
+		origin_fxscene->setModified(true);
 	}
 
 }
@@ -391,10 +401,10 @@ void SceneDeskWidget::keyReleaseEvent(QKeyEvent *event)
  */
 bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 {
-	if (!cur_fxscene || !tube) return false;
+	if (!origin_fxscene || !tube) return false;
 
 	tube->deskVisibleFlag = false;
-	cur_fxscene->setModified(true);
+	origin_fxscene->setModified(true);
 
 	if (mixer) {
 		if (faderAreaWidget->removeMixer(mixer)) {
@@ -407,13 +417,13 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 
 bool SceneDeskWidget::hideSelectedTubes()
 {
-	if (!cur_fxscene) return false;
+	if (!origin_fxscene) return false;
 
 	bool removed = false;
 
 	for (int t=0; t<selected_tube_ids.size(); t++) {
 		int id = selected_tube_ids.at(t);
-		removed |= hideTube( cur_fxscene->tubes.at(id), faderAreaWidget->getMixerById(id) );
+		removed |= hideTube( origin_fxscene->tubes.at(id), faderAreaWidget->getMixerById(id) );
 	}
 	selected_tube_ids.clear();
 
@@ -422,16 +432,16 @@ bool SceneDeskWidget::hideSelectedTubes()
 
 int SceneDeskWidget::setLabelInSelectedTubes(const QString &text)
 {
-	if (!cur_fxscene) return -1;
+	if (!origin_fxscene) return -1;
 
 	int count = 0;
 
 	for (int t=0; t<selected_tube_ids.size(); t++) {
 		int id = selected_tube_ids.at(t);
 		MixerChannel *mix = faderAreaWidget->getMixerById(id);
-		if (mix && id < cur_fxscene->tubeCount()) {
+		if (mix && id < origin_fxscene->tubeCount()) {
 			mix->setLabelText(text);
-			cur_fxscene->tubes.at(id)->labelText = text;
+			origin_fxscene->tubes.at(id)->labelText = text;
 			count++;
 		}
 	}
@@ -469,8 +479,8 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		break;
 
 	case 2:
-		cur_fxscene->setTubeCount(cur_fxscene->tubeCount()+1);
-		setFxScene(cur_fxscene);
+		origin_fxscene->setTubeCount(origin_fxscene->tubeCount()+1);
+		setFxScene(origin_fxscene);
 		emit modified();
 		break;
 	}
@@ -479,12 +489,12 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void SceneDeskWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 {
-	if (!cur_fxscene) return;
+	if (!origin_fxscene) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxscene->fadeInTime() != time_ms) {
-		cur_fxscene->setFadeInTime(time_ms);
-		cur_fxscene->setModified(true);
+	if (origin_fxscene->fadeInTime() != time_ms) {
+		origin_fxscene->setFadeInTime(time_ms);
+		origin_fxscene->setModified(true);
 		emit modified();
 	}
 
@@ -492,12 +502,12 @@ void SceneDeskWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 
 void SceneDeskWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 {
-	if (!cur_fxscene) return;
+	if (!origin_fxscene) return;
 
 	int time_ms = QtStaticTools::timeStringToMS(arg1);
-	if (cur_fxscene->fadeOutTime() != time_ms) {
-		cur_fxscene->setFadeOutTime(time_ms);
-		cur_fxscene->setModified(true);
+	if (origin_fxscene->fadeOutTime() != time_ms) {
+		origin_fxscene->setFadeOutTime(time_ms);
+		origin_fxscene->setModified(true);
 		emit modified();
 	}
 }
@@ -509,11 +519,11 @@ void SceneDeskWidget::on_editCheck_clicked(bool checked)
 
 void SceneDeskWidget::on_sceneNameEdit_textEdited(const QString &arg1)
 {
-	if (!cur_fxscene) return;
+	if (!origin_fxscene) return;
 
-	cur_fxscene->setName(arg1);
+	origin_fxscene->setName(arg1);
 	faderGroup->setTitle(arg1);
-	cur_fxscene->setModified(true);
+	origin_fxscene->setModified(true);
 	emit modified();
 }
 
@@ -524,7 +534,7 @@ void SceneDeskWidget::on_autoHookButton_clicked()
 	}
 
 	// Set Input assign mode and wait for answer in if_input_was_assigned()
-	AppCentral::instance()->setInputAssignMode(cur_fxscene);
+	AppCentral::instance()->setInputAssignMode(origin_fxscene);
 	connect(AppCentral::instance(),SIGNAL(inputAssigned(FxItem*)),this,SLOT(if_input_was_assigned(FxItem*)));
 }
 
@@ -537,7 +547,7 @@ void SceneDeskWidget::on_tubeCommentEdit_textEdited(const QString &arg1)
 SceneDeskWidget * SceneDeskWidget::openSceneDesk(FxSceneItem *scene, QWidget *parent)
 {
 	foreach(SceneDeskWidget *desk, scene_desk_list) {
-		if (desk->cur_fxscene == scene) {
+		if (desk->origin_fxscene == scene) {
 			desk->setWindowState(desk->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
 			desk->raise();
 			desk->show();

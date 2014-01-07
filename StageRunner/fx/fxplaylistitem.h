@@ -12,10 +12,10 @@ class FxItemObj;
 class FxPlayListItem : public FxAudioItem
 {
 public:
-	pstring widgetPos;
 	FxList *fxPlayList;
-
 private:
+	pstring widgetPos;
+
 	FxItemObj *itemObj;
 
 public:
@@ -32,6 +32,8 @@ public:
 	int size();
 	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);
 	inline FxItemObj * connector() {return itemObj;}
+	QString widgetPosition() {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
 
 private:
 	void init();

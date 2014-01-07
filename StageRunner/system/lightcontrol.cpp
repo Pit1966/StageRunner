@@ -10,6 +10,9 @@
 #include "qlcioplugin.h"
 #include "ioplugincentral.h"
 #include "usersettings.h"
+#include "toolclasses.h"
+#include "execcenter.h"
+#include "executer.h"
 
 
 LightControl::LightControl(AppCentral &app_central)
@@ -111,8 +114,11 @@ bool LightControl::sendChangedDmxData()
 bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 {
 	bool active;
-
-	if (!scene->isOnStageIntern()) {
+	if (scene->preDelay() == -1) {
+		SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene);
+		active = exec->activateProcessing();
+	}
+	else if (!scene->isOnStageIntern()) {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
 		if (active) {
 			setSceneActive(scene);

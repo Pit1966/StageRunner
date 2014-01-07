@@ -241,7 +241,7 @@ void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, in
 	if (input_assign_target_fxitem) {
 		assign_target = input_assign_target_fxitem;
 	} else {
-		assign_target = current_selected_project_fx;
+		assign_target = last_global_selected_fxitem;
 	}
 
 
@@ -442,9 +442,9 @@ void AppCentral::onInputUniverseChannelChanged(quint32 universe, quint32 channel
 
 }
 
-void AppCentral::storeSelectedFxListWidgetFx(FxItem *item)
+void AppCentral::setGlobalSelectedFx(FxItem *item)
 {
-	current_selected_project_fx = item;
+	last_global_selected_fxitem = item;
 }
 
 
@@ -472,7 +472,7 @@ void AppCentral::init()
 	input_assign_mode_f = false;
 	input_assign_target_fxitem = 0;
 
-	current_selected_project_fx = 0;
+	last_global_selected_fxitem = 0;
 
 	mainWinObj = 0;
 	userSettings = new UserSettings;

@@ -3,11 +3,11 @@
 
 #include "commandsystem.h"
 
-using namespace AUDIO;
-
 #include <QObject>
 #include <QString>
 #include <QElapsedTimer>
+
+using namespace AUDIO;
 
 class FxList;
 class AppCentral;
@@ -23,7 +23,8 @@ class Executer : public QObject
 public:
 	enum TYPE {
 		EXEC_BASE,
-		EXEC_FXLIST
+		EXEC_FXLIST,
+		EXEC_SCENE
 	};
 	enum STATE {
 		EXEC_IDLE,
@@ -126,6 +127,26 @@ signals:
 
 	friend class ExecCenter;
 
+};
+
+
+class SceneExecuter : public Executer
+{
+protected:
+	FxSceneItem *curScene;
+	LIGHT::SceneSeqState sceneState;
+
+public:
+	inline TYPE type() {return EXEC_SCENE;}
+	bool processExecuter();
+
+protected:
+	SceneExecuter(AppCentral &app_central, FxSceneItem *scene);
+
+public:
+
+
+	friend class ExecCenter;
 };
 
 #endif // FXLISTEXECUTER_H

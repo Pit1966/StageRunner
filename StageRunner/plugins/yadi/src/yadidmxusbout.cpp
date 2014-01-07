@@ -224,7 +224,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		}
 	}
 
-	if (changed_channels > 8 || hi_changed_channel < 50) {
+	if (changed_channels > 8 || hi_changed_channel > 50) {
 //		for (int t=0; t<12;t++) {
 //			if (universe.at(t) != yadi->outUniverse.at(t)) {
 //				qDebug("chan %d: %d->%d",t,quint8(yadi->outUniverse.at(t)),quint8(universe.at(t)));
@@ -244,7 +244,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		} else {
 			yadi->outUniverse = universe;
 		}
-		if (debug > 2) qDebug("out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,universe.size(),out[1],out[2]);
+		if (debug > 2) qDebug("Yadi: out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,universe.size(),out[1],out[2]);
 	} else {
 		for (int t=0; t<hi_changed_channel; t++) {
 			if (universe.at(t) != yadi->outUniverse.at(t) || yadi->outputSendAllData) {
@@ -263,7 +263,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 				}
 			}
 		}
-		if (debug > 2) qDebug("out single %dms",stop.elapsed());
+		if (debug > 2) qDebug("Yadi: out single %dms",stop.elapsed());
 	}
 	update_output_monitor(output,universe);
 }

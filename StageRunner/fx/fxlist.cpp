@@ -3,6 +3,7 @@
 #include "fxsceneitem.h"
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
+#include "log.h"
 
 #include <QMutableListIterator>
 #include <QDateTime>
@@ -133,7 +134,7 @@ QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
 /**
  * @brief Process FxList after Load from File
  *
- * This sets the parentFxList Pointer for any mamber of the list
+ * This sets the parentFxList Pointer for any member of the list
  */
 void FxList::postLoadProcess()
 {
@@ -150,6 +151,41 @@ void FxList::postLoadProcess()
 			break;
 		}
 	}
+}
+
+/**
+ * @brief Reset Scene output values after loading a project
+ * @return  true, a scene was on stage
+ *
+ * When saving the project at the same time all current scene (tubes) output values are stored as well.
+ * Loading this scenes will restore these states. That could cause problems on fading in the scene (cause
+ * it maybe already faded to the target values)
+ *
+ * This function calls itself recursively for all FxSequence members of the list
+ */
+bool FxList::postLoadResetScenes()
+{
+	bool was_on_stage = false;
+	for (int t=0; t<size(); t++) {
+		FxItem *fx = at(t);
+		if (fx->fxType() == FX_SCENE) {
+			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+			/// @todo: Light restore on load funktioniert nicht
+			bool scene_was_on_stage = scene->postLoadInitTubes(false);
+			if (scene_was_on_stage) {
+				was_on_stage = true;
+				LOGTEXT(QObject::tr("Scene <font color=orange>'%1'</font> was on stage when project was saved")
+						.arg(scene->name()));
+			}
+		}
+		else if (fx->fxType() == FX_SEQUENCE) {
+			// A sequence could hold scenes as well. We process them recursively
+			FxSeqItem *fxseq = reinterpret_cast<FxSeqItem*>(fx);
+			if (fxseq->seqList)
+				was_on_stage |= fxseq->seqList->postLoadResetScenes();
+		}
+	}
+	return was_on_stage;
 }
 
 /**

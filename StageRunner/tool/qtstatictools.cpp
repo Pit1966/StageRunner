@@ -39,6 +39,8 @@ int QtStaticTools::timeStringToMS(const QString &str)
 	} else {
 		time_ms = number.toInt();
 	}
+	if (arg.startsWith("-"))
+		time_ms = -time_ms;
 
 	return time_ms;
 }

@@ -35,7 +35,8 @@ public:
 	bool isModified();
 	void setModified(bool state);
 
-	bool postLoadProcessFxList();
+	void postLoadProcessFxList();
+	bool postLoadResetFxScenes();
 
 	inline FxList *mainFxList() {return fxList;}
 

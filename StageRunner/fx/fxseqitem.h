@@ -9,10 +9,11 @@ class FxItemObj;
 class FxSeqItem : public FxItem
 {
 public:
-	pstring widgetPos;
 	FxList *seqList;
 
 private:
+
+	pstring widgetPos;
 	FxItemObj *itemObj;
 
 public:
@@ -28,6 +29,8 @@ public:
 	void resetFx();
 	bool isRandomized();
 	void setRandomized(bool state);
+	QString widgetPosition() {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
 
 
 private:
