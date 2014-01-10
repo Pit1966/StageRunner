@@ -259,7 +259,17 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 void YadiDeviceManager::clearYadiDevices()
 {
 	while (!globYadiDeviceList.isEmpty()) {
-		delete globYadiDeviceList.takeFirst();
+		YadiDevice *yadi = globalDeviceList().takeFirst();
+		yadi->deActivateDevice();
+		delete yadi;
+	}
+}
+
+int YadiDeviceManager::initYadiDevices()
+{
+	for (int t=0; t<globYadiDeviceList.size(); t++) {
+		YadiDevice *yadi = globYadiDeviceList.at(t);
+		yadi->activateDevice();
 	}
 }
 

@@ -92,6 +92,7 @@ void StageRunnerMainWin::initConnects()
 
 	// Light Control -> SceneStatusWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
+	connect(appCentral->unitLight,SIGNAL(sceneFadeChanged(FxSceneItem*,int,int)),sceneStatusDisplay,SLOT(propagateSceneFade(FxSceneItem*,int,int)));
 
 	// Light Control -> Project FxListWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),fxListWidget,SLOT(propagateSceneStatus(FxSceneItem*)));

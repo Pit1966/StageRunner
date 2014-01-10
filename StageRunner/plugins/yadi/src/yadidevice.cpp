@@ -85,7 +85,7 @@ bool YadiDevice::activateDevice()
 
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
-			input_thread = new YadiReceiver(this,file);
+			input_thread = new YadiReceiver(this);
 			inUniverse.resize(512);
 		}
 		else if (!(capabilities&FL_INPUT_UNIVERSE) && input_thread) {
@@ -135,6 +135,7 @@ bool YadiDevice::openOutput()
 
 void YadiDevice::closeOutput()
 {
+	qDebug("Yadi: close output");
 	if (file && !input_open_f) {
 		file->closeSerial();
 	}
@@ -296,8 +297,9 @@ void YadiDevice::loadConfig()
 
 void YadiDevice::sendConfigToDevice()
 {
-	if (debug) qDebug() << "YadiDevice::sendConfigToDevice";
+	/*if (debug)*/ qDebug("YadiDevice::sendConfigToDevice");
 	/// @todo error checking!
+	bool old_open_output_state = output_open_f;
 
 	if (openOutput()) {
 		QString cmd;
@@ -313,6 +315,9 @@ void YadiDevice::sendConfigToDevice()
 			cmd = QString("ho %1").arg(usedDmxOutChannels);
 			write(cmd.toLocal8Bit().data());
 		}
+
+		if (!old_open_output_state)
+			closeOutput();
 	}
 }
 

@@ -49,8 +49,6 @@ public:
 	void loadQLCPlugins(const QString & dir_str);
 	void unloadPlugins();
 	bool updatePluginMappingInformation();
-	bool openPlugins();
-	void reOpenPlugins();
 	void closePlugins();
 	QStringList getAllAvailableInputNames() const;
 	QStringList getAllAvailableOutputNames() const;
@@ -69,6 +67,10 @@ public:
 
 signals:
 	void universeValueChanged(quint32 universe, quint32 channel, uchar value);
+
+public slots:
+	bool openPlugins();
+	void reOpenPlugins();
 
 private slots:
 	void onInputValueChanged(quint32 input, quint32 channel, uchar value);

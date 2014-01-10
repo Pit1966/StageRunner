@@ -204,6 +204,12 @@ void LightControl::init()
 	lightLoopInterface = new LightLoopThreadInterface(*this);
 }
 
+void LightControl::startFxSceneExecuter(FxSceneItem *scene)
+{
+	SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene);
+	exec->activateProcessing();
+}
+
 void LightControl::onSceneStatusChanged(FxSceneItem *scene, quint32 status)
 {
 	if (debug > 1) qDebug() << "Scene" << scene->name() << "INTERN active:" << (status & SCENE_ACTIVE_INTERN)

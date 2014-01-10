@@ -2,6 +2,7 @@
 #include "fxsceneitem.h"
 
 #include <QWriteLocker>
+#include <QPainter>
 
 #define READLOCK QReadLocker(*rwlock);Q_UNUSED(rwlock);
 #define WRITELOCK QWriteLocker(*rwlock);Q_UNUSED(rwlock);
@@ -27,7 +28,6 @@ bool SceneStatusWidget::appendScene(FxSceneItem *scene)
 	scene_hash.insert(scene,item);
 
 	updateScene(scene);
-
 	return true;
 }
 
@@ -95,6 +95,36 @@ bool SceneStatusWidget::propagateScene(FxSceneItem *scene)
 		} else {
 			return false;
 		}
+	}
+}
+
+void SceneStatusWidget::propagateSceneFade(FxSceneItem *scene, int perMilleA, int perMilleB)
+{
+	Q_UNUSED(perMilleB);
+
+	READLOCK;
+
+	SceneStatusListItem *item = scene_hash.value(scene);
+	if (item && scene) {
+		int sx = 14;
+		int sy = 13;
+		int target = (perMilleA * sx * sy + 5) / 1000;
+		QPixmap pix(sx,sy);
+		pix.fill(Qt::black);
+		QPainter p(&pix);
+		p.setPen(QColor(Qt::green));
+		int c = 0;
+		int y = 0;
+		while (c < target) {
+			if (c + sx - 1 < target) {
+				p.drawLine(0,y,sx-1,y);
+			} else {
+				p.drawLine(0,y,target%sx,y);
+			}
+			c += sx;
+			y++;
+		}
+		item->setIcon(pix);
 	}
 }
 

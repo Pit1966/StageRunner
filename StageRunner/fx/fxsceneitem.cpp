@@ -320,10 +320,21 @@ bool FxSceneItem::postLoadInitTubes(bool restore_light)
 			}
 		}
 	}
+
 	if (now_on_stage) {
 		qDebug("Post process loaded project -> Bring Scene to stage");
 		// initSceneCommand(CMD_SCENE_FADEIN);
 		AppCentral::instance()->unitLight->setSceneActive(this);
+	}
+
+	if (sceneMaster->curValue[MIX_INTERN]) {
+		sceneMaster->curValue[MIX_INTERN] = 0;
+		qDebug("Scene: %s reset scene internal master",name().toLocal8Bit().data());
+	}
+
+	if (sceneMaster->curValue[MIX_EXTERN]) {
+		sceneMaster->curValue[MIX_EXTERN] = 0;
+		qDebug("Scene: %s reset scene external master",name().toLocal8Bit().data());
 	}
 
 	return was_on_stage;

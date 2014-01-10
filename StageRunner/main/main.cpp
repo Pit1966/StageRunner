@@ -5,6 +5,7 @@
 #include "stagerunnermainwin.h"
 #include "usersettings.h"
 #include "log.h"
+#include "scapplication.h"
 
 // #include "ioplugincentral.h"
 
@@ -12,7 +13,7 @@ int main(int argc, char *argv[])
 {
 	PrefVarCore::registerVarClasses();
 
-	QApplication app(argc, argv);
+	ScApplication app(argc, argv);
 
 	app.setApplicationName(APP_NAME);
 	app.setOrganizationName(APP_ORG_STRING);

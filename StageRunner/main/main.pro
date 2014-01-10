@@ -95,7 +95,9 @@ SOURCES += \
 	../appcontrol/execloopthreadinterface.cpp \
 	../appcontrol/execloop.cpp \
 	../gui/sequencestatuswidget.cpp \
-    ../system/audioplayer.cpp
+    ../system/audioplayer.cpp \
+    ../appcontrol/scapplication.cpp \
+    ../system/unixsignalcatcher.cpp
 
 HEADERS  += \
 	../config.h \
@@ -162,7 +164,9 @@ HEADERS  += \
 	../appcontrol/execloopthreadinterface.h \
 	../appcontrol/execloop.h \
 	../gui/sequencestatuswidget.h \
-    ../system/audioplayer.h
+    ../system/audioplayer.h \
+    ../appcontrol/scapplication.h \
+    ../system/unixsignalcatcher.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

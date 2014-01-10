@@ -37,6 +37,7 @@ public:
 
 public slots:
 	bool propagateScene(FxSceneItem *scene);
+	void propagateSceneFade(FxSceneItem *scene, int perMilleA, int perMilleB);
 };
 
 #endif // SCENESTATUSWIDGET_H

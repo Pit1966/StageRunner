@@ -97,6 +97,7 @@ FxListExecuter *ExecCenter::newFxListExecuter(FxList *fxlist, FxItem *fxitem)
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
+	connect(exec,SIGNAL(sceneExecuterStartSignal(FxSceneItem*)),myApp.unitLight,SLOT(startFxSceneExecuter(FxSceneItem*)));
 
 	emit executerCreated(exec);
 	return exec;

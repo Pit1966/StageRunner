@@ -1,4 +1,5 @@
 #include "executer.h"
+#include "execcenter.h"
 #include "log.h"
 #include "fxlist.h"
 #include "appcentral.h"
@@ -349,9 +350,18 @@ qint64 FxListExecuter::cue_fx_scene(FxSceneItem *scene)
 	switch (scene->seqStatus()) {
 	case SCENE_OFF:
 		cue_time = scene->preDelay();
-		if (cue_time < 0)
+		if (cue_time == -1) {
 			cue_time = 0;
-		scene->setSeqStatus(SCENE_PRE_DELAY);
+			scene->setSeqStatus(SCENE_FADE_OUT);
+			emit sceneExecuterStartSignal(scene);
+		}
+		else if (cue_time < 0) {
+			cue_time = 0;
+			scene->setSeqStatus(SCENE_PRE_DELAY);
+		}
+		else {
+			scene->setSeqStatus(SCENE_PRE_DELAY);
+		}
 		break;
 	case SCENE_PRE_DELAY:
 		cue_time = scene->fadeInTime();
@@ -389,6 +399,17 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 	switch (audio->seqStatus()) {
 	case AUDIO_OFF:
 		cue_time = audio->preDelay();
+		if (cue_time == -1) {
+			myApp.unitAudio->startFxAudioAt(audio,this);
+			audio->setSeqStatus(AUDIO_POST_DELAY);
+			cue_time = audio->postDelay();
+			if (cue_time < 0)
+				cue_time = 0;
+			return cue_time;
+		}
+		else if (cue_time < 0) {
+			cue_time = 0;
+		}
 		audio->setSeqStatus(AUDIO_PRE_DELAY);
 		break;
 	case AUDIO_PRE_DELAY:
@@ -459,7 +480,8 @@ bool SceneExecuter::processExecuter()
 		case SCENE_HOLD:
 			cue_time = curScene->fadeOutTime();
 			curScene->initSceneCommand(MIX_INTERN,CMD_SCENE_FADEOUT,cue_time);
-			sceneState = SCENE_FADE_OUT;
+			// We skip the postDelay parameter since it makes no sense in a SceneExecuter
+			sceneState = SCENE_POST_DELAY;
 			break;
 		case SCENE_FADE_OUT:
 			cue_time = curScene->postDelay();

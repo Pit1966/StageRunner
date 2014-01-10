@@ -69,16 +69,14 @@ public:
 
 private:
 	YadiDevice *device;
-	SerialWrapper *file;
 
 	int inputNumber;
 
 	volatile RunCmd cmd;
 	QTime *time;
-	int receiver_loop_cnt;
 
 public:
-	YadiReceiver(YadiDevice *p_device, SerialWrapper * p_file);
+	YadiReceiver(YadiDevice *p_device);
 	~YadiReceiver();
 
 	bool startRxDmx(int input);

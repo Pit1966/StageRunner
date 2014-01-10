@@ -8,8 +8,16 @@
 
 #include <QDebug>
 #include <QTime>
+#include <QMutexLocker>
+
+
+#ifdef unix
+#include <errno.h>
+#include <string.h>
+#endif
 
 YadiDMXUSBOut::YadiDMXUSBOut()
+	: accessMutex(new QMutex(QMutex::Recursive))
 {
 	write_universe_debug_out = false;
 }
@@ -22,6 +30,7 @@ YadiDMXUSBOut::~YadiDMXUSBOut()
 #pragma message("Add clearYadiDevices() again !!")
 	// YadiDeviceManager::clearYadiDevices();
 
+	delete accessMutex;
 	if (debug) qDebug("~YadiDMXUSBOut");
 }
 
@@ -29,10 +38,17 @@ void YadiDMXUSBOut::init()
 {
 	qDebug("YadiDMXUSBOut::init");
 	debug = 0;
-
 	write_universe_debug_out = true;
 
-	// YadiDeviceManager::updateYadiDevicesStatus();
+	accessMutex->lock();
+
+	for (int t=0; t<MAX_DEVS; t++) {
+		inDevNameTable[t].clear();
+		outDevNameTable[t].clear();
+	}
+	output_devices.clear();
+	input_devices.clear();
+
 	YadiDeviceManager::clearYadiDevices();
 	findDevices();
 
@@ -41,11 +57,17 @@ void YadiDMXUSBOut::init()
 		YadiDeviceManager::deviceAt(t)->loadConfig();
 	}
 
+	YadiDeviceManager::initYadiDevices();
+
+	accessMutex->unlock();
+
 	emit configurationChanged();
 }
 
 bool YadiDMXUSBOut::findDevices(bool update)
 {
+	QMutexLocker lock(accessMutex);
+
 	QStringList cur_out(output_devices);
 	QStringList cur_in(input_devices);
 
@@ -119,6 +141,8 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 {
 	qDebug("YadiDMXUSBOut::openOutput(%d)",output);
 
+	QMutexLocker lock(accessMutex);
+
 	if ((int)output < output_devices.size()) {
 		bool ok;
 		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
@@ -129,6 +153,7 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 			ok = false;
 		}
 		if (ok) {
+			outDevNameTable[output] = output_devices.at(output);
 			if (debug) qDebug("YadiDMXUSBOut::openOutput(%d) successful",output);
 		} else {
 			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
@@ -142,6 +167,7 @@ void YadiDMXUSBOut::openOutput(quint32 output)
 void YadiDMXUSBOut::closeOutput(quint32 output)
 {
 	if (debug) qDebug("YadiDMXUSBOut::closeOutput(%d)",output);
+	QMutexLocker lock(accessMutex);
 
 	if ((int)output < output_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
@@ -151,6 +177,9 @@ void YadiDMXUSBOut::closeOutput(quint32 output)
 			qDebug("YadiDMXUSBOut::closeOutput(%d) Device not found",output);
 		}
 	}
+
+	if (output < MAX_DEVS)
+		outDevNameTable[output].clear();
 }
 
 int YadiDMXUSBOut::capabilities() const
@@ -160,6 +189,8 @@ int YadiDMXUSBOut::capabilities() const
 
 QStringList YadiDMXUSBOut::outputs()
 {
+	QMutexLocker lock(accessMutex);
+
 	QStringList outnames;
 	for (int t=0; t<output_devices.size(); t++) {
 		YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(t),YadiDevice::FL_OUTPUT_UNIVERSE);
@@ -180,6 +211,8 @@ QStringList YadiDMXUSBOut::outputs()
 
 void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 {
+	QMutexLocker lock(accessMutex);
+
 	if ((int)output >= output_devices.size()) {
 		if (write_universe_debug_out) {
 			write_universe_debug_out = false;
@@ -270,6 +303,8 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 
 QString YadiDMXUSBOut::outputInfo(quint32 output)
 {
+	QMutexLocker lock(accessMutex);
+
 	QString str;
 
 	str += QString("<HTML>");
@@ -319,7 +354,9 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 
 void YadiDMXUSBOut::openInput(quint32 input)
 {
-	if (debug) qDebug("YadiDMXUSBOut::openInput(%d)",input);
+	QMutexLocker lock(accessMutex);
+
+	qDebug("YadiDMXUSBOut::openInput(%d)",input);
 
 	if ((int)input < input_devices.size()) {
 		bool ok;
@@ -331,9 +368,10 @@ void YadiDMXUSBOut::openInput(quint32 input)
 			ok = false;
 		}
 		if (ok) {
+			inDevNameTable[input] = input_devices.at(input);
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
-					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)));
-			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)));
+					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
 		} else {
 			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
 		}
@@ -342,21 +380,27 @@ void YadiDMXUSBOut::openInput(quint32 input)
 
 void YadiDMXUSBOut::closeInput(quint32 input)
 {
-	if (debug) qDebug("YadiDMXUSBOut::closeInput(%d)",input);
+	QMutexLocker lock(accessMutex);
+	qDebug("YadiDMXUSBOut::closeInput(%d)",input);
 
 	if ((int)input < input_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
 		if (yadi) {
-			disconnect(yadi->inputThread(),0,this,0);
+			// disconnect(yadi->inputThread(),0,this,0);
 			yadi->closeInput();
 		} else {
 			qDebug("YadiDMXUSBOut::closeInput(%d) Device not found",input);
 		}
 	}
+
+	if (input < MAX_DEVS)
+		inDevNameTable[input].clear();
 }
 
 QStringList YadiDMXUSBOut::inputs()
 {
+	QMutexLocker lock(accessMutex);
+
 	QStringList innames;
 	for (int t=0; t<input_devices.size(); t++) {
 		YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(t),YadiDevice::FL_INPUT_UNIVERSE);
@@ -377,6 +421,8 @@ QStringList YadiDMXUSBOut::inputs()
 
 QString YadiDMXUSBOut::inputInfo(quint32 input)
 {
+	QMutexLocker lock(accessMutex);
+
 	QString str;
 
 	str += QString("<HTML>");
@@ -458,6 +504,8 @@ void YadiDMXUSBOut::configure()
 
 DmxMonitor *YadiDMXUSBOut::openOutputMonitor(quint32 output)
 {
+	QMutexLocker lock(accessMutex);
+
 	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
 	if (yadi) {
 		return yadi->openDmxOutMonitorWidget();
@@ -468,6 +516,8 @@ DmxMonitor *YadiDMXUSBOut::openOutputMonitor(quint32 output)
 
 DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 {
+	QMutexLocker lock(accessMutex);
+
 	YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
 	if (yadi) {
 		return yadi->openDmxInMonitorWidget();
@@ -478,7 +528,17 @@ DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 
 void YadiDMXUSBOut::handle_output_error(quint32 output)
 {
-	qDebug("Yadi DMX plugin: Communication error occured. Output %d",output);
+	bool confchanged = false;
+
+	accessMutex->lock();
+	if (int(output) >= output_devices.size()) {
+		accessMutex->unlock();
+		return;
+	}
+
+	int errsv = errno;
+	qDebug("Yadi DMX plugin: Communication error occured. Output %d (%s)"
+		   ,output,strerror(errsv));
 
 	bool close_device = false;
 
@@ -491,13 +551,22 @@ void YadiDMXUSBOut::handle_output_error(quint32 output)
 
 	if (close_device && yadi) {
 		yadi->closeInOut();
+		confchanged = true;
 		qDebug("YadiDMXUSBOut::handle_output_error: Device '%s' closed",output_devices.at(output).toLocal8Bit().data());
-		emit configurationChanged();
 	}
+
+	accessMutex->unlock();
+
+	if (confchanged)
+		emit configurationChanged();
+
 }
 
 void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &universe)
 {
+	QMutexLocker lock(accessMutex);
+	if (int(output) >= output_devices.size())
+		return;
 
 	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
 	if (!yadi) return;
@@ -513,7 +582,6 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
 {
 	if (!instance) return;
-
 
 	foreach(QString devname, input_devices) {
 		YadiDevice * yadi = YadiDeviceManager::getDevice(devname,YadiDevice::FL_INPUT_UNIVERSE);
@@ -543,6 +611,13 @@ void YadiDMXUSBOut::inputDeviceFailed(int input)
 {
 	qDebug("YadiDMXUSBOut::inputDeviceFailed(%d) failed!",input);
 
+	accessMutex->lock();
+	if (input >= input_devices.size()) {
+		accessMutex->unlock();
+		return;
+	}
+
+
 	// coming to this point normaly means the device is not connected anymore
 	// So we close all devices to give the device nodes in /dev free
 
@@ -550,10 +625,18 @@ void YadiDMXUSBOut::inputDeviceFailed(int input)
 
 	if (yadi) {
 		qDebug("YadiDMXUSBOut::inputDeviceFailed: Close inputs and outputs");
-		yadi->closeInput();
+		yadi->closeInOut();
 	}
 
+	accessMutex->unlock();
+
 	emit configurationChanged();
+
+}
+
+void YadiDMXUSBOut::outputDeviceFailed(int output)
+{
+	Q_UNUSED(output);
 
 }
 

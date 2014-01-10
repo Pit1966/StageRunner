@@ -4,6 +4,10 @@
 #include "qlcioplugin.h"
 
 #include <QStringList>
+#include <QMutex>
+
+
+#define MAX_DEVS 10
 
 class SerialWrapper;
 class YadiDevice;
@@ -19,12 +23,15 @@ class YadiDMXUSBOut : public QLCIOPlugin
 #endif
 public:
 	int debug;
+	QString inDevNameTable[MAX_DEVS];		///< this list maps the current opened input device numbers to the device name
+	QString outDevNameTable[MAX_DEVS];		///< this list maps the current opened output device numbers to the device name
 
 private:
 	QStringList output_devices;
 	QStringList input_devices;
 
 	bool write_universe_debug_out;
+	QMutex *accessMutex;
 
 public:
 	YadiDMXUSBOut();
@@ -67,6 +74,7 @@ public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
 	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
 	void inputDeviceFailed(int input);
+	void outputDeviceFailed(int output);
 
 };
 

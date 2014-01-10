@@ -51,6 +51,7 @@ signals:
 	void audioSlotVolChanged(int slot, int value);
 
 public slots:
+	void startFxSceneExecuter(FxSceneItem *scene);
 	void onSceneStatusChanged(FxSceneItem *scene, quint32 status);
 	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void onSceneCueReady(FxSceneItem *scene);

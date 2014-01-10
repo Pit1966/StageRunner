@@ -7,6 +7,7 @@ class YadiReceiver;
 class SerialWrapper;
 class DmxMonitor;
 
+
 class YadiDevice
 {
 public:
@@ -67,6 +68,7 @@ public:
 	bool openInput();
 	void closeInput();
 	void closeInOut();
+	inline SerialWrapper *serialDev() const {return file;}
 
 	QByteArray read(qint64 size);
 	qint64 read(char *buf, qint64 size);

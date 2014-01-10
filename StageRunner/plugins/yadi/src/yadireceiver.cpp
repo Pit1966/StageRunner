@@ -9,16 +9,14 @@
 
 #define DMX_HEADER_SIZE 4
 
-YadiReceiver::YadiReceiver(YadiDevice *p_device, SerialWrapper * p_file)
+YadiReceiver::YadiReceiver(YadiDevice *p_device)
+	: device(p_device)
 {
-	device = p_device;
-	file = p_file;
 	init();
 }
 
 YadiReceiver::~YadiReceiver()
 {
-
 	delete time;
 }
 
@@ -27,7 +25,6 @@ void YadiReceiver::init()
 	dmxStatus = 0;
 	cmd = IDLE;
 	time = new QTime;
-	receiver_loop_cnt = 0;
 	inputNumber = 0;
 }
 
@@ -49,26 +46,12 @@ bool YadiReceiver::startRxDmx(int input)
 
 void YadiReceiver::run()
 {
-	bool reloop = true;
-	bool ok = true;
+	cmd = RUNNING;
 
-	while (reloop) {
-		receiver_loop_cnt++;
-		ok = receiver_loop();
-		if (ok) {
-			reloop = false;
-		} else {
-			if (receiver_loop_cnt++ < 10) {
-				qDebug("YadiReceiver::run: exit DMXreceiver thread with failure -> restart");
-				reloop = true;
-			} else {
-				reloop = false;
-			}
-		}
-	}
+	bool ok = receiver_loop();
 
 	if (!ok) {
-		qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
+		if (device->debug) qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
 		emit exitReceiverWithFailure(inputNumber);
 	} else {
 		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
@@ -81,7 +64,7 @@ bool YadiReceiver::receiver_loop()
 {
 	bool ok = true;
 
-	while (cmd != STOPPED && ok) {
+	while (cmd != STOPPED && ok && device->serialDev() && device->serialDev()->isOpen()) {
 		bool emit_all = true;
 
 		int max_channels = -1;
@@ -101,12 +84,11 @@ bool YadiReceiver::receiver_loop()
 		time->restart();
 		int transfer = 5;
 		while (cmd != STOPPED && (dmxStatus&1) && ok) {
-			cmd = RUNNING;
 
 			DmxAnswer dmx;
 			ok = waitForAtHeader(dmx);
 			if (!ok) {
-				qDebug() << "YadiReceiver::run: Wait for @-Header failed -> Leave receiver loop";
+				qDebug() << "YadiReceiver::run: Wait for @-Header failed -> Leave inner receiver loop";
 				// We could not receive rx DMX input data from interface.
 				// This means that cable was disconnected or something similar
 				// Not a fault so far.
@@ -114,8 +96,6 @@ bool YadiReceiver::receiver_loop()
 				ok = true;
 				// So we leave the receiver loop and check if the interface is still present.
 				break;
-			} else {
-				receiver_loop_cnt = 0;
 			}
 
 			if (dmx.type == DmxAnswer::DMX_DATA) {
@@ -124,18 +104,20 @@ bool YadiReceiver::receiver_loop()
 				wait.restart();
 
 				qint64 channels_to_read = dmx.dmxDataSize;
-				while (channels_to_read > 0 && wait.elapsed() < 1400) {
-					in += file->readSerial(channels_to_read);
+				while (channels_to_read > 0 && wait.elapsed() < 1400 && cmd != STOPPED) {
+					if (!device->serialDev()) return false;
+					in += device->serialDev()->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
 				}
 				if (device->debug > 1) qDebug("YadiReceiver::run: read size: %d",in.size());
 				if (in.size() != dmx.dmxDataSize) {
 					qDebug("YadiReceiver::run: read size: %d",in.size());
 				}
+				if (!device->serialDev()) return false;
 
-				if (file->error()) {
-					qDebug() << file->errorString();
-					cmd = STOPPED;
+				if (device->serialDev()->error()) {
+					qDebug() << device->serialDev()->errorString();
+					ok = false;
 				} else {
 					int millis = time->elapsed();
 					if (!millis) {
@@ -179,10 +161,11 @@ bool YadiReceiver::stopRxDmx()
 	if (isRunning()) {
 		cmd = STOPPED;
 		QTime wait;
-		wait.restart();
+		wait.start();
 		while (wait.elapsed() < 800) ;;
 
 		if (isRunning()) {
+			qDebug("YadiReceiver: stopRxDmx: Still running after 800ms");
 			this->terminate();
 			ok = false;
 		}
@@ -194,10 +177,16 @@ bool YadiReceiver::stopRxDmx()
 
 bool YadiReceiver::detectRxDmxPacketSize(int *packet_size)
 {
-	if (!file->isOpen())
+	if (!device->serialDev())
 		return false;
 
-	file->writeSerial("c");
+	if (!device->serialDev()->isOpen())
+		return false;
+
+	if ( device->serialDev()->writeSerial("c") <= 0 ) {
+		qDebug("YadiReceiver: Device 'c' command failed");
+		return false;
+	}
 
 	DmxAnswer stat(DmxAnswer::REQ_DMX_FRAMESIZE);
 	bool ok = waitForAtHeader(stat);
@@ -215,10 +204,15 @@ bool YadiReceiver::detectRxDmxPacketSize(int *packet_size)
 
 bool YadiReceiver::detectRxDmxUniverseSize(int *max_universe_size, int *used_universe_size)
 {
-	if (!file->isOpen())
+	if (!device->serialDev())
+		return false;
+	if (!device->serialDev()->isOpen())
 		return false;
 
-	file->writeSerial("ui");
+	if ( device->serialDev()->writeSerial("ui") <= 0 ) {
+		qDebug("YadiReceiver: Device 'ui' command failed");
+		return false;
+	}
 
 	DmxAnswer stat(DmxAnswer::REQ_CHANNELS);
 	bool ok = waitForAtHeader(stat);
@@ -240,11 +234,14 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 {
 	DmxAnswer::DmxAnswerType wait_for_type = dmxstat.type;
 
+	if (!device->serialDev())
+		return false;
+	if (!device->serialDev()->isOpen())
+		return false;
+
+
 	// We do not wait forever here. So we need a timer for a breakcondition
 	// We are waiting max 100ms
-
-	if (!file->isOpen())
-		return false;
 
 	QTime wait;
 	wait.start();
@@ -271,8 +268,9 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 		bool end = false;
 		in.clear();
 		while (wait.elapsed()<time_to_wait && !end && cmd != STOPPED) {
+			if (!device->serialDev()) return false;
 			char inchar;
-			qint64 bytes_read = file->readSerial(&inchar,1);
+			qint64 bytes_read = device->serialDev()->readSerial(&inchar,1);
 			if (bytes_read < 1) {
 				msleep(5);
 				continue;
@@ -378,7 +376,7 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 			dmxstat.type = DmxAnswer::NONE;
 			dmxstat.dmxDataSize = 0;
 		}
-	} while (ok && wait_for_type != DmxAnswer::NONE && wait_for_type != dmxstat.type);
+	} while (ok && wait_for_type != DmxAnswer::NONE && wait_for_type != dmxstat.type && cmd != STOPPED);
 
 	return ok;
 }

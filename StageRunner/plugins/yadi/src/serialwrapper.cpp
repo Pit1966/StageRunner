@@ -99,11 +99,11 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 	serial_fd = open(device_node.toLocal8Bit().data(), O_RDWR | O_NONBLOCK);
 	if (serial_fd > 0) {
 		ok = true;
-		qDebug() << device_node << "opened.";
+		qDebug("Yadi: %s opened",deviceNode().toLocal8Bit().data());
 	} else {
 		ok = false;
-		qDebug() << "Device open failed for" << device_node
-					<< strerror(errno);
+		qDebug("Yadi: Device open failed for %s (%s)"
+			   ,deviceNode().toLocal8Bit().data(),strerror(errno));
 	}
 
 #endif
@@ -114,6 +114,7 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 
 void SerialWrapper::closeSerial()
 {
+	qDebug("Yadi: close serial interface");
 #if defined(WIN32)
 	if (serial_handle) {
 		CloseHandle(serial_handle);
