@@ -21,8 +21,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 			FxAudioItem *new_fxaudio = new FxAudioItem(*fxaudio);
 			new_fxaudio->refCount.ref();
 			newFx = new_fxaudio;
-
-			new_fxaudio->setName(fxaudio->name() + "_cp");
+			setClonedFxName(fxaudio,new_fxaudio);
+			// new_fxaudio->setName(fxaudio->name() + "_cp");
 			new_fxaudio->setKeyCode(0);
 		}
 		break;
@@ -33,7 +33,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 			new_scene->refCount.ref();
 			newFx = new_scene;
 
-			new_scene->setName(scene->name() + "_cp");
+			setClonedFxName(scene,new_scene);
+			// new_scene->setName(scene->name() + "_cp");
 			new_scene->setKeyCode(0);
 		}
 		break;
@@ -46,4 +47,17 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 	}
 
 	return newFx;
+}
+
+void FxItemTool::setClonedFxName(FxItem *srcItem, FxItem *destItem, FxList *fxList)
+{
+	int pos = srcItem->name().indexOf("_cp");
+	if (pos > 0) {
+		int num = srcItem->name().mid(pos + 3).toInt();
+		QString destname = srcItem->name().left(pos) + "_cp" + QString::number(num+1);
+		destItem->setName(destname);
+	}
+	else {
+		destItem->setName(srcItem->name() + "_cp");
+	}
 }

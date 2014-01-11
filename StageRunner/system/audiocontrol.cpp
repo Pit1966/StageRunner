@@ -103,10 +103,7 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
-			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
-			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START,exec);
-			emit audioThreadCtrlMsgEmitted(msg);
-			ok = true;
+			ok = startFxAudioInSlot(fxa, t, exec, 0);
 			break;
 		}
 	}
@@ -119,17 +116,31 @@ bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs)
 	bool ok = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
-			if (atMs >= 0) {
-				fxa->setSeekPosition(atMs);
-			}
-			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
-			AudioCtrlMsg msg(fxa,t, CMD_AUDIO_START_AT,exec);
-			emit audioThreadCtrlMsgEmitted(msg);
-			ok = true;
+			ok = startFxAudioInSlot(fxa, t, exec, atMs);
 			break;
 		}
 	}
 	return ok;
+}
+
+bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs)
+{
+	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
+
+		if (atMs >= 0) {
+			fxa->setSeekPosition(atMs);
+		}
+		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
+		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START_AT,exec);
+		emit audioThreadCtrlMsgEmitted(msg);
+
+		return true;
+	} else {
+		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_STATUS_CHANGED, exec);
+		msg.currentAudioStatus = AUDIO_NO_FREE_SLOT;
+		emit audioCtrlMsgEmitted(msg);
+		return false;
+	}
 }
 
 bool AudioControl::restartFxAudioInSlot(int slotnum)

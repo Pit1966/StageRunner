@@ -38,6 +38,7 @@ public:
 	void setSubText(const QString &text);
 	Ps::Button execMessage(const QString &mainText, const QString &subText);
 	void showMessage(const QString &mainText, const QString &subText);
+	void showInformation(const QString &mainText, const QString &subText);
 	void connectSpecialFunction(QObject *target, const QString &func);
 
 

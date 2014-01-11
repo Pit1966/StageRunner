@@ -312,7 +312,11 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 	case FX_AUDIO:
 		switch (cmd) {
 		case CMD_AUDIO_START:
-			unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx), exec);
+			if (!exec && fx->preDelay() > 0) {
+				unitAudio->startFxAudioAt(reinterpret_cast<FxAudioItem*>(fx), exec, fx->preDelay());
+			} else {
+				unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx), exec);
+			}
 			break;
 		case CMD_AUDIO_START_AT:
 			unitAudio->startFxAudioAt(reinterpret_cast<FxAudioItem*>(fx), exec);
@@ -387,6 +391,9 @@ void AppCentral::executeNextFx(int listID)
 	}
 	if (next_fx) {
 		executeFxCmd(next_fx,CMD_FX_START,0);
+		if (next_fx->preDelay() == -1) {
+			QTimer::singleShot(next_fx->postDelay(),this,SLOT(executeNextFx()));
+		}
 	}
 }
 

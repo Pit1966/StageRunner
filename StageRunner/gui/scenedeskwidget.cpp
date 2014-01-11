@@ -117,7 +117,6 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	QRect rect = QtStaticTools::stringToQRect(origin_fxscene->widgetPosition());
 	if (!rect.isNull()) {
 		setGeometry(rect);
-		move(rect.bottomLeft());
 	}
 
 

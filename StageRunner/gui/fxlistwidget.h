@@ -55,6 +55,7 @@ public:
 	FxListWidgetItem * getFxListWidgetItemFor(FxItem *fx);
 	void setStandAlone(bool state);
 	inline bool isStandAlone() const {return is_standalone_f;}
+	bool isFxItemPossibleHere(FxItem *fx);
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
@@ -97,15 +98,14 @@ private slots:
 	void on_fxTable_itemChanged(QTableWidgetItem *item);
 	void if_fxitemwidget_clicked(FxListWidgetItem *listitem);
 	void if_fxitemwidget_doubleclicked(FxListWidgetItem *listitem);
+	void if_fxitemwidget_tab_pressed(FxListWidgetItem *listitem);
+	void if_fxitemwidget_enter_pressed(FxListWidgetItem *listitem);
 	void if_fxitemwidget_edited(FxListWidgetItem *listitem, const QString &text);
 	void if_fxitemwidget_seeked(FxListWidgetItem *listitem, int perMille);
 
 	void drop_event_receiver(QString str, int row);
-
 	void on_randomCheckBox_clicked(bool checked);
-
 	void on_closeButton_clicked();
-
 	void on_editButton_clicked(bool checked);
 
 signals:

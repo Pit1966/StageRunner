@@ -4,6 +4,7 @@
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
 #include "log.h"
+#include "fxitemtool.h"
 
 #include <QMutableListIterator>
 #include <QDateTime>
@@ -30,6 +31,7 @@ FxList::FxList(FxItem *parentFx) :
 	showColumnHoldFlag = false;
 	showColumnPredelayFlag = false;
 	showColumnPostdelayFlag = false;
+	showColumnKeyFlag = false;
 }
 
 FxList::~FxList()
@@ -379,6 +381,7 @@ void FxList::cloneSelectedSceneItem()
 		new_scene->refCount.ref();
 		fx_list.append(new_scene);
 		modified_f = true;
+		FxItemTool::setClonedFxName(scene,new_scene,this);
 	}
 }
 

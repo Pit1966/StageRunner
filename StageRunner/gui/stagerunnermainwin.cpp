@@ -129,6 +129,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	fxItemEditor = new FxItemPropertyWidget();
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxItemEditor,SLOT(setEditable(bool)));
 	fxItemEditor->setEditable(false);
+	fxItemEditor->closeButton->hide();
 
 	fxitem_editor_dock->setObjectName("Fx Editor");
 	fxitem_editor_dock->setWindowTitle("Fx Editor");
@@ -250,7 +251,7 @@ void StageRunnerMainWin::initAppDefaults()
 			setProjectName(propath);
 		} else {
 			QMessageBox::critical(this,tr("Load error")
-								  ,tr("An error occured while loading file:\n\n%1\n%2:%3")
+								  ,tr("An error occured while loading file:\n\n%1\nLine %2:'%3'")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
 			setProjectName("");
@@ -319,6 +320,7 @@ void StageRunnerMainWin::openFxPlayListItemPanel(FxPlayListItem *fx)
 			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
 			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
 			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
+			connect(playlistwid,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 
 		}
 		// This connect is for starting / forwarding the playback by double click on a FxAudio in the PlayList
@@ -350,6 +352,7 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 
 	// Let us look if an executer is running on this FxSequenceItem
 	if (new_created) {
+		connect(sequencewid,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {
 			sequencewid->markFx(exe->currentFx());

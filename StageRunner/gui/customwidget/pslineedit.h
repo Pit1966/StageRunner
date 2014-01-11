@@ -56,6 +56,8 @@ private:
 signals:
 	void clicked();
 	void doubleClicked();
+	void tabPressed();
+	void enterPressed();
 
 public slots:
 

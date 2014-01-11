@@ -56,6 +56,12 @@ void MessageDialog::showMessage(const QString &mainText, const QString &subText)
 	show();
 }
 
+void MessageDialog::showInformation(const QString &mainText, const QString &subText)
+{
+	cancelButton->hide();
+	showMessage(mainText, subText);
+}
+
 void MessageDialog::connectSpecialFunction(QObject *target, const QString &func)
 {
 	specialFunctionObj = target;

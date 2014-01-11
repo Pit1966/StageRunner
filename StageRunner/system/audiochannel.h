@@ -84,6 +84,7 @@ private slots:
 	void on_audio_io_read_ready();
 	// qmediaplayer audio slots
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
+	void on_media_playstate_changed(QMediaPlayer::State state);
 
 
 	void on_vulevel_changed(int left, int right);

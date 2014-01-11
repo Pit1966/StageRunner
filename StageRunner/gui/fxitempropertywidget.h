@@ -33,8 +33,11 @@ private slots:
 	void on_keyEdit_textEdited(const QString &arg1);
 	void on_faderCountEdit_textEdited(const QString &arg1);
 	void on_audioFilePathEdit_doubleClicked();
+	void on_preDelayEdit_textEdited(const QString &arg1);
 	void on_fadeInTimeEdit_textEdited(const QString &arg1);
+	void on_holdTimeEdit_textEdited(const QString &arg1);
 	void on_fadeOutTimeEdit_textEdited(const QString &arg1);
+	void on_postDelayEdit_textEdited(const QString &arg1);
 	void on_keyClearButton_clicked();
 	void on_editOnceButton_clicked();
 

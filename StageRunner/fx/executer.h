@@ -41,7 +41,7 @@ protected:
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
 	bool isWaitingForAudio;
-	STATE myState;
+	volatile STATE myState;
 
 private:
 	int use_cnt;								///< if this usage counter is > 0 the object should not been deleted

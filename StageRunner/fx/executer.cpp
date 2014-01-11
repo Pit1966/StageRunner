@@ -8,6 +8,7 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "usersettings.h"
 
 using namespace LIGHT;
 
@@ -179,7 +180,7 @@ bool FxListExecuter::processExecuter()
 	}
 
 	// Execute cues until cue time is not NULL or we have reached fxList end
-	while (fx && cue_time == 0) {
+	while (fx && cue_time == 0 && myState == EXEC_RUNNING) {
 		// Execute next CUE command in FxScene and give me the estimated execution time in ms
 		cue_time = cue_fx(fx);
 		// if time < 0: fx is completely processed. Move to next
@@ -239,6 +240,13 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 				move_to_next_fx();
 				isWaitingForAudio = false;
 				eventTargetTimeMs = runTime.elapsed();
+			}
+			else if (msg.currentAudioStatus == AUDIO_NO_FREE_SLOT) {
+				DEBUGERROR("No free audio slot found in sequence executer '%s' for audio '%s'"
+						   ,originFx()->name().toLocal8Bit().data()
+						   ,msg.fxAudio->name().toLocal8Bit().data());
+				setNextFx(0);
+				destroyLater();
 			}
 		}
 	}
@@ -315,7 +323,7 @@ FxItem *FxListExecuter::move_to_next_fx()
 /**
  * @brief Execute next CUE command in Fx sequence
  * @param fx Pointer to the FxItem that will be executed
- * @return cue time in ms (time the execution of the command lasts) or -1, if Fx is at the end of the
+ * @return cue time in ms (time the execution of the command lasts) or -1, if Fx is not valid or Fx processing has finished
  */
 qint64 FxListExecuter::cue_fx(FxItem *fx)
 {
@@ -331,7 +339,9 @@ qint64 FxListExecuter::cue_fx(FxItem *fx)
 		cue_time = cue_fx_audio(reinterpret_cast<FxAudioItem*>(fx));
 		break;
 	default:
-		return 0;
+		DEBUGERROR("Executing '%s' is not supported by Sequences and Playlists"
+				   ,fx->name().toLocal8Bit().data());
+		return -1;
 	}
 
 	emit changed(this);
@@ -419,8 +429,11 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 			isWaitingForAudio = true;
 			cue_time = 1000000;
 		}
-		// myApp.unitAudio->startFxAudio(audio,this);
-		myApp.unitAudio->startFxAudioAt(audio,this);
+		if (originFx()->fxType() == FX_AUDIO_PLAYLIST) {
+			myApp.unitAudio->startFxAudioInSlot(audio,myApp.userSettings->pAudioPlayListChannel,this);
+		} else {
+			myApp.unitAudio->startFxAudioAt(audio,this);
+		}
 		audio->setSeqStatus(AUDIO_PLAYTIME);
 		break;
 	case AUDIO_PLAYTIME:

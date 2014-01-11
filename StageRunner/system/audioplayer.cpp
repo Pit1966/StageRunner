@@ -22,8 +22,10 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 
 bool AudioPlayer::setSourceFilename(const QString &path)
 {
-	QMediaPlayer::setMedia(QUrl::fromLocalFile(path));
-	mediaPath = path;
+	if (path != mediaPath) {
+		QMediaPlayer::setMedia(QUrl::fromLocalFile(path));
+		mediaPath = path;
+	}
 	return true;
 }
 
@@ -46,7 +48,8 @@ void AudioPlayer::start(int loops)
 void AudioPlayer::stop()
 {
 	loopCnt = loopTarget;
-	QMediaPlayer::stop();
+	QMediaPlayer::pause();
+	// QMediaPlayer::stop();
 }
 
 qint64 AudioPlayer::currentPlayPosUs() const
@@ -57,6 +60,21 @@ qint64 AudioPlayer::currentPlayPosUs() const
 qint64 AudioPlayer::currentPlayPosMs() const
 {
 	return position();
+}
+
+bool AudioPlayer::seekPlayPosMs(qint64 posMs)
+{
+	bool seekok = true;
+
+	if (posMs > duration()) {
+		seekok = false;
+	}
+	if (posMs < 0) {
+		seekok = false;
+		posMs = 0;
+	}
+
+	setPosition(posMs);
 }
 
 void AudioPlayer::setVolume(int vol)
@@ -98,8 +116,6 @@ void AudioPlayer::on_play_state_changed(QMediaPlayer::State state)
 				if (loopCnt < loopTarget) {
 					loopCnt++;
 					QMediaPlayer::play();
-				} else {
-					setSourceFilename("");
 				}
 			}
 		}

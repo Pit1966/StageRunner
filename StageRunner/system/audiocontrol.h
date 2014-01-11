@@ -53,6 +53,7 @@ private slots:
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
 	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1);
+	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	bool stopAllFxAudio();
 	void stopFxAudio(int slot);

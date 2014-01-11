@@ -109,6 +109,9 @@ void PsLineEdit::mousePressEvent(QMouseEvent *event)
 
 void PsLineEdit::mouseDoubleClickEvent(QMouseEvent *event)
 {
+	if (prop_editable)
+		QLineEdit::selectAll();
+
 	emit doubleClicked();
 	if (prop_events_shared)
 		event->ignore();
@@ -126,6 +129,12 @@ void PsLineEdit::keyPressEvent(QKeyEvent *event)
 	switch(key) {
 	case Qt::Key_Control:
 		current_modifier |= Qt::CTRL;
+		break;
+	case Qt::Key_Tab:
+		emit tabPressed();
+		break;
+	case Qt::Key_Return:
+		emit enterPressed();
 		break;
 	case Qt::Key_Space:
 	default:

@@ -54,6 +54,19 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 	// Create an executor for the sequence
 	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxseq->seqList,fxseq);
 
+	// Determine what the FxListWidget is where the Sequence comes from
+	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxseq);
+	if (parentwid) {
+
+	}
+
+	// Determine the FxListWidget that shows the current sequence (if opened)
+	FxListWidget *seqwid = FxListWidget::findFxListWidget(fxseq->seqList);
+	if (seqwid) {
+		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
+		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
+	}
+
 
 	// Give control for executer to FxControl loop
 	fxexec->activateProcessing();

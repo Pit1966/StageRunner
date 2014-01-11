@@ -56,5 +56,9 @@
         <file>gfx/icons/playlist.png</file>
         <file>gfx/icons/sequence.png</file>
         <file>gfx/icons/audio_repeat_22.png</file>
+        <file>gfx/icons/green_down_22.png</file>
+        <file>gfx/icons/green_left_22.png</file>
+        <file>gfx/icons/green_right_22.png</file>
+        <file>gfx/icons/green_up_22.png</file>
     </qresource>
 </RCC>

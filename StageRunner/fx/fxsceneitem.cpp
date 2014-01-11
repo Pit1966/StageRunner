@@ -37,7 +37,7 @@ void FxSceneItem::init()
 	sceneMaster = new DmxChannel;
 	sceneMaster->targetValue = 1000;
 
-	addExistingVar(widgetPos,"seqWidgetPos");
+	addExistingVar(widgetPos,"WidgetPos");
 	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
 

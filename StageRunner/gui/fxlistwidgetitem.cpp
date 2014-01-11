@@ -53,13 +53,13 @@ void FxListWidgetItem::setText(const QString &txt)
 
 QSize FxListWidgetItem::sizeHint()
 {
-	qDebug("sizeHint");
+	// qDebug("sizeHint");
 	return QSize(20,20);
 }
 
 QSize FxListWidgetItem::minimumSizeHint()
 {
-	qDebug("minimumSizeHint");
+	// qDebug("minimumSizeHint");
 	return QSize();
 }
 
@@ -76,6 +76,7 @@ void FxListWidgetItem::init()
 
 	setupUi(this);
 	itemLabel->clear();
+	itemExtra->clear();
 	itemEdit->setText(itemText);
 	itemEdit->setReadOnly(true);
 	itemEdit->setEventsShared(true);
@@ -83,6 +84,8 @@ void FxListWidgetItem::init()
 	connect(itemEdit,SIGNAL(clicked()),this,SLOT(if_edit_item_clicked()));
 	connect(itemEdit,SIGNAL(doubleClicked()),this,SLOT(if_edit_item_doubleclicked()));
 	connect(itemEdit,SIGNAL(textEdited(QString)),this,SLOT(if_edit_item_edited(QString)));
+	connect(itemEdit,SIGNAL(tabPressed()),this,SLOT(if_edit_item_tab_pressed()));
+	connect(itemEdit,SIGNAL(enterPressed()),this,SLOT(if_edit_item_enter_pressed()));
 	connect(itemLabel,SIGNAL(doubleClicked()),this,SLOT(if_label_item_doubleclicked()));
 
 	org_palette = palette();
@@ -92,10 +95,13 @@ void FxListWidgetItem::init()
 	setAutoFillBackground(false);
 	itemEdit->setAutoFillBackground(false);
 	itemLabel->setAutoFillBackground(false);
+	itemExtra->setAutoFillBackground(false);
 
 	itemEdit->setContextMenuPolicy(Qt::NoContextMenu);
 	itemLabel->setContextMenuPolicy(Qt::NoContextMenu);
+	itemExtra->setContextMenuPolicy(Qt::NoContextMenu);
 
+	itemExtra->hide();
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
@@ -255,6 +261,16 @@ void FxListWidgetItem::if_edit_item_doubleclicked()
 void FxListWidgetItem::if_edit_item_edited(const QString &text)
 {
 	emit itemTextEdited(this, text);
+}
+
+void FxListWidgetItem::if_edit_item_tab_pressed()
+{
+	emit tabPressedInEdit(this);
+}
+
+void FxListWidgetItem::if_edit_item_enter_pressed()
+{
+	emit enterPressedInEdit(this);
 }
 
 void FxListWidgetItem::if_label_item_doubleclicked()

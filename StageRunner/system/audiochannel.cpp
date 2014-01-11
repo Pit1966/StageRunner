@@ -60,7 +60,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	// QMediaPlayer (experimental audio) connects
 	connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
 	connect(audio_player,SIGNAL(durationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
-
+	connect(audio_player,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_media_playstate_changed(QMediaPlayer::State)));
 }
 
 AudioSlot::~AudioSlot()
@@ -140,16 +140,24 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	if (startPosMs < 0) {
+		// We get the start play position in ms from the last played seek position in the FxAudio instance
 		if (is_experimental_audio_f) {
-			if (fxa->seekPosition() > 0)
+			if (fxa->seekPosition() == 0) {
+				audio_player->setPosition(0);
+			}
+			else if (fxa->seekPosition() > 0) {
 				audio_player->setPosition(fxa->seekPosition());
+			}
 		} else {
 			audio_io->seekPlayPosMs(fxa->seekPosition());
 		}
 		fxa->setSeekPosition(0);
 	} else {
 		if (is_experimental_audio_f) {
-			if (startPosMs > 0)
+			if (startPosMs == 0) {
+				audio_player->setPosition(0);
+			}
+			else if (startPosMs > 0)
 				audio_player->setPosition(startPosMs);
 		} else {
 			audio_io->seekPlayPosMs(startPosMs);
@@ -234,6 +242,10 @@ bool AudioSlot::stopFxAudio()
 
 bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 {
+	if (time_ms <= 0) {
+		qDebug("Fade out time = %d",time_ms);
+		return false;
+	}
 	// Fadeout only possible if audio is running
 	if (is_experimental_audio_f) {
 		if (audio_player->state() != QMediaPlayer::PlayingState) return false;
@@ -260,6 +272,10 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 
 bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 {
+	if (time_ms <= 0) {
+		qDebug("Fade in time = %d",time_ms);
+		return false;
+	}
 	// Fadeout only possible if audio is running
 	// if (audio_output->state() != QAudio::ActiveState) return false;
 
@@ -276,6 +292,8 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 	fade_timeline.start();
 	LOGTEXT(tr("Fade in for slot %1: '%2' started with duration %3ms")
 			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
+
+
 
 	return true;
 }
@@ -360,13 +378,17 @@ void AudioSlot::emit_audio_play_progress()
 
 	int loop;
 	int per_mille;
+	qint64 time_ms;
 
 	if (is_experimental_audio_f) {
 		loop = audio_player->currentLoop();
-		per_mille = audio_player->currentPlayPosUs() / soundlen;
+		time_ms = audio_player->currentPlayPosMs();
+		per_mille = time_ms * 1000 / soundlen;
+
 	} else {
 		loop = audio_io->currentLoop();
-		per_mille = audio_io->currentPlayPosUs() / soundlen;
+		time_ms = audio_io->currentPlayPosMs();
+		per_mille = time_ms * 1000 / soundlen;
 	}
 
 	emit audioProgressChanged(slotNumber, current_fx, per_mille);
@@ -374,6 +396,7 @@ void AudioSlot::emit_audio_play_progress()
 	AudioCtrlMsg msg(current_fx,slotNumber);
 	msg.currentAudioStatus = run_status;
 	msg.progress = per_mille;
+	msg.progressTime = time_ms;
 	msg.loop = loop;
 	msg.executer = current_executer;
 	if (current_fx->loopTimes > 1) {
@@ -474,10 +497,50 @@ void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
 	}
 }
 
+void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
+{
+	AudioStatus cur_status = run_status;
+
+	if (state == QMediaPlayer::PausedState) {
+		run_status = AUDIO_IDLE;
+	}
+	else if (state == QMediaPlayer::PlayingState) {
+		run_status = AUDIO_RUNNING;
+	}
+	else if (state == QMediaPlayer::StoppedState) {
+		// run_status = AUDIO_IDLE;
+	}
+
+	if (cur_status != run_status) {
+		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
+		msg.fxAudio = current_fx;
+
+		if (run_status == AUDIO_IDLE) {
+			emit vuLevelChanged(slotNumber,0,0);
+			emit audioProgressChanged(slotNumber,current_fx,0);
+			msg.progress = 0;
+		}
+		emit audioCtrlMsgEmitted(msg);
+
+	}
+}
+
 void AudioSlot::on_vulevel_changed(int left, int right)
 {
 	emit vuLevelChanged(slotNumber, left, right);
 	emit_audio_play_progress();
+
+	// Proof if audio must be faded out or ended
+	if (current_fx && current_fx->holdTime() > 0) {
+		if (run_time.elapsed() >= current_fx->fadeInTime() + current_fx->holdTime()) {
+			if (current_fx->fadeOutTime()) {
+				if (fade_timeline.state() != QTimeLine::Running)
+					fadeoutFxAudio(0,current_fx->fadeOutTime());
+			} else {
+				stopFxAudio();
+			}
+		}
+	}
 }
 
 void AudioSlot::on_fade_frame_changed(qreal value)
@@ -580,7 +643,11 @@ bool AudioSlot::seekPosMs(qint64 ms)
 {
 	bool seek = false;
 	if (current_fx && run_status == AUDIO_RUNNING) {
-		seek = audio_io->seekPlayPosMs(ms);
+		if (is_experimental_audio_f) {
+			seek = audio_player->seekPlayPosMs(ms);
+		} else {
+			seek = audio_io->seekPlayPosMs(ms);
+		}
 		volset_text = tr("Audio: '%1' seek to %2ms").arg(current_fx->name()).arg(ms);
 		if (!volset_timer.isActive())
 			volset_timer.start();
@@ -593,7 +660,11 @@ bool AudioSlot::seekPosPerMille(int perMille)
 	bool seek = false;
 	if (current_fx && run_status == AUDIO_RUNNING) {
 		qint64 seekpos = current_fx->audioDuration * perMille / 1000;
-		seek = audio_io->seekPlayPosMs(seekpos);
+		if (is_experimental_audio_f) {
+			seek = audio_player->seekPlayPosMs(seekpos);
+		} else {
+			seek = audio_io->seekPlayPosMs(seekpos);
+		}
 		volset_text = tr("Audio: '%1' seek to %2ms (%3pMille)")
 				.arg(current_fx->name()).arg(seekpos).arg(perMille);
 		if (!volset_timer.isActive())
@@ -605,6 +676,6 @@ bool AudioSlot::seekPosPerMille(int perMille)
 void AudioSlot::storeCurrentSeekPos()
 {
 	if (run_status == AUDIO_RUNNING && FxItem::exists(current_fx)) {
-		current_fx->setSeekPosition(audio_io->currentPlayPosMs());
+		current_fx->setSeekPosition(is_experimental_audio_f?audio_player->currentPlayPosMs():audio_io->currentPlayPosMs());
 	}
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>204</width>
-    <height>791</height>
+    <height>530</height>
    </rect>
   </property>
   <property name="font">
@@ -39,6 +39,22 @@
       <property name="margin">
        <number>2</number>
       </property>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="keyClearButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="PsLineEdit" name="nameEdit"/>
+      </item>
       <item row="2" column="1">
        <widget class="PsLineEdit" name="keyEdit">
         <property name="minimumSize">
@@ -62,27 +78,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="nameLabel">
-        <property name="text">
-         <string>Name:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="keyLabel">
-        <property name="text">
-         <string>Key:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="idLabel">
-        <property name="text">
-         <string>Id:</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1">
        <widget class="PsLineEdit" name="idEdit">
         <property name="minimumSize">
@@ -102,21 +97,106 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="keyClearButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="2" column="0">
+       <widget class="QLabel" name="keyLabel">
         <property name="text">
-         <string>Clear</string>
+         <string>Key:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="PsLineEdit" name="nameEdit"/>
+      <item row="3" column="0">
+       <widget class="QLabel" name="idLabel">
+        <property name="text">
+         <string>Id:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="nameLabel">
+        <property name="text">
+         <string>Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="3">
+       <layout class="QGridLayout" name="fadeTimeLayout">
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <item row="4" column="0">
+         <widget class="QLabel" name="postDelayLabel">
+          <property name="text">
+           <string>Post Delay</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="PsLineEdit" name="fadeOutTimeEdit">
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="PsLineEdit" name="preDelayEdit">
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="preDelayLabel">
+          <property name="text">
+           <string>Pre Delay</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="fadeInTimeLabel">
+          <property name="text">
+           <string>Fade In Time:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="PsLineEdit" name="fadeInTimeEdit">
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="fadeOutTimeLabel">
+          <property name="text">
+           <string>Fade Out Time:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="holdTimeLabel">
+          <property name="text">
+           <string>Hold Time</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="PsLineEdit" name="holdTimeEdit">
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="PsLineEdit" name="postDelayEdit">
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -196,12 +276,12 @@ Volume</string>
       <string>Scene</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <property name="verticalSpacing">
+       <number>0</number>
+      </property>
       <property name="margin">
        <number>2</number>
       </property>
-      <item row="1" column="1">
-       <widget class="PsLineEdit" name="fadeInTimeEdit"/>
-      </item>
       <item row="0" column="1">
        <widget class="PsLineEdit" name="faderCountEdit">
         <property name="frame">
@@ -217,23 +297,6 @@ count</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="PsLineEdit" name="fadeOutTimeEdit"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="fadeInTimeLabel">
-        <property name="text">
-         <string>Fade In Time:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="fadeOutTimeLabel">
-        <property name="text">
-         <string>Fade Out Time:</string>
         </property>
        </widget>
       </item>
@@ -271,14 +334,14 @@ count</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PsLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>customwidget/pslineedit.h</header>
-  </customwidget>
-  <customwidget>
    <class>qsynthKnob</class>
    <extends>QDial</extends>
    <header>thirdparty/widget/qsynthknob.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PsLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>customwidget/pslineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

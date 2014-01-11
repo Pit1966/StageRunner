@@ -11,17 +11,19 @@ enum CtrlCmd {
 	CMD_AUDIO_START = 2,
 	CMD_AUDIO_START_AT = 3,
 	CMD_AUDIO_STOP = 4,
-	CMD_AUDIO_FADEIN = 5,
-	CMD_AUDIO_FADEOUT = 6,
-	CMD_AUDIO_CHANGE_VOL = 7,
-	CMD_SCENE_BLACK = 8,
-	CMD_SCENE_FADEIN = 9,
-	CMD_SCENE_FADEOUT = 10,
-	CMD_SCENE_FADETO = 11,
+	CMD_AUDIO_PAUSE = 5,
+	CMD_AUDIO_FADEIN = 6,
+	CMD_AUDIO_FADEOUT = 7,
+	CMD_AUDIO_CHANGE_VOL = 8,
+	CMD_SCENE_BLACK = 9,
+	CMD_SCENE_FADEIN = 10,
+	CMD_SCENE_FADEOUT = 11,
+	CMD_SCENE_FADETO = 12,
 
 
 	CMD_STATUS_REPORT = CMD_NONE,
 	CMD_FX_START = CMD_AUDIO_START,
+	CMD_FX_START_AT = CMD_AUDIO_START_AT,
 	CMD_FX_STOP = CMD_AUDIO_STOP,
 	CMD_SCENE_START = CMD_AUDIO_START,
 	CMD_SCENE_STOP = CMD_AUDIO_STOP
@@ -35,7 +37,8 @@ enum AudioStatus {
 	AUDIO_IDLE,
 	AUDIO_ERROR,
 	AUDIO_INIT,
-	AUDIO_RUNNING
+	AUDIO_RUNNING,
+	AUDIO_NO_FREE_SLOT
 };
 
 enum AudioSeqState {
@@ -66,6 +69,7 @@ public:
 	int volume;
 	int fadetime;
 	int progress;
+	int progressTime;
 	int loop;
 	int maxloop;
 	FxAudioItem *fxAudio;
@@ -79,6 +83,7 @@ public:
 		, volume(-1)
 		, fadetime(-1)
 		, progress(-1)
+		, progressTime(0)
 		, loop(0)
 		, maxloop(0)
 		, fxAudio(0)

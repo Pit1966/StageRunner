@@ -28,6 +28,7 @@ public:
 	inline int currentLoop() const {return loopCnt;}
 	qint64 currentPlayPosUs() const;
 	qint64 currentPlayPosMs() const;
+	bool seekPlayPosMs(qint64 posMs);
 	void setVolume(int vol);
 
 

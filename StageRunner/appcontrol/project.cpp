@@ -32,6 +32,7 @@ void Project::clear()
 	pProjectFormat = 0;
 
 	if (fxList->size()) fxList->clear();
+	fxList->showColumnKeyFlag = true;
 }
 
 bool Project::saveToFile(const QString &path)

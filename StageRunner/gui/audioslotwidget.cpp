@@ -10,6 +10,7 @@ AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
 	slotNumber = -1;
+	isAbsoluteTime = false;
 
 	setupUi(this);
 	init_gui();
@@ -65,6 +66,21 @@ void AudioSlotWidget::on_slotStopButton_clicked()
 
 }
 
+void AudioSlotWidget::on_slotAbsButton_clicked(bool checked)
+{
+	isAbsoluteTime = checked;
+
+}
+
+void AudioSlotWidget::on_slotPauseButton_clicked()
+{
+	AudioCtrlMsg msg;
+
+	msg.ctrlCmd = CMD_AUDIO_PAUSE;
+	msg.slotNumber = slotNumber;
+	emit audioCtrlCmdEmitted(msg);
+}
+
 void AudioSlotWidget::on_slotVolumeDial_sliderMoved(int position)
 {
 	AudioCtrlMsg msg;
@@ -100,11 +116,13 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
+		case AUDIO_NO_FREE_SLOT:
+			break;
 		case AUDIO_IDLE:
 		case AUDIO_ERROR:
 			setPlayState(false);
 			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
-				setTitle(msg.fxAudio->name().left(5) + "...");
+				setTitle(msg.fxAudio->name().left(7) + "...");
 			}
 			break;
 		default:
@@ -115,13 +133,24 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 				slotStopButton->setToolTip(msg.fxAudio->name());
 			}
 			if (msg.progress >= 0) {
-				QString time = QString("%1.%2\%")
-						.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
-						.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
-				if (msg.maxloop > 0) {
-					time += QString(" L%1/%2").arg(msg.loop+1).arg(msg.maxloop);
+				if (isAbsoluteTime) {
+					int min = msg.progressTime / 60000;
+					int sec = ( msg.progressTime - (min * 60000) ) / 1000;
+					int ms = (( msg.progressTime - (min * 60000)) % 1000) / 100;
+					QString time = QString("%1m%2.%3s")
+							.arg(min, 1, 10, QLatin1Char('0'))
+							.arg(sec, 2, 10, QLatin1Char('0'))
+							.arg(ms, 1, 10, QLatin1Char('0'));
+					setTitle(time);
+				} else {
+					QString time = QString("%1.%2\%")
+							.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
+							.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
+					if (msg.maxloop > 0) {
+						time += QString(" L%1/%2").arg(msg.loop+1).arg(msg.maxloop);
+					}
+					setTitle(time);
 				}
-				setTitle(time);
 			}
 			break;
 		}
@@ -141,3 +170,5 @@ void AudioSlotWidget::setVuLevel(int left, int right)
 		}
 	}
 }
+
+

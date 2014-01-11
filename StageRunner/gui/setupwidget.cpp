@@ -83,6 +83,8 @@ void SetupWidget::copy_settings_to_gui()
 			spin_chan->setValue(set->mapAudioToDmxChan[t]);
 		}
 	}
+
+	playlistChannelSpin->setValue(set->pAudioPlayListChannel+1);
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -107,6 +109,7 @@ void SetupWidget::copy_gui_to_settings()
 			set->mapAudioToDmxChan[t] = spin_chan->value();
 		}
 	}
+	set->pAudioPlayListChannel = playlistChannelSpin->value()-1;
 }
 
 void SetupWidget::on_okButton_clicked()

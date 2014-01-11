@@ -81,6 +81,8 @@ private slots:
 	void if_edit_item_clicked();
 	void if_edit_item_doubleclicked();
 	void if_edit_item_edited(const QString & text);
+	void if_edit_item_tab_pressed();
+	void if_edit_item_enter_pressed();
 	void if_label_item_doubleclicked();
 
 signals:
@@ -89,6 +91,8 @@ signals:
 	void itemTextEdited(FxListWidgetItem *, const QString &);
 	void draged(FxListWidgetItem * item);
 	void seekToPerMille(FxListWidgetItem * item, int perMille);
+	void tabPressedInEdit(FxListWidgetItem * item);
+	void enterPressedInEdit(FxListWidgetItem * item);
 };
 
 #endif // FXLISTWIDGETITEM_H
