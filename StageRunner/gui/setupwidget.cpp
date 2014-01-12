@@ -84,7 +84,7 @@ void SetupWidget::copy_settings_to_gui()
 		}
 	}
 
-	playlistChannelSpin->setValue(set->pAudioPlayListChannel+1);
+	playlistChannelSpin->setValue(qint32(set->pAudioPlayListChannel)+1);
 }
 
 void SetupWidget::copy_gui_to_settings()
