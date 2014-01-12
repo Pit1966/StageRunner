@@ -44,7 +44,7 @@ public:
 	FxListExecuter * findFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
 
-	SceneExecuter * newSceneExecuter(FxSceneItem *scene);
+	SceneExecuter * newSceneExecuter(FxSceneItem *scene, FxItem *parentFx);
 
 	void queueRemove(Executer *exec);
 

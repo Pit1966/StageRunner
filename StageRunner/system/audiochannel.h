@@ -59,7 +59,7 @@ public:
 	AudioSlot(AudioControl *parent, int pSlotNumber);
 	~AudioSlot();
 
-	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0);
+	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
@@ -68,10 +68,12 @@ public:
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
 	Executer * currentExecuter();
-	int currentRunTime();
+	int currentRunTime() const;
 	bool seekPosMs(qint64 ms);
 	bool seekPosPerMille(int perMille);
+	qint64 currentPlayPosMs() const;
 	void storeCurrentSeekPos();
+	inline bool isActive() const {return run_status == AUDIO_RUNNING || run_status == AUDIO_PAUSED;}
 
 	inline AudioStatus status() {return run_status;}
 

@@ -10,6 +10,7 @@ class FxListWidgetItem;
 class MixerChannel;
 class FxList;
 class PTableWidget;
+class QDrag;
 
 class ExtMimeData : public QMimeData
 {
@@ -20,6 +21,7 @@ public:
 	FxList *originFxList;
 	PTableWidget *originPTableWidget;
 	MixerChannel *mixerChannel;
+	QDrag *dragObject;
 	int tableRow;
 	int tableCol;
 

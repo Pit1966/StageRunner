@@ -43,6 +43,9 @@ public:
 	~AudioControl();
 
 	void getAudioDevices();
+	bool isFxAudioActive(FxAudioItem *fxa);
+	bool isFxAudioActive(int slotnum);
+	int getAudioSlot(FxAudioItem *fxa);
 
 private:
 	void run();
@@ -52,13 +55,14 @@ private slots:
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
-	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1);
-	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1);
+	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	bool stopAllFxAudio();
 	void stopFxAudio(int slot);
 	void stopFxAudio(FxAudioItem *fxa);
 	void storeCurrentSeekPositions();
+	void storeCurrentSeekPos(int slot);
 	bool fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
@@ -72,7 +76,10 @@ public slots:
 	void setVolume(int slot, int vol);
 	void setVolumeInFx(int slot, int vol);
 	int getVolume(int slot) const;
+	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);
+
+	bool handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value);
 
 private:
 	void init();

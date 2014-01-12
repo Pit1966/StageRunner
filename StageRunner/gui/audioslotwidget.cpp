@@ -133,17 +133,19 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 				slotStopButton->setToolTip(msg.fxAudio->name());
 			}
 			if (msg.progress >= 0) {
+				QString time;
+				int min = msg.progressTime / 60000;
+				int sec = ( msg.progressTime - (min * 60000) ) / 1000;
+				int ms = (( msg.progressTime - (min * 60000)) % 1000) / 100;
+				time = QString("%1m%2.%3s")
+						.arg(min, 1, 10, QLatin1Char('0'))
+						.arg(sec, 2, 10, QLatin1Char('0'))
+						.arg(ms, 1, 10, QLatin1Char('0'));
+				slotAbsButton->setToolTip(time);
 				if (isAbsoluteTime) {
-					int min = msg.progressTime / 60000;
-					int sec = ( msg.progressTime - (min * 60000) ) / 1000;
-					int ms = (( msg.progressTime - (min * 60000)) % 1000) / 100;
-					QString time = QString("%1m%2.%3s")
-							.arg(min, 1, 10, QLatin1Char('0'))
-							.arg(sec, 2, 10, QLatin1Char('0'))
-							.arg(ms, 1, 10, QLatin1Char('0'));
 					setTitle(time);
 				} else {
-					QString time = QString("%1.%2\%")
+					time = QString("%1.%2\%")
 							.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
 							.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
 					if (msg.maxloop > 0) {

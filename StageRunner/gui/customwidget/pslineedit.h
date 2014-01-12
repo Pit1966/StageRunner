@@ -51,6 +51,7 @@ private:
 	void mouseMoveEvent(QMouseEvent *event);
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
+	bool event(QEvent *event);
 
 
 signals:

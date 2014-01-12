@@ -15,12 +15,13 @@
 #include "fxitempropertywidget.h"
 #include "fxplaylistitem.h"
 #include "fxitemtool.h"
+#include "fxcontrol.h"
 #include "execcenter.h"
 #include "executer.h"
 #include "qtstatictools.h"
 #include "audiocontrol.h"
 #include "messagedialog.h"
-
+#include "lightcontrol.h"
 #include <QDebug>
 #include <QLineEdit>
 #include <QDrag>
@@ -40,10 +41,11 @@ FxListWidget::FxListWidget(QWidget *parent) :
 
 	fxTable->setDragEnabled(true);
 	fxTable->setSelectionMode(QAbstractItemView::SingleSelection);
-	fxTable->setDragDropMode(QAbstractItemView::InternalMove);
-	fxTable->setDropIndicatorShown(true);
+	fxTable->setDragDropMode(QAbstractItemView::DragDrop);
+	// fxTable->setDropIndicatorShown(true);
 	fxTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	fxTable->setSelectionMode(QAbstractItemView::NoSelection);
+
 
 	// fxTable->setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -412,6 +414,26 @@ bool FxListWidget::isFxItemPossibleHere(FxItem *fx)
 }
 
 
+void FxListWidget::generateDropAllowedFxTypeList(FxItem *fx)
+{
+	QList<int>list;
+
+	if (FxItem::exists(fx)) {
+		switch (fx->fxType()) {
+		case FX_SEQUENCE:
+			list.append(FX_SCENE);
+		case FX_AUDIO_PLAYLIST:
+			list.append(FX_AUDIO);
+			break;
+		default:
+			break;
+		}
+	}
+
+	fxTable->setDropAllowedIndices(list);
+}
+
+
 
 FxListWidget *FxListWidget::findFxListWidget(PTableWidget *tableWidget)
 {
@@ -506,9 +528,11 @@ bool FxListWidget::destroyFxListWidget(FxListWidget *wid)
 				wid->setAttribute(Qt::WA_DeleteOnClose);
 				wid->close();
 				globalFxListWidgetList.removeAt(t);
+				return true;
 			}
 		}
 	}
+	return false;
 }
 
 void FxListWidget::destroyAllFxListWidgets()
@@ -585,6 +609,7 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	mdata->setText(item->linkedFxItem->name());
 	mdata->tableRow = item->myRow;
 	mdata->tableCol = item->myColumn;
+	mdata->dragObject = drag;
 
 	QPixmap pixmap(size().width(), item->height());
 
@@ -620,7 +645,7 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	fxTable->setOldScrollPos();
 
 	Qt::DropAction dropaction = drag->exec();
-	qDebug("dropaction: %d",dropaction);
+	qDebug() << "Dropaction:" << dropaction;
 	if (dropaction != Qt::MoveAction) {
 		refreshList();
 	}
@@ -1119,7 +1144,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		}
 
 	} else {
-		FxType fxtype = FxType(item->linkedFxItem->fxType());
+		if (!FxItem::exists(item->linkedFxItem))
+			return;
+		FxItem *fx = item->linkedFxItem;
+		FxType fxtype = FxType(fx->fxType());
 
 		QMenu menu(this);
 		QAction *act;
@@ -1139,6 +1167,15 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		if (fxtype == FX_SCENE) {
 			act = menu.addAction(tr("Clone Fx Scene"));
 			act->setObjectName("6");
+		}
+		act = menu.addAction(tr("------------"));
+		if (fxtype == FX_SEQUENCE) {
+			if (AppCentral::instance()->execCenter->findExecuter(fx)) {
+				act = menu.addAction(tr("Stop Sequence"));
+				act->setObjectName("7");
+				act = menu.addAction(tr("Stop and BLACK Sequence"));
+				act->setObjectName("8");
+			}
 		}
 
 		act = menu.exec(event->globalPos());
@@ -1168,6 +1205,13 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		case 6:
 			fxList()->cloneSelectedSceneItem();
 			refreshList();
+			break;
+		case 7:
+			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
+			break;
+		case 8:
+			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
+			AppCentral::instance()->unitLight->blackFxItem(fx,200);
 			break;
 
 		default:
@@ -1201,8 +1245,18 @@ void FxListWidget::if_fxitemwidget_tab_pressed(FxListWidgetItem *listitem)
 {
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
-	qDebug("Tab pressed in fx: %s : coltype: %d"
-		   ,fx->name().toLocal8Bit().data(),listitem->columnType);
+
+	int newcol = listitem->myColumn+1;
+	int newrow = listitem->myRow;
+
+	if (listitem->columnType == FxListWidgetItem::CT_NAME)
+		newcol++;
+
+	FxListWidgetItem *nextitem = static_cast<FxListWidgetItem*>(fxTable->cellWidget(newrow,newcol));
+	if (nextitem) {
+		nextitem->itemEdit->selectAll();
+		nextitem->itemEdit->setFocus();
+	}
 
 }
 
@@ -1213,6 +1267,15 @@ void FxListWidget::if_fxitemwidget_enter_pressed(FxListWidgetItem *listitem)
 
 	qDebug("Enter pressed in fx: %s : coltype: %d"
 		   ,fx->name().toLocal8Bit().data(),listitem->columnType);
+
+	int newcol = listitem->myColumn;
+	int newrow = listitem->myRow+1;
+
+	FxListWidgetItem *nextitem = static_cast<FxListWidgetItem*>(fxTable->cellWidget(newrow,newcol));
+	if (nextitem) {
+		nextitem->itemEdit->selectAll();
+		nextitem->itemEdit->setFocus();
+	}
 
 }
 
@@ -1306,3 +1369,4 @@ void FxListWidget::on_editButton_clicked(bool checked)
 {
 	setEditable(checked);
 }
+

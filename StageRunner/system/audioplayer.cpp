@@ -31,6 +31,7 @@ bool AudioPlayer::setSourceFilename(const QString &path)
 
 void AudioPlayer::start(int loops)
 {
+	// qDebug("Buffer filled: %d",bufferStatus());
 	loopCnt = 1;
 	if (loops > 1) {
 		loopTarget = loops;
@@ -75,6 +76,7 @@ bool AudioPlayer::seekPlayPosMs(qint64 posMs)
 	}
 
 	setPosition(posMs);
+	return seekok;
 }
 
 void AudioPlayer::setVolume(int vol)

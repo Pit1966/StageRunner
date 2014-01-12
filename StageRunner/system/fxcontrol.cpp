@@ -57,7 +57,8 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 	// Determine what the FxListWidget is where the Sequence comes from
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxseq);
 	if (parentwid) {
-
+		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxseq);
+		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
 	}
 
 	// Determine the FxListWidget that shows the current sequence (if opened)
@@ -86,11 +87,7 @@ bool FxControl::stopFxSequence(FxSeqItem *fxseq)
 		if (exec->originFx() == fxseq && exec->type() == Executer::EXEC_FXLIST) {
 			if (exec->state() != Executer::EXEC_DELETED) {
 				found = true;
-				// Stop Sequence Current FxItem
-				FxItem *fx = reinterpret_cast<FxListExecuter*>(exec)->currentFx();
-				if (FxItem::exists(fx)) {
-					myApp.executeFxCmd(fx,CMD_FX_STOP,exec);
-				}
+				/// @todo: Search for child executers. Both. SceneExecuter and FxListExecuter
 				// Stop Sequence Executer
 				exec->setPaused(true);
 				exec->destroyLater();
@@ -282,7 +279,7 @@ FxListExecuter *FxControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAud
 	FxListWidget *wid = FxListWidget::findFxListWidget(fxlist);
 	if (wid) {
 		FxListWidgetItem *listitem = wid->getFxListWidgetItemFor(fxplay);
-		connect(exe,SIGNAL(playListProgressChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+		connect(exe,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
 	}
 
 	// Maybe there is a FxListWidget window opened. Than we can do some monitoring

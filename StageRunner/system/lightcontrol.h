@@ -13,6 +13,9 @@ class LightLoopThreadInterface;
 class FxList;
 class QLCIOPlugin;
 class FxSceneItem;
+class FxItem;
+class FxSceneItem;
+class FxSeqItem;
 
 
 class LightControl : public QObject
@@ -39,6 +42,9 @@ public:
 	bool setSceneActive(FxSceneItem *scene);
 	bool setSceneIdle(FxSceneItem * scene);
 	qint32 black(qint32 time_ms);
+	qint32 blackFxScene(FxSceneItem *scene, qint32 time_ms);
+	qint32 blackFxSequence(FxSeqItem *seq, qint32 time_ms);
+	qint32 blackFxItem(FxItem *fx, qint32 time_ms);
 
 private:
 	void init();

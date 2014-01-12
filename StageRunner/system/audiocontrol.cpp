@@ -61,6 +61,43 @@ void AudioControl::getAudioDevices()
 	}
 }
 
+/**
+ * @brief Check if FxAudioItem is active (means Playing or Paused)
+ * @param fxa Pointer to FxAudioItem instance
+ * @return true, if audio is in RUNNING state or PAUSED state
+ */
+bool AudioControl::isFxAudioActive(FxAudioItem *fxa)
+{
+	if (!fxa) return false;
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentFxAudio() == fxa)
+			return audioChannels[t]->isActive() || fxa->startInProgress;
+	}
+
+	return false;
+}
+
+bool AudioControl::isFxAudioActive(int slotnum)
+{
+	if (slotnum < 0 || slotnum >= audioChannels.size())
+		return false;
+
+	return audioChannels[slotnum]->isActive();
+}
+
+int AudioControl::getAudioSlot(FxAudioItem *fxa)
+{
+	if (!fxa) return false;
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (audioChannels[t]->currentFxAudio() == fxa) {
+			return t;
+		}
+	}
+	return -1;
+}
+
 void AudioControl::run()
 {
 	initFromThread();
@@ -111,27 +148,30 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 	return ok;
 }
 
-bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs)
+bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
 	bool ok = false;
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (audioChannels[t]->status() < AUDIO_INIT) {
-			ok = startFxAudioInSlot(fxa, t, exec, atMs);
+			ok = startFxAudioInSlot(fxa, t, exec, atMs, initVol);
 			break;
 		}
 	}
 	return ok;
 }
 
-bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs)
+bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
 {
 	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
 
 		if (atMs >= 0) {
 			fxa->setSeekPosition(atMs);
 		}
+		fxa->startInProgress = true;
+
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START_AT,exec);
+		msg.volume = initVol;
 		emit audioThreadCtrlMsgEmitted(msg);
 
 		return true;
@@ -150,6 +190,8 @@ bool AudioControl::restartFxAudioInSlot(int slotnum)
 	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		FxAudioItem *fxa = audioChannels[slotnum]->currentFxAudio();
+		fxa->startInProgress = true;
+
 		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START);
 		emit audioThreadCtrlMsgEmitted(msg);
 		return true;
@@ -193,6 +235,13 @@ void AudioControl::storeCurrentSeekPositions()
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		audioChannels[t]->storeCurrentSeekPos();
+	}
+}
+
+void AudioControl::storeCurrentSeekPos(int slot)
+{
+	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+		audioChannels[slot]->storeCurrentSeekPos();
 	}
 }
 
@@ -364,11 +413,11 @@ int AudioControl::getVolume(int slot) const
 	}
 }
 
-void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
+void AudioControl::setVolumeByDmxInput(int slot, int vol)
 {
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
 
-	qDebug("Set Volume slot %d, %d",slot,vol);
+	if (debug) qDebug("Set Volume by DMX input in slot %d, %d",slot,vol);
 	vol = MAX_VOLUME * vol / 255;
 	int cvol = getVolume(slot);
 
@@ -407,15 +456,56 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audioChannels[slot]->setVolume(vol);
-	}
+
+	audioChannels[slot]->setVolume(vol);
 
 	AudioCtrlMsg msg;
 	msg.ctrlCmd = CMD_STATUS_REPORT;
 	msg.slotNumber = slot;
 	msg.volume = vol;
 	emit audioCtrlMsgEmitted(msg);
+}
+
+void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
+{
+	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
+
+	if (debug) qDebug("Set Volume slot %d, %d",slot,vol);
+
+	vol = MAX_VOLUME * vol / 255;
+	audioChannels[slot]->setVolume(vol);
+
+	AudioCtrlMsg msg;
+	msg.ctrlCmd = CMD_STATUS_REPORT;
+	msg.slotNumber = slot;
+	msg.volume = vol;
+	emit audioCtrlMsgEmitted(msg);
+}
+
+bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
+{
+	bool ok = true;
+	if (value > 5) {
+		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
+			ok = startFxAudioAt(fxa, 0, -1, 5);
+			fxa->isDmxStarted = true;
+		}
+		else if (fxa->isDmxStarted) {
+			int slot = getAudioSlot(fxa);
+			if (slot >= 0) {
+				setVolumeFromDmxLevel(slot,value);
+			}
+		}
+	}
+	else {
+		fxa->isDmxStarted = false;
+		int slot = getAudioSlot(fxa);
+		if (slot >= 0) {
+			storeCurrentSeekPos(slot);
+			stopFxAudio(slot);
+		}
+	}
+	return ok;
 }
 
 

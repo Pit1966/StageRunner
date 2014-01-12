@@ -312,6 +312,7 @@ void StageRunnerMainWin::openFxPlayListItemPanel(FxPlayListItem *fx)
 
 	// Let us look if an executer is running on this FxPlayListItem
 	if (new_created) {
+		playlistwid->generateDropAllowedFxTypeList(fx);
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {
 			playlistwid->markFx(exe->currentFx());
@@ -352,6 +353,8 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 
 	// Let us look if an executer is running on this FxSequenceItem
 	if (new_created) {
+		sequencewid->generateDropAllowedFxTypeList(fx);
+
 		connect(sequencewid,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 		FxListExecuter *exe = AppCentral::instance()->execCenter->findFxListExecuter(fx);
 		if (exe) {

@@ -1,5 +1,7 @@
 #include "ptablewidget.h"
 #include "customwidget/extmimedata.h"
+#include "fxitem.h"
+#include "fxlistwidgetitem.h"
 
 #include <QDropEvent>
 #include <QMimeData>
@@ -9,6 +11,7 @@
 #include <QDragLeaveEvent>
 #include <QScrollBar>
 #include <QPoint>
+#include <QToolTip>
 
 PTableWidget::PTableWidget(QWidget *parent) :
 	QTableWidget(parent)
@@ -19,6 +22,7 @@ PTableWidget::PTableWidget(QWidget *parent) :
 	current_vert_scrollpos = 0;
 
 	connect(verticalScrollBar(),SIGNAL(valueChanged(int)),this,SLOT(if_scrolled_vertical(int)));
+
 }
 
 void PTableWidget::clearDragAndDropAction()
@@ -42,6 +46,11 @@ void PTableWidget::setOldScrollPos()
 	verticalScrollBar()->setValue(current_vert_scrollpos);
 }
 
+void PTableWidget::setDropAllowedIndices(QList<int> list)
+{
+	allowed_indices = list;
+}
+
 void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 {
 	const QMimeData * mime = event->mimeData();
@@ -49,13 +58,15 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
 	QObject * src = event->source();
 	QPoint dragpos = event->pos();
 	int current_row = indexAt(dragpos).row();
+	// qDebug() << event->possibleActions();
 
-	if (extmime && extmime->fxListWidgetItem) {
+	if (extmime)
+		extmime->dragObject->setDragCursor(QPixmap(),Qt::MoveAction);
+
+	if (extmime && extmime->fxListWidgetItem) { // note: this functionality can be done by event->source() too
 		qDebug("PTableWidget::dragEnterEvent: Mime:'%s': ObjectName:%s, row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
 
-		QPoint mouse = event->pos();
-		qDebug() << mouse;
 		// event->setDropAction(Qt::MoveAction);
 		event->accept();
 		drag_start_row = extmime->tableRow;
@@ -83,6 +94,44 @@ void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 		setOldScrollPos();
 		drag_temp_row = -1;
 	}
+}
+
+void PTableWidget::dragMoveEvent(QDragMoveEvent *event)
+{
+	const QMimeData * mime = event->mimeData();
+	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
+
+	if (!extmime || !extmime->fxListWidgetItem)
+		return;	// external Source, not from PTableWidget
+
+	QPoint dragpos = event->pos();
+	// int current_row = indexAt(dragpos).row();
+
+	// This event is only for interest if its origin came from other PTableWidget
+	if (extmime->originPTableWidget != this) {
+//		qDebug("PTableWidget::dragMoveEvent: Mime:'%s': ObjectName:%s, row:%d, col:%d -> current row:%d"
+//			   ,mime->text().toLocal8Bit().data()
+//			   ,src->objectName().toLocal8Bit().data()
+//			   ,extmime->tableRow,extmime->tableCol,current_row);
+		// qDebug() << event->possibleActions();
+		if (allowed_indices.size() && !allowed_indices.contains(extmime->fxListWidgetItem->linkedFxItem->fxType())) {
+			event->ignore();
+		}
+		if (dragpos.x() > width()/2) {
+			extmime->dragObject->setDragCursor(QPixmap(":/gfx/icons/editcopy_32.png"),Qt::MoveAction);
+			event->accept();
+		} else {
+			extmime->dragObject->setDragCursor(QPixmap(),Qt::MoveAction);
+			event->accept();
+		}
+	}
+}
+
+Qt::DropActions PTableWidget::supportedDropActions() const
+{
+	/// @todo this function is never called
+	qDebug() << Q_FUNC_INFO << "A wonder has happend. I have not seen this function called before";
+	return Qt::MoveAction | Qt::LinkAction | Qt::CopyAction;
 }
 
 

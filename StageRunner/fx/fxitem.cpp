@@ -85,6 +85,22 @@ bool FxItem::exists(FxItem *item)
 	return global_fx_list->contains(item);
 }
 
+/**
+ * @brief Get the parent FxItem
+ * @return Pointer to FxItem or NULL if no parent exists (e.g. FxItem is part of main fx list)
+ *
+ * If an FxItem is in the FxList of a FxSeqItem or FxAudioItem than it has a parent FxItem that contains
+ * this list. So this function evaluates if a parent FxItem exists and returns a pointer to it
+ */
+FxItem *FxItem::parentFxItem()
+{
+	FxItem *parentfx = 0;
+	if (myParentFxList) {
+		parentfx = myParentFxList->parentFx();
+	}
+	return parentfx;
+}
+
 void FxItem::setName(const QString &name)
 {
 	if (name != myName) {

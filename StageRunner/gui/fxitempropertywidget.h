@@ -40,9 +40,14 @@ private slots:
 	void on_postDelayEdit_textEdited(const QString &arg1);
 	void on_keyClearButton_clicked();
 	void on_editOnceButton_clicked();
-
-	void finish_edit();
 	void on_audioLoopsSpin_valueChanged(int arg1);
+	void on_audioStartAtEdit_textEdited(const QString &arg1);
+	void on_audioStopAtEdit_textEdited(const QString &arg1);
+	void finish_edit();
+
+	void on_hookedToUniverseSpin_valueChanged(int arg1);
+
+	void on_hookedToChannelSpin_valueChanged(int arg1);
 
 signals:
 	void modified();

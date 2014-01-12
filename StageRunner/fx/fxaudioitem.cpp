@@ -67,6 +67,8 @@ void FxAudioItem::setSeekPosition(qint64 posMs)
 
 void FxAudioItem::init()
 {
+	startInProgress = false;
+	isDmxStarted = false;
 	mySeekPosition = 0;
 	mySeekPosPerMille = -1;
 	myFxType = FX_AUDIO;
@@ -76,6 +78,8 @@ void FxAudioItem::init()
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(audioDuration,"DurationMS");
+	addExistingVar(initialSeekPos,"InitialSeekPos");
+	addExistingVar(stopAtSeekPos,"StopAtSeekPos");
 	addExistingVar(loopTimes,"LoopTimes");
 	// qDebug("init audio fx with id: %d",myId);
 }

@@ -13,7 +13,12 @@ public:
 	qint32 initialVolume;
 	qint32 currentVolume;
 	qint64 audioDuration;					///< Length of audio stream in ms (or 0, if unknown)
+	qint64 initialSeekPos;					///< This is the time in ms the audio file should start on play
+	qint64 stopAtSeekPos;					///< Playing of audio will be stopped at this time (ms) (if not NULL)
 	qint32 loopTimes;
+
+	bool startInProgress;					///< set this Flag to give a hint, that this effect will start in a short time
+	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)
 
 protected:
 	AudioSeqState mySeqStatus;

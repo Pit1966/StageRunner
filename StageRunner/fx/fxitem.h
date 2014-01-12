@@ -56,6 +56,8 @@ public:
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
 
+	FxItem * parentFxItem();
+
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
 	void setName(const QString &name);

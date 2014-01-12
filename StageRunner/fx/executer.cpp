@@ -12,9 +12,10 @@
 
 using namespace LIGHT;
 
-Executer::Executer(AppCentral &app_central)
+Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	: myApp(app_central)
-	, originFxItem(0)
+	, originFxItem(originFx)
+	, parentFxItem(0)
 	, eventTargetTimeMs(0)
 	, isWaitingForAudio(false)
 	, myState(EXEC_IDLE)
@@ -128,7 +129,7 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 
 FxListExecuter::~FxListExecuter()
 {
-	emit playListProgressChanged(0,0);
+	emit listProgressStepChanged(0,0);
 }
 
 void FxListExecuter::setCurrentFx(FxItem *fx)
@@ -252,7 +253,7 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 	}
 	else if (msg.ctrlCmd == CMD_STATUS_REPORT) {
 		if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
-			emit playListProgressChanged(playbackProgress, msg.progress);
+			emit listProgressStepChanged(playbackProgress, msg.progress);
 		}
 	}
 }
@@ -306,13 +307,15 @@ FxItem *FxListExecuter::move_to_next_fx()
 		if (next) next->resetFx();
 	}
 
-	if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
-		int pos = 0;
-		while (pos < fxList->size() && fxList->at(pos) != next) {
-			pos++;
+	if (originFxItem && fxList->size()) {
+		if (originFxItem->fxType() == FX_AUDIO_PLAYLIST || originFxItem->fxType() == FX_SEQUENCE) {
+			int pos = 0;
+			while (pos < fxList->size() && fxList->at(pos) != next) {
+				pos++;
+			}
+			playbackProgress = pos * 1000 / fxList->size();
+			emit listProgressStepChanged(playbackProgress,0);
 		}
-		playbackProgress = pos * 1000 / fxList->size();
-		emit playListProgressChanged(playbackProgress,0);
 	}
 
 	setCurrentFx(next);
@@ -514,10 +517,10 @@ bool SceneExecuter::processExecuter()
 	return active;
 }
 
-SceneExecuter::SceneExecuter(AppCentral &app_central, FxSceneItem *scene)
-	: Executer(app_central)
+SceneExecuter::SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx)
+	: Executer(app_central,scene)
 	, curScene(scene)
 	, sceneState(LIGHT::SCENE_OFF)
 {
-
+	parentFxItem = parentFx;
 }

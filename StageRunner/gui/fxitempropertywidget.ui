@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>204</width>
-    <height>530</height>
+    <height>605</height>
    </rect>
   </property>
   <property name="font">
@@ -157,7 +157,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="fadeInTimeLabel">
           <property name="text">
-           <string>Fade In Time:</string>
+           <string>Fade In Time</string>
           </property>
          </widget>
         </item>
@@ -171,7 +171,7 @@
         <item row="3" column="0">
          <widget class="QLabel" name="fadeOutTimeLabel">
           <property name="text">
-           <string>Fade Out Time:</string>
+           <string>Fade Out Time</string>
           </property>
          </widget>
         </item>
@@ -202,14 +202,67 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="hookedToGroup">
+     <property name="title">
+      <string>Hooked to</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <property name="verticalSpacing">
+       <number>0</number>
+      </property>
+      <property name="margin">
+       <number>2</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="hookedToUniverseLabel">
+        <property name="text">
+         <string>Universe</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="hookedToChannelLabel">
+        <property name="text">
+         <string>Channel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="hookedToUniverseSpin">
+        <property name="maximum">
+         <number>4</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="hookedToChannelSpin">
+        <property name="maximum">
+         <number>512</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="audioGroup">
      <property name="title">
       <string>Audio</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <property name="verticalSpacing">
+       <number>0</number>
+      </property>
       <property name="margin">
        <number>2</number>
       </property>
+      <item row="4" column="1">
+       <widget class="PsLineEdit" name="audioStopAtEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="PsLineEdit" name="audioFilePathEdit"/>
       </item>
@@ -264,6 +317,27 @@ Volume</string>
         </property>
         <property name="maximum">
          <number>999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="audioStartAtLabel">
+        <property name="text">
+         <string>Start at</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="PsLineEdit" name="audioStartAtEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="audioStopAtLabel">
+        <property name="text">
+         <string>Stop at</string>
         </property>
        </widget>
       </item>

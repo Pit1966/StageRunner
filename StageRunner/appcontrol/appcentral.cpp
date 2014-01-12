@@ -310,22 +310,25 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 
 	switch (fx->fxType()) {
 	case FX_AUDIO:
-		switch (cmd) {
-		case CMD_AUDIO_START:
-			if (!exec && fx->preDelay() > 0) {
-				unitAudio->startFxAudioAt(reinterpret_cast<FxAudioItem*>(fx), exec, fx->preDelay());
-			} else {
-				unitAudio->startFxAudio(reinterpret_cast<FxAudioItem*>(fx), exec);
+		{
+			FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
+			switch (cmd) {
+			case CMD_AUDIO_START:
+				if (fxa->initialSeekPos) {
+					unitAudio->startFxAudioAt(fxa, exec, fxa->initialSeekPos);
+				} else {
+					unitAudio->startFxAudio(fxa, exec);
+				}
+				break;
+			case CMD_AUDIO_START_AT:
+				unitAudio->startFxAudioAt(fxa, exec);
+				break;
+			case CMD_AUDIO_STOP:
+				unitAudio->stopFxAudio(fxa);
+				break;
+			default:
+				DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
 			}
-			break;
-		case CMD_AUDIO_START_AT:
-			unitAudio->startFxAudioAt(reinterpret_cast<FxAudioItem*>(fx), exec);
-			break;
-		case CMD_AUDIO_STOP:
-			unitAudio->stopFxAudio(reinterpret_cast<FxAudioItem*>(fx));
-			break;
-		default:
-			DEBUGERROR("Execute FX: Unimplemented Command: %d for audio",cmd);
 		}
 		break;
 

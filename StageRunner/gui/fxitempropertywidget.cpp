@@ -33,6 +33,9 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	connect(preDelayEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(postDelayEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(holdTimeEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(audioStartAtEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+	connect(audioStopAtEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
+
 }
 
 FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)
@@ -72,26 +75,37 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->setText(cur_fxa->filePath());
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
-		audioGroup->setVisible(true);
-	}
+		audioStartAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->initialSeekPos));
+		audioStopAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->stopAtSeekPos));
+		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
+		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
 
+		audioGroup->setVisible(true);
+		hookedToGroup->setVisible(true);
+	}
 	else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->clear();
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
+
 		audioGroup->setVisible(true);
+		hookedToGroup->setVisible(false);
 	}
 	else {
 		cur_fxa = 0;
 		audioGroup->setVisible(false);
+		hookedToGroup->setVisible(false);
 	}
 
 	if (fx->fxType() == FX_SCENE) {
 		cur_fxs = static_cast<FxSceneItem*>(fx);
 		faderCountEdit->setText(QString::number(cur_fxs->tubeCount()));
+		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
+		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
 
 		sceneGroup->setVisible(true);
+		hookedToGroup->setVisible(true);
 	} else {
 		cur_fxs = 0;
 		sceneGroup->setVisible(false);
@@ -279,4 +293,54 @@ void FxItemPropertyWidget::on_audioLoopsSpin_valueChanged(int arg1)
 		emit modified();
 	}
 
+}
+
+void FxItemPropertyWidget::on_audioStartAtEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	int time_ms = QtStaticTools::timeStringToMS(arg1);
+	if (cur_fxa->initialSeekPos != time_ms) {
+		cur_fxa->initialSeekPos = time_ms;
+		cur_fxa->setModified(true);
+		emit modified();
+	}
+}
+
+
+void FxItemPropertyWidget::on_audioStopAtEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	int time_ms = QtStaticTools::timeStringToMS(arg1);
+	if (cur_fxa->stopAtSeekPos != time_ms) {
+		cur_fxa->stopAtSeekPos = time_ms;
+		cur_fxa->setModified(true);
+		emit modified();
+	}
+
+}
+
+void FxItemPropertyWidget::on_hookedToUniverseSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fx)) return;
+	arg1--;
+
+	if (cur_fx->hookedUniverse() != arg1) {
+		cur_fx->hookToUniverse(arg1);
+		cur_fxa->setModified(true);
+		emit modified();
+	}
+}
+
+void FxItemPropertyWidget::on_hookedToChannelSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fx)) return;
+	arg1--;
+
+	if (cur_fx->hookedChannel() != arg1) {
+		cur_fx->hookToChannel(arg1);
+		cur_fxa->setModified(true);
+		emit modified();
+	}
 }

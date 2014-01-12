@@ -6,6 +6,8 @@
 #include "lightloop.h"
 #include "fxitem.h"
 #include "fxsceneitem.h"
+#include "fxseqitem.h"
+#include "fxaudioitem.h"
 #include "fxlist.h"
 #include "qlcioplugin.h"
 #include "ioplugincentral.h"
@@ -13,6 +15,7 @@
 #include "toolclasses.h"
 #include "execcenter.h"
 #include "executer.h"
+#include "audiocontrol.h"
 
 
 LightControl::LightControl(AppCentral &app_central)
@@ -115,7 +118,7 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 {
 	bool active;
 	if (scene->preDelay() == -1) {
-		SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene);
+		SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene,scene->parentFxItem());
 		active = exec->activateProcessing();
 	}
 	else if (!scene->isOnStageIntern()) {
@@ -184,12 +187,48 @@ qint32 LightControl::black(qint32 time_ms)
 			if (scene->initSceneCommand(MIX_EXTERN,CMD_SCENE_BLACK, time_ms)) {
 				num++;
 			}
-
-//			if (scene->directFadeToDmx(0,time_ms)) {
-//				num++;
-//			}
 			scene->setLive(false);
 		}
+	}
+	return num;
+}
+
+qint32 LightControl::blackFxScene(FxSceneItem *scene, qint32 time_ms)
+{
+	if (!FxItem::exists(scene))
+		return 0;
+
+	if (scene->isOnStageIntern())
+		if (scene->initSceneCommand(MIX_INTERN,CMD_SCENE_BLACK, time_ms))
+			return 1;
+
+	return 0;
+}
+
+qint32 LightControl::blackFxSequence(FxSeqItem *seq, qint32 time_ms)
+{
+	int num = 0;
+
+	for (int t=0; t<seq->seqList->size(); t++) {
+		num += blackFxItem(seq->seqList->at(t), time_ms);
+	}
+	return num;
+}
+
+/**
+ * @brief Blacks (or fade to Black) all Members of the FxItem
+ * @param time_ms
+ * @return amount of Scenes that were affected
+ */
+qint32 LightControl::blackFxItem(FxItem *fx, qint32 time_ms)
+{
+	int num = 0;
+	if (fx->fxType() == FX_SCENE) {
+		if (blackFxScene(static_cast<FxSceneItem*>(fx), time_ms))
+			num = 1;
+	}
+	else if (fx->fxType() == FX_SEQUENCE) {
+		num = blackFxSequence(static_cast<FxSeqItem*>(fx), time_ms);
 	}
 	return num;
 }
@@ -206,7 +245,7 @@ void LightControl::init()
 
 void LightControl::startFxSceneExecuter(FxSceneItem *scene)
 {
-	SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene);
+	SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene,scene->parentFxItem());
 	exec->activateProcessing();
 }
 
@@ -247,9 +286,9 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 
 	foreach (FxItem * fx, FxItem::globalFxList()) {
-		if (fx->fxType() == FX_SCENE) {
-			FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
-			if (scene->isHookedToInput(universe,channel)) {
+		if (fx->isHookedToInput(universe,channel)) {
+			if (fx->fxType() == FX_SCENE) {
+				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 				int response_time = myApp.pluginCentral->fastMapInUniverse[universe].responseTime;
 				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
 
@@ -262,6 +301,10 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 				else if (scene->directFadeToDmx(value,response_time)) {
 					setSceneActive(scene);
 				}
+			}
+			else if (fx->fxType() == FX_AUDIO) {
+				FxAudioItem *audio = static_cast<FxAudioItem*>(fx);
+				myApp.unitAudio->handleDmxInputAudioEvent(audio, value);
 			}
 		}
 	}

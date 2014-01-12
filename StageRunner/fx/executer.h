@@ -36,7 +36,8 @@ public:
 protected:
 	AppCentral &myApp;
 
-	FxItem *originFxItem;						///<  This should be the FxItem that has initiated the executer or 0
+	FxItem *originFxItem;						///< This should be the FxItem that has initiated the executer or NULL
+	FxItem *parentFxItem;						///< This is the parent FxItem, that contains the originFxItem or NULL
 	QString idString;
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
@@ -47,7 +48,7 @@ private:
 	int use_cnt;								///< if this usage counter is > 0 the object should not been deleted
 
 protected:
-	Executer(AppCentral &app_central);
+	Executer(AppCentral &app_central, FxItem *originFx = 0);
 	~Executer();
 
 public:
@@ -69,6 +70,7 @@ public:
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
+	inline FxItem * parentFx() const {return parentFxItem;}
 
 signals:
 	void deleteMe(Executer *exec);
@@ -124,7 +126,7 @@ public slots:
 signals:
 	void currentFxChanged(FxItem *fx);
 	void nextFxChanged(FxItem *fx);
-	void playListProgressChanged(int audioProgressMille, int playlistProgressMille);
+	void listProgressStepChanged(int step1, int step2);
 
 	friend class ExecCenter;
 
@@ -142,7 +144,7 @@ public:
 	bool processExecuter();
 
 protected:
-	SceneExecuter(AppCentral &app_central, FxSceneItem *scene);
+	SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx);
 
 public:
 

@@ -2,6 +2,7 @@
 #define PTABLEWIDGET_H
 
 #include <QTableWidget>
+#include <QList>
 #ifdef IS_QT5
 #include <QtWidgets>
 #endif
@@ -15,6 +16,7 @@ private:
 	int drag_dest_row;
 	int drag_temp_row;
 	int current_vert_scrollpos;
+	QList<int>allowed_indices;
 
 public:
 	PTableWidget(QWidget *parent = 0);
@@ -23,11 +25,16 @@ public:
 	void saveScrollPos();
 	void setOldScrollPos();
 
+	void setDropAllowedIndices(QList<int>list);
+
+protected:
+	Qt::DropActions supportedDropActions() const;
+
 private:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
 	void dragLeaveEvent(QDragLeaveEvent *event);
-
+	void dragMoveEvent(QDragMoveEvent *event);
 
 signals:
 	void dropEventReceived(QString text, int row);

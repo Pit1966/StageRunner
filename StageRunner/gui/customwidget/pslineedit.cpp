@@ -1,6 +1,8 @@
 #include "pslineedit.h"
 #include "qtstatictools.h"
 
+#include <QDebug>
+
 
 PsLineEdit::PsLineEdit(QWidget *parent) :
 	QLineEdit(parent)
@@ -169,4 +171,16 @@ void PsLineEdit::keyReleaseEvent(QKeyEvent *event)
 	} else {
 		QLineEdit::keyReleaseEvent(event);
 	}
+}
+
+bool PsLineEdit::event(QEvent *event)
+{
+	if (event->type() == 6) {
+		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+		int key = ev->key();
+		if (key == Qt::Key_Tab) {
+			emit tabPressed();
+		}
+	}
+	return QLineEdit::event(event);
 }

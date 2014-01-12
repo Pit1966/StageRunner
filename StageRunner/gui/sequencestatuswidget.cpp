@@ -78,7 +78,10 @@ bool SequenceStatusWidget::appendExecuter(Executer *exec)
 
 	if (fx) {
 		fx_hash.insert(fx,item);
-		name = fx->name();
+		if (exec->parentFx()) {
+			name = exec->parentFx()->name() +": ";
+		}
+		name += fx->name();
 	} else {
 		name = "FxSequence";
 	}
@@ -118,7 +121,12 @@ bool SequenceStatusWidget::updateExecuter(Executer *exec)
 			fx_hash.insert(fx,item);
 			item->setFxItem(fx);
 			if (fx) {
-				item->setText(fx->name());
+				QString name;
+				if (exec->parentFx()) {
+					name = exec->parentFx()->name() +": ";
+				}
+				name += fx->name();
+				item->setText(name);
 			}
 		}
 		switch (exec->state()) {

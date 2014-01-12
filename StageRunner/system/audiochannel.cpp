@@ -74,7 +74,7 @@ AudioSlot::~AudioSlot()
 	delete audio_io;
 }
 
-bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs)
+bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
 {
 	if (AppCentral::instance()->isExperimentalAudio()) {
 		is_experimental_audio_f = true;
@@ -101,7 +101,10 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	// Find out what the initial volume for audio is
 	qint32 targetVolume = fxa->initialVolume;
-	if (fxa->parentFxList() && fxa->parentFxList()->parentFx()) {
+	if (initVol >= 0) {
+		targetVolume = initVol;
+	}
+	else if (fxa->parentFxList() && fxa->parentFxList()->parentFx()) {
 		FxItem *fx = fxa->parentFxList()->parentFx();
 		if (FxItem::exists(fx) && fx->fxType() == FX_AUDIO_PLAYLIST) {
 			targetVolume = reinterpret_cast<FxPlayListItem*>(fx)->initialVolume;
@@ -114,7 +117,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		setVolume(0);
 		fadeinFxAudio(targetVolume,fxa->fadeInTime());
 	}
-	else if (startPosMs != 0) {
+	else if (startPosMs != 0 && initVol == -1) {
 		setVolume(0);
 		fadeinFxAudio(targetVolume,200);
 	}
@@ -143,10 +146,10 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		// We get the start play position in ms from the last played seek position in the FxAudio instance
 		if (is_experimental_audio_f) {
 			if (fxa->seekPosition() == 0) {
-				audio_player->setPosition(0);
+				audio_player->seekPlayPosMs(0);
 			}
 			else if (fxa->seekPosition() > 0) {
-				audio_player->setPosition(fxa->seekPosition());
+				audio_player->seekPlayPosMs(fxa->seekPosition());
 			}
 		} else {
 			audio_io->seekPlayPosMs(fxa->seekPosition());
@@ -155,10 +158,10 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	} else {
 		if (is_experimental_audio_f) {
 			if (startPosMs == 0) {
-				audio_player->setPosition(0);
+				audio_player->seekPlayPosMs(0);
 			}
 			else if (startPosMs > 0)
-				audio_player->setPosition(startPosMs);
+				audio_player->seekPlayPosMs(startPosMs);
 		} else {
 			audio_io->seekPlayPosMs(startPosMs);
 		}
@@ -181,6 +184,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
+			current_fx->startInProgress = false;
 			float vol = 0;
 			if (is_experimental_audio_f) {
 				vol = audio_player->volume();
@@ -211,6 +215,9 @@ bool AudioSlot::stopFxAudio()
 	if (fade_timeline.state() == QTimeLine::Running) {
 		fade_timeline.stop();
 	}
+
+	if (current_fx)
+		current_fx->startInProgress = false;
 
 	emit vuLevelChanged(slotNumber,0,0);
 
@@ -360,7 +367,7 @@ Executer *AudioSlot::currentExecuter()
  * @brief Get the playback position of current Audio Stream.
  * @return Time in ms or -1 if there is no audio running
  */
-int AudioSlot::currentRunTime()
+int AudioSlot::currentRunTime() const
 {
 	if (run_status == AUDIO_IDLE || !current_fx || !FxItem::exists(current_fx)) {
 		return -1;
@@ -415,6 +422,8 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 	switch (state) {
 	case QAudio::ActiveState:
 		run_status = AUDIO_RUNNING;
+		if (current_fx)
+			current_fx->startInProgress = false;
 		break;
 	case QAudio::IdleState:
 		run_status = AUDIO_IDLE;
@@ -474,6 +483,8 @@ void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
 	case QMediaPlayer::BufferingMedia:
 	case QMediaPlayer::BufferedMedia:
 		run_status = AUDIO_RUNNING;
+		if (current_fx)
+			current_fx->startInProgress = false;
 		break;
 	case QMediaPlayer::EndOfMedia:
 		run_status = AUDIO_IDLE;
@@ -506,6 +517,8 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 	}
 	else if (state == QMediaPlayer::PlayingState) {
 		run_status = AUDIO_RUNNING;
+		if (current_fx)
+			current_fx->startInProgress = false;
 	}
 	else if (state == QMediaPlayer::StoppedState) {
 		// run_status = AUDIO_IDLE;
@@ -530,10 +543,16 @@ void AudioSlot::on_vulevel_changed(int left, int right)
 	emit vuLevelChanged(slotNumber, left, right);
 	emit_audio_play_progress();
 
-	// Proof if audio must be faded out or ended
-	if (current_fx && current_fx->holdTime() > 0) {
-		if (run_time.elapsed() >= current_fx->fadeInTime() + current_fx->holdTime()) {
-			if (current_fx->fadeOutTime()) {
+	// Investigate if audio must be faded out or ended
+	if (current_fx) {
+		bool stopaudio = false;
+		if (current_fx->stopAtSeekPos > 0 && currentPlayPosMs() >= current_fx->stopAtSeekPos)
+				stopaudio = true;
+		if (current_fx->holdTime() > 0 && run_time.elapsed() >= current_fx->fadeInTime() + current_fx->holdTime())
+				stopaudio = true;
+
+		if (stopaudio) {
+			if (current_fx->fadeOutTime() > 0) {
 				if (fade_timeline.state() != QTimeLine::Running)
 					fadeoutFxAudio(0,current_fx->fadeOutTime());
 			} else {
@@ -605,7 +624,7 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 		if (FxItem::exists(msg.fxAudio)) {
 			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel :%d"
 									 ,Q_FUNC_INFO,msg.slotNumber+1);
-			startFxAudio(msg.fxAudio,msg.executer);
+			startFxAudio(msg.fxAudio,msg.executer,0,msg.volume);
 		} else {
 			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
 		}
@@ -614,7 +633,7 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 		if (FxItem::exists(msg.fxAudio)) {
 			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel %d AT LAST POSITION"
 									 ,Q_FUNC_INFO,msg.slotNumber+1);
-			startFxAudio(msg.fxAudio,msg.executer,-1);
+			startFxAudio(msg.fxAudio,msg.executer,-1,msg.volume);
 		} else {
 			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
 		}
@@ -671,6 +690,21 @@ bool AudioSlot::seekPosPerMille(int perMille)
 			volset_timer.start();
 	}
 	return seek;
+}
+
+/**
+ * @brief Get the current play position of audio stream
+ * @return play position (ms) or -1 if audio channel is idle
+ */
+qint64 AudioSlot::currentPlayPosMs() const
+{
+	if (run_status != AUDIO_RUNNING && run_status != AUDIO_PAUSED)
+		return -1;
+	if (is_experimental_audio_f) {
+		return audio_player->currentPlayPosMs();
+	} else {
+		return audio_io->currentPlayPosMs();
+	}
 }
 
 void AudioSlot::storeCurrentSeekPos()
