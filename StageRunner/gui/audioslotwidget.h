@@ -31,9 +31,7 @@ private slots:
 	void on_slotStopButton_clicked();
 	void on_slotVolumeDial_sliderMoved(int position);
 	void on_slotVolumeDial_doubleClicked();
-
 	void on_slotAbsButton_clicked(bool checked);
-
 	void on_slotPauseButton_clicked();
 
 public slots:

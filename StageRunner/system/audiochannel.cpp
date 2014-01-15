@@ -74,6 +74,27 @@ AudioSlot::~AudioSlot()
 	delete audio_io;
 }
 
+/**
+ * @brief Select Audio Slot (prepare for audio start)
+ * @return true, if Audio status was IDLE when selecting
+ *
+ *  This function sets the audio slot to AUDIO_INIT status. This is for preparing
+ *  audio start. The slot is now occupied.
+ */
+bool AudioSlot::select()
+{
+	if (run_status <= AUDIO_IDLE) {
+		run_status = AUDIO_INIT;
+		return true;
+	}
+	return false;
+}
+
+void AudioSlot::unselect()
+{
+	run_status = AUDIO_IDLE;
+}
+
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
 {
 	if (AppCentral::instance()->isExperimentalAudio()) {
@@ -96,7 +117,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	current_fx = fxa;
 	current_executer = exec;
-	run_status = AUDIO_INIT;
+	run_status = AUDIO_BUFFERING;
 	run_time.start();
 
 	// Find out what the initial volume for audio is
@@ -221,7 +242,7 @@ bool AudioSlot::stopFxAudio()
 
 	emit vuLevelChanged(slotNumber,0,0);
 
-	if (run_status != AUDIO_IDLE) {
+	if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
 		if (is_experimental_audio_f) {
 			audio_player->stop();
@@ -341,7 +362,7 @@ void AudioSlot::setVolume(int vol)
 void AudioSlot::setMasterVolume(int vol)
 {
 	master_volume = vol;
-	if (run_status != AUDIO_IDLE) {
+	if (run_status > AUDIO_IDLE) {
 		setVolume(current_volume);
 	}
 }
@@ -369,7 +390,7 @@ Executer *AudioSlot::currentExecuter()
  */
 int AudioSlot::currentRunTime() const
 {
-	if (run_status == AUDIO_IDLE || !current_fx || !FxItem::exists(current_fx)) {
+	if (run_status <= AUDIO_IDLE || !current_fx || !FxItem::exists(current_fx)) {
 		return -1;
 	}
 	return run_time.elapsed();

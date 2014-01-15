@@ -6,6 +6,7 @@
 
 #include <QThread>
 #include <QList>
+#include <QMutex>
 
 using namespace AUDIO;
 
@@ -24,7 +25,7 @@ public:
 	AppCentral &myApp;
 
 protected:
-	QList<AudioSlot*> audioChannels;
+	QList<AudioSlot*> audioSlots;
 	int masterVolume;
 
 private:
@@ -37,6 +38,10 @@ private:
 	};
 	int dmx_audio_ctrl_status[MAX_AUDIO_SLOTS];
 	int dmx_audio_ctrl_last_vol[MAX_AUDIO_SLOTS];
+	int used_slots;
+
+	QMutex *slotMutex;
+
 
 public:
 	AudioControl(AppCentral &app_central);
@@ -45,10 +50,12 @@ public:
 	void getAudioDevices();
 	bool isFxAudioActive(FxAudioItem *fxa);
 	bool isFxAudioActive(int slotnum);
-	int getAudioSlot(FxAudioItem *fxa);
+	int findAudioSlot(FxAudioItem *fxa);
+	int selectFreeAudioSlot(int slotnum = -1);
 
 private:
 	void run();
+	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
 
 private slots:
 	void vu_level_changed_receiver(int slotnum, int left, int right);
@@ -58,12 +65,12 @@ public slots:
 	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
 	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);
-	bool stopAllFxAudio();
+	int stopAllFxAudio();
 	void stopFxAudio(int slot);
 	void stopFxAudio(FxAudioItem *fxa);
 	void storeCurrentSeekPositions();
 	void storeCurrentSeekPos(int slot);
-	bool fadeoutAllFxAudio(int time_ms = 5000);
+	int fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
 	void fadeoutFxAudio(Executer *exec, int time_ms = 5000);

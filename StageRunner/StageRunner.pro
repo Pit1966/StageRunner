@@ -3,7 +3,7 @@ include(configvars.pri)
 TEMPLATE = subdirs
 
 SUBDIRS += main
-SUBDIRS += plugins
+# SUBDIRS += plugins
 
 
 # Translations

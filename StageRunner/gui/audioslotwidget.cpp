@@ -117,6 +117,7 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
 		case AUDIO_NO_FREE_SLOT:
+		case AUDIO_NO_STATE:
 			break;
 		case AUDIO_IDLE:
 		case AUDIO_ERROR:

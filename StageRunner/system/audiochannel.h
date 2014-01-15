@@ -59,6 +59,8 @@ public:
 	AudioSlot(AudioControl *parent, int pSlotNumber);
 	~AudioSlot();
 
+	bool select();
+	void unselect();
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int targetVolume, int time_ms);

@@ -25,6 +25,8 @@
 AudioControl::AudioControl(AppCentral &app_central)
 	: QThread()
 	,myApp(app_central)
+	,used_slots(MAX_AUDIO_SLOTS)
+	,slotMutex(new QMutex(QMutex::Recursive))
 {
 	init();
 	getAudioDevices();
@@ -42,6 +44,7 @@ AudioControl::~AudioControl()
 		quit();
 		wait(500);
 	}
+	delete slotMutex;
 }
 
 void AudioControl::getAudioDevices()
@@ -70,9 +73,9 @@ bool AudioControl::isFxAudioActive(FxAudioItem *fxa)
 {
 	if (!fxa) return false;
 
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentFxAudio() == fxa)
-			return audioChannels[t]->isActive() || fxa->startInProgress;
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa)
+			return audioSlots[t]->isActive() || fxa->startInProgress;
 	}
 
 	return false;
@@ -80,22 +83,53 @@ bool AudioControl::isFxAudioActive(FxAudioItem *fxa)
 
 bool AudioControl::isFxAudioActive(int slotnum)
 {
-	if (slotnum < 0 || slotnum >= audioChannels.size())
+	if (slotnum < 0 || slotnum >= used_slots)
 		return false;
 
-	return audioChannels[slotnum]->isActive();
+	return audioSlots[slotnum]->isActive();
 }
 
-int AudioControl::getAudioSlot(FxAudioItem *fxa)
+int AudioControl::findAudioSlot(FxAudioItem *fxa)
 {
 	if (!fxa) return false;
 
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentFxAudio() == fxa) {
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa) {
 			return t;
 		}
 	}
 	return -1;
+}
+
+/**
+* @brief Find and select a free audio slot.
+* @param slotnum [default -1] use dedicated channel if number is >= 0
+* @return slot number that was selected or -1 if none has found
+*
+*/
+int AudioControl::selectFreeAudioSlot(int slotnum)
+{
+	if (slotnum > used_slots)
+		return -1;
+
+	int slot = -1;
+	slotMutex->lock();
+	if (slotnum < 0) {
+		int i = 0;
+		while (slot < 0 && i < used_slots) {
+			if (audioSlots[i]->status() <= AUDIO_IDLE) {
+				audioSlots[i]->select();
+				slot = i;
+			}
+
+			i++;
+		}
+	} else {
+		if (audioSlots[slotnum]->select())
+			slot = slotnum;
+	}
+	slotMutex->unlock();
+	return slot;
 }
 
 void AudioControl::run()
@@ -105,8 +139,8 @@ void AudioControl::run()
 
 	exec();
 
-	while (!audioChannels.isEmpty()) {
-		delete audioChannels.takeFirst();
+	while (!audioSlots.isEmpty()) {
+		delete audioSlots.takeFirst();
 	}
 
 	LOGTEXT(tr("Audio control finished"));
@@ -114,21 +148,22 @@ void AudioControl::run()
 
 void AudioControl::vu_level_changed_receiver(int slotnum, int left, int right)
 {
-	if (slotnum < 0 || slotnum >= audioChannels.size()) return;
+	if (slotnum < 0 || slotnum >= used_slots) return;
 
-	int vol = audioChannels.at(slotnum)->volume();
+	int vol = audioSlots.at(slotnum)->volume();
 	emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
 }
 
 bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
-	bool ok = false;
+	QMutexLocker lock(slotMutex);
+
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
 	if (!exec && myApp.userSettings->pProhibitAudioDoubleStart) {
-		for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-			if (audioChannels[t]->currentFxAudio() == fxa) {
+		for (int t=0; t<used_slots; t++) {
+			if (audioSlots[t]->currentFxAudio() == fxa) {
 				// Ok, audio is already running -> Check the time
-				int cur_run_time = audioChannels[t]->currentRunTime();
+				int cur_run_time = audioSlots[t]->currentRunTime();
 				if ( cur_run_time >= 0 && cur_run_time < myApp.userSettings->pAudioAllowReactivateTime) {
 					LOGERROR(tr("Audio Fx '%1' not started since it is already running on channel %2")
 							 .arg(fxa->name()).arg(t+1));
@@ -138,31 +173,59 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 		}
 	}
 
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->status() < AUDIO_INIT) {
-			ok = startFxAudioInSlot(fxa, t, exec, 0);
-			break;
-		}
-	}
 
-	return ok;
+	int slot = selectFreeAudioSlot();
+	if (slot < 0) {
+		return false;
+	} else {
+		return start_fxaudio_in_slot(fxa, slot, exec, 0);
+	}
 }
 
 bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
-	bool ok = false;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->status() < AUDIO_INIT) {
-			ok = startFxAudioInSlot(fxa, t, exec, atMs, initVol);
-			break;
-		}
+	QMutexLocker lock(slotMutex);
+
+	int slot = selectFreeAudioSlot();
+	if (slot < 0) {
+		return false;
+	} else {
+		return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
 	}
-	return ok;
 }
 
 bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
 {
-	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
+	if (slotnum < 0 || slotnum >= used_slots)
+		return false;
+
+	if (audioSlots[slotnum]->select()) {
+		if (start_fxaudio_in_slot(fxa,slotnum,exec,atMs,initVol))
+			return true;
+
+		audioSlots[slotnum]->unselect();
+	}
+	return false;
+}
+
+/**
+ * @brief Start FxAudioItem in dedicated slot
+ * @param fxa Pointer to FxAudioItem instance
+ * @param slotnum The slotnumber
+ * @param exec [default 0] Poiner to Executer (if started from an executer)
+ * @param atMs [default -1] Start at this seek position in ms (if -1: the last value stored in FxAudioItem will be used later)
+ * @param initVol [default -1] The initial volume for audio playback (-1: the value stored in FxAudioItem will be used)
+ *
+ * @note the audio slot that is used must be in AudioStatus AUDIO_INIT. This means the slot has to
+ * be selected before (use audioSlots[slotnum]->select() to do that
+ *
+ * @return true means ok
+ */
+bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
+{
+	QMutexLocker lock(slotMutex);
+
+	if (audioSlots[slotnum]->status() == AUDIO_INIT) {
 
 		if (atMs >= 0) {
 			fxa->setSeekPosition(atMs);
@@ -175,7 +238,10 @@ bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *e
 		emit audioThreadCtrlMsgEmitted(msg);
 
 		return true;
+
 	} else {
+		DEBUGERROR("Slot %d is not selected when trying to start '%s'"
+				   ,fxa->name().toLocal8Bit().data());
 		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_STATUS_CHANGED, exec);
 		msg.currentAudioStatus = AUDIO_NO_FREE_SLOT;
 		emit audioCtrlMsgEmitted(msg);
@@ -185,46 +251,62 @@ bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *e
 
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
-	if (slotnum < 0 || slotnum >= audioChannels.size()) return false;
+	if (slotnum < 0 || slotnum >= used_slots) return false;
 
-	if (audioChannels[slotnum]->status() < AUDIO_INIT) {
+	QMutexLocker lock(slotMutex);
+
+	if (audioSlots[slotnum]->select()) {
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
-		FxAudioItem *fxa = audioChannels[slotnum]->currentFxAudio();
-		fxa->startInProgress = true;
+		FxAudioItem *fxa = audioSlots[slotnum]->currentFxAudio();
+		if (!fxa) {
+			audioSlots[slotnum]->unselect();
+			return false;
+		}
 
 		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START);
+		msg.volume = audioSlots[slotnum]->volume();
 		emit audioThreadCtrlMsgEmitted(msg);
 		return true;
 	}
+
 	return false;
 }
 
-bool AudioControl::stopAllFxAudio()
+int AudioControl::stopAllFxAudio()
 {
-	bool was_running = false;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->status() != AUDIO_IDLE) was_running = true;
+	QMutexLocker lock(slotMutex);
+
+	int stopcnt = 0;
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->status() > AUDIO_IDLE)
+			stopcnt++;
 		stopFxAudio(t);
 	}
-	return was_running;
+	return stopcnt;
 }
 
 void AudioControl::stopFxAudio(int slot)
 {
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		// We send this via Message to communicate with the thread
-		AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
-		msg.executer = audioChannels[slot]->currentExecuter();
-		emit audioThreadCtrlMsgEmitted(msg);
+	if (slot < 0 || slot >= used_slots)
+		return;
+
+	QMutexLocker lock(slotMutex);
+	if (audioSlots[slot]->status() <= AUDIO_IDLE) {
+		audioSlots[slot]->unselect();
 	}
+	// We send this via Message to communicate with the thread
+	AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
+	msg.executer = audioSlots[slot]->currentExecuter();
+	emit audioThreadCtrlMsgEmitted(msg);
 }
 
 void AudioControl::stopFxAudio(FxAudioItem *fxa)
 {
 	if (!fxa) return;
+	QMutexLocker lock(slotMutex);
 
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentFxAudio() == fxa) {
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa) {
 			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 			stopFxAudio(t);
 		}
@@ -233,47 +315,58 @@ void AudioControl::stopFxAudio(FxAudioItem *fxa)
 
 void AudioControl::storeCurrentSeekPositions()
 {
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audioChannels[t]->storeCurrentSeekPos();
+	QMutexLocker lock(slotMutex);
+
+	for (int t=0; t<used_slots; t++) {
+		audioSlots[t]->storeCurrentSeekPos();
 	}
 }
 
 void AudioControl::storeCurrentSeekPos(int slot)
 {
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audioChannels[slot]->storeCurrentSeekPos();
-	}
+	if (slot < 0 || slot >= used_slots)
+		return;
+
+	QMutexLocker lock(slotMutex);
+	audioSlots[slot]->storeCurrentSeekPos();
 }
 
-bool AudioControl::fadeoutAllFxAudio(int time_ms)
+int AudioControl::fadeoutAllFxAudio(int time_ms)
 {
-	bool was_running = false;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->status() != AUDIO_IDLE) was_running = true;
+	QMutexLocker lock(slotMutex);
+
+	int fadecnt = 0;
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->status() > AUDIO_IDLE)
+			fadecnt++;
 		fadeoutFxAudio(t,time_ms);
 	}
-	return was_running;
+	return fadecnt;
 }
 
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 {
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+	if (slot < 0 || slot >= used_slots)
+		return;
 
-		// This is a private message to my audio thread
-		//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
-		//		msg.fadetime = time_ms;
-		//		msg.executer = audioChannels[slot]->currentExecuter();
-		//		emit audioThreadCtrlMsgEmitted(msg);
+	QMutexLocker lock(slotMutex);
+	dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 
-		audioChannels[slot]->fadeoutFxAudio(0,time_ms);
-	}
+	// This is a private message to my audio thread
+	//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+	//		msg.fadetime = time_ms;
+	//		msg.executer = audioChannels[slot]->currentExecuter();
+	//		emit audioThreadCtrlMsgEmitted(msg);
+
+	audioSlots[slot]->fadeoutFxAudio(0,time_ms);
 }
 
 void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
 {
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentFxAudio() == fxa) {
+	QMutexLocker lock(slotMutex);
+
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa) {
 			fadeoutFxAudio(t,time_ms);
 		}
 	}
@@ -281,8 +374,10 @@ void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
 
 void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
 {
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentExecuter() == exec) {
+	QMutexLocker lock(slotMutex);
+
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentExecuter() == exec) {
 			fadeoutFxAudio(t,time_ms);
 		}
 	}
@@ -290,27 +385,29 @@ void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
 
 bool AudioControl::seekPosPerMilleFxAudio(int slot, int perMille)
 {
-	bool seek = false;
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
+	if (slot < 0 || slot >= used_slots)
+		return false;
 
-		// dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
-		// This is a private message to my audio thread
-		//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
-		//		msg.fadetime = time_ms;
-		//		msg.executer = audioChannels[slot]->currentExecuter();
-		// emit audioThreadCtrlMsgEmitted(msg);
+	QMutexLocker lock(slotMutex);
 
-		seek = audioChannels[slot]->seekPosPerMille(perMille);
-	}
-	return seek;
+	// dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+	// This is a private message to my audio thread
+	//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+	//		msg.fadetime = time_ms;
+	//		msg.executer = audioChannels[slot]->currentExecuter();
+	// emit audioThreadCtrlMsgEmitted(msg);
+
+	return audioSlots[slot]->seekPosPerMille(perMille);
 }
 
 bool AudioControl::seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille)
 {
+	QMutexLocker lock(slotMutex);
+
 	bool seek = false;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		if (audioChannels[t]->currentFxAudio() == fxa) {
-			seek = audioChannels[t]->seekPosPerMille(perMille);
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa) {
+			seek = audioSlots[t]->seekPosPerMille(perMille);
 		}
 	}
 	return seek;
@@ -346,7 +443,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		fadeoutFxAudio(msg.slotNumber,msg.fadetime);
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
-		audioChannels[msg.slotNumber]->setVolume(msg.volume);
+		setVolume(msg.slotNumber,msg.volume);
 		setVolumeInFx(msg.slotNumber,msg.volume);
 		break;
 	default:
@@ -357,6 +454,8 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 
 void AudioControl::setMasterVolume(int vol)
 {
+	QMutexLocker lock(slotMutex);
+
 	if (vol < 0) {
 		vol = 0;
 	}
@@ -364,21 +463,23 @@ void AudioControl::setMasterVolume(int vol)
 		vol = MAX_VOLUME;
 	}
 	masterVolume = vol;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
-		audioChannels[t]->setMasterVolume(vol);
+	for (int t=0; t<used_slots; t++) {
+		audioSlots[t]->setMasterVolume(vol);
 	}
 }
 
 void AudioControl::setVolume(int slot, int vol)
 {
+	QMutexLocker lock(slotMutex);
+
 	if (vol < 0) {
 		vol = 0;
 	}
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		audioChannels[slot]->setVolume(vol);
+	if (slot >= 0 && slot < used_slots) {
+		audioSlots[slot]->setVolume(vol);
 		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 		dmx_audio_ctrl_last_vol[slot] = vol;
 	}
@@ -386,14 +487,16 @@ void AudioControl::setVolume(int slot, int vol)
 
 void AudioControl::setVolumeInFx(int slot, int vol)
 {
+	QMutexLocker lock(slotMutex);
+
 	if (vol < 0) {
 		vol = 0;
 	}
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		FxItem *fx = audioChannels[slot]->currentFxAudio();
+	if (slot >= 0 && slot < used_slots) {
+		FxItem *fx = audioSlots[slot]->currentFxAudio();
 		if (fx && fx->parentFxList() && fx->parentFxList()->parentFx()) {
 			FxItem *parentFx = fx->parentFxList()->parentFx();
 			if (parentFx->fxType() == FX_AUDIO_PLAYLIST) {
@@ -406,15 +509,16 @@ void AudioControl::setVolumeInFx(int slot, int vol)
 
 int AudioControl::getVolume(int slot) const
 {
-	if (slot >= 0 && slot < MAX_AUDIO_SLOTS) {
-		return audioChannels[slot]->volume();
-	} else {
+	if (slot < 0 || slot >= used_slots)
 		return 0;
-	}
+
+	return audioSlots[slot]->volume();
 }
 
 void AudioControl::setVolumeByDmxInput(int slot, int vol)
 {
+	QMutexLocker lock(slotMutex);
+
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
 
 	if (debug) qDebug("Set Volume by DMX input in slot %d, %d",slot,vol);
@@ -457,7 +561,7 @@ void AudioControl::setVolumeByDmxInput(int slot, int vol)
 		vol = MAX_VOLUME;
 	}
 
-	audioChannels[slot]->setVolume(vol);
+	audioSlots[slot]->setVolume(vol);
 
 	AudioCtrlMsg msg;
 	msg.ctrlCmd = CMD_STATUS_REPORT;
@@ -470,10 +574,11 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 {
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
 
+
 	if (debug) qDebug("Set Volume slot %d, %d",slot,vol);
 
 	vol = MAX_VOLUME * vol / 255;
-	audioChannels[slot]->setVolume(vol);
+	audioSlots[slot]->setVolume(vol);
 
 	AudioCtrlMsg msg;
 	msg.ctrlCmd = CMD_STATUS_REPORT;
@@ -484,6 +589,8 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 
 bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 {
+	QMutexLocker lock(slotMutex);
+
 	bool ok = true;
 	if (value > 5) {
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
@@ -491,7 +598,7 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 			fxa->isDmxStarted = true;
 		}
 		else if (fxa->isDmxStarted) {
-			int slot = getAudioSlot(fxa);
+			int slot = findAudioSlot(fxa);
 			if (slot >= 0) {
 				setVolumeFromDmxLevel(slot,value);
 			}
@@ -499,7 +606,7 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 	}
 	else {
 		fxa->isDmxStarted = false;
-		int slot = getAudioSlot(fxa);
+		int slot = findAudioSlot(fxa);
 		if (slot >= 0) {
 			storeCurrentSeekPos(slot);
 			stopFxAudio(slot);
@@ -513,7 +620,7 @@ void AudioControl::init()
 {
 	setObjectName("Audio Control");
 	masterVolume = MAX_VOLUME;
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+	for (int t=0; t<used_slots; t++) {
 		dmx_audio_ctrl_last_vol[t] = 0;
 		dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 	}
@@ -521,9 +628,9 @@ void AudioControl::init()
 
 void AudioControl::initFromThread()
 {
-	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+	for (int t=0; t<used_slots; t++) {
 		AudioSlot *slot = new AudioSlot(this,t);
-		audioChannels.append(slot);
+		audioSlots.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SLOT(vu_level_changed_receiver(int,int,int)));
