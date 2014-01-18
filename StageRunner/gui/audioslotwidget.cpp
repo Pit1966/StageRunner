@@ -14,6 +14,7 @@ AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 
 	setupUi(this);
 	init_gui();
+
 }
 
 AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)
@@ -150,7 +151,7 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 							.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
 							.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
 					if (msg.maxloop > 0) {
-						time += QString(" L%1/%2").arg(msg.loop+1).arg(msg.maxloop);
+						time += QString(" L%1/%2").arg(msg.loop).arg(msg.maxloop);
 					}
 					setTitle(time);
 				}
@@ -163,8 +164,8 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 
 void AudioSlotWidget::setVuLevel(int left, int right)
 {
-	meterWidget->setValue(0,(float)left/10000);
-	meterWidget->setValue(1,(float)right/10000);
+	meterWidget->setValue(0,(float)left/4000);
+	meterWidget->setValue(1,(float)right/4000);
 	if (left == 0 && right == 0) {
 		for (int t=0;t<5;t++) {
 			meterWidget->setValue(0,0.001f);

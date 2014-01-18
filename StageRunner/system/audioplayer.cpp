@@ -131,9 +131,13 @@ void AudioPlayer::on_play_state_changed(QMediaPlayer::State state)
 
 void AudioPlayer::calculate_vu_level(QAudioBuffer buffer)
 {
+	static QTime time;
+
 	/// @todo: implement this function here in audio player
 	myChannel.audio_io->calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
 									,buffer.byteCount()
 									,buffer.format());
+
+	time.restart();
 
 }

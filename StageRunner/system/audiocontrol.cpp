@@ -501,7 +501,6 @@ void AudioControl::setVolumeInFx(int slot, int vol)
 			FxItem *parentFx = fx->parentFxList()->parentFx();
 			if (parentFx->fxType() == FX_AUDIO_PLAYLIST) {
 				reinterpret_cast<FxPlayListItem*>(parentFx)->initialVolume = vol;
-				qDebug("Set volume in parentFx %s to %d",parentFx->name().toLocal8Bit().data(),vol);
 			}
 		}
 	}

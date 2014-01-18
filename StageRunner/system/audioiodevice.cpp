@@ -2,6 +2,8 @@
 #include "audioformat.h"
 #include "../system/log.h"
 
+#include "math.h"
+
 #include <QTime>
 #include <QByteArray>
 
@@ -21,6 +23,9 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	loop_count = 0;
 	loop_target = 0;
 
+	m_leftAvg = new PsMovingAverage<qint64>(5);
+	m_rightAvg = new PsMovingAverage<qint64>(5);
+
 #ifdef IS_QT5
 	audio_decoder = new QAudioDecoder;
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
@@ -39,6 +44,8 @@ AudioIODevice::~AudioIODevice()
 #endif
 	delete audio_buffer;
 	delete audio_format;
+	delete m_leftAvg;
+	delete m_rightAvg;
 }
 
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
@@ -67,11 +74,11 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 
 	// Check for regular end of playing
 	if (avail == 0 && bytes_read > 0 && decoding_finished_f) {
-		loop_count++;
 		if (loop_count < loop_target || loop_target < 0) {
 			if (debug > 1) LOGTEXT(tr("Loop audio file '%1' -> Loop: %2").arg(current_filename).arg(loop_count));
 			bytes_read = 0;
 			avail = bytes_avail;
+			loop_count++;
 		} else {
 			if (debug > 2) qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
 			emit readReady();
@@ -227,8 +234,13 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	//	qDebug("left:%lli right:%lli",left/frames,right/frames);
 	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
 
+	m_leftAvg->append(left/frames);
+	m_rightAvg->append(right/frames);
 
-	emit vuLevelChanged(left/frames, right/frames);
+	double vl = m_leftAvg->currentAvg();
+	double vr = m_rightAvg->currentAvg();
+	emit vuLevelChanged(vl, vr);
+
 }
 
 
@@ -277,7 +289,7 @@ void AudioIODevice::start(int loops)
 	else {
 		loop_target = 1;
 	}
-	loop_count = 0;
+	loop_count = 1;
 
 
 	if (!open(QIODevice::ReadOnly)) {

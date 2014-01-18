@@ -3,6 +3,7 @@
 
 #include "audioformat.h"
 #include "commandsystem.h"
+#include "psmovingaverage.h"
 
 #include <QIODevice>
 #include <QTime>
@@ -30,13 +31,9 @@ public:
 	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
 
 private:
-
-
-private:
 	QString current_filename;
 	QTime run_time;
 	AUDIO::AudioErrorType audio_error;
-
 	AudioFormat *audio_format;
 #ifdef IS_QT5
 	QAudioDecoder *audio_decoder;
@@ -51,6 +48,10 @@ private:
 
 	int loop_target;							// How many loops of the sound to play
 	int loop_count;								// Amount of loops the sound has been played already
+
+	PsMovingAverage<qint64> *m_leftAvg;
+	PsMovingAverage<qint64> *m_rightAvg;
+
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}

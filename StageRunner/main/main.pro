@@ -5,6 +5,9 @@ LANGUAGE = C++
 TARGET   = stagerunner
 
 
+
+
+
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
 INCLUDEPATH  += ../appcontrol
@@ -15,6 +18,10 @@ INCLUDEPATH  += ../system
 INCLUDEPATH  += ../thirdparty
 INCLUDEPATH  += ../tool
 INCLUDEPATH  += ../plugins/interfaces
+
+fftreal_dir = ../3rdparty/fftreal
+INCLUDEPATH += $${fftreal_dir}
+
 
 QT += core gui
 QT += sql
@@ -95,9 +102,10 @@ SOURCES += \
 	../appcontrol/execloopthreadinterface.cpp \
 	../appcontrol/execloop.cpp \
 	../gui/sequencestatuswidget.cpp \
-    ../system/audioplayer.cpp \
-    ../appcontrol/scapplication.cpp \
-    ../system/unixsignalcatcher.cpp
+	../system/audioplayer.cpp \
+	../appcontrol/scapplication.cpp \
+	../system/unixsignalcatcher.cpp \
+    ../tool/psmovingaverage.cpp
 
 HEADERS  += \
 	../config.h \
@@ -164,9 +172,10 @@ HEADERS  += \
 	../appcontrol/execloopthreadinterface.h \
 	../appcontrol/execloop.h \
 	../gui/sequencestatuswidget.h \
-    ../system/audioplayer.h \
-    ../appcontrol/scapplication.h \
-    ../system/unixsignalcatcher.h
+	../system/audioplayer.h \
+	../appcontrol/scapplication.h \
+	../system/unixsignalcatcher.h \
+    ../tool/psmovingaverage.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -186,6 +195,18 @@ FORMS    += \
 
 RESOURCES += \
 	../gfx_ressource.qrc
+
+# Dynamic linkage against FFTReal DLL
+macx {
+	# Link to fftreal framework
+	LIBS += -F$${fftreal_dir}
+	LIBS += -framework fftreal
+} else {
+	LIBS += -L..$${spectrum_build_dir}
+	LIBS += -lfftreal
+}
+
+
 
 
 # Installation
@@ -246,4 +267,4 @@ win32 {
 }
 
 OTHER_FILES += \
-    version.h.in
+	version.h.in

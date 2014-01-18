@@ -2,6 +2,7 @@
 #define AUDIOCHANNEL_H
 
 #include "commandsystem.h"
+#include "psmovingaverage.h"
 
 #ifdef IS_QT5
 #include <QAudioDecoder>
@@ -22,6 +23,7 @@ class AudioIODevice;
 class AudioControl;
 class Executer;
 class AudioPlayer;
+class FFTRealWrapper;
 
 
 class AudioSlot : public QObject
@@ -38,6 +40,7 @@ private:
 	QAudioOutput *audio_output;
 	AudioPlayer *audio_player;
 	QFile *audio_file;
+	FFTRealWrapper *fft_wrapper;
 
 	AudioStatus run_status;
 	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot

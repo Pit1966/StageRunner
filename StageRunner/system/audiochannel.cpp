@@ -7,12 +7,13 @@
 #include "config.h"
 #include "audioiodevice.h"
 #include "audiocontrol.h"
-#include "appcontrol/appcentral.h"
-#include "appcontrol/usersettings.h"
+#include "appcentral.h"
+#include "usersettings.h"
 #include "executer.h"
 #include "execcenter.h"
 #include "fxlist.h"
 #include "audioplayer.h"
+#include "fftreal/fftreal_wrapper.h"
 
 #include <QTime>
 #include <QApplication>
@@ -40,6 +41,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	volset_timer.setInterval(500);
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
+	fft_wrapper = new FFTRealWrapper();
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 	audio_player = new AudioPlayer(*this);
@@ -72,6 +74,7 @@ AudioSlot::~AudioSlot()
 	delete audio_player;
 	delete audio_output;
 	delete audio_io;
+	delete fft_wrapper;
 }
 
 /**
