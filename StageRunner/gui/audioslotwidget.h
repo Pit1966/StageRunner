@@ -3,6 +3,7 @@
 
 #include "ui_audioslotwidget.h"
 #include "commandsystem.h"
+#include "frqspectrum.h"
 
 using namespace AUDIO;
 
@@ -37,7 +38,8 @@ private slots:
 public slots:
 	void setPlayState(bool state);
 	void updateGuiStatus(AudioCtrlMsg msg);
-	void setVuLevel(int left, int right);
+	void setVuLevel(qreal left, qreal right);
+	void setFFTSpectrum(FrqSpectrum *spectrum);
 
 signals:
 	void playClicked(int slotNum);

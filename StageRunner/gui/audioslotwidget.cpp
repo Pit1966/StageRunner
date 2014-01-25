@@ -162,10 +162,10 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 	}
 }
 
-void AudioSlotWidget::setVuLevel(int left, int right)
+void AudioSlotWidget::setVuLevel(qreal left, qreal right)
 {
-	meterWidget->setValue(0,(float)left/4000);
-	meterWidget->setValue(1,(float)right/4000);
+	meterWidget->setValue(0,left);
+	meterWidget->setValue(1,right);
 	if (left == 0 && right == 0) {
 		for (int t=0;t<5;t++) {
 			meterWidget->setValue(0,0.001f);
@@ -175,4 +175,7 @@ void AudioSlotWidget::setVuLevel(int left, int right)
 	}
 }
 
-
+void AudioSlotWidget::setFFTSpectrum(FrqSpectrum *spectrum)
+{
+	fftWidget->setFrqSpectrum(spectrum);
+}

@@ -16,6 +16,7 @@ class AppCentral;
 class FxPlayListItem;
 class Executer;
 class FxControl;
+class FrqSpectrum;
 
 class AudioControl : public QThread
 {
@@ -58,7 +59,8 @@ private:
 	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
 
 private slots:
-	void vu_level_changed_receiver(int slotnum, int left, int right);
+	void vu_level_changed_receiver(int slotnum, qreal left, qreal right);
+	void fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec);
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
@@ -95,7 +97,8 @@ private:
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 	void audioThreadCtrlMsgEmitted(AudioCtrlMsg msg);
-	void vuLevelChanged(int slotnum, int left, int right);
+	void vuLevelChanged(int slotnum, qreal left, qreal right);
+	void fftSpectrumChanged(int slotnum, FrqSpectrum * spec);
 };
 
 #endif // AUDIOCONTROL_H

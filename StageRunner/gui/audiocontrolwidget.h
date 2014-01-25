@@ -12,6 +12,7 @@ using namespace AUDIO;
 class AudioSlot;
 class AppCentral;
 class AudioSlotWidget;
+class FrqSpectrum;
 
 class AudioControlWidget : public QGroupBox, private Ui::AudioControlWidget
 {
@@ -35,7 +36,8 @@ private:
 public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void audioCtrlRepeater(AudioCtrlMsg msg);
-	void setVuMeterLevel(int channel, int left, int right);
+	void setVuMeterLevel(int channel, qreal left, qreal right);
+	void setFFTSpectrum(int channel, FrqSpectrum *spectrum);
 
 signals:
 	void playClicked(int slotNum);

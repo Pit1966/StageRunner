@@ -146,12 +146,19 @@ void AudioControl::run()
 	LOGTEXT(tr("Audio control finished"));
 }
 
-void AudioControl::vu_level_changed_receiver(int slotnum, int left, int right)
+void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal right)
 {
 	if (slotnum < 0 || slotnum >= used_slots) return;
 
 	int vol = audioSlots.at(slotnum)->volume();
-	emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
+	emit vuLevelChanged(slotnum, left, right);
+	// emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
+}
+
+void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)
+{
+	if (slotnum < 0 || slotnum >= used_slots) return;
+	emit fftSpectrumChanged(slotnum,spec);
 }
 
 bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
@@ -632,7 +639,8 @@ void AudioControl::initFromThread()
 		audioSlots.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
-		connect(slot,SIGNAL(vuLevelChanged(int,int,int)),this,SLOT(vu_level_changed_receiver(int,int,int)));
+		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(vu_level_changed_receiver(int,qreal,qreal)));
+		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(fft_spectrum_changed_receiver(int,FrqSpectrum*)));
 		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 
 	}

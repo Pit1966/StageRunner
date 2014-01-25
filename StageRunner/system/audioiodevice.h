@@ -4,6 +4,7 @@
 #include "audioformat.h"
 #include "commandsystem.h"
 #include "psmovingaverage.h"
+#include "frqspectrum.h"
 
 #include <QIODevice>
 #include <QTime>
@@ -13,6 +14,7 @@
 #endif // IS_QT5
 
 class QAudioFormat;
+class FFTRealWrapper;
 
 class AudioIODevice : public QIODevice
 {
@@ -49,9 +51,17 @@ private:
 	int loop_target;							// How many loops of the sound to play
 	int loop_count;								// Amount of loops the sound has been played already
 
-	PsMovingAverage<qint64> *m_leftAvg;
-	PsMovingAverage<qint64> *m_rightAvg;
+	PsMovingAverage<qreal> *m_leftAvg;
+	PsMovingAverage<qreal> *m_rightAvg;
+	FFTRealWrapper *m_leftFFT;
+	FFTRealWrapper *m_rightFFT;
 
+	int m_fftDim;
+	QVector<float> m_windowDat;
+	QVector<float> m_inBuffer[4];
+	QVector<float> m_inFFTDat[4];
+	QVector<float> m_outFFTDat[4];
+	FrqSpectrum m_frqSpectrum[4];
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}
@@ -60,6 +70,13 @@ public:
 	qint64 currentPlayPosUs() const;
 	bool seekPlayPosMs(qint64 posMs);
 	inline AUDIO::AudioErrorType audioError() const {return audio_error;}
+	inline qreal pcm16ToReal(qint16 pcm) { return qreal(pcm * 2) / ((1<<audio_format->sampleSize())-1);}
+	inline qint16 realToPcm16(qreal real) { return real * ((1<<audio_format->sampleSize())-1) / 2;}
+
+	inline static qreal pcm16ToReal(qint16 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
+	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
+	inline static qreal realToRealNorm(qreal real, const QAudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
+	inline static qreal realNormToReal(qreal realnorm, const QAudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
 
 public slots:
 	void start(int loops = 1);
@@ -75,7 +92,8 @@ private slots:
 
 signals:
 	void readReady();
-	void vuLevelChanged(int left, int right);
+	void vuLevelChanged(qreal left, qreal right);
+	void frqSpectrumChanged(FrqSpectrum *spec);
 	void audioDurationDetected(qint64 ms);
 
 };

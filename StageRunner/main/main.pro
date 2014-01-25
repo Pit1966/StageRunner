@@ -105,7 +105,9 @@ SOURCES += \
 	../system/audioplayer.cpp \
 	../appcontrol/scapplication.cpp \
 	../system/unixsignalcatcher.cpp \
-    ../tool/psmovingaverage.cpp
+    ../tool/psmovingaverage.cpp \
+    ../tool/frqspectrum.cpp \
+    ../gui/customwidget/psspectrometer.cpp
 
 HEADERS  += \
 	../config.h \
@@ -175,7 +177,9 @@ HEADERS  += \
 	../system/audioplayer.h \
 	../appcontrol/scapplication.h \
 	../system/unixsignalcatcher.h \
-    ../tool/psmovingaverage.h
+    ../tool/psmovingaverage.h \
+    ../tool/frqspectrum.h \
+    ../gui/customwidget/psspectrometer.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

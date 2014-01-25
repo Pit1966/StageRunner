@@ -24,6 +24,7 @@ class AudioControl;
 class Executer;
 class AudioPlayer;
 class FFTRealWrapper;
+class FrqSpectrum;
 
 
 class AudioSlot : public QObject
@@ -40,7 +41,6 @@ private:
 	QAudioOutput *audio_output;
 	AudioPlayer *audio_player;
 	QFile *audio_file;
-	FFTRealWrapper *fft_wrapper;
 
 	AudioStatus run_status;
 	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot
@@ -94,7 +94,8 @@ private slots:
 	void on_media_playstate_changed(QMediaPlayer::State state);
 
 
-	void on_vulevel_changed(int left, int right);
+	void on_vulevel_changed(qreal left, qreal right);
+	void on_frqSpectrum_changed(FrqSpectrum *spec);
 	void on_fade_frame_changed(qreal value);
 	void on_fade_finished();
 	void on_volset_timer_finished();
@@ -106,7 +107,8 @@ public slots:
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 	void audioProgressChanged(int slotnum, FxAudioItem *fxaudio, int perMille);
-	void vuLevelChanged(int slotnum, int left, int right);
+	void vuLevelChanged(int slotnum, qreal left, qreal right);
+	void frqSpectrumChanged(int slotnum, FrqSpectrum *spec);
 };
 
 #endif // AUDIOCHANNEL_H

@@ -145,6 +145,43 @@
     </widget>
    </item>
    <item>
+    <widget class="QFrame" name="fftFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="PsSpectrometer" name="fftWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="qsynthKnob" name="slotVolumeDial">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -169,6 +206,12 @@
    <class>qsynthMeter</class>
    <extends>QWidget</extends>
    <header>thirdparty/widget/qsynthmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PsSpectrometer</class>
+   <extends>QWidget</extends>
+   <header>gui/customwidget/psspectrometer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

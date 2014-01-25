@@ -41,7 +41,6 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	volset_timer.setInterval(500);
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
-	fft_wrapper = new FFTRealWrapper();
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 	audio_player = new AudioPlayer(*this);
@@ -52,7 +51,8 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 
 	connect(audio_output,SIGNAL(stateChanged(QAudio::State)),this,SLOT(on_audio_output_status_changed(QAudio::State)));
 	connect(audio_io,SIGNAL(readReady()),this,SLOT(on_audio_io_read_ready()),Qt::QueuedConnection);
-	connect(audio_io,SIGNAL(vuLevelChanged(int,int)),this,SLOT(on_vulevel_changed(int,int)),Qt::QueuedConnection);
+	connect(audio_io,SIGNAL(vuLevelChanged(qreal,qreal)),this,SLOT(on_vulevel_changed(qreal,qreal)),Qt::QueuedConnection);
+	connect(audio_io,SIGNAL(frqSpectrumChanged(FrqSpectrum*)),this,SLOT(on_frqSpectrum_changed(FrqSpectrum*)),Qt::QueuedConnection);
 	connect(audio_io,SIGNAL(audioDurationDetected(qint64)),this,SLOT(setAudioDurationMs(qint64)));
 
 	//Fadeout Timeline
@@ -74,7 +74,6 @@ AudioSlot::~AudioSlot()
 	delete audio_player;
 	delete audio_output;
 	delete audio_io;
-	delete fft_wrapper;
 }
 
 /**
@@ -243,7 +242,7 @@ bool AudioSlot::stopFxAudio()
 	if (current_fx)
 		current_fx->startInProgress = false;
 
-	emit vuLevelChanged(slotNumber,0,0);
+	emit vuLevelChanged(slotNumber,0.0f,0.0f);
 
 	if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
@@ -468,7 +467,7 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0,0);
+			emit vuLevelChanged(slotNumber,0.0f,0.0f);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -523,7 +522,7 @@ void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0,0);
+			emit vuLevelChanged(slotNumber,0.0f,0.0f);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -553,7 +552,7 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0,0);
+			emit vuLevelChanged(slotNumber,0.0f,0.0f);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -562,7 +561,7 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 	}
 }
 
-void AudioSlot::on_vulevel_changed(int left, int right)
+void AudioSlot::on_vulevel_changed(qreal left, qreal right)
 {
 	emit vuLevelChanged(slotNumber, left, right);
 	emit_audio_play_progress();
@@ -584,6 +583,11 @@ void AudioSlot::on_vulevel_changed(int left, int right)
 			}
 		}
 	}
+}
+
+void AudioSlot::on_frqSpectrum_changed(FrqSpectrum *spec)
+{
+	emit frqSpectrumChanged(slotNumber,spec);
 }
 
 void AudioSlot::on_fade_frame_changed(qreal value)

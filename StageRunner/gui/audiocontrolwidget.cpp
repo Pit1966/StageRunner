@@ -68,9 +68,16 @@ void AudioControlWidget::audioCtrlRepeater(AudioCtrlMsg msg)
 	emit audioCtrlCmdEmitted(msg);
 }
 
-void AudioControlWidget::setVuMeterLevel(int channel, int left, int right)
+void AudioControlWidget::setVuMeterLevel(int channel, qreal left, qreal right)
 {
 	if (channel >= 0 && channel < audioSlotWidgets.size()) {
 		audioSlotWidgets[channel]->setVuLevel(left,right);
+	}
+}
+
+void AudioControlWidget::setFFTSpectrum(int channel, FrqSpectrum *spectrum)
+{
+	if (channel >= 0 && channel < audioSlotWidgets.size()) {
+		audioSlotWidgets[channel]->setFFTSpectrum(spectrum);
 	}
 }
