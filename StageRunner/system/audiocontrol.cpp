@@ -62,6 +62,9 @@ void AudioControl::getAudioDevices()
 	} else {
 		LOGTEXT(tr("<font color=red>Default audio format not supported by audio device"));
 	}
+
+	if (audioSlots.size())
+		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
 }
 
 /**
@@ -151,8 +154,10 @@ void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal righ
 	if (slotnum < 0 || slotnum >= used_slots) return;
 
 	int vol = audioSlots.at(slotnum)->volume();
-	emit vuLevelChanged(slotnum, left, right);
-	// emit vuLevelChanged(slotnum, left * vol / MAX_VOLUME, right * vol / MAX_VOLUME);
+	// emit vuLevelChanged(slotnum, left, right);
+	float volf = float(vol) / MAX_VOLUME;
+
+	emit vuLevelChanged(slotnum, left * (pow(10,volf)-1) * 10 / 90, right * (pow(10,volf)-1) * 10 / 90);
 }
 
 void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)

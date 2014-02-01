@@ -52,6 +52,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
+	connect(this,SIGNAL(rawDataProcessed(const char*,int,QAudioFormat)),this,SLOT(calcVuLevel(const char*,int,QAudioFormat)),Qt::QueuedConnection);
 
 #endif
 }
@@ -73,6 +74,9 @@ AudioIODevice::~AudioIODevice()
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
+	// qDebug("want readData %lli",maxlen);
+	if (maxlen == 0)
+		return 0;
 
 	if (avail < 0) {
 		if (run_time.elapsed() > 500 && bytes_avail == 0) {
@@ -122,7 +126,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 		return maxlen;
 	}
 
-	// qDebug("readData %lli",maxlen);
+	// qDebug("  -> readData %lli",maxlen);
 	if (maxlen>avail) {
 		maxlen = avail;
 	}
@@ -131,6 +135,8 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 	bytes_read += maxlen;
 
 	calcVuLevel(data,maxlen,*audio_format);
+	// emit calcVuLevel(data,maxlen,*audio_format);
+	// qDebug() << "emit calc vu level" << QThread::currentThread()->objectName();
 
 	return maxlen;
 }
@@ -144,7 +150,7 @@ qint64 AudioIODevice::writeData(const char *data, qint64 len)
 
 qint64 AudioIODevice::bytesAvailable() const
 {
-	qDebug("bytesAvail %lli",bytes_avail-bytes_read);
+	// qDebug("bytesAvail %lli",bytes_avail-bytes_read);
 	return bytes_avail - bytes_read;
 }
 
@@ -182,6 +188,10 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
  */
 void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat & audioFormat)
 {
+//	static QTime checktime;
+//	qDebug("calcLast %dms",checktime.elapsed());
+//	checktime.start();
+
 	qreal left = 0;
 	qreal right = 0;
 	qreal energy[4] = {0,0,0,0};
@@ -191,7 +201,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	int frames = size / channels;
 
 	if (frames == 0) return;
-
+	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
 
 	switch (audioFormat.sampleType()) {
 	case QAudioFormat::SignedInt:
@@ -238,7 +248,9 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const float val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::realToRealNorm(val,audioFormat);
+					// const qreal valF = AudioIODevice::realToRealNorm(val,audioFormat);
+					const float valF = val;
+
 					if (valF > sample_peak)
 						sample_peak = valF;
 					if (valF > peak[chan])
@@ -264,7 +276,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 		break;
 	}
 
-	//	qDebug("left:%lli right:%lli",left/frames,right/frames);
+	// qDebug("left:%f right:%f",left,right);
 	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
 
 	m_leftAvg->append(left);
@@ -273,7 +285,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	// double vl = m_leftAvg->currentAvg();
 	// double vr = m_rightAvg->currentAvg();
 
-	emit vuLevelChanged(left,right);
+	emit vuLevelChanged(left * 1.8,right * 1.8);
 
 	bool e = false;
 	while (m_inBuffer[0].size() >= m_fftDim) {
@@ -292,7 +304,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	if (e) {
 		emit frqSpectrumChanged(&m_frqSpectrum[0]);
 	} else {
-		qDebug("  no fft");
+		// qDebug("  no fft");
 	}
 
 }

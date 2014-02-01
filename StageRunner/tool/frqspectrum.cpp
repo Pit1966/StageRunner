@@ -13,6 +13,8 @@ FrqSpectrum &FrqSpectrum::operator =(const FrqSpectrum &other)
 		setFrqBands(other.size());
 
 	m_bands = other.m_bands;
+
+	return *this;
 }
 
 void FrqSpectrum::setFrqBands(int frqBands)

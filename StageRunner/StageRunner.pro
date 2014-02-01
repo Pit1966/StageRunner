@@ -7,7 +7,7 @@ CONFIG  += ordered
 
 SUBDIRS += thirdparty/fftreal
 SUBDIRS += main
-# SUBDIRS += plugins
+SUBDIRS += plugins
 
 
 # Translations

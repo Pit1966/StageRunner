@@ -30,7 +30,6 @@ public:
 	bool setSourceFilename(const QString & filename);
 	void examineQAudioFormat(AudioFormat & form);
 	AudioFormat & audioFormat() const {return *audio_format;}
-	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
 
 private:
 	QString current_filename;
@@ -81,6 +80,7 @@ public:
 public slots:
 	void start(int loops = 1);
 	void stop();
+	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
 
 private slots:
 	void process_decoder_buffer();
@@ -95,6 +95,7 @@ signals:
 	void vuLevelChanged(qreal left, qreal right);
 	void frqSpectrumChanged(FrqSpectrum *spec);
 	void audioDurationDetected(qint64 ms);
+	void rawDataProcessed(const char *data, int size, const QAudioFormat &audioFormat);
 
 };
 

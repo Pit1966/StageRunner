@@ -45,7 +45,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 	audio_player = new AudioPlayer(*this);
 	audio_player->setVolume(100);
-	if (parent->myApp.userSettings->pAudioBufferSize > 90) {
+	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
 		audio_output->setBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
 
@@ -159,7 +159,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 
 	// Set Audio Buffer Size
-	if (audio_ctrl->myApp.userSettings->pAudioBufferSize > 90) {
+	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 16384) {
 		if (!is_experimental_audio_f) {
 			audio_output->setBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
 		}
@@ -740,4 +740,13 @@ void AudioSlot::storeCurrentSeekPos()
 	if (run_status == AUDIO_RUNNING && FxItem::exists(current_fx)) {
 		current_fx->setSeekPosition(is_experimental_audio_f?audio_player->currentPlayPosMs():audio_io->currentPlayPosMs());
 	}
+}
+
+
+int AudioSlot::audioOutputBufferSize() const
+{
+	if (audio_output)
+		return audio_output->bufferSize();
+
+	return 0;
 }
