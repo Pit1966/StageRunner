@@ -7,6 +7,7 @@
 
 #include <QDir>
 #include <QPluginLoader>
+#include <QMetaObject>
 
 IOPluginCentral::IOPluginCentral(QObject *parent) :
 	QObject(parent)
@@ -62,6 +63,9 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 
 				plugin->init();
 				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
+				if (obj->metaObject()->indexOfSignal("errorMsgEmitted(QString)") >= 0) {
+					connect(plugin,SIGNAL(errorMsgEmitted(QString)),this,SLOT(onErrorMessageReceived(QString)));
+				}
 
 			} else {
 				DEBUGERROR("'%s' QLC I/O plugin in %s is already loaded -> unload again"
@@ -447,6 +451,11 @@ void IOPluginCentral::onPluginConfigurationChanged()
 	}
 
 	updatePluginMappingInformation();
+}
+
+void IOPluginCentral::onErrorMessageReceived(QString msg)
+{
+	LOGERROR(tr("Plugin: %1").arg(msg));
 }
 
 void IOPluginCentral::reOpenPlugins()

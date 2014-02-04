@@ -15,6 +15,17 @@ AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	init_gui();
 }
 
+void AudioControlWidget::setFFTGraphEnabledFromMask(qint32 mask)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (mask & (1<<t)) {
+			audioSlotWidgets.at(t)->setFFTGraphEnabled(true);
+		} else {
+			audioSlotWidgets.at(t)->setFFTGraphEnabled(false);
+		}
+	}
+}
+
 void AudioControlWidget::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);

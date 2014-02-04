@@ -14,6 +14,7 @@ class QDockWidget;
 class SceneStatusWidget;
 class FxSceneItem;
 class SequenceStatusWidget;
+class FxListWidget;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -24,6 +25,7 @@ private:
 	QDockWidget *fxitem_editor_dock;
 	QDockWidget *scene_status_dock;
 	QDockWidget *sequence_status_dock;
+	QDockWidget *template_dock;
 
 public:
 	QStyle *dialWidgetStyle;
@@ -31,6 +33,7 @@ public:
 	FxItemPropertyWidget *fxItemEditor;
 	SceneStatusWidget *sceneStatusDisplay;
 	SequenceStatusWidget *seqStatusDisplay;
+	FxListWidget *templateWidget;
 
 	int activeKeyModifiers;
 
@@ -86,6 +89,20 @@ private slots:
 	void on_addFxSeqButton_clicked();
 	void on_actionExperimental_audio_mode_triggered(bool checked);
 	void on_actionOpen_FxItem_triggered();
+
+	void on_actionEnable_audio_FFT_triggered(bool checked);
+
+	void on_saveTemplatesButton_clicked();
+
+	void on_loadTemplatesButton_clicked();
+
+	void on_actionShow_Templates_triggered();
+
+	void on_actionShow_Fx_Properties_Editor_triggered();
+
+	void on_actionShow_Scene_Status_triggered();
+
+	void on_actionShow_Sequence_Status_triggered();
 
 private:
 	void init();

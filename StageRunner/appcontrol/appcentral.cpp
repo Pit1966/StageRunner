@@ -6,6 +6,7 @@
 #include "fxlist.h"
 #include "fxitem.h"
 #include "fxaudioitem.h"
+#include "fxsceneitem.h"
 #include "project.h"
 #include "usersettings.h"
 #include "fxlist.h"
@@ -16,6 +17,8 @@
 #include "messagehub.h"
 #include "execcenter.h"
 #include "executer.h"
+#include "fxlistvarset.h"
+#include "fxlistwidget.h"
 
 #include <QFileDialog>
 
@@ -160,6 +163,15 @@ void AppCentral::setExperimentalAudio(bool state)
 	}
 }
 
+void AppCentral::setFFTAudioChannelMask(qint32 mask)
+{
+	if (mask != userSettings->pFFTAudioMask) {
+		userSettings->pFFTAudioMask = mask;
+		unitAudio->setFFTAudioChannelFromMask(mask);
+	}
+}
+
+
 void AppCentral::setInputAssignMode(bool state)
 {
 	if (state != input_assign_mode_f) {
@@ -298,6 +310,30 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 		return true;
 	}
 	return false;
+}
+
+FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
+{
+	if (!fxlist) return 0;
+
+	FxItem *addfx = 0;
+
+
+	FxList *templates = templateFxList->fxList();
+	FxListWidget *listwid = FxListWidget::findFxListWidget(templates);
+	if (listwid && listwid->currentSelectedFxItem()) {
+		FxItem *fx = listwid->currentSelectedFxItem();
+		if (fx->fxType() == FX_SCENE) {
+			FxSceneItem *scene = reinterpret_cast<FxSceneItem *>(fx);
+			FxSceneItem *newscene = new FxSceneItem(*scene);
+			fxlist->addFx(newscene);
+			addfx = newscene;
+		}
+	} else {
+		fxlist->addFxScene(28,&addfx);
+	}
+
+	return addfx;
 }
 
 
@@ -465,6 +501,7 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
+	delete templateFxList;
 	delete unitFx;
 	delete execCenter;
 	delete unitLight;
@@ -492,6 +529,8 @@ void AppCentral::init()
 	unitLight = new LightControl(*this);
 	execCenter = new ExecCenter(*this);
 	unitFx = new FxControl(*this, *execCenter);
+	templateFxList = new FxListVarSet;
+	templateFxList->fxList()->setProtected(true);
 
 	int id = registerFxList(project->mainFxList());
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);

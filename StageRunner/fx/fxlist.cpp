@@ -13,17 +13,17 @@
 FxList::FxList(FxItem *parentFx) :
 	QObject()
 {
-	fx_last = 0;
-	fx_next = 0;
-	fx_current = 0;
-	fx_parent = parentFx;
+	m_fxLast = 0;
+	m_fxNext = 0;
+	m_fxCurrent = 0;
+	m_fxParent = parentFx;
 	myAutoProceedFlag = false;
 	myLoopFlag = false;
-	auto_run_f = false;
 	regid = 0;
-	modified_f = false;
+	m_isModified = false;
 	myRandomizedFlag = false;
 	myLoopTimes = 1;
+	m_isProtected = false;
 
 	showColumnFadeinFlag = false;
 	showColumnFadeoutFlag = false;
@@ -41,14 +41,14 @@ FxList::~FxList()
 
 void FxList::clear()
 {
-	fx_last = 0;
-	fx_next = 0;
-	fx_current = 0;
-	modified_f = true;
+	m_fxLast = 0;
+	m_fxNext = 0;
+	m_fxCurrent = 0;
+	m_isModified = true;
 
-	while (!fx_list.isEmpty()) {
+	while (!m_fxList.isEmpty()) {
 		// remove effect from list and delete it if there is no more reference
-		FxItem *fx = fx_list.takeFirst();
+		FxItem *fx = m_fxList.takeFirst();
 		if (!fx->refCount.deref()) {
 			delete fx;
 		}
@@ -57,9 +57,9 @@ void FxList::clear()
 
 void FxList::setNextFx(FxItem *nfx)
 {
-	if (nfx != fx_next) {
-		fx_next = nfx;
-		emit fxNextChanged(fx_next);
+	if (nfx != m_fxNext) {
+		m_fxNext = nfx;
+		emit fxNextChanged(m_fxNext);
 	}
 }
 
@@ -67,31 +67,31 @@ void FxList::setCurrentFx(FxItem *curfx)
 {
 	if (!FxItem::exists(curfx)) curfx = 0;
 
-	if (fx_current != curfx) {
-		emit fxCurrentChanged(curfx, fx_current);
-		fx_current = curfx;
+	if (m_fxCurrent != curfx) {
+		emit fxCurrentChanged(curfx, m_fxCurrent);
+		m_fxCurrent = curfx;
 	}
 }
 
 FxItem *FxList::stepToSequenceNext()
 {
-	if (!fx_next) return 0;
-	fx_last = fx_current;
-	if (fx_current != fx_next) {
-		emit fxCurrentChanged(fx_next, fx_current);
-		fx_current = fx_next;
+	if (!m_fxNext) return 0;
+	m_fxLast = m_fxCurrent;
+	if (m_fxCurrent != m_fxNext) {
+		emit fxCurrentChanged(m_fxNext, m_fxCurrent);
+		m_fxCurrent = m_fxNext;
 	}
 
 	// Now check if auto proceed is selected and find next entry in list
 	if (myAutoProceedFlag) {
-		setNextFx( findSequenceFollower(fx_current) );
+		setNextFx( findSequenceFollower(m_fxCurrent) );
 	}
-	return fx_current;
+	return m_fxCurrent;
 }
 
 FxItem *FxList::getFxByKeyCode(int keycode) const
 {
-	QListIterator<FxItem*> it(fx_list.nativeList());
+	QListIterator<FxItem*> it(m_fxList.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->keyCode() == keycode) return fx;
@@ -101,8 +101,8 @@ FxItem *FxList::getFxByKeyCode(int keycode) const
 
 FxItem *FxList::getFxByListIndex(int idx) const
 {
-	if (idx < fx_list.nativeList().size()) {
-		return fx_list.nativeList().at(idx);
+	if (idx < m_fxList.nativeList().size()) {
+		return m_fxList.nativeList().at(idx);
 	}
 	return 0;
 }
@@ -125,7 +125,7 @@ void FxList::setLoopTimes(int loops)
 QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
 {
 	QList<FxItem*>fxlist;
-	QListIterator<FxItem*> it(fx_list.nativeList());
+	QListIterator<FxItem*> it(m_fxList.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->keyCode() == keycode) fxlist.append(fx);
@@ -140,8 +140,8 @@ QList<FxItem*>FxList::getFxListByKeyCode(int keycode) const
  */
 void FxList::postLoadProcess()
 {
-	for (int t=0; t<fx_list.size(); t++) {
-		FxItem *fx = fx_list.at(t);
+	for (int t=0; t<m_fxList.size(); t++) {
+		FxItem *fx = m_fxList.at(t);
 		fx->setParentFxList(this);
 		switch (fx->fxType()) {
 		case FX_AUDIO_PLAYLIST:
@@ -199,13 +199,13 @@ bool FxList::postLoadResetScenes()
  */
 FxItem *FxList::findSequenceFollower(FxItem *curfx)
 {
-	if (!curfx) curfx = fx_next;
+	if (!curfx) curfx = m_fxNext;
 
 	FxItem *followfx = 0;
-	int idx_cur = fx_list.indexOf(curfx);
+	int idx_cur = m_fxList.indexOf(curfx);
 	if (idx_cur >= 0) {
-		if (idx_cur+1 < fx_list.size()) {
-			followfx = fx_list.at(idx_cur+1);
+		if (idx_cur+1 < m_fxList.size()) {
+			followfx = m_fxList.at(idx_cur+1);
 
 		}
 	}
@@ -221,34 +221,34 @@ FxItem *FxList::findSequenceFollower(FxItem *curfx)
  */
 FxItem *FxList::findSequenceForerunner(FxItem *curfx)
 {
-	if (!curfx) curfx = fx_next;
+	if (!curfx) curfx = m_fxNext;
 
 	FxItem *prevfx = 0;
-	int idx_cur = fx_list.indexOf(curfx);
+	int idx_cur = m_fxList.indexOf(curfx);
 	if (idx_cur > 0) {
-		prevfx = fx_list.at(idx_cur-1);
+		prevfx = m_fxList.at(idx_cur-1);
 	}
 	return prevfx;
 }
 
 FxItem *FxList::findSequenceRandomFxItem()
 {
-	int cnt = fx_list.size();
+	int cnt = m_fxList.size();
 	FxItem *fx = 0;
 	qsrand(QDateTime::currentDateTime().toTime_t());
 	int tries = 0;
 	while (!fx && tries++ < 1000) {
 		int rnd = double(qrand()) * cnt / RAND_MAX;
-		if (!fx_list.at(rnd)->playedInRandomList) {
-			fx = fx_list.at(rnd);
+		if (!m_fxList.at(rnd)->playedInRandomList) {
+			fx = m_fxList.at(rnd);
 			fx->playedInRandomList = true;
 		}
 	}
 
 	int i = 0;
 	while (!fx && i<cnt) {
-		if (!fx_list.at(i)->playedInRandomList) {
-			fx = fx_list.at(i);
+		if (!m_fxList.at(i)->playedInRandomList) {
+			fx = m_fxList.at(i);
 			fx->playedInRandomList = true;
 		}
 		i++;
@@ -260,21 +260,26 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 {
 	FxAudioItem *fx = new FxAudioItem(path,this);
 	fx->refCount.ref();
-	if (pos < 0 || pos >= fx_list.size()) {
-		fx_list.append(fx);
+	if (pos < 0 || pos >= m_fxList.size()) {
+		m_fxList.append(fx);
 	} else {
-		fx_list.insert(pos,fx);
+		m_fxList.insert(pos,fx);
 	}
-	modified_f = true;
+	m_isModified = true;
 
 	return true;
 }
 
-bool FxList::addFxScene(int tubes)
+bool FxList::addFxScene(int tubes, FxItem **addedFxPointer)
 {
 	FxItem *fx = addFx(FX_SCENE,tubes);
 	if (fx) {
 		fx->setName("New Scene");
+		m_isModified = true;
+
+		if (addedFxPointer)
+			*addedFxPointer = fx;
+
 		return true;
 	}
 
@@ -286,6 +291,7 @@ bool FxList::addFxAudioPlayList()
 	FxItem *fx = addFx(FX_AUDIO_PLAYLIST);
 	if (fx) {
 		fx->setName("Audio play list");
+		m_isModified = true;
 		return true;
 	}
 	return false;
@@ -296,6 +302,7 @@ bool FxList::addFxSequence()
 	FxItem *fx = addFx(FX_SEQUENCE);
 	if (fx) {
 		fx->setName("FX Sequence");
+		m_isModified = true;
 		return true;
 	}
 	return false;
@@ -304,46 +311,46 @@ bool FxList::addFxSequence()
 void FxList::moveFromTo(int srcidx, int destidx)
 {
 	FxItem *xitem = 0;
-	if (srcidx >= 0 && srcidx < fx_list.size()) {
-		xitem = fx_list.takeAt(srcidx);
+	if (srcidx >= 0 && srcidx < m_fxList.size()) {
+		xitem = m_fxList.takeAt(srcidx);
 	} else {
 		return;
 	}
 
 	if (destidx < 0) {
-		fx_list.append(xitem);
+		m_fxList.append(xitem);
 	}
 	else if (srcidx < destidx) {
-		fx_list.insert(destidx,xitem);
+		m_fxList.insert(destidx,xitem);
 	}
 	else if (destidx <= srcidx ){
-		fx_list.insert(destidx,xitem);
+		m_fxList.insert(destidx,xitem);
 	}
-	modified_f = true;
+	m_isModified = true;
 
 	emit fxListChanged();
 }
 
 bool FxList::deleteFx(FxItem *fx)
 {
-	bool del = fx_list.removeOne(fx);
+	bool del = m_fxList.removeOne(fx);
 	if (del) {
-		if (fx == fx_next) fx_next = 0;
-		if (fx == fx_last) fx_last = 0;
-		if (fx == fx_current) {
-			emit fxCurrentChanged(0,fx_current);
-			fx_current = 0;
+		if (fx == m_fxNext) m_fxNext = 0;
+		if (fx == m_fxLast) m_fxLast = 0;
+		if (fx == m_fxCurrent) {
+			emit fxCurrentChanged(0,m_fxCurrent);
+			m_fxCurrent = 0;
 		}
 		delete fx;
 		emit fxListChanged();
-		modified_f = true;
+		m_isModified = true;
 	}
 	return del;
 }
 
 bool FxList::contains(FxItem *fx)
 {
-	if (fx_list.indexOf(fx) < 0) {
+	if (m_fxList.indexOf(fx) < 0) {
 		return false;
 	} else {
 		return true;
@@ -352,8 +359,8 @@ bool FxList::contains(FxItem *fx)
 
 bool FxList::isModified() const
 {
-	bool modified = modified_f;
-	QListIterator<FxItem*> it(fx_list.nativeList());
+	bool modified = m_isModified;
+	QListIterator<FxItem*> it(m_fxList.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->isModified()) {
@@ -365,22 +372,22 @@ bool FxList::isModified() const
 
 void FxList::setModified(bool state)
 {
-	QMutableListIterator<FxItem*> it(fx_list.nativeList());
+	QMutableListIterator<FxItem*> it(m_fxList.nativeList());
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		fx->setModified(state);
 	}
-	modified_f = state;
+	m_isModified = state;
 }
 
 void FxList::cloneSelectedSceneItem()
 {
-	if (fx_next && fx_next->fxType() == FX_SCENE) {
-		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(fx_next);
+	if (m_fxNext && m_fxNext->fxType() == FX_SCENE) {
+		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(m_fxNext);
 		FxSceneItem *new_scene = new FxSceneItem(*scene);
 		new_scene->refCount.ref();
-		fx_list.append(new_scene);
-		modified_f = true;
+		m_fxList.append(new_scene);
+		m_isModified = true;
 		FxItemTool::setClonedFxName(scene,new_scene,this);
 	}
 }
@@ -392,17 +399,17 @@ void FxList::cloneSelectedSceneItem()
  */
 void FxList::resetFxItems(FxItem *skipFx)
 {
-	for (int t=0; t<fx_list.size(); t++) {
-		if (fx_list.at(t) != skipFx) {
-			fx_list.at(t)->resetFx();
+	for (int t=0; t<m_fxList.size(); t++) {
+		if (m_fxList.at(t) != skipFx) {
+			m_fxList.at(t)->resetFx();
 		}
 	}
 }
 
 void FxList::resetFxItemsForNewExecuter()
 {
-	for (int t=0; t<fx_list.size(); t++) {
-		FxItem *fx = fx_list.at(t);
+	for (int t=0; t<m_fxList.size(); t++) {
+		FxItem *fx = m_fxList.at(t);
 		fx->playedInRandomList = false;
 	}
 }
@@ -414,8 +421,8 @@ FxItem *FxList::addFx(int fxtype, int option)
 		{
 			FxAudioItem *fx = new FxAudioItem(this);
 			fx->refCount.ref();
-			fx_list.append(fx);
-			modified_f = true;
+			m_fxList.append(fx);
+			m_isModified = true;
 			return fx;
 		}
 		break;
@@ -423,8 +430,8 @@ FxItem *FxList::addFx(int fxtype, int option)
 		{
 			FxSceneItem *fx = new FxSceneItem(this);
 			fx->refCount.ref();
-			fx_list.append(fx);
-			modified_f = true;
+			m_fxList.append(fx);
+			m_isModified = true;
 			if (option >= 0) {
 				fx->createDefaultTubes(option);
 			}
@@ -434,16 +441,16 @@ FxItem *FxList::addFx(int fxtype, int option)
 		{
 			FxPlayListItem *fx = new FxPlayListItem(this);
 			fx->refCount.ref();
-			fx_list.append(fx);
-			modified_f = true;
+			m_fxList.append(fx);
+			m_isModified = true;
 			return fx;
 		}
 	case FX_SEQUENCE:
 		{
 			FxSeqItem *fx = new FxSeqItem(this);
 			fx->refCount.ref();
-			fx_list.append(fx);
-			modified_f = true;
+			m_fxList.append(fx);
+			m_isModified = true;
 			return fx;
 		}
 	default:
@@ -451,4 +458,11 @@ FxItem *FxList::addFx(int fxtype, int option)
 	}
 
 	return 0;
+}
+
+void FxList::addFx(FxItem *newfx)
+{
+	newfx->refCount.ref();
+	m_fxList.append(newfx);
+	m_isModified = true;
 }

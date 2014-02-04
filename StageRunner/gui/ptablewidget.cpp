@@ -117,7 +117,7 @@ void PTableWidget::dragMoveEvent(QDragMoveEvent *event)
 		if (allowed_indices.size() && !allowed_indices.contains(extmime->fxListWidgetItem->linkedFxItem->fxType())) {
 			event->ignore();
 		}
-		if (dragpos.x() > width()/2) {
+		if (dragpos.x() > width()/2 || extmime->moveDisabled) {
 			extmime->dragObject->setDragCursor(QPixmap(":/gfx/icons/editcopy_32.png"),Qt::MoveAction);
 			event->accept();
 		} else {
@@ -155,7 +155,7 @@ void PTableWidget::dropEvent(QDropEvent *event)
 		if (extmime->originPTableWidget != this) {
 			qDebug("PTableWidget::dropEvent: Received Row from foreign Widget");
 			if (extmime->originPTableWidget) {
-				if (event->pos().x() > width()/2) {
+				if (event->pos().x() > width()/2  || extmime->moveDisabled) {
 					emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row, false);
 				} else {
 					emit rowClonedFrom(extmime->originPTableWidget, extmime->tableRow, drag_dest_row, true);

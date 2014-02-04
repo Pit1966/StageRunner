@@ -57,6 +57,7 @@ public:
 	inline bool isStandAlone() const {return is_standalone_f;}
 	bool isFxItemPossibleHere(FxItem *fx);
 	void generateDropAllowedFxTypeList(FxItem *fx);
+	inline void setAutoProceedCheckVisible(bool state) {autoProceedCheck->setVisible(state);}
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);

@@ -20,6 +20,7 @@ class ExecCenter;
 class Executer;
 class FxList;
 class FxControl;
+class FxListVarSet;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -45,6 +46,7 @@ public:
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
 	ExecCenter *execCenter;
+	FxListVarSet *templateFxList;
 
 private:
 	AppCentral();
@@ -84,6 +86,7 @@ public:
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
 	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = 0, int row = -1);
 	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
+	FxItem *addDefaultSceneToFxList(FxList *fxlist);
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
@@ -93,6 +96,7 @@ public slots:
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);
 	void setExperimentalAudio(bool state);
+	void setFFTAudioChannelMask(qint32 mask);
 
 	void testSetDmxChannel(int val, int channel);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);

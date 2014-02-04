@@ -1,6 +1,8 @@
 #include "usersettings.h"
 #include "log.h"
 
+#include <QDir>
+
 UserSettings::UserSettings()
 	: VarSet()
 {
@@ -16,6 +18,10 @@ UserSettings::~UserSettings()
 
 void UserSettings::init()
 {
+	QString templatePath = QString("%1/.config/%2/%3.templates")
+			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APP_NAME);
+
+
 	setClass(PrefVarCore::USER_CONFIG,"UserSettings");
 	registerQSetGlobal("User and GUI settings for StageRunner Application");
 
@@ -38,4 +44,6 @@ void UserSettings::init()
 	}
 	addExistingVar(pAudioPlayListChannel,"AudioPlayListChannel",0,3,3);
 	addExistingVar(pAltAudioEngine,"AlternativeAudioEngine");
+	addExistingVar(pFFTAudioMask,"FFTAudioMask",0,15,15);
+	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 }

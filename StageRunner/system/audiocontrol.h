@@ -53,6 +53,7 @@ public:
 	bool isFxAudioActive(int slotnum);
 	int findAudioSlot(FxAudioItem *fxa);
 	int selectFreeAudioSlot(int slotnum = -1);
+	void setFFTAudioChannelFromMask(qint32 mask);
 
 private:
 	void run();

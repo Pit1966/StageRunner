@@ -75,6 +75,7 @@ public slots:
 private slots:
 	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
 	void onPluginConfigurationChanged();
+	void onErrorMessageReceived(QString msg);
 
 public slots:
 

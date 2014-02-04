@@ -24,7 +24,8 @@ public:
 	QList<AudioSlotWidget*> audioSlotWidgets;
 
 public:
-	explicit AudioControlWidget(QWidget *parent = 0);
+	AudioControlWidget(QWidget *parent = 0);
+	void setFFTGraphEnabledFromMask(qint32 mask);
 
 protected:
 	void resizeEvent(QResizeEvent *event);

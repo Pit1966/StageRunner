@@ -21,15 +21,15 @@ private:
 	 * This Id is unique in the system
 	 */
 	int regid;
-	VarSetList<FxItem*>fx_list;
-	FxItem * fx_last;
-	FxItem * fx_next;
-	FxItem * fx_current;
+	VarSetList<FxItem*>m_fxList;
+	FxItem * m_fxLast;
+	FxItem * m_fxNext;
+	FxItem * m_fxCurrent;
 
-	bool auto_run_f;
-	bool modified_f;
+	bool m_isModified;
+	bool m_isProtected;					///< if Flag is set Drag and Move is disabled
 
-	FxItem * fx_parent;					///< If the list resides in a FxSequence or FxAudioPlaylist: here is the pointer
+	FxItem * m_fxParent;				///< If the list resides in a FxSequence or FxAudioPlaylist: here is the pointer
 
 public:
 	bool showColumnFadeinFlag;
@@ -52,19 +52,19 @@ public:
 
 	void clear();
 
-	inline VarSetList<FxItem*> & nativeFxList() {return fx_list;}
-	inline int size() const {return fx_list.size();}
-	inline void append(FxItem* fx) {fx_list.append(fx);}
-	inline void insert(int idx, FxItem* fx) {fx_list.insert(idx,fx);}
-	inline FxItem* at(int idx) const {return fx_list.at(idx);}
-	inline FxItem* takeAt(int idx) {return fx_list.takeAt(idx);}
-	inline bool removeOne(FxItem *fx) {return fx_list.removeOne(fx);}
-	inline FxItem & operator[] (int idx) {return *fx_list[idx];}
-	inline FxItem * nextFx() {return fx_next;}
-	inline FxItem * lastFx() {return fx_last;}
-	inline FxItem * currentFx() {return fx_current;}
-	inline void setParentFx(FxItem *fx) {fx_parent = fx;}
-	inline FxItem * parentFx() const {return fx_parent;}
+	inline VarSetList<FxItem*> & nativeFxList() {return m_fxList;}
+	inline int size() const {return m_fxList.size();}
+	inline void append(FxItem* fx) {m_fxList.append(fx);}
+	inline void insert(int idx, FxItem* fx) {m_fxList.insert(idx,fx);}
+	inline FxItem* at(int idx) const {return m_fxList.at(idx);}
+	inline FxItem* takeAt(int idx) {return m_fxList.takeAt(idx);}
+	inline bool removeOne(FxItem *fx) {return m_fxList.removeOne(fx);}
+	inline FxItem & operator[] (int idx) {return *m_fxList[idx];}
+	inline FxItem * nextFx() {return m_fxNext;}
+	inline FxItem * lastFx() {return m_fxLast;}
+	inline FxItem * currentFx() {return m_fxCurrent;}
+	inline void setParentFx(FxItem *fx) {m_fxParent = fx;}
+	inline FxItem * parentFx() const {return m_fxParent;}
 	FxItem * stepToSequenceNext();
 	FxItem * getFxByKeyCode(int keycode) const;
 	FxItem * getFxByListIndex(int idx) const;
@@ -78,11 +78,13 @@ public:
 	inline bool isLooped() const {return myLoopFlag;}
 	inline void setRandomized(bool state) {myRandomizedFlag = state;}
 	inline bool isRandomized() const {return myRandomizedFlag;}
+	inline void setProtected(bool state) {m_isProtected = state;}
+	inline bool isProtected() const {return m_isProtected;}
 	int loopTimes() const;
 	void setLoopTimes(int loops);
 
 	bool addFxAudioSimple(const QString & path, int pos = -1);
-	bool addFxScene(int tubes = 1);
+	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);
 	bool addFxAudioPlayList();
 	bool addFxSequence();
 	void moveFromTo(int srcidx, int destidx);
@@ -95,6 +97,7 @@ public:
 	void resetFxItemsForNewExecuter();
 
 	FxItem * addFx(int fxtype, int option = -1);
+	void addFx(FxItem *newfx);
 	FxItem * findSequenceFollower(FxItem *curfx = 0);
 	FxItem * findSequenceForerunner(FxItem *curfx = 0);
 	FxItem * findSequenceRandomFxItem();

@@ -11,6 +11,7 @@
 #include <QContextMenuEvent>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QInputDialog>
 
 QList<SceneDeskWidget*>SceneDeskWidget::scene_desk_list;
 
@@ -94,6 +95,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			fader->setRange(0,dmx->targetFullValue);
 			fader->setValue(dmx->targetValue);
 			fader->setChannelShown(true);
+			fader->setLabelText(dmx->labelText);
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
 			ref_val = ref_val * dmx->targetFullValue / 255;
@@ -429,6 +431,18 @@ bool SceneDeskWidget::hideSelectedTubes()
 	return removed;
 }
 
+bool SceneDeskWidget::unhideAllTubes()
+{
+	if (!origin_fxscene) return false;
+
+	for (int t=0; t<origin_fxscene->tubes.size(); t++) {
+		DmxChannel *tube = origin_fxscene->tubes.at(t);
+		tube->deskVisibleFlag = true;
+	}
+
+	return setFxScene(origin_fxscene);
+}
+
 int SceneDeskWidget::setLabelInSelectedTubes(const QString &text)
 {
 	if (!origin_fxscene) return -1;
@@ -457,10 +471,16 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 
 	QMenu menu(this);
 	QAction *act;
+	if (!selected_tube_ids.size()) {
+		act = menu.addAction(tr("Edit Label"));
+		act->setObjectName("3");
+	}
 	act = menu.addAction(tr("Hide Channel(s)"));
 	act->setObjectName("1");
 	act = menu.addAction(tr("Add Channel"));
 	act->setObjectName("2");
+	act = menu.addAction(tr("Show hidden channels"));
+	act->setObjectName("4");
 
 	act = menu.exec(event->globalPos());
 	if (!act) return;
@@ -481,6 +501,18 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		origin_fxscene->setTubeCount(origin_fxscene->tubeCount()+1);
 		setFxScene(origin_fxscene);
 		emit modified();
+		break;
+
+	case 3:
+		mixer->setLabelText(QInputDialog::getText(this
+												  ,tr("Edit")
+												  ,tr("Enter text for channel")
+												  ,QLineEdit::Normal
+												  ,mixer->labelText()));
+		break;
+
+	case 4:
+		unhideAllTubes();
 		break;
 	}
 }
@@ -566,4 +598,11 @@ void SceneDeskWidget::destroyAllSceneDesks()
 	while (!scene_desk_list.isEmpty()) {
 		delete scene_desk_list.takeFirst();
 	}
+}
+
+void SceneDeskWidget::on_channelCountSpin_valueChanged(int arg1)
+{
+	if (!origin_fxscene) return;
+	origin_fxscene->setTubeCount(arg1);
+	setFxScene(origin_fxscene);
 }

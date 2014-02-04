@@ -56,7 +56,8 @@ private:
 	int current_volume;								///< Volume the audio slot is set to
 	int master_volume;								///< This is Master Volume
 
-	bool is_experimental_audio_f;
+	bool m_isQMediaPlayerAudio;
+	bool m_isFFTEnabled;
 
 public:
 	AudioSlot(AudioControl *parent, int pSlotNumber);
@@ -81,6 +82,8 @@ public:
 	inline bool isActive() const {return run_status == AUDIO_RUNNING || run_status == AUDIO_PAUSED;}
 	inline AudioStatus status() {return run_status;}
 	int audioOutputBufferSize() const;
+	void setFFTEnabled(bool state);
+	inline bool isFFTEnabled() const {return m_isFFTEnabled;}
 
 private:
 	void emit_audio_play_progress();

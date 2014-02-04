@@ -107,7 +107,8 @@ SOURCES += \
 	../system/unixsignalcatcher.cpp \
     ../tool/psmovingaverage.cpp \
     ../tool/frqspectrum.cpp \
-    ../gui/customwidget/psspectrometer.cpp
+    ../gui/customwidget/psspectrometer.cpp \
+    ../appcontrol/fxlistvarset.cpp
 
 HEADERS  += \
 	../config.h \
@@ -179,7 +180,8 @@ HEADERS  += \
 	../system/unixsignalcatcher.h \
     ../tool/psmovingaverage.h \
     ../tool/frqspectrum.h \
-    ../gui/customwidget/psspectrometer.h
+    ../gui/customwidget/psspectrometer.h \
+    ../appcontrol/fxlistvarset.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

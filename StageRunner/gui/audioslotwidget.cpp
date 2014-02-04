@@ -31,6 +31,11 @@ AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)
 
 }
 
+void AudioSlotWidget::setFFTGraphEnabled(bool state)
+{
+	fftFrame->setVisible(state);
+}
+
 void AudioSlotWidget::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);

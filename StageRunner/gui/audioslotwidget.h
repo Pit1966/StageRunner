@@ -19,6 +19,7 @@ public:
 public:
 	AudioSlotWidget(QWidget *parent = 0);
 	AudioSlotWidget(AudioControlWidget *widget);
+	void setFFTGraphEnabled(bool state);
 
 
 protected:

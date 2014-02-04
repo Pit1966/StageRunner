@@ -20,6 +20,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_error = AUDIO::AUDIO_ERR_NONE;
 	audio_format = new AudioFormat(format);
 	audio_buffer = new QByteArray;
+	m_fftEnabled = false;
 
 	loop_count = 0;
 	loop_target = 0;
@@ -223,7 +224,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 						peak[chan] = valF;
 
 					energy[chan] += valF * valF;
-					if (chan == 0)
+					if (m_fftEnabled && chan == 0)
 						m_inBuffer[chan].append(valF);
 				}
 			}
@@ -257,7 +258,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 						peak[chan] = valF;
 
 					energy[chan] += valF * valF;
-					if (chan == 0)
+					if (m_fftEnabled && chan == 0)
 						m_inBuffer[chan].append(valF);
 				}
 			}
@@ -288,17 +289,21 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	emit vuLevelChanged(left * 1.8,right * 1.8);
 
 	bool e = false;
-	while (m_inBuffer[0].size() >= m_fftDim) {
-		for (int t=0; t<m_fftDim; t++)
-			m_inFFTDat[0][t] = m_inBuffer[0][t] * m_windowDat[t];
+	if (m_fftEnabled) {
+		while (m_inBuffer[0].size() >= m_fftDim) {
+			for (int t=0; t<m_fftDim; t++)
+				m_inFFTDat[0][t] = m_inBuffer[0][t] * m_windowDat[t];
 
-		m_leftFFT->calculateFFT(m_outFFTDat[0].data(), m_inFFTDat[0].data());
+			m_leftFFT->calculateFFT(m_outFFTDat[0].data(), m_inFFTDat[0].data());
 
-		m_frqSpectrum[0].fillSpectrumFFTQVectorArray(m_outFFTDat[0]);
+			m_frqSpectrum[0].fillSpectrumFFTQVectorArray(m_outFFTDat[0]);
 
-		m_inBuffer[0].remove(0,m_fftDim/8);
+			m_inBuffer[0].remove(0,m_fftDim/8);
 
-		e = true;
+			e = true;
+		}
+	} else {
+		m_inBuffer[0].clear();
 	}
 
 	if (e) {

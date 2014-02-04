@@ -610,6 +610,8 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	mdata->tableRow = item->myRow;
 	mdata->tableCol = item->myColumn;
 	mdata->dragObject = drag;
+	if (fxList()->isProtected())
+		mdata->moveDisabled = true;
 
 	QPixmap pixmap(size().width(), item->height());
 
@@ -829,7 +831,7 @@ void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
 
 void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc)
 {
-	qDebug("%s clone row: %d to row: %d remove:%d",Q_FUNC_INFO,srcRow, destRow, removeSrc);
+	if (debug > 1) qDebug("%s clone row: %d to row: %d remove:%d",Q_FUNC_INFO,srcRow, destRow, removeSrc);
 
 	FxListWidget *srcwidget = FxListWidget::findFxListWidget(srcPtable);
 	if (srcwidget) {
@@ -889,7 +891,7 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 
 void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 {
-	qDebug("FxListWidget::moveRowFromTo: %d to %d",srcrow,destrow);
+	if (debug > 1) qDebug("FxListWidget::moveRowFromTo: %d to %d",srcrow,destrow);
 	if (myfxlist) {
 		FxItem *cur = 0;
 		if (srcrow >= 0 && srcrow < myfxlist->size()) cur = myfxlist->at(srcrow);
@@ -1104,7 +1106,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			refreshList();
 			break;
 		case 22:
-			fxList()->addFxScene(28);
+			AppCentral::instance()->addDefaultSceneToFxList(fxList());
 			refreshList();
 			break;
 		case 23:
@@ -1153,6 +1155,8 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		QAction *act;
 		act = menu.addAction(tr("Unselect"));
 		act->setObjectName("2");
+		act = menu.addAction(tr("Edit Fx name"));
+		act->setObjectName("9");
 		act = menu.addAction(tr("Open Fx properties"));
 		act->setObjectName("4");
 		if (fxtype == FX_SCENE || fxtype == FX_AUDIO_PLAYLIST || fxtype == FX_SEQUENCE) {
@@ -1213,7 +1217,14 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
 			AppCentral::instance()->unitLight->blackFxItem(fx,200);
 			break;
-
+		case 9:
+			fx->setName(QInputDialog::getText(this
+											  ,tr("Edit")
+											  ,tr("Enter name label for Fx")
+											  ,QLineEdit::Normal
+											  ,fx->name()));
+			refreshList();
+			break;
 		default:
 			break;
 		}

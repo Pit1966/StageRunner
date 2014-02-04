@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QTime>
 #include <QMutexLocker>
+#include <QTimer>
 
 
 #ifdef unix
@@ -18,8 +19,13 @@
 
 YadiDMXUSBOut::YadiDMXUSBOut()
 	: accessMutex(new QMutex(QMutex::Recursive))
+	, write_universe_debug_out(false)
+	, m_reOpenOutput(-1)
+	, m_reOpenInput(-1)
+	, m_comErrorCounter(0)
+	, m_totalComErrorCounter(0)
 {
-	write_universe_debug_out = false;
+	connect (this,SIGNAL(communicationErrorDetected()),this,SLOT(handleCommunicationError()),Qt::QueuedConnection);
 }
 
 
@@ -36,7 +42,7 @@ YadiDMXUSBOut::~YadiDMXUSBOut()
 
 void YadiDMXUSBOut::init()
 {
-	qDebug("YadiDMXUSBOut::init");
+	qDebug("%s",Q_FUNC_INFO);
 	debug = 0;
 	write_universe_debug_out = true;
 
@@ -140,28 +146,7 @@ QString YadiDMXUSBOut::name()
 void YadiDMXUSBOut::openOutput(quint32 output)
 {
 	qDebug("YadiDMXUSBOut::openOutput(%d)",output);
-
-	QMutexLocker lock(accessMutex);
-
-	if ((int)output < output_devices.size()) {
-		bool ok;
-		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
-		if (yadi) {
-			yadi->outputId = output;
-			ok = yadi->openOutput();
-		} else {
-			ok = false;
-		}
-		if (ok) {
-			outDevNameTable[output] = output_devices.at(output);
-			if (debug) qDebug("YadiDMXUSBOut::openOutput(%d) successful",output);
-		} else {
-			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
-		}
-
-	} else {
-		qDebug("YadiDMXUSBOut::openOutput(%d) failed! Device list own %d outputs",output+1,output_devices.size());
-	}
+	internOpenOutput(output);
 }
 
 void YadiDMXUSBOut::closeOutput(quint32 output)
@@ -354,28 +339,8 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 
 void YadiDMXUSBOut::openInput(quint32 input)
 {
-	QMutexLocker lock(accessMutex);
-
 	qDebug("YadiDMXUSBOut::openInput(%d)",input);
-
-	if ((int)input < input_devices.size()) {
-		bool ok;
-		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
-		if (yadi) {
-			yadi->inputId = input;
-			ok = yadi->openInput();
-		} else {
-			ok = false;
-		}
-		if (ok) {
-			inDevNameTable[input] = input_devices.at(input);
-			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
-					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)),Qt::UniqueConnection);
-			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
-		} else {
-			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
-		}
-	}
+	internOpenInput(input);
 }
 
 void YadiDMXUSBOut::closeInput(quint32 input)
@@ -528,8 +493,6 @@ DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 
 void YadiDMXUSBOut::handle_output_error(quint32 output)
 {
-	bool confchanged = false;
-
 	accessMutex->lock();
 	if (int(output) >= output_devices.size()) {
 		accessMutex->unlock();
@@ -537,29 +500,35 @@ void YadiDMXUSBOut::handle_output_error(quint32 output)
 	}
 
 	int errsv = errno;
-	qDebug("Yadi DMX plugin: Communication error occured. Output %d (%s)"
-		   ,output,strerror(errsv));
-
-	bool close_device = false;
+	QString msg (QString("Communication error occured. Output %1 (%2)")
+		   .arg(output+1).arg(strerror(errsv)));
+	qDebug() << Q_FUNC_INFO << msg;
+	emit errorMsgEmitted(msg);
 
 	/// @todo: to have an existing device node does not mean necessarely that the device is still connected
 	YadiDevice * yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
 	if (yadi) {
 		yadi->deviceNodePresent = false;
-		close_device = true;
+		if (yadi->isOutputOpen())
+			m_reOpenOutput = output;
+		else
+			m_reOpenOutput = -1;
+
+		if (yadi->isInputOpen())
+			m_reOpenInput = output;
+		else
+			m_reOpenInput = -1;
+
+		yadi->closeInOut();
+
+		qDebug("%s: Device '%s' now closed, due to error"
+			   ,Q_FUNC_INFO,output_devices.at(output).toLocal8Bit().data());
 	}
 
-	if (close_device && yadi) {
-		yadi->closeInOut();
-		confchanged = true;
-		qDebug("YadiDMXUSBOut::handle_output_error: Device '%s' closed",output_devices.at(output).toLocal8Bit().data());
-	}
 
 	accessMutex->unlock();
 
-	if (confchanged)
-		emit configurationChanged();
-
+	emit communicationErrorDetected();
 }
 
 void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &universe)
@@ -577,6 +546,56 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 			mon->setValueInBar(t,uchar(universe[t]));
 		}
 	}
+}
+
+bool YadiDMXUSBOut::internOpenOutput(quint32 output)
+{
+	QMutexLocker lock(accessMutex);
+
+	bool ok = false;
+	if ((int)output < output_devices.size()) {
+		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
+		if (yadi) {
+			yadi->outputId = output;
+			ok = yadi->openOutput();
+		}
+
+		if (ok) {
+			outDevNameTable[output] = output_devices.at(output);
+			if (debug) qDebug("YadiDMXUSBOut::openOutput(%d) successful",output);
+		} else {
+			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
+		}
+
+	} else {
+		qDebug("YadiDMXUSBOut::openOutput(%d) failed! Device list own %d outputs",output+1,output_devices.size());
+	}
+	return ok;
+}
+
+bool YadiDMXUSBOut::internOpenInput(quint32 input)
+{
+	QMutexLocker lock(accessMutex);
+
+	bool ok = false;
+	if ((int)input < input_devices.size()) {
+		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
+		if (yadi) {
+			yadi->inputId = input;
+			ok = yadi->openInput();
+		}
+
+		if (ok) {
+			inDevNameTable[input] = input_devices.at(input);
+			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
+					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
+		} else {
+			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
+		}
+	}
+
+	return ok;
 }
 
 void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
@@ -617,27 +636,84 @@ void YadiDMXUSBOut::inputDeviceFailed(int input)
 		return;
 	}
 
-
 	// coming to this point normaly means the device is not connected anymore
 	// So we close all devices to give the device nodes in /dev free
 
 	YadiDevice * yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
 
 	if (yadi) {
+		if (yadi->isOutputOpen())
+			m_reOpenOutput = input;
+		else
+			m_reOpenOutput = -1;
+
+		if (yadi->isInputOpen())
+			m_reOpenInput = input;
+		else
+			m_reOpenInput = -1;
+
 		qDebug("YadiDMXUSBOut::inputDeviceFailed: Close inputs and outputs");
 		yadi->closeInOut();
 	}
 
 	accessMutex->unlock();
 
-	emit configurationChanged();
-
+	emit communicationErrorDetected();
 }
 
 void YadiDMXUSBOut::outputDeviceFailed(int output)
 {
 	Q_UNUSED(output);
 
+}
+
+void YadiDMXUSBOut::handleCommunicationError()
+{
+	if (m_comErrorCounter > 2) {
+		m_comErrorCounter = 0;
+		m_reOpenInput = -1;
+		m_reOpenOutput = -1;
+		emit configurationChanged();
+		return;
+	}
+
+	bool tryagain = false;
+	if (m_reOpenOutput >= 0) {
+
+		if (internOpenOutput(m_reOpenOutput)) {
+			QString msg(QString("Reopened output %1 after communication error (#%2)")
+				   .arg(m_reOpenOutput+1).arg(m_totalComErrorCounter+1));
+			qDebug() << Q_FUNC_INFO << msg;
+			emit errorMsgEmitted(msg);
+			m_reOpenOutput = -1;
+
+		} else {
+			qDebug("%s Error on reopening output %d after communication error"
+				   ,Q_FUNC_INFO,m_reOpenOutput+1);
+			tryagain = true;
+		}
+	}
+
+	if (m_reOpenInput >= 0) {
+
+		if (internOpenInput(m_reOpenInput)) {
+			QString msg(QString("Reopened input %1 after communication error (#%2)")
+				   .arg(m_reOpenInput+1).arg(m_totalComErrorCounter+1));
+			qDebug() << Q_FUNC_INFO << msg;
+			emit errorMsgEmitted(msg);
+			m_reOpenInput = -1;
+		} else {
+			qDebug("%s Error on reopening input %d after communication error"
+				   ,Q_FUNC_INFO,m_reOpenInput+1);
+		}
+	}
+
+	m_totalComErrorCounter++;
+
+	if (tryagain) {
+		m_comErrorCounter++;
+		QTimer::singleShot(100,this,SLOT(handleCommunicationError()));
+	}
 }
 
 /****************************************************************************

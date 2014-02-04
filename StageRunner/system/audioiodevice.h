@@ -55,6 +55,7 @@ private:
 	FFTRealWrapper *m_leftFFT;
 	FFTRealWrapper *m_rightFFT;
 
+	bool m_fftEnabled;
 	int m_fftDim;
 	QVector<float> m_windowDat;
 	QVector<float> m_inBuffer[4];
@@ -71,6 +72,7 @@ public:
 	inline AUDIO::AudioErrorType audioError() const {return audio_error;}
 	inline qreal pcm16ToReal(qint16 pcm) { return qreal(pcm * 2) / ((1<<audio_format->sampleSize())-1);}
 	inline qint16 realToPcm16(qreal real) { return real * ((1<<audio_format->sampleSize())-1) / 2;}
+	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 
 	inline static qreal pcm16ToReal(qint16 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
 	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}

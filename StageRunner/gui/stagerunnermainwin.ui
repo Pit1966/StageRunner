@@ -215,6 +215,27 @@
               </property>
              </widget>
             </item>
+            <item row="6" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="loadTemplatesButton">
+                <property name="text">
+                 <string>Load Templates</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="saveTemplatesButton">
+                <property name="text">
+                 <string>Save Templates</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
            </layout>
           </widget>
          </item>
@@ -231,7 +252,7 @@
      <x>0</x>
      <y>0</y>
      <width>888</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -261,6 +282,7 @@
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
     <addaction name="actionExperimental_audio_mode"/>
+    <addaction name="actionEnable_audio_FFT"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">
@@ -275,10 +297,20 @@
     </property>
     <addaction name="actionInfo"/>
    </widget>
+   <widget class="QMenu" name="menuDocks">
+    <property name="title">
+     <string>Docks</string>
+    </property>
+    <addaction name="actionShow_Templates"/>
+    <addaction name="actionShow_Fx_Properties_Editor"/>
+    <addaction name="actionShow_Scene_Status"/>
+    <addaction name="actionShow_Sequence_Status"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuConfiguration"/>
    <addaction name="menuMonitor"/>
+   <addaction name="menuDocks"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -375,6 +407,34 @@
   <action name="actionOpen_FxItem">
    <property name="text">
     <string>Open FxItem</string>
+   </property>
+  </action>
+  <action name="actionEnable_audio_FFT">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable audio FFT</string>
+   </property>
+  </action>
+  <action name="actionShow_Templates">
+   <property name="text">
+    <string>Show Templates</string>
+   </property>
+  </action>
+  <action name="actionShow_Fx_Properties_Editor">
+   <property name="text">
+    <string>Show Fx Properties Editor</string>
+   </property>
+  </action>
+  <action name="actionShow_Scene_Status">
+   <property name="text">
+    <string>Show Scene Status</string>
+   </property>
+  </action>
+  <action name="actionShow_Sequence_Status">
+   <property name="text">
+    <string>Show Sequence Status</string>
    </property>
   </action>
  </widget>

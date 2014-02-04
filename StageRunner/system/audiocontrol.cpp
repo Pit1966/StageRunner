@@ -135,6 +135,17 @@ int AudioControl::selectFreeAudioSlot(int slotnum)
 	return slot;
 }
 
+void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (mask & (1<<t)) {
+			audioSlots[t]->setFFTEnabled(true);
+		} else {
+			audioSlots[t]->setFFTEnabled(false);
+		}
+	}
+}
+
 void AudioControl::run()
 {
 	initFromThread();

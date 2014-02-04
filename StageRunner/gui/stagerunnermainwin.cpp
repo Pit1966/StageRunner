@@ -27,6 +27,7 @@
 #include "fxlistwidget.h"
 #include "scenedeskwidget.h"
 #include "fxitemobj.h"
+#include "fxlistvarset.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -46,6 +47,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	debugLevelSpin->setValue(debug);
 
 	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
+	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
 
 	// For external access
 	logWidget = logEdit;
@@ -154,6 +156,17 @@ void StageRunnerMainWin::setup_gui_docks()
 	sequence_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,sequence_status_dock);
 
+	template_dock = new QDockWidget(this);
+	templateWidget =new FxListWidget();
+	template_dock->setObjectName("Fx Templates");
+	template_dock->setWindowTitle("Fx Templates");
+	template_dock->setWidget(templateWidget);
+	template_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	this->addDockWidget(Qt::RightDockWidgetArea,template_dock);
+	templateWidget->setFxList(appCentral->templateFxList->fxList());
+	templateWidget->setAutoProceedCheckVisible(false);
+	connect(templateWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
+
 }
 
 void StageRunnerMainWin::restore_window()
@@ -261,6 +274,13 @@ void StageRunnerMainWin::initAppDefaults()
 
 	// Test Audio Features
 	appCentral->unitAudio->getAudioDevices();
+
+	// Set Audio Defaults
+	appCentral->unitAudio->setFFTAudioChannelFromMask(appCentral->userSettings->pFFTAudioMask);
+
+	// Load Default Template FxList
+	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
+		on_loadTemplatesButton_clicked();
 
 }
 
@@ -603,6 +623,15 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 			on_actionSave_Project_triggered();
 		}
 	}
+
+	if (appCentral->templateFxList->isModified()) {
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("Your FX templae list is modified!\n\nDo you want to save it now?"));
+		if (ret == QMessageBox::Yes) {
+			on_saveTemplatesButton_clicked();
+		}
+	}
+
 	// This stops and removes all running sequences
 	appCentral->stopAllSequencesAndPlaylists();
 
@@ -779,4 +808,49 @@ void StageRunnerMainWin::on_actionOpen_FxItem_triggered()
 {
 	if (appCentral->globalSelectedFx())
 		openFxItemPanel(appCentral->globalSelectedFx());
+}
+
+void StageRunnerMainWin::on_actionEnable_audio_FFT_triggered(bool checked)
+{
+	qint32 mask = 0;
+	if (checked)
+		mask = 0x0f;
+	appCentral->setFFTAudioChannelMask(mask);
+	audioCtrlGroup->setFFTGraphEnabledFromMask(mask);
+}
+
+void StageRunnerMainWin::on_saveTemplatesButton_clicked()
+{
+	appCentral->templateFxList->fileSave(appCentral->userSettings->pFxTemplatePath,false,true);
+}
+
+void StageRunnerMainWin::on_loadTemplatesButton_clicked()
+{
+	appCentral->templateFxList->fileLoad(appCentral->userSettings->pFxTemplatePath);
+	templateWidget->refreshList();
+}
+
+void StageRunnerMainWin::on_actionShow_Templates_triggered()
+{
+	template_dock->show();
+	templateWidget->show();
+
+}
+
+void StageRunnerMainWin::on_actionShow_Fx_Properties_Editor_triggered()
+{
+	fxitem_editor_dock->show();
+	fxItemEditor->show();
+}
+
+void StageRunnerMainWin::on_actionShow_Scene_Status_triggered()
+{
+	scene_status_dock->show();
+	sceneStatusDisplay->show();
+}
+
+void StageRunnerMainWin::on_actionShow_Sequence_Status_triggered()
+{
+	sequence_status_dock->show();
+	seqStatusDisplay->show();
 }

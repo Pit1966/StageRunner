@@ -38,6 +38,7 @@ protected:
 
 	bool hideTube(DmxChannel *tube, MixerChannel *mixer);
 	bool hideSelectedTubes();
+	bool unhideAllTubes();
 	int setLabelInSelectedTubes(const QString &text);
 
 private:
@@ -67,6 +68,8 @@ private slots:
 	void on_autoHookButton_clicked();
 
 	void on_tubeCommentEdit_textEdited(const QString &arg1);
+
+	void on_channelCountSpin_valueChanged(int arg1);
 
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

@@ -9,5 +9,6 @@ ExtMimeData::ExtMimeData() :
   ,mixerChannel(0)
   ,tableRow(-1)
   ,tableCol(-1)
+  ,moveDisabled(false)
 {
 }

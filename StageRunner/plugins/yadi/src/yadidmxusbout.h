@@ -30,8 +30,12 @@ private:
 	QStringList output_devices;
 	QStringList input_devices;
 
-	bool write_universe_debug_out;
 	QMutex *accessMutex;
+	bool write_universe_debug_out;
+	int m_reOpenOutput;
+	int m_reOpenInput;
+	int m_comErrorCounter;
+	int m_totalComErrorCounter;
 
 public:
 	YadiDMXUSBOut();
@@ -66,15 +70,19 @@ public:
 private:
 	void handle_output_error(quint32 output);
 	void update_output_monitor(quint32 output, const QByteArray& universe);
+	bool internOpenOutput(quint32 output);
+	bool internOpenInput(quint32 input);
 
 signals:
-
+	void communicationErrorDetected();
+	void errorMsgEmitted(QString msg);
 
 public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
 	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
 	void inputDeviceFailed(int input);
 	void outputDeviceFailed(int output);
+	void handleCommunicationError();
 
 };
 

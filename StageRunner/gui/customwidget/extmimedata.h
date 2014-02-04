@@ -24,6 +24,7 @@ public:
 	QDrag *dragObject;
 	int tableRow;
 	int tableCol;
+	bool moveDisabled;
 
 public:
 	ExtMimeData();
