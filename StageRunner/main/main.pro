@@ -181,7 +181,27 @@ HEADERS  += \
 	../tool/psmovingaverage.h \
 	../tool/frqspectrum.h \
 	../gui/customwidget/psspectrometer.h \
-	../appcontrol/fxlistvarset.h
+	../appcontrol/fxlistvarset.h \
+    ../thirdparty/fftreal2/ffft/Array.h \
+    ../thirdparty/fftreal2/ffft/Array.hpp \
+    ../thirdparty/fftreal2/ffft/def.h \
+    ../thirdparty/fftreal2/ffft/DynArray.h \
+    ../thirdparty/fftreal2/ffft/DynArray.hpp \
+    ../thirdparty/fftreal2/ffft/FFTReal.h \
+    ../thirdparty/fftreal2/ffft/FFTReal.hpp \
+    ../thirdparty/fftreal2/ffft/FFTRealFixLen.h \
+    ../thirdparty/fftreal2/ffft/FFTRealFixLen.hpp \
+    ../thirdparty/fftreal2/ffft/FFTRealFixLenParam.h \
+    ../thirdparty/fftreal2/ffft/FFTRealPassDirect.h \
+    ../thirdparty/fftreal2/ffft/FFTRealPassDirect.hpp \
+    ../thirdparty/fftreal2/ffft/FFTRealPassInverse.h \
+    ../thirdparty/fftreal2/ffft/FFTRealPassInverse.hpp \
+    ../thirdparty/fftreal2/ffft/FFTRealSelect.h \
+    ../thirdparty/fftreal2/ffft/FFTRealSelect.hpp \
+    ../thirdparty/fftreal2/ffft/FFTRealUseTrigo.h \
+    ../thirdparty/fftreal2/ffft/FFTRealUseTrigo.hpp \
+    ../thirdparty/fftreal2/ffft/OscSinCos.h \
+    ../thirdparty/fftreal2/ffft/OscSinCos.hpp
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
