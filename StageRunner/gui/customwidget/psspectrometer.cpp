@@ -10,6 +10,7 @@ PsSpectrometer::PsSpectrometer(QWidget *parent, int specSize)
 	, m_bars(specSize)
 	, m_showLowBand(0)
 	, m_showHiBand(specSize-1)
+	, m_isZoomed(false)
 {
 	m_timer.start();
 }
@@ -58,25 +59,23 @@ void PsSpectrometer::paintEvent(QPaintEvent *event)
 			}
 		}
 
-		p.setBrush(QBrush(Qt::blue));
-		p.drawRect(i*w_bar,0,w_bar,bar.lastPeak);
-
+		p.setPen(QPen());
 		p.setBrush(QBrush(Qt::red));
+		p.drawRect(i*w_bar,bar.lastPeak-1,w_bar,3);
+
+		p.setBrush(QBrush(Qt::blue));
 		p.drawRect(i*w_bar,0,w_bar,y_bar);
 	}
 }
 
 void PsSpectrometer::mousePressEvent(QMouseEvent *)
 {
-	if (m_spectrum.size() == BANDS_NORMAL) {
-		m_spectrum.setFrqBands(BANDS_ZOOM);
-		m_bars.resize(BANDS_ZOOM);
-		m_showHiBand = BANDS_ZOOM/2;
+	if (!m_isZoomed) {
+		m_showHiBand = m_spectrum.size()/4;
 	} else {
-		m_spectrum.setFrqBands(BANDS_NORMAL);
-		m_bars.resize(BANDS_NORMAL);
-		m_showHiBand = BANDS_NORMAL-1;
+		m_showHiBand = m_spectrum.size()-1;
 	}
+	m_isZoomed = !m_isZoomed;
 	update();
 }
 

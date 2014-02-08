@@ -5,6 +5,7 @@
 #include "commandsystem.h"
 #include "psmovingaverage.h"
 #include "frqspectrum.h"
+#include "fftrealfixlenwrapper.h"
 
 #include <QIODevice>
 #include <QTime>
@@ -14,7 +15,6 @@
 #endif // IS_QT5
 
 class QAudioFormat;
-class FFTRealWrapper;
 
 class AudioIODevice : public QIODevice
 {
@@ -52,17 +52,11 @@ private:
 
 	PsMovingAverage<qreal> *m_leftAvg;
 	PsMovingAverage<qreal> *m_rightAvg;
-	FFTRealWrapper *m_leftFFT;
-	FFTRealWrapper *m_rightFFT;
-
+	FFTRealFixLenWrapper m_leftFFT;
+	FFTRealFixLenWrapper m_rightFFT;
+	FrqSpectrum m_leftSpectrum;
+	FrqSpectrum m_rightSpectrum;
 	bool m_fftEnabled;
-	int m_fftDim;
-	QVector<float> m_windowDat;
-	QVector<float> m_outFFTDat[4];
-	QVector<float> m_inFFTDat[4];
-	QVector<float> m_inBuffer[4];
-	FrqSpectrum m_frqSpectrum[4];
-	float * m_outFFTFloat[4];
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}

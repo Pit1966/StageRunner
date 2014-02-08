@@ -18,9 +18,7 @@ INCLUDEPATH  += ../system
 INCLUDEPATH  += ../thirdparty
 INCLUDEPATH  += ../tool
 INCLUDEPATH  += ../plugins/interfaces
-
-fftreal_dir = ../3rdparty/fftreal2
-INCLUDEPATH += $${fftreal_dir}
+INCLUDEPATH  += ../thirdparty/fftreal2
 
 
 QT += core gui
@@ -108,7 +106,8 @@ SOURCES += \
 	../tool/psmovingaverage.cpp \
 	../tool/frqspectrum.cpp \
 	../gui/customwidget/psspectrometer.cpp \
-	../appcontrol/fxlistvarset.cpp
+	../appcontrol/fxlistvarset.cpp \
+	../tool/fftrealfixlenwrapper.cpp
 
 HEADERS  += \
 	../config.h \
@@ -182,26 +181,27 @@ HEADERS  += \
 	../tool/frqspectrum.h \
 	../gui/customwidget/psspectrometer.h \
 	../appcontrol/fxlistvarset.h \
-    ../thirdparty/fftreal2/ffft/Array.h \
-    ../thirdparty/fftreal2/ffft/Array.hpp \
-    ../thirdparty/fftreal2/ffft/def.h \
-    ../thirdparty/fftreal2/ffft/DynArray.h \
-    ../thirdparty/fftreal2/ffft/DynArray.hpp \
-    ../thirdparty/fftreal2/ffft/FFTReal.h \
-    ../thirdparty/fftreal2/ffft/FFTReal.hpp \
-    ../thirdparty/fftreal2/ffft/FFTRealFixLen.h \
-    ../thirdparty/fftreal2/ffft/FFTRealFixLen.hpp \
-    ../thirdparty/fftreal2/ffft/FFTRealFixLenParam.h \
-    ../thirdparty/fftreal2/ffft/FFTRealPassDirect.h \
-    ../thirdparty/fftreal2/ffft/FFTRealPassDirect.hpp \
-    ../thirdparty/fftreal2/ffft/FFTRealPassInverse.h \
-    ../thirdparty/fftreal2/ffft/FFTRealPassInverse.hpp \
-    ../thirdparty/fftreal2/ffft/FFTRealSelect.h \
-    ../thirdparty/fftreal2/ffft/FFTRealSelect.hpp \
-    ../thirdparty/fftreal2/ffft/FFTRealUseTrigo.h \
-    ../thirdparty/fftreal2/ffft/FFTRealUseTrigo.hpp \
-    ../thirdparty/fftreal2/ffft/OscSinCos.h \
-    ../thirdparty/fftreal2/ffft/OscSinCos.hpp
+	../thirdparty/fftreal2/ffft/Array.h \
+	../thirdparty/fftreal2/ffft/Array.hpp \
+	../thirdparty/fftreal2/ffft/def.h \
+	../thirdparty/fftreal2/ffft/DynArray.h \
+	../thirdparty/fftreal2/ffft/DynArray.hpp \
+	../thirdparty/fftreal2/ffft/FFTReal.h \
+	../thirdparty/fftreal2/ffft/FFTReal.hpp \
+	../thirdparty/fftreal2/ffft/FFTRealFixLen.h \
+	../thirdparty/fftreal2/ffft/FFTRealFixLen.hpp \
+	../thirdparty/fftreal2/ffft/FFTRealFixLenParam.h \
+	../thirdparty/fftreal2/ffft/FFTRealPassDirect.h \
+	../thirdparty/fftreal2/ffft/FFTRealPassDirect.hpp \
+	../thirdparty/fftreal2/ffft/FFTRealPassInverse.h \
+	../thirdparty/fftreal2/ffft/FFTRealPassInverse.hpp \
+	../thirdparty/fftreal2/ffft/FFTRealSelect.h \
+	../thirdparty/fftreal2/ffft/FFTRealSelect.hpp \
+	../thirdparty/fftreal2/ffft/FFTRealUseTrigo.h \
+	../thirdparty/fftreal2/ffft/FFTRealUseTrigo.hpp \
+	../thirdparty/fftreal2/ffft/OscSinCos.h \
+	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
+	../tool/fftrealfixlenwrapper.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

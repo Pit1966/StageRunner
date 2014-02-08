@@ -7,8 +7,7 @@
 #include <QTime>
 #include <QVector>
 
-#define BANDS_NORMAL 20
-#define BANDS_ZOOM 40
+#define BANDS_NORMAL 40
 
 class PsSpectrometer : public QWidget
 {
@@ -32,6 +31,7 @@ private:
 	int m_showLowBand;
 	int m_showHiBand;
 	QTime m_timer;
+	bool m_isZoomed;
 
 public:
 	PsSpectrometer(QWidget *parent = 0, int specSize = BANDS_NORMAL);

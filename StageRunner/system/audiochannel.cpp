@@ -13,7 +13,6 @@
 #include "execcenter.h"
 #include "fxlist.h"
 #include "audioplayer.h"
-#include "fftreal/fftreal_wrapper.h"
 
 #include <QTime>
 #include <QApplication>

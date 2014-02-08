@@ -1,7 +1,6 @@
 #include "audioiodevice.h"
 #include "audioformat.h"
 #include "../system/log.h"
-#include "fftreal/fftreal_wrapper.h"
 #include "frqspectrum.h"
 
 #include <QTime>
@@ -29,24 +28,8 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	m_rightAvg = new PsMovingAverage<qreal>(4);
 
 	// Size of FFT data block
-	m_fftDim = pow(2, FFTLengthPowerOfTwo);
-	qDebug("init FFT Size: %d",m_fftDim);
-	m_windowDat.resize(m_fftDim);
-
-	for (int t=0; t<4; t++) {
-		m_outFFTDat[t].resize(m_fftDim);
-		m_inFFTDat[t].resize(m_fftDim);
-		m_outFFTFloat[t] = new float[m_fftDim];
-	}
-	// Calculate Hann Window
-	for (int t=0; t<m_fftDim; t++) {
-		m_windowDat[t] = 0.5 * (1 - qCos((2 * M_PI * t) / (m_fftDim - 1)));
-	}
-
-	m_leftFFT = new FFTRealWrapper;
-	m_leftFFT = new FFTRealWrapper;
-
-
+	qDebug("init FFT Size: %d",m_leftFFT.fftDimension());
+	m_leftFFT.setOversampling(4);
 
 #ifdef IS_QT5
 	audio_decoder = new QAudioDecoder;
@@ -69,12 +52,6 @@ AudioIODevice::~AudioIODevice()
 	delete audio_format;
 	delete m_leftAvg;
 	delete m_rightAvg;
-	delete m_leftFFT;
-	delete m_rightFFT;
-
-	for (int t=0; t<4; t++) {
-		delete [] m_outFFTFloat[t];
-	}
 }
 
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
@@ -212,28 +189,35 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	switch (audioFormat.sampleType()) {
 	case QAudioFormat::SignedInt:
 	case QAudioFormat::UnSignedInt:
-	{
 		switch (audioFormat.sampleSize()) {
 		case 16:
-		{
-			const qint16 *dat = reinterpret_cast<const qint16*>(data);
-			frames /= 2;
+			{
+				const qint16 *dat = reinterpret_cast<const qint16*>(data);
+				frames /= 2;
 
-			for (int chan = 0; chan < channels; chan++) {
-				for (int frame = 0; frame<frames; frame++) {
-					const qint16 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
-					if (valF > sample_peak)
-						sample_peak = valF;
-					if (valF > peak[chan])
-						peak[chan] = valF;
+				for (int chan = 0; chan < channels; chan++) {
+					for (int frame = 0; frame<frames; frame++) {
+						const qint16 val = dat[frame*channels+chan];
+						const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
+						if (valF > sample_peak)
+							sample_peak = valF;
+						if (valF > peak[chan])
+							peak[chan] = valF;
 
-					energy[chan] += valF * valF;
-					if (m_fftEnabled && chan == 0)
-						m_inBuffer[chan].append(valF);
+						energy[chan] += valF * valF;
+						if (m_fftEnabled) {
+							switch (chan) {
+							case 0:
+								m_leftFFT.appendToBuffer(valF);
+								break;
+							case 1:
+								m_rightFFT.appendToBuffer(valF);
+								break;
+							}
+						}
+					}
 				}
 			}
-		}
 			break;
 		default:
 			DEBUGERROR("Sampletype in audiostream not supported");
@@ -241,10 +225,10 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 		}
 		left = sqrt(energy[0] / frames);
 		right = sqrt(energy[1] / frames);
-	}
 		break;
+
 	case QAudioFormat::Float:
-	{
+		{
 		switch (audioFormat.sampleSize()) {
 		case 32:
 		{
@@ -263,8 +247,16 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 						peak[chan] = valF;
 
 					energy[chan] += valF * valF;
-					if (m_fftEnabled && chan == 0)
-						m_inBuffer[chan].append(valF);
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -293,50 +285,26 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 
 	emit vuLevelChanged(left * 1.8,right * 1.8);
 
-	static int hit = 0;
-	static int flag = 0;
-	bool e = false;
 	if (m_fftEnabled) {
-		while (m_inBuffer[0].size() >= m_fftDim) {
-			for (int t=0; t<m_fftDim; t++) {
-				if (t>hit) {
-					if (t > 1020) {
-						flag = 1;
-					}
-					hit = t;
-				}
-				if (flag == 1)
-					qDebug() << t << m_inFFTDat[0].size()  << m_outFFTDat[0].size() << m_inBuffer[0].size() << m_windowDat.size() << m_fftDim;
-				if (flag == 2 && t < 3)
-					qDebug() << t << m_inFFTDat[0].size() << m_outFFTDat[0].size() << m_inBuffer[0].size() << m_windowDat.size() << m_fftDim;
+		while (m_leftFFT.bufferFilled()) {
+			m_leftFFT.calculateFFT();
 
-				m_inFFTDat[0][t] = m_inBuffer[0][t] * m_windowDat[t];
-
-			}
-
-			// m_leftFFT->calculateFFT(m_outFFTFloat[0], m_inFFTDat[0].data());
-			m_leftFFT->calculateFFT(m_outFFTFloat[0], m_inFFTDat[0].data());
-
-
-			//m_frqSpectrum[0].fillSpectrumFFTQVectorArray(m_outFFTDat[0]);
-			m_frqSpectrum[0].fillSpectrumFFTFloatArray(m_outFFTFloat[0],m_fftDim);
-
-			m_inBuffer[0].remove(0,m_fftDim/8);
-
-			e = true;
-
-			flag ++;
+			m_leftSpectrum.fillSpectrumFFTQVectorArray(m_leftFFT.fftComplexArray());
+			emit frqSpectrumChanged(&m_leftSpectrum);
 		}
 	} else {
-		m_inBuffer[0].clear();
+		m_leftFFT.clearBuffer();
 	}
+	if (m_fftEnabled) {
+		while (m_rightFFT.bufferFilled()) {
+			m_rightFFT.calculateFFT();
 
-	if (e) {
-		emit frqSpectrumChanged(&m_frqSpectrum[0]);
+			m_rightSpectrum.fillSpectrumFFTQVectorArray(m_rightFFT.fftComplexArray());
+			emit frqSpectrumChanged(&m_rightSpectrum);
+		}
 	} else {
-		// qDebug("  no fft");
+		m_rightFFT.clearBuffer();
 	}
-
 }
 
 

@@ -51,6 +51,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem)
 
 void FxItemTool::setClonedFxName(FxItem *srcItem, FxItem *destItem, FxList *fxList)
 {
+	Q_UNUSED(fxList);
+
 	int pos = srcItem->name().indexOf("_cp");
 	if (pos > 0) {
 		int num = srcItem->name().mid(pos + 3).toInt();
