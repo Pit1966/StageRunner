@@ -58,10 +58,11 @@ private:
 	bool m_fftEnabled;
 	int m_fftDim;
 	QVector<float> m_windowDat;
-	QVector<float> m_inBuffer[4];
-	QVector<float> m_inFFTDat[4];
 	QVector<float> m_outFFTDat[4];
+	QVector<float> m_inFFTDat[4];
+	QVector<float> m_inBuffer[4];
 	FrqSpectrum m_frqSpectrum[4];
+	float * m_outFFTFloat[4];
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}

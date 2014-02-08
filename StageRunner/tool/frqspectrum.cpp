@@ -51,6 +51,35 @@ void FrqSpectrum::fillSpectrumFFTQVectorArray(const QVector<float> &fftArray)
 	}
 }
 
+void FrqSpectrum::fillSpectrumFFTFloatArray(const float fftArray[], int arraySize)
+{
+	// Amount of frequency bands is half than FFT result size (nyquist)
+	int bands = arraySize/2;
+
+	// Resize the spectrum if source array does not have the same size
+	if (bands != m_bands.size())
+		setFrqBands(bands);
+
+
+	for (int t=0; t<bands; t++) {
+		const float real = fftArray[t];
+		const float imag = fftArray[bands + t];
+		const float magnitude = sqrt(real * real + imag * imag);
+		const float level = log(magnitude) * 0.18f;
+
+		if (level < 0.0f) {
+			m_bands[t].level = 0.0f;
+		}
+		else if (level > 1.0f) {
+			m_bands[t].level = 1.0f;
+		}
+		else {
+			m_bands[t].level = level;
+		}
+
+	}
+}
+
 float FrqSpectrum::getPeakSpecFromSegment(int seg, int segments) const
 {
 	if (seg >= segments)

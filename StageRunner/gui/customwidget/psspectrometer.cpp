@@ -16,6 +16,7 @@ PsSpectrometer::PsSpectrometer(QWidget *parent, int specSize)
 
 void PsSpectrometer::paintEvent(QPaintEvent *event)
 {
+
 	QRect drawRect = event->rect();
 	int w = drawRect.width();
 	int h = drawRect.height();

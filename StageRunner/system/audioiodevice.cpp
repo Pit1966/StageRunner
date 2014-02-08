@@ -36,6 +36,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	for (int t=0; t<4; t++) {
 		m_outFFTDat[t].resize(m_fftDim);
 		m_inFFTDat[t].resize(m_fftDim);
+		m_outFFTFloat[t] = new float[m_fftDim];
 	}
 	// Calculate Hann Window
 	for (int t=0; t<m_fftDim; t++) {
@@ -70,6 +71,10 @@ AudioIODevice::~AudioIODevice()
 	delete m_rightAvg;
 	delete m_leftFFT;
 	delete m_rightFFT;
+
+	for (int t=0; t<4; t++) {
+		delete [] m_outFFTFloat[t];
+	}
 }
 
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
@@ -288,19 +293,39 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 
 	emit vuLevelChanged(left * 1.8,right * 1.8);
 
+	static int hit = 0;
+	static int flag = 0;
 	bool e = false;
 	if (m_fftEnabled) {
 		while (m_inBuffer[0].size() >= m_fftDim) {
-			for (int t=0; t<m_fftDim; t++)
+			for (int t=0; t<m_fftDim; t++) {
+				if (t>hit) {
+					if (t > 1020) {
+						flag = 1;
+					}
+					hit = t;
+				}
+				if (flag == 1)
+					qDebug() << t << m_inFFTDat[0].size()  << m_outFFTDat[0].size() << m_inBuffer[0].size() << m_windowDat.size() << m_fftDim;
+				if (flag == 2 && t < 3)
+					qDebug() << t << m_inFFTDat[0].size() << m_outFFTDat[0].size() << m_inBuffer[0].size() << m_windowDat.size() << m_fftDim;
+
 				m_inFFTDat[0][t] = m_inBuffer[0][t] * m_windowDat[t];
 
-			m_leftFFT->calculateFFT(m_outFFTDat[0].data(), m_inFFTDat[0].data());
+			}
 
-			m_frqSpectrum[0].fillSpectrumFFTQVectorArray(m_outFFTDat[0]);
+			// m_leftFFT->calculateFFT(m_outFFTFloat[0], m_inFFTDat[0].data());
+			m_leftFFT->calculateFFT(m_outFFTFloat[0], m_inFFTDat[0].data());
+
+
+			//m_frqSpectrum[0].fillSpectrumFFTQVectorArray(m_outFFTDat[0]);
+			m_frqSpectrum[0].fillSpectrumFFTFloatArray(m_outFFTFloat[0],m_fftDim);
 
 			m_inBuffer[0].remove(0,m_fftDim/8);
 
 			e = true;
+
+			flag ++;
 		}
 	} else {
 		m_inBuffer[0].clear();

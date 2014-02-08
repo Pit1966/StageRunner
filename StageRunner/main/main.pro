@@ -19,7 +19,7 @@ INCLUDEPATH  += ../thirdparty
 INCLUDEPATH  += ../tool
 INCLUDEPATH  += ../plugins/interfaces
 
-fftreal_dir = ../3rdparty/fftreal
+fftreal_dir = ../3rdparty/fftreal2
 INCLUDEPATH += $${fftreal_dir}
 
 
@@ -105,10 +105,10 @@ SOURCES += \
 	../system/audioplayer.cpp \
 	../appcontrol/scapplication.cpp \
 	../system/unixsignalcatcher.cpp \
-    ../tool/psmovingaverage.cpp \
-    ../tool/frqspectrum.cpp \
-    ../gui/customwidget/psspectrometer.cpp \
-    ../appcontrol/fxlistvarset.cpp
+	../tool/psmovingaverage.cpp \
+	../tool/frqspectrum.cpp \
+	../gui/customwidget/psspectrometer.cpp \
+	../appcontrol/fxlistvarset.cpp
 
 HEADERS  += \
 	../config.h \
@@ -178,10 +178,10 @@ HEADERS  += \
 	../system/audioplayer.h \
 	../appcontrol/scapplication.h \
 	../system/unixsignalcatcher.h \
-    ../tool/psmovingaverage.h \
-    ../tool/frqspectrum.h \
-    ../gui/customwidget/psspectrometer.h \
-    ../appcontrol/fxlistvarset.h
+	../tool/psmovingaverage.h \
+	../tool/frqspectrum.h \
+	../gui/customwidget/psspectrometer.h \
+	../appcontrol/fxlistvarset.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -201,17 +201,6 @@ FORMS    += \
 
 RESOURCES += \
 	../gfx_ressource.qrc
-
-# Dynamic linkage against FFTReal DLL
-macx {
-	# Link to fftreal framework
-	LIBS += -F$${fftreal_dir}
-	LIBS += -framework fftreal
-} else {
-	LIBS += -L..$${spectrum_build_dir}
-	LIBS += -lfftreal
-}
-
 
 
 

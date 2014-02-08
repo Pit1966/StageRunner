@@ -27,6 +27,7 @@ public:
 	inline float levelAt(int i) const {return m_bands.at(i).level;}
 
 	void fillSpectrumFFTQVectorArray(const QVector<float> &fftArray);
+	void fillSpectrumFFTFloatArray(const float fftArray[], int arraySize);
 	float getPeakSpecFromSegment(int seg, int segments) const;
 	float getAvgSpecFromSegment(int seg,int segments) const;
 
