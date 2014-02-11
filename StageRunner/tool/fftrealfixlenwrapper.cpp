@@ -25,13 +25,14 @@ FFTRealFixLenWrapper::FFTRealFixLenWrapper()
  , m_fftComplexArray(REALFFT_FFT_DIM)
  , m_windowArray(REALFFT_FFT_DIM)
  , m_oversampling(1)
+ , m_hannEnabled(false)
 {
 	init();
 }
 
 FFTRealFixLenWrapper::~FFTRealFixLenWrapper()
 {
-	// delete m_priv;
+	delete m_priv;
 }
 
 void FFTRealFixLenWrapper::calculateFFT()
@@ -40,9 +41,14 @@ void FFTRealFixLenWrapper::calculateFFT()
 	Q_ASSERT(m_inBuffer.size() >= REALFFT_FFT_DIM);
 
 	// Copy Buffer Dat to fft_in Buffer
-	for (int t=0; t<REALFFT_FFT_DIM; t++)
-		m_fftRealArray[t] = m_inBuffer[t] * m_windowArray[t];
 
+	if (m_hannEnabled) {
+		for (int t=0; t<REALFFT_FFT_DIM; t++)
+			m_fftRealArray[t] = m_inBuffer[t] * m_windowArray[t];
+	} else {
+		for (int t=0; t<REALFFT_FFT_DIM; t++)
+			m_fftRealArray[t] = m_inBuffer[t];
+	}
 	// remove used data (regarding the oversampling setting
 	m_inBuffer.remove(0,REALFFT_FFT_DIM / m_oversampling);
 

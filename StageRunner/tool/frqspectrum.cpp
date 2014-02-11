@@ -4,6 +4,7 @@
 
 FrqSpectrum::FrqSpectrum(int frqBands)
 	: m_bands(frqBands)
+	, m_maxFrequency(24000.0f)
 {
 }
 
@@ -20,6 +21,14 @@ FrqSpectrum &FrqSpectrum::operator =(const FrqSpectrum &other)
 void FrqSpectrum::setFrqBands(int frqBands)
 {
 	m_bands.fill(Band(),frqBands);
+}
+
+void FrqSpectrum::clear()
+{
+	for (int t=0; t<m_bands.size(); t++) {
+		m_bands[t].level = 0;
+		m_bands[t].phase = 0;
+	}
 }
 
 void FrqSpectrum::fillSpectrumFFTQVectorArray(const QVector<float> &fftArray)
@@ -122,6 +131,7 @@ void FrqSpectrum::transformPeakFrom(const FrqSpectrum &other)
 			m_bands[t].level = other.getPeakSpecFromSegment(t,size());
 		}
 	}
+	m_maxFrequency = other.m_maxFrequency;
 }
 
 void FrqSpectrum::transformAvgFrom(const FrqSpectrum &other)
@@ -131,4 +141,5 @@ void FrqSpectrum::transformAvgFrom(const FrqSpectrum &other)
 			m_bands[t].level = other.getAvgSpecFromSegment(t,size());
 		}
 	}
+	m_maxFrequency = other.m_maxFrequency;
 }

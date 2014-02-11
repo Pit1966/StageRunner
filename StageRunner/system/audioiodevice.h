@@ -47,6 +47,7 @@ private:
 	double frame_energy_peak;
 	double sample_peak;
 
+	int m_currentPlaybackSamplerate;
 	int loop_target;							// How many loops of the sound to play
 	int loop_count;								// Amount of loops the sound has been played already
 

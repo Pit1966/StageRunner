@@ -15,11 +15,13 @@ class PsSpectrometer : public QWidget
 private:
 	struct Bar {
 		Bar()
-			: lastPeak(0)
+			: value(0)
+			, lastPeak(0)
 			, peakAtMs(0)
 			, holdSub(1)
 			, hold(false)
 		{}
+		int value;
 		int lastPeak;
 		int peakAtMs;
 		int holdSub;
@@ -30,6 +32,9 @@ private:
 	QVector<Bar> m_bars;
 	int m_showLowBand;
 	int m_showHiBand;
+	int m_idleTimerId;
+	int m_idleCount;
+	int m_idleBar;
 	QTime m_timer;
 	bool m_isZoomed;
 
@@ -40,6 +45,8 @@ public:
 private:
 	void paintEvent(QPaintEvent *event);
 	void mousePressEvent(QMouseEvent *);
+	void timerEvent(QTimerEvent *ev);
+	void animateIdle();
 
 signals:
 

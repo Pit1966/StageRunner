@@ -20,6 +20,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_format = new AudioFormat(format);
 	audio_buffer = new QByteArray;
 	m_fftEnabled = false;
+	m_currentPlaybackSamplerate = 0;
 
 	loop_count = 0;
 	loop_target = 0;
@@ -144,7 +145,7 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 	audio_decoder->setAudioFormat(*audio_format);
 #endif
 	current_filename = filename;
-
+	m_currentPlaybackSamplerate = 0;
 	return true;
 }
 
@@ -290,6 +291,10 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 			m_leftFFT.calculateFFT();
 
 			m_leftSpectrum.fillSpectrumFFTQVectorArray(m_leftFFT.fftComplexArray());
+			if (audioFormat.sampleRate() > m_currentPlaybackSamplerate) {
+				m_currentPlaybackSamplerate = audioFormat.sampleRate();
+				m_leftSpectrum.setMaxFrequency(double(m_currentPlaybackSamplerate) / 2);
+			}
 			emit frqSpectrumChanged(&m_leftSpectrum);
 		}
 	} else {
@@ -300,6 +305,10 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 			m_rightFFT.calculateFFT();
 
 			m_rightSpectrum.fillSpectrumFFTQVectorArray(m_rightFFT.fftComplexArray());
+			if (audioFormat.sampleRate() > m_currentPlaybackSamplerate) {
+				m_currentPlaybackSamplerate = audioFormat.sampleRate();
+				m_leftSpectrum.setMaxFrequency(double(m_currentPlaybackSamplerate) / 2);
+			}
 			emit frqSpectrumChanged(&m_rightSpectrum);
 		}
 	} else {

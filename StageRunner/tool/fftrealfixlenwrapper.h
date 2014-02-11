@@ -17,6 +17,7 @@ public:
 
 	inline int fftDimension() const {return REALFFT_FFT_DIM;}
 	inline void setOversampling(int over) {m_oversampling = over;}
+	inline void setHannEnabled(bool state) {m_hannEnabled = state;}
 	inline void appendToBuffer(float real) {m_inBuffer.append(real);}
 	inline void clearBuffer() {m_inBuffer.clear();}
 	inline bool bufferFilled() const {return m_inBuffer.size() >= REALFFT_FFT_DIM;}
@@ -41,6 +42,7 @@ private:
 	QVector<float>m_inBuffer;
 
 	int m_oversampling;
+	bool m_hannEnabled;
 };
 
 

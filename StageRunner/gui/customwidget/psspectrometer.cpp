@@ -10,9 +10,13 @@ PsSpectrometer::PsSpectrometer(QWidget *parent, int specSize)
 	, m_bars(specSize)
 	, m_showLowBand(0)
 	, m_showHiBand(specSize-1)
+	, m_idleTimerId(0)
+	, m_idleCount(0)
+	, m_idleBar(0)
 	, m_isZoomed(false)
 {
 	m_timer.start();
+	m_idleTimerId = startTimer(40);
 }
 
 void PsSpectrometer::paintEvent(QPaintEvent *event)
@@ -24,14 +28,23 @@ void PsSpectrometer::paintEvent(QPaintEvent *event)
 	int bars = m_showHiBand - m_showLowBand + 1;
 
 	QPainter p(this);
+	p.fillRect(drawRect,QColor(Qt::black));
+	if (frqBands() <= 0) return;
+
+	float freq = m_spectrum.maxFrequency() * (m_showHiBand+1) / frqBands();
+	QFont font;
+	font.setPointSize(6);
+	p.setFont(font);
+	p.setPen(QPen(Qt::white));
+	p.drawText(QRect(0,0,w,10),tr("max %1Hz").arg(freq),QTextOption(Qt::AlignRight));
+
 	// this mirrors the paintarea at x-axes. 0,0 coordinate is now left/bottom
 	p.setViewport(0,h,w,-h);
-	p.fillRect(drawRect,QColor(Qt::black));
 
 	if (bars <= 0)
 		return;
 
-	int w_bar = w / bars;
+	float w_bar = float(w) / bars;
 
 
 	for (int i=m_showLowBand; i<=m_showHiBand; i++) {
@@ -40,6 +53,7 @@ void PsSpectrometer::paintEvent(QPaintEvent *event)
 		Bar &bar = m_bars[i];
 
 		int y_bar = float(h) * m_spectrum.levelAt(i);
+		bar.value = y_bar;
 		if (y_bar >= bar.lastPeak) {
 			bar.lastPeak = y_bar;
 			bar.peakAtMs = m_timer.elapsed();
@@ -61,11 +75,12 @@ void PsSpectrometer::paintEvent(QPaintEvent *event)
 
 		p.setPen(QPen());
 		p.setBrush(QBrush(Qt::red));
-		p.drawRect(i*w_bar,bar.lastPeak-1,w_bar,3);
+		p.drawRect(w_bar * i,bar.lastPeak-1,w_bar,3);
 
-		p.setBrush(QBrush(Qt::blue));
-		p.drawRect(i*w_bar,0,w_bar,y_bar);
+		p.setBrush(QBrush(QColor(0x4050ff)));
+		p.drawRect(w_bar * i,0,w_bar,y_bar);
 	}
+
 }
 
 void PsSpectrometer::mousePressEvent(QMouseEvent *)
@@ -79,13 +94,48 @@ void PsSpectrometer::mousePressEvent(QMouseEvent *)
 	update();
 }
 
+void PsSpectrometer::timerEvent(QTimerEvent *ev)
+{
+	if (ev->timerId() == m_idleTimerId) {
+		if (m_idleCount == 1) {
+			m_spectrum.clear();
+			m_idleCount--;
+		}
+		else if (m_idleCount == 0) {
+			animateIdle();
+			update();
+		}
+		else {
+			m_idleCount--;
+		}
+	}
+}
+
+void PsSpectrometer::animateIdle()
+{
+	if (m_idleBar <= frqBands()) {
+		if (m_idleBar < frqBands()) {
+			m_bars[m_idleBar].lastPeak = height();
+			m_bars[m_idleBar].peakAtMs = m_timer.elapsed();
+			m_bars[m_idleBar].hold = true;
+		}
+	} else {
+		if (m_idleBar > 100) {
+			m_idleBar = 0;
+		}
+	}
+	m_idleBar++;
+}
+
 void PsSpectrometer::setFrqSpectrum(FrqSpectrum *newSpectrum)
 {
 	if (!newSpectrum) return;
+	m_idleCount = 40;
 
 	// Transform the spectral data
 	m_spectrum.transformPeakFrom(*newSpectrum);
 	// m_spectrum.transformAvgFrom(*newSpectrum);
 	// and initiate a gui update
 	update();
+	// qDebug("samplerate: %f",newSpectrum->maxFrequency());
 }

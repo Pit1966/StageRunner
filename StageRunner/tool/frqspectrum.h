@@ -17,11 +17,15 @@ public:
 
 private:
 	QVector<Band> m_bands;
+	double m_maxFrequency;
 
 public:
 	FrqSpectrum(int frqBands = 8192);
 	FrqSpectrum & operator = (const FrqSpectrum &other);
 	void setFrqBands(int frqBands);
+	void clear();
+	inline void setMaxFrequency(double val) {m_maxFrequency = val;}
+	inline double maxFrequency() const {return m_maxFrequency;}
 	inline int size() const {return m_bands.count();}
 	inline const Band bandAt(int i) const {return m_bands.at(i);}
 	inline float levelAt(int i) const {return m_bands.at(i).level;}
