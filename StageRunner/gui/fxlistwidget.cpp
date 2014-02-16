@@ -917,12 +917,21 @@ void FxListWidget::on_autoProceedCheck_clicked(bool checked)
 void FxListWidget::on_loopCheck_clicked(bool checked)
 {
 	if (myfxlist) {
+		FxItem *parentfx = myfxlist->parentFx();
 		myfxlist->setLoopList(checked);
 		if (checked) {
-			myfxlist->setLoopTimes(1000);
+			if (parentfx) {
+				parentfx->setLoopValue(10000);
+			} else {
+				myfxlist->setLoopTimes(100000);
+			}
 			myfxlist->setLoopList(true);
 		} else {
-			myfxlist->setLoopTimes(1);
+			if (parentfx) {
+				parentfx->setLoopValue(1);
+			} else {
+				myfxlist->setLoopTimes(1);
+			}
 			myfxlist->setLoopList(false);
 		}
 	}

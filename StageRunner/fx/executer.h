@@ -91,7 +91,8 @@ protected:
 	FxItem *nxtFx;
 
 private:
-	int playbackProgress;
+	int m_playbackProgress;
+	int m_loopCount;
 
 public:
 	inline TYPE type() {return EXEC_FXLIST;}

@@ -22,6 +22,9 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	setWindowTitle("Fx Editor");
 	setObjectName("DockFxEditor");
 
+	audioGroup->setVisible(false);
+	sceneGroup->setVisible(false);
+
 	keyEdit->setSingleKeyEditEnabled(true);
 
 	connect(nameEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
@@ -56,6 +59,8 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 {
 	if (!FxItem::exists(fx)) {
 		cur_fx = 0;
+		audioGroup->setVisible(false);
+		sceneGroup->setVisible(false);
 		return false;
 	}
 	cur_fx = fx;

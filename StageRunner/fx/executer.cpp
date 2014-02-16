@@ -123,6 +123,8 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 	, fxList(fx_list)
 	, curFx(0)
 	, nxtFx(0)
+	, m_playbackProgress(0)
+	, m_loopCount(0)
 {
 	init();
 }
@@ -253,7 +255,7 @@ void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 	}
 	else if (msg.ctrlCmd == CMD_STATUS_REPORT) {
 		if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
-			emit listProgressStepChanged(playbackProgress, msg.progress);
+			emit listProgressStepChanged(m_playbackProgress, msg.progress);
 		}
 	}
 }
@@ -274,8 +276,6 @@ void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 
 void FxListExecuter::init()
 {
-	playbackProgress = 0;
-
 	connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	// connect(myApp.unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	connect(myApp.unitLight,SIGNAL(sceneChanged(FxSceneItem*)),this,SLOT(lightCtrlReceiver(FxSceneItem*)),Qt::DirectConnection);
@@ -313,12 +313,30 @@ FxItem *FxListExecuter::move_to_next_fx()
 			while (pos < fxList->size() && fxList->at(pos) != next) {
 				pos++;
 			}
-			playbackProgress = pos * 1000 / fxList->size();
-			emit listProgressStepChanged(playbackProgress,0);
+			m_playbackProgress = pos * 1000 / fxList->size();
+			emit listProgressStepChanged(m_playbackProgress,0);
+		}
+	}
+
+	// Check for fxList end
+	if (!next) {
+		// Check if playback of list is looped
+		m_loopCount++;
+		if (m_loopCount < fxList->loopTimes()) {
+			fxList->resetFxItemsForNewExecuter();
+			fxList->resetFxItems();
+			if (fxList->isRandomized()) {
+				next = fxList->findSequenceRandomFxItem();
+			} else {
+				next = fxList->findSequenceFirstItem();
+			}
 		}
 	}
 
 	setCurrentFx(next);
+
+//	QString nextName = next!=0?next->name():QString("NULL");
+//	qDebug() << "move to next fx" << nextName;
 
 	return next;
 }

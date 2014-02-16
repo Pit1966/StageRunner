@@ -17,7 +17,7 @@ public:
 	inline static int devices() {return globYadiDeviceList.size();}
 	static int enumerateYadiDevices(bool update = false);
 	static void clearYadiDevices();
-	static int initYadiDevices();
+	static void initYadiDevices();
 	static YadiDevice * getDevice(const QString &dev_node, int cap);
 	static void updateYadiDevicesStatus();
 	static QList<YadiDevice*> & globalDeviceList() {return globYadiDeviceList;}

@@ -107,7 +107,8 @@ SOURCES += \
 	../tool/frqspectrum.cpp \
 	../gui/customwidget/psspectrometer.cpp \
 	../appcontrol/fxlistvarset.cpp \
-	../tool/fftrealfixlenwrapper.cpp
+	../tool/fftrealfixlenwrapper.cpp \
+    ../gui/customwidget/psvumeter.cpp
 
 HEADERS  += \
 	../config.h \
@@ -201,7 +202,8 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/FFTRealUseTrigo.hpp \
 	../thirdparty/fftreal2/ffft/OscSinCos.h \
 	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
-	../tool/fftrealfixlenwrapper.h
+	../tool/fftrealfixlenwrapper.h \
+    ../gui/customwidget/psvumeter.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

@@ -28,6 +28,7 @@ FxPlayListItem::~FxPlayListItem()
 void FxPlayListItem::setLoopValue(qint32 val)
 {
 	loopTimes = val;
+	fxPlayList->setLoopTimes(val);
 }
 
 qint32 FxPlayListItem::loopValue()
@@ -70,7 +71,7 @@ void FxPlayListItem::init()
 
 	addExistingVar(widgetPos,"WidgetPos");
 	addExistingVar(fxPlayList->myLoopFlag,"ListIsLooped");
-	addExistingVar(fxPlayList->myLoopTimes,"LoopTimes");
+	// addExistingVar(fxPlayList->myLoopTimes,"LoopTimes",1,1000000,1);
 	addExistingVar(fxPlayList->myRandomizedFlag,"RandomizedList");
 	addExistingVar(fxPlayList->myAutoProceedFlag,"AutoProceedList");
 	addExistingVarSetList(fxPlayList->nativeFxList(),"AudioPlayList",PrefVarCore::FX_AUDIO_ITEM);

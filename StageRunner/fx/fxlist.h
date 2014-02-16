@@ -42,8 +42,8 @@ public:
 
 protected:
 	int myLoopTimes;
-	bool myAutoProceedFlag;
 	bool myLoopFlag;
+	bool myAutoProceedFlag;
 	bool myRandomizedFlag;
 
 public:
@@ -80,7 +80,7 @@ public:
 	inline bool isRandomized() const {return myRandomizedFlag;}
 	inline void setProtected(bool state) {m_isProtected = state;}
 	inline bool isProtected() const {return m_isProtected;}
-	int loopTimes() const;
+	int loopTimes();
 	void setLoopTimes(int loops);
 
 	bool addFxAudioSimple(const QString & path, int pos = -1);
@@ -101,6 +101,7 @@ public:
 	FxItem * findSequenceFollower(FxItem *curfx = 0);
 	FxItem * findSequenceForerunner(FxItem *curfx = 0);
 	FxItem * findSequenceRandomFxItem();
+	FxItem * findSequenceFirstItem();
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();

@@ -75,6 +75,10 @@ public:
 		return list.indexOf(t, from);
 	}
 
+	inline T first() {
+		return list.first();
+	}
+
 
 };
 

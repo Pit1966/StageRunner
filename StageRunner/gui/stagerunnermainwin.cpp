@@ -277,6 +277,8 @@ void StageRunnerMainWin::initAppDefaults()
 
 	// Set Audio Defaults
 	appCentral->unitAudio->setFFTAudioChannelFromMask(appCentral->userSettings->pFFTAudioMask);
+	audioCtrlGroup->setFFTGraphEnabledFromMask(appCentral->userSettings->pFFTAudioMask);
+	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask == 15);
 
 	// Load Default Template FxList
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))

@@ -265,7 +265,7 @@ void YadiDeviceManager::clearYadiDevices()
 	}
 }
 
-int YadiDeviceManager::initYadiDevices()
+void YadiDeviceManager::initYadiDevices()
 {
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		YadiDevice *yadi = globYadiDeviceList.at(t);

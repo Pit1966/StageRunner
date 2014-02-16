@@ -18,7 +18,6 @@ FxList::FxList(FxItem *parentFx) :
 	m_fxCurrent = 0;
 	m_fxParent = parentFx;
 	myAutoProceedFlag = false;
-	myLoopFlag = false;
 	regid = 0;
 	m_isModified = false;
 	myRandomizedFlag = false;
@@ -107,8 +106,18 @@ FxItem *FxList::getFxByListIndex(int idx) const
 	return 0;
 }
 
-int FxList::loopTimes() const
+int FxList::loopTimes()
 {
+	if (m_fxParent) {
+		switch (m_fxParent->fxType()) {
+		case FX_AUDIO_PLAYLIST:
+		case FX_SEQUENCE:
+			myLoopTimes = m_fxParent->loopValue();
+			break;
+		default:
+			break;
+		}
+	}
 	return myLoopTimes;
 }
 
@@ -253,6 +262,15 @@ FxItem *FxList::findSequenceRandomFxItem()
 		}
 		i++;
 	}
+	return fx;
+}
+
+FxItem *FxList::findSequenceFirstItem()
+{
+	FxItem *fx = 0;
+	if (m_fxList.size())
+		fx = m_fxList.first();
+
 	return fx;
 }
 

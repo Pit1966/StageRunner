@@ -50,6 +50,8 @@ void AudioSlotWidget::init_gui()
 	slotVolumeDial->setNotchesVisible(true);
 	slotVolumeDial->setNotchTarget(18);
 
+	connect(meterWidget,SIGNAL(valueChanged(float)),this,SLOT(if_meter_volume_changed(float)));
+	connect(slotVolumeDial,SIGNAL(valueChanged(int)),this,SLOT(if_volume_knob_changed(int)));
 }
 
 void AudioSlotWidget::on_slotPlayButton_clicked()
@@ -85,6 +87,17 @@ void AudioSlotWidget::on_slotPauseButton_clicked()
 	msg.ctrlCmd = CMD_AUDIO_PAUSE;
 	msg.slotNumber = slotNumber;
 	emit audioCtrlCmdEmitted(msg);
+}
+
+void AudioSlotWidget::if_meter_volume_changed(float valf)
+{
+	slotVolumeDial->setValue(valf * slotVolumeDial->maximum());
+	on_slotVolumeDial_sliderMoved(slotVolumeDial->sliderPosition());
+}
+
+void AudioSlotWidget::if_volume_knob_changed(int val)
+{
+	meterWidget->setVolume(float(val) / float(slotVolumeDial->maximum()));
 }
 
 void AudioSlotWidget::on_slotVolumeDial_sliderMoved(int position)

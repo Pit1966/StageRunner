@@ -35,6 +35,8 @@ private slots:
 	void on_slotVolumeDial_doubleClicked();
 	void on_slotAbsButton_clicked(bool checked);
 	void on_slotPauseButton_clicked();
+	void if_meter_volume_changed(float valf);
+	void if_volume_knob_changed(int val);
 
 public slots:
 	void setPlayState(bool state);

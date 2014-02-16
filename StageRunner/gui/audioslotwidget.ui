@@ -135,7 +135,7 @@
     </layout>
    </item>
    <item>
-    <widget class="qsynthMeter" name="meterWidget" native="true">
+    <widget class="PsVuMeter" name="meterWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -203,15 +203,15 @@
    <header>thirdparty/widget/qsynthknob.h</header>
   </customwidget>
   <customwidget>
-   <class>qsynthMeter</class>
-   <extends>QWidget</extends>
-   <header>thirdparty/widget/qsynthmeter.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>PsSpectrometer</class>
    <extends>QWidget</extends>
    <header>gui/customwidget/psspectrometer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PsVuMeter</class>
+   <extends>QWidget</extends>
+   <header>gui/customwidget/psvumeter.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
