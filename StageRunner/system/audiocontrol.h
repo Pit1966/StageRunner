@@ -84,7 +84,7 @@ public slots:
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
-	void setVolumeInFx(int slot, int vol);
+	void setVolumeInFx(int slot, int vol, bool setAsInitVolume);
 	int getVolume(int slot) const;
 	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);

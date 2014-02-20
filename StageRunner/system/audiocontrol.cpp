@@ -467,7 +467,7 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		setVolume(msg.slotNumber,msg.volume);
-		setVolumeInFx(msg.slotNumber,msg.volume);
+		setVolumeInFx(msg.slotNumber,msg.volume, msg.isActive);
 		break;
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
@@ -508,10 +508,10 @@ void AudioControl::setVolume(int slot, int vol)
 	}
 }
 
-void AudioControl::setVolumeInFx(int slot, int vol)
+void AudioControl::setVolumeInFx(int slot, int vol, bool setAsInitVolume)
 {
 	QMutexLocker lock(slotMutex);
-
+	// qDebug() << Q_FUNC_INFO << slot << vol;
 	if (vol < 0) {
 		vol = 0;
 	}
@@ -519,11 +519,18 @@ void AudioControl::setVolumeInFx(int slot, int vol)
 		vol = MAX_VOLUME;
 	}
 	if (slot >= 0 && slot < used_slots) {
-		FxItem *fx = audioSlots[slot]->currentFxAudio();
+		FxAudioItem *fx = audioSlots[slot]->currentFxAudio();
+		if (fx)
+			fx->currentVolume = vol;
+
 		if (fx && fx->parentFxList() && fx->parentFxList()->parentFx()) {
 			FxItem *parentFx = fx->parentFxList()->parentFx();
 			if (parentFx->fxType() == FX_AUDIO_PLAYLIST) {
-				reinterpret_cast<FxPlayListItem*>(parentFx)->initialVolume = vol;
+				if (setAsInitVolume) {
+					reinterpret_cast<FxPlayListItem*>(parentFx)->initialVolume = vol;
+				} else {
+					reinterpret_cast<FxPlayListItem*>(parentFx)->currentVolume = vol;
+				}
 			}
 		}
 	}

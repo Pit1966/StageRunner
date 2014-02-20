@@ -282,7 +282,6 @@
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
     <addaction name="actionExperimental_audio_mode"/>
-    <addaction name="actionEnable_audio_FFT"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">

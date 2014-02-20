@@ -21,6 +21,7 @@ public:
 	qint32 mapAudioToDmxChan[MAX_AUDIO_SLOTS];
 	pint32 pAudioPlayListChannel;
 	pbool pAltAudioEngine;
+	pint32 pVolumeDialMask;
 	pint32 pFFTAudioMask;							///< The bits of this mask corresponds to the FFT enabled status of the channels
 	pstring pFxTemplatePath;						///< This is the default Template File
 

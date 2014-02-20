@@ -74,6 +74,7 @@ public:
 	int progressTime;
 	int loop;
 	int maxloop;
+	bool isActive;
 	FxAudioItem *fxAudio;
 	Executer *executer;
 
@@ -88,6 +89,7 @@ public:
 		, progressTime(0)
 		, loop(0)
 		, maxloop(0)
+		, isActive(false)
 		, fxAudio(0)
 		, executer(exec)
 	{}
@@ -101,6 +103,7 @@ public:
 		, progress(-1)
 		, loop(0)
 		, maxloop(0)
+		, isActive(false)
 		, fxAudio(fxaudio)
 		, executer(exec)
 	{}

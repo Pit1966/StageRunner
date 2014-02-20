@@ -15,13 +15,24 @@ AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	init_gui();
 }
 
-void AudioControlWidget::setFFTGraphEnabledFromMask(qint32 mask)
+void AudioControlWidget::setFFTGraphVisibleFromMask(qint32 mask)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (mask & (1<<t)) {
-			audioSlotWidgets.at(t)->setFFTGraphEnabled(true);
+			audioSlotWidgets.at(t)->setFFTGraphVisible(true);
 		} else {
-			audioSlotWidgets.at(t)->setFFTGraphEnabled(false);
+			audioSlotWidgets.at(t)->setFFTGraphVisible(false);
+		}
+	}
+}
+
+void AudioControlWidget::setVolumeDialVisibleFromMask(qint32 mask)
+{
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (mask & (1<<t)) {
+			audioSlotWidgets.at(t)->setVolumeDialVisible(true);
+		} else {
+			audioSlotWidgets.at(t)->setVolumeDialVisible(false);
 		}
 	}
 }

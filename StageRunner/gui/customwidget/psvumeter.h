@@ -28,6 +28,8 @@ private:
 signals:
 	void valueChanged(float level);
 	void valueChanged(int level);
+	void sliderPressed();
+	void sliderReleased();
 };
 
 #endif // PSVUMETER_H

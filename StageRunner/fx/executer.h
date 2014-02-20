@@ -72,6 +72,7 @@ public:
 	inline FxItem * originFx() const {return originFxItem;}
 	inline FxItem * parentFx() const {return parentFxItem;}
 
+
 signals:
 	void deleteMe(Executer *exec);
 	void changed(Executer *exec);
@@ -92,6 +93,7 @@ protected:
 
 private:
 	int m_playbackProgress;
+	int m_currentInitialVolume;
 	int m_loopCount;
 
 public:
@@ -104,6 +106,7 @@ public:
 	void setCurrentFx(FxItem *fx);
 	inline FxItem * currentFx() const {return curFx;}
 	FxAudioItem * currentFxAudio();
+	inline void setCurrentInitialVol(int vol) {m_currentInitialVolume = vol;}
 
 protected:
 	FxListExecuter(AppCentral & app_central, FxList *fx_list);

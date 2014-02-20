@@ -124,6 +124,7 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 	, curFx(0)
 	, nxtFx(0)
 	, m_playbackProgress(0)
+	, m_currentInitialVolume(-1)
 	, m_loopCount(0)
 {
 	init();

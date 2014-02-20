@@ -222,6 +222,7 @@ void StageRunnerMainWin::clearProject()
 {
 	// Clear Project and project member
 	appCentral->clearProject();
+	setProjectName("");
 
 	// Clear Fx list in GUI
 	fxListWidget->setFxList(appCentral->project->mainFxList());
@@ -277,8 +278,10 @@ void StageRunnerMainWin::initAppDefaults()
 
 	// Set Audio Defaults
 	appCentral->unitAudio->setFFTAudioChannelFromMask(appCentral->userSettings->pFFTAudioMask);
-	audioCtrlGroup->setFFTGraphEnabledFromMask(appCentral->userSettings->pFFTAudioMask);
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask == 15);
+
+	// Copy User Settings to GUI
+	applyUserSettingsToGui(appCentral->userSettings);
 
 	// Load Default Template FxList
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
@@ -312,6 +315,12 @@ void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
 		break;
 	}
 
+}
+
+void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
+{
+	audioCtrlGroup->setFFTGraphVisibleFromMask(set->pFFTAudioMask);
+	audioCtrlGroup->setVolumeDialVisibleFromMask(set->pVolumeDialMask);
 }
 
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
@@ -468,6 +477,7 @@ void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 		appCentral->userSettings->pLastProjectSavePath = path;
 		copyGuiSettingsToProject();
 		if (appCentral->project->saveToFile(path)) {
+			setProjectName(path);
 			POPUPINFOMSG(Q_FUNC_INFO,tr("Project successfully saved!"));
 		} else {
 			POPUPERRORMSG(Q_FUNC_INFO,tr("Could not save project!"));
@@ -689,6 +699,7 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 	SetupWidget setup(appCentral);
 	connect(&setup,SIGNAL(applicationStyleChanged(QString)),this,SLOT(setApplicationGuiStyle(QString)));
 	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateButtonStyles(QString)));
+	connect(&setup,SIGNAL(setupChanged(UserSettings *)),this,SLOT(applyUserSettingsToGui(UserSettings*)));
 
 
 	setup.show();
@@ -810,15 +821,6 @@ void StageRunnerMainWin::on_actionOpen_FxItem_triggered()
 {
 	if (appCentral->globalSelectedFx())
 		openFxItemPanel(appCentral->globalSelectedFx());
-}
-
-void StageRunnerMainWin::on_actionEnable_audio_FFT_triggered(bool checked)
-{
-	qint32 mask = 0;
-	if (checked)
-		mask = 0x0f;
-	appCentral->setFFTAudioChannelMask(mask);
-	audioCtrlGroup->setFFTGraphEnabledFromMask(mask);
 }
 
 void StageRunnerMainWin::on_saveTemplatesButton_clicked()

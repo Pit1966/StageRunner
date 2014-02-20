@@ -25,7 +25,8 @@ public:
 
 public:
 	AudioControlWidget(QWidget *parent = 0);
-	void setFFTGraphEnabledFromMask(qint32 mask);
+	void setFFTGraphVisibleFromMask(qint32 mask);
+	void setVolumeDialVisibleFromMask(qint32 mask);
 
 protected:
 	void resizeEvent(QResizeEvent *event);

@@ -15,6 +15,7 @@ class SceneStatusWidget;
 class FxSceneItem;
 class SequenceStatusWidget;
 class FxListWidget;
+class UserSettings;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -65,6 +66,7 @@ public slots:
 	void updateButtonStyles(QString style = "");
 	void openFxPropertyEditor(FxItem *item);
 	void openFxItemPanel(FxItem *fx);
+	void applyUserSettingsToGui(UserSettings *set);
 
 private slots:
 	void on_addAudioFxButton_clicked();
@@ -89,19 +91,11 @@ private slots:
 	void on_addFxSeqButton_clicked();
 	void on_actionExperimental_audio_mode_triggered(bool checked);
 	void on_actionOpen_FxItem_triggered();
-
-	void on_actionEnable_audio_FFT_triggered(bool checked);
-
 	void on_saveTemplatesButton_clicked();
-
 	void on_loadTemplatesButton_clicked();
-
 	void on_actionShow_Templates_triggered();
-
 	void on_actionShow_Fx_Properties_Editor_triggered();
-
 	void on_actionShow_Scene_Status_triggered();
-
 	void on_actionShow_Sequence_Status_triggered();
 
 private:

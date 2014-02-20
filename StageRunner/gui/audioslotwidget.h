@@ -16,10 +16,14 @@ public:
 	int slotNumber;
 	bool isAbsoluteTime;
 
+private:
+	bool m_volumeDialPressed;
+
 public:
 	AudioSlotWidget(QWidget *parent = 0);
 	AudioSlotWidget(AudioControlWidget *widget);
-	void setFFTGraphEnabled(bool state);
+	void setFFTGraphVisible(bool state);
+	void setVolumeDialVisible(bool state);
 
 
 protected:
@@ -37,6 +41,8 @@ private slots:
 	void on_slotPauseButton_clicked();
 	void if_meter_volume_changed(float valf);
 	void if_volume_knob_changed(int val);
+	void on_slotVolumeDial_sliderPressed();
+	void on_slotVolumeDial_sliderReleased();
 
 public slots:
 	void setPlayState(bool state);

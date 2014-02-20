@@ -130,7 +130,8 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	else if (fxa->parentFxList() && fxa->parentFxList()->parentFx()) {
 		FxItem *fx = fxa->parentFxList()->parentFx();
 		if (FxItem::exists(fx) && fx->fxType() == FX_AUDIO_PLAYLIST) {
-			targetVolume = reinterpret_cast<FxPlayListItem*>(fx)->initialVolume;
+			FxPlayListItem *play = reinterpret_cast<FxPlayListItem*>(fx);
+			targetVolume = play->initialVolume;
 			LOGTEXT(tr("Set initial volume for audio playlist member to %1").arg(targetVolume));
 		}
 	}

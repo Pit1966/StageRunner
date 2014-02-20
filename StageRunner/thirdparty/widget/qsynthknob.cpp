@@ -140,6 +140,7 @@ void qsynthKnob::mouseReleaseEvent ( QMouseEvent *pMouseEvent )
 		QDial::mouseReleaseEvent(pMouseEvent);
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;
+		emit sliderReleased();
 	}
 }
 

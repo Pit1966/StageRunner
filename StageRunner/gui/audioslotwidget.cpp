@@ -11,6 +11,7 @@ AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 {
 	slotNumber = -1;
 	isAbsoluteTime = false;
+	m_volumeDialPressed = false;
 
 	setupUi(this);
 	init_gui();
@@ -31,9 +32,14 @@ AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)
 
 }
 
-void AudioSlotWidget::setFFTGraphEnabled(bool state)
+void AudioSlotWidget::setFFTGraphVisible(bool state)
 {
 	fftFrame->setVisible(state);
+}
+
+void AudioSlotWidget::setVolumeDialVisible(bool state)
+{
+	slotVolumeDial->setVisible(state);
 }
 
 void AudioSlotWidget::resizeEvent(QResizeEvent *event)
@@ -52,6 +58,8 @@ void AudioSlotWidget::init_gui()
 
 	connect(meterWidget,SIGNAL(valueChanged(float)),this,SLOT(if_meter_volume_changed(float)));
 	connect(slotVolumeDial,SIGNAL(valueChanged(int)),this,SLOT(if_volume_knob_changed(int)));
+	connect(meterWidget,SIGNAL(sliderPressed()),this,SLOT(on_slotVolumeDial_sliderPressed()));
+	connect(meterWidget,SIGNAL(sliderReleased()),this,SLOT(on_slotVolumeDial_sliderReleased()));
 }
 
 void AudioSlotWidget::on_slotPlayButton_clicked()
@@ -106,6 +114,7 @@ void AudioSlotWidget::on_slotVolumeDial_sliderMoved(int position)
 	msg.ctrlCmd = CMD_AUDIO_CHANGE_VOL;
 	msg.slotNumber = slotNumber;
 	msg.volume = position;
+	msg.isActive = m_volumeDialPressed;
 	emit audioCtrlCmdEmitted(msg);
 	emit volumeChanged(slotNumber,position);
 }
@@ -196,4 +205,18 @@ void AudioSlotWidget::setVuLevel(qreal left, qreal right)
 void AudioSlotWidget::setFFTSpectrum(FrqSpectrum *spectrum)
 {
 	fftWidget->setFrqSpectrum(spectrum);
+}
+
+
+
+void AudioSlotWidget::on_slotVolumeDial_sliderPressed()
+{
+	qDebug() << "pressed";
+	m_volumeDialPressed = true;
+}
+
+void AudioSlotWidget::on_slotVolumeDial_sliderReleased()
+{
+	qDebug() << "released";
+	m_volumeDialPressed = false;
 }

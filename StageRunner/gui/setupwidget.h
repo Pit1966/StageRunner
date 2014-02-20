@@ -6,6 +6,7 @@
 class AppCentral;
 class QLCIOPlugin;
 class PluginMapping;
+class UserSettings;
 
 class SetupWidget : public QDialog, public Ui::SetupWidget
 {
@@ -22,6 +23,7 @@ public:
 
 private:
 	void init();
+	void initGui();
 	void copy_settings_to_gui();
 	void copy_gui_to_settings();
 	void update_dmx_mapping_table(QLCIOPlugin *plugin);
@@ -42,6 +44,7 @@ private slots:
 signals:
 	void applicationStyleChanged(QString style);
 	void dialKnobStyleChanged(QString style);
+	void setupChanged(UserSettings *);
 };
 
 #endif // SETUPWIDGET_H

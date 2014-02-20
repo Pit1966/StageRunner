@@ -28,6 +28,8 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	init();
 
 	setupUi(this);
+	initGui();
+
 
 	myapp->pluginCentral->updatePluginMappingInformation();
 	cur_plugin_map = myapp->pluginCentral->pluginMapping;
@@ -47,6 +49,26 @@ void SetupWidget::init()
 	cur_selected_qlc_plugin = 0;
 	cur_plugin_map = 0;
 	update_plugin_mapping_f = false;
+}
+
+void SetupWidget::initGui()
+{
+	QHBoxLayout *lay1 = new QHBoxLayout;
+	QHBoxLayout *lay2 = new QHBoxLayout;
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QCheckBox *check1 = new QCheckBox;
+		check1->setObjectName(QString("EnableVolumeDial%1").arg(t));
+		check1->setText(tr("Channel %1").arg(t+1));
+		lay1->addWidget(check1);
+
+		QCheckBox *check2 = new QCheckBox;
+		check2->setObjectName(QString("EnableFFT%1").arg(t));
+		check2->setText(tr("Channel %1").arg(t+1));
+		lay2->addWidget(check2);
+	}
+	showVolumeDialGroup->setLayout(lay1);
+	enableFFTGroup->setLayout(lay2);
 }
 
 void SetupWidget::copy_settings_to_gui()
@@ -85,6 +107,13 @@ void SetupWidget::copy_settings_to_gui()
 	}
 
 	playlistChannelSpin->setValue(qint32(set->pAudioPlayListChannel)+1);
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QCheckBox *check_volumedial = findChild<QCheckBox*>(QString("EnableVolumeDial%1").arg(t));
+		check_volumedial->setChecked(set->pVolumeDialMask & (1<<t));
+		QCheckBox *check_fftenable = findChild<QCheckBox*>(QString("EnableFFT%1").arg(t));
+		check_fftenable->setChecked(set->pFFTAudioMask & (1<<t));
+	}
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -110,6 +139,26 @@ void SetupWidget::copy_gui_to_settings()
 		}
 	}
 	set->pAudioPlayListChannel = playlistChannelSpin->value()-1;
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QCheckBox *check_volumedial = findChild<QCheckBox*>(QString("EnableVolumeDial%1").arg(t));
+		quint32 mask1 = set->pVolumeDialMask;
+		if (check_volumedial->isChecked()) {
+			mask1 |= 1<<t;
+		} else {
+			mask1 &= ~(1<<t);
+		}
+		set->pVolumeDialMask = mask1;
+
+		QCheckBox *check_fftenable = findChild<QCheckBox*>(QString("EnableFFT%1").arg(t));
+		quint32 mask2 = set->pFFTAudioMask;
+		if (check_fftenable->isChecked()) {
+			mask2 |= 1<<t;
+		} else {
+			mask2 &= ~(1<<t);
+		}
+		set->pFFTAudioMask = mask2;
+	}
 }
 
 void SetupWidget::on_okButton_clicked()
@@ -118,6 +167,8 @@ void SetupWidget::on_okButton_clicked()
 	if (update_plugin_mapping_f) {
 		myapp->pluginCentral->updatePluginMappingInformation();
 	}
+	emit setupChanged(myapp->userSettings);
+
 	accept();
 }
 

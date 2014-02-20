@@ -48,6 +48,7 @@ void PsVuMeter::mousePressEvent(QMouseEvent *ev)
 		m_mouseButton = Qt::LeftButton;
 		m_dragBeginMousePos = ev->pos();
 		m_dragBeginVolume = m_volume;
+		emit sliderPressed();
 	}
 }
 
@@ -63,6 +64,7 @@ void PsVuMeter::mouseMoveEvent(QMouseEvent *ev)
 
 void PsVuMeter::mouseReleaseEvent(QMouseEvent *)
 {
+	if (m_mouseButton == Qt::LeftButton)
+		emit sliderReleased();
 	m_mouseButton = 0;
-
 }
