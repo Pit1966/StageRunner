@@ -13,6 +13,7 @@
 #include "execcenter.h"
 #include "fxlist.h"
 #include "audioplayer.h"
+#include "qtstatictools.h"
 
 #include <QTime>
 #include <QApplication>
@@ -107,20 +108,13 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		if (!audio_output) return false;
 	}
 
-
-	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
-		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2 with Executer: %3")
-				.arg(fxa->name()).arg(slotNumber+1).arg(exec->getIdString()));
-	} else {
-		exec = 0;
-		LOGTEXT(tr("Start FxAudio: %1 in audio slot %2")
-				.arg(fxa->name()).arg(slotNumber+1));
-	}
-
 	current_fx = fxa;
 	current_executer = exec;
 	run_status = AUDIO_BUFFERING;
 	run_time.start();
+
+	//
+	qint64 target_pos_ms = startPosMs;
 
 	// Find out what the initial volume for audio is
 	qint32 targetVolume = fxa->initialVolume;
@@ -170,22 +164,27 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		// We get the start play position in ms from the last played seek position in the FxAudio instance
 		if (m_isQMediaPlayerAudio) {
 			if (fxa->seekPosition() == 0) {
+				target_pos_ms = 0;
 				audio_player->seekPlayPosMs(0);
 			}
 			else if (fxa->seekPosition() > 0) {
+				target_pos_ms = fxa->seekPosition();
 				audio_player->seekPlayPosMs(fxa->seekPosition());
 			}
 		} else {
+			target_pos_ms = fxa->seekPosition();
 			audio_io->seekPlayPosMs(fxa->seekPosition());
 		}
+		// Reset the seek position to zero
 		fxa->setSeekPosition(0);
 	} else {
 		if (m_isQMediaPlayerAudio) {
 			if (startPosMs == 0) {
 				audio_player->seekPlayPosMs(0);
 			}
-			else if (startPosMs > 0)
+			else if (startPosMs > 0) {
 				audio_player->seekPlayPosMs(startPosMs);
+			}
 		} else {
 			audio_io->seekPlayPosMs(startPosMs);
 		}
@@ -203,6 +202,15 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	msg.volume = current_volume;
 	msg.executer = exec;
 	emit audioCtrlMsgEmitted(msg);
+
+	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
+		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> with Executer: %3 at position %4 with volume %5")
+				.arg(fxa->name()).arg(slotNumber+1).arg(exec->getIdString()).arg(QtStaticTools::msToTimeString(target_pos_ms)).arg(targetVolume));
+	} else {
+		exec = 0;
+		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> at time %3 with volume %4")
+				.arg(fxa->name()).arg(slotNumber+1).arg(QtStaticTools::msToTimeString(target_pos_ms)).arg(targetVolume));
+	}
 
 	bool ok = false;
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
