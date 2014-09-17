@@ -84,6 +84,7 @@ public:
 	int audioOutputBufferSize() const;
 	void setFFTEnabled(bool state);
 	inline bool isFFTEnabled() const {return m_isFFTEnabled;}
+	QString currentFxName() const;
 
 private:
 	void emit_audio_play_progress();

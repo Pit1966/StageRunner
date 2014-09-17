@@ -634,11 +634,11 @@ void AudioSlot::on_fade_finished()
 		stopFxAudio();
 
 		LOGTEXT(tr("Audio fade out finished for slot %1: '%2'")
-			.arg(slotNumber+1).arg(current_fx->name()));
+			.arg(slotNumber+1).arg(currentFxName()));
 	}
 	else if (fade_mode == AUDIO_FADE_IN) {
 		LOGTEXT(tr("Audio fade in finished for slot %1: '%2'")
-			.arg(slotNumber+1).arg(current_fx->name()));
+			.arg(slotNumber+1).arg(currentFxName()));
 
 	}
 }
@@ -768,3 +768,14 @@ void AudioSlot::setFFTEnabled(bool state)
 			audio_io->setFFTEnabled(state);
 	}
 }
+
+QString AudioSlot::currentFxName() const
+{
+	if (FxItem::exists(current_fx)) {
+		return current_fx->name();
+	} else {
+		return trUtf8("No FX was set");
+	}
+}
+
+
