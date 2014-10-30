@@ -278,6 +278,32 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawText(bound,label,QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 	}
 
+	if (my_dmx_type > DMX_GENERIC) {
+		QString tstr;
+		switch (my_dmx_type) {
+		case DMX_INTENSITY:
+			tstr = "I";
+			break;
+		case DMX_PAN:
+			tstr = "PAN";
+			break;
+		case DMX_TILT:
+			tstr = "TILT";
+			break;
+		default:
+			tstr.clear();
+		}
+
+		QFont font(p.font());
+		font.setFixedPitch(true);
+		font.setItalic(false);
+		font.setBold(false);
+		p.setFont(font);
+		p.setPen(Qt::red);
+		QRect bound(QPoint(0,0),QPoint(width(),height()));
+		p.drawText(bound,tstr,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+	}
+
 
 	// Draw the knob
 	y = lo_pos_percent * height();

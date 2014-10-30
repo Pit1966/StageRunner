@@ -4,23 +4,14 @@
 #include "varset.h"
 #include "commandsystem.h"
 
+#include "dmxtypes.h"
+
 #ifndef MIX_LINES
 #define MIX_INTERN 0
 #define MIX_EXTERN 1
 #define MIX_LINES 2
 #endif
 
-enum DmxChannelType {
-	DMX_GENERIC,
-	DMX_INTENSITY,
-	DMX_PAN,
-	DMX_TILT,
-	DMX_GOBO,
-	DMX_COLOR,
-
-
-	DMX_TYPES					///< entry count
-};
 
 
 class DmxChannel : public VarSet
@@ -64,6 +55,7 @@ public:
 
 	bool initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 target_value=0 );
 	bool loopFunction(int mixline);
+	inline DmxChannelType dmxChannelType() {return DmxChannelType(dmxType);}
 
 private:
 	void init();

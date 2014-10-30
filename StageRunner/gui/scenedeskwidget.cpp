@@ -96,6 +96,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			fader->setValue(dmx->targetValue);
 			fader->setChannelShown(true);
 			fader->setLabelText(dmx->labelText);
+			fader->setDmxType(dmx->dmxChannelType());
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
 			ref_val = ref_val * dmx->targetFullValue / 255;
@@ -115,6 +116,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 	hookedChannelSpin->setValue(origin_fxscene->hookedChannel()+1);
 	fadeInTimeEdit->setText(QtStaticTools::msToTimeString(origin_fxscene->fadeInTime()));
 	fadeOutTimeEdit->setText(QtStaticTools::msToTimeString(origin_fxscene->fadeOutTime()));
+	channelCountSpin->setValue(origin_fxscene->tubeCount());
 
 	QRect rect = QtStaticTools::stringToQRect(origin_fxscene->widgetPosition());
 	if (!rect.isNull()) {
@@ -374,6 +376,12 @@ void SceneDeskWidget::keyPressEvent(QKeyEvent *event)
 	case Qt::Key_Shift:
 		setShiftKey(true);
 		break;
+	case Qt::Key_F5:
+		setTypeOfSelectedTubes(DMX_PAN);
+		break;
+	case Qt::Key_F6:
+		setTypeOfSelectedTubes(DMX_INTENSITY);
+		break;
 	}
 }
 
@@ -429,6 +437,20 @@ bool SceneDeskWidget::hideSelectedTubes()
 	selected_tube_ids.clear();
 
 	return removed;
+}
+
+bool SceneDeskWidget::setTypeOfSelectedTubes(DmxChannelType type)
+{
+	if (!origin_fxscene) return false;
+	for (int t=0; t<selected_tube_ids.size(); t++) {
+		int id = selected_tube_ids.at(t);
+		DmxChannel *tube = origin_fxscene->tubes.at(id);
+		MixerChannel *mix = faderAreaWidget->getMixerById(id);
+		tube->dmxType = type;
+		mix->setDmxType(type);
+		mix->update();
+	}
+	return true;
 }
 
 bool SceneDeskWidget::unhideAllTubes()
@@ -603,6 +625,13 @@ void SceneDeskWidget::destroyAllSceneDesks()
 void SceneDeskWidget::on_channelCountSpin_valueChanged(int arg1)
 {
 	if (!origin_fxscene) return;
-	origin_fxscene->setTubeCount(arg1);
+	// origin_fxscene->setTubeCount(arg1);
+	// setFxScene(origin_fxscene);
+}
+
+void SceneDeskWidget::on_channelCountSpin_editingFinished()
+{
+	if (!origin_fxscene) return;
+	origin_fxscene->setTubeCount(channelCountSpin->value());
 	setFxScene(origin_fxscene);
 }

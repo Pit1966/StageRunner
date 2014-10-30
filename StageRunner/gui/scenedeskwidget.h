@@ -3,6 +3,8 @@
 
 #include "ui_scenedeskwidget.h"
 
+#include "dmxtypes.h"
+
 class FxSceneItem;
 class FxItem;
 class DmxChannel;
@@ -38,6 +40,7 @@ protected:
 
 	bool hideTube(DmxChannel *tube, MixerChannel *mixer);
 	bool hideSelectedTubes();
+	bool setTypeOfSelectedTubes(DmxChannelType type);
 	bool unhideAllTubes();
 	int setLabelInSelectedTubes(const QString &text);
 
@@ -66,10 +69,9 @@ private slots:
 	void on_editCheck_clicked(bool checked);
 	void on_sceneNameEdit_textEdited(const QString &arg1);
 	void on_autoHookButton_clicked();
-
 	void on_tubeCommentEdit_textEdited(const QString &arg1);
-
 	void on_channelCountSpin_valueChanged(int arg1);
+	void on_channelCountSpin_editingFinished();
 
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

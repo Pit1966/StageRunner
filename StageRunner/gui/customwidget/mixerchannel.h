@@ -6,6 +6,8 @@
 #include <QPixmap>
 #include <QSize>
 
+#include "dmxtypes.h"
+
 class MixerChannel : public QAbstractSlider
 {
 	Q_OBJECT
@@ -20,6 +22,7 @@ private:
 	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
 	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
 	QString label;
+	DmxChannelType my_dmx_type;		///< The type of the dmx channel
 
 	bool prop_channel_shown_f;
 	bool prop_selectable_f;
@@ -81,6 +84,7 @@ public:
 	inline int backGroundWidth() const {return org_pix_back.size().width();}
 	inline int backGroundHeight() const {return org_pix_back.size().height();}
 	inline const QString & labelText() const {return label;}
+	inline void setDmxType(DmxChannelType type) {my_dmx_type = type;}
 
 private:
 	void mousePressEvent(QMouseEvent *event);

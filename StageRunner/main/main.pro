@@ -203,7 +203,8 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/OscSinCos.h \
 	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
 	../tool/fftrealfixlenwrapper.h \
-    ../gui/customwidget/psvumeter.h
+    ../gui/customwidget/psvumeter.h \
+    ../system/dmxtypes.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
