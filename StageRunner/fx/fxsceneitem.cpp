@@ -2,6 +2,8 @@
 #include "dmxchannel.h"
 #include "lightcontrol.h"
 #include "appcentral.h"
+#include "lightloop.h"
+#include "lightloopthreadinterface.h"
 
 FxSceneItem::FxSceneItem(FxList *fxList)
 	:FxItem(fxList)
@@ -98,6 +100,7 @@ void FxSceneItem::setTubeCount(int tubecount)
  */
 bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 {
+	LightLoop *lightloop = AppCentral::instance()->unitLight->lightLoopInterface->getLightLoopInstance();
 	int cmd_time = 0;
 
 	quint32 STAGE_FLAG = 1<<(1 + mixline);
@@ -139,11 +142,25 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		if (tube->dmxType == DMX_INTENSITY) {
+		switch (tube->dmxType) {
+		case DMX_INTENSITY:
 			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
 				active = true;
 			}
+			break;
+		case DMX_PAN:
+		case DMX_TILT:
+			if (tube->initFadeScannerCmd(mixline
+										 ,cmd
+										 ,cmd_time
+										 ,lightloop->scanOutValues[tube->dmxChannel][tube->dmxUniverse])) {
+				active = true;
+			}
+			break;
+		default:
+			break;
 		}
+
 	}
 
 	// This is for Progress only

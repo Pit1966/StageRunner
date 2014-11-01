@@ -18,6 +18,7 @@ public:
 		STAT_IDLE,
 		STAT_RUNNING
 	};
+	int scanOutValues[512][MAX_DMX_UNIVERSE];
 
 private:
 	volatile STATUS loop_status;
@@ -37,6 +38,7 @@ public:
 
 private:
 	void init();
+	void clearScanOutArray();
 
 signals:
 	void sceneStatusChanged(FxSceneItem *scene, quint32 stat);

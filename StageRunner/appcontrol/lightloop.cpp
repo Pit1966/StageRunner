@@ -31,7 +31,14 @@ void LightLoop::init()
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		dmxtout[t].resize(512);
 	}
+	clearScanOutArray();
 	connect(&loop_timer,SIGNAL(timeout()),this,SLOT(processPendingEvents()));
+}
+
+void LightLoop::clearScanOutArray()
+{
+	memset(scanOutValues,0,512*MAX_DMX_UNIVERSE*sizeof(int));
+
 }
 
 void LightLoop::startProcessTimer()
@@ -128,7 +135,12 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		int universe = tube->dmxUniverse;
 		int value = 0;
 		for (int i=0; i<MIX_LINES; i++) {
-			if (tube->curValue[i] > value) value = tube->curValue[i];
+			if (tube->curValue[i] > value)
+				value = tube->curValue[i];
+
+			// scanner pan and tilt channels need special treatment
+			if (tube->curValueChanged && tube->dmxType > DMX_INTENSITY)
+				scanOutValues[channel][universe] = value;
 		}
 
 		tube->dmxValue = value * 255 / tube->targetFullValue;

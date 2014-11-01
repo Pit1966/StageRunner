@@ -110,6 +110,41 @@ bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 ta
 	return true;
 }
 
+bool DmxChannel::initFadeScannerCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 curScanValue)
+{
+	fadeStartValue[mixline] = curValue[mixline];
+	fadeValue[mixline] = curValue[mixline];
+
+	switch(cmd) {
+	case CMD_SCENE_BLACK:
+		return false;
+	case CMD_SCENE_FADEIN:
+		if (curValue[mixline] == targetValue) return false;
+		fadeTargetValue[mixline] = targetValue;
+		break;
+	case CMD_SCENE_FADEOUT:
+		return false;
+	case CMD_SCENE_FADETO:
+		if (curValue[mixline] == targetValue) return false;
+		fadeTargetValue[mixline] = targetValue;
+		break;
+	default:
+		return false;
+	}
+
+
+	// Calculate the fade step size as a function of the LightLoop time interval
+	qint32 steps = time_ms / LIGHT_LOOP_INTERVAL_MS;
+	if (steps < 1) {
+		fadeStep[mixline] = fadeTargetValue[mixline] - fadeStartValue[mixline];
+	} else {
+		fadeStep[mixline] = (fadeTargetValue[mixline] - fadeStartValue[mixline]) / steps;
+	}
+
+	curCmd[mixline] = cmd;
+	return true;
+}
+
 /**
  * @brief Execute running commands
  * @return true: if command is (still) running, false: if channel is idle (fade has ended)
