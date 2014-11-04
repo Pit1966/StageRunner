@@ -20,7 +20,8 @@ public:
 		CT_FADEOUT_TIME,
 		CT_PRE_DELAY,
 		CT_POST_DELAY,
-		CT_HOLD_TIME
+		CT_HOLD_TIME,
+		CT_MOVE_TIME
 	};
 
 	FxItem *linkedFxItem;

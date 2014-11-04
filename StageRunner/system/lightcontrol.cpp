@@ -240,6 +240,12 @@ void LightControl::init()
 		dmxOutputValues[t].resize(512);
 		memset(dmxOutputValues[t].data(),0,512);
 	}
+	// initialize the hidden scene that will catch all scanner events.
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		hiddenScannerScenes[t] = new FxSceneItem;
+		hiddenScannerScenes[t]->setTubeCount(512);
+	}
+
 	lightLoopInterface = new LightLoopThreadInterface(*this);
 }
 

@@ -29,6 +29,7 @@ public:
 	MutexQHash<int,FxSceneItem*>activeScenes;
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
+	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 
 public:
 	LightControl(AppCentral &app_central);

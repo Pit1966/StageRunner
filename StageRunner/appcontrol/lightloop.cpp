@@ -31,14 +31,8 @@ void LightLoop::init()
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		dmxtout[t].resize(512);
 	}
-	clearScanOutArray();
+
 	connect(&loop_timer,SIGNAL(timeout()),this,SLOT(processPendingEvents()));
-}
-
-void LightLoop::clearScanOutArray()
-{
-	memset(scanOutValues,0,512*MAX_DMX_UNIVERSE*sizeof(int));
-
 }
 
 void LightLoop::startProcessTimer()
@@ -56,6 +50,7 @@ void LightLoop::stopProcessTimer()
 
 void LightLoop::processPendingEvents()
 {
+	static int count = 1;
 	if (first_process_event_f) {
 		loop_time.start();
 		loop_exec_target_time_ms = LIGHT_LOOP_INTERVAL_MS;
@@ -80,8 +75,16 @@ void LightLoop::processPendingEvents()
 	// Lets have a look onto the list with active marked scenes
 	MutexQHash<int, FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
+	// add scanner scene
+	if (!scenes.contains(lightCtrlRef.hiddenScannerScenes[0]->id())) {
+		scenes.insert(lightCtrlRef.hiddenScannerScenes[0]->id(),lightCtrlRef.hiddenScannerScenes[0]);
+	}
+
 	// Get dmx channel output for every scene in the list
 	foreach (FxSceneItem * sceneitem, scenes) {
+		if (sceneitem->id() == 1) {
+			int a = 0;
+		}
 		// Fill channel data into temp dmx data and determine if scene is still active
 		if (!processFxSceneItem(sceneitem)) {
 			if (debug > 1) DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());
@@ -97,6 +100,14 @@ void LightLoop::processPendingEvents()
 
 	}
 	scenes.unlock();
+
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		for (int chan=0; chan<512; chan++) {
+			if (lightCtrlRef.hiddenScannerScenes[t]->tube(chan)->dmxType >= DMX_PAN) {
+	//			dmxtout[t][chan] = lightCtrlRef.hiddenScannerScenes[t]->tube(chan)->dmxValue;
+			}
+		}
+	}
 
 	// For the dmx channel data array should contain valid dmx data for stage output
 	// Checked if the output has changed and give it to the output modules if it has changed
@@ -138,13 +149,11 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 			if (tube->curValue[i] > value)
 				value = tube->curValue[i];
 
-			// scanner pan and tilt channels need special treatment
-			if (tube->curValueChanged && tube->dmxType > DMX_INTENSITY)
-				scanOutValues[channel][universe] = value;
 		}
 
 		tube->dmxValue = value * 255 / tube->targetFullValue;
-//		if (tube->dmxValue > 0) {
+
+			//		if (tube->dmxValue > 0) {
 //			qDebug() << "channel " << tube->dmxChannel << "dmx" << tube->dmxValue << "universe" << tube->dmxUniverse;
 //		}
 		if (tube->dmxValue > quint8(dmxtout[universe].at(channel)) ) {

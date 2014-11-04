@@ -31,6 +31,7 @@ FxList::FxList(FxItem *parentFx) :
 	showColumnPredelayFlag = false;
 	showColumnPostdelayFlag = false;
 	showColumnKeyFlag = false;
+	showColumnMoveFlag = true;
 }
 
 FxList::~FxList()

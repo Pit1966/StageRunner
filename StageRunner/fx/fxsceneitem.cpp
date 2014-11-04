@@ -5,6 +5,12 @@
 #include "lightloop.h"
 #include "lightloopthreadinterface.h"
 
+FxSceneItem::FxSceneItem()
+	:FxItem()
+{
+	init();
+}
+
 FxSceneItem::FxSceneItem(FxList *fxList)
 	:FxItem(fxList)
 {
@@ -100,7 +106,8 @@ void FxSceneItem::setTubeCount(int tubecount)
  */
 bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 {
-	LightLoop *lightloop = AppCentral::instance()->unitLight->lightLoopInterface->getLightLoopInstance();
+	LightControl *lightctrl = AppCentral::instance()->unitLight;
+
 	int cmd_time = 0;
 
 	quint32 STAGE_FLAG = 1<<(1 + mixline);
@@ -139,6 +146,8 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	// qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
 
+	FxSceneItem *scanscene = 0;
+
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
@@ -150,12 +159,28 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 			break;
 		case DMX_PAN:
 		case DMX_TILT:
-			if (tube->initFadeScannerCmd(mixline
-										 ,cmd
-										 ,cmd_time
-										 ,lightloop->scanOutValues[tube->dmxChannel][tube->dmxUniverse])) {
-				active = true;
+			{
+				scanscene = lightctrl->hiddenScannerScenes[tube->dmxUniverse];
+				DmxChannel *scantube = scanscene->tube(tube->dmxChannel);
+				qint32 movetime = moveTime();
+				// copy channel parameter to hidden scanner scene
+				scantube->targetFullValue = tube->targetFullValue;
+				scantube->targetValue = tube->targetValue;
+				scantube->dmxType = tube->dmxType;
+
+				if (scantube->initFadeCmd(mixline,CMD_SCENE_FADETO,movetime,tube->targetValue)) {
+					scanscene->setActiveIntern();
+					lightctrl->setSceneActive(scanscene);
+				}
 			}
+
+//			if (tube->initFadeScannerCmd(mixline
+//										 ,cmd
+//										 ,cmd_time
+//										 ,lightctrl->hiddenScannerScenes[tube->dmxUniverse]->tube(tube->dmxChannel)->curValue[mixline]))
+//			{
+//				active = true;
+//			}
 			break;
 		default:
 			break;

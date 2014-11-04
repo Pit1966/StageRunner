@@ -4,6 +4,15 @@
 QList<FxItem*>*FxItem::global_fx_list = 0;
 
 
+FxItem::FxItem()
+	: VarSet()
+	, myParentFxList(0)
+	, playedInRandomList(false)
+{
+	init();
+	myId = init_generate_id();
+}
+
 FxItem::FxItem(FxList *fxList)
 	: VarSet()
 	, myParentFxList(fxList)
@@ -40,6 +49,7 @@ void FxItem::init()
 	addExistingVar(defaultHoldTime,"DefHoldTime");
 	addExistingVar(defaultPreDelay,"DefPreDelay");
 	addExistingVar(defaultPostDelay,"DefPostDelay");
+	addExistingVar(defaultMoveTime,"DefMoveTime");
 	addExistingVar(hookedToInputUniverse,"HookToInputUniverse",0,3,0);
 	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 }
@@ -134,6 +144,14 @@ void FxItem::setFadeInTime(qint32 val)
 {
 	if (defaultFadeInTime != val) {
 		defaultFadeInTime = val;
+		setModified(true);
+	}
+}
+
+void FxItem::setMoveTime(qint32 val)
+{
+	if (defaultMoveTime != val) {
+		defaultMoveTime = val;
 		setModified(true);
 	}
 }

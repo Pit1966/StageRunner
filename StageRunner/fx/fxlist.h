@@ -39,6 +39,7 @@ public:
 	bool showColumnPredelayFlag;
 	bool showColumnPostdelayFlag;
 	bool showColumnKeyFlag;
+	bool showColumnMoveFlag;
 
 protected:
 	int myLoopTimes;

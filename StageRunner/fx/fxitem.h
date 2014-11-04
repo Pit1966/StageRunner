@@ -25,7 +25,6 @@ class FxItem : public VarSet
 private:
 	static QList<FxItem*>*global_fx_list;
 
-
 protected:
 	QAtomicInt refCount;
 	qint32 myId;
@@ -39,6 +38,7 @@ protected:
 	qint32 defaultHoldTime;
 	qint32 defaultPreDelay;
 	qint32 defaultPostDelay;
+	qint32 defaultMoveTime;
 	qint32 hookedToInputUniverse;
 	qint32 hookedToInputDmxChannel;
 
@@ -46,6 +46,7 @@ protected:
 	bool playedInRandomList;
 
 public:
+	FxItem();
 	FxItem(FxList *fxList);
 	FxItem(const FxItem &o);
 	~FxItem();
@@ -78,6 +79,8 @@ public:
 	virtual void initForSequence() {;}
 	virtual qint32 fadeInTime() {return defaultFadeInTime;}
 	virtual	void setFadeInTime(qint32 val);
+	virtual qint32 moveTime() {return defaultMoveTime;}
+	virtual void setMoveTime(qint32 val);
 	virtual qint32 fadeOutTime() {return defaultFadeOutTime;}
 	virtual void setFadeOutTime(qint32 val);
 	virtual qint32 preDelay() {return defaultPreDelay;}

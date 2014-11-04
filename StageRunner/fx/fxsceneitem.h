@@ -35,6 +35,7 @@ private:
 	bool wasBlacked[MIX_LINES];
 
 public:
+	FxSceneItem();
 	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
 	~FxSceneItem();
@@ -65,6 +66,8 @@ public:
 	bool getClearStatusHasChanged();
 	bool getClearActiveHasChanged();
 	inline quint32 status() const {return myStatus;}
+	inline void setStatus(quint32 stat) {myStatus = stat;}
+	inline void setActiveIntern() {myStatus |= SCENE_ACTIVE_INTERN;}
 	inline SceneSeqState seqStatus() const {return mySeqStatus;}
 	inline void setSeqStatus(SceneSeqState status) {mySeqStatus = status;}
 	QString statusString();

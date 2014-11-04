@@ -108,6 +108,9 @@ void FxListWidget::setFxList(FxList *fxlist)
 	if (fxlist->showColumnFadeinFlag) {
 		header << tr("FadeIN");
 	}
+	if (fxlist->showColumnMoveFlag) {
+		header << tr("Move");
+	}
 	if (fxlist->showColumnHoldFlag) {
 		header << tr("Hold");
 	}
@@ -226,6 +229,15 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 		if (fxlist->showColumnFadeinFlag) {
 			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
+			item->myRow = t;
+			item->myColumn = col;
+			item->itemEdit->setMinimized(true);
+			item->itemLabel->hide();
+			fxTable->setCellWidget(t,col++,item);
+		}
+
+		if (fxlist->showColumnMoveFlag) {
+			item = new_fxlistwidgetitem(fx,QString::number(fx->moveTime()),FxListWidgetItem::CT_MOVE_TIME);
 			item->myRow = t;
 			item->myColumn = col;
 			item->itemEdit->setMinimized(true);
@@ -1081,6 +1093,12 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 				act = menu.addAction(tr("Show FadeIN time column"));
 			}
 			act->setObjectName("5");
+			if (fxList()->showColumnMoveFlag) {
+				act = menu.addAction(tr("Hide Move time column"));
+			} else {
+				act = menu.addAction(tr("Show Move time column"));
+			}
+			act->setObjectName("9");
 			if (fxList()->showColumnHoldFlag) {
 				act = menu.addAction(tr("Hide Hold time Column"));
 			} else {
@@ -1147,6 +1165,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 8:
 			fxl->showColumnPostdelayFlag = !fxl->showColumnPostdelayFlag;
+			refreshList();
+			break;
+		case 9:
+			fxl->showColumnMoveFlag = !fxl->showColumnMoveFlag;
 			refreshList();
 			break;
 
@@ -1326,6 +1348,9 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 	case FxListWidgetItem::CT_HOLD_TIME:
 		fx->setHoldTime(QtStaticTools::timeStringToMS(text));
 		break;
+	case FxListWidgetItem::CT_MOVE_TIME:
+		fx->setMoveTime(QtStaticTools::timeStringToMS(text));
+		break;
 
 	default:
 		break;
@@ -1355,6 +1380,8 @@ void FxListWidget::if_fxitemwidget_seeked(FxListWidgetItem *listitem, int perMil
 	case FxListWidgetItem::CT_FADEOUT_TIME:
 		break;
 	case FxListWidgetItem::CT_HOLD_TIME:
+		break;
+	case FxListWidgetItem::CT_MOVE_TIME:
 		break;
 
 	default:

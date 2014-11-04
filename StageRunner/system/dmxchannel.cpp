@@ -90,6 +90,8 @@ bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 ta
 		fadeTargetValue[mixline] = 0;
 		break;
 	case CMD_SCENE_FADETO:
+		if (dmxChannel == 54)
+			qDebug() << "initFadeTo" << dmxChannel << "cur:" << curValue[mixline] << "target:" << target_value;
 		if (curValue[mixline] == target_value) return false;
 		fadeTargetValue[mixline] = target_value;
 		break;
@@ -118,16 +120,15 @@ bool DmxChannel::initFadeScannerCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qi
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
 		return false;
+	case CMD_SCENE_FADETO:
 	case CMD_SCENE_FADEIN:
 		if (curValue[mixline] == targetValue) return false;
+
+		qDebug() << dmxChannel << "FadeIN/TO" << curScanValue << targetValue;
 		fadeTargetValue[mixline] = targetValue;
 		break;
 	case CMD_SCENE_FADEOUT:
 		return false;
-	case CMD_SCENE_FADETO:
-		if (curValue[mixline] == targetValue) return false;
-		fadeTargetValue[mixline] = targetValue;
-		break;
 	default:
 		return false;
 	}
