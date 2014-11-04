@@ -61,5 +61,6 @@
         <file>gfx/icons/green_right_22.png</file>
         <file>gfx/icons/green_up_22.png</file>
         <file>gfx/icons/editcopy_32.png</file>
+        <file>gfx/icons/backspace.png</file>
     </qresource>
 </RCC>

@@ -159,7 +159,7 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 			break;
 		case DMX_PAN:
 		case DMX_TILT:
-			{
+			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
 				scanscene = lightctrl->hiddenScannerScenes[tube->dmxUniverse];
 				DmxChannel *scantube = scanscene->tube(tube->dmxChannel);
 				qint32 movetime = moveTime();
@@ -173,14 +173,6 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 					lightctrl->setSceneActive(scanscene);
 				}
 			}
-
-//			if (tube->initFadeScannerCmd(mixline
-//										 ,cmd
-//										 ,cmd_time
-//										 ,lightctrl->hiddenScannerScenes[tube->dmxUniverse]->tube(tube->dmxChannel)->curValue[mixline]))
-//			{
-//				active = true;
-//			}
 			break;
 		default:
 			break;

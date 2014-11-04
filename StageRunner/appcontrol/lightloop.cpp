@@ -75,9 +75,11 @@ void LightLoop::processPendingEvents()
 	// Lets have a look onto the list with active marked scenes
 	MutexQHash<int, FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
-	// add scanner scene
-	if (!scenes.contains(lightCtrlRef.hiddenScannerScenes[0]->id())) {
-		scenes.insert(lightCtrlRef.hiddenScannerScenes[0]->id(),lightCtrlRef.hiddenScannerScenes[0]);
+	// add scanner scenes
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		if (!scenes.contains(lightCtrlRef.hiddenScannerScenes[t]->id())) {
+			scenes.insert(lightCtrlRef.hiddenScannerScenes[t]->id(),lightCtrlRef.hiddenScannerScenes[t]);
+		}
 	}
 
 	// Get dmx channel output for every scene in the list

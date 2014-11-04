@@ -244,6 +244,7 @@ void LightControl::init()
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		hiddenScannerScenes[t] = new FxSceneItem;
 		hiddenScannerScenes[t]->setTubeCount(512);
+		hiddenScannerScenes[t]->setName(QString("ScanMove%1").arg(t+1));
 	}
 
 	lightLoopInterface = new LightLoopThreadInterface(*this);
