@@ -70,6 +70,8 @@ void FxSeqItem::init()
 	myFxType = FX_SEQUENCE;
 	myclass = PrefVarCore::FX_SEQUENCE_ITEM;
 	addExistingVar(widgetPos,"WidgetPos");
+	addExistingVar(blackOtherSeqOnStart,"BlackOtherSeqOnStart");
+	addExistingVar(stopOtherSeqOnStart,"StopOtherSeqOnStart");
 	addExistingVar(seqList->myLoopFlag,"ListIsLooped");
 	addExistingVar(seqList->myLoopTimes,"LoopTimes");
 	addExistingVar(seqList->myRandomizedFlag,"RandomizedList");

@@ -90,8 +90,6 @@ bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 ta
 		fadeTargetValue[mixline] = 0;
 		break;
 	case CMD_SCENE_FADETO:
-		if (dmxChannel == 54)
-			qDebug() << "initFadeTo" << dmxChannel << "cur:" << curValue[mixline] << "target:" << target_value;
 		if (curValue[mixline] == target_value) return false;
 		fadeTargetValue[mixline] = target_value;
 		break;

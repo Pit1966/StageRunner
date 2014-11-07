@@ -10,6 +10,8 @@ class FxSeqItem : public FxItem
 {
 public:
 	FxList *seqList;
+	pbool blackOtherSeqOnStart;
+	pbool stopOtherSeqOnStart;
 
 private:
 

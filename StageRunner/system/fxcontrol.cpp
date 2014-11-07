@@ -51,6 +51,15 @@ FxListExecuter * FxControl::startFxSequence(FxSeqItem *fxseq)
 		return 0;
 	}
 
+	// See what has to be done before starting the sequence
+	if (fxseq->stopOtherSeqOnStart) {
+		myApp.sequenceStop();
+	}
+	if (fxseq->blackOtherSeqOnStart) {
+		myApp.lightBlack(200);
+	}
+
+
 	// Create an executor for the sequence
 	FxListExecuter *fxexec = myApp.execCenter->newFxListExecuter(fxseq->seqList,fxseq);
 

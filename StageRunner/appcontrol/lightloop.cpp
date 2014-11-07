@@ -84,9 +84,9 @@ void LightLoop::processPendingEvents()
 
 	// Get dmx channel output for every scene in the list
 	foreach (FxSceneItem * sceneitem, scenes) {
-		if (sceneitem->id() == 1) {
-			int a = 0;
-		}
+//		if (sceneitem->id() == 1) {
+//			int a = 0;
+//		}
 		// Fill channel data into temp dmx data and determine if scene is still active
 		if (!processFxSceneItem(sceneitem)) {
 			if (debug > 1) DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());

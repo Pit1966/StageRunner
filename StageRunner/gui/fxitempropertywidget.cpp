@@ -2,6 +2,7 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "fxseqitem.h"
 #include "usersettings.h"
 #include "appcentral.h"
 #include "qtstatictools.h"
@@ -61,9 +62,13 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		cur_fx = 0;
 		audioGroup->setVisible(false);
 		sceneGroup->setVisible(false);
+		sequenceGroup->setVisible(false);
 		return false;
 	}
 	cur_fx = fx;
+	cur_fxa = 0;
+	cur_fxs = 0;
+	cur_fxseq = 0;
 
 	nameEdit->setText(fx->name());
 	idEdit->setText(QString::number(fx->id()));
@@ -98,7 +103,6 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		hookedToGroup->setVisible(false);
 	}
 	else {
-		cur_fxa = 0;
 		audioGroup->setVisible(false);
 		hookedToGroup->setVisible(false);
 	}
@@ -110,10 +114,24 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
 
 		sceneGroup->setVisible(true);
+		sequenceGroup->setVisible(false);
 		hookedToGroup->setVisible(true);
-	} else {
-		cur_fxs = 0;
+	}
+	else if (fx->fxType() == FX_SEQUENCE) {
+		cur_fxseq = static_cast<FxSeqItem*>(fx);
 		sceneGroup->setVisible(false);
+		sequenceGroup->setVisible(true);
+
+		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
+		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
+		hookedToGroup->setVisible(true);
+
+		seqBlackOtherCheck->setChecked(cur_fxseq->blackOtherSeqOnStart);
+		seqStopOtherCheck->setChecked(cur_fxseq->stopOtherSeqOnStart);
+	}
+	else {
+		sceneGroup->setVisible(false);
+		sequenceGroup->setVisible(false);
 	}
 
 
@@ -346,6 +364,26 @@ void FxItemPropertyWidget::on_hookedToChannelSpin_valueChanged(int arg1)
 	if (cur_fx->hookedChannel() != arg1) {
 		cur_fx->hookToChannel(arg1);
 		cur_fxa->setModified(true);
+		emit modified();
+	}
+}
+
+void FxItemPropertyWidget::on_seqStopOtherCheck_clicked(bool checked)
+{
+	if (!FxItem::exists(cur_fxseq)) return;
+
+	if (cur_fxseq->stopOtherSeqOnStart != checked) {
+		cur_fxseq->stopOtherSeqOnStart = checked;
+		emit modified();
+	}
+}
+
+void FxItemPropertyWidget::on_seqBlackOtherCheck_clicked(bool checked)
+{
+	if (!FxItem::exists(cur_fxseq)) return;
+
+	if (cur_fxseq->blackOtherSeqOnStart != checked) {
+		cur_fxseq->blackOtherSeqOnStart = checked;
 		emit modified();
 	}
 }
