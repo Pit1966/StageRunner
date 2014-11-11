@@ -50,6 +50,7 @@ public:
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
 	DmxChannel *tube(int id);
+	bool removeTube(int id);
 
 	bool initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime = 0);
 	bool directFadeToDmx(qint32 dmxval, qint32 time_ms);

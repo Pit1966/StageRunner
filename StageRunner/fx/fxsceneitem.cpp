@@ -381,3 +381,13 @@ DmxChannel *FxSceneItem::tube(int id)
 	return tubes.at(id);
 }
 
+bool FxSceneItem::removeTube(int id)
+{
+	if (id < 0 || id >= tubes.size()) return false;
+
+	DmxChannel *tube = tubes.takeAt(id);
+	delete tube;
+
+	return true;
+}
+

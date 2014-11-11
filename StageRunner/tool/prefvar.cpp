@@ -137,13 +137,15 @@ void PrefVarCore::init()
 
 QVariant PrefVarCore::get_value() const
 {
-	if (debug) qDebug() << Q_FUNC_INFO << "'get_value' not implemented by" << myname;
+	if (debug)
+		qDebug() << Q_FUNC_INFO << "'get_value' not implemented by" << myname;
 	return QVariant();
 }
 
 void PrefVarCore::set_value(QVariant val)
 {
-	if (debug) qDebug() << Q_FUNC_INFO << "'set_value' not implemented by" << myname << " set:" << val;
+	if (debug)
+		qDebug() << Q_FUNC_INFO << "'set_value' not implemented by" << myname << " set:" << val;
 }
 
 bool PrefVarCore::writeToPrefGroup(QSettings * setting, const QString & group)

@@ -20,7 +20,8 @@ private:
 	int default_min;						///< Default minimum value used for new Mixer
 	int default_max;						///< Default maximum value user for new Mixer
 
-	bool prop_multiselect_f;				///< If true, multiple mixer can be selected at the same time
+	bool m_propEnableMultiSelect;			///< If true, multiple mixer can be selected at the same time
+	bool m_propEnableRangeSelect;			///< If true, multiple mixer can be selected in a range
 
 	int temp_drag_start_move_idx;
 	int temp_drag_move_idx;
@@ -34,10 +35,13 @@ public:
 	bool removeMixer(MixerChannel *mixer, bool renumberIds = false);
 	void setIdsToMixerListIndex();
 	void setRange(int min, int max);
-	inline bool isMultiSelectEnabled() const {return prop_multiselect_f;}
+	inline bool isMultiSelectEnabled() const {return m_propEnableMultiSelect;}
 	void setMultiSelectEnabled(bool state);
+	void setRangeSelectEnabled(bool state);
 	MixerChannel *findMixerAtPos(QPoint pos);
 	MixerChannel *getMixerById(int id);
+	bool selectMixer(MixerChannel *mixer, int id, bool state);
+	bool selectMixerRange(MixerChannel *fromMixer, MixerChannel *toMixer, bool state);
 	QList<MixerChannel*> & selectedMixer() {return selected_mixer;}
 	void unselectAllMixers();
 

@@ -130,13 +130,13 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 void SceneDeskWidget::setControlKey(bool state)
 {
 	ctrl_pressed_f = state;
-	faderAreaWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
+	faderAreaWidget->setMultiSelectEnabled(ctrl_pressed_f);
 }
 
 void SceneDeskWidget::setShiftKey(bool state)
 {
 	shift_pressed_f = state;
-	faderAreaWidget->setMultiSelectEnabled(ctrl_pressed_f | shift_pressed_f);
+	faderAreaWidget->setRangeSelectEnabled(shift_pressed_f);
 }
 
 DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
@@ -189,7 +189,7 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 		selected_tube_ids.removeAll(id);
 		copyTubeSettingsToGui(-1);
 	}
-	// qDebug() << "tubes selected:" << selected_tube_ids;
+	qDebug() << "tubes selected:" << selected_tube_ids;
 }
 
 void SceneDeskWidget::setSceneEditable(bool state)
@@ -382,6 +382,9 @@ void SceneDeskWidget::keyPressEvent(QKeyEvent *event)
 	case Qt::Key_F6:
 		setTypeOfSelectedTubes(DMX_INTENSITY);
 		break;
+	case Qt::Key_Delete:
+		deleteSelectedTubes();
+		break;
 	}
 }
 
@@ -451,6 +454,21 @@ bool SceneDeskWidget::setTypeOfSelectedTubes(DmxChannelType type)
 		mix->update();
 	}
 	return true;
+}
+
+bool SceneDeskWidget::deleteSelectedTubes()
+{
+	if (!origin_fxscene) return false;
+
+	for (int t=selected_tube_ids.size()-1; t>=0; t--) {
+		int id = selected_tube_ids.at(t);
+		MixerChannel *mix = faderAreaWidget->getMixerById(id);
+		origin_fxscene->removeTube(id);
+		faderAreaWidget->removeMixer(mix);
+	}
+
+
+	return setFxScene(origin_fxscene);
 }
 
 bool SceneDeskWidget::unhideAllTubes()

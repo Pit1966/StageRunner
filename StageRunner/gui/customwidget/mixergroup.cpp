@@ -9,6 +9,9 @@
 MixerGroup::MixerGroup(QWidget *parent) :
 	QWidget(parent)
 {
+	m_propEnableMultiSelect = false;
+	m_propEnableRangeSelect = false;
+
 	default_min = 0;
 	default_max = 100;
 	temp_drag_move_idx = -1;
@@ -109,7 +112,12 @@ void MixerGroup::setRange(int min, int max)
 
 void MixerGroup::setMultiSelectEnabled(bool state)
 {
-	prop_multiselect_f = state;
+	m_propEnableMultiSelect = state;
+}
+
+void MixerGroup::setRangeSelectEnabled(bool state)
+{
+	m_propEnableRangeSelect = state;
 }
 
 MixerChannel *MixerGroup::findMixerAtPos(QPoint pos)
@@ -130,6 +138,59 @@ MixerChannel *MixerGroup::getMixerById(int id)
 			return mixerlist.at(t);
 	}
 	return 0;
+}
+
+bool MixerGroup::selectMixer(MixerChannel *mixer, int id, bool state)
+{
+	if (!mixerlist.contains(mixer)) return false;
+
+
+
+	if (state) {
+		if (!selected_mixer.contains(mixer)) {
+			selected_mixer.append(mixer);
+			mixer->setSelected(true);
+			emit mixerSelected(true, id);
+		}
+	} else {
+		if (selected_mixer.contains(mixer)) {
+			selected_mixer.removeAll(mixer);
+			mixer->setSelected(false);
+			emit mixerSelected(false, id);
+		}
+	}
+
+	return true;
+}
+
+bool MixerGroup::selectMixerRange(MixerChannel *fromMixer, MixerChannel *toMixer, bool state)
+{
+	// find position in list for the lower and upper mixer
+	int from_idx = mixerlist.indexOf(fromMixer);
+	int to_idx = mixerlist.indexOf(toMixer);
+
+	// if mixer does not exist we cancel any action
+	if (from_idx < 0 || to_idx < 0) return false;
+
+	if (to_idx > from_idx) {
+		for (int t=0; t<mixerlist.size();t++) {
+			if (t < from_idx || t > to_idx) {
+				selectMixer(mixerlist.at(t),mixerlist.at(t)->id(),false);
+			} else {
+				selectMixer(mixerlist.at(t),mixerlist.at(t)->id(),state);
+			}
+		}
+	} else {
+		for (int t=mixerlist.size()-1; t>= 0; t--) {
+			if (t > from_idx || t < to_idx) {
+				selectMixer(mixerlist.at(t),mixerlist.at(t)->id(),false);
+			} else {
+				selectMixer(mixerlist.at(t),mixerlist.at(t)->id(),state);
+			}
+		}
+	}
+
+	return true;
 }
 
 void MixerGroup::unselectAllMixers()
@@ -294,20 +355,18 @@ void MixerGroup::on_mixer_moved(int val, int id)
 void MixerGroup::on_mixer_selected(bool state, int id)
 {
 	MixerChannel *mixer = qobject_cast<MixerChannel*>(sender());
-	if (mixer) {
-		if (!prop_multiselect_f)
-			unselectAllMixers();
+	if (!mixer) return;
 
-		if (state) {
-			selected_mixer.append(mixer);
-		} else {
-			selected_mixer.removeOne(mixer);
+	if (m_propEnableRangeSelect) {
+		if (selected_mixer.size()) {
+			selectMixerRange(selected_mixer.at(0),mixer,true);
 		}
 	}
 
-	if (id >= 0) {
-		emit mixerSelected(state, id);
-	}
+	if (!m_propEnableMultiSelect && !m_propEnableRangeSelect)
+		unselectAllMixers();
+
+	selectMixer(mixer,id,state);
 }
 
 void MixerGroup::notifyChangedDmxUniverse(int universe, const QByteArray &dmxValues)

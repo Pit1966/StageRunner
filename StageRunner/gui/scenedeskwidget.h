@@ -41,6 +41,7 @@ protected:
 	bool hideTube(DmxChannel *tube, MixerChannel *mixer);
 	bool hideSelectedTubes();
 	bool setTypeOfSelectedTubes(DmxChannelType type);
+	bool deleteSelectedTubes();
 	bool unhideAllTubes();
 	int setLabelInSelectedTubes(const QString &text);
 
