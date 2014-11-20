@@ -58,6 +58,8 @@ public:
 	bool isFxItemPossibleHere(FxItem *fx);
 	void generateDropAllowedFxTypeList(FxItem *fx);
 	inline void setAutoProceedCheckVisible(bool state) {autoProceedCheck->setVisible(state);}
+	FxListWidgetItem *findFxListWidgetItem(int row, int columnType);
+	void updateFxListRow(FxItem *fx, FxList *fxlist, int row);
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
@@ -70,9 +72,11 @@ private:
 	void init();
 	void closeEvent(QCloseEvent *);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
+	void create_fxlist_row(FxItem *fx, FxList *fxlist, int row);
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);
 	void contextMenuEvent(QContextMenuEvent *event);
+
 
 public slots:
 	void selectFx(FxItem *fx);
@@ -80,6 +84,7 @@ public slots:
 	void setCurrentFx(FxItem *newfx, FxItem *oldfx);
 	void initRowDrag(FxListWidgetItem *item);
 	void refreshList();
+	void refreshFxItem(FxItem *fx);
 	void setEditable(bool state);
 	void setRowSelected(int row, bool state);
 	void setSingleRowSelected(int row);

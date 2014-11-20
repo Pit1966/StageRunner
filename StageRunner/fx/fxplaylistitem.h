@@ -23,7 +23,7 @@ public:
 	~FxPlayListItem();
 
 	void setLoopValue(qint32 val);
-	qint32 loopValue();
+	qint32 loopValue() const;
 	bool isRandomized();
 	void setRandomized(bool state);
 

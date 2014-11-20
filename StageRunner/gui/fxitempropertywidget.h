@@ -56,7 +56,7 @@ private slots:
 	void on_seqBlackOtherCheck_clicked(bool checked);
 
 signals:
-	void modified();
+	void modified(FxItem *fx);
 };
 
 #endif // FXITEMPROPERTYWIDGET_H

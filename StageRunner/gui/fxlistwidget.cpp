@@ -133,145 +133,9 @@ void FxListWidget::setFxList(FxList *fxlist)
 	key_font.setBold(true);
 
 	for (int t=0; t<rows; t++) {
-		int col = 0;
 		FxItem *fx = fxlist->at(t);
-		// FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
-		FxListWidgetItem *item;
-
-		if (fxlist->showColumnKeyFlag) {
-			QString key;
-			if (fx->keyCode() != Qt::Key_Space) {
-				key = QtStaticTools::keyToString(fx->keyCode());
-			}
-
-			item = new_fxlistwidgetitem(fx,key,FxListWidgetItem::CT_KEY);
-			item->itemEdit->setMinimized(true);
-			item->itemEdit->setSingleKeyEditEnabled(true);
-			item->itemEdit->setFont(key_font);
-			item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
-			item->itemLabel->hide();
-			item->myRow = t;
-			item->myColumn = col;
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
-		item->myRow = t;
-		item->myColumn = col;
-		item->itemLabel->hide();
-		if (fx->loopValue() > 1) {
-			item->itemExtra->setPixmap(QPixmap(":/gfx/icons/audio_repeat_22.png"));
-			item->itemExtra->show();
-		}
-		else if (fx->preDelay() == -1) {
-			item->itemExtra->setPixmap(QPixmap(":/gfx/icons/green_down_22.png"));
-			item->itemExtra->show();
-		}
-		fxTable->setCellWidget(t,col++,item);
-		switch (fx->fxType()) {
-		case FX_AUDIO:
-//			if (fxa->seekPosPerMille() > 0) {
-//				item->setActivationProgressA(fxa->seekPosPerMille());
-//				qDebug() << "seek pos" << fxa->seekPosPerMille();
-//			}
-			break;
-		case FX_SCENE:
-			break;
-		case FX_AUDIO_PLAYLIST:
-			break;
-		case FX_SEQUENCE:
-			break;
-		default:
-			break;
-		}
-
-		item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
-		item->setNeverEditable(true);
-		item->itemLabel->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
-		switch (fx->fxType()) {
-		case FX_AUDIO:
-			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
-			break;
-		case FX_SCENE:
-			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/scene_mixer.png"));
-			break;
-		case FX_AUDIO_PLAYLIST:
-			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/playlist.png"));
-			break;
-		case FX_SEQUENCE:
-			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/sequence.png"));
-			break;
-		default:
-			break;
-		}
-		item->itemEdit->hide();
-		item->myRow = t;
-		item->myColumn = col;
-		fxTable->setCellWidget(t,col++,item);
-
-		if (fxlist->showColumnIdFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
-			item->setNeverEditable(true);
-			item->itemEdit->setMinimized(true);
-			item->myRow = t;
-			item->myColumn = col;
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnPredelayFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->preDelay()),FxListWidgetItem::CT_PRE_DELAY);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnFadeinFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnMoveFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->moveTime()),FxListWidgetItem::CT_MOVE_TIME);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnHoldFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->holdTime()),FxListWidgetItem::CT_HOLD_TIME);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnFadeoutFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->fadeOutTime()),FxListWidgetItem::CT_FADEOUT_TIME);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
-		if (fxlist->showColumnPostdelayFlag) {
-			item = new_fxlistwidgetitem(fx,QString::number(fx->postDelay()),FxListWidgetItem::CT_POST_DELAY);
-			item->myRow = t;
-			item->myColumn = col;
-			item->itemEdit->setMinimized(true);
-			item->itemLabel->hide();
-			fxTable->setCellWidget(t,col++,item);
-		}
-
+		create_fxlist_row(fx, fxlist, t);
+		updateFxListRow(fx, fxlist, t);
 	}
 	fxTable->resizeColumnsToContents();
 
@@ -288,6 +152,8 @@ void FxListWidget::setFxList(FxList *fxlist)
 	loopCheck->setChecked(fxlist->isLooped());
 	randomCheckBox->setChecked(fxlist->isRandomized());
 }
+
+
 
 void FxListWidget::setAutoProceedSequence(bool state)
 {
@@ -443,6 +309,21 @@ void FxListWidget::generateDropAllowedFxTypeList(FxItem *fx)
 	}
 
 	fxTable->setDropAllowedIndices(list);
+}
+
+FxListWidgetItem *FxListWidget::findFxListWidgetItem(int row, int columnType)
+{
+	FxListWidgetItem *ret_item = 0;
+	FxListWidgetItem *cur_item = 0;
+
+	int col = 0;
+	do {
+		cur_item = qobject_cast<FxListWidgetItem *>(fxTable->cellWidget(row,col++));
+		if (cur_item && cur_item->columnType == columnType)
+			ret_item = cur_item;
+	} while (ret_item == 0 && cur_item != 0);
+
+	return ret_item;
 }
 
 
@@ -699,11 +580,256 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 	return item;
 }
 
+void FxListWidget::create_fxlist_row(FxItem *fx, FxList *fxlist, int row)
+{
+	FxListWidgetItem *item;
+
+	QFont key_font;
+	key_font.setPointSize(14);
+	key_font.setBold(true);
+
+	int col = 0;
+
+	if (fxlist->showColumnKeyFlag) {
+		QString key;
+		if (fx->keyCode() != Qt::Key_Space) {
+			key = QtStaticTools::keyToString(fx->keyCode());
+		}
+
+		item = new_fxlistwidgetitem(fx,key,FxListWidgetItem::CT_KEY);
+		item->itemEdit->setMinimized(true);
+		item->itemEdit->setSingleKeyEditEnabled(true);
+		item->itemEdit->setFont(key_font);
+		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+		item->itemLabel->hide();
+		item->myRow = row;
+		item->myColumn = col;
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	item = new_fxlistwidgetitem(fx,fx->name(),FxListWidgetItem::CT_NAME);
+	item->myRow = row;
+	item->myColumn = col;
+	item->itemLabel->hide();
+	fxTable->setCellWidget(row,col++,item);
+
+
+	item = new_fxlistwidgetitem(fx,"",FxListWidgetItem::CT_FX_TYPE);
+	item->setNeverEditable(true);
+	item->itemLabel->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
+	item->itemEdit->hide();
+	item->myRow = row;
+	item->myColumn = col;
+	fxTable->setCellWidget(row,col++,item);
+
+	if (fxlist->showColumnIdFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->id()),FxListWidgetItem::CT_ID);
+		item->setNeverEditable(true);
+		item->itemEdit->setMinimized(true);
+		item->myRow = row;
+		item->myColumn = col;
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnPredelayFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->preDelay()),FxListWidgetItem::CT_PRE_DELAY);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnFadeinFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->fadeInTime()),FxListWidgetItem::CT_FADEIN_TIME);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnMoveFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->moveTime()),FxListWidgetItem::CT_MOVE_TIME);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnHoldFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->holdTime()),FxListWidgetItem::CT_HOLD_TIME);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnFadeoutFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->fadeOutTime()),FxListWidgetItem::CT_FADEOUT_TIME);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+
+	if (fxlist->showColumnPostdelayFlag) {
+		item = new_fxlistwidgetitem(fx,QString::number(fx->postDelay()),FxListWidgetItem::CT_POST_DELAY);
+		item->myRow = row;
+		item->myColumn = col;
+		item->itemEdit->setMinimized(true);
+		item->itemLabel->hide();
+		fxTable->setCellWidget(row,col++,item);
+	}
+}
+
+void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
+{
+	FxListWidgetItem *item;
+
+	if (fxlist->showColumnKeyFlag) {
+		QString key;
+		if (fx->keyCode() != Qt::Key_Space) {
+			key = QtStaticTools::keyToString(fx->keyCode());
+		}
+
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_KEY);
+		if (item) {
+			item->setText(key);
+		}
+	}
+
+
+	item = findFxListWidgetItem(row, FxListWidgetItem::CT_NAME);
+	if (item) {
+		item->setText(fx->name());
+		if (fx->loopValue() > 1) {
+			item->itemExtra->setPixmap(QPixmap(":/gfx/icons/audio_repeat_22.png"));
+			item->itemExtra->show();
+		}
+		else if (fx->preDelay() == -1) {
+			item->itemExtra->setPixmap(QPixmap(":/gfx/icons/green_down_22.png"));
+			item->itemExtra->show();
+		}
+		else {
+			item->itemExtra->hide();
+		}
+
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			//			if (fxa->seekPosPerMille() > 0) {
+			//				item->setActivationProgressA(fxa->seekPosPerMille());
+			//				qDebug() << "seek pos" << fxa->seekPosPerMille();
+			//			}
+			break;
+		case FX_SCENE:
+			break;
+		case FX_AUDIO_PLAYLIST:
+			break;
+		case FX_SEQUENCE:
+			break;
+		default:
+			break;
+		}
+		item->update();
+	}
+
+	item = findFxListWidgetItem(row, FxListWidgetItem::CT_FX_TYPE);
+	if (item) {
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
+			break;
+		case FX_SCENE:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/scene_mixer.png"));
+			break;
+		case FX_AUDIO_PLAYLIST:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/playlist.png"));
+			break;
+		case FX_SEQUENCE:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/sequence.png"));
+			break;
+		default:
+			break;
+		}
+		item->update();
+	}
+
+	if (fxlist->showColumnIdFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_ID);
+		if (item) {
+			item->setText(QString::number(fx->id()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnPredelayFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_PRE_DELAY);
+		if (item) {
+			item->setText(QString::number(fx->preDelay()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnFadeinFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_FADEIN_TIME);
+		if (item) {
+			item->setText(QString::number(fx->fadeInTime()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnMoveFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_MOVE_TIME);
+		if (item) {
+			item->setText(QString::number(fx->moveTime()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnHoldFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_HOLD_TIME);
+		if (item) {
+			item->setText(QString::number(fx->holdTime()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnFadeoutFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_FADEOUT_TIME);
+		if (item) {
+			item->setText(QString::number(fx->fadeOutTime()));
+			item->update();
+		}
+	}
+
+	if (fxlist->showColumnPostdelayFlag) {
+		item = findFxListWidgetItem(row, FxListWidgetItem::CT_POST_DELAY);
+		if (item) {
+			item->setText(QString::number(fx->postDelay()));
+			item->update();
+		}
+	}
+}
+
 void FxListWidget::refreshList()
 {
 	// qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
+	}
+}
+
+void FxListWidget::refreshFxItem(FxItem *fx)
+{
+	if (!FxItem::exists(fx)) return;
+
+	int fx_in_row = getRowThatContainsFxItem(fx);
+	if (fx_in_row >= 0) {
+		updateFxListRow(fx,fxList(),fx_in_row);
 	}
 }
 
@@ -1203,6 +1329,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Clone Fx Scene"));
 			act->setObjectName("6");
 		}
+		if (fxtype == FX_SEQUENCE) {
+			act = menu.addAction(tr("Clone Fx Sequence"));
+			act->setObjectName("10");
+		}
 		act = menu.addAction(tr("------------"));
 		if (fxtype == FX_SEQUENCE) {
 			if (AppCentral::instance()->execCenter->findExecuter(fx)) {
@@ -1231,7 +1361,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		case 4:
 			{
 				FxItemPropertyWidget *editor = FxItemPropertyWidget::openFxPropertyEditor(item->linkedFxItem);
-				if (editor) connect(editor,SIGNAL(modified()),this,SLOT(refreshList()));
+				if (editor) connect(editor,SIGNAL(modified(FxItem*)),this,SLOT(refreshFxItem(FxItem*)));
 			}
 			break;
 		case 5:
@@ -1254,6 +1384,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 											  ,tr("Enter name label for Fx")
 											  ,QLineEdit::Normal
 											  ,fx->name()));
+			refreshList();
+			break;
+		case 10:
+			fxList()->cloneSelectedSeqItem();
 			refreshList();
 			break;
 		default:

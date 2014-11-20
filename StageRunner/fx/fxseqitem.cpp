@@ -5,6 +5,7 @@
 #include "appcentral.h"
 #include "fxsceneitem.h"
 #include "fxaudioitem.h"
+#include "fxitemtool.h"
 
 FxSeqItem::FxSeqItem(FxList *fxList)
 	: FxItem(fxList)
@@ -14,10 +15,27 @@ FxSeqItem::FxSeqItem(FxList *fxList)
 	init();
 }
 
+FxSeqItem::FxSeqItem(const FxSeqItem &o)
+	: FxItem(o.parentFxList())
+	, seqList(new FxList(this))
+	, itemObj(new FxItemObj(this))
+{
+	init();
+	copyFrom(o);
+}
+
 FxSeqItem::~FxSeqItem()
 {
 	delete seqList;
 	delete itemObj;
+}
+
+void FxSeqItem::copyFrom(const FxSeqItem &o)
+{
+	seqList->copyFrom(*o.seqList);
+	setLoopValue(o.loopValue());
+	blackOtherSeqOnStart = o.blackOtherSeqOnStart;
+	stopOtherSeqOnStart = o.stopOtherSeqOnStart;
 }
 
 qint32 FxSeqItem::fadeInTime()
@@ -40,7 +58,7 @@ void FxSeqItem::setFadeOutTime(qint32 val)
 	Q_UNUSED(val);
 }
 
-qint32 FxSeqItem::loopValue()
+qint32 FxSeqItem::loopValue() const
 {
 	return seqList->myLoopTimes;
 }

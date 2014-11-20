@@ -165,6 +165,12 @@ public:
 		if (val!=pvalue) {pvalue=val;modified_f=true;}
 		return *this;
 	}
+	/// Zuweisung: pbool val = pbool
+	inline pbool & operator= (const pbool &o) {
+		if (o.pvalue != pvalue) {pvalue = o.pvalue;modified_f=true;}
+		return *this;
+	}
+
 	void cloneFrom(const PrefVarCore &other);
 
 private:

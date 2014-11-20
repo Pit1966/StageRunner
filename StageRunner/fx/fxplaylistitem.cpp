@@ -31,7 +31,7 @@ void FxPlayListItem::setLoopValue(qint32 val)
 	fxPlayList->setLoopTimes(val);
 }
 
-qint32 FxPlayListItem::loopValue()
+qint32 FxPlayListItem::loopValue() const
 {
 	return loopTimes;
 }

@@ -13,15 +13,37 @@
 FxList::FxList(FxItem *parentFx) :
 	QObject()
 {
+	m_fxParent = parentFx;
+
+	init();
+}
+
+FxList::FxList(const FxList &o) :
+	QObject()
+{
+	m_fxParent = o.m_fxParent;
+
+	copyFrom(o);
+}
+
+FxList::~FxList()
+{
+	clear();
+}
+
+void FxList::init()
+{
+	regid = 0;
+
 	m_fxLast = 0;
 	m_fxNext = 0;
 	m_fxCurrent = 0;
-	m_fxParent = parentFx;
-	myAutoProceedFlag = false;
-	regid = 0;
 	m_isModified = false;
+
+	myAutoProceedFlag = false;
 	myRandomizedFlag = false;
 	myLoopTimes = 1;
+	myLoopFlag = false;
 	m_isProtected = false;
 
 	showColumnFadeinFlag = false;
@@ -31,12 +53,38 @@ FxList::FxList(FxItem *parentFx) :
 	showColumnPredelayFlag = false;
 	showColumnPostdelayFlag = false;
 	showColumnKeyFlag = false;
-	showColumnMoveFlag = true;
+	showColumnMoveFlag = false;
 }
 
-FxList::~FxList()
+void FxList::copyFrom(const FxList &o)
 {
-	clear();
+	regid = 0;
+
+	m_fxLast = 0;
+	m_fxNext = 0;
+	m_fxCurrent = 0;
+	m_isModified = true;
+
+	myAutoProceedFlag = o.myAutoProceedFlag;
+	myRandomizedFlag = o.myRandomizedFlag;
+	myLoopTimes = o.myLoopTimes;
+	myLoopFlag = o.myLoopFlag;
+	m_isProtected = o.m_isProtected;
+
+	showColumnFadeinFlag = o.showColumnFadeinFlag;
+	showColumnFadeoutFlag = o.showColumnFadeoutFlag;
+	showColumnIdFlag = o.showColumnIdFlag;
+	showColumnHoldFlag = o.showColumnHoldFlag;
+	showColumnPredelayFlag = o.showColumnPredelayFlag;
+	showColumnPostdelayFlag = o.showColumnPostdelayFlag;
+	showColumnKeyFlag = o.showColumnKeyFlag;
+	showColumnMoveFlag = o.showColumnMoveFlag;
+
+	// Copy Sequence FX items
+	for (int t=0; t<o.m_fxList.size(); t++) {
+		FxItem *newfx = FxItemTool::cloneFxItem(o.m_fxList.at(t),false);
+		m_fxList.append(newfx);
+	}
 }
 
 void FxList::clear()
@@ -199,6 +247,7 @@ bool FxList::postLoadResetScenes()
 	}
 	return was_on_stage;
 }
+
 
 /**
  * @brief Find the follower of an arbitrary FX entry in the list
@@ -408,6 +457,18 @@ void FxList::cloneSelectedSceneItem()
 		m_fxList.append(new_scene);
 		m_isModified = true;
 		FxItemTool::setClonedFxName(scene,new_scene,this);
+	}
+}
+
+void FxList::cloneSelectedSeqItem()
+{
+	if (m_fxNext && m_fxNext->fxType() == FX_SEQUENCE) {
+		FxSeqItem *seq = reinterpret_cast<FxSeqItem*>(m_fxNext);
+		FxSeqItem *new_seq = new FxSeqItem(*seq);
+		new_seq->refCount.ref();
+		m_fxList.append(new_seq);
+		m_isModified = true;
+		FxItemTool::setClonedFxName(seq,new_seq,this);
 	}
 }
 

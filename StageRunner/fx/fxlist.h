@@ -49,7 +49,10 @@ protected:
 
 public:
 	FxList(FxItem *parentFx = 0);
+	FxList(const FxList &o);
 	~FxList();
+
+	void copyFrom(const FxList &o);
 
 	void clear();
 
@@ -94,6 +97,7 @@ public:
 	bool isModified() const;
 	void setModified(bool state);
 	void cloneSelectedSceneItem();
+	void cloneSelectedSeqItem();
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
 
@@ -107,6 +111,9 @@ public:
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();
 	bool postLoadResetScenes();
+
+private:
+	void init();
 
 signals:
 	void fxNextChanged(FxItem *nextfx);

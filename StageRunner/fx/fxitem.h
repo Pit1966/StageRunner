@@ -89,7 +89,7 @@ public:
 	virtual void setPostDelay(qint32 val);
 	virtual qint32 holdTime() {return defaultHoldTime;}
 	virtual void setHoldTime(qint32 val);
-	virtual qint32 loopValue() = 0;
+	virtual qint32 loopValue() const = 0;
 	virtual void setLoopValue(qint32 val) = 0;
 	virtual bool isRandomized() {return false;}
 	virtual void setRandomized(bool state) {Q_UNUSED(state);}

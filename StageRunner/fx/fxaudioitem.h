@@ -32,7 +32,7 @@ public:
 	void setFilePath(const QString &path);
 	AudioSeqState seqStatus() const {return mySeqStatus;}
 	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
-	qint32 loopValue() {return loopTimes;}
+	qint32 loopValue() const {return loopTimes;}
 	void setLoopValue(qint32 val) {loopTimes = val;}
 	void initForSequence();
 	void resetFx();

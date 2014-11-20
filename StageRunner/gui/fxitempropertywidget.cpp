@@ -158,7 +158,7 @@ void FxItemPropertyWidget::on_initialVolDial_sliderMoved(int position)
 	if (FxItem::exists(cur_fxa)) {
 		cur_fxa->initialVolume = position;
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fxa);
 	}
 
 }
@@ -168,7 +168,7 @@ void FxItemPropertyWidget::on_nameEdit_textEdited(const QString &arg1)
 	if (FxItem::exists(cur_fx)) {
 		cur_fx->setName(arg1);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 
 }
@@ -185,7 +185,7 @@ void FxItemPropertyWidget::on_keyEdit_textEdited(const QString &arg1)
 			cur_fx->setKeyCode(0);
 		}
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -196,6 +196,8 @@ void FxItemPropertyWidget::on_faderCountEdit_textEdited(const QString &arg1)
 		int num = arg1.toInt(&ok);
 		if (ok && num != cur_fxs->tubeCount()) {
 			cur_fxs->setTubeCount(num);
+			cur_fxs->setModified(true);
+			emit modified(cur_fxs);
 		}
 	}
 }
@@ -212,7 +214,7 @@ void FxItemPropertyWidget::on_audioFilePathEdit_doubleClicked()
 			cur_fxa->setFilePath(path);
 			cur_fxa->setModified(true);
 			audioFilePathEdit->setText(cur_fxa->filePath());
-			emit modified();
+			emit modified(cur_fxa);
 		}
 	}
 }
@@ -225,7 +227,7 @@ void FxItemPropertyWidget::on_preDelayEdit_textEdited(const QString &arg1)
 	if (cur_fx->preDelay() != time_ms) {
 		cur_fx->setPreDelay(time_ms);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fxa);
 	}
 }
 
@@ -237,7 +239,7 @@ void FxItemPropertyWidget::on_fadeInTimeEdit_textEdited(const QString &arg1)
 	if (cur_fx->fadeInTime() != time_ms) {
 		cur_fx->setFadeInTime(time_ms);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -249,7 +251,7 @@ void FxItemPropertyWidget::on_holdTimeEdit_textEdited(const QString &arg1)
 	if (cur_fx->holdTime() != time_ms) {
 		cur_fx->setHoldTime(time_ms);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -261,7 +263,7 @@ void FxItemPropertyWidget::on_fadeOutTimeEdit_textEdited(const QString &arg1)
 	if (cur_fx->fadeOutTime() != time_ms) {
 		cur_fx->setFadeOutTime(time_ms);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -273,7 +275,7 @@ void FxItemPropertyWidget::on_postDelayEdit_textEdited(const QString &arg1)
 	if (cur_fx->postDelay() != time_ms) {
 		cur_fx->setPostDelay(time_ms);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -286,7 +288,7 @@ void FxItemPropertyWidget::on_keyClearButton_clicked()
 	if (cur_fx->keyCode()) {
 		cur_fx->setKeyCode(0);
 		cur_fx->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -313,7 +315,7 @@ void FxItemPropertyWidget::on_audioLoopsSpin_valueChanged(int arg1)
 	if (cur_fxa->loopTimes != arg1) {
 		cur_fxa->loopTimes = arg1;
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fxa);
 	}
 
 }
@@ -326,7 +328,7 @@ void FxItemPropertyWidget::on_audioStartAtEdit_textEdited(const QString &arg1)
 	if (cur_fxa->initialSeekPos != time_ms) {
 		cur_fxa->initialSeekPos = time_ms;
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fxa);
 	}
 }
 
@@ -339,7 +341,7 @@ void FxItemPropertyWidget::on_audioStopAtEdit_textEdited(const QString &arg1)
 	if (cur_fxa->stopAtSeekPos != time_ms) {
 		cur_fxa->stopAtSeekPos = time_ms;
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fxa);
 	}
 
 }
@@ -352,7 +354,7 @@ void FxItemPropertyWidget::on_hookedToUniverseSpin_valueChanged(int arg1)
 	if (cur_fx->hookedUniverse() != arg1) {
 		cur_fx->hookToUniverse(arg1);
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -364,7 +366,7 @@ void FxItemPropertyWidget::on_hookedToChannelSpin_valueChanged(int arg1)
 	if (cur_fx->hookedChannel() != arg1) {
 		cur_fx->hookToChannel(arg1);
 		cur_fxa->setModified(true);
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -374,7 +376,7 @@ void FxItemPropertyWidget::on_seqStopOtherCheck_clicked(bool checked)
 
 	if (cur_fxseq->stopOtherSeqOnStart != checked) {
 		cur_fxseq->stopOtherSeqOnStart = checked;
-		emit modified();
+		emit modified(cur_fx);
 	}
 }
 
@@ -384,6 +386,6 @@ void FxItemPropertyWidget::on_seqBlackOtherCheck_clicked(bool checked)
 
 	if (cur_fxseq->blackOtherSeqOnStart != checked) {
 		cur_fxseq->blackOtherSeqOnStart = checked;
-		emit modified();
+		emit modified(cur_fx);
 	}
 }

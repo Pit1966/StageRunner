@@ -40,7 +40,7 @@ public:
 	FxSceneItem(const FxSceneItem &o);
 	~FxSceneItem();
 
-	qint32 loopValue() {return 0;}
+	qint32 loopValue() const {return 0;}
 	void setLoopValue(qint32 val);
 	void resetFx();
 	QString widgetPosition() {return widgetPos;}

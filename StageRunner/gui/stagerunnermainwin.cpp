@@ -84,7 +84,7 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxItemSelected(FxItem*)),fxItemEditor,SLOT(setFxItem(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxItemSelectedForEdit(FxItem*)),this,SLOT(openFxPropertyEditor(FxItem*)));
 	connect(fxListWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
-	connect(fxItemEditor,SIGNAL(modified()),fxListWidget,SLOT(refreshList()));
+	connect(fxItemEditor,SIGNAL(modified(FxItem*)),fxListWidget,SLOT(refreshFxItem(FxItem*)));
 	connect(fxListWidget,SIGNAL(editableChanged(bool)),appCentral,SLOT(setEditMode(bool)));
 
 	// Audio Control Panel <-> Audio Control
