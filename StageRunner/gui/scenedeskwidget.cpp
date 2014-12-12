@@ -642,6 +642,8 @@ void SceneDeskWidget::destroyAllSceneDesks()
 
 void SceneDeskWidget::on_channelCountSpin_valueChanged(int arg1)
 {
+	Q_UNUSED(arg1)
+
 	if (!origin_fxscene) return;
 	// origin_fxscene->setTubeCount(arg1);
 	// setFxScene(origin_fxscene);

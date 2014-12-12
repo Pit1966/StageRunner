@@ -112,7 +112,8 @@ SOURCES += \
 	../gui/customwidget/psvumeter.cpp \
 	../system/videocontrol.cpp \
 	../system/fxclipitem.cpp \
-    ../gui/customwidget/psvideowidget.cpp
+	../gui/customwidget/psvideowidget.cpp \
+	../system/videoplayer.cpp
 
 HEADERS  += \
 	../config.h \
@@ -211,7 +212,9 @@ HEADERS  += \
 	../system/dmxtypes.h \
 	../system/videocontrol.h \
 	../system/fxclipitem.h \
-    ../gui/customwidget/psvideowidget.h
+	../gui/customwidget/psvideowidget.h \
+	../system/videoplayer.h
+
 
 FORMS    += \
 	../gui/fxlistwidget.ui \

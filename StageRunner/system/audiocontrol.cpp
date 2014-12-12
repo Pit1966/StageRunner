@@ -14,6 +14,7 @@
 #include "fxlist.h"
 #include "fxclipitem.h"
 #include "customwidget/psvideowidget.h"
+#include "videoplayer.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -707,8 +708,7 @@ void AudioControl::createMediaPlayInstances()
 
 	// This is for video playback
 	m_videoWid = new PsVideoWidget;
-	m_videoPlayer = new QMediaPlayer;
-	m_videoPlayer->setVideoOutput(m_videoWid);
+	m_videoPlayer = new VideoPlayer(m_videoWid);
 }
 
 void AudioControl::destroyMediaPlayInstances()

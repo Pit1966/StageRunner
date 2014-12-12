@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = 0.1.1
+APPVERSION = 0.7.1
 
 #############################################################################
 # Compiler & linker configuration
@@ -19,8 +19,8 @@ CONFIG         -= release # Enable this when making a release
 CONFIG         += debug   # Disable this when making a release
 
 # Disable these if you don't want to see SVN revision in the About Box
-unix:REVISION = $$system(svn info | grep "Revision" | sed 's/Revision://')
-unix:APPVERSION = $$APPVERSION-r$$REVISION
+# unix:REVISION = $$system(svn info | grep "Revision" | sed 's/Revision://')
+# unix:APPVERSION = $$APPVERSION-r$$REVISION
 
 
 #macx:CONFIG   += x86 ppc  # Build universal binaries (Leopard only)
@@ -71,4 +71,5 @@ macx:PLUGINDIR       = Plugins
 win32:TRANSLATIONDIR      =
 unix:!macx:TRANSLATIONDIR = $$DATADIR/translations
 macx:TRANSLATIONDIR       = $$DATADIR/Translations
+
 

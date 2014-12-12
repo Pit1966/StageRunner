@@ -4,9 +4,8 @@
 #include "appcentral.h"
 #include "fxclipitem.h"
 #include "audiocontrol.h"
-
-#include <QMediaPlayer>
-#include <customwidget/psvideowidget.h>
+#include "videoplayer.h"
+#include "customwidget/psvideowidget.h"
 
 VideoControl::VideoControl(AppCentral &app_central)
 	: QObject()
@@ -27,7 +26,7 @@ void VideoControl::videoBlack(qint32 time_ms)
 
 	if (!myApp.unitAudio->isValid()) return;
 
-	QMediaPlayer *vp = myApp.unitAudio->videoPlayer();
+	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	vp->stop();
 	myApp.unitAudio->videoWidget()->update();
 }

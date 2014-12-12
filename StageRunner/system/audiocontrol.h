@@ -18,7 +18,7 @@ class Executer;
 class FxControl;
 class FrqSpectrum;
 class QMediaPlaylist;
-class QMediaPlayer;
+class VideoPlayer;
 class PsVideoWidget;
 class FxClipItem;
 
@@ -36,7 +36,7 @@ protected:
 	bool m_initInThread;
 
 	// Video player stuff (as hyper extension)
-	QMediaPlayer *m_videoPlayer;
+	VideoPlayer *m_videoPlayer;
 	QMediaPlaylist *m_playlist;
 	PsVideoWidget *m_videoWid;
 
@@ -69,7 +69,7 @@ public:
 
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
-	inline QMediaPlayer * videoPlayer() const {return m_videoPlayer;}
+	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 
 
 private:

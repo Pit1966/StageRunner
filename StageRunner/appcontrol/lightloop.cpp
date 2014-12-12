@@ -50,7 +50,6 @@ void LightLoop::stopProcessTimer()
 
 void LightLoop::processPendingEvents()
 {
-	static int count = 1;
 	if (first_process_event_f) {
 		loop_time.start();
 		loop_exec_target_time_ms = LIGHT_LOOP_INTERVAL_MS;
