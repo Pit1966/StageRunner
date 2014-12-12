@@ -28,6 +28,7 @@
 #include "scenedeskwidget.h"
 #include "fxitemobj.h"
 #include "fxlistvarset.h"
+#include "customwidget/psvideowidget.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -277,8 +278,10 @@ void StageRunnerMainWin::initAppDefaults()
 	appCentral->unitAudio->getAudioDevices();
 
 	// Set Audio Defaults
-	appCentral->unitAudio->setFFTAudioChannelFromMask(appCentral->userSettings->pFFTAudioMask);
-	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask == 15);
+	if (appCentral->unitAudio->isValid()) {
+		appCentral->unitAudio->setFFTAudioChannelFromMask(appCentral->userSettings->pFFTAudioMask);
+		actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask == 15);
+	}
 
 	// Copy User Settings to GUI
 	applyUserSettingsToGui(appCentral->userSettings);
@@ -589,6 +592,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		case Qt::Key_Backspace:
 			appCentral->unitFx->stopAllFxSequences();
 			appCentral->lightBlack(0);
+			appCentral->videoBlack(0);
 			break;
 
 		default:
@@ -648,19 +652,25 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	// This stops and removes all running sequences
 	appCentral->stopAllSequencesAndPlaylists();
 
-	if (appCentral->unitAudio->fadeoutAllFxAudio(1000)) {
-		hide();
-		QTime wait;
-		wait.start();
-		while (wait.elapsed() < 1500) QApplication::processEvents();
+	if (appCentral->unitAudio->isValid()) {
+		if (appCentral->unitAudio->fadeoutAllFxAudio(1000)) {
+			hide();
+			QTime wait;
+			wait.start();
+			while (wait.elapsed() < 1500) QApplication::processEvents();
+		}
 	}
 
+	if (appCentral->unitAudio->videoWidget())
+		appCentral->unitAudio->videoWidget()->close();
 
 	QSettings set;
 	set.beginGroup("GuiSettings");
 	set.setValue("MainWinGeometry",saveGeometry());
 	set.setValue("MainWinSize",size());
 	set.setValue("MainWinDocks",saveState());
+	set.endGroup();
+
 	QMainWindow::closeEvent(event);
 
 	FxListWidget::destroyAllFxListWidgets();

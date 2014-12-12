@@ -1,3 +1,9 @@
+#include <QDebug>
+#include <QLineEdit>
+#include <QDrag>
+#include <QPainter>
+#include <QKeyEvent>
+
 #include "fxlistwidget.h"
 #include "log.h"
 #include "fxlist.h"
@@ -5,6 +11,7 @@
 #include "fxsceneitem.h"
 #include "fxaudioitem.h"
 #include "fxseqitem.h"
+#include "fxclipitem.h"
 #include "fxitemobj.h"
 #include "appcentral.h"
 #include "usersettings.h"
@@ -22,11 +29,7 @@
 #include "audiocontrol.h"
 #include "messagedialog.h"
 #include "lightcontrol.h"
-#include <QDebug>
-#include <QLineEdit>
-#include <QDrag>
-#include <QPainter>
-#include <QKeyEvent>
+#include "videocontrol.h"
 
 
 MutexQList<FxListWidget*>FxListWidget::globalFxListWidgetList;
@@ -741,7 +744,11 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	if (item) {
 		switch (fx->fxType()) {
 		case FX_AUDIO:
-			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
+			if (reinterpret_cast<FxAudioItem*>(fx)->isFxClip) {
+				item->itemLabel->setPixmap(QPixmap(":/gfx/icons/video.png"));
+			} else {
+				item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
+			}
 			break;
 		case FX_SCENE:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/scene_mixer.png"));
@@ -1333,6 +1340,13 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Clone Fx Sequence"));
 			act->setObjectName("10");
 		}
+
+		if (fxtype == FX_AUDIO) {
+			act = menu.addAction(tr("Start in external video player"));
+			act->setObjectName("11");
+		}
+
+
 		act = menu.addAction(tr("------------"));
 		if (fxtype == FX_SEQUENCE) {
 			if (AppCentral::instance()->execCenter->findExecuter(fx)) {
@@ -1342,6 +1356,8 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 				act->setObjectName("8");
 			}
 		}
+
+
 
 		act = menu.exec(event->globalPos());
 		if (!act) return;
@@ -1389,6 +1405,9 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		case 10:
 			fxList()->cloneSelectedSeqItem();
 			refreshList();
+			break;
+		case 11:
+			AppCentral::instance()->unitVideo->startFxClip(reinterpret_cast<FxClipItem*>(fx));
 			break;
 		default:
 			break;

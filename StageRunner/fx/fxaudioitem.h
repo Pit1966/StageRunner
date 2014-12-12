@@ -19,6 +19,7 @@ public:
 
 	bool startInProgress;					///< set this Flag to give a hint, that this effect will start in a short time
 	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)
+	bool isFxClip;							///< True, if Audio is recognized to be a video clip
 
 protected:
 	AudioSeqState mySeqStatus;
@@ -39,6 +40,8 @@ public:
 	inline qint64 seekPosition() const {return mySeekPosition;}
 	inline int seekPosPerMille() const {return mySeekPosPerMille;}
 	void setSeekPosition(qint64 posMs);
+
+	bool checkForVideoClip();
 
 private:
 	void init();

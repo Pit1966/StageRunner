@@ -17,6 +17,10 @@ class FxPlayListItem;
 class Executer;
 class FxControl;
 class FrqSpectrum;
+class QMediaPlaylist;
+class QMediaPlayer;
+class PsVideoWidget;
+class FxClipItem;
 
 class AudioControl : public QThread
 {
@@ -28,6 +32,13 @@ public:
 protected:
 	QList<AudioSlot*> audioSlots;
 	int masterVolume;
+	bool m_isValid;
+	bool m_initInThread;
+
+	// Video player stuff (as hyper extension)
+	QMediaPlayer *m_videoPlayer;
+	QMediaPlaylist *m_playlist;
+	PsVideoWidget *m_videoWid;
 
 private:
 	enum {
@@ -45,7 +56,7 @@ private:
 
 
 public:
-	AudioControl(AppCentral &app_central);
+	AudioControl(AppCentral &app_central, bool initInThread);
 	~AudioControl();
 
 	void getAudioDevices();
@@ -54,6 +65,12 @@ public:
 	int findAudioSlot(FxAudioItem *fxa);
 	int selectFreeAudioSlot(int slotnum = -1);
 	void setFFTAudioChannelFromMask(qint32 mask);
+	inline bool isValid() const {return m_isValid;}
+
+	bool startFxClip(FxClipItem *fxc);
+	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
+	inline QMediaPlayer * videoPlayer() const {return m_videoPlayer;}
+
 
 private:
 	void run();
@@ -93,7 +110,8 @@ public slots:
 
 private:
 	void init();
-	void initFromThread();
+	void createMediaPlayInstances();
+	void destroyMediaPlayInstances();
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

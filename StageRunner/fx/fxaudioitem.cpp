@@ -2,6 +2,7 @@
 #include "../config.h"
 
 #include <QFileInfo>
+#include <QMediaPlayer>
 
 FxAudioItem::FxAudioItem(FxList *fxList)
 	: FxItem(fxList)
@@ -64,11 +65,30 @@ void FxAudioItem::setSeekPosition(qint64 posMs)
 	}
 }
 
+bool FxAudioItem::checkForVideoClip()
+{
+	const QString &suf = QFileInfo(filePath()).suffix().toLower();
+	if (suf == "mkv"
+			|| suf == "avi"
+			|| suf == "mpg"
+			|| suf == "mp4"
+			|| suf == "m4v"
+			|| suf == "mov") {
+		isFxClip = true;
+		qDebug() << fileName() << " is video file";
+	} else {
+		isFxClip = false;
+	}
+
+	return isFxClip;
+}
+
 
 void FxAudioItem::init()
 {
 	startInProgress = false;
 	isDmxStarted = false;
+	isFxClip = false;
 	mySeekPosition = 0;
 	mySeekPosPerMille = -1;
 	myFxType = FX_AUDIO;

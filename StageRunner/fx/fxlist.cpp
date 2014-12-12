@@ -202,6 +202,9 @@ void FxList::postLoadProcess()
 		FxItem *fx = m_fxList.at(t);
 		fx->setParentFxList(this);
 		switch (fx->fxType()) {
+		case FX_AUDIO:
+			reinterpret_cast<FxAudioItem*>(fx)->checkForVideoClip();
+			break;
 		case FX_AUDIO_PLAYLIST:
 			reinterpret_cast<FxPlayListItem*>(fx)->fxPlayList->postLoadProcess();
 			break;
@@ -334,6 +337,8 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 		m_fxList.insert(pos,fx);
 	}
 	m_isModified = true;
+
+	fx->checkForVideoClip();
 
 	return true;
 }

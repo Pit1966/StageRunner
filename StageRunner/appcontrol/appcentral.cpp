@@ -7,6 +7,7 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "fxclipitem.h"
 #include "project.h"
 #include "usersettings.h"
 #include "fxlist.h"
@@ -19,6 +20,7 @@
 #include "executer.h"
 #include "fxlistvarset.h"
 #include "fxlistwidget.h"
+#include "videocontrol.h"
 
 #include <QFileDialog>
 
@@ -96,6 +98,12 @@ void AppCentral::lightBlack(qint32 time_ms)
 	int num = unitLight->black(time_ms);
 	LOGTEXT(tr("BLACK: Fade %1 scenes to level 0 in %2s")
 			.arg(num).arg(float(time_ms)/1000));
+}
+
+void AppCentral::videoBlack(qint32 time_ms)
+{
+	if (unitVideo)
+		unitVideo->videoBlack(time_ms);
 }
 
 /**
@@ -346,7 +354,10 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 
 	switch (fx->fxType()) {
 	case FX_AUDIO:
-		{
+		if (reinterpret_cast<FxAudioItem*>(fx)->isFxClip) {
+			FxClipItem *fxc = reinterpret_cast<FxClipItem*>(fx);
+			unitVideo->startFxClip(fxc);
+		} else {
 			FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
 			switch (cmd) {
 			case CMD_AUDIO_START:
@@ -502,6 +513,7 @@ AppCentral::AppCentral()
 AppCentral::~AppCentral()
 {
 	delete templateFxList;
+	delete unitVideo;
 	delete unitFx;
 	delete execCenter;
 	delete unitLight;
@@ -522,10 +534,13 @@ void AppCentral::init()
 	last_global_selected_fxitem = 0;
 
 	mainWinObj = 0;
+
 	userSettings = new UserSettings;
 	project = new Project;
 	pluginCentral = new IOPluginCentral;
-	unitAudio = new AudioControl(*this);
+	unitVideo = new VideoControl(*this);
+
+	unitAudio = new AudioControl(*this,false);
 	unitLight = new LightControl(*this);
 	execCenter = new ExecCenter(*this);
 	unitFx = new FxControl(*this, *execCenter);
@@ -540,6 +555,8 @@ void AppCentral::init()
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 	qRegisterMetaType<CtrlCmd>("CtrlCmd");
+
+	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules
 	MessageHub::instance();

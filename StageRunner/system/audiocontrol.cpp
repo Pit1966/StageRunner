@@ -12,29 +12,43 @@
 #include "fxcontrol.h"
 #include "audioformat.h"
 #include "fxlist.h"
+#include "fxclipitem.h"
+#include "customwidget/psvideowidget.h"
 
 #include <QStringList>
 #include <QDebug>
 
 #ifdef IS_QT5
 #include <QAudioDeviceInfo>
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
+#include <QUrl>
+#include <QVideoWidget>
+#include <QThread>
 #endif
 
 
 
-AudioControl::AudioControl(AppCentral &app_central)
+AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 	: QThread()
 	,myApp(app_central)
+	,m_initInThread(initInThread)
 	,used_slots(MAX_AUDIO_SLOTS)
 	,slotMutex(new QMutex(QMutex::Recursive))
 {
 	init();
 	getAudioDevices();
 
+	if (!m_initInThread)
+		createMediaPlayInstances();
+
 	// Audio Thread starten
 	start();
 	if (!isRunning()) {
 		DEBUGERROR("%s: Could not start audio control thread",Q_FUNC_INFO);
+		m_isValid = false;
+	} else {
+		m_isValid = true;
 	}
 }
 
@@ -44,6 +58,10 @@ AudioControl::~AudioControl()
 		quit();
 		wait(500);
 	}
+
+	if (!m_initInThread)
+		destroyMediaPlayInstances();
+
 	delete slotMutex;
 }
 
@@ -146,16 +164,31 @@ void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
 	}
 }
 
+bool AudioControl::startFxClip(FxClipItem *fxc)
+{
+	if (!m_videoPlayer) return false;
+
+	qDebug() << "Start FxClip"<< fxc->name();
+
+	m_videoPlayer->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+	m_videoPlayer->play();
+
+	m_videoWid->show();
+
+	return false;
+}
+
 void AudioControl::run()
 {
-	initFromThread();
+	if (m_initInThread)
+		createMediaPlayInstances();
+
 	LOGTEXT(tr("Audio control is running"));
 
 	exec();
 
-	while (!audioSlots.isEmpty()) {
-		delete audioSlots.takeFirst();
-	}
+	if (m_initInThread)
+		destroyMediaPlayInstances();
 
 	LOGTEXT(tr("Audio control finished"));
 }
@@ -647,6 +680,10 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 
 void AudioControl::init()
 {
+	m_playlist = 0;
+	m_videoPlayer = 0;
+	m_videoWid = 0;
+
 	setObjectName("Audio Control");
 	masterVolume = MAX_VOLUME;
 	for (int t=0; t<used_slots; t++) {
@@ -655,8 +692,9 @@ void AudioControl::init()
 	}
 }
 
-void AudioControl::initFromThread()
+void AudioControl::createMediaPlayInstances()
 {
+	// This is for audio use
 	for (int t=0; t<used_slots; t++) {
 		AudioSlot *slot = new AudioSlot(this,t);
 		audioSlots.append(slot);
@@ -665,6 +703,25 @@ void AudioControl::initFromThread()
 		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(vu_level_changed_receiver(int,qreal,qreal)));
 		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(fft_spectrum_changed_receiver(int,FrqSpectrum*)));
 		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-
 	}
+
+	// This is for video playback
+	m_videoWid = new PsVideoWidget;
+	m_videoPlayer = new QMediaPlayer;
+	m_videoPlayer->setVideoOutput(m_videoWid);
+}
+
+void AudioControl::destroyMediaPlayInstances()
+{
+	while (!audioSlots.isEmpty()) {
+		delete audioSlots.takeFirst();
+	}
+
+	delete m_videoWid;
+	m_videoWid = 0;
+	delete m_videoPlayer;
+	m_videoPlayer = 0;
+	delete m_playlist;
+	m_playlist = 0;
+
 }

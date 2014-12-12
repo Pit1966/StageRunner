@@ -21,6 +21,7 @@ class Executer;
 class FxList;
 class FxControl;
 class FxListVarSet;
+class VideoControl;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -42,6 +43,7 @@ public:
 	AudioControl *unitAudio;
 	LightControl *unitLight;
 	FxControl *unitFx;
+	VideoControl *unitVideo;
 	Project *project;
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
@@ -66,6 +68,7 @@ public:
 	void stopAllSequencesAndPlaylists();
 
 	void lightBlack(qint32 time_ms = 0);
+	void videoBlack(qint32 time_ms = 0);
 	void sequenceStop(FxItem *fxseq = 0);
 
 	int registerFxList(FxList *fxlist);

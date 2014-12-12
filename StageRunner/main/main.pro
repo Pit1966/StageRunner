@@ -30,6 +30,7 @@ QT += multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 QT += widgets
+QT += multimediawidgets
 
 DEFINES += IS_QT5
 
@@ -108,7 +109,10 @@ SOURCES += \
 	../gui/customwidget/psspectrometer.cpp \
 	../appcontrol/fxlistvarset.cpp \
 	../tool/fftrealfixlenwrapper.cpp \
-    ../gui/customwidget/psvumeter.cpp
+	../gui/customwidget/psvumeter.cpp \
+	../system/videocontrol.cpp \
+	../system/fxclipitem.cpp \
+    ../gui/customwidget/psvideowidget.cpp
 
 HEADERS  += \
 	../config.h \
@@ -203,8 +207,11 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/OscSinCos.h \
 	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
 	../tool/fftrealfixlenwrapper.h \
-    ../gui/customwidget/psvumeter.h \
-    ../system/dmxtypes.h
+	../gui/customwidget/psvumeter.h \
+	../system/dmxtypes.h \
+	../system/videocontrol.h \
+	../system/fxclipitem.h \
+    ../gui/customwidget/psvideowidget.h
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
