@@ -34,9 +34,9 @@ private:
 	FxListWidgetItem* cur_clicked_item;
 	FxItem * origin_fxitem;
 	QList<int>selected_rows;
-	static MutexQList<FxListWidget*>globalFxListWidgetList;
-
 	int upper_context_menu_split;
+
+	static MutexQList<FxListWidget*>globalFxListWidgetList;
 
 public:
 	FxListWidget(QWidget *parent = 0);

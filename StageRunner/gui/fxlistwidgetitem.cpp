@@ -51,13 +51,13 @@ void FxListWidgetItem::setText(const QString &txt)
 	itemEdit->setText(txt);
 }
 
-QSize FxListWidgetItem::sizeHint()
+QSize FxListWidgetItem::sizeHint() const
 {
 	// qDebug("sizeHint");
 	return QSize(20,20);
 }
 
-QSize FxListWidgetItem::minimumSizeHint()
+QSize FxListWidgetItem::minimumSizeHint() const
 {
 	// qDebug("minimumSizeHint");
 	return QSize();

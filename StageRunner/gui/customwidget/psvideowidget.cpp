@@ -1,4 +1,5 @@
 #include <QSettings>
+#include <QDebug>
 
 #include "psvideowidget.h"
 
@@ -14,6 +15,9 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 		move(set.value("VideoWinPos").toPoint());
 		setFullScreen(set.value("VideoWinIsFullscreen").toBool());
 		set.endGroup();
+
+		if (set.value("VideoWinEnabled").toBool() == false)
+			close();
 	}
 }
 
@@ -25,7 +29,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 void PsVideoWidget::closeEvent(QCloseEvent *event)
 {
 	QSettings set;
-	set.setValue("VideoWinEnabled",true);
+	set.setValue("VideoWinEnabled",!isHidden());
 	set.beginGroup("GuiSettings");
 	set.setValue("VideoWinGeometry",saveGeometry());
 	set.setValue("VideoWinPos",pos());

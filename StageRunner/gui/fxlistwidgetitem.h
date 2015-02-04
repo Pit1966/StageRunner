@@ -55,8 +55,8 @@ public:
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
 	QPoint dragBeginPos() const {return drag_begin_pos;}
-	QSize sizeHint();
-	QSize minimumSizeHint();
+	QSize sizeHint() const;
+	QSize minimumSizeHint() const;
 
 
 private:

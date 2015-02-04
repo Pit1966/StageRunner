@@ -272,7 +272,7 @@ QString IOPluginCentral::sysPluginDir()
 	dir = "../plugins";
 #elif __APPLE__
 	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-								   .arg(PLUGINDIR));
+								   .arg(PLUGINDIR);
 #elif unix
 	dir = PLUGINDIR;
 #endif

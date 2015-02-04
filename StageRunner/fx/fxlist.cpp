@@ -92,9 +92,9 @@ void FxList::clear()
 	m_fxLast = 0;
 	m_fxNext = 0;
 	m_fxCurrent = 0;
-	m_isModified = true;
 
 	while (!m_fxList.isEmpty()) {
+		m_isModified = true;
 		// remove effect from list and delete it if there is no more reference
 		FxItem *fx = m_fxList.takeFirst();
 		if (!fx->refCount.deref()) {

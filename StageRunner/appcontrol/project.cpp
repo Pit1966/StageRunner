@@ -31,7 +31,11 @@ void Project::clear()
 	pProjectId = QDateTime::currentDateTime().toTime_t();
 	pProjectFormat = 0;
 
-	if (fxList->size()) fxList->clear();
+	if (fxList->size()) {
+		fxList->clear();
+		fxList->setModified(false);
+	}
+
 	fxList->showColumnKeyFlag = true;
 }
 

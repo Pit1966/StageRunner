@@ -553,6 +553,9 @@ void FxListWidget::init()
 {
 	is_modified_f = false;
 	is_editable_f = false;
+	is_standalone_f = false;
+
+	myfxlist = 0;
 	cur_selected_item = 0;
 	cur_clicked_item = 0;
 	origin_fxitem = 0;
@@ -1545,6 +1548,8 @@ void FxListWidget::if_fxitemwidget_seeked(FxListWidgetItem *listitem, int perMil
 
 void FxListWidget::drop_event_receiver(QString str, int row)
 {
+	Q_ASSERT(fxList());
+
 	if (!str.startsWith("file://")) {
 		DEBUGERROR("Add Drag'n'Drop File: %s not valid",str.toLatin1().data());
 		return;

@@ -45,6 +45,8 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
 
+	fxListWidget->setFxList(appCentral->project->mainFxList());
+
 	debugLevelSpin->setValue(debug);
 
 	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
@@ -53,7 +55,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	// For external access
 	logWidget = logEdit;
 	if (myapp->mainWinObj) {
-		DEBUGERROR("There seems to be one than one StageRunnerMainWin instance!");
+		DEBUGERROR("There seems to be more than one StageRunnerMainWin instance!");
 	}
 	myapp->mainWinObj = this;
 }
@@ -221,6 +223,18 @@ void StageRunnerMainWin::openFxPropertyEditor(FxItem *item)
  */
 void StageRunnerMainWin::clearProject()
 {
+	if (appCentral->project->isModified()) {
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("The current project is modified!\n\nDo you want to save it now?")
+										,QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+		if (ret == QMessageBox::Yes) {
+			on_actionSave_Project_triggered();
+		}
+		else if (ret == QMessageBox::Cancel) {
+			return;
+		}
+	}
+
 	// Clear Project and project member
 	appCentral->clearProject();
 	setProjectName("");
@@ -478,6 +492,7 @@ void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 			path += ".srp";
 		}
 		appCentral->userSettings->pLastProjectSavePath = path;
+		appCentral->userSettings->pLastProjectLoadPath = path;
 		copyGuiSettingsToProject();
 		if (appCentral->project->saveToFile(path)) {
 			setProjectName(path);
@@ -643,10 +658,14 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 
 	if (appCentral->templateFxList->isModified()) {
 		int ret = QMessageBox::question(this,tr("Attention")
-										,tr("Your FX templae list is modified!\n\nDo you want to save it now?"));
+										,tr("Your FX template list is modified!\n\nDo you want to save it now?"));
 		if (ret == QMessageBox::Yes) {
 			on_saveTemplatesButton_clicked();
 		}
+	}
+
+	if (appCentral->project->curProjectFilePath.isEmpty()) {
+		appCentral->userSettings->pLastProjectLoadPath = "";
 	}
 
 	// This stops and removes all running sequences
@@ -663,6 +682,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 
 	if (appCentral->unitAudio->videoWidget())
 		appCentral->unitAudio->videoWidget()->close();
+
 
 	QSettings set;
 	set.beginGroup("GuiSettings");
