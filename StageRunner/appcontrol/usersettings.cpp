@@ -9,6 +9,10 @@ UserSettings::UserSettings()
 	init();
 
 	readFromPref();
+
+#ifdef __APPLE__
+	pAltAudioEngine = true;
+#endif
 }
 
 UserSettings::~UserSettings()
@@ -47,4 +51,6 @@ void UserSettings::init()
 	addExistingVar(pFFTAudioMask,"FFTAudioMask",0,15,15);
 	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,15);
+
+
 }

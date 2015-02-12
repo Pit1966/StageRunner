@@ -166,9 +166,13 @@ void AppCentral::setEditMode(bool state)
 
 void AppCentral::setExperimentalAudio(bool state)
 {
+#ifdef __APPLE__
+	userSettings->pAltAudioEngine = true;
+#else
 	if (state != userSettings->pAltAudioEngine) {
 		userSettings->pAltAudioEngine = state;
 	}
+#endif
 }
 
 void AppCentral::setFFTAudioChannelMask(qint32 mask)

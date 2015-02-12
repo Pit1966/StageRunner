@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = 0.7.1
+APPVERSION = 0.7.2
 
 #############################################################################
 # Compiler & linker configuration
@@ -24,7 +24,7 @@ CONFIG         += debug   # Disable this when making a release
 
 
 #macx:CONFIG   += x86 ppc  # Build universal binaries (Leopard only)
-macx:CONFIG    -= app_bundle # Let StageRunner construct the .app bundle
+#macx:CONFIG    -= app_bundle # Let StageRunner construct the .app bundle
 
 # Produce build targets to the source directory
 win32:DESTDIR  = ./
