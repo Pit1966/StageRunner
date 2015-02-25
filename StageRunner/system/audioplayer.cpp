@@ -14,6 +14,9 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 {
 	if (audioProbe->setSource(this)) {
 		connect(audioProbe,SIGNAL(audioBufferProbed(QAudioBuffer)),this,SLOT(calculate_vu_level(QAudioBuffer)));
+	} else {
+		LOGERROR("Could not connect AudioProbe to MediaPlayer");
+		qDebug() << "Could not connect AudioProbe to MediaPlayer";
 	}
 
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);

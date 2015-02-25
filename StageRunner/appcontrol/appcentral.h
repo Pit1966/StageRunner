@@ -8,6 +8,12 @@
 #include <QByteArray>
 #include <QWidget>
 
+#ifdef USE_SDL
+#include <SDL.h>
+#include <SDL_mixer.h>
+#endif
+
+
 class AudioControl;
 class LightControl;
 class Project;
@@ -49,6 +55,9 @@ public:
 	IOPluginCentral *pluginCentral;
 	ExecCenter *execCenter;
 	FxListVarSet *templateFxList;
+
+
+	Mix_Music *testsdl;
 
 private:
 	AppCentral();

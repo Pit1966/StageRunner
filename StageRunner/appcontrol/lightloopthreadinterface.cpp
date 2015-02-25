@@ -21,7 +21,8 @@ bool LightLoopThreadInterface::startThread()
 	if (!isRunning()) {
 		if (!lightLoop) {
 			start();
-			while (!lightLoop) ;;
+			while (!lightLoop)
+				;;
 		}
 	}
 

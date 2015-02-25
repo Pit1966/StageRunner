@@ -316,6 +316,26 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 	QString path = QFileDialog::getOpenFileName(widget,tr("Choose Audio File")
 												,userSettings->pLastAudioFxImportPath);
 
+//	/* load the song */
+//	if (testsdl=Mix_LoadMUS(path.toLocal8Bit().data())) {
+//		Mix_MusicType type=Mix_GetMusicType(testsdl);
+//		qDebug("Music type: %s\n",
+//			   type==MUS_NONE?"MUS_NONE":
+//							  type==MUS_CMD?"MUS_CMD":
+//											type==MUS_WAV?"MUS_WAV":
+//														  type==MUS_MOD?"MUS_MOD":
+//																		type==MUS_MID?"MUS_MID":
+//																					  type==MUS_OGG?"MUS_OGG":
+//																									type==MUS_MP3?"MUS_MP3":
+//																												  type==MUS_MP3_MAD?"MUS_MP3_MAD":
+//																																	type==MUS_FLAC?"MUS_FLAC":
+//																																				   "Unknown");
+//		Mix_PlayMusic(testsdl,1);
+//		Mix_VolumeMusic(MIX_MAX_VOLUME);
+//	}
+
+
+
 	if (path.size()) {
 		userSettings->pLastAudioFxImportPath = path;
 		fxlist->addFxAudioSimple(path,row);
@@ -516,6 +536,12 @@ AppCentral::AppCentral()
 
 AppCentral::~AppCentral()
 {
+#ifdef USE_SDL
+	Mix_FreeMusic(testsdl);
+	Mix_CloseAudio();
+	SDL_Quit();
+#endif
+
 	delete templateFxList;
 	delete unitVideo;
 	delete unitFx;
@@ -538,6 +564,7 @@ void AppCentral::init()
 	last_global_selected_fxitem = 0;
 
 	mainWinObj = 0;
+	testsdl = 0;
 
 	userSettings = new UserSettings;
 	project = new Project;
@@ -570,5 +597,17 @@ void AppCentral::init()
 
 	// AppCentral -> AudioControl Thread (unitAudio)
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+
+
+#ifdef USE_SDL
+	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
+		/* initialize sdl mixer, open up the audio device */
+		if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,1024) >=0) {
+
+
+			qDebug() << "SDL init ok";
+		}
+	}
+#endif // ifdef USE_SDL
 
 }

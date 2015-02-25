@@ -20,6 +20,15 @@ INCLUDEPATH  += ../tool
 INCLUDEPATH  += ../plugins/interfaces
 INCLUDEPATH  += ../thirdparty/fftreal2
 
+macx {
+INCLUDEPATH += /Library/Frameworks/SDL2.framework/Headers
+INCLUDEPATH += /Library/Frameworks/SDL2_mixer.framework/Headers
+LIBS += -framework SDL2
+LIBS += -framework SDL2_mixer
+LIBS += -F/Library/Frameworks
+
+DEFINES += USE_SDL
+}
 
 QT += core gui
 QT += sql

@@ -4,9 +4,10 @@ TEMPLATE = subdirs
 
 # Ensure that library is built before application
 CONFIG  += ordered
+# CONFIG  += app_bundle
 
 SUBDIRS += main
-SUBDIRS += plugins
+# SUBDIRS += plugins
 
 
 # Translations
