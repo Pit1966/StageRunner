@@ -564,7 +564,6 @@ void AppCentral::init()
 	last_global_selected_fxitem = 0;
 
 	mainWinObj = 0;
-	testsdl = 0;
 
 	userSettings = new UserSettings;
 	project = new Project;

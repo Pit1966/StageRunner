@@ -56,8 +56,9 @@ public:
 	ExecCenter *execCenter;
 	FxListVarSet *templateFxList;
 
-
+#ifdef USE_SDL
 	Mix_Music *testsdl;
+#endif
 
 private:
 	AppCentral();

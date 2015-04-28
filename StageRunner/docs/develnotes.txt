@@ -1,0 +1,51 @@
+Sound unter MacOSX
+
+https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/CoreAudioOverview/CoreAudioEssentials/CoreAudioEssentials.html#//apple_ref/doc/uid/TP40003577-CH10-SW1
+
+Stichwort AVAudioPlayer
+
+
+
+I have a pure C++/Qt project on a Mac, but I now find that I need to call a few methods only available in the Cocoa API. Following instructions listed here:
+
+http://el-tramo.be/blog/mixing-cocoa-and-qt
+
+I have a C++ class implementation in a ".m"m file. As a test, my "foo.mm" file contains the following code (relevant #include methods have been stripped for clarity).:
+
+int foo::getMagicNumber()
+{
+	NSCursor *cursor = [NSCursor new];
+}
+
+Apparently, I need to add the .mm file to a qmake variable called OBJECTIVE_SOURCES. My project .pro file looks like this:
+
+TARGET = testApp
+CONFIG += console
+CONFIG -= app_bundle
+TEMPLATE = app
+SOURCES += main.cpp
+OBJECTIVE_SOURCES += foo.mm
+HEADERS += test.h
+
+
+
+
+
+#project.pro
+TEMPLATE = app
+
+LIBS += -framework AppKit -framework Foundation
+
+OBJECTIVE_SOURCES = main.mm
+
+//main.mm
+#import <Foundation/NSUserNotification.h>
+#import <AppKit/NSApplication.h>
+#include <QCoreApplication>
+
+int main(int argc, char ** argv)
+{
+   QCoreApplication a(argc, argv);
+   NSApplication * app = [NSApplication sharedApplication];
+   return 0;
+}
