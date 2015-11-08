@@ -1,5 +1,8 @@
 #include "scapplication.h"
+
+#ifdef unix
 #include "unixsignalcatcher.h"
+#endif
 
 #include <QApplication>
 // #include <typeinfo>
@@ -7,16 +10,20 @@
 ScApplication::ScApplication(int &argc, char **argv)
 	: QApplication(argc,argv)
 {
+#ifdef unix
 	int ret = UnixSignalCatcher::installUnixSignalHandlers();
 	qDebug("Install signal handler: %d",ret);
 
 	mySignalCatcher = new UnixSignalCatcher;
+#endif
 
 }
 
 ScApplication::~ScApplication()
 {
+#ifdef unix
 	delete mySignalCatcher;
+#endif
 }
 
 //bool ScApplication::notify(QObject *receiver, QEvent *event)

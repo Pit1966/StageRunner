@@ -174,7 +174,7 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 				if (isAbsoluteTime) {
 					setTitle(time);
 				} else {
-					time = QString("%1.%2\%")
+					time = QString("%1.%2")
 							.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
 							.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
 					if (msg.maxloop > 0) {

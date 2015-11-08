@@ -47,6 +47,8 @@ DEFINES += IS_QT5
 
 lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
+QMAKE_LFLAGS += /INCREMENTAL:NO
+
 
 SOURCES += \
 	main.cpp \
@@ -112,7 +114,6 @@ SOURCES += \
 	../gui/sequencestatuswidget.cpp \
 	../system/audioplayer.cpp \
 	../appcontrol/scapplication.cpp \
-	../system/unixsignalcatcher.cpp \
 	../tool/psmovingaverage.cpp \
 	../tool/frqspectrum.cpp \
 	../gui/customwidget/psspectrometer.cpp \
@@ -123,6 +124,10 @@ SOURCES += \
 	../system/fxclipitem.cpp \
 	../gui/customwidget/psvideowidget.cpp \
 	../system/videoplayer.cpp
+
+unix {
+SOURCES += 	../system/unixsignalcatcher.cpp
+}
 
 HEADERS  += \
 	../config.h \
@@ -191,7 +196,6 @@ HEADERS  += \
 	../gui/sequencestatuswidget.h \
 	../system/audioplayer.h \
 	../appcontrol/scapplication.h \
-	../system/unixsignalcatcher.h \
 	../tool/psmovingaverage.h \
 	../tool/frqspectrum.h \
 	../gui/customwidget/psspectrometer.h \
@@ -224,6 +228,9 @@ HEADERS  += \
 	../gui/customwidget/psvideowidget.h \
 	../system/videoplayer.h
 
+unix {
+HEADERS +=	../system/unixsignalcatcher.h
+}
 
 FORMS    += \
 	../gui/fxlistwidget.ui \
@@ -257,8 +264,8 @@ INSTALLS   += target
 	GIT_VERSION = $$system($$quote(git describe))
 	GIT_TIMESTAMP = $$system($$quote(git log -n 1 --format=format:"%at"))
 
-	QMAKE_SUBSTITUTES += $$PWD/version.h.in
-
+#	QMAKE_SUBSTITUTES += $$PWD/version.h.in
+#	QMAKE_SUBSTITUTES += version.h.in
 
 
 #############################################################################

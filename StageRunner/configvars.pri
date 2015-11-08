@@ -9,6 +9,9 @@ APPVERSION = 0.7.2
 # Compiler & linker configuration
 #############################################################################
 
+
+# QMAKE_LFLAGS += /INCREMENTAL:NO
+
 # Treat all compiler warnings as errors
 # QMAKE_CXXFLAGS += -Werror
 CONFIG         += warn_on

@@ -1,5 +1,5 @@
 #include "config.h"
-#include "version.h"
+// #include "version.h"
 #include "log.h"
 #include "stagerunnermainwin.h"
 #include "commandsystem.h"
@@ -834,12 +834,15 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 
 void StageRunnerMainWin::on_actionInfo_triggered()
 {
-	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment\n\n").arg(APP_NAME).arg(APP_VERSION);
+	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment\n\n").arg(APP_NAME).arg(APP_VERSION);	
 	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
+
+#ifdef unix
 	msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
 	msg += QString("Build date: %1\n").arg(BUILD_DATE);
 	msg += QString("Build path: %1\n").arg(BUILD_PATH);
 	QMessageBox::information(this,tr("About Info"),msg);
+#endif
 
 }
 
