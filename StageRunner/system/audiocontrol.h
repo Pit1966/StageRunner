@@ -96,6 +96,8 @@ public slots:
 	void fadeoutFxAudio(Executer *exec, int time_ms = 5000);
 	bool seekPosPerMilleFxAudio(int slot, int perMille);
 	bool seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille);
+	bool executeAttachedAudioStartCmd(FxAudioItem *fxa);
+
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);

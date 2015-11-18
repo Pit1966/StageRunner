@@ -55,6 +55,8 @@ private slots:
 
 	void on_seqBlackOtherCheck_clicked(bool checked);
 
+	void on_audioOnStartCombo_activated(int index);
+
 signals:
 	void modified(FxItem *fx);
 };

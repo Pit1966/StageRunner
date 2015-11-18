@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>204</width>
+    <width>209</width>
     <height>706</height>
    </rect>
   </property>
@@ -293,6 +293,13 @@
       <property name="verticalSpacing">
        <number>0</number>
       </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="audioFilePathLabel">
+        <property name="text">
+         <string>File path:</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="1">
        <widget class="PsLineEdit" name="audioStopAtEdit">
         <property name="frame">
@@ -322,13 +329,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="audioFilePathLabel">
-        <property name="text">
-         <string>File path:</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -340,13 +340,6 @@ Volume</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="audioLoopsLabel">
-        <property name="text">
-         <string>Loops</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="1">
        <widget class="QSpinBox" name="audioLoopsSpin">
         <property name="minimum">
@@ -354,6 +347,13 @@ Volume</string>
         </property>
         <property name="maximum">
          <number>999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="audioLoopsLabel">
+        <property name="text">
+         <string>Loops</string>
         </property>
        </widget>
       </item>
@@ -377,6 +377,16 @@ Volume</string>
          <string>Stop at</string>
         </property>
        </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="audioOnStartLabel">
+        <property name="text">
+         <string>on Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="audioOnStartCombo"/>
       </item>
      </layout>
     </widget>

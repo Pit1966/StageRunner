@@ -1,5 +1,5 @@
 #include "config.h"
-// #include "version.h"
+#include "version.h"
 #include "log.h"
 #include "stagerunnermainwin.h"
 #include "commandsystem.h"

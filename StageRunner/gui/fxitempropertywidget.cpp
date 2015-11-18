@@ -28,6 +28,9 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 
 	keyEdit->setSingleKeyEditEnabled(true);
 
+	for (int t=0; t<FxAudioItem::ATTACHED_CMD_CNT; t++)
+		audioOnStartCombo->addItem(FxAudioItem::attachedCmdStrings.at(t));
+
 	connect(nameEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(keyEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(faderCountEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
@@ -92,6 +95,8 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(true);
+
+		audioOnStartCombo->setCurrentIndex(cur_fxa->attachedStartCmd);
 	}
 	else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
@@ -386,6 +391,17 @@ void FxItemPropertyWidget::on_seqBlackOtherCheck_clicked(bool checked)
 
 	if (cur_fxseq->blackOtherSeqOnStart != checked) {
 		cur_fxseq->blackOtherSeqOnStart = checked;
+		emit modified(cur_fx);
+	}
+}
+
+void FxItemPropertyWidget::on_audioOnStartCombo_activated(int index)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	if (cur_fxa->attachedStartCmd != index) {
+		cur_fxa->attachedStartCmd = index;
+		cur_fxa->setModified(true);
 		emit modified(cur_fx);
 	}
 }

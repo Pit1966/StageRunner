@@ -316,7 +316,7 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 	QString path = QFileDialog::getOpenFileName(widget,tr("Choose Audio File")
 												,userSettings->pLastAudioFxImportPath);
 
-//	/* load the song */
+	/* load the song */
 //	if (testsdl=Mix_LoadMUS(path.toLocal8Bit().data())) {
 //		Mix_MusicType type=Mix_GetMusicType(testsdl);
 //		qDebug("Music type: %s\n",
@@ -599,6 +599,7 @@ void AppCentral::init()
 
 
 #ifdef USE_SDL
+	testsdl = 0;
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
 		/* initialize sdl mixer, open up the audio device */
 		if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,1024) >=0) {

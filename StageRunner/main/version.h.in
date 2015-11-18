@@ -6,6 +6,6 @@
 #define GIT_APP_VERSION_RC   $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\\1,\\2,\\3,\\4")
 #define GIT_APP_REVISION     $$replace(GIT_VERSION, "^v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-(.*)$", "\"\\5\"")
 #define GIT_APP_TIME         $$GIT_TIMESTAMP
-// #define BUILD_PATH			\"$$system($$quote(pwd))\"
-// #define BUILD_DATE			\"$$system(date +"%d.%m.%Y\ %k:%M")\"
+#define BUILD_PATH			\"$$system($$quote(pwd))\"
+#define BUILD_DATE			\"$$system(date +"%d.%m.%Y\ %k:%M")\"
 

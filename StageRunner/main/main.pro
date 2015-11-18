@@ -30,6 +30,15 @@ LIBS += -F/Library/Frameworks
 DEFINES += USE_SDL
 }
 
+unix {
+INCLUDEPATH += /usr/include/SDL
+DEFINES += USE_SDL
+
+LIBS += -lSDL
+LIBS += -lSDL_mixer
+}
+
+
 QT += core gui
 QT += sql
 QT += multimedia
@@ -47,7 +56,9 @@ DEFINES += IS_QT5
 
 lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
+win32 {
 QMAKE_LFLAGS += /INCREMENTAL:NO
+}
 
 
 SOURCES += \
@@ -261,10 +272,10 @@ INSTALLS   += target
 #############################################################################
 # version.h
 #############################################################################
-	GIT_VERSION = $$system($$quote(git describe))
+	GIT_VERSION = $$system($$quote(git describe --always))
 	GIT_TIMESTAMP = $$system($$quote(git log -n 1 --format=format:"%at"))
 
-#	QMAKE_SUBSTITUTES += $$PWD/version.h.in
+	QMAKE_SUBSTITUTES += $$PWD/version.h.in
 #	QMAKE_SUBSTITUTES += version.h.in
 
 

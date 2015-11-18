@@ -4,6 +4,13 @@
 #include <QFileInfo>
 #include <QMediaPlayer>
 
+QStringList FxAudioItem::attachedCmdStrings = QStringList()
+		<< QObject::tr("None")
+		<< QObject::tr("Fade out all audio")
+		<< QObject::tr("Stop all audio")
+		<< QString("DEVELOPER ADD TEXT!");
+
+
 FxAudioItem::FxAudioItem(FxList *fxList)
 	: FxItem(fxList)
 {
@@ -101,5 +108,6 @@ void FxAudioItem::init()
 	addExistingVar(initialSeekPos,"InitialSeekPos");
 	addExistingVar(stopAtSeekPos,"StopAtSeekPos");
 	addExistingVar(loopTimes,"LoopTimes");
+	addExistingVar(attachedStartCmd,"AttachedStartCmd");
 	// qDebug("init audio fx with id: %d",myId);
 }
