@@ -70,7 +70,7 @@ public:
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
-
+	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 
 private:
 	void run();

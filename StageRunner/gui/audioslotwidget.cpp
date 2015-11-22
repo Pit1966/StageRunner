@@ -211,12 +211,10 @@ void AudioSlotWidget::setFFTSpectrum(FrqSpectrum *spectrum)
 
 void AudioSlotWidget::on_slotVolumeDial_sliderPressed()
 {
-	qDebug() << "pressed";
 	m_volumeDialPressed = true;
 }
 
 void AudioSlotWidget::on_slotVolumeDial_sliderReleased()
 {
-	qDebug() << "released";
 	m_volumeDialPressed = false;
 }

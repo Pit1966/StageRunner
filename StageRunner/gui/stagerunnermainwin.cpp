@@ -29,6 +29,7 @@
 #include "fxitemobj.h"
 #include "fxlistvarset.h"
 #include "customwidget/psvideowidget.h"
+// #include "configrev.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -834,7 +835,7 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 
 void StageRunnerMainWin::on_actionInfo_triggered()
 {
-	QString msg = QString("%1 %2\n\n(C) 2013 Stonechip Entertainment\n\n").arg(APP_NAME).arg(APP_VERSION);	
+	QString msg = QString("%1 %2\n\n%3\n\n").arg(APP_NAME).arg(APP_VERSION).arg(APP_PRODUCER);
 	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
 
 #ifdef unix

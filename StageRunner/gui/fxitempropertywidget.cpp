@@ -5,6 +5,7 @@
 #include "fxseqitem.h"
 #include "usersettings.h"
 #include "appcentral.h"
+#include "audiocontrol.h"
 #include "qtstatictools.h"
 
 #include <QFileDialog>
@@ -403,5 +404,18 @@ void FxItemPropertyWidget::on_audioOnStartCombo_activated(int index)
 		cur_fxa->attachedStartCmd = index;
 		cur_fxa->setModified(true);
 		emit modified(cur_fx);
+	}
+}
+
+void FxItemPropertyWidget::on_setToCurrentVolButton_clicked()
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	int new_vol = AppCentral::ref().unitAudio->evaluateCurrentVolumeForFxAudio(cur_fxa);
+	if (new_vol > 0) {
+		cur_fxa->initialVolume = new_vol;
+		cur_fxa->setModified(true);
+		emit modified(cur_fx);
+		initialVolDial->setValue(new_vol);
 	}
 }

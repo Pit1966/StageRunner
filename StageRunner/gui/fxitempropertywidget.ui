@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>209</width>
-    <height>706</height>
+    <height>730</height>
    </rect>
   </property>
   <property name="font">
@@ -300,7 +300,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="5" column="1">
        <widget class="PsLineEdit" name="audioStopAtEdit">
         <property name="frame">
          <bool>false</bool>
@@ -310,26 +310,7 @@
       <item row="0" column="1">
        <widget class="PsLineEdit" name="audioFilePathEdit"/>
       </item>
-      <item row="1" column="1">
-       <widget class="qsynthKnob" name="initialVolDial">
-        <property name="maximumSize">
-         <size>
-          <width>80</width>
-          <height>80</height>
-         </size>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="notchTarget">
-         <double>10.000000000000000</double>
-        </property>
-        <property name="notchesVisible">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Initial
@@ -340,7 +321,7 @@ Volume</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QSpinBox" name="audioLoopsSpin">
         <property name="minimum">
          <number>-1</number>
@@ -350,43 +331,89 @@ Volume</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="audioLoopsLabel">
-        <property name="text">
-         <string>Loops</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="audioStartAtLabel">
-        <property name="text">
-         <string>Start at</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="PsLineEdit" name="audioStartAtEdit">
         <property name="frame">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="audioStopAtLabel">
+      <item row="3" column="0">
+       <widget class="QLabel" name="audioLoopsLabel">
         <property name="text">
-         <string>Stop at</string>
+         <string>Loops</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="4" column="0">
+       <widget class="QLabel" name="audioStartAtLabel">
+        <property name="text">
+         <string>Start at</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
        <widget class="QLabel" name="audioOnStartLabel">
         <property name="text">
          <string>on Start</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="audioOnStartCombo"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="audioStopAtLabel">
+        <property name="text">
+         <string>Stop at</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="initVolLayout">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="qsynthKnob" name="initialVolDial">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>80</width>
+            <height>80</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="notchTarget">
+           <double>10.000000000000000</double>
+          </property>
+          <property name="notchesVisible">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setToCurrentVolButton">
+          <property name="text">
+           <string>Set to
+current</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

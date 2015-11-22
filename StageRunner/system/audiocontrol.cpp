@@ -179,6 +179,25 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 	return false;
 }
 
+/**
+ * @brief Search audio fx in any audio slot and return current play volume if found
+ * @param fxa
+ * @return current play volume or -1, if audio was not found
+ */
+int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
+{
+	int curvol = -1;
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa) {
+			AudioSlot *slot = audioSlots[t];
+			curvol = slot->volume();
+			break;
+		}
+	}
+
+	return curvol;
+}
+
 void AudioControl::run()
 {
 	if (m_initInThread)

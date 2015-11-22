@@ -57,6 +57,8 @@ private slots:
 
 	void on_audioOnStartCombo_activated(int index);
 
+	void on_setToCurrentVolButton_clicked();
+
 signals:
 	void modified(FxItem *fx);
 };

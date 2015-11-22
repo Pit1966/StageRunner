@@ -5,9 +5,6 @@ LANGUAGE = C++
 TARGET   = stagerunner
 
 
-
-
-
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
 INCLUDEPATH  += ../appcontrol

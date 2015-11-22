@@ -8,4 +8,5 @@
 #define GIT_APP_TIME         $$GIT_TIMESTAMP
 #define BUILD_PATH			\"$$system($$quote(pwd))\"
 #define BUILD_DATE			\"$$system(date +"%d.%m.%Y\ %k:%M")\"
+#define BUILD_VERSION  12345
 

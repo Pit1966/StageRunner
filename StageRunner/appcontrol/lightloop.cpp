@@ -88,7 +88,8 @@ void LightLoop::processPendingEvents()
 //		}
 		// Fill channel data into temp dmx data and determine if scene is still active
 		if (!processFxSceneItem(sceneitem)) {
-			if (debug > 1) DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());
+			if (debug > 1 && !sceneitem->name().startsWith("ScanMove"))
+				DEBUGTEXT("Scene %s is idle now",sceneitem->name().toLocal8Bit().data());
 			inactive_scenes.append(sceneitem);
 		}
 		if (sceneitem->getClearStatusHasChanged()) {

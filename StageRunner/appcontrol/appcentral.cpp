@@ -37,6 +37,14 @@ AppCentral *AppCentral::instance()
 	return myinstance;
 }
 
+AppCentral &AppCentral::ref()
+{
+	if (!myinstance) {
+		myinstance = new AppCentral;
+	}
+	return *myinstance;
+}
+
 bool AppCentral::destroyInstance()
 {
 	if (myinstance) {

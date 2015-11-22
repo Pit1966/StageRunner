@@ -67,6 +67,7 @@ private:
 
 public:
 	static AppCentral * instance();
+	static AppCentral & ref();
 	static bool destroyInstance();
 
 	void clearProject();
