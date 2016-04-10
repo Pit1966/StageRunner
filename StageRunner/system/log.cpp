@@ -39,6 +39,34 @@ const char *error_msg_asc[] = {
 
 };
 
+void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+	QByteArray localMsg = msg.toLocal8Bit();
+	QString srcContext;
+	if (debug)
+		srcContext = QString("file: %1 line: %2 : %3").arg(context.file).arg(context.line).arg(context.function);
+
+	switch (type) {
+	case QtDebugMsg:
+		fprintf(stderr, "Debug: %s\n", localMsg.constData());
+		break;
+	case QtInfoMsg:
+		fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+		break;
+	case QtWarningMsg:
+		LOGERROR(QString("Warning(Qt): %1  %2").arg(msg,srcContext));
+		break;
+	case QtCriticalMsg:
+		fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+		break;
+	case QtFatalMsg:
+		fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+		abort();
+	}
+}
+
+
+
 Log::Log()
 {
 	this->setObjectName("Thread::Log");
@@ -79,6 +107,8 @@ void Log::initLog(QWidget *wid) {
 	this->start();
 	qDebug("\n");
 	DEVELTEXT("----- StageRunner Log started -----");
+
+	qInstallMessageHandler(srMessageHandler);
 }
 
 /**

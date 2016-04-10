@@ -44,6 +44,7 @@ CONFIG(ftd2xx) {
 	}
 	DEFINES     += FTD2XX
 } else {
+	# INCLUDEPATH += /usr/include/libftdi1
 	CONFIG      += link_pkgconfig
 	PKGCONFIG   += libftdi libusb
 }

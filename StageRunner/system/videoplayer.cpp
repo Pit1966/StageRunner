@@ -1,5 +1,6 @@
 #include "videoplayer.h"
 #include "customwidget/psvideowidget.h"
+#include "log.h"
 
 #include <QMediaPlayer>
 
@@ -33,11 +34,13 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 		if (loopCnt < loopTarget) return;
 		break;
 	case QMediaPlayer::InvalidMedia:
+		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(media().canonicalUrl().toString()));
 		break;
 	}
 
 	emit statusChanged(status);
 
+	// qDebug() << Q_FUNC_INFO << status;
 }
 
 void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)

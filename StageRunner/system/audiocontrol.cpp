@@ -169,14 +169,16 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 {
 	if (!m_videoPlayer) return false;
 
+	QMultimedia::AvailabilityStatus astat = m_videoPlayer->availability();
+	Q_UNUSED(astat)
+
 	qDebug() << "Start FxClip"<< fxc->name();
 
 	m_videoPlayer->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+	m_videoWid->show();
 	m_videoPlayer->play();
 
-	m_videoWid->show();
-
-	return false;
+	return true;
 }
 
 /**

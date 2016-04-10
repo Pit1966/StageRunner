@@ -7,7 +7,7 @@ CONFIG  += ordered
 # CONFIG  += app_bundle
 
 SUBDIRS += main
-# SUBDIRS += plugins
+SUBDIRS += plugins
 
 
 # Translations

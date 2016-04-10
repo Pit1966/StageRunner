@@ -70,7 +70,7 @@ class QTextEdit;
  */
 class Log : public QThread
 {
-	Q_OBJECT;
+	Q_OBJECT
 
 public:
 

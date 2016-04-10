@@ -699,10 +699,6 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 
 }
 
-
-
-
-
 void StageRunnerMainWin::showInfoMsg(QString where, QString text)
 {
 	Q_UNUSED(where);
@@ -710,6 +706,8 @@ void StageRunnerMainWin::showInfoMsg(QString where, QString text)
 			.arg(text,where);
 	msg_dialog->setStyleSheet("");
 	msg_dialog->showMessage(text,where);
+	msg_dialog->resize(600,200);
+	msg_dialog->setWindowTitle(tr("Information"));
 }
 
 void StageRunnerMainWin::showErrorMsg(QString where, QString text)
@@ -718,6 +716,8 @@ void StageRunnerMainWin::showErrorMsg(QString where, QString text)
 			.arg(text,where);
 	msg_dialog->setStyleSheet("color:red;");
 	msg_dialog->showMessage(text,where);
+	msg_dialog->resize(600,200);
+	msg_dialog->setWindowTitle(tr("StageRunner error message"));
 }
 
 
