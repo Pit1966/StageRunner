@@ -131,7 +131,9 @@ SOURCES += \
 	../system/videocontrol.cpp \
 	../system/fxclipitem.cpp \
 	../gui/customwidget/psvideowidget.cpp \
-	../system/videoplayer.cpp
+	../system/videoplayer.cpp \
+	../system/dmxchanproperty.cpp \
+    ../system/dmxuniverseproperty.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -234,7 +236,9 @@ HEADERS  += \
 	../system/videocontrol.h \
 	../system/fxclipitem.h \
 	../gui/customwidget/psvideowidget.h \
-	../system/videoplayer.h
+	../system/videoplayer.h \
+	../system/dmxchanproperty.h \
+    ../system/dmxuniverseproperty.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

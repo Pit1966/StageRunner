@@ -21,6 +21,7 @@
 #include "fxlistvarset.h"
 #include "fxlistwidget.h"
 #include "videocontrol.h"
+#include "dmxuniverseproperty.h"
 
 #include <QFileDialog>
 
@@ -557,6 +558,7 @@ AppCentral::~AppCentral()
 	delete unitLight;
 	delete unitAudio;
 	delete pluginCentral;
+	delete universeLayout;
 	delete project;
 	delete userSettings;
 
@@ -575,6 +577,7 @@ void AppCentral::init()
 
 	userSettings = new UserSettings;
 	project = new Project;
+	universeLayout = new DmxUniverseProperty;
 	pluginCentral = new IOPluginCentral;
 	unitVideo = new VideoControl(*this);
 

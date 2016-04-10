@@ -25,7 +25,7 @@ public:
 	/**
 	 * Type or Function this channel is used for
 	 */
-	qint32 dmxType;
+	qint32 dmxType;						///< @see DmxChannelType
 	qint32 dmxUniverse;					///< DMX universe number
 	qint32 dmxChannel;					///< DMX channel the function uses
 	qint32 dmxValue;					///< current output value of this dmx channel (0-255)

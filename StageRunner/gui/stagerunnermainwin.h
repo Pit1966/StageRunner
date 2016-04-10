@@ -97,6 +97,8 @@ private slots:
 	void on_actionShow_Fx_Properties_Editor_triggered();
 	void on_actionShow_Scene_Status_triggered();
 	void on_actionShow_Sequence_Status_triggered();
+	void on_saveUniverseButton_clicked();
+	void on_loadUniverseButton_clicked();
 
 private:
 	void init();

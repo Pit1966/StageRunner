@@ -12,6 +12,7 @@
 #include "fxsceneitem.h"
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
+#include "dmxchanproperty.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -274,6 +275,16 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 									} else {
 										return 0;
 									}
+								}
+							}
+							else if (var->contextClass == PrefVarCore::DMX_CHANNEL_PROPERTY) {
+								VarSetList<DmxChanProperty*> *varsetlist = reinterpret_cast<VarSetList<DmxChanProperty*>*>(var->p_refvar);
+								DmxChanProperty *item = new DmxChanProperty();
+								varsetlist->append(item);
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
+									return -1;
+								} else {
+									return 0;
 								}
 							}
 						}

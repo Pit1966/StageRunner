@@ -28,6 +28,7 @@ class FxList;
 class FxControl;
 class FxListVarSet;
 class VideoControl;
+class DmxUniverseProperty;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -51,6 +52,7 @@ public:
 	FxControl *unitFx;
 	VideoControl *unitVideo;
 	Project *project;
+	DmxUniverseProperty *universeLayout;
 	UserSettings *userSettings;
 	IOPluginCentral *pluginCentral;
 	ExecCenter *execCenter;

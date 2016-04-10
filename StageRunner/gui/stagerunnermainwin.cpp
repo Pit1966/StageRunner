@@ -29,6 +29,7 @@
 #include "fxitemobj.h"
 #include "fxlistvarset.h"
 #include "customwidget/psvideowidget.h"
+#include "dmxuniverseproperty.h"
 // #include "configrev.h"
 
 #include <QFileDialog>
@@ -893,4 +894,16 @@ void StageRunnerMainWin::on_actionShow_Sequence_Status_triggered()
 {
 	sequence_status_dock->show();
 	seqStatusDisplay->show();
+}
+
+void StageRunnerMainWin::on_saveUniverseButton_clicked()
+{
+	appCentral->universeLayout->initDmxChannels(0, 64);
+	appCentral->universeLayout->fileSave("/tmp/universelayout.txt");
+}
+
+void StageRunnerMainWin::on_loadUniverseButton_clicked()
+{
+	appCentral->universeLayout->fileLoad("/tmp/universelayout.txt");
+	appCentral->universeLayout->fileSave("/tmp/universelayout_copy.txt");
 }
