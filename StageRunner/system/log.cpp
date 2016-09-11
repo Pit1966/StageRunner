@@ -50,9 +50,11 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 	case QtDebugMsg:
 		fprintf(stderr, "Debug: %s\n", localMsg.constData());
 		break;
+#if QT_VERSION >= 0x050600
 	case QtInfoMsg:
 		fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
 		break;
+#endif
 	case QtWarningMsg:
 		LOGERROR(QString("Warning(Qt): %1  %2").arg(msg,srcContext));
 		break;

@@ -585,7 +585,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	}
 
 
-	if (event->type() == 6) {
+	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
 		switch (key) {
@@ -614,6 +614,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 		default:
 			if (key) {
+				// Do not start FX if CTRL key is pressed.
+				if ((activeKeyModifiers & Qt::CTRL)) {
+					return qApp->eventFilter(obj, event);
+				}
+
 				QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
 				if (fxlist.size()) {
 					for (int t=0; t<fxlist.size(); t++) {
@@ -630,7 +635,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 		return true;
 	}
-	if (event->type() == 7) {
+
+	if (event->type() == QEvent::KeyRelease) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 
 		switch (ev->key()) {

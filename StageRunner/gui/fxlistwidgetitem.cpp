@@ -178,6 +178,21 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 
 }
 
+void FxListWidgetItem::keyPressEvent(QKeyEvent *event)
+{
+	int key = event->key();
+
+	if (key == Qt::Key_F2) {
+		linkedFxItem->setName(QInputDialog::getText(this
+													,tr("Edit")
+													,tr("Enter name for Fx")
+													,QLineEdit::Normal
+													,linkedFxItem->name()));
+		setText(linkedFxItem->name());
+		update();
+	}
+}
+
 void FxListWidgetItem::setEditable(bool state)
 {
 	if (is_never_editable_f) state = false;

@@ -67,6 +67,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent *);
 	void mouseMoveEvent(QMouseEvent *event);
 	void paintEvent(QPaintEvent *event);
+	void keyPressEvent(QKeyEvent *event);
 
 
 public slots:

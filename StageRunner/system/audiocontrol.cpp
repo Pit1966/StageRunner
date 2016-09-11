@@ -507,6 +507,7 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 	default:
 		break;
 	}
+	return true;
 }
 
 /**
