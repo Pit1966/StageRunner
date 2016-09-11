@@ -174,11 +174,23 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 
 	qDebug() << "Start FxClip"<< fxc->name();
 
+
 	m_videoPlayer->setMedia(QUrl::fromLocalFile(fxc->filePath()));
 	m_videoWid->show();
+	setVideoPlayerVolume(fxc->initialVolume);
 	m_videoPlayer->play();
 
 	return true;
+}
+
+void AudioControl::setVideoPlayerVolume(int vol)
+{
+	float audiolevel = float(vol) * 100 / MAX_VOLUME;
+	if (masterVolume >= 0)
+		audiolevel *= (float)masterVolume / MAX_VOLUME;
+
+	m_videoPlayer->setVolume(audiolevel);
+	m_videoPlayerCurrentVolume = vol;
 }
 
 /**
@@ -563,6 +575,8 @@ void AudioControl::setMasterVolume(int vol)
 	for (int t=0; t<used_slots; t++) {
 		audioSlots[t]->setMasterVolume(vol);
 	}
+	if (m_videoPlayer)
+		setVideoPlayerVolume(m_videoPlayerCurrentVolume);
 }
 
 void AudioControl::setVolume(int slot, int vol)
@@ -724,6 +738,7 @@ void AudioControl::init()
 	m_playlist = 0;
 	m_videoPlayer = 0;
 	m_videoWid = 0;
+	m_videoPlayerCurrentVolume = 0;
 
 	setObjectName("Audio Control");
 	masterVolume = MAX_VOLUME;

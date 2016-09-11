@@ -86,6 +86,7 @@ public:
 	inline bool isProtected() const {return m_isProtected;}
 	int loopTimes();
 	void setLoopTimes(int loops);
+	void emitListChangedSignal();
 
 	bool addFxAudioSimple(const QString & path, int pos = -1);
 	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);

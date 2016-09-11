@@ -175,6 +175,11 @@ void FxList::setLoopTimes(int loops)
 	myLoopTimes = loops;
 }
 
+void FxList::emitListChangedSignal()
+{
+	emit fxListChanged();
+}
+
 /**
  * @brief Returns a list with FXs that contains the desired key code
  * @param keycode
@@ -501,6 +506,8 @@ void FxList::resetFxItemsForNewExecuter()
 
 FxItem *FxList::addFx(int fxtype, int option)
 {
+	FxItem *retfx = 0;
+
 	switch (fxtype) {
 	case FX_AUDIO:
 		{
@@ -508,7 +515,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 			fx->refCount.ref();
 			m_fxList.append(fx);
 			m_isModified = true;
-			return fx;
+			retfx = fx;
 		}
 		break;
 	case FX_SCENE:
@@ -520,29 +527,35 @@ FxItem *FxList::addFx(int fxtype, int option)
 			if (option >= 0) {
 				fx->createDefaultTubes(option);
 			}
-			return fx;
+			retfx = fx;
 		}
+		break;
 	case FX_AUDIO_PLAYLIST:
 		{
 			FxPlayListItem *fx = new FxPlayListItem(this);
 			fx->refCount.ref();
 			m_fxList.append(fx);
 			m_isModified = true;
-			return fx;
+			retfx = fx;
 		}
+		break;
 	case FX_SEQUENCE:
 		{
 			FxSeqItem *fx = new FxSeqItem(this);
 			fx->refCount.ref();
 			m_fxList.append(fx);
 			m_isModified = true;
-			return fx;
+			retfx = fx;
 		}
+		break;
 	default:
 		break;
 	}
 
-	return 0;
+//	if (retfx)
+//		emit fxListChanged();
+
+	return retfx;
 }
 
 void FxList::addFx(FxItem *newfx)

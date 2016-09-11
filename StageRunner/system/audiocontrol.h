@@ -39,6 +39,7 @@ protected:
 	VideoPlayer *m_videoPlayer;
 	QMediaPlaylist *m_playlist;
 	PsVideoWidget *m_videoWid;
+	int m_videoPlayerCurrentVolume;
 
 private:
 	enum {
@@ -70,6 +71,7 @@ public:
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
+	void setVideoPlayerVolume(int vol);
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 
 private:

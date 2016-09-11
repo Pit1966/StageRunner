@@ -6,6 +6,9 @@
 #include "plugins/interfaces/qlcioplugin.h"
 #include "usersettings.h"
 #include "pluginmapping.h"
+#include "appcontrol/fxlistvarset.h"
+#include "fx/fxlist.h"
+#include "fx/fxsceneitem.h"
 
 #ifdef IS_QT5
 #include <QtWidgets>
@@ -377,4 +380,22 @@ void SetupWidget::on_appStyleCombo_currentIndexChanged(const QString &arg1)
 void SetupWidget::on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1)
 {
 	emit dialKnobStyleChanged(arg1);
+}
+
+void SetupWidget::on_pushButton_clicked()
+{
+	int channels = QInputDialog::getInt(this
+										, tr("System question!")
+										, tr("How many channels should be used?")
+										, 64, 24, 512);
+
+
+	FxItem *fxc = 0;
+
+	FxList *fxlist = AppCentral::ref().templateFxList->fxList();
+	fxlist->addFxScene(channels,&fxc);
+	if (fxc) {
+		fxc->setName(tr("Universe%1_%2Ch").arg(1).arg(channels));
+	}
+	fxlist->emitListChangedSignal();
 }

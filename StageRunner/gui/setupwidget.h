@@ -41,6 +41,8 @@ private slots:
 	void on_appStyleCombo_currentIndexChanged(const QString &arg1);
 	void on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1);
 
+	void on_pushButton_clicked();
+
 signals:
 	void applicationStyleChanged(QString style);
 	void dialKnobStyleChanged(QString style);
