@@ -220,6 +220,35 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 				}
 			}
 			break;
+		case 32:
+			{
+				const qint32 *dat = reinterpret_cast<const qint32*>(data);
+				frames /= 4;
+
+				for (int chan = 0; chan < channels; chan++) {
+					for (int frame = 0; frame<frames; frame++) {
+						const qint32 val = dat[frame*channels+chan];
+						const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
+						if (valF > sample_peak)
+							sample_peak = valF;
+						if (valF > peak[chan])
+							peak[chan] = valF;
+
+						energy[chan] += valF * valF;
+						if (m_fftEnabled) {
+							switch (chan) {
+							case 0:
+								m_leftFFT.appendToBuffer(valF);
+								break;
+							case 1:
+								m_rightFFT.appendToBuffer(valF);
+								break;
+							}
+						}
+					}
+				}
+			}
+			break;
 		default:
 			DEBUGERROR("Sampletype in audiostream not supported");
 			break;

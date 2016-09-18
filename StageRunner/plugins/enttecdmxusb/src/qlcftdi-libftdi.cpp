@@ -56,7 +56,11 @@ QList <EnttecDMXUSBWidget*> QLCFTDI::widgets()
 	ftdi_usb_find_all(&ftdi, &list, QLCFTDI::VID, QLCFTDI::PID);
 	while (list != NULL)
 	{
+#ifdef LIBFTDI_1_2
+		struct libusb_device* dev = list->dev;
+#else
 		struct usb_device* dev = list->dev;
+#endif
 		Q_ASSERT(dev != NULL);
 
 		char serial[256];
