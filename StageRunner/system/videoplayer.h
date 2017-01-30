@@ -18,13 +18,16 @@ protected:
 	int loopTarget;
 	int loopCnt;
 	QMediaPlayer::State currentState;
+	FxClipItem *m_currentFxClipItem;
 
 public:
 	VideoPlayer(PsVideoWidget *videoWid);
+	bool playFxClip(FxClipItem *fxc);
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
 	void on_play_state_changed(QMediaPlayer::State state);
+	void on_playback_position_changed(qint64 pos);
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);

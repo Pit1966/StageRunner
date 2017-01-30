@@ -165,6 +165,11 @@ void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
 	}
 }
 
+/**
+ * @brief Start Clip (Video)
+ * @param fxc
+ * @return
+ */
 bool AudioControl::startFxClip(FxClipItem *fxc)
 {
 	if (!m_videoPlayer) return false;
@@ -174,11 +179,8 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 
 	qDebug() << "Start FxClip"<< fxc->name();
 
-
-	m_videoPlayer->setMedia(QUrl::fromLocalFile(fxc->filePath()));
-	m_videoWid->show();
 	setVideoPlayerVolume(fxc->initialVolume);
-	m_videoPlayer->play();
+	m_videoPlayer->playFxClip(fxc);
 
 	return true;
 }

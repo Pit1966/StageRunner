@@ -130,18 +130,18 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		}
 	}
 
-	// set initial Volume
-	if (fxa->fadeInTime() > 0) {
-		setVolume(0);
-		fadeinFxAudio(targetVolume,fxa->fadeInTime());
-	}
-	else if (startPosMs != 0 && initVol == -1) {
-		setVolume(0);
-		fadeinFxAudio(targetVolume,200);
-	}
-	else {
-		setVolume(targetVolume);
-	}
+//	// set initial Volume
+//	if (fxa->fadeInTime() > 0) {
+//		setVolume(0);
+//		fadeinFxAudio(targetVolume,fxa->fadeInTime());
+//	}
+//	else if (startPosMs > 0 && initVol == -1) {
+//		setVolume(0);
+//		fadeinFxAudio(targetVolume,200);
+//	}
+//	else {
+//		setVolume(targetVolume);
+//	}
 
 	// Set Filename of audio file
 	if (m_isQMediaPlayerAudio) {
@@ -188,6 +188,19 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		} else {
 			audio_io->seekPlayPosMs(startPosMs);
 		}
+	}
+
+	// set initial Volume
+	if (fxa->fadeInTime() > 0) {
+		setVolume(0);
+		fadeinFxAudio(targetVolume,fxa->fadeInTime());
+	}
+	else if (startPosMs > 0 && initVol == -1) {
+		setVolume(0);
+		fadeinFxAudio(targetVolume,200);
+	}
+	else {
+		setVolume(targetVolume);
 	}
 
 	// Feed audio device with decoded data

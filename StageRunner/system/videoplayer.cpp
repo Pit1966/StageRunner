@@ -1,6 +1,7 @@
 #include "videoplayer.h"
 #include "customwidget/psvideowidget.h"
 #include "log.h"
+#include "fxclipitem.h"
 
 #include <QMediaPlayer>
 
@@ -10,11 +11,27 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	, loopTarget(1)
 	, loopCnt(1)
 	, currentState(QMediaPlayer::StoppedState)
+	, m_currentFxClipItem(0)
 {
 	setVideoOutput(m_videoWid);
 
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
 	connect(this,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_play_state_changed(QMediaPlayer::State)),Qt::DirectConnection);
+	connect(this,SIGNAL(positionChanged(qint64)),this,SLOT(on_playback_position_changed(qint64)));
+}
+
+bool VideoPlayer::playFxClip(FxClipItem *fxc)
+{
+	loopTarget = fxc->loopTimes;
+	loopCnt = 1;
+
+	m_currentFxClipItem = fxc;
+	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+	m_videoWid->show();
+	m_videoWid->raise();
+	this->play();
+
+	return true;
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
@@ -45,12 +62,14 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 
 void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 {
+	bool restart = false;
+
 	if (state != currentState) {
 		if (state == QMediaPlayer::StoppedState) {
 			if (currentState == QMediaPlayer::PlayingState) {
 				if (loopCnt < loopTarget) {
 					loopCnt++;
-					QMediaPlayer::play();
+					restart = true;
 				}
 			}
 		}
@@ -60,4 +79,18 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 		}
 		currentState = state;
 	}
+
+	if (restart)
+		QMediaPlayer::play();
+}
+
+void VideoPlayer::on_playback_position_changed(qint64 pos)
+{
+
+	int permille = pos * 1000 / duration();
+
+	emit clipProgressChanged(m_currentFxClipItem, permille);
+
+	qDebug() << "pos" << pos << permille/10;
+
 }
