@@ -766,6 +766,7 @@ void AudioControl::createMediaPlayInstances()
 	// This is for video playback
 	m_videoWid = new PsVideoWidget;
 	m_videoPlayer = new VideoPlayer(m_videoWid);
+	m_videoWid->setVideoPlayer(m_videoPlayer);
 }
 
 void AudioControl::destroyMediaPlayInstances()

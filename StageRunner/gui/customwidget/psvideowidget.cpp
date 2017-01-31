@@ -1,10 +1,13 @@
 #include <QSettings>
 #include <QDebug>
+#include <QMouseEvent>
 
 #include "psvideowidget.h"
+#include "videoplayer.h"
 
 PsVideoWidget::PsVideoWidget(QWidget *parent)
 	: QVideoWidget(parent)
+	, m_myPlayer(0)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
 
@@ -21,9 +24,22 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	}
 }
 
+void PsVideoWidget::setVideoPlayer(VideoPlayer *vidplay)
+{
+	m_myPlayer = vidplay;
+}
+
 void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
 	setFullScreen(!isFullScreen());
+}
+
+void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
+{
+	if (ev->button() == Qt::RightButton) {
+		m_myPlayer->setPosition(0);
+		qDebug() << Q_FUNC_INFO;
+	}
 }
 
 void PsVideoWidget::closeEvent(QCloseEvent *event)
