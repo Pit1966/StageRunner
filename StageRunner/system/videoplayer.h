@@ -23,6 +23,7 @@ protected:
 public:
 	VideoPlayer(PsVideoWidget *videoWid);
 	bool playFxClip(FxClipItem *fxc);
+	void stop();
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
@@ -31,9 +32,11 @@ private slots:
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);
-
 	void clipCtrlMsgEmitted(AudioCtrlMsg msg);
 	void clipProgressChanged(FxClipItem *fxclip, int perMille);
+
+	void endReached(qint64 ms);
+	void seekMe(qint64 ms);
 };
 
 #endif // VIDEOPLAYER_H

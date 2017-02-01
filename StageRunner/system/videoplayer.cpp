@@ -18,7 +18,10 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
 	connect(this,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_play_state_changed(QMediaPlayer::State)),Qt::DirectConnection);
 	connect(this,SIGNAL(positionChanged(qint64)),this,SLOT(on_playback_position_changed(qint64)));
-	setNotifyInterval(40);
+	setNotifyInterval(20);
+
+	connect(this,SIGNAL(endReached(qint64)),this,SLOT(pause()),Qt::QueuedConnection);
+	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
 }
 
 bool VideoPlayer::playFxClip(FxClipItem *fxc)
@@ -35,6 +38,12 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc)
 //	qDebug() << Q_FUNC_INFO << thread();
 
 	return true;
+}
+
+void VideoPlayer::stop()
+{
+	loopCnt = loopTarget;
+	QMediaPlayer::stop();
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
@@ -76,6 +85,7 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 					restart = true;
 				}
 			}
+			qDebug() << "stopped";
 		}
 		else if (state == QMediaPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
@@ -95,16 +105,19 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 
 	int permille = pos * 1000 / dur;
 
-	qDebug() << "pos" << pos << dur << permille/10 << thread();
+//	qDebug() << "pos" << pos << dur << permille/10 << thread();
 
-//	if (pos >= 2000 /*dur - 80*/) {
-//		if (loopCnt < loopTarget) {
-//			loopCnt++;
-//			setPosition(0);
-//		} else {
-//			this->pause();
-//		}
-//	}
+	if (pos >= dur - 120) {
+		if (loopCnt < loopTarget) {
+			loopCnt++;
+			emit seekMe(0);
+		} else {
+			if (currentState != QMediaPlayer::PausedState) {
+				emit endReached(pos);
+//				emit seekMe(100);
+			}
+		}
+	}
 
 	emit clipProgressChanged(m_currentFxClipItem, permille);
 }

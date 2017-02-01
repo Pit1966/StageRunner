@@ -36,10 +36,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 {
-	if (ev->button() == Qt::RightButton) {
-		m_myPlayer->setPosition(0);
-		qDebug() << Q_FUNC_INFO;
-	}
+	Q_UNUSED(ev)
 }
 
 void PsVideoWidget::closeEvent(QCloseEvent *event)

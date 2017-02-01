@@ -28,5 +28,7 @@ void VideoControl::videoBlack(qint32 time_ms)
 
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	vp->stop();
+
 	myApp.unitAudio->videoWidget()->update();
+
 }
