@@ -42,6 +42,9 @@ int main(int argc, char *argv[])
 	myapp->setLightLoopEnabled(true);
 	myapp->setFxExecLoopEnabled(true);
 
+	// Bring to top
+	mywin->raise();
+
 	// and run
 	int ret =  app.exec();
 

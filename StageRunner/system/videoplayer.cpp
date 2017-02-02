@@ -83,9 +83,11 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 				if (loopCnt < loopTarget) {
 					loopCnt++;
 					restart = true;
+				} else {
+					if (m_currentFxClipItem && m_currentFxClipItem->blackAtVideoEnd)
+						QMediaPlayer::stop();
 				}
 			}
-			qDebug() << "stopped";
 		}
 		else if (state == QMediaPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
@@ -100,6 +102,8 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 
 void VideoPlayer::on_playback_position_changed(qint64 pos)
 {
+	if (!m_currentFxClipItem) return;
+
 	int dur = duration();
 	if (dur <= 0) return;
 
@@ -107,14 +111,16 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 
 //	qDebug() << "pos" << pos << dur << permille/10 << thread();
 
-	if (pos >= dur - 120) {
-		if (loopCnt < loopTarget) {
-			loopCnt++;
-			emit seekMe(0);
-		} else {
-			if (currentState != QMediaPlayer::PausedState) {
-				emit endReached(pos);
-//				emit seekMe(100);
+	if (!m_currentFxClipItem->blackAtVideoEnd) {
+		if (pos >= dur - 120) {
+			if (loopCnt < loopTarget) {
+				loopCnt++;
+				emit seekMe(0);
+			} else {
+				if (currentState != QMediaPlayer::PausedState) {
+					emit endReached(pos);
+					//				emit seekMe(100);
+				}
 			}
 		}
 	}

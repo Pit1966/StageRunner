@@ -3,6 +3,7 @@
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
 #include "fxseqitem.h"
+#include "fxclipitem.h"
 #include "usersettings.h"
 #include "appcentral.h"
 #include "audiocontrol.h"
@@ -17,6 +18,8 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	cur_fx = 0;
 	cur_fxa = 0;
 	cur_fxs = 0;
+	cur_fxseq = 0;
+	cur_fxclip = 0;
 
 	once_edit_f = false;
 
@@ -26,6 +29,7 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 
 	audioGroup->setVisible(false);
 	sceneGroup->setVisible(false);
+	videoGroup->setVisible(false);
 
 	keyEdit->setSingleKeyEditEnabled(true);
 
@@ -73,6 +77,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	cur_fxa = 0;
 	cur_fxs = 0;
 	cur_fxseq = 0;
+	cur_fxclip = 0;
 
 	nameEdit->setText(fx->name());
 	idEdit->setText(QString::number(fx->id()));
@@ -88,6 +93,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->setText(cur_fxa->filePath());
+		audioFilePathEdit->setToolTip(cur_fxa->filePath());
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
 		audioStartAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->initialSeekPos));
 		audioStopAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->stopAtSeekPos));
@@ -98,6 +104,20 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		hookedToGroup->setVisible(true);
 
 		audioOnStartCombo->setCurrentIndex(cur_fxa->attachedStartCmd);
+
+		// Is not audio but Video in Audio slot
+		if (cur_fxa->isFxClip) {
+			cur_fxa = 0;
+			cur_fxclip = static_cast<FxClipItem*>(cur_fx);
+			audioGroup->setVisible(false);
+			videoGroup->setVisible(true);
+			videoFilePathEdit->setText(cur_fxclip->filePath());
+			videoFilePathEdit->setToolTip(cur_fxclip->filePath());
+			videoLoopsSpin->setValue(cur_fxclip->loopTimes);
+			videoBlackAtEndCheck->setChecked(cur_fxclip->blackAtVideoEnd);
+		} else {
+			videoGroup->setVisible(false);
+		}
 	}
 	else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
@@ -107,10 +127,12 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(false);
+		videoGroup->setVisible(false);
 	}
 	else {
 		audioGroup->setVisible(false);
 		hookedToGroup->setVisible(false);
+		videoGroup->setVisible(false);
 	}
 
 	if (fx->fxType() == FX_SCENE) {
@@ -417,5 +439,44 @@ void FxItemPropertyWidget::on_setToCurrentVolButton_clicked()
 		cur_fxa->setModified(true);
 		emit modified(cur_fx);
 		initialVolDial->setValue(new_vol);
+	}
+}
+
+void FxItemPropertyWidget::on_videoLoopsSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fxclip)) return;
+
+	if (cur_fxclip->loopTimes != arg1) {
+		cur_fxclip->loopTimes = arg1;
+		cur_fxclip->setModified(true);
+		emit modified(cur_fxclip);
+	}
+}
+
+void FxItemPropertyWidget::on_videoBlackAtEndCheck_clicked(bool checked)
+{
+	if (!FxItem::exists(cur_fxclip)) return;
+
+	if (cur_fxclip->blackAtVideoEnd != checked) {
+		cur_fxclip->blackAtVideoEnd = checked;
+		cur_fxclip->setModified(true);
+		emit modified(cur_fxclip);
+	}
+}
+
+void FxItemPropertyWidget::on_videoFilePathEdit_doubleClicked()
+{
+	QString path = QFileDialog::getOpenFileName(this
+												,tr("Choose Video File")
+												,AppCentral::instance()->userSettings->pLastVideoFxImportPath);
+	if (path.size()) {
+		AppCentral::instance()->userSettings->pLastVideoFxImportPath = path;
+
+		if (FxItem::exists(cur_fxclip)) {
+			cur_fxclip->setFilePath(path);
+			cur_fxclip->setModified(true);
+			videoFilePathEdit->setText(cur_fxclip->filePath());
+			emit modified(cur_fxclip);
+		}
 	}
 }

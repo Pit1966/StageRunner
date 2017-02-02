@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>209</width>
-    <height>730</height>
+    <width>233</width>
+    <height>967</height>
    </rect>
   </property>
   <property name="font">
@@ -273,6 +273,61 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="videoGroup">
+     <property name="title">
+      <string>Video</string>
+     </property>
+     <layout class="QGridLayout" name="videoGroupLayout">
+      <property name="leftMargin">
+       <number>2</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>2</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="videoLoopsLabel">
+        <property name="text">
+         <string>Loops</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="videoFilePathLabel">
+        <property name="text">
+         <string>File path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QSpinBox" name="videoLoopsSpin">
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="PsLineEdit" name="videoFilePathEdit"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="videoBlackAtEndCheck">
+        <property name="text">
+         <string>Black at End</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="audioGroup">
      <property name="title">
       <string>Audio</string>
@@ -311,7 +366,7 @@
        <widget class="PsLineEdit" name="audioFilePathEdit"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="audioInitVolLabel">
         <property name="text">
          <string>Initial
 Volume</string>

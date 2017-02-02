@@ -7,6 +7,7 @@ class FxItem;
 class FxAudioItem;
 class FxSceneItem;
 class FxSeqItem;
+class FxClipItem;
 
 class FxItemPropertyWidget : public QWidget, public Ui::FxItemPropertyWidget
 {
@@ -14,8 +15,9 @@ class FxItemPropertyWidget : public QWidget, public Ui::FxItemPropertyWidget
 private:
 	FxItem *cur_fx;						///< A pointer to the actually set FxItem (of NULL if none)
 	FxAudioItem *cur_fxa;				///< A convenience pointer to FxItem if it is an FxAudioItem (Type FX_AUDIO)
-	FxSceneItem *cur_fxs;				///< A cnnvenience pointer to FxItem if it is an FxSceneItem (Type FX_SCENE)
+	FxSceneItem *cur_fxs;				///< A convenience pointer to FxItem if it is an FxSceneItem (Type FX_SCENE)
 	FxSeqItem *cur_fxseq;
+	FxClipItem *cur_fxclip;				///< A convenience pointer to FxItem if it is an FxClipItem (Type FX_CLIP)
 
 	bool once_edit_f;
 
@@ -48,16 +50,15 @@ private slots:
 	void finish_edit();
 
 	void on_hookedToUniverseSpin_valueChanged(int arg1);
-
 	void on_hookedToChannelSpin_valueChanged(int arg1);
-
 	void on_seqStopOtherCheck_clicked(bool checked);
-
 	void on_seqBlackOtherCheck_clicked(bool checked);
-
 	void on_audioOnStartCombo_activated(int index);
-
 	void on_setToCurrentVolButton_clicked();
+
+	void on_videoLoopsSpin_valueChanged(int arg1);
+	void on_videoBlackAtEndCheck_clicked(bool checked);
+	void on_videoFilePathEdit_doubleClicked();
 
 signals:
 	void modified(FxItem *fx);

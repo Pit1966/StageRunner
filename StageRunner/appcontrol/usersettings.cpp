@@ -32,6 +32,7 @@ void UserSettings::init()
 	addExistingVar(pApplicationGuiStyle,"ApplicationGuiStyle");
 	addExistingVar(pDialKnobStyle,"DialKnobStyle");
 	addExistingVar(pLastAudioFxImportPath,"LastAudioFxImportPath");
+	addExistingVar(pLastVideoFxImportPath,"LastVideoFxImportPath");
 	addExistingVar(pLastAudioTrackImportPath,"LastAudioTrackImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");

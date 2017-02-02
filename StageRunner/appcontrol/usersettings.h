@@ -10,6 +10,7 @@ public:
 	pstring pApplicationGuiStyle;
 	pstring pDialKnobStyle;
 	pstring pLastAudioFxImportPath;
+	pstring pLastVideoFxImportPath;
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
 	pstring pLastAudioTrackImportPath;

@@ -8,6 +8,9 @@ class FxList;
 class FxClipItem : public FxAudioItem
 {
 public:
+	pbool blackAtVideoEnd;
+
+public:
 	FxClipItem(FxList *fxList);
 
 private:
