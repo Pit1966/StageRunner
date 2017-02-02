@@ -84,8 +84,10 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 					loopCnt++;
 					restart = true;
 				} else {
-					if (m_currentFxClipItem && m_currentFxClipItem->blackAtVideoEnd)
+					if (m_currentFxClipItem && m_currentFxClipItem->blackAtVideoEnd) {
 						QMediaPlayer::stop();
+						m_videoWid->update();
+					}
 				}
 			}
 		}
