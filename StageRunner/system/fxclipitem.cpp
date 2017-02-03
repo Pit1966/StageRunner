@@ -8,8 +8,6 @@ FxClipItem::FxClipItem(FxList *fxList)
 void FxClipItem::init()
 {
 	myFxType = FX_CLIP;
-	myclass = PrefVarCore::FX_AUDIO_ITEM;
-
-	addExistingVar(blackAtVideoEnd,"BlackAtVideoEnd");
+	myclass = PrefVarCore::FX_CLIP_ITEM;
 
 }

@@ -15,6 +15,9 @@ public:
 		ATTACHED_CMD_NONE,
 		ATTACHED_CMD_FADEOUT_ALL,
 		ATTACHED_CMD_STOP_ALL,
+		ATTACHED_CMD_STOP_VIDEO,
+		ATTACHED_CMD_START_FX,
+
 		ATTACHED_CMD_CNT
 	};
 	static QStringList attachedCmdStrings;
@@ -26,6 +29,12 @@ public:
 	qint64 stopAtSeekPos;					///< Playing of audio will be stopped at this time (ms) (if not NULL)
 	qint32 loopTimes;
 	qint32 attachedStartCmd;				///< This is a command that is executed at the same time this Fx is started
+	qint32 attachedStopCmd;
+	qint32 attachedStartPara1;
+	qint32 attachedStartPara2;
+	qint32 attachedStopPara1;
+	qint32 attachedStopPara2;
+	pbool blackAtVideoEnd;
 
 	bool startInProgress;					///< set this Flag to give a hint, that this effect will start in a short time
 	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)

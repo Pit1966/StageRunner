@@ -106,6 +106,7 @@ public:
 
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
+	void executeFxCmd(qint32 id, CtrlCmd cmd, Executer *exec);
 	void executeNextFx(int listID = 1);
 	void clearCurrentFx(int listID);
 	void moveToFollowerFx(int listID);

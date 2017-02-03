@@ -15,6 +15,7 @@
 #include "fxclipitem.h"
 #include "customwidget/psvideowidget.h"
 #include "videoplayer.h"
+#include "videocontrol.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -518,6 +519,35 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL:
 		myApp.stopAllFxAudio();
 		break;
+	case FxAudioItem::ATTACHED_CMD_STOP_VIDEO:
+		myApp.videoBlack(0);
+		break;
+	case FxAudioItem::ATTACHED_CMD_START_FX:
+		myApp.executeFxCmd(fxa->attachedStartPara1, CMD_FX_START, 0);
+//		myApp.unitVideo->startFxClipById(fxa->attachedStartPara1);
+		break;
+	default:
+		break;
+	}
+	return true;
+}
+
+bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
+{
+	switch (fxa->attachedStopCmd) {
+	case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
+		myApp.fadeoutAllFxAudio();
+		break;
+	case FxAudioItem::ATTACHED_CMD_STOP_ALL:
+		myApp.stopAllFxAudio();
+		break;
+	case FxAudioItem::ATTACHED_CMD_STOP_VIDEO:
+		myApp.videoBlack(0);
+		break;
+	case FxAudioItem::ATTACHED_CMD_START_FX:
+		myApp.executeFxCmd(fxa->attachedStopPara1, CMD_FX_START, 0);
+//		myApp.unitVideo->startFxClipById(fxa->attachedStopPara1);
+		break;
 	default:
 		break;
 	}
@@ -533,7 +563,15 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
  */
 void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 {
-	// qDebug("AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded");
+//	qDebug() << "AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded"
+//			 << msg.ctrlCmd
+//			 << msg.currentAudioStatus
+//			 << msg.isActive
+//			 << msg.executer;
+
+	if (msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED && msg.currentAudioStatus == AUDIO_IDLE)
+		executeAttachedAudioStopCmd(msg.fxAudio);
+
 	emit audioCtrlMsgEmitted(msg);
 }
 

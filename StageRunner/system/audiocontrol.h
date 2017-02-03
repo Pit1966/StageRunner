@@ -99,6 +99,7 @@ public slots:
 	bool seekPosPerMilleFxAudio(int slot, int perMille);
 	bool seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille);
 	bool executeAttachedAudioStartCmd(FxAudioItem *fxa);
+	bool executeAttachedAudioStopCmd(FxAudioItem *fxa);
 
 
 	void audioCtrlRepeater(AudioCtrlMsg msg);

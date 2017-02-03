@@ -30,11 +30,15 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	audioGroup->setVisible(false);
 	sceneGroup->setVisible(false);
 	videoGroup->setVisible(false);
+	hookedToGroup->setVisible(false);
+	sequenceGroup->setVisible(false);
 
 	keyEdit->setSingleKeyEditEnabled(true);
 
-	for (int t=0; t<FxAudioItem::ATTACHED_CMD_CNT; t++)
+	for (int t=0; t<FxAudioItem::ATTACHED_CMD_CNT; t++) {
 		audioOnStartCombo->addItem(FxAudioItem::attachedCmdStrings.at(t));
+		audioOnStopCombo->addItem(FxAudioItem::attachedCmdStrings.at(t));
+	}
 
 	connect(nameEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(keyEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
@@ -99,11 +103,15 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		audioStopAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->stopAtSeekPos));
 		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
 		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
+		audioOnStartCombo->setCurrentIndex(cur_fxa->attachedStartCmd);
+		audioOnStopCombo->setCurrentIndex(cur_fxa->attachedStopCmd);
+		audioOnStartEdit->setText(QString::number(cur_fxa->attachedStartPara1));
+		audioOnStopEdit->setText(QString::number(cur_fxa->attachedStopPara1));
+
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(true);
 
-		audioOnStartCombo->setCurrentIndex(cur_fxa->attachedStartCmd);
 
 		// Is not audio but Video in Audio slot
 		if (cur_fxa->isFxClip) {
@@ -374,6 +382,58 @@ void FxItemPropertyWidget::on_audioStopAtEdit_textEdited(const QString &arg1)
 
 }
 
+void FxItemPropertyWidget::on_audioOnStartCombo_activated(int index)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	if (cur_fxa->attachedStartCmd != index) {
+		cur_fxa->attachedStartCmd = index;
+		cur_fxa->setModified(true);
+		emit modified(cur_fx);
+	}
+}
+
+void FxItemPropertyWidget::on_audioOnStopCombo_activated(int index)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	if (cur_fxa->attachedStopCmd != index) {
+		cur_fxa->attachedStopCmd = index;
+		cur_fxa->setModified(true);
+		emit modified(cur_fx);
+	}
+}
+
+void FxItemPropertyWidget::on_audioOnStartEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	bool ok;
+	int fxid = arg1.toInt(&ok);
+	if (!ok) return;
+
+	if (cur_fxa->attachedStartPara1 != fxid) {
+		cur_fxa->attachedStartPara1 = fxid;
+		cur_fxa->setModified(true);
+		emit modified(cur_fxa);
+	}
+}
+
+void FxItemPropertyWidget::on_audioOnStopEdit_textEdited(const QString &arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	bool ok;
+	int fxid = arg1.toInt(&ok);
+	if (!ok) return;
+
+	if (cur_fxa->attachedStopPara1 != fxid) {
+		cur_fxa->attachedStopPara1 = fxid;
+		cur_fxa->setModified(true);
+		emit modified(cur_fxa);
+	}
+}
+
 void FxItemPropertyWidget::on_hookedToUniverseSpin_valueChanged(int arg1)
 {
 	if (!FxItem::exists(cur_fx)) return;
@@ -414,17 +474,6 @@ void FxItemPropertyWidget::on_seqBlackOtherCheck_clicked(bool checked)
 
 	if (cur_fxseq->blackOtherSeqOnStart != checked) {
 		cur_fxseq->blackOtherSeqOnStart = checked;
-		emit modified(cur_fx);
-	}
-}
-
-void FxItemPropertyWidget::on_audioOnStartCombo_activated(int index)
-{
-	if (!FxItem::exists(cur_fxa)) return;
-
-	if (cur_fxa->attachedStartCmd != index) {
-		cur_fxa->attachedStartCmd = index;
-		cur_fxa->setModified(true);
 		emit modified(cur_fx);
 	}
 }
@@ -480,3 +529,5 @@ void FxItemPropertyWidget::on_videoFilePathEdit_doubleClicked()
 		}
 	}
 }
+
+

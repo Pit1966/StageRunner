@@ -8,6 +8,8 @@ QStringList FxAudioItem::attachedCmdStrings = QStringList()
 		<< QObject::tr("None")
 		<< QObject::tr("Fade out all audio")
 		<< QObject::tr("Stop all audio")
+		<< QObject::tr("Stop/BLACK video")
+		<< QObject::tr("Start FX")
 		<< QString("DEVELOPER ADD TEXT!");
 
 
@@ -109,5 +111,11 @@ void FxAudioItem::init()
 	addExistingVar(stopAtSeekPos,"StopAtSeekPos");
 	addExistingVar(loopTimes,"LoopTimes");
 	addExistingVar(attachedStartCmd,"AttachedStartCmd");
+	addExistingVar(attachedStopCmd,"AttachedStopCmd");
+	addExistingVar(attachedStartPara1,"AttachedStartPara1");
+	addExistingVar(attachedStartPara2,"AttachedStartPara2");
+	addExistingVar(attachedStopPara1,"AttachedStopPara1");
+	addExistingVar(attachedStopPara2,"AttachedStopPara2");
+	addExistingVar(blackAtVideoEnd,"BlackAtVideoEnd");
 	// qDebug("init audio fx with id: %d",myId);
 }

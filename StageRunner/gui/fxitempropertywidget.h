@@ -47,18 +47,23 @@ private slots:
 	void on_audioLoopsSpin_valueChanged(int arg1);
 	void on_audioStartAtEdit_textEdited(const QString &arg1);
 	void on_audioStopAtEdit_textEdited(const QString &arg1);
+	void on_audioOnStartCombo_activated(int index);
+	void on_audioOnStopCombo_activated(int index);
+	void on_audioOnStartEdit_textEdited(const QString &arg1);
+	void on_audioOnStopEdit_textEdited(const QString &arg1);
 	void finish_edit();
 
 	void on_hookedToUniverseSpin_valueChanged(int arg1);
 	void on_hookedToChannelSpin_valueChanged(int arg1);
 	void on_seqStopOtherCheck_clicked(bool checked);
 	void on_seqBlackOtherCheck_clicked(bool checked);
-	void on_audioOnStartCombo_activated(int index);
 	void on_setToCurrentVolButton_clicked();
 
 	void on_videoLoopsSpin_valueChanged(int arg1);
 	void on_videoBlackAtEndCheck_clicked(bool checked);
 	void on_videoFilePathEdit_doubleClicked();
+
+
 
 signals:
 	void modified(FxItem *fx);

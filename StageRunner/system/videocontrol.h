@@ -20,6 +20,7 @@ private:
 public:
 	VideoControl(AppCentral &app_central);
 
+	bool startFxClipById(qint32 id);
 	bool startFxClip(FxClipItem *fxc);
 
 	void videoBlack(qint32 time_ms);

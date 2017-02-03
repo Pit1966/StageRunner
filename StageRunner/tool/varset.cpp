@@ -12,6 +12,7 @@
 #include "fxsceneitem.h"
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
+#include "fxclipitem.h"
 #include "dmxchanproperty.h"
 
 #include <QSettings>
@@ -264,6 +265,9 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 									break;
 								case PrefVarCore::FX_SEQUENCE_ITEM:
 									item = new FxSeqItem(0);
+									break;
+								case PrefVarCore::FX_CLIP_ITEM:
+									item = new FxClipItem(0);
 									break;
 								default:
 									break;

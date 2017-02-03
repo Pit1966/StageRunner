@@ -54,6 +54,7 @@ public:
 
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
+	static FxItem * findFxById(qint32 id);
 
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
