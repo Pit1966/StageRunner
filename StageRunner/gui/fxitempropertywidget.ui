@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>233</width>
-    <height>967</height>
+    <height>982</height>
    </rect>
   </property>
   <property name="font">
@@ -348,82 +348,6 @@
       <property name="verticalSpacing">
        <number>0</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="audioFilePathLabel">
-        <property name="text">
-         <string>File path:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="PsLineEdit" name="audioStopAtEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="PsLineEdit" name="audioFilePathEdit"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="audioInitVolLabel">
-        <property name="text">
-         <string>Initial
-Volume</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="audioLoopsSpin">
-        <property name="minimum">
-         <number>-1</number>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="PsLineEdit" name="audioStartAtEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="audioLoopsLabel">
-        <property name="text">
-         <string>Loops</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="audioStartAtLabel">
-        <property name="text">
-         <string>Start at</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="audioOnStartLabel">
-        <property name="text">
-         <string>on Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QComboBox" name="audioOnStartCombo"/>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="audioStopAtLabel">
-        <property name="text">
-         <string>Stop at</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="1">
        <layout class="QHBoxLayout" name="initVolLayout">
         <property name="topMargin">
@@ -465,6 +389,120 @@ Volume</string>
           <property name="text">
            <string>Set to
 current</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="audioLoopsSpin">
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="PsLineEdit" name="audioStopAtEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="audioOnStartLabel">
+        <property name="text">
+         <string>on Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="PsLineEdit" name="audioStartAtEdit">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="audioStopAtLabel">
+        <property name="text">
+         <string>Stop at</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="PsLineEdit" name="audioFilePathEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="audioFilePathLabel">
+        <property name="text">
+         <string>File path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="audioLoopsLabel">
+        <property name="text">
+         <string>Loops</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="audioOnStopLabel">
+        <property name="text">
+         <string>on Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="audioStartAtLabel">
+        <property name="text">
+         <string>Start at</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="audioInitVolLabel">
+        <property name="text">
+         <string>Initial
+Volume</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <layout class="QHBoxLayout" name="onStartLayout">
+        <item>
+         <widget class="QComboBox" name="audioOnStartCombo"/>
+        </item>
+        <item>
+         <widget class="PsLineEdit" name="audioOnStartEdit">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="9" column="1">
+       <layout class="QHBoxLayout" name="onStopLayout">
+        <item>
+         <widget class="QComboBox" name="audioOnStopCombo"/>
+        </item>
+        <item>
+         <widget class="PsLineEdit" name="audioOnStopEdit">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
           </property>
          </widget>
         </item>

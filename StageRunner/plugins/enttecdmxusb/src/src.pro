@@ -46,12 +46,17 @@ CONFIG(ftd2xx) {
 } else {
 	# INCLUDEPATH += /usr/include/libftdi1
 	CONFIG      += link_pkgconfig
-	#PKGCONFIG	+= libusb
-	#PKGCONFIG   += libftdi
 
-	PKGCONFIG	+= libusb-1.0
-	PKGCONFIG   += libftdi1
-	DEFINES += LIBFTDI_1_2
+	exists("/usr/include/ftdi.h") {
+	# this is for libftdi 1.1
+		PKGCONFIG	+= libusb
+		PKGCONFIG   += libftdi
+	} else {
+	# this is for libftdi 1.2
+		PKGCONFIG	+= libusb-1.0
+		PKGCONFIG   += libftdi1
+		DEFINES += LIBFTDI_1_2
+	}
 }
 
 HEADERS += ../../interfaces/qlcioplugin.h

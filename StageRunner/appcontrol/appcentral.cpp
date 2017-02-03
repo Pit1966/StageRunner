@@ -387,11 +387,11 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 
 	switch (fx->fxType()) {
 	case FX_AUDIO:
-		if (reinterpret_cast<FxAudioItem*>(fx)->isFxClip) {
-			FxClipItem *fxc = reinterpret_cast<FxClipItem*>(fx);
+		if (static_cast<FxAudioItem*>(fx)->isFxClip) {
+			FxClipItem *fxc = static_cast<FxClipItem*>(fx);
 			unitVideo->startFxClip(fxc);
 		} else {
-			FxAudioItem *fxa = reinterpret_cast<FxAudioItem*>(fx);
+			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
 			switch (cmd) {
 			case CMD_AUDIO_START:
 				if (fxa->initialSeekPos) {
@@ -457,6 +457,17 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 	default:
 		break;
 	}
+}
+
+void AppCentral::executeFxCmd(qint32 id, CtrlCmd cmd, Executer *exec)
+{
+	FxItem *fx = FxItem::findFxById(id);
+	if (!fx) {
+		POPUPERRORMSG(Q_FUNC_INFO,tr("FX Id %1 does not exist!").arg(id));
+		return;
+	}
+
+	executeFxCmd(fx, cmd, exec);
 }
 
 void AppCentral::executeNextFx(int listID)

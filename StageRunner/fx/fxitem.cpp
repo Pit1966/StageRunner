@@ -95,6 +95,15 @@ bool FxItem::exists(FxItem *item)
 	return global_fx_list->contains(item);
 }
 
+FxItem *FxItem::findFxById(qint32 id)
+{
+	for (int t=0; t<global_fx_list->size(); t++) {
+		if (global_fx_list->at(t)->myId == id)
+			return global_fx_list->at(t);
+	}
+	return 0;
+}
+
 /**
  * @brief Get the parent FxItem
  * @return Pointer to FxItem or NULL if no parent exists (e.g. FxItem is part of main fx list)
