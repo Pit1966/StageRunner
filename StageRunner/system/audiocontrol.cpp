@@ -69,12 +69,26 @@ AudioControl::~AudioControl()
 
 void AudioControl::getAudioDevices()
 {
+//	qDebug() << "getAudioDevices";
+
+	AudioFormat default_format = AudioFormat::defaultFormat();
+
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	for (int t=0; t<devList.size(); t++) {
 		QAudioDeviceInfo &dev = devList[t];
-		LOGTEXT(tr("Audio Device: %1").arg(dev.deviceName()));
+		bool default_format_supported = dev.isFormatSupported(default_format);
+		QString dev_name = dev.deviceName();
+		if (default_format_supported) {
+			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
+			/// @todo this takes a hardcoded device name and should be adjustable
+			if (dev_name.contains("UA-25EX")) {
+				m_extraDevice = dev;
+			}
+		}
 	}
 	LOGTEXT(tr("<font color=darkgreen>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
+	if (!m_extraDevice.isNull())
+		LOGTEXT(tr("<font color=darkgreen>Extra Audio: %1</font>").arg(m_extraDevice.deviceName()));
 
 	QAudioDeviceInfo def_dev(QAudioDeviceInfo::defaultOutputDevice());
 	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
@@ -269,12 +283,22 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 	}
 
 
-	int slot = selectFreeAudioSlot();
-	if (slot < 0) {
-		return false;
+	int slot;
+	if (fxa->playBackSlot == 0) {
+		slot = selectFreeAudioSlot();
+		if (slot < 0)
+			return false;
 	} else {
-		return start_fxaudio_in_slot(fxa, slot, exec, 0);
+		slot = fxa->playBackSlot-1;
+		if (slot >= used_slots)
+			return false;
+		if (audioSlots[slot]->status() > AUDIO_IDLE)
+			return false;
+
+		audioSlots[slot]->select();
 	}
+
+	return start_fxaudio_in_slot(fxa, slot, exec, 0);
 }
 
 bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)

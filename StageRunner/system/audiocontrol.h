@@ -7,6 +7,7 @@
 #include <QThread>
 #include <QList>
 #include <QMutex>
+#include <QAudioDeviceInfo>
 
 using namespace AUDIO;
 
@@ -34,6 +35,7 @@ protected:
 	int masterVolume;
 	bool m_isValid;
 	bool m_initInThread;
+	QAudioDeviceInfo m_extraDevice;
 
 	// Video player stuff (as hyper extension)
 	VideoPlayer *m_videoPlayer;
@@ -73,6 +75,8 @@ public:
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	void setVideoPlayerVolume(int vol);
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
+
+	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}
 
 private:
 	void run();

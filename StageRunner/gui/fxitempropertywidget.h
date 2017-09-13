@@ -45,6 +45,7 @@ private slots:
 	void on_keyClearButton_clicked();
 	void on_editOnceButton_clicked();
 	void on_audioLoopsSpin_valueChanged(int arg1);
+	void on_audioSlotSpin_valueChanged(int arg1);
 	void on_audioStartAtEdit_textEdited(const QString &arg1);
 	void on_audioStopAtEdit_textEdited(const QString &arg1);
 	void on_audioOnStartCombo_activated(int index);
@@ -62,8 +63,6 @@ private slots:
 	void on_videoLoopsSpin_valueChanged(int arg1);
 	void on_videoBlackAtEndCheck_clicked(bool checked);
 	void on_videoFilePathEdit_doubleClicked();
-
-
 
 signals:
 	void modified(FxItem *fx);

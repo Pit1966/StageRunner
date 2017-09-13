@@ -99,6 +99,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		audioFilePathEdit->setText(cur_fxa->filePath());
 		audioFilePathEdit->setToolTip(cur_fxa->filePath());
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
+		audioSlotSpin->setValue(cur_fxa->playBackSlot);
 		audioStartAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->initialSeekPos));
 		audioStopAtEdit->setText(QtStaticTools::msToTimeString(cur_fxa->stopAtSeekPos));
 		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
@@ -132,6 +133,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->clear();
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
+		audioSlotSpin->setValue(cur_fxa->playBackSlot);
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(false);
@@ -354,6 +356,17 @@ void FxItemPropertyWidget::on_audioLoopsSpin_valueChanged(int arg1)
 		emit modified(cur_fxa);
 	}
 
+}
+
+void FxItemPropertyWidget::on_audioSlotSpin_valueChanged(int arg1)
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	if (cur_fxa->playBackSlot != arg1) {
+		cur_fxa->playBackSlot = arg1;
+		cur_fxa->setModified(true);
+		emit modified(cur_fxa);
+	}
 }
 
 void FxItemPropertyWidget::on_audioStartAtEdit_textEdited(const QString &arg1)

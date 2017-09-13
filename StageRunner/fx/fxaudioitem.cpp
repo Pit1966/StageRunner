@@ -110,6 +110,7 @@ void FxAudioItem::init()
 	addExistingVar(initialSeekPos,"InitialSeekPos");
 	addExistingVar(stopAtSeekPos,"StopAtSeekPos");
 	addExistingVar(loopTimes,"LoopTimes");
+	addExistingVar(playBackSlot,"PlayBackSlot");
 	addExistingVar(attachedStartCmd,"AttachedStartCmd");
 	addExistingVar(attachedStopCmd,"AttachedStopCmd");
 	addExistingVar(attachedStartPara1,"AttachedStartPara1");
