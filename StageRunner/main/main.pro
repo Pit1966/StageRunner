@@ -4,6 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = stagerunner
 
+CONFIG += static
 
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
@@ -29,10 +30,9 @@ DEFINES += USE_SDL
 
 unix {
 INCLUDEPATH += /usr/include/SDL
-DEFINES += USE_SDL
-
-LIBS += -lSDL
-LIBS += -lSDL_mixer
+# DEFINES += USE_SDL
+# LIBS += -lSDL
+# LIBS += -lSDL_mixer
 }
 
 
