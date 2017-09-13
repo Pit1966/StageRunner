@@ -3,7 +3,8 @@ include(configvars.pri)
 TEMPLATE = subdirs
 
 # Ensure that library is built before application
-CONFIG  += ordered
+CONFIG += ordered
+CONFIG += static
 # CONFIG  += app_bundle
 
 SUBDIRS += main
