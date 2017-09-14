@@ -25,6 +25,8 @@
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	: QObject()
 {
+//	qDebug() << "init AudioSlot" << pSlotNumber;
+
 	audio_ctrl = parent;
 
 	run_status = AUDIO_IDLE;
@@ -43,7 +45,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
-	audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
+	if (pSlotNumber >= 3 && !parent->extraAudioDevice().isNull()) {
+		audio_output = new QAudioOutput(parent->extraAudioDevice(), AudioFormat::defaultFormat(),this);
+	} else {
+		audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
+	}
 	audio_player = new AudioPlayer(*this);
 	audio_player->setVolume(100);
 	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
