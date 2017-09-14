@@ -4,7 +4,8 @@
 
 #define APP_NAME "StageRunner"
 #define APP_ORG_STRING "Stonechip"
-#define APP_VERSION "V0.7.6"
+#define APP_VERSION "V0.7.7"
+#define APP_MILESTONE "Dinner für Spinner (with multi audio device)"
 #define APP_PRODUCER "(C) 2017 Stonechip Entertainment"
 #define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
