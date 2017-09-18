@@ -9,6 +9,7 @@
 #include "appcontrol/fxlistvarset.h"
 #include "fx/fxlist.h"
 #include "fx/fxsceneitem.h"
+#include "system/audiocontrol.h"
 
 #ifdef IS_QT5
 #include <QtWidgets>
@@ -117,6 +118,21 @@ void SetupWidget::copy_settings_to_gui()
 		QCheckBox *check_fftenable = findChild<QCheckBox*>(QString("EnableFFT%1").arg(t));
 		check_fftenable->setChecked(set->pFFTAudioMask & (1<<t));
 	}
+
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
+		if (!combo) continue;
+		combo->clear();
+		combo->addItem("system default");
+
+		foreach (QString devname, myapp->unitAudio->audioDeviceNames()) {
+			combo->addItem(devname);
+			// set current configuration
+			if (devname == set->pSlotAudioDevice[t])
+				combo->setCurrentIndex(combo->count()-1);
+		}
+	}
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -162,6 +178,18 @@ void SetupWidget::copy_gui_to_settings()
 		}
 		set->pFFTAudioMask = mask2;
 	}
+
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
+		if (!combo) continue;
+		if (combo->currentIndex() > 0) {
+			set->pSlotAudioDevice[t] = combo->currentText();
+		} else {
+			set->pSlotAudioDevice[t] = QString();
+		}
+
+	}
+
 }
 
 void SetupWidget::on_okButton_clicked()

@@ -36,6 +36,8 @@ protected:
 	bool m_isValid;
 	bool m_initInThread;
 	QAudioDeviceInfo m_extraDevice;
+	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
+	QStringList m_audioDeviceNames;						///< A list of audio devices by names
 
 	// Video player stuff (as hyper extension)
 	VideoPlayer *m_videoPlayer;
@@ -63,6 +65,7 @@ public:
 	~AudioControl();
 
 	void getAudioDevices();
+	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = 0);
 	bool isFxAudioActive(FxAudioItem *fxa);
 	bool isFxAudioActive(int slotnum);
 	int findAudioSlot(FxAudioItem *fxa);
@@ -77,6 +80,7 @@ public:
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 
 	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}
+	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
 
 private:
 	void run();

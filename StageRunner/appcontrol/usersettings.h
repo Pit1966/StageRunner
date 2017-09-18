@@ -20,6 +20,7 @@ public:
 	pbool pNoInterfaceDmxFeedback;
 	qint32 mapAudioToDmxUniv[MAX_AUDIO_SLOTS];
 	qint32 mapAudioToDmxChan[MAX_AUDIO_SLOTS];
+	pstring pSlotAudioDevice[MAX_AUDIO_SLOTS];
 	pint32 pAudioPlayListChannel;
 	pbool pAltAudioEngine;
 	pint32 pVolumeDialMask;

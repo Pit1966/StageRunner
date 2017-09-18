@@ -22,7 +22,7 @@
 #include <QMediaPlayer>
 #endif
 
-AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
+AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName)
 	: QObject()
 {
 //	qDebug() << "init AudioSlot" << pSlotNumber;
@@ -45,11 +45,23 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber)
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
-	if (pSlotNumber >= 3 && !parent->extraAudioDevice().isNull()) {
-		audio_output = new QAudioOutput(parent->extraAudioDevice(), AudioFormat::defaultFormat(),this);
-	} else {
+	if (devName.isEmpty() || devName == "system default") {
 		audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 	}
+	else {
+		bool ok;
+		QAudioDeviceInfo dev = parent->getAudioDeviceInfo(devName, &ok);
+		if (ok) {
+			audio_output = new QAudioOutput(dev, AudioFormat::defaultFormat(),this);
+		} else {
+			audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
+		}
+	}
+
+//	if (pSlotNumber >= 3 && !parent->extraAudioDevice().isNull()) {
+//		audio_output = new QAudioOutput(parent->extraAudioDevice(), AudioFormat::defaultFormat(),this);
+//	}
+
 	audio_player = new AudioPlayer(*this);
 	audio_player->setVolume(100);
 	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
