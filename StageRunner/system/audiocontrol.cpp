@@ -67,6 +67,32 @@ AudioControl::~AudioControl()
 	delete slotMutex;
 }
 
+void AudioControl::reCreateMediaPlayerInstances()
+{
+	stopAllFxAudio();
+
+	if (isRunning()) {
+		m_isValid = false;
+		quit();
+		wait(500);
+	}
+
+	if (!m_initInThread) {
+		destroyMediaPlayInstances();
+		createMediaPlayInstances();
+	}
+
+	if (!isRunning()) {
+		start();
+		if (isRunning()) {
+			m_isValid = true;
+		}
+	} else {
+		DEBUGERROR("Restart of audio control failed!");
+	}
+
+}
+
 void AudioControl::getAudioDevices()
 {
 //	qDebug() << "getAudioDevices";

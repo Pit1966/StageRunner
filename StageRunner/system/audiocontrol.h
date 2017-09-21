@@ -64,6 +64,8 @@ public:
 	AudioControl(AppCentral &app_central, bool initInThread);
 	~AudioControl();
 
+	void reCreateMediaPlayerInstances();
+
 	void getAudioDevices();
 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = 0);
 	bool isFxAudioActive(FxAudioItem *fxa);
