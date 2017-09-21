@@ -71,6 +71,8 @@ void AudioControl::getAudioDevices()
 {
 //	qDebug() << "getAudioDevices";
 
+	m_audioDeviceNames.clear();
+
 	AudioFormat default_format = AudioFormat::defaultFormat();
 
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -79,6 +81,7 @@ void AudioControl::getAudioDevices()
 		bool default_format_supported = dev.isFormatSupported(default_format);
 		QString dev_name = dev.deviceName();
 		if (default_format_supported) {
+			m_audioDeviceNames.append(dev_name);
 			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
 			/// @todo this takes a hardcoded device name and should be adjustable
 			if (dev_name.contains("UA-25EX")) {
@@ -99,6 +102,23 @@ void AudioControl::getAudioDevices()
 
 	if (audioSlots.size())
 		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
+}
+
+QAudioDeviceInfo AudioControl::getAudioDeviceInfo(const QString &devName, bool *found)
+{
+	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	for (int t=0; t<devList.size(); t++) {
+		if (devList.at(t).deviceName() == devName) {
+			if (found)
+				*found = true;
+			return devList.at(t);
+		}
+	}
+
+	if (found)
+		*found = false;
+
+	return QAudioDeviceInfo();
 }
 
 /**
@@ -814,9 +834,11 @@ void AudioControl::init()
 
 void AudioControl::createMediaPlayInstances()
 {
+	UserSettings *set = myApp.userSettings;
+
 	// This is for audio use
 	for (int t=0; t<used_slots; t++) {
-		AudioSlot *slot = new AudioSlot(this,t);
+		AudioSlot *slot = new AudioSlot(this,t,set->pSlotAudioDevice[t]);
 		audioSlots.append(slot);
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
@@ -843,5 +865,4 @@ void AudioControl::destroyMediaPlayInstances()
 	m_videoPlayer = 0;
 	delete m_playlist;
 	m_playlist = 0;
-
 }

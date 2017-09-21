@@ -60,7 +60,7 @@ private:
 	bool m_isFFTEnabled;
 
 public:
-	AudioSlot(AudioControl *parent, int pSlotNumber);
+	AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName);
 	~AudioSlot();
 
 	bool select();
