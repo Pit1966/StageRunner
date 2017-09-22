@@ -17,6 +17,7 @@ private:
 	PluginMapping *cur_plugin_map;
 
 	bool update_plugin_mapping_f;					///< Flag that decides if PluginMapping should be adjusted on Setup Dialog close
+	bool m_restartAudioSlotsOnExit;
 
 public:
 	SetupWidget(AppCentral *app_central, QWidget *parent = 0);
@@ -41,7 +42,8 @@ private slots:
 	void on_appStyleCombo_currentIndexChanged(const QString &arg1);
 	void on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1);
 
-	void on_pushButton_clicked();
+	void on_addDmxUniverseToTemplateButton_clicked();
+	void on_restartAudioVideoSlots_clicked();
 
 signals:
 	void applicationStyleChanged(QString style);

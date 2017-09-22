@@ -858,6 +858,7 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
 {
 	appCentral->setExperimentalAudio(checked);
+	appCentral->unitAudio->reCreateMediaPlayerInstances();
 }
 
 void StageRunnerMainWin::on_actionOpen_FxItem_triggered()

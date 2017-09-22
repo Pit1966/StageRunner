@@ -53,6 +53,7 @@ void SetupWidget::init()
 	cur_selected_qlc_plugin = 0;
 	cur_plugin_map = 0;
 	update_plugin_mapping_f = false;
+	m_restartAudioSlotsOnExit = false;
 }
 
 void SetupWidget::initGui()
@@ -199,6 +200,9 @@ void SetupWidget::on_okButton_clicked()
 		myapp->pluginCentral->updatePluginMappingInformation();
 	}
 	emit setupChanged(myapp->userSettings);
+
+	if (m_restartAudioSlotsOnExit)
+		AppCentral::ref().unitAudio->reCreateMediaPlayerInstances();
 
 	accept();
 }
@@ -410,7 +414,7 @@ void SetupWidget::on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1)
 	emit dialKnobStyleChanged(arg1);
 }
 
-void SetupWidget::on_pushButton_clicked()
+void SetupWidget::on_addDmxUniverseToTemplateButton_clicked()
 {
 	int channels = QInputDialog::getInt(this
 										, tr("System question!")
@@ -426,4 +430,10 @@ void SetupWidget::on_pushButton_clicked()
 		fxc->setName(tr("Universe%1_%2Ch").arg(1).arg(channels));
 	}
 	fxlist->emitListChangedSignal();
+}
+
+void SetupWidget::on_restartAudioVideoSlots_clicked()
+{
+	m_restartAudioSlotsOnExit = true;
+	restartAudioVideoSlots->setText("Audio will be restarted on setup exit");
 }
