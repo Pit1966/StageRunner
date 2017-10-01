@@ -16,6 +16,7 @@ class FxSceneItem;
 class SequenceStatusWidget;
 class FxListWidget;
 class UserSettings;
+class FxScriptItem;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -52,6 +53,7 @@ public:
 	void openFxSceneItemPanel(FxSceneItem *fx);
 	void openFxPlayListItemPanel(FxPlayListItem *fx);
 	void openFxSeqItemPanel(FxSeqItem *fx);
+	void openFxScriptPanel(FxScriptItem *fx);
 	void setProjectName(const QString &path);
 
 

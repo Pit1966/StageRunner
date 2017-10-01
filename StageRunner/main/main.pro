@@ -133,7 +133,9 @@ SOURCES += \
 	../gui/customwidget/psvideowidget.cpp \
 	../system/videoplayer.cpp \
 	../system/dmxchanproperty.cpp \
-    ../system/dmxuniverseproperty.cpp
+	../system/dmxuniverseproperty.cpp \
+	../fx/fxscriptitem.cpp \
+    ../gui/fxscriptwidget.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -238,7 +240,9 @@ HEADERS  += \
 	../gui/customwidget/psvideowidget.h \
 	../system/videoplayer.h \
 	../system/dmxchanproperty.h \
-    ../system/dmxuniverseproperty.h
+	../system/dmxuniverseproperty.h \
+	../fx/fxscriptitem.h \
+    ../gui/fxscriptwidget.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h
@@ -258,7 +262,8 @@ FORMS    += \
 	../gui/fxlistwidgetitem.ui \
 	../system/messagedialog.ui \
 	../gui/fxplaylistwidget.ui \
-	../gui/sequencestatuswidget.ui
+	../gui/sequencestatuswidget.ui \
+    ../gui/fxscriptwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

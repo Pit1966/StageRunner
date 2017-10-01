@@ -92,6 +92,7 @@ public:
 	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);
 	bool addFxAudioPlayList();
 	bool addFxSequence();
+	bool addFxScript();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);

@@ -762,6 +762,8 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 		case FX_SEQUENCE:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/sequence.png"));
 			break;
+		case FX_SCRIPT:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/script.png"));
 		default:
 			break;
 		}
@@ -1200,6 +1202,8 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("New Sequence"));
 			act->setObjectName("23");
 
+			act = menu.addAction(tr("New Script"));
+			act->setObjectName("25");
 
 			act = menu.addAction("--------------------");
 			if (isEditable()) {
@@ -1274,6 +1278,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 23:
 			fxList()->addFxSequence();
+			refreshList();
+			break;
+		case 25:
+			fxList()->addFxScript();
 			refreshList();
 			break;
 		case 2:

@@ -22,6 +22,7 @@
 #include "fxitem.h"
 #include "fxsceneitem.h"
 #include "fxseqitem.h"
+#include "fxscriptitem.h"
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "fxlistwidget.h"
@@ -30,6 +31,7 @@
 #include "fxlistvarset.h"
 #include "customwidget/psvideowidget.h"
 #include "dmxuniverseproperty.h"
+#include "fxscriptwidget.h"
 // #include "configrev.h"
 
 #include <QFileDialog>
@@ -332,8 +334,10 @@ void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
 	case FX_SEQUENCE:
 		openFxSeqItemPanel(static_cast<FxSeqItem*>(fx));
 		break;
+	case FX_SCRIPT:
+		openFxScriptPanel(static_cast<FxScriptItem*>(fx));
+		break;
 	}
-
 }
 
 void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
@@ -431,6 +435,19 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 		sequencewid->setOriginFx(fx);
 	} else {
 		sequencewid->raise();
+	}
+}
+
+void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
+{
+	FxScriptWidget *desk = FxScriptWidget::openFxScriptPanel(fx);
+
+	if (desk) {
+		FxListWidget *parentWid = FxListWidget::findParentFxListWidget(fx);
+		if (parentWid) {
+			connect(desk,SIGNAL(modified()),parentWid,SLOT(refreshList()));
+		}
+		desk->show();
 	}
 }
 

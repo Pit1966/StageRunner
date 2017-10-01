@@ -8,6 +8,12 @@
 #include <QList>
 #include <QAtomicInt>
 
+
+/**
+ * @brief The FxType enum
+ *
+ * @note There is an additional type definition in PrefVar (prefvar.h). You will need this to save/load the fx
+ */
 enum FxType {
 	FX_NULL,				// no fx type set
 	FX_AUDIO,				// is Audio Fx
@@ -15,9 +21,12 @@ enum FxType {
 	FX_AUDIO_PLAYLIST,		// is Audio Play List
 	FX_SEQUENCE,			// is a Sequence of FxItems
 	FX_CLIP,				// is a video clip (or audio)
+	FX_SCRIPT,				// is a script file
 
 	FX_SIZE
 };
+
+
 
 class FxList;
 

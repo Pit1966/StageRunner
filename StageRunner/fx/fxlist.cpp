@@ -3,6 +3,7 @@
 #include "fxsceneitem.h"
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
+#include "fxscriptitem.h"
 #include "log.h"
 #include "fxitemtool.h"
 
@@ -386,6 +387,17 @@ bool FxList::addFxSequence()
 	return false;
 }
 
+bool FxList::addFxScript()
+{
+	FxItem *fx = addFx(FX_SCRIPT);
+	if (fx) {
+		fx->setName("FX Script");
+		m_isModified = true;
+		return true;
+	}
+	return false;
+}
+
 void FxList::moveFromTo(int srcidx, int destidx)
 {
 	FxItem *xitem = 0;
@@ -542,6 +554,15 @@ FxItem *FxList::addFx(int fxtype, int option)
 	case FX_SEQUENCE:
 		{
 			FxSeqItem *fx = new FxSeqItem(this);
+			fx->refCount.ref();
+			m_fxList.append(fx);
+			m_isModified = true;
+			retfx = fx;
+		}
+		break;
+	case FX_SCRIPT:
+		{
+			FxScriptItem *fx = new FxScriptItem(this);
 			fx->refCount.ref();
 			m_fxList.append(fx);
 			m_isModified = true;
