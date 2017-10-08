@@ -29,12 +29,25 @@ void FxScriptWidget::destroyAllScriptPanels()
 		delete m_scriptWidgetList.takeFirst();
 }
 
+FxScriptWidget *FxScriptWidget::findParentFxScriptWidget(FxItem *fx)
+{
+	foreach(FxScriptWidget *scrwid, m_scriptWidgetList) {
+		if (scrwid->m_OriginFxScript == fx)
+			return scrwid;
+	}
+
+	return 0;
+}
+
 bool FxScriptWidget::setFxScriptContent(FxScriptItem *fxscr)
 {
 	if (!fxscr)
 		return false;
 
-	scriptEdit->setPlainText(fxscr->m_scriptRaw);
+	QString script = fxscr->m_scriptRaw;
+	script.replace(';',"\n");
+
+	scriptEdit->setPlainText(script);
 
 	return true;
 }
@@ -61,6 +74,7 @@ bool FxScriptWidget::applyChanges()
 		return false;
 
 	QString new_script = scriptEdit->toPlainText();
+	new_script.replace("\n",";");
 	if (new_script != m_OriginFxScript->m_scriptRaw) {
 		m_OriginFxScript->m_scriptRaw = new_script;
 		m_OriginFxScript->setModified(true);

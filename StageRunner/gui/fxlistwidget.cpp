@@ -1168,6 +1168,10 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 		selectFx(fx);
 		emit fxCmdActivated(fx,CMD_FX_START,0);
 		break;
+	case FX_SCRIPT:
+		selectFx(fx);
+		emit fxCmdActivated(fx,CMD_FX_START,0);
+		break;
 	}
 }
 

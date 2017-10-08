@@ -4,6 +4,8 @@
 #include "ui_fxscriptwidget.h"
 
 class FxScriptItem;
+class FxScriptWidget;
+class FxItem;
 
 class FxScriptWidget : public QWidget, private Ui::FxScriptWidget
 {
@@ -15,6 +17,8 @@ private:
 public:
 	static FxScriptWidget * openFxScriptPanel(FxScriptItem *fx, QWidget *parent = 0);
 	static void destroyAllScriptPanels();
+	static FxScriptWidget * findParentFxScriptWidget(FxItem *fx);
+
 
 	bool setFxScriptContent(FxScriptItem *fxscr);
 

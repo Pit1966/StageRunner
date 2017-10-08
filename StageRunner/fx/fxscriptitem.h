@@ -2,34 +2,7 @@
 #define FXSCRIPTITEM_H
 
 #include "fxitem.h"
-#include <QList>
-
-
-class FxScriptLine
-{
-private:
-	QString m_cmd;
-	QString m_paras;
-
-public:
-	FxScriptLine();
-	FxScriptLine(const FxScriptLine &o);
-};
-
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
-
-class FxScriptList : public QList<FxScriptLine>
-{
-public:
-	FxScriptList();
-	FxScriptList(const FxScriptList &o);
-};
-
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
+#include "fxscripttools.h"
 
 class FxScriptItem : public FxItem
 {
@@ -44,6 +17,11 @@ public:
 	qint32 loopValue() const;
 	void setLoopValue(qint32 val);
 	void resetFx();
+
+	inline const QString & rawScript() const {return m_scriptRaw;}
+	bool updateScript();
+
+	static int rawToScript(const QString &rawlines, FxScriptList &scriptlist);
 
 private:
 	void init();

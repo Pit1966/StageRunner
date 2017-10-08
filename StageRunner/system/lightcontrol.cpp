@@ -133,6 +133,19 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 	return active;
 }
 
+bool LightControl::startFxScene(FxSceneItem *scene)
+{
+	if (scene->isOnStageIntern())
+		return false;
+
+	bool active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
+	if (active) {
+		setSceneActive(scene);
+	}
+
+	return active;
+}
+
 bool LightControl::stopFxScene(FxSceneItem *scene)
 {
 	return scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);

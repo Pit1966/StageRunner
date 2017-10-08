@@ -1,35 +1,5 @@
 #include "fxscriptitem.h"
 
-FxScriptLine::FxScriptLine()
-{
-}
-
-FxScriptLine::FxScriptLine(const FxScriptLine &o)
-	: m_cmd(o.m_cmd)
-	, m_paras(o.m_paras)
-{
-}
-
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
-
-FxScriptList::FxScriptList()
-	: QList<FxScriptLine>()
-{
-
-}
-
-FxScriptList::FxScriptList(const FxScriptList &o)
-	: QList<FxScriptLine>(o)
-{
-
-}
-
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
-
 FxScriptItem::FxScriptItem(FxList *fxList)
 	: FxItem(fxList)
 {
@@ -55,6 +25,34 @@ void FxScriptItem::setLoopValue(qint32 val)
 
 void FxScriptItem::resetFx()
 {
+}
+
+/**
+ * @brief This function generates the internal ScriptList from raw text
+ * @return
+ */
+bool FxScriptItem::updateScript()
+{
+	int linecnt = rawToScript(m_scriptRaw, m_script);
+	if (linecnt < 0)
+		return false;
+
+	return true;
+}
+
+int FxScriptItem::rawToScript(const QString &rawlines, FxScriptList &scriptlist)
+{
+	QStringList lines = rawlines.split(';');
+	int linecnt = 0;
+	foreach (QString line, lines) {
+		QString cmd = line.section(' ',0,0,QString::SectionSkipEmpty);
+		QString paras = line.section(' ',1,-1,QString::SectionSkipEmpty);
+		FxScriptLine sl(cmd,paras);
+		scriptlist.append(sl);
+		linecnt++;
+	}
+
+	return linecnt;
 }
 
 void FxScriptItem::init()

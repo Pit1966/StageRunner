@@ -64,7 +64,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	myapp->mainWinObj = this;
 }
 
-StageRunnerMainWin::~StageRunnerMainWin()
+StageRunnerMainWin::~ StageRunnerMainWin()
 {
 	delete dialWidgetStyle;
 	delete msg_dialog;
@@ -536,7 +536,7 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 		Project *pro = appCentral->project;
 		if ( !pro->loadFromFile(path) ) {
 			QMessageBox::critical(this,tr("Load error")
-								  ,tr("An error occured while loading file:\n\n%1\n\n%2:%3")
+								  ,tr("An error occured while loading file:\n\n%1\n\nLine %2:'%3'")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
 			setProjectName("");
@@ -690,7 +690,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	}
 
 	if (appCentral->project->curProjectFilePath.isEmpty()) {
-		appCentral->userSettings->pLastProjectLoadPath = "";
+//		appCentral->userSettings->pLastProjectLoadPath = "";
 	}
 
 	// This stops and removes all running sequences

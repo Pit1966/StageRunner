@@ -2,6 +2,7 @@
 #define FXLISTEXECUTER_H
 
 #include "commandsystem.h"
+#include "fx/fxscripttools.h"
 
 #include <QObject>
 #include <QString>
@@ -16,6 +17,8 @@ class LightControl;
 class FxControl;
 class FxItem;
 class FxSceneItem;
+class FxScriptItem;
+class FxScriptList;
 
 class Executer : public QObject
 {
@@ -24,7 +27,8 @@ public:
 	enum TYPE {
 		EXEC_BASE,
 		EXEC_FXLIST,
-		EXEC_SCENE
+		EXEC_SCENE,
+		EXEC_SCRIPT
 	};
 	enum STATE {
 		EXEC_IDLE,
@@ -67,6 +71,7 @@ public:
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
 	inline void setTargetTimeToCurrent() {eventTargetTimeMs = runTime.elapsed();}
+	inline void setEventTargetTime(qint64 ms) {eventTargetTimeMs = runTime.elapsed() + ms;}
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
@@ -81,7 +86,9 @@ signals:
 	friend class ExecCenter;
 };
 
+//---------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------
 
 class FxListExecuter : public Executer
 {
@@ -136,6 +143,9 @@ signals:
 
 };
 
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
 
 class SceneExecuter : public Executer
 {
@@ -150,8 +160,31 @@ public:
 protected:
 	SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx);
 
-public:
 
+	friend class ExecCenter;
+};
+
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+class ScriptExecuter : public Executer
+{
+protected:
+	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
+	FxScriptList m_script;
+	int m_currentLineNum;
+
+public:
+	inline TYPE type() {return EXEC_SCRIPT;}
+	bool processExecuter();
+
+protected:
+	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
+	virtual ~ScriptExecuter();
+
+	bool executeLine(FxScriptLine *line);
+	bool executeCmdStartOrStop(FxScriptLine *line, int cmdnum);
 
 	friend class ExecCenter;
 };

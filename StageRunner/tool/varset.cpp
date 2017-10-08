@@ -123,10 +123,13 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 	int seek = read.pos();
 
 	QString line = read.readLine();
-	if (lineCopy) *lineCopy = line;
+	if (lineCopy)
+		*lineCopy = line;
 	(*p_line_number)++;
 	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level << (varset?varset->className():QString());
 
+	if (line.contains("start 5"))
+		qDebug() << "start5";
 
 	if (line.size() < 2) {
 		if (cancel_file_analyze_on_empty_line) {

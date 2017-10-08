@@ -8,6 +8,7 @@
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
 #include "fxclipitem.h"
+#include "fxscriptitem.h"
 #include "project.h"
 #include "usersettings.h"
 #include "fxlist.h"
@@ -453,6 +454,21 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 		default:
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for sequence",cmd);
 		}
+
+	case FX_SCRIPT:
+		switch (cmd) {
+		case CMD_FX_START:
+			unitFx->startFxScript(static_cast<FxScriptItem*>(fx));
+			break;
+		case CMD_FX_STOP:
+			unitFx->stopFxScript(static_cast<FxScriptItem*>(fx));
+			break;
+
+		default:
+			break;
+		}
+
+		break;
 
 	default:
 		break;

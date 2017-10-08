@@ -8,7 +8,11 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "fxscriptitem.h"
 #include "usersettings.h"
+#include "qtstatictools.h"
+
+#include <QStringList>
 
 using namespace LIGHT;
 
@@ -212,8 +216,6 @@ void FxListExecuter::setFxList(FxList *fx_list)
 {
 	fxList = fx_list;
 }
-
-
 
 void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 {
@@ -482,8 +484,9 @@ void FxListExecuter::selectNextFx(FxItem *fx)
 	setNextFx(fx);
 }
 
+//---------------------------------------------------------------------------------
 
-
+//---------------------------------------------------------------------------------
 
 bool SceneExecuter::processExecuter()
 {
@@ -536,10 +539,148 @@ bool SceneExecuter::processExecuter()
 	return active;
 }
 
+
 SceneExecuter::SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx)
 	: Executer(app_central,scene)
 	, curScene(scene)
 	, sceneState(LIGHT::SCENE_OFF)
 {
 	parentFxItem = parentFx;
+}
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+
+bool ScriptExecuter::processExecuter()
+{
+	if (myState == EXEC_IDLE) return false;
+
+	bool proceed = true;
+	bool active = true;
+
+	while (proceed) {
+		FxScriptLine *line = m_script.at(m_currentLineNum);
+		if (line) {
+			proceed = executeLine(line);
+			m_currentLineNum++;
+		} else {
+			proceed = false;
+			active = false;
+		}
+	}
+
+	return active;
+}
+
+ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx)
+	: Executer(app_central,script)
+	, m_fxScriptItem(script)
+	, m_currentLineNum(0)
+{
+	parentFxItem = parentFx;
+	FxScriptItem::rawToScript(script->rawScript(), m_script);
+}
+
+ScriptExecuter::~ScriptExecuter()
+{
+	qDebug() << "script executer destroyed";
+}
+
+bool ScriptExecuter::executeLine(FxScriptLine *line)
+{
+	bool ok = true;
+
+	const QString &cmd = line->command();
+	if (cmd == "wait") {
+		qint64 delayMs = QtStaticTools::timeStringToMS(line->parameters());
+		setEventTargetTime(delayMs);
+
+		return false;
+	}
+	else if (cmd == "start") {
+		ok = executeCmdStartOrStop(line, CMD_FX_START);
+	}
+	else if (cmd == "stop") {
+		ok = executeCmdStartOrStop(line, CMD_FX_STOP);
+	}
+	else {
+		ok = false;
+		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
+//		qDebug() << myState << line->lineNumber() << line->command() << line->parameters();
+	}
+
+	if (!ok) {
+		LOGERROR(tr("Failed to execute script line #%1 in script %2")
+				 .arg(line->lineNumber())
+				 .arg(m_fxScriptItem->name()));
+	}
+
+	return true;
+}
+
+bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, int cmdnum)
+{
+	// Try to find the target fx here
+	FxItem *fx = 0;
+
+	// get the reference type (parse parameter list)
+	QStringList tlist = line->parameters().split(" ",QString::SkipEmptyParts);
+	if (tlist.size() >= 2) {
+		if (tlist.at(0).toLower() == "id") {
+			fx = FxItem::findFxById(tlist.at(1).toInt());
+		}
+		else {
+			/// @todo
+		}
+	}
+	else if (tlist.size() == 1) {
+		// Let's try to convert the one and only parameter to a number
+		bool ok;
+		int id = tlist.at(0).toInt(&ok);
+		if (ok) {
+			//ok, seems to be a number: We believe it is an Fx ID
+			fx = FxItem::findFxById(id);
+		} else {
+			//seems to be text ....
+			/// @todo
+		}
+	}
+
+	if (!fx) {
+		LOGERROR(tr("Could not find target FX in line #%1 of script %2")
+				 .arg(line->lineNumber())
+				 .arg(m_fxScriptItem->name()));
+		return false;
+	}
+
+
+	if (cmdnum == CMD_FX_START) {
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			return myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this);
+		case FX_SCENE:
+			/// @todo it would be better to copy the scene and actually fade in the new instance here
+			/// Further the executer is not handed over to scene
+			return myApp.unitLight->startFxScene(static_cast<FxSceneItem*>(fx));
+		default:
+			DEBUGERROR("Executing '%s' is not supported by FxScript"
+					   ,fx->name().toLocal8Bit().data());
+			return false;
+		}
+	}
+	else if (cmdnum == CMD_FX_STOP) {
+		switch (fx->fxType()) {
+		case FX_SCENE:
+			/// @todo it would be better to copy the scene and actually fade in the new instance here
+			/// Further the executer is not handed over to scene
+			return myApp.unitLight->stopFxScene(static_cast<FxSceneItem*>(fx));
+		default:
+			DEBUGERROR("Executing '%s' is not supported by FxScript"
+					   ,fx->name().toLocal8Bit().data());
+			return false;
+		}
+	}
+
+	return true;
 }

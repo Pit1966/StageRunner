@@ -14,6 +14,8 @@
 #include "audiocontrol.h"
 #include "fxlistwidgetitem.h"
 #include "fxlist.h"
+#include "fxscriptitem.h"
+#include "fxscriptwidget.h"
 
 FxControl::FxControl(AppCentral &appCentral, ExecCenter &exec_center) :
 	QObject()
@@ -240,6 +242,72 @@ int FxControl::stopAllFxPlaylists()
 	execCenter.unlockExecuterList();
 	return count;
 
+}
+
+ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
+{
+	if (!FxItem::exists(fxscript)) {
+		qDebug("FxScriptItem not found in pool");
+		return 0;
+	}
+
+	// See what has to be done before starting the sequence
+//	if (fxseq->stopOtherSeqOnStart) {
+//		myApp.sequenceStop();
+//	}
+//	if (fxseq->blackOtherSeqOnStart) {
+//		myApp.lightBlack(200);
+//	}
+
+	// Create an executor for the script
+	ScriptExecuter *fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
+
+	// Determine what the FxListWidget is where the script comes from
+	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxscript);
+	if (parentwid) {
+		/// @todo script
+		/// FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
+//		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+	}
+
+	// Determine the FxScriptWidget that is the editing widget of the current script
+	FxScriptWidget *scrwid = FxScriptWidget::findParentFxScriptWidget(fxscript);
+	if (scrwid) {
+		/// @todo script
+//		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
+//		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
+	}
+
+
+	// Give control for executer to FxControl loop
+	fxexec->activateProcessing();
+
+	return fxexec;
+}
+
+bool FxControl::stopFxScript(FxScriptItem *fxscript)
+{
+	bool found = false;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->originFx() == fxscript && exec->type() == Executer::EXEC_SCRIPT) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				found = true;
+				/// @todo: Search for child executers. Both. SceneExecuter and FxListExecuter
+				// Stop Sequence Executer
+				exec->setPaused(true);
+				exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return found;
 }
 
 FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)
