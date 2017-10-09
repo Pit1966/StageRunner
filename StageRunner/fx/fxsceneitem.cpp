@@ -38,6 +38,8 @@ void FxSceneItem::init()
 	my_last_status = SCENE_IDLE;
 	my_last_active_flag = false;
 
+	m_deleteMeOnFinished = false;
+
 	for (int t=0; t<MIX_LINES; t++) {
 		wasBlacked[t] = false;
 	}
@@ -58,6 +60,8 @@ FxSceneItem::~FxSceneItem()
 	while (tubes.size()) {
 		delete tubes.takeFirst();
 	}
+
+	qDebug() << "FxSceneItem deleted" << name();
 }
 
 void FxSceneItem::setLoopValue(qint32 val)
@@ -268,6 +272,9 @@ bool FxSceneItem::loopFunction()
 	} else {
 		myStatus &= ~SCENE_ACTIVE_EXTERN;
 	}
+
+	if (myStatus == SCENE_IDLE && m_deleteMeOnFinished)
+		qDebug() << __func__ << "delete this scene now!" << name();
 
 	return active_auto || active_direct;
 }

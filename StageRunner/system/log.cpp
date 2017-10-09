@@ -588,23 +588,23 @@ void Log::process_line_for_log_output(QString & msg)
 	}
 	else if (msg.left(4) == "E_Ke") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_Va") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_De") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_St") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_Pr") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else {
 		setColor(QColor(Qt::gray));

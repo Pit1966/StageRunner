@@ -15,6 +15,7 @@
 #include <QStringList>
 
 using namespace LIGHT;
+using namespace SCRIPT;
 
 Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	: myApp(app_central)
@@ -562,11 +563,13 @@ bool ScriptExecuter::processExecuter()
 	while (proceed) {
 		FxScriptLine *line = m_script.at(m_currentLineNum);
 		if (line) {
-			proceed = executeLine(line);
+			if (line->command().size() > 2 && !line->command().startsWith("#"))
+				proceed = executeLine(line);
 			m_currentLineNum++;
 		} else {
 			proceed = false;
 			active = false;
+			LOGTEXT(tr("Script <font color=darkGreen>'%1'</font> finished").arg(m_fxScriptItem->name()));
 		}
 	}
 
@@ -584,48 +587,22 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 
 ScriptExecuter::~ScriptExecuter()
 {
+	while (!m_clonedSceneList.isEmpty()) {
+		FxSceneItem *scene = m_clonedSceneList.takeFirst();
+		if (!scene->isOnStageIntern() && !scene->isActive()) {
+			delete scene;
+		} else {
+			scene->setDeleteOnFinished();
+		}
+	}
 	qDebug() << "script executer destroyed";
 }
 
-bool ScriptExecuter::executeLine(FxScriptLine *line)
+FxItem *ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QString &paras)
 {
-	bool ok = true;
-
-	const QString &cmd = line->command();
-	if (cmd == "wait") {
-		qint64 delayMs = QtStaticTools::timeStringToMS(line->parameters());
-		setEventTargetTime(delayMs);
-
-		return false;
-	}
-	else if (cmd == "start") {
-		ok = executeCmdStartOrStop(line, CMD_FX_START);
-	}
-	else if (cmd == "stop") {
-		ok = executeCmdStartOrStop(line, CMD_FX_STOP);
-	}
-	else {
-		ok = false;
-		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
-//		qDebug() << myState << line->lineNumber() << line->command() << line->parameters();
-	}
-
-	if (!ok) {
-		LOGERROR(tr("Failed to execute script line #%1 in script %2")
-				 .arg(line->lineNumber())
-				 .arg(m_fxScriptItem->name()));
-	}
-
-	return true;
-}
-
-bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, int cmdnum)
-{
-	// Try to find the target fx here
 	FxItem *fx = 0;
-
-	// get the reference type (parse parameter list)
-	QStringList tlist = line->parameters().split(" ",QString::SkipEmptyParts);
+	// parse parameter string
+	QStringList tlist = paras.split(" ",QString::SkipEmptyParts);
 	if (tlist.size() >= 2) {
 		if (tlist.at(0).toLower() == "id") {
 			fx = FxItem::findFxById(tlist.at(1).toInt());
@@ -651,11 +628,60 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, int cmdnum)
 		LOGERROR(tr("Could not find target FX in line #%1 of script %2")
 				 .arg(line->lineNumber())
 				 .arg(m_fxScriptItem->name()));
-		return false;
 	}
 
+	return fx;
+}
 
-	if (cmdnum == CMD_FX_START) {
+bool ScriptExecuter::executeLine(FxScriptLine *line)
+{
+	bool ok = true;
+
+	const QString &cmd = line->command();
+	KEY_WORD key = FxScriptList::keywords.keyNumber(cmd);
+	switch (key) {
+	case KW_WAIT:
+		{
+			qint64 delayMs = QtStaticTools::timeStringToMS(line->parameters());
+			setEventTargetTime(delayMs);
+		}
+		return false;
+
+	case KW_START:
+		ok = executeCmdStartOrStop(line, KW_START);
+		break;
+
+	case KW_STOP:
+		ok = executeCmdStartOrStop(line, KW_STOP);
+		break;
+
+	case KW_FADEIN:
+		ok = executeFadeIn(line);
+		break;
+
+	default:
+		ok = false;
+		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
+		break;
+	}
+
+	if (!ok) {
+		LOGERROR(tr("Failed to execute script line #%1 (%2) in script %3")
+				 .arg(line->lineNumber())
+				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
+				 .arg(m_fxScriptItem->name()));
+	}
+
+	return true;
+}
+
+bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD cmdnum)
+{
+	// Try to find the target fx here
+	FxItem *fx = getTargetFxItemFromPara(line, line->parameters());
+	if (!fx) return false;
+
+	if (cmdnum == KW_START) {
 		switch (fx->fxType()) {
 		case FX_AUDIO:
 			return myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this);
@@ -669,12 +695,21 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, int cmdnum)
 			return false;
 		}
 	}
-	else if (cmdnum == CMD_FX_STOP) {
+	else if (cmdnum == KW_STOP) {
 		switch (fx->fxType()) {
 		case FX_SCENE:
 			/// @todo it would be better to copy the scene and actually fade in the new instance here
 			/// Further the executer is not handed over to scene
-			return myApp.unitLight->stopFxScene(static_cast<FxSceneItem*>(fx));
+			{
+				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+				if (!scene->isOnStageIntern()) {
+					LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Line %2: target not on stage")
+							.arg(originFxItem->name()).arg(line->lineNumber()));
+					return true;
+				} else {
+					return myApp.unitLight->stopFxScene(scene);
+				}
+			}
 		default:
 			DEBUGERROR("Executing '%s' is not supported by FxScript"
 					   ,fx->name().toLocal8Bit().data());
@@ -683,4 +718,23 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, int cmdnum)
 	}
 
 	return true;
+}
+
+bool ScriptExecuter::executeFadeIn(FxScriptLine *line)
+{
+	FxItem *fx = getTargetFxItemFromPara(line,line->parameters());
+	if (!fx) return false;
+
+	FxSceneItem *scene = dynamic_cast<FxSceneItem*>(fx);
+	if (!scene) {
+		DEBUGERROR("%s: FADEIN needs a SCENE Fx!",fx->name().toLocal8Bit().data());
+	}
+
+	// now clone FxSceneItem
+
+	FxSceneItem *clonescene = new FxSceneItem(*scene);
+	clonescene->setName(tr("%1:%2_tmp").arg(originFxItem->name()).arg(scene->name()));
+	m_clonedSceneList.append(clonescene);
+
+	return myApp.unitLight->startFxScene(clonescene);
 }

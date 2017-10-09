@@ -174,6 +174,7 @@ protected:
 	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
 	FxScriptList m_script;
 	int m_currentLineNum;
+	QList<FxSceneItem*> m_clonedSceneList;
 
 public:
 	inline TYPE type() {return EXEC_SCRIPT;}
@@ -183,8 +184,11 @@ protected:
 	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
 	virtual ~ScriptExecuter();
 
+	FxItem * getTargetFxItemFromPara(FxScriptLine *line, const QString &paras);
+
 	bool executeLine(FxScriptLine *line);
-	bool executeCmdStartOrStop(FxScriptLine *line, int cmdnum);
+	bool executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD cmdnum);
+	bool executeFadeIn(FxScriptLine * line);
 
 	friend class ExecCenter;
 };

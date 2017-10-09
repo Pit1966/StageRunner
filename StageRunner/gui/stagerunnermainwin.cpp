@@ -440,14 +440,14 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 
 void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
 {
-	FxScriptWidget *desk = FxScriptWidget::openFxScriptPanel(fx);
+	FxScriptWidget *editor = FxScriptWidget::openFxScriptPanel(fx);
 
-	if (desk) {
+	if (editor) {
 		FxListWidget *parentWid = FxListWidget::findParentFxListWidget(fx);
 		if (parentWid) {
-			connect(desk,SIGNAL(modified()),parentWid,SLOT(refreshList()));
+			connect(editor,SIGNAL(modified()),parentWid,SLOT(refreshList()));
 		}
-		desk->show();
+		editor->show();
 	}
 }
 

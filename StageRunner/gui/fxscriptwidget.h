@@ -36,6 +36,9 @@ private slots:
 	void on_cancelButton_clicked();
 	void on_applyButton_clicked();
 	void on_applyCloseButton_clicked();
+
+signals:
+	void modified();
 };
 
 #endif // FXSCRIPTWIDGET_H

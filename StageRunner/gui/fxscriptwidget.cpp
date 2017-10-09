@@ -78,6 +78,7 @@ bool FxScriptWidget::applyChanges()
 	if (new_script != m_OriginFxScript->m_scriptRaw) {
 		m_OriginFxScript->m_scriptRaw = new_script;
 		m_OriginFxScript->setModified(true);
+		emit modified();
 		return true;
 	}
 

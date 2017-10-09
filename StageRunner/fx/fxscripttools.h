@@ -3,6 +3,36 @@
 
 #include <QString>
 #include <QList>
+#include <QHash>
+
+
+namespace SCRIPT {
+
+enum KEY_WORD {
+	KW_NONE,
+	KW_WAIT,
+	KW_START,
+	KW_STOP,
+	KW_FADEIN,
+	KW_COUNT
+};
+
+}
+
+class ScriptKeyWord
+{
+private:
+	QHash<QString,SCRIPT::KEY_WORD> m_keywordHash;
+
+public:
+	ScriptKeyWord();
+	QString keyWord(SCRIPT::KEY_WORD keyword);
+	SCRIPT::KEY_WORD keyNumber(const QString &text);
+};
+
+//-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
 
 class FxScriptLine
 {
@@ -28,6 +58,9 @@ public:
 
 class FxScriptList : protected QList<FxScriptLine>
 {
+public:
+	static ScriptKeyWord keywords;
+
 public:
 	FxScriptList();
 	FxScriptList(const FxScriptList &o);
