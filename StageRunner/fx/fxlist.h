@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-#include "varsetlist.h"
+#include "../tool/varsetlist.h"
 
 
 class FxItem;
@@ -93,6 +93,7 @@ public:
 	bool addFxAudioPlayList();
 	bool addFxSequence();
 	bool addFxScript();
+	bool addFxCue();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);

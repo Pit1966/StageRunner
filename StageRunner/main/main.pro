@@ -136,7 +136,8 @@ SOURCES += \
 	../system/dmxuniverseproperty.cpp \
 	../fx/fxscriptitem.cpp \
     ../gui/fxscriptwidget.cpp \
-    ../fx/fxscripttools.cpp
+	../fx/fxscripttools.cpp \
+	../fx/fxcueitem.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -244,7 +245,8 @@ HEADERS  += \
 	../system/dmxuniverseproperty.h \
 	../fx/fxscriptitem.h \
     ../gui/fxscriptwidget.h \
-    ../fx/fxscripttools.h
+	../fx/fxscripttools.h \
+	../fx/fxcueitem.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

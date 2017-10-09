@@ -22,6 +22,7 @@ enum FxType {
 	FX_SEQUENCE,			// is a Sequence of FxItems
 	FX_CLIP,				// is a video clip (or audio)
 	FX_SCRIPT,				// is a script file
+	Fx_CUE,					// is a cue list for existing other fx types
 
 	FX_SIZE
 };

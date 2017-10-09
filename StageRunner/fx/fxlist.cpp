@@ -4,6 +4,7 @@
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
 #include "fxscriptitem.h"
+#include "fxcueitem.h"
 #include "log.h"
 #include "fxitemtool.h"
 
@@ -398,6 +399,18 @@ bool FxList::addFxScript()
 	return false;
 }
 
+
+bool FxList::addFxCue()
+{
+	FxItem *fx = addFx(Fx_CUE);
+	if (fx) {
+		fx->setName("FX Cue");
+		m_isModified = true;
+		return true;
+	}
+	return false;
+}
+
 void FxList::moveFromTo(int srcidx, int destidx)
 {
 	FxItem *xitem = 0;
@@ -563,6 +576,14 @@ FxItem *FxList::addFx(int fxtype, int option)
 	case FX_SCRIPT:
 		{
 			FxScriptItem *fx = new FxScriptItem(this);
+			fx->refCount.ref();
+			m_fxList.append(fx);
+			m_isModified = true;
+			retfx = fx;
+		}
+	case Fx_CUE:
+		{
+			FxCueItem *fx = new FxCueItem(this);
 			fx->refCount.ref();
 			m_fxList.append(fx);
 			m_isModified = true;

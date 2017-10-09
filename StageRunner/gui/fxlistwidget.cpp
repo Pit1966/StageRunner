@@ -1207,7 +1207,11 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act->setObjectName("23");
 
 			act = menu.addAction(tr("New Script"));
-			act->setObjectName("25");
+			act->setObjectName("24");
+
+//			act = menu.addAction(tr("New Cue List"));
+//			act->setObjectName("25");
+
 
 			act = menu.addAction("--------------------");
 			if (isEditable()) {
@@ -1284,8 +1288,12 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			fxList()->addFxSequence();
 			refreshList();
 			break;
-		case 25:
+		case 24:
 			fxList()->addFxScript();
+			refreshList();
+			break;
+		case 25:
+			fxList()->addFxCue();
 			refreshList();
 			break;
 		case 2:
