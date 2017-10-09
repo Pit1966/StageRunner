@@ -379,6 +379,7 @@ FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
 }
 
 
+
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 {
 	if (!FxItem::exists(fx)) {
@@ -564,6 +565,14 @@ void AppCentral::setGlobalSelectedFx(FxItem *item)
 	last_global_selected_fxitem = item;
 }
 
+void AppCentral::deleteFxSceneItem(FxSceneItem *scene)
+{
+	bool ok = FxItem::exists(scene);
+	if (ok) {
+		delete scene;
+		emit fxSceneDeleted(scene);
+	}
+}
 
 AppCentral::AppCentral()
 {

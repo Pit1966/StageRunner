@@ -54,6 +54,9 @@ void FxListWidgetItem::setText(const QString &txt)
 QSize FxListWidgetItem::sizeHint() const
 {
 	// qDebug("sizeHint");
+	if (columnType == CT_ID)
+		return QSize(itemText.size() * 14, 20);
+
 	return QSize(20,20);
 }
 

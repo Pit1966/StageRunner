@@ -29,6 +29,7 @@ class FxControl;
 class FxListVarSet;
 class VideoControl;
 class DmxUniverseProperty;
+class FxSceneItem;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -62,10 +63,6 @@ public:
 	Mix_Music *testsdl;
 #endif
 
-private:
-	AppCentral();
-	~AppCentral();
-	void init();
 
 public:
 	static AppCentral * instance();
@@ -104,6 +101,11 @@ public:
 	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
 	FxItem *addDefaultSceneToFxList(FxList *fxlist);
 
+private:
+	AppCentral();
+	~AppCentral();
+	void init();
+
 public slots:
 	void executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec);
 	void executeFxCmd(qint32 id, CtrlCmd cmd, Executer *exec);
@@ -119,12 +121,15 @@ public slots:
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
 	void setGlobalSelectedFx(FxItem *item);
 
+	void deleteFxSceneItem(FxSceneItem *scene);
+
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
 	void editModeChanged(bool state);
 	void inputAssignModeChanged(bool state);
 	void inputAssigned(FxItem *);
 
+	void fxSceneDeleted(FxSceneItem *scene);
 };
 
 #endif // APPCENTRAL_H

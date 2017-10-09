@@ -261,6 +261,7 @@ void LightControl::init()
 	}
 
 	lightLoopInterface = new LightLoopThreadInterface(*this);
+	connect(lightLoopInterface,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),&myApp,SLOT(deleteFxSceneItem(FxSceneItem*)));
 }
 
 void LightControl::startFxSceneExecuter(FxSceneItem *scene)

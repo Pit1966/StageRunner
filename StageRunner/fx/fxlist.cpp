@@ -581,6 +581,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 			m_isModified = true;
 			retfx = fx;
 		}
+		break;
 	case Fx_CUE:
 		{
 			FxCueItem *fx = new FxCueItem(this);

@@ -6,6 +6,7 @@
 class LightLoop;
 class FxList;
 class LightControl;
+class FxSceneItem;
 
 // template <class T> class MutexQList;
 
@@ -28,6 +29,7 @@ private:
 	void run();
 
 signals:
+	void wantedDeleteFxScene(FxSceneItem *scene);
 
 public slots:
 

@@ -114,8 +114,12 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 
 	int cmd_time = 0;
 
-	quint32 STAGE_FLAG = 1<<(1 + mixline);
-	quint32 ACTIVE_FLAG = 1<<(8 + mixline);
+	quint32 STAGE_FLAG = SCENE_STAGE_INTERN;
+	quint32 ACTIVE_FLAG = SCENE_ACTIVE_INTERN;
+	if (mixline == MIX_EXTERN) {
+		STAGE_FLAG = SCENE_STAGE_EXTERN;
+		ACTIVE_FLAG = SCENE_ACTIVE_EXTERN;
+	}
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:

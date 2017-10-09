@@ -82,6 +82,7 @@ signals:
 	void deleteMe(Executer *exec);
 	void changed(Executer *exec);
 	void sceneExecuterStartSignal(FxSceneItem *scene);
+	void wantedDeleteFxScene(FxSceneItem *scene);
 
 	friend class ExecCenter;
 };

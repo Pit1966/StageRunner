@@ -8,7 +8,6 @@
 #include "dmxchannel.h"
 #include "toolclasses.h"
 
-
 #include <QDebug>
 #include <QEventLoop>
 #include <QThread>
@@ -124,9 +123,13 @@ void LightLoop::processPendingEvents()
 
 	lightCtrlRef.sendChangedDmxData();
 
-	// Now check the list of inactive scenes. This removes NULL level scenes from list
+	// Now check the list of inactive scenes. This removes NULL level scenes from active scenes list
 	foreach (FxSceneItem *sceneitem, inactive_scenes) {
 		lightCtrlRef.setSceneIdle(sceneitem);
+
+		// This is for special scenes, which are temporary
+		if (sceneitem->deleteOnFinished() && sceneitem->isTempCopy())
+			emit wantedDeleteFxScene(sceneitem);
 	}
 }
 

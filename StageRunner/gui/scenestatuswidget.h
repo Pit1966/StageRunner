@@ -24,6 +24,7 @@ class SceneStatusWidget : public QWidget, public Ui::SceneStatusWidget
 {
 	Q_OBJECT
 private:
+	bool m_doNotRemove;
 	QReadWriteLock *rwlock;
 	QHash<FxSceneItem*,SceneStatusListItem*>scene_hash;
 
@@ -32,12 +33,15 @@ public:
 	~SceneStatusWidget();
 
 	bool appendScene(FxSceneItem *scene);
-	bool removeScene(FxSceneItem *scene);
 	bool updateScene(FxSceneItem *scene);
+	bool removeOrDeactivateScene(FxSceneItem *scene);
 
 public slots:
+	void removeScene(FxSceneItem *scene);
 	bool propagateScene(FxSceneItem *scene);
 	void propagateSceneFade(FxSceneItem *scene, int perMilleA, int perMilleB);
+private slots:
+	void on_showInactiveCheck_clicked(bool checked);
 };
 
 #endif // SCENESTATUSWIDGET_H

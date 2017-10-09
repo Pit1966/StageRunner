@@ -590,7 +590,7 @@ ScriptExecuter::~ScriptExecuter()
 	while (!m_clonedSceneList.isEmpty()) {
 		FxSceneItem *scene = m_clonedSceneList.takeFirst();
 		if (!scene->isOnStageIntern() && !scene->isActive()) {
-			delete scene;
+			emit wantedDeleteFxScene(scene);
 		} else {
 			scene->setDeleteOnFinished();
 		}
@@ -734,6 +734,7 @@ bool ScriptExecuter::executeFadeIn(FxScriptLine *line)
 
 	FxSceneItem *clonescene = new FxSceneItem(*scene);
 	clonescene->setName(tr("%1:%2_tmp").arg(originFxItem->name()).arg(scene->name()));
+	clonescene->setIsTempCopyOf(scene);
 	m_clonedSceneList.append(clonescene);
 
 	return myApp.unitLight->startFxScene(clonescene);

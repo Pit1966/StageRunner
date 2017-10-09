@@ -154,6 +154,7 @@ ScriptExecuter *ExecCenter::newScriptExecuter(FxScriptItem *script, FxItem *pare
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
+	connect(exec,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),&myApp,SLOT(deleteFxSceneItem(FxSceneItem*)));
 
 	emit executerCreated(exec);
 	return exec;
