@@ -27,7 +27,10 @@ enum FxType {
 	FX_SIZE
 };
 
-
+enum FxSearchMode {
+    FXSM_EXACT,
+    FXSM_LIKE
+};
 
 class FxList;
 
@@ -35,6 +38,7 @@ class FxItem : public VarSet
 {
 private:
 	static QList<FxItem*>*global_fx_list;
+    static QMutex global_fx_lock;
 
 protected:
 	QAtomicInt refCount;
@@ -56,6 +60,8 @@ protected:
 	FxList *myParentFxList;
 	bool playedInRandomList;
 
+    FxItem *m_isTempCopyOf;				///< FX is temporary copy (maybe a work copy);
+
 public:
 	FxItem();
 	FxItem(FxList *fxList);
@@ -65,9 +71,14 @@ public:
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
 	static FxItem * findFxById(qint32 id);
+    static QList<FxItem*> findFxByName(const QString &name, FxSearchMode mode = FXSM_EXACT);
 
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
+
+    inline void setIsTempCopyOf(FxItem *other) {m_isTempCopyOf = other;}
+    inline bool isTempCopy() const {return m_isTempCopyOf != 0;}
+    FxItem *tempCopyOrigin() const {return m_isTempCopyOf;}
 
 	FxItem * parentFxItem();
 

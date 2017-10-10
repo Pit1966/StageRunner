@@ -186,6 +186,7 @@ protected:
 	virtual ~ScriptExecuter();
 
 	FxItem * getTargetFxItemFromPara(FxScriptLine *line, const QString &paras);
+    QList<FxItem *> getTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line);
 	bool executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD cmdnum);

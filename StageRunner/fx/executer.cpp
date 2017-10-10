@@ -601,6 +601,7 @@ ScriptExecuter::~ScriptExecuter()
 FxItem *ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QString &paras)
 {
 	FxItem *fx = 0;
+    QString msg;
 	// parse parameter string
 	QStringList tlist = paras.split(" ",QString::SkipEmptyParts);
 	if (tlist.size() >= 2) {
@@ -611,26 +612,48 @@ FxItem *ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 			/// @todo
 		}
 	}
-	else if (tlist.size() == 1) {
-		// Let's try to convert the one and only parameter to a number
-		bool ok;
-		int id = tlist.at(0).toInt(&ok);
-		if (ok) {
-			//ok, seems to be a number: We believe it is an Fx ID
-			fx = FxItem::findFxById(id);
-		} else {
-			//seems to be text ....
-			/// @todo
-		}
+    else if (tlist.size() == 1) {
+        // Let's try to convert the one and only parameter to a number
+        bool ok;
+        const QString &tpara = tlist.at(0);
+        int id = tpara.toInt(&ok);
+        if (ok) {
+            //ok, seems to be a number: We believe it is an Fx ID
+            fx = FxItem::findFxById(id);
+        } else {
+            //seems to be text .... search for matching name now
+            QList<FxItem*>fxlist = FxItem::findFxByName(tpara);
+            if (fxlist.isEmpty()) {
+                msg = tr(" (Name '%1' not found)").arg(tpara);
+            }
+            else if (fxlist.size() > 1) {
+                msg = tr(" (Found more than one FX with Name '%1' -> took first)").arg(tpara);
+                fx = fxlist.at(0);
+            }
+            else {
+                fx = fxlist.at(0);
+            }
+        }
+    }
+
+    if (!fx || !msg.isEmpty()) {
+        LOGERROR(tr("Script '%1': Could not find target FX in line #%2%3")
+                 .arg(m_fxScriptItem->name())
+                 .arg(line->lineNumber())
+                 .arg(msg));
 	}
 
-	if (!fx) {
-		LOGERROR(tr("Could not find target FX in line #%1 of script %2")
-				 .arg(line->lineNumber())
-				 .arg(m_fxScriptItem->name()));
-	}
+    return fx;
+}
 
-	return fx;
+QList<FxItem *> ScriptExecuter::getTempCopiesOfFx(FxItem *fx) const
+{
+    QList<FxItem*> list;
+    foreach (FxItem *fxcopy, m_clonedSceneList) {
+        if (fxcopy->tempCopyOrigin() == fx)
+            list.append(fxcopy);
+    }
+    return list;
 }
 
 bool ScriptExecuter::executeLine(FxScriptLine *line)
@@ -705,6 +728,15 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD 
 				if (!scene->isOnStageIntern()) {
 					LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Line %2: target not on stage")
 							.arg(originFxItem->name()).arg(line->lineNumber()));
+                    QList<FxItem*>fxlist = getTempCopiesOfFx(fx);
+                    foreach (FxItem *fx_cp, fxlist) {
+                        FxSceneItem *fxsc_cp = dynamic_cast<FxSceneItem*>(fx_cp);
+                        if (fxsc_cp) {
+                            LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Stop child '%2'")
+                                    .arg(originFxItem->name()).arg(fxsc_cp->name()));
+                            myApp.unitLight->stopFxScene(fxsc_cp);
+                        }
+                    }
 					return true;
 				} else {
 					return myApp.unitLight->stopFxScene(scene);

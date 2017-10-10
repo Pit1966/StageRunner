@@ -34,16 +34,11 @@ private:
 	bool my_last_active_flag;
 	bool wasBlacked[MIX_LINES];
 	bool m_deleteMeOnFinished;
-	FxSceneItem *m_isTempCopyOf;				///< Scene is temporary (not in list) copy of this scene (maybe a work copy);
 
 public:
 	FxSceneItem();
 	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
-
-	inline void setIsTempCopyOf(FxSceneItem *other) {m_isTempCopyOf = other;}
-	inline bool isTempCopy() const {return m_isTempCopyOf != 0;}
-	FxSceneItem *tempCopyOrigin() const {return m_isTempCopyOf;}
 
 	qint32 loopValue() const {return 0;}
 	void setLoopValue(qint32 val);
