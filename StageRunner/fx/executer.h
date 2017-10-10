@@ -185,7 +185,7 @@ protected:
 	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
 	virtual ~ScriptExecuter();
 
-	FxItem * getTargetFxItemFromPara(FxScriptLine *line, const QString &paras);
+    QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
     QList<FxItem *> getTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line);

@@ -598,20 +598,32 @@ ScriptExecuter::~ScriptExecuter()
 	qDebug() << "script executer destroyed";
 }
 
-FxItem *ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QString &paras)
+QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QString &paras, FxItemList &fxList)
 {
 	FxItem *fx = 0;
     QString msg;
 	// parse parameter string
 	QStringList tlist = paras.split(" ",QString::SkipEmptyParts);
-	if (tlist.size() >= 2) {
+
+    int searchtype = 0;
+    if (tlist.size() >= 2) {
 		if (tlist.at(0).toLower() == "id") {
+            searchtype = 1;
 			fx = FxItem::findFxById(tlist.at(1).toInt());
-		}
-		else {
-			/// @todo
-		}
-	}
+            if (fx)
+                fxList.append(fx);
+            tlist.removeFirst();
+            tlist.removeFirst();
+        }
+        else if (tlist.at(0).toLower() == "name") {
+            fxList.append( FxItem::findFxByName(tlist.at(1)) );
+            tlist.removeFirst();
+            tlist.removeFirst();
+        }
+        else {
+
+        }
+    }
     else if (tlist.size() == 1) {
         // Let's try to convert the one and only parameter to a number
         bool ok;
@@ -721,8 +733,6 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD 
 	else if (cmdnum == KW_STOP) {
 		switch (fx->fxType()) {
 		case FX_SCENE:
-			/// @todo it would be better to copy the scene and actually fade in the new instance here
-			/// Further the executer is not handed over to scene
 			{
 				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 				if (!scene->isOnStageIntern()) {
@@ -739,7 +749,9 @@ bool ScriptExecuter::executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD 
                     }
 					return true;
 				} else {
-					return myApp.unitLight->stopFxScene(scene);
+                    LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Stop FX '%2'")
+                            .arg(originFxItem->name()).arg(fxsc_cp->name()));
+                    return myApp.unitLight->stopFxScene(scene);
 				}
 			}
 		default:

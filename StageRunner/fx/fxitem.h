@@ -29,7 +29,10 @@ enum FxType {
 
 enum FxSearchMode {
     FXSM_EXACT,
-    FXSM_LIKE
+    FXSM_LIKE,
+    FXSM_LEFT,
+    FXSM_RIGHT
+
 };
 
 class FxList;
@@ -127,5 +130,7 @@ private:
 	friend class FxList;
 	friend class FxItemTool;
 };
+
+typedef QList<FxItem*> FxItemList;
 
 #endif // FXITEM_H

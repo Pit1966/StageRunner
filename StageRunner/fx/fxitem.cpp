@@ -129,6 +129,14 @@ QList<FxItem *> FxItem::findFxByName(const QString &name, FxSearchMode mode)
             if (fx->myName.contains(name))
                 list.append(fx);
             break;
+        case FXSM_LEFT:
+            if (fx->myName.startsWith(name))
+                list.append(fx);
+            break;
+        case FXSM_RIGHT:
+            if (fx->myName.endsWith(name))
+                list.append(fx);
+            break;
         default:
             if (fx->myName == name)
                 list.append(fx);
