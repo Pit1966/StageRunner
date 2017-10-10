@@ -8,6 +8,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("start",KW_START);
 	m_keywordHash.insert("stop",KW_STOP);
 	m_keywordHash.insert("fadein",KW_FADEIN);
+	m_keywordHash.insert("fadeout",KW_FADEOUT);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)

@@ -20,6 +20,8 @@ class FxSceneItem;
 class FxScriptItem;
 class FxScriptList;
 
+typedef QList<FxItem*> FxItemList;
+
 class Executer : public QObject
 {
 	Q_OBJECT
@@ -186,11 +188,13 @@ protected:
 	virtual ~ScriptExecuter();
 
     QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
-    QList<FxItem *> getTempCopiesOfFx(FxItem *fx) const;
+	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line);
-	bool executeCmdStartOrStop(FxScriptLine *line, SCRIPT::KEY_WORD cmdnum);
+	bool executeCmdStart(FxScriptLine *line);
+	bool executeCmdStop(FxScriptLine *line);
 	bool executeFadeIn(FxScriptLine * line);
+	bool executeFadeOut(FxScriptLine *line);
 
 	friend class ExecCenter;
 };

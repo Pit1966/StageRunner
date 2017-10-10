@@ -14,6 +14,7 @@ enum KEY_WORD {
 	KW_START,
 	KW_STOP,
 	KW_FADEIN,
+	KW_FADEOUT,
 	KW_COUNT
 };
 

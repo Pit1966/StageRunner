@@ -144,7 +144,26 @@ QList<FxItem *> FxItem::findFxByName(const QString &name, FxSearchMode mode)
         }
 
     }
-    return list;
+	return list;
+}
+
+/**
+ * @brief This function does return the temorary copied FxItems for a given parent FxItem
+ * @param fx
+ * @return
+ *
+ * @note  the complete (global) item list is used for the search
+ */
+FxItemList FxItem::getTempCopiesOfFx(FxItem *fx)
+{
+	QList<FxItem*> list;
+	QMutexLocker lock(&global_fx_lock);
+
+	foreach (FxItem *fxcopy, *global_fx_list) {
+		if (fxcopy->tempCopyOrigin() == fx)
+			list.append(fxcopy);
+	}
+	return list;
 }
 
 /**

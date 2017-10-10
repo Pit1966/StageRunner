@@ -24,7 +24,6 @@ bool SceneStatusWidget::appendScene(FxSceneItem *scene)
 {
 	WRITELOCK;
 
-	qDebug() << "append" << scene;
 	if (scene_hash.contains(scene))
 		return updateScene(scene);
 

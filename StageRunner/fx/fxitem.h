@@ -36,6 +36,10 @@ enum FxSearchMode {
 };
 
 class FxList;
+class FxItem;
+
+typedef QList<FxItem*> FxItemList;
+
 
 class FxItem : public VarSet
 {
@@ -82,6 +86,7 @@ public:
     inline void setIsTempCopyOf(FxItem *other) {m_isTempCopyOf = other;}
     inline bool isTempCopy() const {return m_isTempCopyOf != 0;}
     FxItem *tempCopyOrigin() const {return m_isTempCopyOf;}
+	static FxItemList getTempCopiesOfFx(FxItem *fx);
 
 	FxItem * parentFxItem();
 
@@ -131,6 +136,5 @@ private:
 	friend class FxItemTool;
 };
 
-typedef QList<FxItem*> FxItemList;
 
 #endif // FXITEM_H
