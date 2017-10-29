@@ -137,7 +137,8 @@ SOURCES += \
 	../fx/fxscriptitem.cpp \
     ../gui/fxscriptwidget.cpp \
 	../fx/fxscripttools.cpp \
-	../fx/fxcueitem.cpp
+	../fx/fxcueitem.cpp \
+    ../plugins/yadi/src/dmxmonitor.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -246,7 +247,8 @@ HEADERS  += \
 	../fx/fxscriptitem.h \
     ../gui/fxscriptwidget.h \
 	../fx/fxscripttools.h \
-	../fx/fxcueitem.h
+	../fx/fxcueitem.h \
+    ../plugins/yadi/src/dmxmonitor.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

@@ -34,6 +34,8 @@
 #include "fxscriptwidget.h"
 // #include "configrev.h"
 
+#include "../plugins/yadi/src/dmxmonitor.h"
+
 #include <QFileDialog>
 #include <QErrorMessage>
 
@@ -55,6 +57,9 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
+	actionVirtualDmxOutput->setChecked(false);
+	virtDmxWidget->setVisible(false);
+	virtDmxWidget->setAutoBarsEnabled(true);
 
 	// For external access
 	logWidget = logEdit;
@@ -112,6 +117,9 @@ void StageRunnerMainWin::initConnects()
 
 	// Light Control -> Audio Control
 	connect(appCentral->unitLight,SIGNAL(audioSlotVolChanged(int,int)),appCentral->unitAudio,SLOT(setVolumeFromDmxLevel(int,int)));
+
+	// Light Control -> virt DMX Monitor
+	connect(appCentral->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),virtDmxWidget,SLOT(setDmxValues(int,QByteArray)));
 
 	// Audio Control -> Project FxListWidget
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));
@@ -932,4 +940,9 @@ void StageRunnerMainWin::on_loadUniverseButton_clicked()
 {
 	appCentral->universeLayout->fileLoad("/tmp/universelayout.txt");
 	appCentral->universeLayout->fileSave("/tmp/universelayout_copy.txt");
+}
+
+void StageRunnerMainWin::on_actionVirtualDmxOutput_triggered(bool checked)
+{
+	virtDmxWidget->setVisible(checked);
 }

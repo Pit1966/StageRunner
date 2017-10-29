@@ -265,6 +265,9 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="DmxMonitor" name="virtDmxWidget" native="true"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -310,6 +313,7 @@
     </property>
     <addaction name="actionDMX_Input"/>
     <addaction name="actionDMX_Output"/>
+    <addaction name="actionVirtualDmxOutput"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -457,6 +461,17 @@
     <string>Show Sequence Status</string>
    </property>
   </action>
+  <action name="actionVirtualDmxOutput">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Virtual DMX Output</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a DMX control monitor for universe 1</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -481,6 +496,12 @@
    <class>LightControlWidget</class>
    <extends>QGroupBox</extends>
    <header>gui/lightcontrolwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DmxMonitor</class>
+   <extends>QWidget</extends>
+   <header>../plugins/yadi/src/dmxmonitor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

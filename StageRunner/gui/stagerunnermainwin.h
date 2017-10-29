@@ -102,6 +102,8 @@ private slots:
 	void on_saveUniverseButton_clicked();
 	void on_loadUniverseButton_clicked();
 
+	void on_actionVirtualDmxOutput_triggered(bool checked);
+
 private:
 	void init();
 	void setup_gui_docks();
