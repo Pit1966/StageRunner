@@ -74,9 +74,8 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 				if (m_autoBarsEnabled) {
 					paint.setPen(Qt::white);
 					QString val = QString("%1").arg(t+1,3,10);
-					QRect rect = paint.boundingRect(0,12,bar_width,12,Qt::AlignCenter,val);
+					QRect rect = paint.boundingRect(0,18,bar_width,12,Qt::AlignCenter,val);
 					paint.drawText(t * bar_width + rect.x(), rect.y(), val);
-					qDebug() << "recty" << rect.y();
 				}
 
 				if (t >= used_bars) {

@@ -218,6 +218,11 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		write_universe_debug_out = true;
 	}
 
+	if (universe.size() >  yadi->outUniverse.size()) {
+		yadi->outUniverse.resize(universe.size());
+		qDebug() << "Yadi DMX plugin::writeUniverse:  resize output universe to" << universe.size();
+	}
+
 	QTime stop;
 	stop.restart();
 	// qDebug() << QTime::currentTime().msec();

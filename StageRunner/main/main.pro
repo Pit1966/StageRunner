@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = stagerunner
 
-CONFIG += static
+# CONFIG += static
 
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
