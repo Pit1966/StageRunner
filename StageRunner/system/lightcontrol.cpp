@@ -90,7 +90,7 @@ bool LightControl::sendChangedDmxData()
 			QLCIOPlugin *plugin;
 			int output;
 			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
-				plugin->writeUniverse(t,dmxOutputValues[t]);
+				plugin->writeUniverse(t,output,dmxOutputValues[t]);
 				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
 			} else {

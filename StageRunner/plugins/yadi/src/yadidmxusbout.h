@@ -36,6 +36,8 @@ private:
 	int m_reOpenInput;
 	int m_comErrorCounter;
 	int m_totalComErrorCounter;
+	int m_inputUniverse;
+	int m_outputUniverse;
 
 public:
 	YadiDMXUSBOut();
@@ -45,16 +47,16 @@ public:
 	bool findDevices(bool update = false);
 	QString name();						///< @reimp
 	int capabilities() const;			///< @reimp
-	void openOutput(quint32 output = 0);		///< @reimp
-	void closeOutput(quint32 output = 0);		///< @reimp
+	bool openOutput(quint32 output, quint32 universe);		///< @reimp
+	void closeOutput(quint32 output, quint32 universe);		///< @reimp
 	QStringList outputs();				///< @reimp
-	void writeUniverse(quint32 output, const QByteArray& universe); ///< @reimp
+	void writeUniverse(quint32 universe, quint32 output, const QByteArray& data); ///< @reimp
 	QString outputInfo(quint32 output = QLCIOPlugin::invalidLine()); ///< @reimp
-	void openInput(quint32 input);		///< @reimp
-	void closeInput(quint32 input);		///< @reimp
+	bool openInput(quint32 input, quint32 universe);		///< @reimp
+	void closeInput(quint32 input, quint32 universe);		///< @reimp
 	QStringList inputs();				///< @reimp
 	QString inputInfo(quint32 input);	///< @reimp
-	void sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString& key = 0);
+	void sendFeedBack(quint32 universe, quint32 inputLine, quint32 channel, uchar value, const QString& key = 0);
 
 	bool canConfigure();				///< @reimp
 	void configure();					///< @reimp

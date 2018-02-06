@@ -32,6 +32,7 @@ HEADERS += \
 	yadireceiver.h \
     dmxmonitor.h
 
+SOURCES += ../../interfaces/qlcioplugin.cpp
 SOURCES += \
 	yadidmxusbout.cpp \
 	serialwrapper.cpp \

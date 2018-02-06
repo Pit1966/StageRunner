@@ -143,15 +143,16 @@ QString YadiDMXUSBOut::name()
 	return QString("YADI DMX USB Device");
 }
 
-void YadiDMXUSBOut::openOutput(quint32 output)
+bool YadiDMXUSBOut::openOutput(quint32 output, quint32 universe)
 {
-	qDebug("YadiDMXUSBOut::openOutput(%d)",output);
-	internOpenOutput(output);
+	qDebug("YadiDMXUSBOut::openOutput(%d), universe %d",output,universe);
+	m_outputUniverse = universe;
+	return internOpenOutput(output);
 }
 
-void YadiDMXUSBOut::closeOutput(quint32 output)
+void YadiDMXUSBOut::closeOutput(quint32 output, quint32 universe)
 {
-	if (debug) qDebug("YadiDMXUSBOut::closeOutput(%d)",output);
+	if (debug) qDebug("YadiDMXUSBOut::closeOutput(%d), universe %d",output,universe);
 	QMutexLocker lock(accessMutex);
 
 	if ((int)output < output_devices.size()) {
@@ -194,7 +195,7 @@ QStringList YadiDMXUSBOut::outputs()
 	return outnames;
 }
 
-void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
+void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteArray &data)
 {
 	QMutexLocker lock(accessMutex);
 
@@ -218,9 +219,9 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		write_universe_debug_out = true;
 	}
 
-	if (universe.size() >  yadi->outUniverse.size()) {
-		yadi->outUniverse.resize(universe.size());
-		qDebug() << "Yadi DMX plugin::writeUniverse:  resize output universe to" << universe.size();
+	if (data.size() >  yadi->outUniverse.size()) {
+		yadi->outUniverse.resize(data.size());
+		qDebug() << "Yadi DMX plugin::writeUniverse:  resize output universe to" << data.size();
 	}
 
 	QTime stop;
@@ -232,15 +233,15 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 	int changed_channels = 0;
 	if (yadi->outputSendAllData) {
 		yadi->outputSendAllData = false;
-		changed_channels = universe.size();
-		hi_changed_channel = universe.size();
+		changed_channels = data.size();
+		hi_changed_channel = data.size();
 	} else {
-		int max_out = universe.size();
+		int max_out = data.size();
 		if (max_out > yadi->usedDmxOutChannels) {
 			max_out = yadi->usedDmxOutChannels;
 		}
 		for (int t=0; t<max_out;t++) {
-			if (universe.at(t) != yadi->outUniverse.at(t)) {
+			if (data.at(t) != yadi->outUniverse.at(t)) {
 				changed_channels++;
 				hi_changed_channel = t+1;
 			}
@@ -261,21 +262,21 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 			handle_output_error(output);
 			return;
 		}
-		bytes += yadi->write(universe.data(),hi_changed_channel);
+		bytes += yadi->write(data.data(),hi_changed_channel);
 		if (bytes != hi_changed_channel + 3) {
 			handle_output_error(output);
 		} else {
-			yadi->outUniverse = universe;
+			yadi->outUniverse = data;
 		}
-		if (debug > 2) qDebug("Yadi: out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,universe.size(),out[1],out[2]);
+		if (debug > 2) qDebug("Yadi: out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,data.size(),out[1],out[2]);
 	} else {
 		for (int t=0; t<hi_changed_channel; t++) {
-			if (universe.at(t) != yadi->outUniverse.at(t) || yadi->outputSendAllData) {
-				yadi->outUniverse[t] = universe.at(t);
+			if (data.at(t) != yadi->outUniverse.at(t) || yadi->outputSendAllData) {
+				yadi->outUniverse[t] = data.at(t);
 				QString dat = "o";
 				dat += QString::number(t+1);
 				dat += " ";
-				dat += QString::number((quint8)universe.at(t));
+				dat += QString::number((quint8)data.at(t));
 				dat += "\n";
 
 				if (debug > 3) qDebug() << t << dat;
@@ -288,7 +289,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 output, const QByteArray &universe)
 		}
 		if (debug > 2) qDebug("Yadi: out single %dms",stop.elapsed());
 	}
-	update_output_monitor(output,universe);
+	update_output_monitor(output,data);
 }
 
 QString YadiDMXUSBOut::outputInfo(quint32 output)
@@ -342,16 +343,17 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 
 }
 
-void YadiDMXUSBOut::openInput(quint32 input)
+bool YadiDMXUSBOut::openInput(quint32 input, quint32 universe)
 {
-	qDebug("YadiDMXUSBOut::openInput(%d)",input);
-	internOpenInput(input);
+	qDebug("YadiDMXUSBOut::openInput(%d), universe %d",input,universe);
+	m_inputUniverse = universe;
+	return internOpenInput(input);
 }
 
-void YadiDMXUSBOut::closeInput(quint32 input)
+void YadiDMXUSBOut::closeInput(quint32 input, quint32 universe)
 {
 	QMutexLocker lock(accessMutex);
-	qDebug("YadiDMXUSBOut::closeInput(%d)",input);
+	qDebug("YadiDMXUSBOut::closeInput(%d), universe: %d",input,universe);
 
 	if ((int)input < input_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
@@ -440,8 +442,9 @@ QString YadiDMXUSBOut::inputInfo(quint32 input)
 
 }
 
-void YadiDMXUSBOut::sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString &key)
+void YadiDMXUSBOut::sendFeedBack(quint32 universe, quint32 inputLine, quint32 channel, uchar value, const QString &key)
 {
+	Q_UNUSED(universe);
 	Q_UNUSED(inputLine);
 	Q_UNUSED(channel);
 	Q_UNUSED(value);
@@ -626,7 +629,7 @@ void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
 
 void YadiDMXUSBOut::propagateChangedInput(quint32 input, quint32 channel, uchar value)
 {
-	emit valueChanged(input,channel,value);
+	emit valueChanged(m_inputUniverse, input, channel, value);
 
 	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
 }

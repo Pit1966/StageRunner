@@ -69,6 +69,7 @@ HEADERS += enttecdmxusb.h \
 		   enttecdmxusbconfig.h \
 		   qlcftdi.h
 
+SOURCES += ../../interfaces/qlcioplugin.cpp
 SOURCES += enttecdmxusb.cpp \
 		   enttecdmxusbwidget.cpp \
 		   enttecdmxusbpro.cpp \

@@ -202,7 +202,7 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   Output %1 not used").arg(outputs.at(o)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Output: %1</font>").arg(outputs.at(o)));
-				plugin->openOutput(o);
+				plugin->openOutput(o, universe);
 				one_opened = true;
 			}
 		}
@@ -215,7 +215,7 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   Input %1 not used").arg(inputs.at(i)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Input: %1</font>").arg(inputs.at(i)));
-				plugin->openInput(i);
+				plugin->openInput(i,universe);
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
@@ -233,13 +233,13 @@ void IOPluginCentral::closePlugins()
 		QStringList outputs = plugin->outputs();
 		for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
-			plugin->closeOutput(o);
+			plugin->closeOutput(o,0);
 			plugin->disconnect();
 		}
 		QStringList inputs = plugin->inputs();
 		for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
-			plugin->closeInput(i);
+			plugin->closeInput(i,0);
 			plugin->disconnect();
 		}
 	}
