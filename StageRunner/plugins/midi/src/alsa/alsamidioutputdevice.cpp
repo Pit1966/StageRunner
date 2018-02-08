@@ -80,6 +80,15 @@ void AlsaMidiOutputDevice::close()
     qDebug() << Q_FUNC_INFO;
     m_open = false;
 
+	if (m_sender_address == NULL) {
+		qDebug() << Q_FUNC_INFO << "m_sender_adress is NULL";
+		return;
+	}
+	if (m_receiver_address == NULL) {
+		qDebug() << Q_FUNC_INFO << "m_receiver_adress is NULL";
+		return;
+	}
+
     Q_ASSERT(m_sender_address != NULL);
     Q_ASSERT(m_receiver_address != NULL);
 

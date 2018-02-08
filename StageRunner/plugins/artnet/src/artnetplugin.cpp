@@ -116,7 +116,7 @@ QStringList ArtNetPlugin::outputs()
 
     foreach (ArtNetIO line, m_IOmapping)
     {
-        list << QString("%1: %2").arg(j + 1).arg(line.address.ip().toString());
+		list << QString("TX: %1: %2").arg(j + 1).arg(line.address.ip().toString());
         j++;
     }
     return list;
@@ -205,12 +205,14 @@ void ArtNetPlugin::closeOutput(quint32 output, quint32 universe)
 
 void ArtNetPlugin::writeUniverse(quint32 universe, quint32 output, const QByteArray &data)
 {
+//	qDebug() << "[ArtNet] write Universe :" << universe << output;
     if (output >= (quint32)m_IOmapping.count())
         return;
-
     ArtNetController *controller = m_IOmapping.at(output).controller;
-    if (controller != NULL)
+	if (controller != NULL) {
+//		qDebug() << "[ArtNet] send";
         controller->sendDmx(universe, data);
+	}
 }
 
 /*************************************************************************
@@ -225,7 +227,7 @@ QStringList ArtNetPlugin::inputs()
 
     foreach (ArtNetIO line, m_IOmapping)
     {
-        list << QString("%1: %2").arg(j + 1).arg(line.address.ip().toString());
+		list << QString("RX: %1: %2").arg(j + 1).arg(line.address.ip().toString());
         j++;
     }
     return list;
