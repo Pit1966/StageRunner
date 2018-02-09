@@ -3,7 +3,7 @@ include(../../../coverage.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = ../../artnet
+TARGET   = artnet
 
 QT      += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

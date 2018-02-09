@@ -1,4 +1,4 @@
-include(../../../../variables.pri)
+include(../../../../configvars.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
