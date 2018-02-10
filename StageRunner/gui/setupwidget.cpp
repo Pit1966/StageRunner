@@ -223,16 +223,18 @@ void SetupWidget::update_gui_plugin_info()
 {
 	if (cur_selected_qlc_plugin) {
 		QString info;
-		info += tr("<br><font color=blue>Available outputs</font><br>");
-		QStringList outputs = cur_selected_qlc_plugin->outputs();
+        QStringList outputs = cur_selected_qlc_plugin->outputs();
+        if (outputs.size())
+            info += tr("<font color=darkOrange>Available outputs</font>");
 		for (int t=0; t<outputs.size(); t++) {
-			info += cur_selected_qlc_plugin->outputInfo(t);
+            info += cur_selected_qlc_plugin->outputInfo(t);
 		}
 
-		info += tr("<br><font color=blue>Available inputs</font><br>");
 		QStringList inputs = cur_selected_qlc_plugin->inputs();
-		for (int t=0; t<inputs.size(); t++) {
-			info += cur_selected_qlc_plugin->inputInfo(t);
+        if (inputs.size())
+            info += tr("<br><font color=darkOrange>Available inputs</font>");
+        for (int t=0; t<inputs.size(); t++) {
+            info += cur_selected_qlc_plugin->inputInfo(t);
 		}
 
 		update_dmx_mapping_table(cur_selected_qlc_plugin);
@@ -250,8 +252,16 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 	if (!plugin) return;
 
 	QStringList outnames = plugin->outputs();
+    for (QString &name : outnames) {
+        if (!name.startsWith("TX:"))
+            name.prepend("TX:");
+    }
 	QStringList innames = plugin->inputs();
-	dmxMappingTable->setRowCount(outnames.size() + innames.size());
+    for (QString &name : innames) {
+        if (!name.startsWith("RX:"))
+            name.prepend("RX:");
+    }
+    dmxMappingTable->setRowCount(outnames.size() + innames.size());
 	dmxMappingTable->setColumnCount(4);
 
 	QStringList header;

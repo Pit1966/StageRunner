@@ -53,10 +53,8 @@ int main(int argc, char *argv[])
 	myapp->setLightLoopEnabled(false);
 
 	// Clean up plugins
-	myapp->closePlugins(); // now done in stagerunnermainwin closeEvent
-	qDebug() << "plugins closed";
+    myapp->closePlugins();
 	AppCentral::instance()->pluginCentral->unloadPlugins();
-	qDebug() << "plugins unloaded";
 
 	logThread->stopLog();
 	delete mywin;

@@ -9,14 +9,16 @@
 #include <QPluginLoader>
 #include <QMetaObject>
 
-IOPluginCentral::IOPluginCentral(QObject *parent) :
-	QObject(parent)
-  , pluginMapping(new PluginMapping())
+IOPluginCentral::IOPluginCentral(QObject *parent)
+    : QObject(parent)
+    , pluginMapping(new PluginMapping())
 {
 }
 
 IOPluginCentral::~IOPluginCentral()
 {
+    if (!qlc_plugins.isEmpty())
+        unloadPlugins();
 	delete pluginMapping;
 }
 
@@ -84,12 +86,17 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 
 void IOPluginCentral::unloadPlugins()
 {
-	QObjectList plugins = QPluginLoader::staticInstances();
+//	QObjectList plugins = QPluginLoader::staticInstances();
 
-	for (int t=0; t<plugins.size(); t++) {
-		delete plugins.at(t);
-	}
-	qlc_plugins.clear();
+//	for (int t=0; t<plugins.size(); t++) {
+//		delete plugins.at(t);
+//	}
+//  qlc_plugins.clear();
+
+    if (debug) qDebug() << "unload plugins";
+
+    while (!qlc_plugins.isEmpty())
+        delete qlc_plugins.takeFirst();
 }
 
 bool IOPluginCentral::updatePluginMappingInformation()
@@ -105,7 +112,15 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
 		QString plugin_name = plugin->name();
 		QStringList outputs = plugin->outputs();
+        for (QString &name : outputs) {
+            if (!name.startsWith("TX:"))
+                name.prepend("TX:");
+        }
 		QStringList inputs = plugin->inputs();
+        for (QString &name : inputs) {
+            if (!name.startsWith("RX:"))
+                name.prepend("RX:");
+        }
 
 		for (int t=0; t<outputs.size(); t++) {
 			// Check if line is valid
@@ -195,7 +210,11 @@ bool IOPluginCentral::openPlugins()
 		LOGTEXT(tr("Open Plugin '%1' with capabilities: %2").arg(plugin->name(),capstr));
 
 		QStringList outputs = plugin->outputs();
-		for (int o=0; o<outputs.size(); o++) {
+        for (QString &name : outputs) {
+            if (!name.startsWith("TX:"))
+                name.prepend("TX:");
+        }
+        for (int o=0; o<outputs.size(); o++) {
 			int universe;
 			getOutputUniverseForPlugin(plugin,o,universe);
 			if (universe < 0) {
@@ -208,7 +227,11 @@ bool IOPluginCentral::openPlugins()
 		}
 
 		QStringList inputs = plugin->inputs();
-		for (int i=0; i<inputs.size(); i++) {
+        for (QString &name : inputs) {
+            if (!name.startsWith("RX:"))
+                name.prepend("RX:");
+        }
+        for (int i=0; i<inputs.size(); i++) {
 			int universe;
 			getInputUniverseForPlugin(plugin,i,universe);
 			if (universe < 0) {
@@ -231,13 +254,21 @@ void IOPluginCentral::closePlugins()
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
 		QStringList outputs = plugin->outputs();
-		for (int o=0; o<outputs.size(); o++) {
+        for (QString &name : outputs) {
+            if (!name.startsWith("TX:"))
+                name.prepend("TX:");
+        }
+        for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
 			plugin->closeOutput(o,0);
 			plugin->disconnect();
 		}
 		QStringList inputs = plugin->inputs();
-		for (int i=0; i<inputs.size(); i++) {
+        for (QString &name : inputs) {
+            if (!name.startsWith("RX:"))
+                name.prepend("RX:");
+        }
+        for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
 			plugin->closeInput(i,0);
 			plugin->disconnect();
@@ -250,8 +281,13 @@ QStringList IOPluginCentral::getAllAvailableInputNames() const
 	QStringList input_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		input_names += plugin->inputs();
-	}
+        QStringList inputs = plugin->inputs();
+        for (QString &name : inputs) {
+            if (!name.startsWith("RX:"))
+                name.prepend("RX:");
+        }
+        input_names += inputs;
+    }
 	return input_names;
 }
 
@@ -260,7 +296,12 @@ QStringList IOPluginCentral::getAllAvailableOutputNames() const
 	QStringList output_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		output_names += plugin->outputs();
+        QStringList outputs = plugin->outputs();
+        for (QString &name : outputs) {
+            if (!name.startsWith("TX:"))
+                name.prepend("TX:");
+        }
+        output_names += outputs;
 	}
 	return output_names;
 }

@@ -41,9 +41,13 @@ const char *error_msg_asc[] = {
 
 void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    if (type == QtDebugMsg && !debug)
+        return;
+
 	QByteArray localMsg = msg.toLocal8Bit();
 	QString srcContext;
-	if (debug)
+
+    if (debug)
 		srcContext = QString("file: %1 line: %2 : %3").arg(context.file).arg(context.line).arg(context.function);
 
 	switch (type) {
