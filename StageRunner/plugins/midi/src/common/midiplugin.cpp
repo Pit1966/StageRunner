@@ -119,7 +119,7 @@ QStringList MidiPlugin::outputs()
 
     QListIterator <MidiOutputDevice*> it(m_enumerator->outputDevices());
     while (it.hasNext() == true)
-		list << QString("TX: %1: %2").arg(i++).arg(it.next()->name());
+        list << QString("%1: %2").arg(i++).arg(it.next()->name());
 
     return list;
 }
@@ -239,7 +239,7 @@ QStringList MidiPlugin::inputs()
 
     QListIterator <MidiInputDevice*> it(m_enumerator->inputDevices());
     while (it.hasNext() == true)
-		list << QString("RX: %1: %2").arg(i++).arg(it.next()->name());
+        list << QString("%1: %2").arg(i++).arg(it.next()->name());
 
     return list;
 }

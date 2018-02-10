@@ -335,3 +335,6 @@ win32 {
 
 OTHER_FILES += \
 	version.h.in
+
+DISTFILES += \
+    ../todo.txt

@@ -73,7 +73,7 @@ public slots:
 	void reOpenPlugins();
 
 private slots:
-	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
+    void onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key = 0);
 	void onPluginConfigurationChanged();
 	void onErrorMessageReceived(QString msg);
 

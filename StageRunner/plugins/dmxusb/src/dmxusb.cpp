@@ -118,7 +118,7 @@ QStringList DMXUSB::outputs()
     {
         DMXUSBWidget* widget = m_outputs.at(w);
         foreach(QString name, widget->outputNames())
-			list << QString("TX: %1: %2").arg(i++).arg(name);
+            list << QString("%1: %2").arg(i++).arg(name);
         w += widget->outputsNumber();
     }
     return list;
@@ -241,7 +241,7 @@ QStringList DMXUSB::inputs()
     {
         DMXUSBWidget* widget = m_inputs.at(w);
         foreach(QString name, widget->inputNames())
-			list << QString("RX: %1: %2").arg(i++).arg(name);
+            list << QString("%1: %2").arg(i++).arg(name);
         w += widget->inputsNumber();
     }
 

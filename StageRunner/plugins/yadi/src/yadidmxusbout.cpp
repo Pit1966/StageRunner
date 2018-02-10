@@ -33,8 +33,8 @@ YadiDMXUSBOut::~YadiDMXUSBOut()
 {
 	// This removes the Device objects which
 	// are hold static in memory
-#pragma message("Add clearYadiDevices() again !!")
-	// YadiDeviceManager::clearYadiDevices();
+//#pragma message("Add clearYadiDevices() again !!")
+    YadiDeviceManager::clearYadiDevices();
 
 	delete accessMutex;
 	if (debug) qDebug("~YadiDMXUSBOut");
@@ -197,6 +197,8 @@ QStringList YadiDMXUSBOut::outputs()
 
 void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteArray &data)
 {
+    Q_UNUSED(universe)
+
 	QMutexLocker lock(accessMutex);
 
 	if ((int)output >= output_devices.size()) {

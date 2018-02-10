@@ -70,9 +70,11 @@ bool YadiReceiver::receiver_loop()
 		int max_channels = -1;
 		int used_channels = -1;
 		ok = detectRxDmxUniverseSize(&max_channels, &used_channels);
+        printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
 
 		int rx_dmx_packet_size = -1;
 		ok = detectRxDmxPacketSize(&rx_dmx_packet_size);
+        printf("  -> rx dmx packet size: %d",rx_dmx_packet_size);
 
 		if (rx_dmx_packet_size > 0 && used_channels > 0) {
 			dmxStatus |= 1;

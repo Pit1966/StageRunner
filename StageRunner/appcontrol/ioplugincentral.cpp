@@ -242,7 +242,7 @@ bool IOPluginCentral::openPlugins()
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
-			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)),Qt::UniqueConnection);
+            connect(plugin,SIGNAL(valueChanged(quint32,quint32,quint32,uchar,QString)),this,SLOT(onInputValueChanged(quint32,quint32,quin32,uchar,QString)),Qt::UniqueConnection);
 		}
 
 	}
@@ -406,7 +406,7 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
  * to the configured universe. Than the univeresChannelChanged Signal will be emitted
  *
  */
-void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar value)
+void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key)
 {
 	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
 	if(sendby) {

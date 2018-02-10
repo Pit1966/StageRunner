@@ -635,6 +635,7 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 			// Test if parameter maybe an ID or a FX name
 			bool ok;
 			int id = p1.toInt(&ok);
+            Q_UNUSED(id)
 			if (ok) {
 				searchmode = 1;
 			} else {
