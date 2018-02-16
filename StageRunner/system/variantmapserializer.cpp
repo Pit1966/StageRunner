@@ -90,11 +90,13 @@ bool VariantMapSerializer::parseString(int &pos, const QString &str, QVariantMap
 					map.insert(curkey, val);
 				}
 				else if ( (c >= '0' and c <= '9') || c == '-' || c == '+' || c == '.' ) { // a number
+					// rollback position, cause we have already consumed the first number character
+					pos--;
 					double number;
 					getNumber(pos,str,number);
 					// add key / number pair to map, where number maybe double or long long
-					if (number - qint64(number) == 0) {
-						map.insert(curkey,qint64(number));
+					if (number - int(number) == 0) {
+						map.insert(curkey,int(number));
 					} else {
 						map.insert(curkey,number);
 					}
