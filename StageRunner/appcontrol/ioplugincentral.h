@@ -64,6 +64,11 @@ public:
 	bool getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const;
 	bool getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const;
 
+	static QStringList outputsOf(QLCIOPlugin *plugin);
+	static QString outputOf(int line, QLCIOPlugin *plugin);
+	static QStringList inputsOf(QLCIOPlugin *plugin);
+	static QString inputOf(int line, QLCIOPlugin *plugin);
+
 
 signals:
 	void universeValueChanged(quint32 universe, quint32 channel, uchar value);

@@ -2,7 +2,7 @@ include (../../../configvars.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = ../../dmxusb
+TARGET   = dmxusb
 
 CONFIG      += plugin
 QT          += gui core

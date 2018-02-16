@@ -111,16 +111,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	// Discover plugin lines (input/outputs) and update configuration for each
 	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
 		QString plugin_name = plugin->name();
-		QStringList outputs = plugin->outputs();
-        for (QString &name : outputs) {
-            if (!name.startsWith("TX:"))
-                name.prepend("TX:");
-        }
-		QStringList inputs = plugin->inputs();
-        for (QString &name : inputs) {
-            if (!name.startsWith("RX:"))
-                name.prepend("RX:");
-        }
+		QStringList outputs = IOPluginCentral::outputsOf(plugin);
+		QStringList inputs = IOPluginCentral::inputsOf(plugin);
 
 		for (int t=0; t<outputs.size(); t++) {
 			// Check if line is valid
@@ -158,7 +150,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	// Create fast access tables for universe to plugin mapping
 	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
-		int univ = lineconf->pUniverse;
+		int univ = lineconf->pUniverse-1;
 
 		if (!lineconf->pIsUsed || univ < 0 || univ >= MAX_DMX_UNIVERSE)
 			continue;
@@ -209,12 +201,8 @@ bool IOPluginCentral::openPlugins()
 
 		LOGTEXT(tr("Open Plugin '%1' with capabilities: %2").arg(plugin->name(),capstr));
 
-		QStringList outputs = plugin->outputs();
-        for (QString &name : outputs) {
-            if (!name.startsWith("TX:"))
-                name.prepend("TX:");
-        }
-        for (int o=0; o<outputs.size(); o++) {
+		QStringList outputs = outputsOf(plugin);
+		for (int o=0; o<outputs.size(); o++) {
 			int universe;
 			getOutputUniverseForPlugin(plugin,o,universe);
 			if (universe < 0) {
@@ -226,11 +214,7 @@ bool IOPluginCentral::openPlugins()
 			}
 		}
 
-		QStringList inputs = plugin->inputs();
-        for (QString &name : inputs) {
-            if (!name.startsWith("RX:"))
-                name.prepend("RX:");
-        }
+		QStringList inputs = inputsOf(plugin);
         for (int i=0; i<inputs.size(); i++) {
 			int universe;
 			getInputUniverseForPlugin(plugin,i,universe);
@@ -242,7 +226,8 @@ bool IOPluginCentral::openPlugins()
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
-            connect(plugin,SIGNAL(valueChanged(quint32,quint32,quint32,uchar,QString)),this,SLOT(onInputValueChanged(quint32,quint32,quin32,uchar,QString)),Qt::UniqueConnection);
+			connect(plugin,SIGNAL(valueChanged(quint32,quint32,quint32,uchar,QString))
+					,this,SLOT(onInputValueChanged(quint32,quint32,quint32,uchar,QString)),Qt::UniqueConnection);
 		}
 
 	}
@@ -253,21 +238,13 @@ void IOPluginCentral::closePlugins()
 {
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		QStringList outputs = plugin->outputs();
-        for (QString &name : outputs) {
-            if (!name.startsWith("TX:"))
-                name.prepend("TX:");
-        }
+		QStringList outputs = outputsOf(plugin);
         for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
 			plugin->closeOutput(o,0);
 			plugin->disconnect();
 		}
-		QStringList inputs = plugin->inputs();
-        for (QString &name : inputs) {
-            if (!name.startsWith("RX:"))
-                name.prepend("RX:");
-        }
+		QStringList inputs = inputsOf(plugin);
         for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
 			plugin->closeInput(i,0);
@@ -281,12 +258,7 @@ QStringList IOPluginCentral::getAllAvailableInputNames() const
 	QStringList input_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-        QStringList inputs = plugin->inputs();
-        for (QString &name : inputs) {
-            if (!name.startsWith("RX:"))
-                name.prepend("RX:");
-        }
-        input_names += inputs;
+		input_names += inputsOf(plugin);
     }
 	return input_names;
 }
@@ -296,12 +268,7 @@ QStringList IOPluginCentral::getAllAvailableOutputNames() const
 	QStringList output_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-        QStringList outputs = plugin->outputs();
-        for (QString &name : outputs) {
-            if (!name.startsWith("TX:"))
-                name.prepend("TX:");
-        }
-        output_names += outputs;
+		output_names += outputsOf(plugin);
 	}
 	return output_names;
 }
@@ -360,7 +327,9 @@ bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, 
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == input && lineconf->deviceIoType == QLCIOPlugin::Input) {
 			if (lineconf->pIsUsed) {
-				universe = lineconf->pUniverse;
+				universe = lineconf->pUniverse-1;
+				if (universe < 0)
+					lineconf->pIsUsed = false;
 			} else {
 				universe = -1;
 			}
@@ -384,7 +353,9 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == output && lineconf->deviceIoType == QLCIOPlugin::Output) {
 			if (lineconf->pIsUsed) {
-				universe = lineconf->pUniverse;
+				universe = lineconf->pUniverse-1;
+				if (universe < 0)
+					lineconf->pIsUsed = false;
 			} else {
 				universe = -1;
 			}
@@ -393,6 +364,44 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
 	}
 	universe = -1;
 	return false;
+}
+
+QStringList IOPluginCentral::outputsOf(QLCIOPlugin *plugin)
+{
+	QStringList outnames = plugin->outputs();
+	for (QString &name : outnames) {
+		if (!name.startsWith("TX:"))
+			name.prepend("TX:");
+	}
+	return  outnames;
+}
+
+QString IOPluginCentral::outputOf(int line, QLCIOPlugin *plugin)
+{
+	QStringList outputs = outputsOf(plugin);
+	if (line < 0 || line >= outputs.size())
+		return QString();
+
+	return outputs.at(line);
+}
+
+QStringList IOPluginCentral::inputsOf(QLCIOPlugin *plugin)
+{
+	QStringList innames = plugin->inputs();
+	for (QString &name : innames) {
+		if (!name.startsWith("RX:"))
+			name.prepend("RX:");
+	}
+	return innames;
+}
+
+QString IOPluginCentral::inputOf(int line, QLCIOPlugin *plugin)
+{
+	QStringList inputs = inputsOf(plugin);
+	if (line < 0 || line >= inputs.size())
+		return QString();
+
+	return inputs.at(line);
 }
 
 /**

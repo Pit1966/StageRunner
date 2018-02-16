@@ -10,6 +10,7 @@
 #include "fx/fxlist.h"
 #include "fx/fxsceneitem.h"
 #include "system/audiocontrol.h"
+#include "variantmapserializer.h"
 
 #ifdef IS_QT5
 #include <QtWidgets>
@@ -36,7 +37,7 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 
 
 	myapp->pluginCentral->updatePluginMappingInformation();
-	cur_plugin_map = myapp->pluginCentral->pluginMapping;
+	m_curPluginMap = myapp->pluginCentral->pluginMapping;
 
 	QList<QLCIOPlugin*>qlcplugins = myapp->pluginCentral->qlcPlugins();
 	for (int t=0; t<qlcplugins.size(); t++) {
@@ -50,9 +51,9 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 
 void SetupWidget::init()
 {
-	cur_selected_qlc_plugin = 0;
-	cur_plugin_map = 0;
-	update_plugin_mapping_f = false;
+	m_selectedPlugin = 0;
+	m_curPluginMap = 0;
+	m_updatePluginMapFlag = false;
 	m_restartAudioSlotsOnExit = false;
 }
 
@@ -196,7 +197,7 @@ void SetupWidget::copy_gui_to_settings()
 void SetupWidget::on_okButton_clicked()
 {
 	copy_gui_to_settings();
-	if (update_plugin_mapping_f) {
+	if (m_updatePluginMapFlag) {
 		myapp->pluginCentral->updatePluginMappingInformation();
 	}
 	emit setupChanged(myapp->userSettings);
@@ -214,30 +215,30 @@ void SetupWidget::on_cancelButton_clicked()
 
 void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 {
-	cur_selected_qlc_plugin = myapp->pluginCentral->getQLCPluginByName(item->text());
+	m_selectedPlugin = myapp->pluginCentral->getQLCPluginByName(item->text());
 
 	update_gui_plugin_info();
 }
 
 void SetupWidget::update_gui_plugin_info()
 {
-	if (cur_selected_qlc_plugin) {
+	if (m_selectedPlugin) {
 		QString info;
-        QStringList outputs = cur_selected_qlc_plugin->outputs();
+		QStringList outputs = m_selectedPlugin->outputs();
         if (outputs.size())
             info += tr("<font color=darkOrange>Available outputs</font>");
 		for (int t=0; t<outputs.size(); t++) {
-            info += cur_selected_qlc_plugin->outputInfo(t);
+			info += m_selectedPlugin->outputInfo(t);
 		}
 
-		QStringList inputs = cur_selected_qlc_plugin->inputs();
+		QStringList inputs = m_selectedPlugin->inputs();
         if (inputs.size())
             info += tr("<br><font color=darkOrange>Available inputs</font>");
         for (int t=0; t<inputs.size(); t++) {
-            info += cur_selected_qlc_plugin->inputInfo(t);
+			info += m_selectedPlugin->inputInfo(t);
 		}
 
-		update_dmx_mapping_table(cur_selected_qlc_plugin);
+		update_dmx_mapping_table(m_selectedPlugin);
 		qlcPluginEdit->setHtml(info);
 		configurePluginButton->setEnabled(true);
 	} else {
@@ -251,16 +252,8 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 	dmxMappingTable->clearContents();
 	if (!plugin) return;
 
-	QStringList outnames = plugin->outputs();
-    for (QString &name : outnames) {
-        if (!name.startsWith("TX:"))
-            name.prepend("TX:");
-    }
-	QStringList innames = plugin->inputs();
-    for (QString &name : innames) {
-        if (!name.startsWith("RX:"))
-            name.prepend("RX:");
-    }
+	QStringList outnames = IOPluginCentral::outputsOf(plugin);
+	QStringList innames = IOPluginCentral::inputsOf(plugin);
     dmxMappingTable->setRowCount(outnames.size() + innames.size());
 	dmxMappingTable->setColumnCount(4);
 
@@ -274,8 +267,8 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		QTableWidgetItem *item;
 		// Get current configuration of Plugin and Output-Line from pluginCentral
 		PluginConfig *conf = 0;
-		if (cur_plugin_map)
-			conf = cur_plugin_map->getCreatePluginLineConfig(plugin->name(),outnames.at(t));
+		if (m_curPluginMap)
+			conf = m_curPluginMap->getCreatePluginLineConfig(plugin->name(),outnames.at(t));
 
 		item = new QTableWidgetItem(tr("Output"));
 		if (conf && conf->pIsUsed) {
@@ -292,8 +285,9 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
 		spin->setProperty("tableRow",row);
-		if (conf) spin->setValue(int(conf->pUniverse)+1);
-		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
+		if (conf)
+			spin->setValue(int(conf->pUniverse));
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(onPluginLineUniverseChanged(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
 		item = new QTableWidgetItem(outnames.at(t));
@@ -306,7 +300,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",outnames.at(t));
 		if (conf) spin->setValue(conf->pResponseTime);
-		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_responsetime_changed(int)));
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(onPluginLineResponseTimeChanged(int)));
 		dmxMappingTable->setCellWidget(row,3,spin);
 
 		row++;
@@ -315,7 +309,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 	for (int t=0; t<innames.size(); t++) {
 		QTableWidgetItem *item;
 		PluginConfig *conf = 0;
-		if (cur_plugin_map)
+		if (m_curPluginMap)
 			conf = myapp->pluginCentral->pluginMapping->getCreatePluginLineConfig(plugin->name(),innames.at(t));
 
 		item = new QTableWidgetItem(tr("Input"));
@@ -333,8 +327,9 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
 		spin->setProperty("tableRow",row);
-		if (conf) spin->setValue(int(conf->pUniverse)+1);
-		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_universe_changed(int)));
+		if (conf)
+			spin->setValue(int(conf->pUniverse));
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(onPluginLineUniverseChanged(int)));
 		dmxMappingTable->setCellWidget(row,1,spin);
 
 		item = new QTableWidgetItem(innames.at(t));
@@ -347,7 +342,7 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 		spin->setProperty("plugin",plugin->name());
 		spin->setProperty("line",innames.at(t));
 		if (conf) spin->setValue(conf->pResponseTime);
-		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(if_pluginline_responsetime_changed(int)));
+		connect(spin,SIGNAL(valueChanged(int)),this,SLOT(onPluginLineResponseTimeChanged(int)));
 		dmxMappingTable->setCellWidget(row,3,spin);
 
 		row++;
@@ -357,9 +352,30 @@ void SetupWidget::update_dmx_mapping_table(QLCIOPlugin *plugin)
 
 void SetupWidget::on_configurePluginButton_clicked()
 {
-	if (cur_selected_qlc_plugin) {
-		cur_selected_qlc_plugin->configure();
+	if (m_selectedPlugin) {
+		m_selectedPlugin->configure();
 		update_gui_plugin_info();
+
+		QString plugin_name = m_selectedPlugin->name();
+		for (int line=0; line<2; line++) {
+			for (int uni=0; uni<MAX_DMX_UNIVERSE; uni++) {
+				QString line_name = IOPluginCentral::outputOf(line, m_selectedPlugin);
+				PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name, line_name);
+				if (!lineconf)
+					continue;
+				QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Output);
+				if (lineconf->pUniverse == uni+1) {
+					QString ser = VariantMapSerializer::toString(map);
+					lineconf->pParameters = ser;
+					qDebug() << "Out: line" << line << line_name << "universe" << uni << map << " <<< added " << ser;
+					QVariantMap backtest = VariantMapSerializer::toMap(ser);
+					qDebug() << "back" << backtest;
+				} else {
+					qDebug() << "Out: line" << line << line_name << "universe" << uni << map;
+				}
+
+			}
+		}
 	}
 }
 
@@ -372,20 +388,20 @@ void SetupWidget::on_saveDmxConfigButton_clicked()
 	}
 }
 
-void SetupWidget::if_pluginline_universe_changed(int val)
+void SetupWidget::onPluginLineUniverseChanged(int val)
 {
 	QString plugin_name = sender()->property("plugin").toString();
 	QString plugin_line = sender()->property("line").toString();
 
-	if (cur_plugin_map) {
-		PluginConfig *lineconf = cur_plugin_map->getCreatePluginLineConfig(plugin_name,plugin_line);
+	if (m_curPluginMap) {
+		PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name,plugin_line);
 		if (val > 0) {
-			lineconf->pUniverse = val-1;
+			lineconf->pUniverse = val;
 			lineconf->pIsUsed = true;
 		} else {
 			lineconf->pIsUsed = false;
 		}
-		update_plugin_mapping_f = true;
+		m_updatePluginMapFlag = true;
 
 
 		int row = sender()->property("tableRow").toInt();
@@ -401,15 +417,15 @@ void SetupWidget::if_pluginline_universe_changed(int val)
 
 }
 
-void SetupWidget::if_pluginline_responsetime_changed(int val)
+void SetupWidget::onPluginLineResponseTimeChanged(int val)
 {
 	QString plugin_name = sender()->property("plugin").toString();
 	QString plugin_line = sender()->property("line").toString();
 
-	if (cur_plugin_map) {
-		PluginConfig *lineconf = cur_plugin_map->getCreatePluginLineConfig(plugin_name,plugin_line);
+	if (m_curPluginMap) {
+		PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name,plugin_line);
 		lineconf->pResponseTime = val;
-		update_plugin_mapping_f = true;
+		m_updatePluginMapFlag = true;
 	}
 }
 
@@ -446,4 +462,9 @@ void SetupWidget::on_restartAudioVideoSlots_clicked()
 {
 	m_restartAudioSlotsOnExit = true;
 	restartAudioVideoSlots->setText("Audio will be restarted on setup exit");
+}
+
+void SetupWidget::on_updateLinesButton_clicked()
+{
+	myapp->reOpenPlugins();
 }

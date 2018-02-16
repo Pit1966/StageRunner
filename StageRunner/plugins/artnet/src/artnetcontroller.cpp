@@ -166,7 +166,7 @@ bool ArtNetController::setInputUniverse(quint32 universe, quint32 artnetUni)
 
 bool ArtNetController::setOutputIPAddress(quint32 universe, QString address)
 {
-    if (!m_universeMap.contains(universe))
+	if (!m_universeMap.contains(universe))
         return false;
 
     if (address.size() == 0)
@@ -288,8 +288,10 @@ void ArtNetController::sendDmx(const quint32 universe, const QByteArray &data)
         qWarning() << "Errno: " << m_udpSocket->error();
         qWarning() << "Errmgs: " << m_udpSocket->errorString();
     }
-    else
+	else {
         m_packetSent++;
+		qDebug() << "write udp datagramm" << outAddress;
+	}
 }
 
 bool ArtNetController::handleArtNetPollReply(QByteArray const& datagram, QHostAddress const& senderAddress)
@@ -300,6 +302,7 @@ bool ArtNetController::handleArtNetPollReply(QByteArray const& datagram, QHostAd
         qWarning() << "[ArtNet] Bad ArtPollReply received";
         return false;
     }
+	qDebug() << "[ArtNet] pollReply: from" << senderAddress.toString();
 
 #if _DEBUG_RECEIVED_PACKETS
     qDebug() << "[ArtNet] ArtPollReply received";
