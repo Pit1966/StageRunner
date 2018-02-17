@@ -4,6 +4,7 @@
 #include "config.h"
 #include "pluginmapping.h"
 #include "messagedialog.h"
+#include "variantmapserializer.h"
 
 #include <QDir>
 #include <QPluginLoader>
@@ -126,6 +127,10 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 			allOutputNames.append(outputs.at(t));
 
+			// set parameters in plugin
+			// Möglicherweise ist zu diesem Zeitpunkt das Plugin noch nicht initialisiert
+			// Beispiel: ArtNet hat noch keinen Controller, wenn setParameter(..) direkt nach dem Laden aufgerufen wird
+			setPluginParametersFromLineConf(plugin, lineconf);
 		}
 		for (int t=0; t<inputs.size(); t++) {
 			if (inputs.at(t).endsWith("!!!"))
@@ -138,6 +143,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 			allInputNames.append(inputs.at(t));
 
+			// set parameters in plugin
+			setPluginParametersFromLineConf(plugin, lineconf);
 		}
 	}
 
@@ -212,6 +219,10 @@ bool IOPluginCentral::openPlugins()
 				plugin->openOutput(o, universe);
 				one_opened = true;
 			}
+
+			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin->name(),outputs.at(o));
+			setPluginParametersFromLineConf(plugin, lineconf);
+
 		}
 
 		QStringList inputs = inputsOf(plugin);
@@ -402,6 +413,32 @@ QString IOPluginCentral::inputOf(int line, QLCIOPlugin *plugin)
 		return QString();
 
 	return inputs.at(line);
+}
+
+
+/**
+ * @brief Set plugin parameters from given PluginConfig object
+ * @param plugin Pointer to QLCIOPLugin
+ * @param lineConf
+ * @return true if at least one parameter was set
+ *
+ * Actually this wraps calls to QLCIOPlugin::setParameter( ...... )
+ */
+bool IOPluginCentral::setPluginParametersFromLineConf(QLCIOPlugin *plugin, PluginConfig *lineConf)
+{
+	QString paras = lineConf->pParameters;
+	if (!paras.isEmpty()) {
+		QVariantMap paramap = VariantMapSerializer::toMap(paras);
+		for (const QString &key : paramap.keys()) {
+			plugin->setParameter(lineConf->pUniverse-1
+								 , lineConf->deviceNumber
+								 , QLCIOPlugin::Capability(lineConf->deviceIoType)
+								 , key
+								 , paramap.value(key));
+		}
+		return true;
+	}
+	return false;
 }
 
 /**

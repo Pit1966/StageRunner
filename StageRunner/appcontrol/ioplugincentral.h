@@ -10,6 +10,7 @@
 
 class QLCIOPlugin;
 class PluginMapping;
+class PluginConfig;
 
 class IOPluginCentral : public QObject
 {
@@ -68,6 +69,8 @@ public:
 	static QString outputOf(int line, QLCIOPlugin *plugin);
 	static QStringList inputsOf(QLCIOPlugin *plugin);
 	static QString inputOf(int line, QLCIOPlugin *plugin);
+
+	static bool setPluginParametersFromLineConf(QLCIOPlugin *plugin, PluginConfig *lineConf);
 
 
 signals:

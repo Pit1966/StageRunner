@@ -64,7 +64,7 @@ DmxChannel::~DmxChannel()
 /**
  * @brief Execute fade command for channel
  * @param cmd Fade command @see CtrlCmd
- * @param time_ms time the fade will run in ms
+ * @param time_ms duration the fade will run in ms
  * @param target_value some commands need a target fade value (e.g. CMD_SCENE_FADETO)
  * @return True if a fade will occur. False if current output value is already the target value
  *
