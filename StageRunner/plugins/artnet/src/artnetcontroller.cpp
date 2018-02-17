@@ -290,7 +290,7 @@ void ArtNetController::sendDmx(const quint32 universe, const QByteArray &data)
     }
 	else {
         m_packetSent++;
-		qDebug() << "write udp datagramm" << outAddress;
+		// qDebug() << "write udp datagramm" << outAddress;
 	}
 }
 

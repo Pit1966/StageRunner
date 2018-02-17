@@ -367,13 +367,7 @@ void SetupWidget::on_configurePluginButton_clicked()
 				if (lineconf->pUniverse == uni+1) {
 					QString ser = VariantMapSerializer::toString(map);
 					lineconf->pParameters = ser;
-					qDebug() << "Out: line" << line << line_name << "universe" << uni << map << " <<< added " << ser;
-					QVariantMap backtest = VariantMapSerializer::toMap(ser);
-					qDebug() << "back" << backtest;
-				} else {
-					qDebug() << "Out: line" << line << line_name << "universe" << uni << map;
 				}
-
 			}
 		}
 	}

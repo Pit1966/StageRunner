@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QTime>
+#include <QElapsedTimer>
 #include <QMessageBox>
 
 #define DMX_HEADER_SIZE 4
@@ -17,14 +18,12 @@ YadiReceiver::YadiReceiver(YadiDevice *p_device)
 
 YadiReceiver::~YadiReceiver()
 {
-	delete time;
 }
 
 void YadiReceiver::init()
 {
 	dmxStatus = 0;
 	cmd = IDLE;
-	time = new QTime;
 	inputNumber = 0;
 }
 
@@ -74,7 +73,7 @@ bool YadiReceiver::receiver_loop()
 
 		int rx_dmx_packet_size = -1;
 		ok = detectRxDmxPacketSize(&rx_dmx_packet_size);
-        printf("  -> rx dmx packet size: %d",rx_dmx_packet_size);
+		printf("  -> rx dmx packet size: %d\n",rx_dmx_packet_size);
 
 		if (rx_dmx_packet_size > 0 && used_channels > 0) {
 			dmxStatus |= 1;
@@ -82,8 +81,9 @@ bool YadiReceiver::receiver_loop()
 			msleep(100);
 		}
 
+		printf("[ YadiReceiver ]: Enter inner loop\n");
 		// Begin inner loop
-		time->restart();
+		m_time.start();
 		int transfer = 5;
 		while (cmd != STOPPED && (dmxStatus&1) && ok) {
 
@@ -102,33 +102,34 @@ bool YadiReceiver::receiver_loop()
 
 			if (dmx.type == DmxAnswer::DMX_DATA) {
 				QByteArray in;
-				QTime wait;
-				wait.restart();
+				QElapsedTimer wait;
+				wait.start();
 
 				qint64 channels_to_read = dmx.dmxDataSize;
 				while (channels_to_read > 0 && wait.elapsed() < 1400 && cmd != STOPPED) {
-					if (!device->serialDev()) return false;
+					if (!device->serialDev())
+						return false;
 					in += device->serialDev()->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
 				}
-				if (device->debug > 1) qDebug("YadiReceiver::run: read size: %d",in.size());
-				if (in.size() != dmx.dmxDataSize) {
-					qDebug("YadiReceiver::run: read size: %d",in.size());
-				}
-				if (!device->serialDev()) return false;
+				if (device->debug > 1 || in.size() != dmx.dmxDataSize)
+					qDebug("YadiReceiver::run: read dmx data size: %d",in.size());
+
+				if (!device->serialDev())
+					return false;
 
 				if (device->serialDev()->error()) {
-					qDebug() << device->serialDev()->errorString();
+					qDebug() << "YadiReceiver: serial error:" << device->serialDev()->errorString();
 					ok = false;
 				} else {
-					int millis = time->elapsed();
+					int millis = m_time.elapsed();
 					if (!millis) {
 						msleep(50);
 						continue;
 					}
 					QString update = QString("Frame interval: %1ms (%2frames/s)").arg(millis).arg(1000/millis);
 					emit dmxPacketReceived(update);
-					time->restart();
+					m_time.start();
 				}
 
 				if (in.size() && !(transfer--)) {
@@ -142,9 +143,11 @@ bool YadiReceiver::receiver_loop()
 							device->inUniverse[t] = val;
 							emit dmxInDeviceChannelChanged(device->inputId,t,(uchar)val);
 							emit dmxInChannelChanged(t,(uchar)val);
+							// printf("value changed: channel %d = %d\n",t,(uchar)val);
+							// qDebug() << "Input channel" << t+1 << "=" << QString::number(uchar(val));
 						}
 					}
-					if (device->debug > 4) qDebug() << "Line HEX in:" << in.toHex();
+					if (device->debug > 3) qDebug() << "Line HEX in:" << in.toHex();
 					emit_all = false;
 				}
 			}

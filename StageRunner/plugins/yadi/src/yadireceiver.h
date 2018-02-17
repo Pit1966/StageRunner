@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QPair>
+#include <QElapsedTimer>
 
 
 class QFile;
@@ -73,7 +74,7 @@ private:
 	int inputNumber;
 
 	volatile RunCmd cmd;
-	QTime *time;
+	QElapsedTimer m_time;
 
 public:
 	YadiReceiver(YadiDevice *p_device);
