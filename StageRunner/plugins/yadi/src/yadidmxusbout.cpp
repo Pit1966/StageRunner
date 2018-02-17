@@ -173,6 +173,23 @@ int YadiDMXUSBOut::capabilities() const
 	return QLCIOPlugin::Output | QLCIOPlugin::Input | QLCIOPlugin::Monitor;
 }
 
+QString YadiDMXUSBOut::pluginInfo()
+{
+	QString str;
+
+	str += QString("<HTML>");
+	str += QString("<HEAD>");
+	str += QString("<TITLE>%1</TITLE>").arg(name());
+	str += QString("</HEAD>");
+	str += QString("<BODY>");
+
+	str += QString("<P>");
+	str += QString("<H3>%1</H3>").arg(name());
+	str += tr("This plugin provides DMX output and input for stonechip YADI DMX controllers");
+	str += QString("</P>");
+
+	return str;
+}
 QStringList YadiDMXUSBOut::outputs()
 {
 	QMutexLocker lock(accessMutex);

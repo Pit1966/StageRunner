@@ -47,6 +47,7 @@ public:
 	bool findDevices(bool update = false);
 	QString name();						///< @reimp
 	int capabilities() const;			///< @reimp
+	QString pluginInfo();
 	bool openOutput(quint32 output, quint32 universe);		///< @reimp
 	void closeOutput(quint32 output, quint32 universe);		///< @reimp
 	QStringList outputs();				///< @reimp

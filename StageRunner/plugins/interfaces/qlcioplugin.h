@@ -64,6 +64,8 @@ class DmxMonitor;
  * shared with other lines).
  */
 
+#define QLCIOPLUGINS_UNIVERSES   4
+
 typedef struct
 {
 	/** The plugin input line patched to a QLC+ universe.
@@ -142,6 +144,13 @@ public:
 	 */
 	virtual int capabilities() const = 0;
 
+	/**
+	 * Get the plugin's description info.
+	 *
+	 * This is a pure virtual method that must be implemented by all plugins.
+	 */
+	virtual QString pluginInfo() = 0;
+
 	/** Invalid input/output number */
 	static quint32 invalidLine() { return UINT_MAX; }
 
@@ -198,15 +207,6 @@ public:
 	 * @param universe The universe data to write
 	 */
 	virtual void writeUniverse(quint32 universe, quint32 output, const QByteArray& data);
-	/**
-	 * @brief openOutputMonitor - Extended function for StageRunner Version of plugin
-	 * @param output
-	 * @return
-	 */
-	virtual DmxMonitor *openOutputMonitor(quint32 output) {
-		Q_UNUSED(output)
-		return 0;
-	}
 
 	/*************************************************************************
 	 * Inputs
@@ -269,16 +269,6 @@ public:
 	virtual void sendFeedBack(quint32 universe, quint32 inputLine,
 							  quint32 channel, uchar value, const QString& key = 0);
 
-	/**
-	 * @brief openInputMonitor - Extended function for StageRunner Version of plugin
-	 * @param output
-	 * @return
-	 */
-	virtual DmxMonitor *openInputMonitor(quint32 input)
-	{
-		Q_UNUSED(input)
-		return 0;
-	}
 
 signals:
 	/**
@@ -394,6 +384,28 @@ protected:
 	 * network controllers (PluginUniverseDescriptor)
 	 */
 	QMap<quint32, PluginUniverseDescriptor> m_universesMap;
+
+public:
+	/**
+	 * @brief openOutputMonitor - Extended function for StageRunner Version of plugin
+	 * @param output
+	 * @return
+	 */
+	virtual DmxMonitor *openOutputMonitor(quint32 output) {
+		Q_UNUSED(output)
+		return 0;
+	}
+
+	/**
+	 * @brief openInputMonitor - Extended function for StageRunner Version of plugin
+	 * @param output
+	 * @return
+	 */
+	virtual DmxMonitor *openInputMonitor(quint32 input)
+	{
+		Q_UNUSED(input)
+		return 0;
+	}
 
 };
 
