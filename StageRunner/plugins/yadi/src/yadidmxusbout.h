@@ -36,8 +36,6 @@ private:
 	int m_reOpenInput;
 	int m_comErrorCounter;
 	int m_totalComErrorCounter;
-	int m_inputUniverse;
-	int m_outputUniverse;
 
 public:
 	YadiDMXUSBOut();
@@ -73,8 +71,8 @@ public:
 private:
 	void handle_output_error(quint32 output);
 	void update_output_monitor(quint32 output, const QByteArray& universe);
-	bool internOpenOutput(quint32 output);
-	bool internOpenInput(quint32 input);
+	bool internOpenOutput(quint32 output, int universe);
+	bool internOpenInput(quint32 input, int universe);
 
 signals:
 	void communicationErrorDetected();
@@ -82,7 +80,7 @@ signals:
 
 public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
-	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
+	void propagateChangedInput(quint32 universe, quint32 input, quint32 channel, uchar value);
 	void inputDeviceFailed(int input);
 	void outputDeviceFailed(int output);
 	void handleCommunicationError();

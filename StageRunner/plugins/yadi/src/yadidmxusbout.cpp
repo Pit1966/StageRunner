@@ -146,8 +146,7 @@ QString YadiDMXUSBOut::name()
 bool YadiDMXUSBOut::openOutput(quint32 output, quint32 universe)
 {
 	qDebug("YadiDMXUSBOut::openOutput(%d), universe %d",output,universe);
-	m_outputUniverse = universe;
-	return internOpenOutput(output);
+	return internOpenOutput(output,universe);
 }
 
 void YadiDMXUSBOut::closeOutput(quint32 output, quint32 universe)
@@ -365,8 +364,7 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 bool YadiDMXUSBOut::openInput(quint32 input, quint32 universe)
 {
 	qDebug("YadiDMXUSBOut::openInput(%d), universe %d",input,universe);
-	m_inputUniverse = universe;
-	return internOpenInput(input);
+	return internOpenInput(input,universe);
 }
 
 void YadiDMXUSBOut::closeInput(quint32 input, quint32 universe)
@@ -568,6 +566,8 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 	if (!yadi) return;
 	DmxMonitor *mon = yadi->dmxOutMonWidget;
 
+	fprintf(stderr, "update output monitor (cnt:%d) %s\n",universe.size(),universe.toHex().data());
+
 	if (mon) {
 		for (int t=0; t<mon->visibleBars(); t++) {
 			mon->setValueInBar(t,uchar(universe[t]));
@@ -575,7 +575,7 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 	}
 }
 
-bool YadiDMXUSBOut::internOpenOutput(quint32 output)
+bool YadiDMXUSBOut::internOpenOutput(quint32 output, int universe)
 {
 	QMutexLocker lock(accessMutex);
 
@@ -584,6 +584,11 @@ bool YadiDMXUSBOut::internOpenOutput(quint32 output)
 		YadiDevice *yadi = YadiDeviceManager::getDevice(output_devices.at(output),YadiDevice::FL_OUTPUT_UNIVERSE);
 		if (yadi) {
 			yadi->outputId = output;
+			if (universe < 0) {
+				universe = yadi->outUniverseNumber;
+			} else {
+				yadi->outUniverseNumber = universe;
+			}
 			ok = yadi->openOutput();
 		}
 
@@ -600,7 +605,7 @@ bool YadiDMXUSBOut::internOpenOutput(quint32 output)
 	return ok;
 }
 
-bool YadiDMXUSBOut::internOpenInput(quint32 input)
+bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 {
 	QMutexLocker lock(accessMutex);
 
@@ -609,13 +614,18 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input)
 		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
 		if (yadi) {
 			yadi->inputId = input;
+			if (universe < 0) {
+				universe = yadi->inUniverseNumber;
+			} else {
+				yadi->inUniverseNumber = universe;
+			}
 			ok = yadi->openInput();
 		}
 
 		if (ok) {
 			inDevNameTable[input] = input_devices.at(input);
-			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,uchar))
-					,this,SLOT(propagateChangedInput(quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
+					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
 		} else {
 			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
@@ -646,9 +656,10 @@ void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
 	}
 }
 
-void YadiDMXUSBOut::propagateChangedInput(quint32 input, quint32 channel, uchar value)
+void YadiDMXUSBOut::propagateChangedInput(quint32 universe, quint32 input, quint32 channel, uchar value)
 {
-	emit valueChanged(m_inputUniverse, input, channel, value);
+	emit valueChanged(universe, input, channel, value);
+	// fprintf(stderr, "propagate changed input %d: %d\n",channel,value);
 
 	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
 }
@@ -707,7 +718,7 @@ void YadiDMXUSBOut::handleCommunicationError()
 	bool tryagain = false;
 	if (m_reOpenOutput >= 0) {
 
-		if (internOpenOutput(m_reOpenOutput)) {
+		if (internOpenOutput(m_reOpenOutput, -1)) {
 			QString msg(QString("Reopened output %1 after communication error (#%2)")
 				   .arg(m_reOpenOutput+1).arg(m_totalComErrorCounter+1));
 			qDebug() << Q_FUNC_INFO << msg;
@@ -723,7 +734,7 @@ void YadiDMXUSBOut::handleCommunicationError()
 
 	if (m_reOpenInput >= 0) {
 
-		if (internOpenInput(m_reOpenInput)) {
+		if (internOpenInput(m_reOpenInput, -1)) {
 			QString msg(QString("Reopened input %1 after communication error (#%2)")
 				   .arg(m_reOpenInput+1).arg(m_totalComErrorCounter+1));
 			qDebug() << Q_FUNC_INFO << msg;

@@ -2,11 +2,13 @@
 #define APPCENTRAL_H
 
 #include "commandsystem.h"
+#include "config.h"
 
 #include <QList>
 #include <QObject>
 #include <QByteArray>
 #include <QWidget>
+#include <QPointer>
 
 #ifdef USE_SDL
 #include <SDL.h>
@@ -45,6 +47,9 @@ private:
 	bool input_assign_mode_f;
 	FxItem * input_assign_target_fxitem;
 	FxItem * last_global_selected_fxitem;
+
+	QPointer<DmxMonitor> m_openedInputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
+	QPointer<DmxMonitor> m_openedOutputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
 
 public:
 	QObject *mainWinObj;
@@ -95,6 +100,7 @@ public:
 	void closePlugins();
 	DmxMonitor *openDmxInMonitor(int universe);
 	DmxMonitor *openDmxOutMonitor(int universe);
+	int closeAllDmxMonitors();
 
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
 	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = 0, int row = -1);

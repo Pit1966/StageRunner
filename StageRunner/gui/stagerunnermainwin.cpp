@@ -683,6 +683,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 {
+	appCentral->closeAllDmxMonitors();
+
 	if (appCentral->project->isModified()) {
 		int ret = QMessageBox::question(this,tr("Attention")
 										,tr("Project is modified!\n\nDo you want to save it now?"));
@@ -801,7 +803,7 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 
 void StageRunnerMainWin::on_actionDMX_Input_triggered()
 {
-	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxInMonitor(0));
+	QWidget * mon = appCentral->openDmxInMonitor(0);
 	if (mon) {
 		mon->show();
 		mon->raise();

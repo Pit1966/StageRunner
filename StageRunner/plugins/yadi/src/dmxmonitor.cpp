@@ -16,7 +16,7 @@ void DmxMonitor::init()
 	used_bars = 0;
 	m_myUniverse = 0;
 	m_autoBarsEnabled = false;
-	memset(bar_value,0,sizeof(int));
+	memset(bar_value,0,sizeof(int) * 512);
 }
 
 void DmxMonitor::closeEvent(QCloseEvent *)

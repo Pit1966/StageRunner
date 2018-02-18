@@ -95,7 +95,7 @@ private:
 signals:
 	void exitReceiverWithFailure(int input);
 	void dmxPacketReceived(QString msg);
-	void dmxInDeviceChannelChanged(quint32 input, quint32 channel, uchar value);
+	void dmxInDeviceChannelChanged(quint32 universe, quint32 input, quint32 channel, uchar value);
 	void dmxInChannelChanged(quint32 channel, uchar value);
 	void rxDmxPacketSizeReceived(int channels);
 	void dmxStatusReceived(quint8);

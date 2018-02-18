@@ -69,11 +69,13 @@ bool YadiReceiver::receiver_loop()
 		int max_channels = -1;
 		int used_channels = -1;
 		ok = detectRxDmxUniverseSize(&max_channels, &used_channels);
-        printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
+		if (device->debug)
+			printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
 
 		int rx_dmx_packet_size = -1;
 		ok = detectRxDmxPacketSize(&rx_dmx_packet_size);
-		printf("  -> rx dmx packet size: %d\n",rx_dmx_packet_size);
+		if (device->debug)
+			printf("  -> rx dmx packet size: %d\n",rx_dmx_packet_size);
 
 		if (rx_dmx_packet_size > 0 && used_channels > 0) {
 			dmxStatus |= 1;
@@ -81,7 +83,8 @@ bool YadiReceiver::receiver_loop()
 			msleep(100);
 		}
 
-		printf("[ YadiReceiver ]: Enter inner loop\n");
+		if (device->debug)
+			printf("[ YadiReceiver ]: Enter inner loop\n");
 		// Begin inner loop
 		m_time.start();
 		int transfer = 5;
@@ -141,9 +144,9 @@ bool YadiReceiver::receiver_loop()
 						char val = in.at(t);
 						if (device->inUniverse[t] != val || emit_all) {
 							device->inUniverse[t] = val;
-							emit dmxInDeviceChannelChanged(device->inputId,t,(uchar)val);
+							emit dmxInDeviceChannelChanged(device->inUniverseNumber,device->inputId,t,(uchar)val);
 							emit dmxInChannelChanged(t,(uchar)val);
-							// printf("value changed: channel %d = %d\n",t,(uchar)val);
+							// fprintf(stderr, "value changed: channel %d = %d\n",t,(uchar)val);
 							// qDebug() << "Input channel" << t+1 << "=" << QString::number(uchar(val));
 						}
 					}

@@ -1,4 +1,3 @@
-#include "config.h"
 #include "log.h"
 #include "appcentral.h"
 #include "audiocontrol.h"
@@ -23,6 +22,7 @@
 #include "fxlistwidget.h"
 #include "videocontrol.h"
 #include "dmxuniverseproperty.h"
+#include "../plugins/yadi/src/dmxmonitor.h"
 
 #include <QFileDialog>
 
@@ -236,11 +236,17 @@ void AppCentral::closePlugins()
 
 DmxMonitor * AppCentral::openDmxInMonitor(int universe)
 {
+	if (m_openedInputDmxMonitorWidgets[universe]) {
+		m_openedInputDmxMonitorWidgets[universe]->close();
+		m_openedInputDmxMonitorWidgets[universe] = 0;
+	}
+
 	QLCIOPlugin *plugin;
 	int input;
 	if ( pluginCentral->getPluginAndInputForDmxUniverse(universe,plugin,input) ) {
 		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
-			return plugin->openInputMonitor(input);
+			m_openedInputDmxMonitorWidgets[universe] = plugin->openInputMonitor(input);
+			return m_openedInputDmxMonitorWidgets[universe];
 		}
 	}
 	return 0;
@@ -248,14 +254,38 @@ DmxMonitor * AppCentral::openDmxInMonitor(int universe)
 
 DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
 {
+	if (m_openedOutputDmxMonitorWidgets[universe]) {
+		m_openedOutputDmxMonitorWidgets[universe]->close();
+		m_openedOutputDmxMonitorWidgets[universe] = 0;
+	}
+
 	QLCIOPlugin *plugin;
 	int output;
 	if ( pluginCentral->getPluginAndOutputForDmxUniverse(universe,plugin,output) ) {
 		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
-			return plugin->openOutputMonitor(output);
+			m_openedOutputDmxMonitorWidgets[universe] = plugin->openOutputMonitor(output);
+			return m_openedOutputDmxMonitorWidgets[universe];
 		}
 	}
 	return 0;
+}
+
+int AppCentral::closeAllDmxMonitors()
+{
+	int cnt = 0;
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		if (m_openedOutputDmxMonitorWidgets[t]) {
+			m_openedOutputDmxMonitorWidgets[t]->close();
+			m_openedOutputDmxMonitorWidgets[t] = 0;
+			cnt++;
+		}
+		if (m_openedInputDmxMonitorWidgets[t]) {
+			m_openedInputDmxMonitorWidgets[t]->close();
+			m_openedInputDmxMonitorWidgets[t] = 0;
+			cnt++;
+		}
+	}
+	return cnt;
 }
 
 void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value)
