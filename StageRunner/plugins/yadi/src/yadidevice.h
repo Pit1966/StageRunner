@@ -6,6 +6,7 @@
 class YadiReceiver;
 class SerialWrapper;
 class DmxMonitor;
+class MvgAvgCollector;
 
 
 class YadiDevice

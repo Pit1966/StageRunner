@@ -1,6 +1,7 @@
 #include "yadireceiver.h"
 #include "yadidevice.h"
 #include "serialwrapper.h"
+#include "mvgavgcollector.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -18,6 +19,7 @@ YadiReceiver::YadiReceiver(YadiDevice *p_device)
 
 YadiReceiver::~YadiReceiver()
 {
+	delete m_frameRateAvg;
 }
 
 void YadiReceiver::init()
@@ -25,6 +27,7 @@ void YadiReceiver::init()
 	dmxStatus = 0;
 	cmd = IDLE;
 	inputNumber = 0;
+	m_frameRateAvg = new MvgAvgCollector(40);
 }
 
 bool YadiReceiver::startRxDmx(int input)
@@ -35,7 +38,6 @@ bool YadiReceiver::startRxDmx(int input)
 	}
 
 	inputNumber = input;
-
 
 	// Thread starten
 	this->start();
@@ -62,6 +64,7 @@ void YadiReceiver::run()
 bool YadiReceiver::receiver_loop()
 {
 	bool ok = true;
+	bool firstloop = true;
 
 	while (cmd != STOPPED && ok && device->serialDev() && device->serialDev()->isOpen()) {
 		bool emit_all = true;
@@ -85,6 +88,15 @@ bool YadiReceiver::receiver_loop()
 
 		if (device->debug)
 			printf("[ YadiReceiver ]: Enter inner loop\n");
+
+		if (firstloop) {
+			QString msg = tr("<font color=green>YADI started listener</font>: DMX packet size: %1, channels: used %2 / max %3")
+					.arg(rx_dmx_packet_size)
+					.arg(used_channels)
+					.arg(max_channels);
+			emit statusMsgSent(msg);
+		}
+
 		// Begin inner loop
 		m_time.start();
 		int transfer = 5;
@@ -125,14 +137,22 @@ bool YadiReceiver::receiver_loop()
 					qDebug() << "YadiReceiver: serial error:" << device->serialDev()->errorString();
 					ok = false;
 				} else {
-					int millis = m_time.elapsed();
-					if (!millis) {
-						msleep(50);
+					int framenanos = m_time.nsecsElapsed();
+					double framemillis = double(framenanos)/1000000;
+					m_time.start();
+					m_frameRateAvg->append(framemillis);
+					if (in.isEmpty()) {	// no data received
+						// fprintf(stderr, "[ YadiReceiver ]: NULL frame: dmx data size: %d\n",dmx.dmxDataSize);
+						msleep(2);
 						continue;
 					}
-					QString update = QString("Frame interval: %1ms (%2frames/s)").arg(millis).arg(1000/millis);
-					emit dmxPacketReceived(update);
-					m_time.start();
+
+					QString update = QString("DMX frame rate: %1 fps (Frame duration: %2 ms, data size: %3, frame size: %4)")
+							.arg(1000.0f/ m_frameRateAvg->value(),2,'f',1,QChar('0'))
+							.arg(m_frameRateAvg->value(),2,'f',1,QChar('0'))
+							.arg(dmx.dmxDataSize)
+							.arg(rx_dmx_packet_size);
+					emit dmxPacketReceived(device, update);
 				}
 
 				if (in.size() && !(transfer--)) {
@@ -157,6 +177,8 @@ bool YadiReceiver::receiver_loop()
 
 		}
 		// end inner loop
+
+		firstloop = false;
 	}
 	return ok;
 }
@@ -205,7 +227,8 @@ bool YadiReceiver::detectRxDmxPacketSize(int *packet_size)
 		device->currentDetectedDmxInPacketSize = stat.dmxFrameSize;
 		emit rxDmxPacketSizeReceived(stat.dmxFrameSize);
 	}
-	if (device->debug) qDebug() << "YadiReceiver::getDetectedDmxFrameSize  detected DMX framesize" << stat.dmxFrameSize;
+	if (device->debug)
+		qDebug() << "YadiReceiver::getDetectedDmxFrameSize  detected DMX framesize" << stat.dmxFrameSize;
 
 	return ok;
 }
@@ -249,9 +272,9 @@ bool YadiReceiver::waitForAtHeader(DmxAnswer &dmxstat)
 
 
 	// We do not wait forever here. So we need a timer for a breakcondition
-	// We are waiting max 100ms
+	// We are waiting max 800ms or 1400ms depending on the type
 
-	QTime wait;
+	QElapsedTimer wait;
 	wait.start();
 
 	int time_to_wait;

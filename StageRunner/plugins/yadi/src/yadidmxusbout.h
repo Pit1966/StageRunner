@@ -65,6 +65,7 @@ public:
 	DmxMonitor *openOutputMonitor(quint32 output);
 	DmxMonitor *openInputMonitor(quint32 input);
 
+
 	inline QStringList outputDeviceList() {return output_devices;}
 	inline QStringList inputDeviceList() {return input_devices;}
 
@@ -76,11 +77,13 @@ private:
 
 signals:
 	void communicationErrorDetected();
-	void errorMsgEmitted(QString msg);
+	void errorMsgEmitted(const QString &msg);
+	void statusMsgEmitted(const QString &msg);
 
 public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
 	void propagateChangedInput(quint32 universe, quint32 input, quint32 channel, uchar value);
+	void propagateReceiverFrameRate(YadiDevice *yadiDev, const QString &text);
 	void inputDeviceFailed(int input);
 	void outputDeviceFailed(int output);
 	void handleCommunicationError();

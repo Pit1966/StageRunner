@@ -626,7 +626,10 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 			inDevNameTable[input] = input_devices.at(input);
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(yadi->inputThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
+			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
+			connect(yadi->inputThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
 		} else {
 			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
 		}
@@ -662,6 +665,12 @@ void YadiDMXUSBOut::propagateChangedInput(quint32 universe, quint32 input, quint
 	// fprintf(stderr, "propagate changed input %d: %d\n",channel,value);
 
 	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
+}
+
+void YadiDMXUSBOut::propagateReceiverFrameRate(YadiDevice *yadiDev, const QString &text)
+{
+	Q_UNUSED(yadiDev)
+	Q_UNUSED(text)
 }
 
 void YadiDMXUSBOut::inputDeviceFailed(int input)

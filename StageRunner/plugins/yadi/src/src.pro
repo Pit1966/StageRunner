@@ -30,9 +30,11 @@ HEADERS += \
 	yadidevicemanager.h \
 	yadiconfigdialog.h \
 	yadireceiver.h \
-    dmxmonitor.h
+    dmxmonitor.h \
+    mvgavgcollector.h
 
-SOURCES += ../../interfaces/qlcioplugin.cpp
+SOURCES += ../../interfaces/qlcioplugin.cpp \
+    mvgavgcollector.cpp
 SOURCES += \
 	yadidmxusbout.cpp \
 	serialwrapper.cpp \

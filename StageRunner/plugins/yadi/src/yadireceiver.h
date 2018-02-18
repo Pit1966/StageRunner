@@ -6,10 +6,12 @@
 #include <QElapsedTimer>
 
 
+
 class QFile;
 class QTime;
 class SerialWrapper;
 class YadiDevice;
+class MvgAvgCollector;
 
 class DmxAnswer
 {
@@ -70,11 +72,11 @@ public:
 
 private:
 	YadiDevice *device;
-
 	int inputNumber;
 
 	volatile RunCmd cmd;
 	QElapsedTimer m_time;
+	MvgAvgCollector *m_frameRateAvg;
 
 public:
 	YadiReceiver(YadiDevice *p_device);
@@ -94,11 +96,13 @@ private:
 
 signals:
 	void exitReceiverWithFailure(int input);
-	void dmxPacketReceived(QString msg);
+	void dmxPacketReceived(YadiDevice *yadiDev, const QString &msg);
 	void dmxInDeviceChannelChanged(quint32 universe, quint32 input, quint32 channel, uchar value);
 	void dmxInChannelChanged(quint32 channel, uchar value);
 	void rxDmxPacketSizeReceived(int channels);
 	void dmxStatusReceived(quint8);
+	void statusMsgSent(const QString &msg);
+	void errorMsgSent(const QString &msg);
 
 };
 

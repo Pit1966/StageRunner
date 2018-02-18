@@ -330,6 +330,7 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 		dmxInMonWidget->setWindowTitle(QObject::tr("DMX Input Monitor V0.2 - Universe %1").arg(inUniverseNumber+1));
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 		QObject::connect(input_thread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
+		QObject::connect(input_thread,SIGNAL(dmxPacketReceived(YadiDevice*,QString)),dmxInMonWidget,SLOT(setFrameRateInfo(YadiDevice*,QString)));
 	} else {
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 	}

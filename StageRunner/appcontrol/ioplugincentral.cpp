@@ -65,9 +65,13 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 				qlc_plugins.append(plugin);
 
 				plugin->init();
+
 				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 				if (obj->metaObject()->indexOfSignal("errorMsgEmitted(QString)") >= 0) {
 					connect(plugin,SIGNAL(errorMsgEmitted(QString)),this,SLOT(onErrorMessageReceived(QString)));
+				}
+				if (obj->metaObject()->indexOfSignal("statusMsgEmitted(QString)") >= 0) {
+					connect(plugin,SIGNAL(statusMsgEmitted(QString)),this,SLOT(onStatusMessageReceived(QString)));
 				}
 
 			} else {
@@ -540,9 +544,14 @@ void IOPluginCentral::onPluginConfigurationChanged()
 	updatePluginMappingInformation();
 }
 
-void IOPluginCentral::onErrorMessageReceived(QString msg)
+void IOPluginCentral::onErrorMessageReceived(const QString &msg)
 {
 	LOGERROR(tr("Plugin: %1").arg(msg));
+}
+
+void IOPluginCentral::onStatusMessageReceived(const QString &msg)
+{
+	LOGTEXT(tr("Plugin: %1").arg(msg));
 }
 
 void IOPluginCentral::reOpenPlugins()

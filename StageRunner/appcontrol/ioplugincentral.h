@@ -83,7 +83,8 @@ public slots:
 private slots:
     void onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key = 0);
 	void onPluginConfigurationChanged();
-	void onErrorMessageReceived(QString msg);
+	void onErrorMessageReceived(const QString &msg);
+	void onStatusMessageReceived(const QString &msg);
 
 public slots:
 

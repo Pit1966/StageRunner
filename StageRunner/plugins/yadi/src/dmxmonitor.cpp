@@ -2,6 +2,8 @@
 
 #include <QPainter>
 #include <QDebug>
+
+
 // #include <QDBusConnection>
 
 DmxMonitor::DmxMonitor(QWidget *parent) :
@@ -17,6 +19,7 @@ void DmxMonitor::init()
 	m_myUniverse = 0;
 	m_autoBarsEnabled = false;
 	memset(bar_value,0,sizeof(int) * 512);
+	m_frameRateUpdateTimer.start();
 }
 
 void DmxMonitor::closeEvent(QCloseEvent *)
@@ -53,6 +56,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 	paint.translate(0,ysize-1);
 	paint.scale(1,-1);
 
+
 	if (bars) {
 		int bar_width = xsize / bars;
 		int bar_height = ysize - 20;
@@ -88,6 +92,10 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 			}
 		}
 	}
+
+	paint.resetTransform();
+	paint.setPen(Qt::white);
+	paint.drawText(5,20, m_displayedFrameRateMsg);
 }
 
 void DmxMonitor::setValueInBar(quint32 bar, uchar value)
@@ -128,4 +136,18 @@ void DmxMonitor::setDmxValues(int universe, const QByteArray &dmxValues)
 
 	if (modified)
 		update();
+}
+
+void DmxMonitor::setFrameRateInfo(YadiDevice *yadiDev, const QString &frameRateMsg)
+{
+	Q_UNUSED(yadiDev);
+	if (m_lastReceivedFrameRateMsg != frameRateMsg) {
+		m_lastReceivedFrameRateMsg = frameRateMsg;
+
+		if (m_frameRateUpdateTimer.elapsed() > 200) {
+			m_frameRateUpdateTimer.start();
+			m_displayedFrameRateMsg = m_lastReceivedFrameRateMsg;
+			update();
+		}
+	}
 }
