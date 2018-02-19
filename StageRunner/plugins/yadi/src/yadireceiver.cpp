@@ -72,13 +72,14 @@ bool YadiReceiver::receiver_loop()
 		int max_channels = -1;
 		int used_channels = -1;
 		ok = detectRxDmxUniverseSize(&max_channels, &used_channels);
-		if (device->debug)
+
+		if (device->debug > 3)
 			printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
 
 		int rx_dmx_packet_size = -1;
 		ok = detectRxDmxPacketSize(&rx_dmx_packet_size);
-		if (device->debug)
-			printf("  -> rx dmx packet size: %d\n",rx_dmx_packet_size);
+		if (device->debug > 3)
+			printf("  -> rx dmx packet size: %d",rx_dmx_packet_size);
 
 		if (rx_dmx_packet_size > 0 && used_channels > 0) {
 			dmxStatus |= 1;
@@ -192,7 +193,7 @@ bool YadiReceiver::stopRxDmx()
 		cmd = STOPPED;
 		QTime wait;
 		wait.start();
-		while (wait.elapsed() < 800) ;;
+		while (wait.elapsed() < 800) {;}
 
 		if (isRunning()) {
 			qDebug("YadiReceiver: stopRxDmx: Still running after 800ms");
