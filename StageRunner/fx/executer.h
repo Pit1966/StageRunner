@@ -2,6 +2,7 @@
 #define FXLISTEXECUTER_H
 
 #include "commandsystem.h"
+#include "fx/fxscripttools.h"
 
 #include <QObject>
 #include <QString>
@@ -16,6 +17,10 @@ class LightControl;
 class FxControl;
 class FxItem;
 class FxSceneItem;
+class FxScriptItem;
+class FxScriptList;
+
+typedef QList<FxItem*> FxItemList;
 
 class Executer : public QObject
 {
@@ -24,7 +29,8 @@ public:
 	enum TYPE {
 		EXEC_BASE,
 		EXEC_FXLIST,
-		EXEC_SCENE
+		EXEC_SCENE,
+		EXEC_SCRIPT
 	};
 	enum STATE {
 		EXEC_IDLE,
@@ -67,6 +73,7 @@ public:
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
 	inline void setTargetTimeToCurrent() {eventTargetTimeMs = runTime.elapsed();}
+	inline void setEventTargetTime(qint64 ms) {eventTargetTimeMs = runTime.elapsed() + ms;}
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
@@ -77,11 +84,14 @@ signals:
 	void deleteMe(Executer *exec);
 	void changed(Executer *exec);
 	void sceneExecuterStartSignal(FxSceneItem *scene);
+	void wantedDeleteFxScene(FxSceneItem *scene);
 
 	friend class ExecCenter;
 };
 
+//---------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------
 
 class FxListExecuter : public Executer
 {
@@ -136,6 +146,9 @@ signals:
 
 };
 
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
 
 class SceneExecuter : public Executer
 {
@@ -150,8 +163,38 @@ public:
 protected:
 	SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx);
 
-public:
 
+	friend class ExecCenter;
+};
+
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+class ScriptExecuter : public Executer
+{
+protected:
+	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
+	FxScriptList m_script;
+	int m_currentLineNum;
+	QList<FxSceneItem*> m_clonedSceneList;
+
+public:
+	inline TYPE type() {return EXEC_SCRIPT;}
+	bool processExecuter();
+
+protected:
+	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
+	virtual ~ScriptExecuter();
+
+    QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
+	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
+
+	bool executeLine(FxScriptLine *line);
+	bool executeCmdStart(FxScriptLine *line);
+	bool executeCmdStop(FxScriptLine *line);
+	bool executeFadeIn(FxScriptLine * line);
+	bool executeFadeOut(FxScriptLine *line);
 
 	friend class ExecCenter;
 };

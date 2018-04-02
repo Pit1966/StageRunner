@@ -101,7 +101,7 @@ void PrefVarCore::registerVarClasses()
 	classMapping->insert("VC_FX_PLAYLIST_ITEM",FX_PLAYLIST_ITEM);
 	classMapping->insert("VC_FX_SEQUENCE",FX_SEQUENCE_ITEM);
 	classMapping->insert("VC_FX_CLIP_ITEM",FX_CLIP_ITEM);
-
+	classMapping->insert("VC_FX_SCRIPT_ITEM",FX_SCRIPT_ITEM);
 }
 
 PrefVarCore::VarClass PrefVarCore::getVarClass(const QString &className)

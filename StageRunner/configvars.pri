@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.7.8
+APPVERSION = V0.8.0
 
 #############################################################################
 # Compiler & linker configuration
@@ -74,6 +74,3 @@ macx:PLUGINDIR       = Plugins
 win32:TRANSLATIONDIR      =
 unix:!macx:TRANSLATIONDIR = $$DATADIR/translations
 macx:TRANSLATIONDIR       = $$DATADIR/Translations
-
-
-

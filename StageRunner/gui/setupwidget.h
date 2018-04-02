@@ -13,10 +13,10 @@ class SetupWidget : public QDialog, public Ui::SetupWidget
 	Q_OBJECT
 private:
 	AppCentral * myapp;
-	QLCIOPlugin * cur_selected_qlc_plugin;
-	PluginMapping *cur_plugin_map;
+	QLCIOPlugin * m_selectedPlugin;
+	PluginMapping *m_curPluginMap;
 
-	bool update_plugin_mapping_f;					///< Flag that decides if PluginMapping should be adjusted on Setup Dialog close
+	bool m_updatePluginMapFlag;					///< Flag that decides if PluginMapping should be adjusted on Setup Dialog close
 	bool m_restartAudioSlotsOnExit;
 
 public:
@@ -37,13 +37,15 @@ private slots:
 	void on_configurePluginButton_clicked();
 	void on_saveDmxConfigButton_clicked();
 
-	void if_pluginline_universe_changed(int val);
-	void if_pluginline_responsetime_changed(int val);
+	void onPluginLineUniverseChanged(int val);
+	void onPluginLineResponseTimeChanged(int val);
 	void on_appStyleCombo_currentIndexChanged(const QString &arg1);
 	void on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1);
 
 	void on_addDmxUniverseToTemplateButton_clicked();
 	void on_restartAudioVideoSlots_clicked();
+
+	void on_updateLinesButton_clicked();
 
 signals:
 	void applicationStyleChanged(QString style);

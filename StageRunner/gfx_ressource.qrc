@@ -63,5 +63,6 @@
         <file>gfx/icons/editcopy_32.png</file>
         <file>gfx/icons/backspace.png</file>
         <file>gfx/icons/video.png</file>
+        <file>gfx/icons/script.png</file>
     </qresource>
 </RCC>

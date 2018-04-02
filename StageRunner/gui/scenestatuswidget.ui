@@ -15,6 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QCheckBox" name="showInactiveCheck">
+     <property name="text">
+      <string>Show inactive used scenes</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QListWidget" name="sceneListWidget"/>
    </item>
   </layout>

@@ -29,7 +29,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	m_rightAvg = new PsMovingAverage<qreal>(4);
 
 	// Size of FFT data block
-	qDebug("init FFT Size: %d",m_leftFFT.fftDimension());
+	// qDebug("init FFT Size: %d",m_leftFFT.fftDimension());
 	m_leftFFT.setOversampling(4);
 
 #ifdef IS_QT5

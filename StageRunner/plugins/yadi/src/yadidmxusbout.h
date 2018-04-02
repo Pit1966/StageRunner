@@ -45,16 +45,17 @@ public:
 	bool findDevices(bool update = false);
 	QString name();						///< @reimp
 	int capabilities() const;			///< @reimp
-	void openOutput(quint32 output = 0);		///< @reimp
-	void closeOutput(quint32 output = 0);		///< @reimp
+	QString pluginInfo();
+	bool openOutput(quint32 output, quint32 universe);		///< @reimp
+	void closeOutput(quint32 output, quint32 universe);		///< @reimp
 	QStringList outputs();				///< @reimp
-	void writeUniverse(quint32 output, const QByteArray& universe); ///< @reimp
+	void writeUniverse(quint32 universe, quint32 output, const QByteArray& data); ///< @reimp
 	QString outputInfo(quint32 output = QLCIOPlugin::invalidLine()); ///< @reimp
-	void openInput(quint32 input);		///< @reimp
-	void closeInput(quint32 input);		///< @reimp
+	bool openInput(quint32 input, quint32 universe);		///< @reimp
+	void closeInput(quint32 input, quint32 universe);		///< @reimp
 	QStringList inputs();				///< @reimp
 	QString inputInfo(quint32 input);	///< @reimp
-	void sendFeedBack(quint32 inputLine, quint32 channel, uchar value, const QString& key = 0);
+	void sendFeedBack(quint32 universe, quint32 inputLine, quint32 channel, uchar value, const QString& key = 0);
 
 	bool canConfigure();				///< @reimp
 	void configure();					///< @reimp
@@ -64,22 +65,25 @@ public:
 	DmxMonitor *openOutputMonitor(quint32 output);
 	DmxMonitor *openInputMonitor(quint32 input);
 
+
 	inline QStringList outputDeviceList() {return output_devices;}
 	inline QStringList inputDeviceList() {return input_devices;}
 
 private:
 	void handle_output_error(quint32 output);
 	void update_output_monitor(quint32 output, const QByteArray& universe);
-	bool internOpenOutput(quint32 output);
-	bool internOpenInput(quint32 input);
+	bool internOpenOutput(quint32 output, int universe);
+	bool internOpenInput(quint32 input, int universe);
 
 signals:
 	void communicationErrorDetected();
-	void errorMsgEmitted(QString msg);
+	void errorMsgEmitted(const QString &msg);
+	void statusMsgEmitted(const QString &msg);
 
 public slots:
 	void closeMonitorByInstancePointer(DmxMonitor *instance);
-	void propagateChangedInput(quint32 input, quint32 channel, uchar value);
+	void propagateChangedInput(quint32 universe, quint32 input, quint32 channel, uchar value);
+	void propagateReceiverFrameRate(YadiDevice *yadiDev, const QString &text);
 	void inputDeviceFailed(int input);
 	void outputDeviceFailed(int output);
 	void handleCommunicationError();

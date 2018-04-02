@@ -4,7 +4,7 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = stagerunner
 
-CONFIG += static
+# CONFIG += static
 
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
@@ -133,7 +133,13 @@ SOURCES += \
 	../gui/customwidget/psvideowidget.cpp \
 	../system/videoplayer.cpp \
 	../system/dmxchanproperty.cpp \
-    ../system/dmxuniverseproperty.cpp
+	../system/dmxuniverseproperty.cpp \
+	../fx/fxscriptitem.cpp \
+    ../gui/fxscriptwidget.cpp \
+	../fx/fxscripttools.cpp \
+	../fx/fxcueitem.cpp \
+    ../plugins/yadi/src/dmxmonitor.cpp \
+    ../system/variantmapserializer.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -238,7 +244,13 @@ HEADERS  += \
 	../gui/customwidget/psvideowidget.h \
 	../system/videoplayer.h \
 	../system/dmxchanproperty.h \
-    ../system/dmxuniverseproperty.h
+	../system/dmxuniverseproperty.h \
+	../fx/fxscriptitem.h \
+    ../gui/fxscriptwidget.h \
+	../fx/fxscripttools.h \
+	../fx/fxcueitem.h \
+    ../plugins/yadi/src/dmxmonitor.h \
+    ../system/variantmapserializer.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h
@@ -258,7 +270,8 @@ FORMS    += \
 	../gui/fxlistwidgetitem.ui \
 	../system/messagedialog.ui \
 	../gui/fxplaylistwidget.ui \
-	../gui/sequencestatuswidget.ui
+	../gui/sequencestatuswidget.ui \
+    ../gui/fxscriptwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc
@@ -324,3 +337,6 @@ win32 {
 
 OTHER_FILES += \
 	version.h.in
+
+DISTFILES += \
+    ../todo.txt

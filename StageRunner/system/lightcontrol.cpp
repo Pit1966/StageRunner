@@ -90,7 +90,7 @@ bool LightControl::sendChangedDmxData()
 			QLCIOPlugin *plugin;
 			int output;
 			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
-				plugin->writeUniverse(t,dmxOutputValues[t]);
+				plugin->writeUniverse(t,output,dmxOutputValues[t]);
 				emit outputUniverseChanged(t,dmxOutputValues[t]);
 				sent = true;
 			} else {
@@ -128,6 +128,19 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 		}
 	} else {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
+	}
+
+	return active;
+}
+
+bool LightControl::startFxScene(FxSceneItem *scene)
+{
+	if (scene->isOnStageIntern())
+		return false;
+
+	bool active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
+	if (active) {
+		setSceneActive(scene);
 	}
 
 	return active;
@@ -248,6 +261,7 @@ void LightControl::init()
 	}
 
 	lightLoopInterface = new LightLoopThreadInterface(*this);
+	connect(lightLoopInterface,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),&myApp,SLOT(deleteFxSceneItem(FxSceneItem*)));
 }
 
 void LightControl::startFxSceneExecuter(FxSceneItem *scene)

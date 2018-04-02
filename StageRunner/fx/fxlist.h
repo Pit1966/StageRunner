@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-#include "varsetlist.h"
+#include "../tool/varsetlist.h"
 
 
 class FxItem;
@@ -92,6 +92,8 @@ public:
 	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);
 	bool addFxAudioPlayList();
 	bool addFxSequence();
+	bool addFxScript();
+	bool addFxCue();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);

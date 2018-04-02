@@ -16,6 +16,7 @@ class FxSceneItem;
 class SequenceStatusWidget;
 class FxListWidget;
 class UserSettings;
+class FxScriptItem;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -52,6 +53,7 @@ public:
 	void openFxSceneItemPanel(FxSceneItem *fx);
 	void openFxPlayListItemPanel(FxPlayListItem *fx);
 	void openFxSeqItemPanel(FxSeqItem *fx);
+	void openFxScriptPanel(FxScriptItem *fx);
 	void setProjectName(const QString &path);
 
 
@@ -99,6 +101,8 @@ private slots:
 	void on_actionShow_Sequence_Status_triggered();
 	void on_saveUniverseButton_clicked();
 	void on_loadUniverseButton_clicked();
+
+	void on_actionVirtualDmxOutput_triggered(bool checked);
 
 private:
 	void init();

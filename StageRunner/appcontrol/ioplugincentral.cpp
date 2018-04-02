@@ -4,19 +4,22 @@
 #include "config.h"
 #include "pluginmapping.h"
 #include "messagedialog.h"
+#include "variantmapserializer.h"
 
 #include <QDir>
 #include <QPluginLoader>
 #include <QMetaObject>
 
-IOPluginCentral::IOPluginCentral(QObject *parent) :
-	QObject(parent)
-  , pluginMapping(new PluginMapping())
+IOPluginCentral::IOPluginCentral(QObject *parent)
+    : QObject(parent)
+    , pluginMapping(new PluginMapping())
 {
 }
 
 IOPluginCentral::~IOPluginCentral()
 {
+    if (!qlc_plugins.isEmpty())
+        unloadPlugins();
 	delete pluginMapping;
 }
 
@@ -62,9 +65,13 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 				qlc_plugins.append(plugin);
 
 				plugin->init();
+
 				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 				if (obj->metaObject()->indexOfSignal("errorMsgEmitted(QString)") >= 0) {
 					connect(plugin,SIGNAL(errorMsgEmitted(QString)),this,SLOT(onErrorMessageReceived(QString)));
+				}
+				if (obj->metaObject()->indexOfSignal("statusMsgEmitted(QString)") >= 0) {
+					connect(plugin,SIGNAL(statusMsgEmitted(QString)),this,SLOT(onStatusMessageReceived(QString)));
 				}
 
 			} else {
@@ -84,12 +91,17 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 
 void IOPluginCentral::unloadPlugins()
 {
-	QObjectList plugins = QPluginLoader::staticInstances();
+//	QObjectList plugins = QPluginLoader::staticInstances();
 
-	for (int t=0; t<plugins.size(); t++) {
-		delete plugins.at(t);
-	}
-	qlc_plugins.clear();
+//	for (int t=0; t<plugins.size(); t++) {
+//		delete plugins.at(t);
+//	}
+//  qlc_plugins.clear();
+
+    if (debug) qDebug() << "unload plugins";
+
+    while (!qlc_plugins.isEmpty())
+        delete qlc_plugins.takeFirst();
 }
 
 bool IOPluginCentral::updatePluginMappingInformation()
@@ -104,8 +116,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	// Discover plugin lines (input/outputs) and update configuration for each
 	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
 		QString plugin_name = plugin->name();
-		QStringList outputs = plugin->outputs();
-		QStringList inputs = plugin->inputs();
+		QStringList outputs = IOPluginCentral::outputsOf(plugin);
+		QStringList inputs = IOPluginCentral::inputsOf(plugin);
 
 		for (int t=0; t<outputs.size(); t++) {
 			// Check if line is valid
@@ -119,6 +131,10 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 			allOutputNames.append(outputs.at(t));
 
+			// set parameters in plugin
+			// Möglicherweise ist zu diesem Zeitpunkt das Plugin noch nicht initialisiert
+			// Beispiel: ArtNet hat noch keinen Controller, wenn setParameter(..) direkt nach dem Laden aufgerufen wird
+			setPluginParametersFromLineConf(plugin, lineconf);
 		}
 		for (int t=0; t<inputs.size(); t++) {
 			if (inputs.at(t).endsWith("!!!"))
@@ -131,6 +147,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 			allInputNames.append(inputs.at(t));
 
+			// set parameters in plugin
+			setPluginParametersFromLineConf(plugin, lineconf);
 		}
 	}
 
@@ -143,7 +161,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	// Create fast access tables for universe to plugin mapping
 	for (int t=0; t<pluginMapping->pluginLineConfigs.size(); t++) {
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
-		int univ = lineconf->pUniverse;
+		int univ = lineconf->pUniverse-1;
 
 		if (!lineconf->pIsUsed || univ < 0 || univ >= MAX_DMX_UNIVERSE)
 			continue;
@@ -194,7 +212,7 @@ bool IOPluginCentral::openPlugins()
 
 		LOGTEXT(tr("Open Plugin '%1' with capabilities: %2").arg(plugin->name(),capstr));
 
-		QStringList outputs = plugin->outputs();
+		QStringList outputs = outputsOf(plugin);
 		for (int o=0; o<outputs.size(); o++) {
 			int universe;
 			getOutputUniverseForPlugin(plugin,o,universe);
@@ -202,24 +220,29 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   Output %1 not used").arg(outputs.at(o)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Output: %1</font>").arg(outputs.at(o)));
-				plugin->openOutput(o);
+				plugin->openOutput(o, universe);
 				one_opened = true;
 			}
+
+			PluginConfig *lineconf = pluginMapping->getCreatePluginLineConfig(plugin->name(),outputs.at(o));
+			setPluginParametersFromLineConf(plugin, lineconf);
+
 		}
 
-		QStringList inputs = plugin->inputs();
-		for (int i=0; i<inputs.size(); i++) {
+		QStringList inputs = inputsOf(plugin);
+        for (int i=0; i<inputs.size(); i++) {
 			int universe;
 			getInputUniverseForPlugin(plugin,i,universe);
 			if (universe < 0) {
 				LOGTEXT(tr("   Input %1 not used").arg(inputs.at(i)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Input: %1</font>").arg(inputs.at(i)));
-				plugin->openInput(i);
+				plugin->openInput(i,universe);
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
-			connect(plugin,SIGNAL(valueChanged(quint32,quint32,uchar)),this,SLOT(onInputValueChanged(quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(plugin,SIGNAL(valueChanged(quint32,quint32,quint32,uchar,QString))
+					,this,SLOT(onInputValueChanged(quint32,quint32,quint32,uchar,QString)),Qt::UniqueConnection);
 		}
 
 	}
@@ -230,16 +253,16 @@ void IOPluginCentral::closePlugins()
 {
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		QStringList outputs = plugin->outputs();
-		for (int o=0; o<outputs.size(); o++) {
+		QStringList outputs = outputsOf(plugin);
+        for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
-			plugin->closeOutput(o);
+			plugin->closeOutput(o,0);
 			plugin->disconnect();
 		}
-		QStringList inputs = plugin->inputs();
-		for (int i=0; i<inputs.size(); i++) {
+		QStringList inputs = inputsOf(plugin);
+        for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
-			plugin->closeInput(i);
+			plugin->closeInput(i,0);
 			plugin->disconnect();
 		}
 	}
@@ -250,8 +273,8 @@ QStringList IOPluginCentral::getAllAvailableInputNames() const
 	QStringList input_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		input_names += plugin->inputs();
-	}
+		input_names += inputsOf(plugin);
+    }
 	return input_names;
 }
 
@@ -260,7 +283,7 @@ QStringList IOPluginCentral::getAllAvailableOutputNames() const
 	QStringList output_names;
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
-		output_names += plugin->outputs();
+		output_names += outputsOf(plugin);
 	}
 	return output_names;
 }
@@ -319,7 +342,9 @@ bool IOPluginCentral::getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, 
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == input && lineconf->deviceIoType == QLCIOPlugin::Input) {
 			if (lineconf->pIsUsed) {
-				universe = lineconf->pUniverse;
+				universe = lineconf->pUniverse-1;
+				if (universe < 0)
+					lineconf->pIsUsed = false;
 			} else {
 				universe = -1;
 			}
@@ -343,7 +368,9 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
 		PluginConfig *lineconf = pluginMapping->pluginLineConfigs.at(t);
 		if (lineconf->plugin == plugin && lineconf->deviceNumber == output && lineconf->deviceIoType == QLCIOPlugin::Output) {
 			if (lineconf->pIsUsed) {
-				universe = lineconf->pUniverse;
+				universe = lineconf->pUniverse-1;
+				if (universe < 0)
+					lineconf->pIsUsed = false;
 			} else {
 				universe = -1;
 			}
@@ -351,6 +378,70 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
 		}
 	}
 	universe = -1;
+	return false;
+}
+
+QStringList IOPluginCentral::outputsOf(QLCIOPlugin *plugin)
+{
+	QStringList outnames = plugin->outputs();
+	for (QString &name : outnames) {
+		if (!name.startsWith("TX:"))
+			name.prepend("TX:");
+	}
+	return  outnames;
+}
+
+QString IOPluginCentral::outputOf(int line, QLCIOPlugin *plugin)
+{
+	QStringList outputs = outputsOf(plugin);
+	if (line < 0 || line >= outputs.size())
+		return QString();
+
+	return outputs.at(line);
+}
+
+QStringList IOPluginCentral::inputsOf(QLCIOPlugin *plugin)
+{
+	QStringList innames = plugin->inputs();
+	for (QString &name : innames) {
+		if (!name.startsWith("RX:"))
+			name.prepend("RX:");
+	}
+	return innames;
+}
+
+QString IOPluginCentral::inputOf(int line, QLCIOPlugin *plugin)
+{
+	QStringList inputs = inputsOf(plugin);
+	if (line < 0 || line >= inputs.size())
+		return QString();
+
+	return inputs.at(line);
+}
+
+
+/**
+ * @brief Set plugin parameters from given PluginConfig object
+ * @param plugin Pointer to QLCIOPLugin
+ * @param lineConf
+ * @return true if at least one parameter was set
+ *
+ * Actually this wraps calls to QLCIOPlugin::setParameter( ...... )
+ */
+bool IOPluginCentral::setPluginParametersFromLineConf(QLCIOPlugin *plugin, PluginConfig *lineConf)
+{
+	QString paras = lineConf->pParameters;
+	if (!paras.isEmpty()) {
+		QVariantMap paramap = VariantMapSerializer::toMap(paras);
+		for (const QString &key : paramap.keys()) {
+			plugin->setParameter(lineConf->pUniverse-1
+								 , lineConf->deviceNumber
+								 , QLCIOPlugin::Capability(lineConf->deviceIoType)
+								 , key
+								 , paramap.value(key));
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -365,7 +456,7 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
  * to the configured universe. Than the univeresChannelChanged Signal will be emitted
  *
  */
-void IOPluginCentral::onInputValueChanged(quint32 input, quint32 channel, uchar value)
+void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key)
 {
 	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
 	if(sendby) {
@@ -453,9 +544,14 @@ void IOPluginCentral::onPluginConfigurationChanged()
 	updatePluginMappingInformation();
 }
 
-void IOPluginCentral::onErrorMessageReceived(QString msg)
+void IOPluginCentral::onErrorMessageReceived(const QString &msg)
 {
 	LOGERROR(tr("Plugin: %1").arg(msg));
+}
+
+void IOPluginCentral::onStatusMessageReceived(const QString &msg)
+{
+	LOGTEXT(tr("Plugin: %1").arg(msg));
 }
 
 void IOPluginCentral::reOpenPlugins()

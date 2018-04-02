@@ -39,6 +39,7 @@ public:
 	bool addFxListToControlLoop(const FxList *list);
 	bool sendChangedDmxData();
 	bool startFxSceneSimple(FxSceneItem *scene);
+	bool startFxScene(FxSceneItem *scene);
 	bool stopFxScene(FxSceneItem *scene);
 	bool setSceneActive(FxSceneItem *scene);
 	bool setSceneIdle(FxSceneItem * scene);

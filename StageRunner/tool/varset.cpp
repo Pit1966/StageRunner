@@ -13,6 +13,7 @@
 #include "fxplaylistitem.h"
 #include "fxseqitem.h"
 #include "fxclipitem.h"
+#include "fxscriptitem.h"
 #include "dmxchanproperty.h"
 
 #include <QSettings>
@@ -122,10 +123,13 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 	int seek = read.pos();
 
 	QString line = read.readLine();
-	if (lineCopy) *lineCopy = line;
+	if (lineCopy)
+		*lineCopy = line;
 	(*p_line_number)++;
 	if (debug > 2) qDebug() << "line" << *p_line_number << "child level:" << child_level << (varset?varset->className():QString());
 
+	if (line.contains("start 5"))
+		qDebug() << "start5";
 
 	if (line.size() < 2) {
 		if (cancel_file_analyze_on_empty_line) {
@@ -268,6 +272,9 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 									break;
 								case PrefVarCore::FX_CLIP_ITEM:
 									item = new FxClipItem(0);
+									break;
+								case PrefVarCore::FX_SCRIPT_ITEM:
+									item = new FxScriptItem(0);
 									break;
 								default:
 									break;

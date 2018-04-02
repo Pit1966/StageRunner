@@ -42,6 +42,7 @@ bool LightLoopThreadInterface::stopThread()
 void LightLoopThreadInterface::run()
 {
 	lightLoop = new LightLoop(lightControlRef);
+	connect(lightLoop,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),this,SIGNAL(wantedDeleteFxScene(FxSceneItem*)));
 	lightLoop->startProcessTimer();
 	exec();
 	lightLoop->stopProcessTimer();

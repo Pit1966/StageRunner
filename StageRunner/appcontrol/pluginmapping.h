@@ -10,10 +10,11 @@ class PluginConfig : public VarSet
 {
 public:
 	pstring pPluginName;
-	pstring pLineName;
+	pstring pLineName;						///< This is the string returned from plugin->inputs() or outputs()
 	pbool pIsUsed;
 	pint32 pUniverse;
 	pint32 pResponseTime;					///< This is the fade delay time for incoming DMX Data when it is forwarded to a scene
+	pstring pParameters;					///< Plugin Parameters for this Line
 
 	QLCIOPlugin *plugin;
 	int deviceNumber;

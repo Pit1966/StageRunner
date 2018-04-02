@@ -10,6 +10,7 @@
 
 class QLCIOPlugin;
 class PluginMapping;
+class PluginConfig;
 
 class IOPluginCentral : public QObject
 {
@@ -64,6 +65,13 @@ public:
 	bool getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const;
 	bool getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const;
 
+	static QStringList outputsOf(QLCIOPlugin *plugin);
+	static QString outputOf(int line, QLCIOPlugin *plugin);
+	static QStringList inputsOf(QLCIOPlugin *plugin);
+	static QString inputOf(int line, QLCIOPlugin *plugin);
+
+	static bool setPluginParametersFromLineConf(QLCIOPlugin *plugin, PluginConfig *lineConf);
+
 
 signals:
 	void universeValueChanged(quint32 universe, quint32 channel, uchar value);
@@ -73,9 +81,10 @@ public slots:
 	void reOpenPlugins();
 
 private slots:
-	void onInputValueChanged(quint32 input, quint32 channel, uchar value);
+    void onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key = 0);
 	void onPluginConfigurationChanged();
-	void onErrorMessageReceived(QString msg);
+	void onErrorMessageReceived(const QString &msg);
+	void onStatusMessageReceived(const QString &msg);
 
 public slots:
 

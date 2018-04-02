@@ -26,6 +26,7 @@ void PluginConfig::init()
 	addExistingVar(pIsUsed,"LineUsed",false);
 	addExistingVar(pUniverse,"Universe");
 	addExistingVar(pResponseTime,"ResponseTime");
+	addExistingVar(pParameters,"Parameters");
 }
 
 

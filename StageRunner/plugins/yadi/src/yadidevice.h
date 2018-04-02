@@ -6,6 +6,7 @@
 class YadiReceiver;
 class SerialWrapper;
 class DmxMonitor;
+class MvgAvgCollector;
 
 
 class YadiDevice
@@ -20,6 +21,8 @@ public:
 		FL_INOUT_UNIVERSE = FL_OUTPUT_UNIVERSE + FL_INPUT_UNIVERSE
 	};
 	int debug;
+	int outUniverseNumber;
+	int inUniverseNumber;				// -1: unused
 
 	QByteArray outUniverse;
 	QByteArray inUniverse;

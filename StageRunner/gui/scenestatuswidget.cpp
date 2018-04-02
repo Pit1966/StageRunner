@@ -7,8 +7,9 @@
 #define READLOCK QReadLocker(*rwlock);Q_UNUSED(rwlock);
 #define WRITELOCK QWriteLocker(*rwlock);Q_UNUSED(rwlock);
 
-SceneStatusWidget::SceneStatusWidget(QWidget *parent) :
-	QWidget(parent)
+SceneStatusWidget::SceneStatusWidget(QWidget *parent)
+	: QWidget(parent)
+	, m_doNotRemove(false)
 {
 	rwlock = new QReadWriteLock(QReadWriteLock::Recursive);
 	setupUi(this);
@@ -23,15 +24,19 @@ bool SceneStatusWidget::appendScene(FxSceneItem *scene)
 {
 	WRITELOCK;
 
+	if (scene_hash.contains(scene))
+		return updateScene(scene);
+
 	SceneStatusListItem *item = new SceneStatusListItem(scene,sceneListWidget);
 	item->setText(scene->name());
+
 	scene_hash.insert(scene,item);
 
 	updateScene(scene);
 	return true;
 }
 
-bool SceneStatusWidget::removeScene(FxSceneItem *scene)
+bool SceneStatusWidget::removeOrDeactivateScene(FxSceneItem *scene)
 {
 	bool removed = false;
 
@@ -39,12 +44,31 @@ bool SceneStatusWidget::removeScene(FxSceneItem *scene)
 
 	SceneStatusListItem *item = scene_hash.value(scene);
 	if (item) {
-		delete item;
-		removed = true;
+		if (m_doNotRemove) {
+			item->setBackgroundColor(palette().base().color());
+			item->setForeground(Qt::darkGray);
+			item->setIcon(QPixmap());
+		} else {
+			delete item;
+			removed = true;
+			scene_hash.remove(scene);
+		}
+	} else {
+		scene_hash.remove(scene);
 	}
-	scene_hash.remove(scene);
 
 	return removed;
+}
+
+void SceneStatusWidget::removeScene(FxSceneItem *scene)
+{
+	WRITELOCK;
+
+	SceneStatusListItem *item = scene_hash.value(scene);
+	if (item)
+		delete item;
+
+	scene_hash.remove(scene);
 }
 
 bool SceneStatusWidget::updateScene(FxSceneItem *scene)
@@ -82,7 +106,7 @@ bool SceneStatusWidget::propagateScene(FxSceneItem *scene)
 		// Remove the scene from list if it is not on stage, live or active
 		// Otherwise update the Color in the list view
 		if (!scene->isVisible()) {
-			removeScene(scene);
+			removeOrDeactivateScene(scene);
 			return false;
 		} else {
 			updateScene(scene);
@@ -112,7 +136,7 @@ void SceneStatusWidget::propagateSceneFade(FxSceneItem *scene, int perMilleA, in
 		QPixmap pix(sx,sy);
 		pix.fill(Qt::black);
 		QPainter p(&pix);
-		p.setPen(QColor(Qt::green));
+		p.setPen(QColor(Qt::yellow));
 		int c = 0;
 		int y = 0;
 		while (c < target) {
@@ -133,4 +157,21 @@ SceneStatusListItem::SceneStatusListItem(FxSceneItem *scene, QListWidget *list)
 	: QListWidgetItem(list)
 	, myScene(scene)
 {
+}
+
+void SceneStatusWidget::on_showInactiveCheck_clicked(bool checked)
+{
+	m_doNotRemove = checked;
+	if (!checked) {
+		foreach (FxSceneItem *scene, scene_hash.keys()) {
+			if (FxItem::exists(scene)) {
+				if (!scene->isVisible()) {
+					delete scene_hash.value(scene);
+					scene_hash.remove(scene);
+				}
+			} else {
+				scene_hash.remove(scene);
+			}
+		}
+	}
 }

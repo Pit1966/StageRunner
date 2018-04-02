@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QSettings>
 #include <QDebug>
+#include <QObject>
 
 YadiDevice::YadiDevice(const QString &dev_node)
 {
@@ -26,6 +27,8 @@ YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 		devNodePath = other.devNodePath;
 	}
 
+	outUniverseNumber = other.outUniverseNumber;
+	inUniverseNumber = other.inUniverseNumber;
 	deviceProductName = other.deviceProductName;
 	idVendor = other.idVendor;
 	idProduct = other.idProduct;
@@ -76,8 +79,7 @@ bool YadiDevice::activateDevice()
 	if (!file) {
 		if (SerialWrapper::deviceNodeExists(devNodePath)) {
 			file = new SerialWrapper(devNodePath);
-			outUniverse.resize(512);
-			memset(outUniverse.data(),0,512);
+			outUniverse.fill(0,512);
 		} else {
 			ok = false;
 		}
@@ -86,7 +88,7 @@ bool YadiDevice::activateDevice()
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
 			input_thread = new YadiReceiver(this);
-			inUniverse.resize(512);
+			inUniverse.fill(0,512);
 		}
 		else if (!(capabilities&FL_INPUT_UNIVERSE) && input_thread) {
 			input_thread->stopRxDmx();
@@ -325,9 +327,10 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 {
 	if (!dmxInMonWidget) {
 		dmxInMonWidget = new DmxMonitor;
-		dmxInMonWidget->setWindowTitle("DMX Input Monitor V0.2");
+		dmxInMonWidget->setWindowTitle(QObject::tr("DMX Input Monitor V0.2 - Universe %1").arg(inUniverseNumber+1));
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 		QObject::connect(input_thread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
+		QObject::connect(input_thread,SIGNAL(dmxPacketReceived(YadiDevice*,QString)),dmxInMonWidget,SLOT(setFrameRateInfo(YadiDevice*,QString)));
 	} else {
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 	}
@@ -343,7 +346,7 @@ DmxMonitor *YadiDevice::openDmxOutMonitorWidget()
 {
 	if (!dmxOutMonWidget) {
 		dmxOutMonWidget = new DmxMonitor;
-		dmxOutMonWidget->setWindowTitle("DMX Output Monitor V0.2");
+		dmxOutMonWidget->setWindowTitle(QObject::tr("DMX Output Monitor V0.2 - Universe %1").arg(outUniverseNumber+1));
 		dmxOutMonWidget->setChannelPeakBars(usedDmxOutChannels);
 	} else {
 		dmxOutMonWidget->setChannelPeakBars(usedDmxOutChannels);
@@ -377,6 +380,8 @@ void YadiDevice::closeDmxOutMonitorWidget()
 void YadiDevice::init()
 {
 	debug = 0;
+	outUniverseNumber = -1;
+	inUniverseNumber = -1;
 	deviceNodePresent = false;
 	maxDeviceDmxInChannels = 512;
 	maxDeviceDmxOutChannels = 512;

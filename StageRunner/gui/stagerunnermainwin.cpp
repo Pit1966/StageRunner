@@ -22,6 +22,7 @@
 #include "fxitem.h"
 #include "fxsceneitem.h"
 #include "fxseqitem.h"
+#include "fxscriptitem.h"
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "fxlistwidget.h"
@@ -30,7 +31,10 @@
 #include "fxlistvarset.h"
 #include "customwidget/psvideowidget.h"
 #include "dmxuniverseproperty.h"
+#include "fxscriptwidget.h"
 // #include "configrev.h"
+
+#include "../plugins/yadi/src/dmxmonitor.h"
 
 #include <QFileDialog>
 #include <QErrorMessage>
@@ -53,6 +57,9 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
+	actionVirtualDmxOutput->setChecked(false);
+	virtDmxWidget->setVisible(false);
+	virtDmxWidget->setAutoBarsEnabled(true);
 
 	// For external access
 	logWidget = logEdit;
@@ -62,7 +69,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	myapp->mainWinObj = this;
 }
 
-StageRunnerMainWin::~StageRunnerMainWin()
+StageRunnerMainWin::~ StageRunnerMainWin()
 {
 	delete dialWidgetStyle;
 	delete msg_dialog;
@@ -101,6 +108,8 @@ void StageRunnerMainWin::initConnects()
 	// Light Control -> SceneStatusWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
 	connect(appCentral->unitLight,SIGNAL(sceneFadeChanged(FxSceneItem*,int,int)),sceneStatusDisplay,SLOT(propagateSceneFade(FxSceneItem*,int,int)));
+	// AppCentral -> SceneStatusWidget
+	connect(appCentral,SIGNAL(fxSceneDeleted(FxSceneItem*)),sceneStatusDisplay,SLOT(removeScene(FxSceneItem*)));
 
 	// Light Control -> Project FxListWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),fxListWidget,SLOT(propagateSceneStatus(FxSceneItem*)));
@@ -108,6 +117,9 @@ void StageRunnerMainWin::initConnects()
 
 	// Light Control -> Audio Control
 	connect(appCentral->unitLight,SIGNAL(audioSlotVolChanged(int,int)),appCentral->unitAudio,SLOT(setVolumeFromDmxLevel(int,int)));
+
+	// Light Control -> virt DMX Monitor
+	connect(appCentral->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),virtDmxWidget,SLOT(setDmxValues(int,QByteArray)));
 
 	// Audio Control -> Project FxListWidget
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));
@@ -332,8 +344,10 @@ void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
 	case FX_SEQUENCE:
 		openFxSeqItemPanel(static_cast<FxSeqItem*>(fx));
 		break;
+	case FX_SCRIPT:
+		openFxScriptPanel(static_cast<FxScriptItem*>(fx));
+		break;
 	}
-
 }
 
 void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
@@ -434,6 +448,19 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 	}
 }
 
+void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
+{
+	FxScriptWidget *editor = FxScriptWidget::openFxScriptPanel(fx);
+
+	if (editor) {
+		FxListWidget *parentWid = FxListWidget::findParentFxListWidget(fx);
+		if (parentWid) {
+			connect(editor,SIGNAL(modified()),parentWid,SLOT(refreshList()));
+		}
+		editor->show();
+	}
+}
+
 void StageRunnerMainWin::setProjectName(const QString &path)
 {
 	QString title = QString("%1 %2 ").arg(APP_NAME,APP_VERSION);
@@ -519,7 +546,7 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 		Project *pro = appCentral->project;
 		if ( !pro->loadFromFile(path) ) {
 			QMessageBox::critical(this,tr("Load error")
-								  ,tr("An error occured while loading file:\n\n%1\n\n%2:%3")
+								  ,tr("An error occured while loading file:\n\n%1\n\nLine %2:'%3'")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
 			setProjectName("");
@@ -656,6 +683,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 {
+	appCentral->closeAllDmxMonitors();
+
 	if (appCentral->project->isModified()) {
 		int ret = QMessageBox::question(this,tr("Attention")
 										,tr("Project is modified!\n\nDo you want to save it now?"));
@@ -673,7 +702,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	}
 
 	if (appCentral->project->curProjectFilePath.isEmpty()) {
-		appCentral->userSettings->pLastProjectLoadPath = "";
+//		appCentral->userSettings->pLastProjectLoadPath = "";
 	}
 
 	// This stops and removes all running sequences
@@ -774,7 +803,7 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 
 void StageRunnerMainWin::on_actionDMX_Input_triggered()
 {
-	QWidget * mon = reinterpret_cast<QWidget *>(appCentral->openDmxInMonitor(0));
+	QWidget * mon = appCentral->openDmxInMonitor(0);
 	if (mon) {
 		mon->show();
 		mon->raise();
@@ -913,4 +942,9 @@ void StageRunnerMainWin::on_loadUniverseButton_clicked()
 {
 	appCentral->universeLayout->fileLoad("/tmp/universelayout.txt");
 	appCentral->universeLayout->fileSave("/tmp/universelayout_copy.txt");
+}
+
+void StageRunnerMainWin::on_actionVirtualDmxOutput_triggered(bool checked)
+{
+	virtDmxWidget->setVisible(checked);
 }

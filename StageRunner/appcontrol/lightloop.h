@@ -42,6 +42,7 @@ signals:
 	void sceneStatusChanged(FxSceneItem *scene, quint32 stat);
 	void sceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void sceneCueReady(FxSceneItem *scene);
+	void wantedDeleteFxScene(FxSceneItem *scene);
 
 public slots:
 	void startProcessTimer();

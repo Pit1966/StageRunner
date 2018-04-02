@@ -14,7 +14,9 @@ class Executer;
 class FxListExecuter;
 class FxList;
 class FxSceneItem;
+class FxScriptItem;
 class SceneExecuter;
+class ScriptExecuter;
 
 class ExecCenter : public QObject
 {
@@ -45,6 +47,8 @@ public:
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
 
 	SceneExecuter * newSceneExecuter(FxSceneItem *scene, FxItem *parentFx);
+	ScriptExecuter * newScriptExecuter(FxScriptItem *script, FxItem *parentFx);
+
 
 	void queueRemove(Executer *exec);
 

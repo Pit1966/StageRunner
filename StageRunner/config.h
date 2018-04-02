@@ -3,15 +3,19 @@
 
 
 #define APP_NAME "StageRunner"
+#define APPNAME "StageRunner"
 #define APP_ORG_STRING "Stonechip"
-#define APP_VERSION "V0.7.8"
-#define APP_MILESTONE "Dinner für Spinner (with multi audio device)"
-#define APP_PRODUCER "(C) 2017 Stonechip Entertainment"
+#define APP_VERSION "V0.8.0"
+#define APPVERSION "V0.8.0"
+#define APP_MILESTONE "ArtNet"
+#define APP_PRODUCER "(C) 2018 Stonechip Entertainment"
 #define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
 #define MAX_DMX_UNIVERSE 4
 
 #define PLUGINDIR "/usr/lib/qt4/plugins/stagerunner"
+#define MIDITEMPLATEDIR "/usr/share/stagerunner/miditemplates"
+#define USERMIDITEMPLATEDIR ".stagerunner/miditemplates"
 
 #define FX_AUDIO_START_WAIT_DELAY 100			// Time in ms that will be waited for a successful started audio effect
 

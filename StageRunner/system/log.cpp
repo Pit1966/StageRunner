@@ -41,9 +41,13 @@ const char *error_msg_asc[] = {
 
 void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    if (type == QtDebugMsg && !debug)
+        return;
+
 	QByteArray localMsg = msg.toLocal8Bit();
 	QString srcContext;
-	if (debug)
+
+    if (debug)
 		srcContext = QString("file: %1 line: %2 : %3").arg(context.file).arg(context.line).arg(context.function);
 
 	switch (type) {
@@ -588,23 +592,23 @@ void Log::process_line_for_log_output(QString & msg)
 	}
 	else if (msg.left(4) == "E_Ke") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_Va") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_De") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_St") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else if (msg.left(4) == "E_Pr") {
 		msg = msg.mid(2);
-		setColor(QColor(Qt::darkRed));
+		setColor(QColor(Qt::red));
 	}
 	else {
 		setColor(QColor(Qt::gray));

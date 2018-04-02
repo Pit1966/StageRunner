@@ -8,9 +8,14 @@
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
+#include "fxscriptitem.h"
 #include "usersettings.h"
+#include "qtstatictools.h"
+
+#include <QStringList>
 
 using namespace LIGHT;
+using namespace SCRIPT;
 
 Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	: myApp(app_central)
@@ -212,8 +217,6 @@ void FxListExecuter::setFxList(FxList *fx_list)
 {
 	fxList = fx_list;
 }
-
-
 
 void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
 {
@@ -482,8 +485,9 @@ void FxListExecuter::selectNextFx(FxItem *fx)
 	setNextFx(fx);
 }
 
+//---------------------------------------------------------------------------------
 
-
+//---------------------------------------------------------------------------------
 
 bool SceneExecuter::processExecuter()
 {
@@ -536,10 +540,399 @@ bool SceneExecuter::processExecuter()
 	return active;
 }
 
+
 SceneExecuter::SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx)
 	: Executer(app_central,scene)
 	, curScene(scene)
 	, sceneState(LIGHT::SCENE_OFF)
 {
 	parentFxItem = parentFx;
+}
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+
+bool ScriptExecuter::processExecuter()
+{
+	if (myState == EXEC_IDLE) return false;
+
+	bool proceed = true;
+	bool active = true;
+
+	while (proceed) {
+		FxScriptLine *line = m_script.at(m_currentLineNum);
+		if (line) {
+			if (line->command().size() > 2 && !line->command().startsWith("#"))
+				proceed = executeLine(line);
+			m_currentLineNum++;
+		} else {
+			proceed = false;
+			active = false;
+			LOGTEXT(tr("Script <font color=darkGreen>'%1'</font> finished").arg(m_fxScriptItem->name()));
+		}
+	}
+
+	return active;
+}
+
+ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx)
+	: Executer(app_central,script)
+	, m_fxScriptItem(script)
+	, m_currentLineNum(0)
+{
+	parentFxItem = parentFx;
+	FxScriptItem::rawToScript(script->rawScript(), m_script);
+}
+
+ScriptExecuter::~ScriptExecuter()
+{
+	while (!m_clonedSceneList.isEmpty()) {
+		FxSceneItem *scene = m_clonedSceneList.takeFirst();
+		if (!scene->isOnStageIntern() && !scene->isActive()) {
+			emit wantedDeleteFxScene(scene);
+		} else {
+			scene->setDeleteOnFinished();
+		}
+	}
+	qDebug() << "script executer destroyed";
+}
+
+/**
+ * @brief ScriptExecuter::getTargetFxItemFromPara
+ * @param line
+ * @param paras
+ * @param fxList
+ * @return
+ *
+ * This should parse strings like:
+ * [id|text] number
+ * [id|text] text
+ * number
+ * text
+ *
+ */
+QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QString &paras, FxItemList &fxList)
+{
+	QString returnparas;
+
+	// parse parameter string
+	QStringList tlist = paras.split(" ",QString::SkipEmptyParts);
+
+	int searchmode = 0;
+
+	if (tlist.size()) {
+		QString p1 = tlist.first();
+		if (p1.toLower() == "id") {
+			searchmode = 1;
+			tlist.removeFirst();
+		}
+		else if (p1.toLower() == "text") {
+			searchmode = 2;
+			tlist.removeFirst();
+		}
+		else {
+			// Test if parameter maybe an ID or a FX name
+			bool ok;
+			int id = p1.toInt(&ok);
+            Q_UNUSED(id)
+			if (ok) {
+				searchmode = 1;
+			} else {
+				searchmode = 2;
+			}
+		}
+	}
+
+	if (tlist.isEmpty()) {
+		LOGERROR(tr("Script '%1': Target parameter missing! Line #%2")
+				 .arg(m_fxScriptItem->name())
+				 .arg(line->lineNumber()));
+
+		return returnparas;
+	}
+
+	if (searchmode == 1) { // search for an FX by ID
+		int id = tlist.takeFirst().toInt();
+
+		FxItem *fx = FxItem::findFxById(id);
+		if (!fx) {
+			searchmode = 0;
+			LOGTEXT(tr("Script '%1': <font color=darkOrange>FX with ID #%2 not found!</font> Line #%3")
+					.arg(m_fxScriptItem->name())
+					.arg(id)
+					.arg(line->lineNumber()));
+		} else {
+			fxList.append(fx);
+		}
+	}
+	else if (searchmode == 2) { // search for an FX by name
+		QString name = tlist.takeFirst();
+		QString sname = name;
+		FxSearchMode sm = FXSM_EXACT;
+		if (name.startsWith("*")) {
+			sm = FXSM_RIGHT;
+			sname = name.mid(1);
+		}
+		if (name.endsWith("*")) {
+			sname.chop(1);
+			if (sm == FXSM_RIGHT)
+				sm = FXSM_LIKE;
+			else
+				sm = FXSM_LEFT;
+		}
+		QList<FxItem*>list = FxItem::findFxByName(sname,sm);
+		if (list.isEmpty()) {
+			LOGTEXT(tr("Script '%1': <font color=darkOrange>No FX with name '%2' found!</font> Line #%3")
+					.arg(m_fxScriptItem->name())
+					.arg(name)
+					.arg(line->lineNumber()));
+		}
+		else {
+			fxList.append(list);
+		}
+	}
+
+	for (int t=0; t<tlist.size(); t++) {
+		if (t>0)
+			returnparas += " ";
+		returnparas += tlist.at(t);
+	}
+
+	return returnparas;
+}
+
+
+/**
+ * @brief This function does return the temorary copied FxItems for a given parent FxItem
+ * @param fx
+ * @return
+ *
+ * @note Only FxItems that were created by this executer instance are returned!
+ */
+FxItemList ScriptExecuter::getExecuterTempCopiesOfFx(FxItem *fx) const
+{
+    QList<FxItem*> list;
+    foreach (FxItem *fxcopy, m_clonedSceneList) {
+        if (fxcopy->tempCopyOrigin() == fx)
+            list.append(fxcopy);
+    }
+    return list;
+}
+
+bool ScriptExecuter::executeLine(FxScriptLine *line)
+{
+	bool ok = true;
+
+	const QString &cmd = line->command();
+	KEY_WORD key = FxScriptList::keywords.keyNumber(cmd);
+	switch (key) {
+	case KW_WAIT:
+		{
+			qint64 delayMs = QtStaticTools::timeStringToMS(line->parameters());
+			setEventTargetTime(delayMs);
+		}
+		return false;
+
+	case KW_START:
+		ok = executeCmdStart(line);
+		break;
+
+	case KW_STOP:
+		ok = executeCmdStop(line);
+		break;
+
+	case KW_FADEIN:
+		ok = executeFadeIn(line);
+		break;
+
+	case KW_FADEOUT:
+		ok = executeFadeOut(line);
+		break;
+
+	default:
+		ok = false;
+		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
+		break;
+	}
+
+	if (!ok) {
+		LOGERROR(tr("Failed to execute script line #%1 (%2) in script %3")
+				 .arg(line->lineNumber())
+				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
+				 .arg(m_fxScriptItem->name()));
+	}
+
+	return true;
+}
+
+bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
+{
+	// Try to find the target fx here
+
+	FxItemList fxlist;
+	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
+	if (fxlist.isEmpty()) return false;
+
+	bool ok = true;
+
+	foreach (FxItem *fx, fxlist) {
+		switch (fx->fxType()) {
+		case FX_AUDIO:
+			ok &= myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this);
+			break;
+		case FX_SCENE:
+			/// @todo it would be better to copy the scene and actually fade in the new instance here
+			/// Further the executer is not handed over to scene
+			ok &= myApp.unitLight->startFxScene(static_cast<FxSceneItem*>(fx));
+			break;
+		default:
+			LOGERROR(tr("Script '%1': Executing of target is not supported! Line #%2")
+					 .arg(m_fxScriptItem->name())
+					 .arg(line->lineNumber()));
+		}
+	}
+
+	return ok;
+}
+
+bool ScriptExecuter::executeCmdStop(FxScriptLine *line)
+{
+	FxItemList fxlist;
+	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
+	if (fxlist.isEmpty()) return false;
+
+	bool ok = true;
+
+	foreach (FxItem *fx, fxlist) {
+
+		switch (fx->fxType()) {
+		case FX_SCENE:
+			{
+				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
+				if (!scene->isOnStageIntern()) {
+					LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Target '%2' not on stage. Line %3")
+							.arg(originFxItem->name())
+							.arg(scene->name())
+							.arg(line->lineNumber()));
+					QList<FxItem*>fxlist = getExecuterTempCopiesOfFx(fx);
+					foreach (FxItem *fx_cp, fxlist) {
+						FxSceneItem *fxsc_cp = dynamic_cast<FxSceneItem*>(fx_cp);
+						if (fxsc_cp) {
+							LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Stop temp copy of '%2' -> '%3'")
+									.arg(originFxItem->name())
+									.arg(scene->name())
+									.arg(fxsc_cp->name()));
+							myApp.unitLight->stopFxScene(fxsc_cp);
+						}
+					}
+				} else {
+					LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Stop FX '%2'")
+							.arg(originFxItem->name()).arg(scene->name()));
+					return myApp.unitLight->stopFxScene(scene);
+				}
+			}
+			break;
+		default:
+			LOGERROR(tr("Script '%1': Executing of target is not supported! Line #%2")
+					 .arg(m_fxScriptItem->name())
+					 .arg(line->lineNumber()));
+		}
+
+	}
+
+	if (restparas.size()) {
+		LOGERROR(tr("Script '%1': Command STOP does not support parameters: '%2'! Line #%3")
+				 .arg(m_fxScriptItem->name())
+				 .arg(restparas)
+				 .arg(line->lineNumber()));
+		ok = false;
+	}
+	return ok;
+}
+
+bool ScriptExecuter::executeFadeIn(FxScriptLine *line)
+{
+	FxItemList fxlist;
+	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
+	if (fxlist.isEmpty()) return false;
+
+	qint64 fadein_time_ms = 0;
+	// Do we have more parameters? This could be the fadein time
+	if (restparas.size()) {
+		fadein_time_ms = QtStaticTools::timeStringToMS(restparas);
+	}
+
+	bool ok = true;
+	foreach (FxItem *fx, fxlist) {
+
+		FxSceneItem *scene = dynamic_cast<FxSceneItem*>(fx);
+		if (!scene) {
+			LOGERROR(tr("Script '%1': FADEIN must be applied on a SCENE! Line #%2")
+					 .arg(m_fxScriptItem->name())
+					 .arg(line->lineNumber()));
+			continue;
+		}
+
+		// now clone FxSceneItem
+		FxSceneItem *clonescene = new FxSceneItem(*scene);
+		clonescene->setName(tr("%1:%2_tmp").arg(originFxItem->name()).arg(scene->name()));
+		clonescene->setIsTempCopyOf(scene);
+		m_clonedSceneList.append(clonescene);
+
+		bool is_active = clonescene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN, fadein_time_ms);
+		if (is_active)
+			myApp.unitLight->setSceneActive(clonescene);
+		ok &= is_active;
+	}
+
+	return ok;
+}
+
+bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
+{
+	FxItemList fxlist;
+	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
+	if (fxlist.isEmpty()) return false;
+
+	qint64 fadeout_ms = 0;
+	bool fadeout_all = false;
+	// Do we have more parameters? This could be the fadeout time
+	if (restparas.size()) {
+		if (restparas.toLower().startsWith("all")) {
+			fadeout_all = true;
+			restparas = restparas.mid(3).simplified();
+		}
+		fadeout_ms = QtStaticTools::timeStringToMS(restparas);
+	}
+
+
+	bool ok = true;
+	foreach (FxItem *fx, fxlist) {
+
+		FxSceneItem *scene = dynamic_cast<FxSceneItem*>(fx);
+		if (!scene) {
+			LOGERROR(tr("Script '%1': FADEOUT must be applied on a SCENE! Line #%2")
+					 .arg(m_fxScriptItem->name())
+					 .arg(line->lineNumber()));
+			continue;
+		}
+
+		FxItemList clonelist;
+		if (fadeout_all) {
+			clonelist = FxItem::getTempCopiesOfFx(scene);
+		} else {
+			clonelist = getExecuterTempCopiesOfFx(scene);
+		}
+		foreach (FxItem *clonefx, clonelist) {
+			FxSceneItem *clonescene = dynamic_cast<FxSceneItem*>(clonefx);
+			if (!clonescene)
+				continue;
+
+			bool is_active = clonescene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, fadeout_ms);
+			ok &= is_active | fadeout_all;
+		}
+	}
+
+	return ok;
 }

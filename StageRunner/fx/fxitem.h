@@ -8,6 +8,12 @@
 #include <QList>
 #include <QAtomicInt>
 
+
+/**
+ * @brief The FxType enum
+ *
+ * @note There is an additional type definition in PrefVar (prefvar.h). You will need this to save/load the fx
+ */
 enum FxType {
 	FX_NULL,				// no fx type set
 	FX_AUDIO,				// is Audio Fx
@@ -15,16 +21,31 @@ enum FxType {
 	FX_AUDIO_PLAYLIST,		// is Audio Play List
 	FX_SEQUENCE,			// is a Sequence of FxItems
 	FX_CLIP,				// is a video clip (or audio)
+	FX_SCRIPT,				// is a script file
+	Fx_CUE,					// is a cue list for existing other fx types
 
 	FX_SIZE
 };
 
+enum FxSearchMode {
+    FXSM_EXACT,
+    FXSM_LIKE,
+    FXSM_LEFT,
+    FXSM_RIGHT
+
+};
+
 class FxList;
+class FxItem;
+
+typedef QList<FxItem*> FxItemList;
+
 
 class FxItem : public VarSet
 {
 private:
 	static QList<FxItem*>*global_fx_list;
+    static QMutex global_fx_lock;
 
 protected:
 	QAtomicInt refCount;
@@ -46,6 +67,8 @@ protected:
 	FxList *myParentFxList;
 	bool playedInRandomList;
 
+    FxItem *m_isTempCopyOf;				///< FX is temporary copy (maybe a work copy);
+
 public:
 	FxItem();
 	FxItem(FxList *fxList);
@@ -55,9 +78,15 @@ public:
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
 	static FxItem * findFxById(qint32 id);
+    static QList<FxItem*> findFxByName(const QString &name, FxSearchMode mode = FXSM_EXACT);
 
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
+
+    inline void setIsTempCopyOf(FxItem *other) {m_isTempCopyOf = other;}
+    inline bool isTempCopy() const {return m_isTempCopyOf != 0;}
+    FxItem *tempCopyOrigin() const {return m_isTempCopyOf;}
+	static FxItemList getTempCopiesOfFx(FxItem *fx);
 
 	FxItem * parentFxItem();
 
@@ -106,5 +135,6 @@ private:
 	friend class FxList;
 	friend class FxItemTool;
 };
+
 
 #endif // FXITEM_H

@@ -94,17 +94,22 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 	int rows = fxlist->size();
 
+	int col_name = -1;
+	int col_id = -1;
+
 	QStringList header;
 	if (fxlist->showColumnKeyFlag) {
 		header << tr("Key");
 	}
 
-	header << tr("Name") << tr("Function");
+	col_name = header.size();
+	header << tr("Name");
+	header << tr("Function");
 
 	if (fxlist->showColumnIdFlag) {
+		col_id = header.size();
 		header << tr("Id");
 	}
-
 	if (fxlist->showColumnPredelayFlag) {
 		header << tr("PreDelay");
 	}
@@ -128,7 +133,6 @@ void FxListWidget::setFxList(FxList *fxlist)
 	fxTable->setRowCount(rows);
 	fxTable->setColumnCount(header.size());
 
-
 	fxTable->setHorizontalHeaderLabels(header);
 
 	QFont key_font;
@@ -140,17 +144,15 @@ void FxListWidget::setFxList(FxList *fxlist)
 		create_fxlist_row(fx, fxlist, t);
 		updateFxListRow(fx, fxlist, t);
 	}
+
 	fxTable->resizeColumnsToContents();
 
-	int resize_col = 0;
-	if (fxlist->showColumnKeyFlag)
-		resize_col = 1;
+	QHeaderView *hview = fxTable->horizontalHeader();
+	if (col_name >= 0)
+		hview->setSectionResizeMode(col_name,QHeaderView::Stretch);
+	if (col_id >= 0)
+		hview->setSectionResizeMode(col_id,QHeaderView::ResizeToContents);
 
-#ifdef IS_QT5
-	fxTable->horizontalHeader()->setSectionResizeMode(resize_col,QHeaderView::Stretch);
-#else
-	fxTable->horizontalHeader()->setResizeMode(resize_col,QHeaderView::Stretch);
-#endif
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 	loopCheck->setChecked(fxlist->isLooped());
 	randomCheckBox->setChecked(fxlist->isRandomized());
@@ -762,6 +764,8 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 		case FX_SEQUENCE:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/sequence.png"));
 			break;
+		case FX_SCRIPT:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/script.png"));
 		default:
 			break;
 		}
@@ -1166,6 +1170,10 @@ void FxListWidget::column_name_double_clicked(FxItem *fx)
 		selectFx(fx);
 		emit fxCmdActivated(fx,CMD_FX_START,0);
 		break;
+	case FX_SCRIPT:
+		selectFx(fx);
+		emit fxCmdActivated(fx,CMD_FX_START,0);
+		break;
 	}
 }
 
@@ -1199,6 +1207,12 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 			act = menu.addAction(tr("New Sequence"));
 			act->setObjectName("23");
+
+			act = menu.addAction(tr("New Script"));
+			act->setObjectName("24");
+
+//			act = menu.addAction(tr("New Cue List"));
+//			act->setObjectName("25");
 
 
 			act = menu.addAction("--------------------");
@@ -1274,6 +1288,14 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 23:
 			fxList()->addFxSequence();
+			refreshList();
+			break;
+		case 24:
+			fxList()->addFxScript();
+			refreshList();
+			break;
+		case 25:
+			fxList()->addFxCue();
 			refreshList();
 			break;
 		case 2:

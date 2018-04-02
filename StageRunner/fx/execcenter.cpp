@@ -146,6 +146,20 @@ SceneExecuter *ExecCenter::newSceneExecuter(FxSceneItem *scene, FxItem *parentFx
 	return exec;
 }
 
+ScriptExecuter *ExecCenter::newScriptExecuter(FxScriptItem *script, FxItem *parentFx)
+{
+	ScriptExecuter *exec = new ScriptExecuter(myApp,script,parentFx);
+
+	executerList.lockAppend(exec);
+
+	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
+	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
+	connect(exec,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),&myApp,SLOT(deleteFxSceneItem(FxSceneItem*)));
+
+	emit executerCreated(exec);
+	return exec;
+}
+
 void ExecCenter::queueRemove(Executer *exec)
 {
 	removeQueue.lock();

@@ -33,12 +33,12 @@ private:
 	quint32 my_last_status;
 	bool my_last_active_flag;
 	bool wasBlacked[MIX_LINES];
+	bool m_deleteMeOnFinished;
 
 public:
 	FxSceneItem();
 	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
-	~FxSceneItem();
 
 	qint32 loopValue() const {return 0;}
 	void setLoopValue(qint32 val);
@@ -64,6 +64,8 @@ public:
 	inline bool isOnStageIntern() const {return myStatus & SCENE_STAGE_INTERN;}
 	inline bool isOnStageExtern() const {return myStatus & SCENE_STAGE_EXTERN;}
 	inline bool isVisible() const {return myStatus & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN | SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN | SCENE_STAGE_LIVE);}
+	inline void setDeleteOnFinished() {m_deleteMeOnFinished = true;}
+	inline bool deleteOnFinished() const {return m_deleteMeOnFinished;}
 	bool getClearStatusHasChanged();
 	bool getClearActiveHasChanged();
 	inline quint32 status() const {return myStatus;}
@@ -75,7 +77,10 @@ public:
 	bool postLoadInitTubes(bool restore_light);
 
 private:
+	~FxSceneItem();
 	void init();
+
+	friend class AppCentral;
 };
 
 #endif // FXSCENEITEM_H

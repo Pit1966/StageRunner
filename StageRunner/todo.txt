@@ -1,0 +1,3 @@
+- Setup-Dialog für DMX Konfiguration könnte intuitiver werden. Es ist z.B. nicht klar, dass
+    man SAVE DMX CONFIG drücken muss, nachdem man das Universe für ein Plugin eingestellt hat
+- IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht

@@ -2,7 +2,7 @@
 #include "fxlist.h"
 
 QList<FxItem*>*FxItem::global_fx_list = 0;
-
+QMutex FxItem::global_fx_lock(QMutex::Recursive);
 
 FxItem::FxItem()
 	: VarSet()
@@ -56,7 +56,9 @@ void FxItem::init()
 
 int FxItem::init_generate_id()
 {
-	myId = 0;
+    QMutexLocker lock(&global_fx_lock);
+
+    myId = 0;
 	// hold a backup pointer to every effect in a global list
 	if (!global_fx_list) {
 		// create that list if not happend before
@@ -78,7 +80,9 @@ int FxItem::init_generate_id()
 
 FxItem::~FxItem()
 {
-	// remove the reference to this effect from global list
+    QMutexLocker lock(&global_fx_lock);
+
+    // remove the reference to this effect from global list
 	if (! global_fx_list->removeOne(this)) {
 		// qDebug("%s: FxItem not found in global list",__func__);
 	}
@@ -92,16 +96,74 @@ FxItem::~FxItem()
 
 bool FxItem::exists(FxItem *item)
 {
-	return global_fx_list->contains(item);
+    QMutexLocker lock(&global_fx_lock);
+
+    return global_fx_list->contains(item);
 }
 
 FxItem *FxItem::findFxById(qint32 id)
 {
-	for (int t=0; t<global_fx_list->size(); t++) {
+    QMutexLocker lock(&global_fx_lock);
+
+    for (int t=0; t<global_fx_list->size(); t++) {
 		if (global_fx_list->at(t)->myId == id)
 			return global_fx_list->at(t);
 	}
-	return 0;
+    return 0;
+}
+
+
+/**
+ * @brief Search for all FxItems that match the target name
+ * @param name Target name
+ * @return A list of FxItems.
+ */
+QList<FxItem *> FxItem::findFxByName(const QString &name, FxSearchMode mode)
+{
+    QMutexLocker lock(&global_fx_lock);
+
+    QList<FxItem*>list;
+    foreach (FxItem *fx, *global_fx_list) {
+        switch (mode) {
+        case FXSM_LIKE:
+            if (fx->myName.contains(name))
+                list.append(fx);
+            break;
+        case FXSM_LEFT:
+            if (fx->myName.startsWith(name))
+                list.append(fx);
+            break;
+        case FXSM_RIGHT:
+            if (fx->myName.endsWith(name))
+                list.append(fx);
+            break;
+        default:
+            if (fx->myName == name)
+                list.append(fx);
+            break;
+        }
+
+    }
+	return list;
+}
+
+/**
+ * @brief This function does return the temorary copied FxItems for a given parent FxItem
+ * @param fx
+ * @return
+ *
+ * @note  the complete (global) item list is used for the search
+ */
+FxItemList FxItem::getTempCopiesOfFx(FxItem *fx)
+{
+	QList<FxItem*> list;
+	QMutexLocker lock(&global_fx_lock);
+
+	foreach (FxItem *fxcopy, *global_fx_list) {
+		if (fxcopy->tempCopyOrigin() == fx)
+			list.append(fxcopy);
+	}
+	return list;
 }
 
 /**
