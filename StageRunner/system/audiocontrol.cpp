@@ -308,6 +308,7 @@ void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)
 	emit fftSpectrumChanged(slotnum,spec);
 }
 
+
 bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
 	QMutexLocker lock(slotMutex);
