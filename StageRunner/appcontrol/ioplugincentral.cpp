@@ -18,8 +18,8 @@ IOPluginCentral::IOPluginCentral(QObject *parent)
 
 IOPluginCentral::~IOPluginCentral()
 {
-    if (!qlc_plugins.isEmpty())
-        unloadPlugins();
+	if (!qlc_plugins.isEmpty())
+		unloadPlugins();
 	delete pluginMapping;
 }
 
