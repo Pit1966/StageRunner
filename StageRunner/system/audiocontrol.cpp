@@ -292,7 +292,8 @@ void AudioControl::run()
 
 void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal right)
 {
-	if (slotnum < 0 || slotnum >= used_slots) return;
+	if (slotnum < 0 || slotnum >= audioSlots.size())
+		return;
 
 	int vol = audioSlots.at(slotnum)->volume();
 	// emit vuLevelChanged(slotnum, left, right);
@@ -882,6 +883,9 @@ void AudioControl::createMediaPlayInstances()
 void AudioControl::destroyMediaPlayInstances()
 {
 	while (!audioSlots.isEmpty()) {
+		if (audioSlots.first()->isActive()) {
+			audioSlots.first()->stopFxAudio();
+		}
 		delete audioSlots.takeFirst();
 	}
 

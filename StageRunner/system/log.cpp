@@ -41,8 +41,8 @@ const char *error_msg_asc[] = {
 
 void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    if (type == QtDebugMsg && !debug)
-        return;
+	if (type == QtDebugMsg && !debug)
+		return;
 
 	QByteArray localMsg = msg.toLocal8Bit();
 	QString srcContext;

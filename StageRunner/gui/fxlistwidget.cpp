@@ -305,6 +305,7 @@ void FxListWidget::generateDropAllowedFxTypeList(FxItem *fx)
 		switch (fx->fxType()) {
 		case FX_SEQUENCE:
 			list.append(FX_SCENE);
+			break;
 		case FX_AUDIO_PLAYLIST:
 			list.append(FX_AUDIO);
 			break;
