@@ -3,6 +3,8 @@
 #include "audiochannel.h"
 #include "audioiodevice.h"
 
+using namespace AUDIO;
+
 AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	:QMediaPlayer()
 	,myChannel(audioChannel)
@@ -11,12 +13,14 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	,loopCnt(1)
 	,currentState(QMediaPlayer::StoppedState)
 	,currentVolume(100)
+	,m_audioError(AUDIO_ERR_NONE)
 {
 	if (audioProbe->setSource(this)) {
 		connect(audioProbe,SIGNAL(audioBufferProbed(QAudioBuffer)),this,SLOT(calculate_vu_level(QAudioBuffer)));
 	} else {
+		m_audioError = AUDIO_ERR_PROBE;
 		LOGERROR("Could not connect AudioProbe to MediaPlayer");
-		qDebug() << "Could not connect AudioProbe to MediaPlayer";
+//		qDebug() << "Could not connect AudioProbe to MediaPlayer";
 	}
 
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);

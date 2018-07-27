@@ -74,3 +74,4 @@ macx:PLUGINDIR       = Plugins
 win32:TRANSLATIONDIR      =
 unix:!macx:TRANSLATIONDIR = $$DATADIR/translations
 macx:TRANSLATIONDIR       = $$DATADIR/Translations
+

@@ -60,7 +60,8 @@ enum AudioFadeMode {
 enum AudioErrorType {
 	AUDIO_ERR_NONE,
 	AUDIO_ERR_TIMEOUT,
-	AUDIO_ERR_DECODER
+	AUDIO_ERR_DECODER,
+	AUDIO_ERR_PROBE
 };
 
 class AudioCtrlMsg {

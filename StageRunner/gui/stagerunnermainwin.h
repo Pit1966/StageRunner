@@ -47,6 +47,8 @@ public:
 
 	void clearProject();
 	void initAppDefaults();
+	void showShadowLog();
+	void showModuleError();
 	void copyGuiSettingsToProject();
 	void copyProjectSettingsToGui();
 

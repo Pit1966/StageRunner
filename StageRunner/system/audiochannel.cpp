@@ -24,20 +24,24 @@
 
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName)
 	: QObject()
+	, slotNumber(pSlotNumber)
+	, audio_ctrl(parent)
+	, audio_io(nullptr)
+	, audio_output(nullptr)
+	, audio_player(nullptr)
+	, run_status(AUDIO_IDLE)
+	, current_fx(nullptr)
+	, current_executer(nullptr)
+	, fade_mode(AUDIO_FADE_IDLE)
+	, fade_initial_vol(0)
+	, fade_target_vol(0)
+	, current_volume(0)
+	, master_volume(MAX_VOLUME)
+	, m_isQMediaPlayerAudio(false)
+	, m_isFFTEnabled(false)
+	, m_lastAudioError(AUDIO_ERR_NONE)
 {
 //	qDebug() << "init AudioSlot" << pSlotNumber;
-
-	audio_ctrl = parent;
-
-	run_status = AUDIO_IDLE;
-	slotNumber = pSlotNumber;
-	fade_initial_vol = 0;
-	fade_target_vol = 0;
-	current_fx = 0;
-	current_executer = 0;
-	master_volume = MAX_VOLUME;
-	m_isQMediaPlayerAudio = false;
-	m_isFFTEnabled = false;
 
 	// Vol Set Logging
 	volset_timer.setSingleShot(true);
@@ -45,6 +49,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
+	if (audio_io->audioError()) {
+		m_lastAudioError = audio_io->audioError();
+		m_lastErrorText += audio_io->lastErrorText();
+	}
+
 	if (devName.isEmpty() || devName == "system default") {
 		audio_output = new QAudioOutput(AudioFormat::defaultFormat(),this);
 	}
@@ -62,8 +71,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 //		audio_output = new QAudioOutput(parent->extraAudioDevice(), AudioFormat::defaultFormat(),this);
 //	}
 
-	audio_player = new AudioPlayer(*this);
-	audio_player->setVolume(100);
+	if (m_lastAudioError == AUDIO_ERR_NONE) {
+		audio_player = new AudioPlayer(*this);
+		audio_player->setVolume(100);
+	}
+
 	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
 		audio_output->setBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
@@ -79,9 +91,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 	connect(&fade_timeline,SIGNAL(finished()),this,SLOT(on_fade_finished()));
 
 	// QMediaPlayer (experimental audio) connects
-	connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
-	connect(audio_player,SIGNAL(durationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
-	connect(audio_player,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_media_playstate_changed(QMediaPlayer::State)));
+	if (audio_player) {
+		connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
+		connect(audio_player,SIGNAL(durationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
+		connect(audio_player,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_media_playstate_changed(QMediaPlayer::State)));
+	}
 }
 
 AudioSlot::~AudioSlot()
@@ -238,7 +252,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> with Executer: %3 at position %4 with volume %5")
 				.arg(fxa->name()).arg(slotNumber+1).arg(exec->getIdString()).arg(QtStaticTools::msToTimeString(target_pos_ms)).arg(targetVolume));
 	} else {
-		exec = 0;
+		exec = nullptr;
 		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> at time %3 with volume %4")
 				.arg(fxa->name()).arg(slotNumber+1).arg(QtStaticTools::msToTimeString(target_pos_ms)).arg(targetVolume));
 	}
@@ -262,7 +276,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		}
 		else if (run_status == AUDIO_ERROR) {
 			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLocal8Bit().data());
-			current_fx = 0;
+			current_fx = nullptr;
 			break;
 		}
 
@@ -376,12 +390,12 @@ void AudioSlot::setVolume(int vol)
 	if (m_isQMediaPlayerAudio) {
 		level = float(vol) * 100 / MAX_VOLUME;
 		if (master_volume >= 0) {
-			level *= (float)master_volume / MAX_VOLUME;
+			level *= float(master_volume) / MAX_VOLUME;
 		}
 	} else {
 		level = float(vol) / MAX_VOLUME;
 		if (master_volume >= 0) {
-			level *= (float)master_volume / MAX_VOLUME;
+			level *= float(master_volume) / MAX_VOLUME;
 		}
 	}
 
@@ -412,7 +426,7 @@ void AudioSlot::setMasterVolume(int vol)
 FxAudioItem *AudioSlot::currentFxAudio()
 {
 	if (!FxItem::exists(current_fx)) {
-		return 0;
+		return nullptr;
 	}
 	return current_fx;
 }
@@ -422,7 +436,7 @@ Executer *AudioSlot::currentExecuter()
 	if (current_fx) {
 		return current_executer;
 	} else {
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -479,7 +493,7 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 {
 	AudioStatus current_state = run_status;
 	if (state == QAudio::StoppedState && !audio_io->isDecodingFinished()) {
-		DEBUGERROR("Audio is in Stopped State while decoding -> This might be an buffer underrun for an audio channel");
+		DEBUGERROR("Audio is in Stopped State while decoding -> This might be a buffer underrun for an audio channel");
 	}
 
 	switch (state) {

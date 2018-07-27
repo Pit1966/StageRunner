@@ -8,6 +8,8 @@
 #ifdef unix
 #include <unistd.h>
 #endif
+#include "appcentral.h"
+#include "usersettings.h"
 
 #include <QTextEdit>
 #include <QDateTime>
@@ -18,7 +20,7 @@
 
 
 /// Statics
-QThread *Log::main_thread = 0;
+QThread *Log::main_thread = nullptr;
 
 /// Die Ascii Texte als Auflösung der konstanten Fehlernummern @see ErrMsgCode
 const char *error_msg_asc[] = {
@@ -78,7 +80,7 @@ Log::Log()
 {
 	this->setObjectName("Thread::Log");
 	loggingEnabled = false;
-	statuswid = 0;
+	statuswid = nullptr;
 	logfileEnabled = false;
 	log_line_cnt = 0;
 	stopThreadFlag = false;
@@ -184,15 +186,23 @@ void Log::appendText(QString text)
 
 void Log::appendLogText(const QString & txt, int level)
 {
-
 	do_append_log_text(txt, level, MSG_LOGTXT, false);
 }
 
-void Log::do_append_log_text (const QString & txt, int level, quint32 type, bool remote_only)
+void Log::do_append_log_text (const QString & txt, int level, MsgLogType type, bool remote_only)
 {
-	Q_UNUSED(type);
-
 	QString msg;
+	QDateTime datetime = QDateTime::currentDateTime();
+	QString datestr = datetime.toString("dd MMM hh:mm:ss.zzz") + " -> ";
+
+	if (!loggingEnabled) {
+//		qDebug() << "Log message in startup: " << txt;
+		datestr.remove(0, 7);
+		msg = QString("<font color=blue>Shadow log:</font> %1%2").arg(datestr,txt);
+		replaceColorTags(msg);
+		m_shadowLog.append(LogEntry(type, msg, datetime));
+	}
+
 	switch (level) {
 	case 1:
 		setColor(QColor(Qt::blue));
@@ -220,9 +230,13 @@ void Log::do_append_log_text (const QString & txt, int level, quint32 type, bool
 		break;
 	}
 	msg += ": ";
-	if (level != 2) msg += QDateTime::currentDateTime().toString("dd MMM hh:mm:ss.zzz") + " -> ";
+	if (level != 2)
+		msg += datestr;
 	msg += txt;
-	if (msg.right(2) == "/n") msg.chop(2);
+	if (msg.right(2) == "/n")
+		msg.chop(2);
+
+	replaceColorTags(msg);
 
 	if (!remote_only) {
 		if (log_line_cnt++ > MAX_LOG_LINES) {
@@ -257,12 +271,25 @@ void Log::appendLogError(const QString & txt, int level)
 }
 
 
-void Log::do_append_log_error(const QString & txt, int level, quint32 type, bool remote_only)
+void Log::do_append_log_error(const QString & txt, int level, MsgLogType type, bool remote_only)
 {
-	Q_UNUSED(type);
-
-	setColor(QColor(Qt::darkRed));
 	QString msg;
+	QDateTime datetime = QDateTime::currentDateTime();
+	QString datestr = datetime.toString("dd MMM hh:mm:ss.zzz") + " -> ";
+
+	if (!loggingEnabled) {
+//		qDebug() << "Error message in startup: " << txt;
+		datestr.remove(0, 7);
+		msg = QString("<font color=red>Shadow log:</font> %1%2").arg(datestr,txt);
+		m_shadowLog.append(LogEntry(type, msg, datetime));
+	}
+
+	if (AppCentral::isReady() && AppCentral::ref().userSettings->pIsDarkGuiTheme) {
+		setColor(QColor("#ff7722"));
+	} else {
+		setColor(Qt::darkRed);
+	}
+
 	switch (level) {
 	case 1:
 		msg = "Kernel";
@@ -278,10 +305,12 @@ void Log::do_append_log_error(const QString & txt, int level, quint32 type, bool
 		break;
 	}
 	msg += ": ";
-	if (level != 2) msg += QDateTime::currentDateTime().toString("dd MMM hh:mm:ss.zzz") + " -> ";
+	if (level != 2)
+		msg += datestr;
 	msg += txt;
 
-	if (msg.right(2) == "/n") msg.chop(2);
+	if (msg.right(2) == "/n")
+		msg.chop(2);
 
 	if (!remote_only) {
 		emit newtext(msg);
@@ -293,6 +322,22 @@ void Log::do_append_log_error(const QString & txt, int level, quint32 type, bool
 			logfile.write(msg.toUtf8());
 		}
 		logfile_mutex.unlock();
+	}
+}
+
+void Log::replaceColorTags(QString &txt)
+{
+	if (!txt.contains("color="))
+		return;
+
+	if (AppCentral::isReady() && AppCentral::ref().userSettings->pIsDarkGuiTheme) {
+		txt.replace("color=error","color=#ff7722");
+		txt.replace("color=ok","color=#00ff00");
+		txt.replace("color=info","color=orange");
+	} else {
+		txt.replace("color=error","color=red");
+		txt.replace("color=ok","color=darkGreen");
+		txt.replace("color=info","color=orange");
 	}
 }
 
@@ -320,7 +365,7 @@ void Log::appendDebugText(const char *str,...)
 	va_start(varg_p,str);
 
 	qvsnprintf (temp+pn,950,str,varg_p);
-	qDebug(temp);
+	qDebug("%s",temp);
 	va_end(varg_p);
 	do_append_log_text(QString(temp),3, MSG_DEBUGTXT, false);
 
@@ -339,7 +384,7 @@ void Log::appendDevelText(const char *str,...)
 	va_start(varg_p,str);
 
 	qvsnprintf (temp+pn,950,str,varg_p);
-	qDebug(temp);
+	qDebug("%s",temp);
 	va_end(varg_p);
 	do_append_log_text(QString(temp),5, MSG_DEVELTXT,false);
 
@@ -357,7 +402,7 @@ void Log::appendDebugError(const char *str,...)
 	va_list varg_p;
 	va_start(varg_p,str);
 	qvsnprintf (temp+pn,950,str,varg_p);
-	qDebug (temp);
+	qDebug ("%s",temp);
 	va_end(varg_p);
 	do_append_log_error(QString(temp),3, MSG_DEBUGERR, false);
 }
@@ -383,6 +428,55 @@ QString Log::getCurrentThreadName()
 	return thread_txt;
 }
 
+QStringList Log::shadowLogStrings(MsgLogType type) const
+{
+	QStringList strs;
+	for (int t=0; t<m_shadowLog.size(); t++) {
+		if (m_shadowLog.at(t).type & type)
+			strs.append(m_shadowLog.at(t).text);
+	}
+	return strs;
+}
+
+int Log::shadowErrorCount() const
+{
+	int count = 0;
+	for (int t=0; t<m_shadowLog.size(); t++) {
+		switch (m_shadowLog.at(t).type) {
+		case MSG_LOGERR:
+		case MSG_DEBUGERR:
+			count++;
+			break;
+		default:
+			break;
+		}
+	}
+
+	return count;
+}
+
+/**
+ * @brief Transfer shadow log to "GUI" log
+ * @return amount of entries
+ *
+ * This reemits all entries stored in shadow log as it would be done in normal logging
+ */
+int Log::emitShadowLog(bool clearLog)
+{
+	int count = 0;
+	QMutableListIterator<LogEntry> it(m_shadowLog);
+	while (it.hasNext()) {
+		LogEntry e = it.next();
+		emit newtext(e.text);
+		if (clearLog)
+			it.remove();
+
+		count++;
+	}
+
+	return count;
+}
+
 
 /**
  * \brief Farbe der Logmeldungen setzen
@@ -405,13 +499,13 @@ void Log::setColor(const QColor &col)
  */
 QWidget * Log::setStatusWidget(QWidget * wid)
 {
-	QWidget * old_widget = 0;
+	QWidget * old_widget = nullptr;
 	if (statuswid) {
 		this->disconnect();
 		old_widget = statuswid;
 	}
-	statuswid = (QTextEdit *)wid;
-	if (statuswid != 0) {
+	statuswid = static_cast<QTextEdit*>(wid);
+	if (statuswid != nullptr) {
 
 		loggingEnabled = true;
 		statuswid->setUndoRedoEnabled(false);
@@ -543,7 +637,9 @@ int Log::readAppendLogFile(const QString & path)
 {
 	emit newtext(QString("Read StageRunner Log ---------------------------------------- %1").arg(path));
 	QFile file(path);
-	QProgressDialog progress(trUtf8("Load StageRunner log files..."),trUtf8("Cancel"),0,file.size());
+	QProgressDialog progress(tr("Load StageRunner log files...")
+							 ,trUtf8("Cancel")
+							 ,0,int(file.size()));
 	progress.setWindowModality(Qt::WindowModal);
 	progress.show();
 

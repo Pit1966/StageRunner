@@ -32,6 +32,7 @@
 #include "customwidget/psvideowidget.h"
 #include "dmxuniverseproperty.h"
 #include "fxscriptwidget.h"
+#include "gui/customwidget/psinfodialog.h"
 // #include "configrev.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
@@ -41,7 +42,7 @@
 
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
-	QMainWindow(0)
+	QMainWindow(nullptr)
 {
 	appCentral = myapp;
 
@@ -204,7 +205,7 @@ void StageRunnerMainWin::updateButtonStyles(QString style)
 	// Update Style of Dial knobs
 	if (dialWidgetStyle) {
 		delete dialWidgetStyle;
-		dialWidgetStyle = 0;
+		dialWidgetStyle = nullptr;
 	}
 
 	if (style == "" || style == "QSynth Dial Classic") {
@@ -260,15 +261,15 @@ void StageRunnerMainWin::clearProject()
 void StageRunnerMainWin::init()
 {
 	activeKeyModifiers = 0;
-	dialWidgetStyle = 0;
+	dialWidgetStyle = nullptr;
 
 	msg_dialog = new QErrorMessage(this);
-	fxitem_editor_dock = 0;
-	fxItemEditor = 0;
-	scene_status_dock = 0;
-	sceneStatusDisplay = 0;
-	sequence_status_dock = 0;
-	seqStatusDisplay = 0;
+	fxitem_editor_dock = nullptr;
+	fxItemEditor = nullptr;
+	scene_status_dock = nullptr;
+	sceneStatusDisplay = nullptr;
+	sequence_status_dock = nullptr;
+	seqStatusDisplay = nullptr;
 }
 
 
@@ -318,6 +319,33 @@ void StageRunnerMainWin::initAppDefaults()
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
 		on_loadTemplatesButton_clicked();
 
+}
+
+/**
+ * @brief Open Dialog with content of shadow log messages if there are any
+ */
+void StageRunnerMainWin::showShadowLog()
+{
+	if (logThread->shadowErrorCount() == 0)
+		return;
+
+	PsInfoDialog *dialog = new PsInfoDialog(this);
+	if (logThread->shadowErrorCount() > 0)
+		dialog->setText(logThread->shadowLogStrings(MSG_ALL));
+	dialog->show();
+}
+
+/**
+ * @brief Open Dialog with module error status, if there is any module error
+ */
+void StageRunnerMainWin::showModuleError()
+{
+	if (!appCentral->hasModuleError())
+		return;
+
+	PsInfoDialog *dialog = new PsInfoDialog(this);
+	dialog->setText(appCentral->moduleErrorText(appCentral->moduleErrors()));
+	dialog->show();
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
@@ -482,7 +510,7 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 		QApplication::setStyle(new LightDeskStyle);
 	}
 	else if (style == "Default") {
-		QApplication::setStyle(0);
+		QApplication::setStyle(nullptr);
 	}
 	else {
 		QApplication::setStyle(QStyleFactory::create(style));
@@ -615,6 +643,10 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
+
+		if (debug)
+			DEBUGTEXT("Key pressed: #%d -> '%s'",key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
+
 		switch (key) {
 		case Qt::Key_Shift:
 			activeKeyModifiers |= Qt::SHIFT;
@@ -642,14 +674,14 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		default:
 			if (key) {
 				// Do not start FX if CTRL key is pressed.
-				if ((activeKeyModifiers & Qt::CTRL)) {
+				if (uint(activeKeyModifiers) & Qt::CTRL) {
 					return qApp->eventFilter(obj, event);
 				}
 
 				QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
 				if (fxlist.size()) {
 					for (int t=0; t<fxlist.size(); t++) {
-						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, 0);
+						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, nullptr);
 					}
 					// fxListWidget->selectFx(fx);
 				}
@@ -657,8 +689,6 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		}
 
-		if (debug) DEBUGTEXT("Key pressed: #%d -> '%s'"
-				  ,key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
 
 		return true;
 	}
@@ -748,9 +778,9 @@ void StageRunnerMainWin::showInfoMsg(QString where, QString text)
 
 void StageRunnerMainWin::showErrorMsg(QString where, QString text)
 {
-	QString msg = QString("<font color=red>%1</font><br><br>Reported from function:%2")
+	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
-	msg_dialog->setStyleSheet("color:red;");
+	msg_dialog->setStyleSheet("color:#ff7722;");
 	msg_dialog->showMessage(text,where);
 	msg_dialog->resize(600,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
@@ -797,7 +827,9 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 	qDebug() << "Mainloop stopped";
 	QTime wait;
 	wait.start();
-	while (wait.elapsed() < 3000) ;;
+	while (wait.elapsed() < 3000) {
+		;
+	}
 	qDebug() << "Mainloop is back";
 }
 

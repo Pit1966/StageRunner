@@ -34,6 +34,13 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 
 #ifdef IS_QT5
 	audio_decoder = new QAudioDecoder;
+	if (audio_decoder->error() == QAudioDecoder::ServiceMissingError) {
+		m_lastErrorText = tr("Audio decoder not initialized. No decode/play service available");
+		audio_error = AUDIO::AUDIO_ERR_DECODER;
+		return;
+	}
+	// qDebug() << "audio:" << audio_decoder->error();
+
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));

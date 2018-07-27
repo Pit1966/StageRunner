@@ -32,7 +32,7 @@ QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
 			return plugin;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
@@ -58,7 +58,7 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		QLCIOPlugin *plugin = qobject_cast<QLCIOPlugin*> (obj);
 		if (plugin) {
 			// Check if plugin is already loaded
-			if (0 == getQLCPluginByName(plugin->name())) {
+			if (nullptr == getQLCPluginByName(plugin->name())) {
 				LOGTEXT(tr("QLC plugin '%1' loaded")
 						.arg(plugin->name()));
 
@@ -154,8 +154,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 	// Clear current fast access tables
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
-		fastMapInUniverse[t].plugin = 0;
-		fastMapOutUniverse[t].plugin = 0;
+		fastMapInUniverse[t].plugin = nullptr;
+		fastMapOutUniverse[t].plugin = nullptr;
 	}
 
 	// Create fast access tables for universe to plugin mapping
@@ -310,7 +310,7 @@ bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin
 		output = fastMapOutUniverse[universe].deviceNumber;
 		return true;
 	} else {
-		plugin = 0;
+		plugin = nullptr;
 		output = 0;
 		return false;
 	}
@@ -323,7 +323,7 @@ bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin 
 		input = fastMapInUniverse[universe].deviceNumber;
 		return true;
 	} else {
-		plugin = 0;
+		plugin = nullptr;
 		input = 0;
 		return false;
 	}

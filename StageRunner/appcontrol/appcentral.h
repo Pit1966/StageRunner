@@ -39,6 +39,11 @@ using namespace LIGHT;
 class AppCentral : public QObject
 {
 	Q_OBJECT
+public:
+	enum MODUL_ERROR {
+		E_NO_ERROR				= 0,
+		E_NO_AUDIO_DECODER		= 1<<0			///< Audio decoding service not found
+	};
 
 private:
 	static AppCentral *myinstance;
@@ -50,6 +55,8 @@ private:
 
 	QPointer<DmxMonitor> m_openedInputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
 	QPointer<DmxMonitor> m_openedOutputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
+
+	int m_moduleErrorMask;
 
 public:
 	QObject *mainWinObj;
@@ -72,6 +79,7 @@ public:
 public:
 	static AppCentral * instance();
 	static AppCentral & ref();
+	static bool isReady() {return myinstance != nullptr;}
 	static bool destroyInstance();
 
 	void clearProject();
@@ -84,7 +92,7 @@ public:
 
 	void lightBlack(qint32 time_ms = 0);
 	void videoBlack(qint32 time_ms = 0);
-	void sequenceStop(FxItem *fxseq = 0);
+	void sequenceStop(FxItem *fxseq = nullptr);
 
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
@@ -103,9 +111,15 @@ public:
 	int closeAllDmxMonitors();
 
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
-	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = 0, int row = -1);
+	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = nullptr, int row = -1);
 	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
 	FxItem *addDefaultSceneToFxList(FxList *fxlist);
+
+	// Module error handling
+	void setModuleError(MODUL_ERROR e, bool state = true);
+	MODUL_ERROR moduleErrors() const;
+	bool hasModuleError() const;
+	static QString moduleErrorText(MODUL_ERROR e);
 
 private:
 	AppCentral();

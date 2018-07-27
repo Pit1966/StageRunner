@@ -28,7 +28,7 @@
 
 using namespace AUDIO;
 
-AppCentral *AppCentral::myinstance = 0;
+AppCentral *AppCentral::myinstance = nullptr;
 
 AppCentral *AppCentral::instance()
 {
@@ -51,7 +51,7 @@ bool AppCentral::destroyInstance()
 {
 	if (myinstance) {
 		delete myinstance;
-		myinstance = 0;
+		myinstance = nullptr;
 		return true;
 	} else {
 		return false;
@@ -107,7 +107,7 @@ void AppCentral::lightBlack(qint32 time_ms)
 {
 	int num = unitLight->black(time_ms);
 	LOGTEXT(tr("BLACK: Fade %1 scenes to level 0 in %2s")
-			.arg(num).arg(float(time_ms)/1000));
+			.arg(num).arg(double(time_ms)/1000));
 }
 
 void AppCentral::videoBlack(qint32 time_ms)
@@ -158,7 +158,7 @@ FxList *AppCentral::getRegisteredFxList(int id)
 	}
 	DEBUGERROR("FxList with Id: %d is not registered",id);
 
-	return 0;
+	return nullptr;
 }
 
 bool AppCentral::isExperimentalAudio() const
@@ -238,36 +238,36 @@ DmxMonitor * AppCentral::openDmxInMonitor(int universe)
 {
 	if (m_openedInputDmxMonitorWidgets[universe]) {
 		m_openedInputDmxMonitorWidgets[universe]->close();
-		m_openedInputDmxMonitorWidgets[universe] = 0;
+		m_openedInputDmxMonitorWidgets[universe] = nullptr;
 	}
 
 	QLCIOPlugin *plugin;
 	int input;
 	if ( pluginCentral->getPluginAndInputForDmxUniverse(universe,plugin,input) ) {
 		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
-			m_openedInputDmxMonitorWidgets[universe] = plugin->openInputMonitor(input);
+			m_openedInputDmxMonitorWidgets[universe] = plugin->openInputMonitor(uint(input));
 			return m_openedInputDmxMonitorWidgets[universe];
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
 {
 	if (m_openedOutputDmxMonitorWidgets[universe]) {
 		m_openedOutputDmxMonitorWidgets[universe]->close();
-		m_openedOutputDmxMonitorWidgets[universe] = 0;
+		m_openedOutputDmxMonitorWidgets[universe] = nullptr;
 	}
 
 	QLCIOPlugin *plugin;
 	int output;
 	if ( pluginCentral->getPluginAndOutputForDmxUniverse(universe,plugin,output) ) {
 		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
-			m_openedOutputDmxMonitorWidgets[universe] = plugin->openOutputMonitor(output);
+			m_openedOutputDmxMonitorWidgets[universe] = plugin->openOutputMonitor(uint(output));
 			return m_openedOutputDmxMonitorWidgets[universe];
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 int AppCentral::closeAllDmxMonitors()
@@ -276,12 +276,12 @@ int AppCentral::closeAllDmxMonitors()
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		if (m_openedOutputDmxMonitorWidgets[t]) {
 			m_openedOutputDmxMonitorWidgets[t]->close();
-			m_openedOutputDmxMonitorWidgets[t] = 0;
+			m_openedOutputDmxMonitorWidgets[t] = nullptr;
 			cnt++;
 		}
 		if (m_openedInputDmxMonitorWidgets[t]) {
 			m_openedInputDmxMonitorWidgets[t]->close();
-			m_openedInputDmxMonitorWidgets[t] = 0;
+			m_openedInputDmxMonitorWidgets[t] = nullptr;
 			cnt++;
 		}
 	}
@@ -340,7 +340,7 @@ void AppCentral::assignInputToSelectedFxItem(qint32 universe, qint32 channel, in
 					.arg(universe+1).arg(channel+1).arg(assign_target->name()));
 			emit inputAssigned(assign_target);
 		} else {
-			emit inputAssigned(0);
+			emit inputAssigned(nullptr);
 		}
 
 		if (input_assign_target_fxitem) {
@@ -386,9 +386,10 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 
 FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
 {
-	if (!fxlist) return 0;
+	if (!fxlist)
+		return nullptr;
 
-	FxItem *addfx = 0;
+	FxItem *addfx = nullptr;
 
 
 	FxList *templates = templateFxList->fxList();
@@ -406,6 +407,37 @@ FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
 	}
 
 	return addfx;
+}
+
+void AppCentral::setModuleError(MODUL_ERROR e, bool state)
+{
+	if (state) {
+		m_moduleErrorMask |= e;
+	} else {
+		m_moduleErrorMask &= ~e;
+	}
+}
+
+AppCentral::MODUL_ERROR AppCentral::moduleErrors() const
+{
+	return MODUL_ERROR(m_moduleErrorMask);
+}
+
+bool AppCentral::hasModuleError() const
+{
+	return m_moduleErrorMask != E_NO_ERROR;
+}
+
+QString AppCentral::moduleErrorText(AppCentral::MODUL_ERROR e)
+{
+	QString estr;
+	if (e & E_NO_AUDIO_DECODER) {
+		estr += tr("<b>Audio decoder service not available</b><br>"
+				   "Application will not play audio fx items.<br><br>"
+				   "Check if your gstreamer installation is sufficient<br><br>");
+	}
+
+	return estr;
 }
 
 
@@ -529,10 +561,10 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
 	if (cur_fx && cur_fx != next_fx) {
-		executeFxCmd(cur_fx,CMD_FX_STOP,0);
+		executeFxCmd(cur_fx,CMD_FX_STOP,nullptr);
 	}
 	if (next_fx) {
-		executeFxCmd(next_fx,CMD_FX_START,0);
+		executeFxCmd(next_fx,CMD_FX_START,nullptr);
 		if (next_fx->preDelay() == -1) {
 			QTimer::singleShot(next_fx->postDelay(),this,SLOT(executeNextFx()));
 		}
@@ -543,7 +575,7 @@ void AppCentral::clearCurrentFx(int listID)
 {
 	FxList *fxlist = getRegisteredFxList(listID);
 	if (!fxlist) return;
-	fxlist->setCurrentFx(0);
+	fxlist->setCurrentFx(nullptr);
 }
 
 void AppCentral::moveToFollowerFx(int listID)
@@ -569,7 +601,7 @@ void AppCentral::testSetDmxChannel(int val, int channel)
 	val = val * 255 / MAX_DMX_FADER_RANGE;
 
 	if (unitLight->dmxOutputValues[0].at(channel) != val) {
-		unitLight->dmxOutputValues[0][channel] = val;
+		unitLight->dmxOutputValues[0][channel] = char(val);
 		unitLight->dmxOutputChanged[0] = true;
 	}
 }
@@ -636,11 +668,11 @@ void AppCentral::init()
 {
 	edit_mode_f = false;
 	input_assign_mode_f = false;
-	input_assign_target_fxitem = 0;
+	input_assign_target_fxitem = nullptr;
+	m_moduleErrorMask = E_NO_ERROR;
+	last_global_selected_fxitem = nullptr;
 
-	last_global_selected_fxitem = 0;
-
-	mainWinObj = 0;
+	mainWinObj = nullptr;
 
 	userSettings = new UserSettings;
 	project = new Project;
