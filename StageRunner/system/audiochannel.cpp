@@ -262,7 +262,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
 			current_fx->startInProgress = false;
-			float vol = 0;
+			qreal vol = 0;
 			if (m_isQMediaPlayerAudio) {
 				vol = audio_player->volume();
 			} else {
@@ -296,7 +296,7 @@ bool AudioSlot::stopFxAudio()
 	if (current_fx)
 		current_fx->startInProgress = false;
 
-	emit vuLevelChanged(slotNumber,0.0f,0.0f);
+	emit vuLevelChanged(slotNumber,0.0,0.0);
 
 	if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
@@ -382,20 +382,25 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 	return true;
 }
 
+void AudioSlot::setVolume(qreal vol)
+{
+	setVolume(int(vol));
+}
+
 void AudioSlot::setVolume(int vol)
 {
 
-	float level;
+	qreal level;
 
 	if (m_isQMediaPlayerAudio) {
-		level = float(vol) * 100 / MAX_VOLUME;
+		level = qreal(vol) * 100 / MAX_VOLUME;
 		if (master_volume >= 0) {
-			level *= float(master_volume) / MAX_VOLUME;
+			level *= qreal(master_volume) / MAX_VOLUME;
 		}
 	} else {
-		level = float(vol) / MAX_VOLUME;
+		level = qreal(vol) / MAX_VOLUME;
 		if (master_volume >= 0) {
-			level *= float(master_volume) / MAX_VOLUME;
+			level *= qreal(master_volume) / MAX_VOLUME;
 		}
 	}
 
@@ -461,7 +466,7 @@ void AudioSlot::emit_audio_play_progress()
 	qint64 soundlen = current_fx->audioDuration;
 
 	int loop;
-	int per_mille;
+	qint64 per_mille;
 	qint64 time_ms;
 
 	if (m_isQMediaPlayerAudio) {
@@ -475,12 +480,12 @@ void AudioSlot::emit_audio_play_progress()
 		per_mille = time_ms * 1000 / soundlen;
 	}
 
-	emit audioProgressChanged(slotNumber, current_fx, per_mille);
+	emit audioProgressChanged(slotNumber, current_fx, int(per_mille));
 
 	AudioCtrlMsg msg(current_fx,slotNumber);
 	msg.currentAudioStatus = run_status;
-	msg.progress = per_mille;
-	msg.progressTime = time_ms;
+	msg.progress = int(per_mille);
+	msg.progressTime = int(time_ms);
 	msg.loop = loop;
 	msg.executer = current_executer;
 	if (current_fx->loopTimes > 1) {
@@ -509,6 +514,12 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 	case QAudio::StoppedState:
 		run_status = AUDIO_IDLE;
 		break;
+
+#if QT_VERSION >= 0x050b00
+	case QAudio::InterruptedState:
+		DEBUGERROR("%s: QAudio::Interrupted",Q_FUNC_INFO);
+		break;
+#endif
 	}
 
 	if (audio_io->audioError() != AUDIO_ERR_NONE) {
@@ -521,7 +532,7 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0.0f,0.0f);
+			emit vuLevelChanged(slotNumber,0.0,0.0);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -576,7 +587,7 @@ void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0.0f,0.0f);
+			emit vuLevelChanged(slotNumber,0.0,0.0);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -606,7 +617,7 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 		msg.fxAudio = current_fx;
 
 		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0.0f,0.0f);
+			emit vuLevelChanged(slotNumber,0.0,0.0);
 			emit audioProgressChanged(slotNumber,current_fx,0);
 			msg.progress = 0;
 		}
@@ -652,13 +663,13 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 		new_volume = fade_initial_vol;
 		new_volume -= value * qAbs(fade_initial_vol - fade_target_vol);
 		// some rounding before cast to integer
-		new_volume += 0.5f;
+		new_volume += 0.5;
 	}
 	else if (fade_mode == AUDIO_FADE_IN) {
 		new_volume = fade_initial_vol;
 		new_volume += value * qAbs(fade_target_vol - fade_initial_vol);
 		// some rounding before cast to integer
-		new_volume += 0.5f;
+		new_volume += 0.5;
 	}
 	else {
 		return;
@@ -669,7 +680,7 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 
 	// send message in order to update GUI
 	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status,current_executer);
-	msg.volume = new_volume;
+	msg.volume = int(new_volume);
 	emit audioCtrlMsgEmitted(msg);
 }
 

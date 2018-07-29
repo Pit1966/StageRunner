@@ -57,7 +57,7 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 		fprintf(stderr, "Debug: %s\n", localMsg.constData());
 //		printf("Debug: %s\n",msg.toLocal8Bit().data());
 		break;
-#if QT_VERSION >= 0x050600
+#if QT_VERSION >= 0x050500
 	case QtInfoMsg:
 		fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
 		break;

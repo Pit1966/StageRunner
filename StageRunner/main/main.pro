@@ -6,6 +6,9 @@ TARGET   = stagerunner
 
 # CONFIG += static
 
+#CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
+
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
 INCLUDEPATH  += ../appcontrol

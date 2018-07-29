@@ -56,6 +56,17 @@ QString QtStaticTools::msToTimeString(int ms)
 	return time;
 }
 
+QString QtStaticTools::msToTimeString(qint64 ms)
+{
+	QString time;
+	if (ms >= 10000 || ms%1000 == 0) {
+		time = QString("%1s").arg(ms / 1000);
+	} else {
+		time = QString("%1ms").arg(ms);
+	}
+	return time;
+}
+
 QString QtStaticTools::qRectToString(const QRect rect)
 {
 	QString rs = QString("%1:%2:%3:%4")

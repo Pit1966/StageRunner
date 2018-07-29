@@ -72,6 +72,7 @@ public:
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
+	void setVolume(qreal vol);
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
