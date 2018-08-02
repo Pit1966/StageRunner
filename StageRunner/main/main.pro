@@ -143,7 +143,8 @@ SOURCES += \
 	../fx/fxcueitem.cpp \
     ../plugins/yadi/src/dmxmonitor.cpp \
 	../gui/customwidget/psinfodialog.cpp \
-	../system/variantmapserializer.cpp
+	../system/variantmapserializer.cpp \
+    ../gui/customwidget/psdockwidget.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -255,7 +256,8 @@ HEADERS  += \
 	../fx/fxcueitem.h \
     ../plugins/yadi/src/dmxmonitor.h \
 	../gui/customwidget/psinfodialog.h \
-	../system/variantmapserializer.h
+	../system/variantmapserializer.h \
+    ../gui/customwidget/psdockwidget.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

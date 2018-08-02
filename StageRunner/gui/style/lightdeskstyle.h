@@ -33,7 +33,7 @@ public:
 	~LightDeskStyle();
 
 	void polish(QPalette &pal);
-	// void polish(QWidget *widget);
+	void polish(QWidget *widget);
 
 	int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const;
 	int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
@@ -41,6 +41,8 @@ public:
 	void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 	void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const;
 	void drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal, bool enabled, const QString &text, QPalette::ColorRole textRole) const;
+	void drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const;
+
 
 
 protected:

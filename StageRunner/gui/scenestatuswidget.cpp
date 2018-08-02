@@ -13,6 +13,8 @@ SceneStatusWidget::SceneStatusWidget(QWidget *parent)
 {
 	rwlock = new QReadWriteLock(QReadWriteLock::Recursive);
 	setupUi(this);
+
+	setObjectName("SceneStatus");
 }
 
 SceneStatusWidget::~SceneStatusWidget()

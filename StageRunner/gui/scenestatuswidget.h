@@ -14,7 +14,7 @@ protected:
 	FxSceneItem *myScene;
 
 public:
-	SceneStatusListItem(FxSceneItem *scene, QListWidget *list = 0);
+	SceneStatusListItem(FxSceneItem *scene, QListWidget *list = nullptr);
 
 };
 
@@ -29,7 +29,7 @@ private:
 	QHash<FxSceneItem*,SceneStatusListItem*>scene_hash;
 
 public:
-	SceneStatusWidget(QWidget *parent = 0);
+	SceneStatusWidget(QWidget *parent = nullptr);
 	~SceneStatusWidget();
 
 	bool appendScene(FxSceneItem *scene);

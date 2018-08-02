@@ -33,6 +33,7 @@
 #include "dmxuniverseproperty.h"
 #include "fxscriptwidget.h"
 #include "gui/customwidget/psinfodialog.h"
+#include "gui/customwidget/psdockwidget.h"
 // #include "configrev.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
@@ -150,7 +151,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
 	setDockNestingEnabled(true);
 
-	fxitem_editor_dock = new QDockWidget(this);
+	fxitem_editor_dock = new PsDockWidget(this);
 	fxItemEditor = new FxItemPropertyWidget();
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxItemEditor,SLOT(setEditable(bool)));
 	fxItemEditor->setEditable(false);
@@ -162,7 +163,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,fxitem_editor_dock);
 
-	scene_status_dock = new QDockWidget(this);
+	scene_status_dock = new PsDockWidget(this);
 	sceneStatusDisplay = new SceneStatusWidget();
 	scene_status_dock->setObjectName("Scene Status Display");
 	scene_status_dock->setWindowTitle("Scene Status Display");
@@ -170,7 +171,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	scene_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,scene_status_dock);
 
-	sequence_status_dock = new QDockWidget(this);
+	sequence_status_dock = new PsDockWidget(this);
 	seqStatusDisplay = new SequenceStatusWidget();
 	sequence_status_dock->setObjectName("Sequence Status Display");
 	sequence_status_dock->setWindowTitle("Sequence Status Display");
@@ -178,7 +179,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	sequence_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,sequence_status_dock);
 
-	template_dock = new QDockWidget(this);
+	template_dock = new PsDockWidget(this);
 	templateWidget =new FxListWidget();
 	template_dock->setObjectName("Fx Templates");
 	template_dock->setWindowTitle("Fx Templates");
@@ -605,7 +606,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
 		// qDebug("KeyEvent %s",obj->objectName().toLocal8Bit().data());
 
-		if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
+		if (actionEdit_Mode->isChecked())
+			return qApp->eventFilter(obj, event);
 
 		QString widname;
 		if (QApplication::activeWindow()) {
@@ -674,6 +676,18 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			appCentral->lightBlack(0);
 			appCentral->videoBlack(0);
 			break;
+
+//		case Qt::Key_Q: {
+//			QList<QTabWidget*> list = findChildren<QTabWidget*>();
+//			qDebug() << "tabs" << list;
+
+//			QWidget *l = scene_status_dock;
+//			while (l->parentWidget()) {
+//				l = l->parentWidget();
+//				qDebug() << "parent" << l;
+//			}
+//		}
+//			break;
 
 		default:
 			if (key) {
