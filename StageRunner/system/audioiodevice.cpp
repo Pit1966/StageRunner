@@ -122,7 +122,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 		maxlen = avail;
 	}
 
-	memcpy(data, audio_buffer->data()+bytes_read, maxlen);
+	memcpy(data, audio_buffer->data()+bytes_read, size_t(maxlen));
 	bytes_read += maxlen;
 
 	calcVuLevel(data,maxlen,*audio_format);
@@ -189,7 +189,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	qreal peak[4] = {0,0,0,0};
 
 	int channels = audioFormat.channelCount();
-	int frames = size / channels;
+	qint64 frames = size / channels;
 
 	if (frames == 0) return;
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
@@ -355,22 +355,22 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 
 qint64 AudioIODevice::currentPlayPosMs() const
 {
-	return audio_format->durationForBytes(bytes_read) / 1000;
+	return audio_format->durationForBytes(qint32(bytes_read) / 1000);
 
-	if (bytes_read >= bytes_avail && bytes_avail != 0) {
-		return 0;
-	} else {
-	}
+//	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+//		return 0;
+//	} else {
+//	}
 }
 
 qint64 AudioIODevice::currentPlayPosUs() const
 {
-	return audio_format->durationForBytes(bytes_read);
+	return audio_format->durationForBytes(qint32(bytes_read));
 
-	if (bytes_read >= bytes_avail && bytes_avail != 0) {
-		return 0;
-	} else {
-	}
+//	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+//		return 0;
+//	} else {
+//	}
 }
 
 bool AudioIODevice::seekPlayPosMs(qint64 posMs)

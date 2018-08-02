@@ -69,7 +69,7 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 
 	emit statusChanged(status);
 
-//	qDebug() << Q_FUNC_INFO << status;
+	// qDebug() << Q_FUNC_INFO << status;
 }
 
 void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)

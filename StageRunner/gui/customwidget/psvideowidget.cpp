@@ -7,9 +7,10 @@
 
 PsVideoWidget::PsVideoWidget(QWidget *parent)
 	: QVideoWidget(parent)
-	, m_myPlayer(0)
+	, m_myPlayer(nullptr)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
+	setAutoFillBackground(false);
 
 	QSettings set;
 	if (set.contains("VideoWinEnabled")) {
@@ -49,5 +50,11 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 	set.setValue("VideoWinIsFullscreen",isFullScreen());
 	set.endGroup();
 
+#if QT_VERSION >= 0x050600
+	hide();
+	event->ignore();
+	return;
+#else
 	QVideoWidget::closeEvent(event);
+#endif
 }

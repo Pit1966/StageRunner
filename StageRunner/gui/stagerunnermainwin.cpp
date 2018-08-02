@@ -48,6 +48,10 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	init();
 
+	// DocWidgets defauls
+	setTabPosition(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea, QTabWidget::North);
+	setTabPosition(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea, QTabWidget::West);
+
 	setupUi(this);
 	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
