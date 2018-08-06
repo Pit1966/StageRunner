@@ -10,7 +10,7 @@ class PsVideoWidget : public QVideoWidget
 private:
 	VideoPlayer *m_myPlayer;
 public:
-	PsVideoWidget(QWidget *parent = 0);
+	PsVideoWidget(QWidget *parent = nullptr);
 	void setVideoPlayer(VideoPlayer *vidplay);
 
 

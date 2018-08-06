@@ -115,15 +115,15 @@ void AudioControl::getAudioDevices()
 			}
 		}
 	}
-	LOGTEXT(tr("<font color=darkgreen>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
+	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
 	if (!m_extraDevice.isNull())
-		LOGTEXT(tr("<font color=darkgreen>Extra Audio: %1</font>").arg(m_extraDevice.deviceName()));
+		LOGTEXT(tr("<font color=info>Extra Audio: %1</font>").arg(m_extraDevice.deviceName()));
 
 	QAudioDeviceInfo def_dev(QAudioDeviceInfo::defaultOutputDevice());
 	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
-		LOGTEXT(tr("<font color=green>Default format supported</font>"));
+		LOGTEXT(tr("<font color=ok>Default format supported</font>"));
 	} else {
-		LOGTEXT(tr("<font color=red>Default audio format not supported by audio device"));
+		LOGTEXT(tr("<font color=error>Default audio format not supported by audio device"));
 	}
 
 	if (audioSlots.size())
@@ -250,9 +250,9 @@ void AudioControl::setVideoPlayerVolume(int vol)
 {
 	float audiolevel = float(vol) * 100 / MAX_VOLUME;
 	if (masterVolume >= 0)
-		audiolevel *= (float)masterVolume / MAX_VOLUME;
+		audiolevel *= float(masterVolume) / MAX_VOLUME;
 
-	m_videoPlayer->setVolume(audiolevel);
+	m_videoPlayer->setVolume(int(audiolevel));
 	m_videoPlayerCurrentVolume = vol;
 }
 
@@ -297,7 +297,7 @@ void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal righ
 
 	int vol = audioSlots.at(slotnum)->volume();
 	// emit vuLevelChanged(slotnum, left, right);
-	float volf = float(vol) / MAX_VOLUME;
+	double volf = double(vol) / MAX_VOLUME;
 
 	emit vuLevelChanged(slotnum, left * (pow(10,volf)-1) * 10 / 90, right * (pow(10,volf)-1) * 10 / 90);
 }
@@ -595,7 +595,7 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 		myApp.videoBlack(0);
 		break;
 	case FxAudioItem::ATTACHED_CMD_START_FX:
-		myApp.executeFxCmd(fxa->attachedStartPara1, CMD_FX_START, 0);
+		myApp.executeFxCmd(fxa->attachedStartPara1, CMD_FX_START, nullptr);
 //		myApp.unitVideo->startFxClipById(fxa->attachedStartPara1);
 		break;
 	default:
@@ -617,7 +617,7 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 		myApp.videoBlack(0);
 		break;
 	case FxAudioItem::ATTACHED_CMD_START_FX:
-		myApp.executeFxCmd(fxa->attachedStopPara1, CMD_FX_START, 0);
+		myApp.executeFxCmd(fxa->attachedStopPara1, CMD_FX_START, nullptr);
 //		myApp.unitVideo->startFxClipById(fxa->attachedStopPara1);
 		break;
 	default:
@@ -823,7 +823,7 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 	bool ok = true;
 	if (value > 5) {
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
-			ok = startFxAudioAt(fxa, 0, -1, 5);
+			ok = startFxAudioAt(fxa, nullptr, -1, 5);
 			fxa->isDmxStarted = true;
 		}
 		else if (fxa->isDmxStarted) {
@@ -847,9 +847,9 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 
 void AudioControl::init()
 {
-	m_playlist = 0;
-	m_videoPlayer = 0;
-	m_videoWid = 0;
+	m_playlist = nullptr;
+	m_videoPlayer = nullptr;
+	m_videoWid = nullptr;
 	m_videoPlayerCurrentVolume = 0;
 
 	setObjectName("Audio Control");
@@ -868,6 +868,10 @@ void AudioControl::createMediaPlayInstances()
 	for (int t=0; t<used_slots; t++) {
 		AudioSlot *slot = new AudioSlot(this,t,set->pSlotAudioDevice[t]);
 		audioSlots.append(slot);
+		AudioErrorType aerror = slot->lastAudioError();
+		if (aerror == AUDIO_ERR_DECODER) {
+			myApp.setModuleError(AppCentral::E_NO_AUDIO_DECODER);
+		}
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(vu_level_changed_receiver(int,qreal,qreal)));
@@ -891,9 +895,9 @@ void AudioControl::destroyMediaPlayInstances()
 	}
 
 	delete m_videoWid;
-	m_videoWid = 0;
+	m_videoWid = nullptr;
 	delete m_videoPlayer;
-	m_videoPlayer = 0;
+	m_videoPlayer = nullptr;
 	delete m_playlist;
-	m_playlist = 0;
+	m_playlist = nullptr;
 }

@@ -12,9 +12,11 @@
 #include <QList>
 #include <QVariant>
 #include <QMutex>
+#include <QDateTime>
 
 
 enum MsgLogType {
+	MSG_LOGNONE = 0,
 	MSG_DEBUGTXT = 1<<0,
 	MSG_DEBUGERR = 1<<1,
 	MSG_LOGTXT = 1<<2,
@@ -42,6 +44,25 @@ enum ErrMsgCode {
 
 };
 
+class LogEntry
+{
+public:
+	MsgLogType type;
+	QString text;
+	QDateTime dateTime;
+public:
+	LogEntry(MsgLogType type = MSG_LOGNONE, const QString &text = QString(), const QDateTime & dateTime = QDateTime())
+		: type(type)
+		, text(text)
+		, dateTime(dateTime)
+	{}
+	LogEntry(const LogEntry &o)
+		: type(o.type)
+		, text(o.text)
+		, dateTime(o.dateTime)
+	{}
+};
+
 #define MAX_LOG_LINES 10000
 #define MAX_LOG_SIZE 10000000
 
@@ -63,9 +84,8 @@ class QTextEdit;
  * die Konsole und in das LOG Fenster der Anwendung
  * sowie Protokollierung (insbesondere von Fehlfunktionen) in eine Datei zur Verfügung stellen.
  *
- * Von Log darf es nur eine Instanz geben
- *
- * Achtung: Es gibt nur eine LOG Instanz die über den extern Pointer *logThread angesprochen werden kann.
+ * @attention Von Log darf es nur eine Instanz geben
+ * @note Es gibt nur eine LOG Instanz die über den extern Pointer *logThread angesprochen werden kann.
  *
  */
 class Log : public QThread
@@ -75,16 +95,17 @@ class Log : public QThread
 public:
 
 	bool loggingEnabled;				///< zeigt an, das normales Logging in Gui möglich ist
-	bool logfileEnabled;						///< zeigt an, dass Logfile geöffnet ist.
+	bool logfileEnabled;				///< zeigt an, dass Logfile geöffnet ist.
 	volatile bool stopThreadFlag;
 	QAtomicInt mainThreadLifeCount;		///< wird benutzt, um zu erkennen, ob Mainthread hängt
 
 private:
 	static QThread *main_thread;		///< Pointer auf Main Thread
 
-	QTextEdit * statuswid;		///< an dieses Widget, wird der Statustext gesendet
-	QColor color;				///< aktuelle Textausgabe Farbe
-	int log_line_cnt;			///< Die Anzahl der Zeilen, die ins Log Fenster ausgegeben werden (Bei Ereichen von MAX_LOG_LINES, wird dieses gelöscht);
+	QTextEdit * statuswid;			///< an dieses Widget, wird der Statustext gesendet
+	QColor color;					///< aktuelle Textausgabe Farbe
+	int log_line_cnt;				///< Die Anzahl der Zeilen, die ins Log Fenster ausgegeben werden (Bei Ereichen von MAX_LOG_LINES, wird dieses gelöscht);
+	QList<LogEntry> m_shadowLog;	///< Messages logged in application startup phase, when GUI is not ready
 
 	QMutex logfile_mutex;
 	QFile logfile;
@@ -116,11 +137,17 @@ public:
 	inline static QThread * getCurrentThreadPointer() {return currentThread();}
 	inline static bool isMainThread() {return (main_thread == currentThread());}
 
+	inline const QList<LogEntry> & shadowLog() const {return m_shadowLog;}
+	QStringList shadowLogStrings(MsgLogType type) const;
+	inline int shadowLogSize() const {return m_shadowLog.size();}
+	int shadowErrorCount() const;
+	int emitShadowLog(bool clearLog = true);
 
 private:
 	void run();
-	void do_append_log_text(const QString & txt, int level, quint32 type, bool remote_only);
-	void do_append_log_error(const QString & txt,int level, quint32 type, bool remote_only);
+	void do_append_log_text(const QString & txt, int level, MsgLogType type, bool remote_only);
+	void do_append_log_error(const QString & txt,int level, MsgLogType type, bool remote_only);
+	void replaceColorTags(QString &txt);
 	void process_line_for_log_output(QString & msg);
 
 public slots:
@@ -138,6 +165,7 @@ signals:
 	void errorMsgReceived(const QString & func, const QString & text);
 };
 
+extern const char *error_msg_asc[];
 
 #ifdef LOG_CPP
 	Log *logThread = 0;

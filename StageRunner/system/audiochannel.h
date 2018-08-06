@@ -59,6 +59,9 @@ private:
 	bool m_isQMediaPlayerAudio;
 	bool m_isFFTEnabled;
 
+	QString m_lastErrorText;
+	AudioErrorType m_lastAudioError;
+
 public:
 	AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName);
 	~AudioSlot();
@@ -69,6 +72,7 @@ public:
 	bool stopFxAudio();
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
+	void setVolume(qreal vol);
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
@@ -85,6 +89,8 @@ public:
 	void setFFTEnabled(bool state);
 	inline bool isFFTEnabled() const {return m_isFFTEnabled;}
 	QString currentFxName() const;
+
+	inline AudioErrorType lastAudioError() const {return m_lastAudioError;}
 
 private:
 	void emit_audio_play_progress();

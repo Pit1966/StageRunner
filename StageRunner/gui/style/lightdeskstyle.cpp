@@ -1,4 +1,5 @@
 #include "lightdeskstyle.h"
+#include "customwidget/psdockwidget.h"
 
 /// Statics
 QPen LightDeskStyle::penBevelDarkTrans = QPen(QColor(10,10,10,120),3);
@@ -46,6 +47,8 @@ int LightDeskStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option
 		return int(false);
 	case SH_EtchDisabledText:
 		return int(true);
+	case SH_DockWidget_ButtonsHaveFrame:
+		return int(false);
 	default:
 		return QProxyStyle::styleHint(hint, option, widget, returnData);
 	}
@@ -67,6 +70,33 @@ int LightDeskStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *
 
 void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
+//	const QWidget *w = widget;
+//	while (w) {
+//		if (qobject_cast<const PsDockWidget*>(w)) {
+//			qDebug() << "draw Complex PsDock" << w ;
+//			QRect r = option->rect;
+//			painter->fillRect(r, Qt::blue);
+//		}
+//		w = w->parentWidget();
+//	}
+
+//	QString name = widget->objectName();
+//	if (!name.contains(QRegExp("(Audio|itemEdit)")))
+//		qDebug() << "drawprim" << element << option << widget->objectName();
+
+//	if (element == PE_FrameTabBarBase) {
+//		if (widget->parent())
+//			qDebug() << "draw" << option << widget << " p" << widget->parent();
+//		else
+//			qDebug() << "draw " << option << widget;
+
+
+//		qDebug() << " " << option->rect;
+//	}
+
+
+//	QRect r = option->rect;
+//	painter->fillRect(r, Qt::green);
 
 	switch (element) {
 //	case PE_CustomBase:
@@ -120,6 +150,13 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 			painter->restore();
 		}
 		break;
+
+	case PE_FrameTabBarBase: {
+		QRect r = option->rect;
+		//r.adjust(0,0,0,-1);
+		painter->fillRect(r, QColor(200,200,200,120));
+		break;
+	}
 
 	case PE_FrameTabWidget:
 		{
@@ -235,6 +272,24 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 
 void LightDeskStyle::drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
+//	if (element == CE_ShapedFrame) {
+//		QRect r = option->rect;
+//		//r.adjust(0,0,0,-1);
+//		painter->fillRect(r, Qt::green);
+
+//		return;
+//	}
+
+//	const QWidget *w = widget;
+//	while (w) {
+//		if (qobject_cast<const PsDockWidget*>(w)) {
+//			qDebug() << "PsDock" << w << "element" << element;
+//			QRect r = option->rect;
+//			painter->fillRect(r, Qt::green);
+//		}
+//		w = w->parentWidget();
+//	}
+
 	switch (element) {
 	case CE_TabBarTabShape:
 		{
@@ -296,12 +351,28 @@ void LightDeskStyle::drawControl(QStyle::ControlElement element, const QStyleOpt
 		}
 		break;
 	default:
+//			QRect r = option->rect;
+//			//r.adjust(0,0,0,-1);
+//			painter->fillRect(r, Qt::red);
 		QProxyStyle::drawControl(element, option, painter, widget);
 	}
 }
 
 void LightDeskStyle::drawComplexControl(QStyle::ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const
 {
+//				QRect r = option->rect;
+//				//r.adjust(0,0,0,-1);
+//				painter->fillRect(r, Qt::green);
+//	const QWidget *w = widget;
+//	while (w) {
+//		if (qobject_cast<const PsDockWidget*>(w)) {
+//			qDebug() << "draw Complex PsDock" << w ;
+//			QRect r = option->rect;
+//			painter->fillRect(r, Qt::red);
+//		}
+//		w = w->parentWidget();
+//	}
+
 	QProxyStyle::drawComplexControl(control, option, painter, widget);
 }
 
@@ -324,6 +395,11 @@ void LightDeskStyle::drawItemText(QPainter *painter, const QRect &rect, int flag
 	}
 
 	QProxyStyle::drawItemText(painter, rect, flags, pal, enabled, text, textRole);
+}
+
+void LightDeskStyle::drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const
+{
+	QProxyStyle::drawItemPixmap(painter, rect, alignment, pixmap);
 }
 
 void LightDeskStyle::setTexture(QPalette &pal, QPalette::ColorRole role, const QPixmap &pixmap)
@@ -393,22 +469,32 @@ QPainterPath LightDeskStyle::drawTabRoundBox(const QRect &rect, QStyle::State st
 		path.arcTo(QRect(x2 - diam, y1, diam, diam), -290.0, -90.0);
 		path.lineTo(x2, y2 + 5);
 	} else {
-		path.moveTo(x1 + radius, y2);
-		path.arcTo(QRect(x1, y2 - diam, diam, diam), -90.0, -90.0);
+		// This draws full edge rounded tab entry
+//		path.moveTo(x1 + radius, y2);
+//		path.arcTo(QRect(x1, y2 - diam, diam, diam), -90.0, -90.0);
+//		path.lineTo(x1, y1 + radius);
+//		path.arcTo(QRect(x1,y1, diam, diam), -180.0, -90.0);
+//		path.lineTo(x2 - radius, y1);
+//		path.arcTo(QRect(x2 - diam, y1, diam, diam), -290.0, -90.0);
+//		path.lineTo(x2, y2 - radius);
+//		path.arcTo(QRect(x2 - diam, y2 - diam, diam, diam), 0.0, -90.0);
+//		path.lineTo(x1 + radius, y2);
+
+		// This is for unselected tabs with located at top of the tab widget
+		path.moveTo(x1, y2);
 		path.lineTo(x1, y1 + radius);
 		path.arcTo(QRect(x1,y1, diam, diam), -180.0, -90.0);
 		path.lineTo(x2 - radius, y1);
 		path.arcTo(QRect(x2 - diam, y1, diam, diam), -290.0, -90.0);
-		path.lineTo(x2, y2 - radius);
-		path.arcTo(QRect(x2 - diam, y2 - diam, diam, diam), 0.0, -90.0);
-		path.lineTo(x1 + radius, y2);
+		path.lineTo(x2, y2);
 	}
 
 	return path;
 }
 
 
-//void LightDeskStyle::polish(QWidget *widget)
-//{
-
-//}
+void LightDeskStyle::polish(QWidget *widget)
+{
+	Q_UNUSED(widget)
+	// widget->setAutoFillBackground(true);
+}

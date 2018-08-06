@@ -57,7 +57,7 @@ QVariantMap VariantMapSerializer::toMap(const QString &str)
 
 bool VariantMapSerializer::parseString(int &pos, const QString &str, QVariantMap &map)
 {
-	int size = str.size();
+	//int size = str.size();
 	char c = getNextSkipSpace(pos, str);
 
 	switch (c) {

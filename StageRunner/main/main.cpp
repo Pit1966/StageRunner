@@ -19,12 +19,13 @@ int main(int argc, char *argv[])
 	app.setOrganizationName(APP_ORG_STRING);
 
 	logThread = new Log;
-	logThread->initLog(0);
+	logThread->initLog(nullptr);
 
 	AppCentral *myapp = AppCentral::instance();
 	StageRunnerMainWin *mywin = new StageRunnerMainWin(myapp);
 
 	logThread->initLog(mywin->logWidget);
+	logThread->emitShadowLog(false);
 
 	// Init GUI
 	mywin->setApplicationGuiStyle(myapp->userSettings->pApplicationGuiStyle);
@@ -44,6 +45,12 @@ int main(int argc, char *argv[])
 
 	// Bring to top
 	mywin->raise();
+
+	// Show startup log messages (if something happened)
+	if (AppCentral::ref().hasModuleError())
+		mywin->showModuleError();
+	else
+		mywin->showShadowLog();
 
 	// and run
 	int ret =  app.exec();

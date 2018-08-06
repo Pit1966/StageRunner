@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="dmxTab">
       <attribute name="title">
@@ -390,6 +390,13 @@
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="dialKnobStyleCombo"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="guiIsDarkCheck">
+            <property name="text">
+             <string>GUI has dark appearance</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

@@ -11,7 +11,7 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	, loopTarget(1)
 	, loopCnt(1)
 	, currentState(QMediaPlayer::StoppedState)
-	, m_currentFxClipItem(0)
+	, m_currentFxClipItem(nullptr)
 {
 	setVideoOutput(m_videoWid);
 
@@ -69,7 +69,7 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 
 	emit statusChanged(status);
 
-//	qDebug() << Q_FUNC_INFO << status;
+	// qDebug() << Q_FUNC_INFO << status;
 }
 
 void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
@@ -106,10 +106,10 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 {
 	if (!m_currentFxClipItem) return;
 
-	int dur = duration();
+	qint64 dur = duration();
 	if (dur <= 0) return;
 
-	int permille = pos * 1000 / dur;
+	int permille = int(pos * 1000 / dur);
 
 //	qDebug() << "pos" << pos << dur << permille/10 << thread();
 

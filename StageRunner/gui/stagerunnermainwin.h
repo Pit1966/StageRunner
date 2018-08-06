@@ -17,6 +17,7 @@ class SequenceStatusWidget;
 class FxListWidget;
 class UserSettings;
 class FxScriptItem;
+class PsDockWidget;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -24,10 +25,10 @@ class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 private:
 	AppCentral *appCentral;
 	QErrorMessage *msg_dialog;
-	QDockWidget *fxitem_editor_dock;
-	QDockWidget *scene_status_dock;
-	QDockWidget *sequence_status_dock;
-	QDockWidget *template_dock;
+	PsDockWidget *fxitem_editor_dock;
+	PsDockWidget *scene_status_dock;
+	PsDockWidget *sequence_status_dock;
+	PsDockWidget *template_dock;
 
 public:
 	QStyle *dialWidgetStyle;
@@ -47,6 +48,8 @@ public:
 
 	void clearProject();
 	void initAppDefaults();
+	void showShadowLog();
+	void showModuleError();
 	void copyGuiSettingsToProject();
 	void copyProjectSettingsToGui();
 

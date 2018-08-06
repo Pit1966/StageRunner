@@ -34,6 +34,13 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 
 #ifdef IS_QT5
 	audio_decoder = new QAudioDecoder;
+	if (audio_decoder->error() == QAudioDecoder::ServiceMissingError) {
+		m_lastErrorText = tr("Audio decoder not initialized. No decode/play service available");
+		audio_error = AUDIO::AUDIO_ERR_DECODER;
+		return;
+	}
+	// qDebug() << "audio:" << audio_decoder->error();
+
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
@@ -115,7 +122,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 		maxlen = avail;
 	}
 
-	memcpy(data, audio_buffer->data()+bytes_read, maxlen);
+	memcpy(data, audio_buffer->data()+bytes_read, size_t(maxlen));
 	bytes_read += maxlen;
 
 	calcVuLevel(data,maxlen,*audio_format);
@@ -182,7 +189,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	qreal peak[4] = {0,0,0,0};
 
 	int channels = audioFormat.channelCount();
-	int frames = size / channels;
+	qint64 frames = size / channels;
 
 	if (frames == 0) return;
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
@@ -348,22 +355,22 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 
 qint64 AudioIODevice::currentPlayPosMs() const
 {
-	return audio_format->durationForBytes(bytes_read) / 1000;
+	return audio_format->durationForBytes(qint32(bytes_read) / 1000);
 
-	if (bytes_read >= bytes_avail && bytes_avail != 0) {
-		return 0;
-	} else {
-	}
+//	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+//		return 0;
+//	} else {
+//	}
 }
 
 qint64 AudioIODevice::currentPlayPosUs() const
 {
-	return audio_format->durationForBytes(bytes_read);
+	return audio_format->durationForBytes(qint32(bytes_read));
 
-	if (bytes_read >= bytes_avail && bytes_avail != 0) {
-		return 0;
-	} else {
-	}
+//	if (bytes_read >= bytes_avail && bytes_avail != 0) {
+//		return 0;
+//	} else {
+//	}
 }
 
 bool AudioIODevice::seekPlayPosMs(qint64 posMs)

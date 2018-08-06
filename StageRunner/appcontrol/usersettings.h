@@ -26,6 +26,7 @@ public:
 	pint32 pVolumeDialMask;
 	pint32 pFFTAudioMask;							///< The bits of this mask corresponds to the FFT enabled status of the channels
 	pstring pFxTemplatePath;						///< This is the default Template File
+	pbool pIsDarkGuiTheme;							///< Should be set to true, if GUI Style is dark
 
 public:
 	UserSettings();

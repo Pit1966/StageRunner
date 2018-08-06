@@ -20,7 +20,7 @@ class AudioIODevice : public QIODevice
 {
 	Q_OBJECT
 public:
-	AudioIODevice(AudioFormat format, QObject *parent = 0);
+	AudioIODevice(AudioFormat format, QObject *parent = nullptr);
 	~AudioIODevice();
 
 	qint64 readData(char *data, qint64 maxlen);
@@ -58,10 +58,12 @@ private:
 	FrqSpectrum m_leftSpectrum;
 	FrqSpectrum m_rightSpectrum;
 	bool m_fftEnabled;
+	QString m_lastErrorText;					// last error that occured. At the moment this is only audio service missing at startup
 
 public:
 	inline bool isDecodingFinished() {return decoding_finished_f;}
 	inline int currentLoop() const {return loop_count;}
+	inline const QString &lastErrorText() const {return m_lastErrorText;}
 	qint64 currentPlayPosMs() const;
 	qint64 currentPlayPosUs() const;
 	bool seekPlayPosMs(qint64 posMs);

@@ -53,6 +53,7 @@ void UserSettings::init()
 	addExistingVar(pFFTAudioMask,"FFTAudioMask",0,15,15);
 	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,15);
+	addExistingVar(pIsDarkGuiTheme,"IsDarkGuiTheme",true);
 
 
 }

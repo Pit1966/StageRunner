@@ -90,6 +90,7 @@ void SetupWidget::copy_settings_to_gui()
 	appStyleCombo->addItems(QStyleFactory::keys());
 	idx = appStyleCombo->findText(set->pApplicationGuiStyle);
 	if (idx >= 0) appStyleCombo->setCurrentIndex(idx);
+	guiIsDarkCheck->setChecked(bool(set->pIsDarkGuiTheme));
 
 	dialKnobStyleCombo->addItem("Default");
 	dialKnobStyleCombo->addItem("QSynth Dial Classic");
@@ -144,6 +145,7 @@ void SetupWidget::copy_gui_to_settings()
 
 	set->pApplicationGuiStyle = appStyleCombo->currentText();
 	set->pDialKnobStyle = dialKnobStyleCombo->currentText();
+	set->pIsDarkGuiTheme = guiIsDarkCheck->isChecked();
 
 	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
 	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();

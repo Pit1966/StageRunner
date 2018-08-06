@@ -32,7 +32,7 @@ QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
 			return plugin;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
@@ -58,7 +58,7 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		QLCIOPlugin *plugin = qobject_cast<QLCIOPlugin*> (obj);
 		if (plugin) {
 			// Check if plugin is already loaded
-			if (0 == getQLCPluginByName(plugin->name())) {
+			if (nullptr == getQLCPluginByName(plugin->name())) {
 				LOGTEXT(tr("QLC plugin '%1' loaded")
 						.arg(plugin->name()));
 
@@ -154,8 +154,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 	// Clear current fast access tables
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
-		fastMapInUniverse[t].plugin = 0;
-		fastMapOutUniverse[t].plugin = 0;
+		fastMapInUniverse[t].plugin = nullptr;
+		fastMapOutUniverse[t].plugin = nullptr;
 	}
 
 	// Create fast access tables for universe to plugin mapping
@@ -220,7 +220,7 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   Output %1 not used").arg(outputs.at(o)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Output: %1</font>").arg(outputs.at(o)));
-				plugin->openOutput(o, universe);
+				plugin->openOutput(uint(o), uint(universe));
 				one_opened = true;
 			}
 
@@ -237,7 +237,7 @@ bool IOPluginCentral::openPlugins()
 				LOGTEXT(tr("   Input %1 not used").arg(inputs.at(i)));
 			} else {
 				LOGTEXT(tr("   <font color=darkgreen>Open Input: %1</font>").arg(inputs.at(i)));
-				plugin->openInput(i,universe);
+				plugin->openInput(uint(i),uint(universe));
 				one_opened = true;
 			}
 			// Lets connect to inputChanged Signal
@@ -256,13 +256,13 @@ void IOPluginCentral::closePlugins()
 		QStringList outputs = outputsOf(plugin);
         for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
-			plugin->closeOutput(o,0);
+			plugin->closeOutput(uint(o),0);
 			plugin->disconnect();
 		}
 		QStringList inputs = inputsOf(plugin);
         for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
-			plugin->closeInput(i,0);
+			plugin->closeInput(uint(i),0);
 			plugin->disconnect();
 		}
 	}
@@ -310,7 +310,7 @@ bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin
 		output = fastMapOutUniverse[universe].deviceNumber;
 		return true;
 	} else {
-		plugin = 0;
+		plugin = nullptr;
 		output = 0;
 		return false;
 	}
@@ -323,7 +323,7 @@ bool IOPluginCentral::getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin 
 		input = fastMapInUniverse[universe].deviceNumber;
 		return true;
 	} else {
-		plugin = 0;
+		plugin = nullptr;
 		input = 0;
 		return false;
 	}
@@ -434,8 +434,10 @@ bool IOPluginCentral::setPluginParametersFromLineConf(QLCIOPlugin *plugin, Plugi
 	if (!paras.isEmpty()) {
 		QVariantMap paramap = VariantMapSerializer::toMap(paras);
 		for (const QString &key : paramap.keys()) {
-			plugin->setParameter(lineConf->pUniverse-1
-								 , lineConf->deviceNumber
+			if (lineConf->pUniverse < 1)
+				continue;
+			plugin->setParameter(uint(lineConf->pUniverse-1)
+								 , uint(lineConf->deviceNumber)
 								 , QLCIOPlugin::Capability(lineConf->deviceIoType)
 								 , key
 								 , paramap.value(key));
@@ -460,13 +462,13 @@ void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint
 {
 	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
 	if(sendby) {
-		int universe;
-		if (getInputUniverseForPlugin(sendby,input,universe)) {
-			if (universe < 0) {
+		int i_universe;
+		if (getInputUniverseForPlugin(sendby,int(input),i_universe)) {
+			if (i_universe < 0) {
 				if (debug > 4) DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
 			} else {
-				emit universeValueChanged(universe,channel,value);
-				if (debug > 4) DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",universe+1,channel,value);
+				emit universeValueChanged(uint(i_universe),channel,value);
+				if (debug > 4) DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",i_universe+1,channel,value);
 			}
 		}
 	}

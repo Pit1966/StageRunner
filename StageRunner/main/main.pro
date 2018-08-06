@@ -6,6 +6,9 @@ TARGET   = stagerunner
 
 # CONFIG += static
 
+#CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
+
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
 INCLUDEPATH  += ../appcontrol
@@ -139,7 +142,9 @@ SOURCES += \
 	../fx/fxscripttools.cpp \
 	../fx/fxcueitem.cpp \
     ../plugins/yadi/src/dmxmonitor.cpp \
-    ../system/variantmapserializer.cpp
+	../gui/customwidget/psinfodialog.cpp \
+	../system/variantmapserializer.cpp \
+    ../gui/customwidget/psdockwidget.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -250,7 +255,9 @@ HEADERS  += \
 	../fx/fxscripttools.h \
 	../fx/fxcueitem.h \
     ../plugins/yadi/src/dmxmonitor.h \
-    ../system/variantmapserializer.h
+	../gui/customwidget/psinfodialog.h \
+	../system/variantmapserializer.h \
+    ../gui/customwidget/psdockwidget.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h
@@ -271,7 +278,8 @@ FORMS    += \
 	../system/messagedialog.ui \
 	../gui/fxplaylistwidget.ui \
 	../gui/sequencestatuswidget.ui \
-    ../gui/fxscriptwidget.ui
+	../gui/customwidget/psinfodialog.ui \
+	../gui/fxscriptwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

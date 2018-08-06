@@ -60,7 +60,8 @@ enum AudioFadeMode {
 enum AudioErrorType {
 	AUDIO_ERR_NONE,
 	AUDIO_ERR_TIMEOUT,
-	AUDIO_ERR_DECODER
+	AUDIO_ERR_DECODER,
+	AUDIO_ERR_PROBE
 };
 
 class AudioCtrlMsg {
@@ -79,7 +80,7 @@ public:
 	Executer *executer;
 
 public:
-	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_NO_STATE, Executer *exec = 0)
+	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_NO_STATE, Executer *exec = nullptr)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(status)
@@ -90,11 +91,11 @@ public:
 		, loop(0)
 		, maxloop(0)
 		, isActive(false)
-		, fxAudio(0)
+		, fxAudio(nullptr)
 		, executer(exec)
 	{}
 
-	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, Executer *exec = 0)
+	AudioCtrlMsg(FxAudioItem *fxaudio, int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, Executer *exec = nullptr)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(AUDIO_NO_STATE)

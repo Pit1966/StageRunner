@@ -23,12 +23,14 @@ public:
 		int deviceNumber;							///< The output/input number from plugin for the universe
 		int deviceUniverse;
 		int responseTime;
+		int dummy;
 	public:
 		PluginEntry()
-			: plugin(0)
+			: plugin(nullptr)
 			,deviceNumber(0)
 			,deviceUniverse(0)
 			,responseTime(0)
+			,dummy(0)
 		{
 		}
 	};
@@ -43,7 +45,7 @@ private:
 	QStringList allOutputNames;							///< A list witch contains all available outputs in every plugin
 
 public:
-	explicit IOPluginCentral(QObject *parent = 0);
+	explicit IOPluginCentral(QObject *parent = nullptr);
 	~IOPluginCentral();
 
 	QLCIOPlugin * getQLCPluginByName(const QString & name);
@@ -81,7 +83,7 @@ public slots:
 	void reOpenPlugins();
 
 private slots:
-    void onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key = 0);
+	void onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key = nullptr);
 	void onPluginConfigurationChanged();
 	void onErrorMessageReceived(const QString &msg);
 	void onStatusMessageReceived(const QString &msg);

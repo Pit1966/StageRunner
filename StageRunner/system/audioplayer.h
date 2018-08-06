@@ -1,6 +1,8 @@
 #ifndef AUDIOPLAYER_H
 #define AUDIOPLAYER_H
 
+#include "commandsystem.h"
+
 #include <QMediaPlayer>
 #include <QAudioProbe>
 #include <QAudioBuffer>
@@ -19,9 +21,11 @@ protected:
 	QString mediaPath;
 	QMediaPlayer::State currentState;
 	int currentVolume;
+	AUDIO::AudioErrorType m_audioError;
 
 public:
 	AudioPlayer(AudioSlot &audioChannel);
+	AUDIO::AudioErrorType audioError() const {return m_audioError;}
 	bool setSourceFilename(const QString &path);
 	void start(int loops);
 	void stop();
@@ -30,7 +34,6 @@ public:
 	qint64 currentPlayPosMs() const;
 	bool seekPlayPosMs(qint64 posMs);
 	void setVolume(int vol);
-
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);

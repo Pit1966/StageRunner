@@ -32,6 +32,8 @@
 #include "customwidget/psvideowidget.h"
 #include "dmxuniverseproperty.h"
 #include "fxscriptwidget.h"
+#include "gui/customwidget/psinfodialog.h"
+#include "gui/customwidget/psdockwidget.h"
 // #include "configrev.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
@@ -41,11 +43,15 @@
 
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
-	QMainWindow(0)
+	QMainWindow(nullptr)
 {
 	appCentral = myapp;
 
 	init();
+
+	// DocWidgets defauls
+	setTabPosition(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea, QTabWidget::North);
+	setTabPosition(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea, QTabWidget::West);
 
 	setupUi(this);
 	setObjectName("StageRunnerMainwin");
@@ -145,7 +151,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks);
 	setDockNestingEnabled(true);
 
-	fxitem_editor_dock = new QDockWidget(this);
+	fxitem_editor_dock = new PsDockWidget(this);
 	fxItemEditor = new FxItemPropertyWidget();
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxItemEditor,SLOT(setEditable(bool)));
 	fxItemEditor->setEditable(false);
@@ -157,7 +163,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,fxitem_editor_dock);
 
-	scene_status_dock = new QDockWidget(this);
+	scene_status_dock = new PsDockWidget(this);
 	sceneStatusDisplay = new SceneStatusWidget();
 	scene_status_dock->setObjectName("Scene Status Display");
 	scene_status_dock->setWindowTitle("Scene Status Display");
@@ -165,7 +171,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	scene_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,scene_status_dock);
 
-	sequence_status_dock = new QDockWidget(this);
+	sequence_status_dock = new PsDockWidget(this);
 	seqStatusDisplay = new SequenceStatusWidget();
 	sequence_status_dock->setObjectName("Sequence Status Display");
 	sequence_status_dock->setWindowTitle("Sequence Status Display");
@@ -173,7 +179,7 @@ void StageRunnerMainWin::setup_gui_docks()
 	sequence_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,sequence_status_dock);
 
-	template_dock = new QDockWidget(this);
+	template_dock = new PsDockWidget(this);
 	templateWidget =new FxListWidget();
 	template_dock->setObjectName("Fx Templates");
 	template_dock->setWindowTitle("Fx Templates");
@@ -204,7 +210,7 @@ void StageRunnerMainWin::updateButtonStyles(QString style)
 	// Update Style of Dial knobs
 	if (dialWidgetStyle) {
 		delete dialWidgetStyle;
-		dialWidgetStyle = 0;
+		dialWidgetStyle = nullptr;
 	}
 
 	if (style == "" || style == "QSynth Dial Classic") {
@@ -260,15 +266,15 @@ void StageRunnerMainWin::clearProject()
 void StageRunnerMainWin::init()
 {
 	activeKeyModifiers = 0;
-	dialWidgetStyle = 0;
+	dialWidgetStyle = nullptr;
 
 	msg_dialog = new QErrorMessage(this);
-	fxitem_editor_dock = 0;
-	fxItemEditor = 0;
-	scene_status_dock = 0;
-	sceneStatusDisplay = 0;
-	sequence_status_dock = 0;
-	seqStatusDisplay = 0;
+	fxitem_editor_dock = nullptr;
+	fxItemEditor = nullptr;
+	scene_status_dock = nullptr;
+	sceneStatusDisplay = nullptr;
+	sequence_status_dock = nullptr;
+	seqStatusDisplay = nullptr;
 }
 
 
@@ -318,6 +324,33 @@ void StageRunnerMainWin::initAppDefaults()
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
 		on_loadTemplatesButton_clicked();
 
+}
+
+/**
+ * @brief Open Dialog with content of shadow log messages if there are any
+ */
+void StageRunnerMainWin::showShadowLog()
+{
+	if (logThread->shadowErrorCount() == 0)
+		return;
+
+	PsInfoDialog *dialog = new PsInfoDialog(this);
+	if (logThread->shadowErrorCount() > 0)
+		dialog->setText(logThread->shadowLogStrings(MSG_ALL));
+	dialog->show();
+}
+
+/**
+ * @brief Open Dialog with module error status, if there is any module error
+ */
+void StageRunnerMainWin::showModuleError()
+{
+	if (!appCentral->hasModuleError())
+		return;
+
+	PsInfoDialog *dialog = new PsInfoDialog(this);
+	dialog->setText(appCentral->moduleErrorText(appCentral->moduleErrors()));
+	dialog->show();
 }
 
 void StageRunnerMainWin::copyGuiSettingsToProject()
@@ -482,7 +515,7 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 		QApplication::setStyle(new LightDeskStyle);
 	}
 	else if (style == "Default") {
-		QApplication::setStyle(0);
+		QApplication::setStyle(nullptr);
 	}
 	else {
 		QApplication::setStyle(QStyleFactory::create(style));
@@ -573,7 +606,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
 		// qDebug("KeyEvent %s",obj->objectName().toLocal8Bit().data());
 
-		if (actionEdit_Mode->isChecked()) return qApp->eventFilter(obj, event);
+		if (actionEdit_Mode->isChecked())
+			return qApp->eventFilter(obj, event);
 
 		QString widname;
 		if (QApplication::activeWindow()) {
@@ -615,6 +649,10 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
+
+		if (debug)
+			DEBUGTEXT("Key pressed: #%d -> '%s'",key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
+
 		switch (key) {
 		case Qt::Key_Shift:
 			activeKeyModifiers |= Qt::SHIFT;
@@ -639,17 +677,29 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			appCentral->videoBlack(0);
 			break;
 
+//		case Qt::Key_Q: {
+//			QList<QTabWidget*> list = findChildren<QTabWidget*>();
+//			qDebug() << "tabs" << list;
+
+//			QWidget *l = scene_status_dock;
+//			while (l->parentWidget()) {
+//				l = l->parentWidget();
+//				qDebug() << "parent" << l;
+//			}
+//		}
+//			break;
+
 		default:
 			if (key) {
 				// Do not start FX if CTRL key is pressed.
-				if ((activeKeyModifiers & Qt::CTRL)) {
+				if (uint(activeKeyModifiers) & Qt::CTRL) {
 					return qApp->eventFilter(obj, event);
 				}
 
 				QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
 				if (fxlist.size()) {
 					for (int t=0; t<fxlist.size(); t++) {
-						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, 0);
+						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, nullptr);
 					}
 					// fxListWidget->selectFx(fx);
 				}
@@ -657,8 +707,6 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		}
 
-		if (debug) DEBUGTEXT("Key pressed: #%d -> '%s'"
-				  ,key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
 
 		return true;
 	}
@@ -748,9 +796,9 @@ void StageRunnerMainWin::showInfoMsg(QString where, QString text)
 
 void StageRunnerMainWin::showErrorMsg(QString where, QString text)
 {
-	QString msg = QString("<font color=red>%1</font><br><br>Reported from function:%2")
+	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
-	msg_dialog->setStyleSheet("color:red;");
+	msg_dialog->setStyleSheet("color:#ff7722;");
 	msg_dialog->showMessage(text,where);
 	msg_dialog->resize(600,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
@@ -797,7 +845,9 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 	qDebug() << "Mainloop stopped";
 	QTime wait;
 	wait.start();
-	while (wait.elapsed() < 3000) ;;
+	while (wait.elapsed() < 3000) {
+		;
+	}
 	qDebug() << "Mainloop is back";
 }
 
