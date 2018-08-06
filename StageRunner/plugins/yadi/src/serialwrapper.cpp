@@ -14,7 +14,7 @@ SerialWrapper::SerialWrapper(const QString &dev_node) :
 	if (dev_node.isEmpty()) {
 		device_node = "com3";
 	}
-#elif defined(unix)
+#elif defined(__unix__)
 	serial_fd = 0;
 #endif
 }
@@ -25,7 +25,7 @@ SerialWrapper::~SerialWrapper()
 	if (serial_handle > 0) {
 		CloseHandle(serial_handle);
 	}
-#elif defined(unix)
+#elif defined(__unix__)
 	if (serial_fd) {
 		close(serial_fd);
 	}
@@ -38,7 +38,7 @@ bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 	return true;
 
 
-#elif defined(unix)
+#elif defined(__unix__)
 	if (dev_node.size() && QFile::exists(dev_node)) {
 		return true;
 	} else {
@@ -90,7 +90,7 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 		error_num = GetLastError();
 	}
 
-#elif defined(unix)
+#elif defined(__unix__)
 	if (serial_fd > 0) {
 		close(serial_fd);
 		serial_fd = 0;
@@ -121,7 +121,7 @@ void SerialWrapper::closeSerial()
 		serial_handle = 0;
 	}
 
-#elif defined(unix)
+#elif defined(__unix__)
 	if (serial_fd > 0) {
 		close(serial_fd);
 		serial_fd = 0;
@@ -142,11 +142,11 @@ QByteArray SerialWrapper::readSerial(qint64 size)
 			in_char[t] = readbuf[t];
 		}
 	}
-#elif defined(unix)
+#elif defined(__unix__)
 	char readbuf[600];
-	ssize_t bytes_read = read(serial_fd, readbuf, size);
+	ssize_t bytes_read = read(serial_fd, readbuf, size_t(size));
 	if (bytes_read > 0) {
-		in.resize(bytes_read);
+		in.resize(int(bytes_read));
 		char *in_char = in.data();
 		for (uint t=0; t<bytes_read; t++) {
 			in_char[t] = readbuf[t];
@@ -173,8 +173,8 @@ qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 	} else {
 		return -1;
 	}
-#elif defined(unix)
-	return read(serial_fd, buf, size);
+#elif defined(__unix__)
+	return read(serial_fd, buf, size_t(size));
 #endif
 }
 
@@ -189,7 +189,7 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 	} else {
 		error_num = 0;
 	}
-#elif defined(unix)
+#elif defined(__unix__)
 	qint64 num = write(serial_fd, buf, strlen(buf));
 	if (num < 0) {
 		error_num = errno;
@@ -211,8 +211,8 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 	} else {
 		error_num = 0;
 	}
-#elif defined(unix)
-	qint64 num = write(serial_fd, buf, size);
+#elif defined(__unix__)
+	qint64 num = write(serial_fd, buf, size_t(size));
 	if (num < 0) {
 		error_num = errno;
 	} else {
@@ -229,7 +229,7 @@ int SerialWrapper::error()
 
 QString SerialWrapper::errorString()
 {
-#if defined(unix)
+#if defined(__unix__)
 	return strerror(error_num);
 #elif defined(WIN32)
 	return QString::number(error_num);
@@ -243,7 +243,7 @@ bool SerialWrapper::isOpen()
 	if (serial_handle) {
 		open = true;
 	}
-#elif defined(unix)
+#elif defined(__unix__)
 	if (serial_fd > 0) {
 		open = true;
 	}

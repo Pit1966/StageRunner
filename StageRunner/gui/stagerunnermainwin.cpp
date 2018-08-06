@@ -924,12 +924,12 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 	QString msg = QString("%1 %2\n%3\n\n%4\n\n").arg(APP_NAME).arg(APP_VERSION).arg(APP_MILESTONE).arg(APP_PRODUCER);
 	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
 
-#ifdef unix
+#ifdef __unix__
 	msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
 	msg += QString("Build date: %1\n").arg(BUILD_DATE);
 	msg += QString("Build path: %1\n").arg(BUILD_PATH);
-	QMessageBox::information(this,tr("About Info"),msg);
 #endif
+	QMessageBox::information(this,tr("About Info"),msg);
 
 }
 

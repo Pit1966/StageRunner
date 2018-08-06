@@ -67,7 +67,7 @@ public:
 	void reCreateMediaPlayerInstances();
 
 	void getAudioDevices();
-	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = 0);
+	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
 	bool isFxAudioActive(FxAudioItem *fxa);
 	bool isFxAudioActive(int slotnum);
 	int findAudioSlot(FxAudioItem *fxa);
@@ -86,7 +86,7 @@ public:
 
 private:
 	void run();
-	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
+	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 
 private slots:
 	void vu_level_changed_receiver(int slotnum, qreal left, qreal right);
@@ -94,8 +94,8 @@ private slots:
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
-	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
-	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = 0, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	int stopAllFxAudio();
 	void stopFxAudio(int slot);

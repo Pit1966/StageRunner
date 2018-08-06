@@ -12,7 +12,7 @@
 #include <QTimer>
 
 
-#ifdef unix
+#ifdef __unix__
 #include <errno.h>
 #include <string.h>
 #endif

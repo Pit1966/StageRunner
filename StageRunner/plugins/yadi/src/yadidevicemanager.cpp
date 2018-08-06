@@ -2,7 +2,7 @@
 #include "yadidevice.h"
 #include "serialwrapper.h"
 
-#ifdef unix
+#ifdef __unix__
 #include <libudev.h>
 #include <QProcess>
 #endif
@@ -22,7 +22,7 @@ YadiDeviceManager::YadiDeviceManager()
 YadiDevice *YadiDeviceManager::deviceAt(int idx)
 {
 	if (idx < 0 || idx >= globYadiDeviceList.size()) {
-		return 0;
+		return nullptr;
 	} else {
 		return globYadiDeviceList.at(idx);
 	}
@@ -109,7 +109,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 
 #endif
 
-#ifdef unix
+#ifdef __unix__
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
@@ -245,7 +245,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 			// qDebug() <<  "QProcess" << cmd;
 			QString err =  QString::fromUtf8(stty.readAllStandardError().data());
 			if (err.size()) {
-				QMessageBox::warning(0,QObject::tr("System error"),QObject::tr("An error occured while setting the device parameter"
+				QMessageBox::warning(nullptr,QObject::tr("System error"),QObject::tr("An error occured while setting the device parameter"
 															 "\n\n%1").arg(err));
 			}
 		}

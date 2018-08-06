@@ -5,7 +5,7 @@
 
 #include "log.h"
 #include "../config.h"
-#ifdef unix
+#ifdef __unix__
 #include <unistd.h>
 #endif
 #include "appcentral.h"
