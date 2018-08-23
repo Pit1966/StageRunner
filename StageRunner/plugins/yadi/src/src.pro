@@ -15,7 +15,6 @@ DEFINES += IS_QT5
 
 }
 
-
 INCLUDEPATH += .
 INCLUDEPATH += ../../interfaces
 

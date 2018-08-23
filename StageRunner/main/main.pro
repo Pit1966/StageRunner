@@ -22,6 +22,9 @@ INCLUDEPATH  += ../plugins/interfaces
 INCLUDEPATH  += ../thirdparty/fftreal2
 
 macx {
+INCLUDEPATH += ../SDL2/SDL2
+INCLUDEPATH += ../SDL2
+
 INCLUDEPATH += /Library/Frameworks/SDL2.framework/Headers
 INCLUDEPATH += /Library/Frameworks/SDL2_mixer.framework/Headers
 LIBS += -framework SDL2

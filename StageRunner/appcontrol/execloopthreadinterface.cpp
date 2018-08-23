@@ -6,7 +6,7 @@
 ExecLoopThreadInterface::ExecLoopThreadInterface(FxControl &unit_fx)
 	: QThread()
 	, fxControlRef(unit_fx)
-	, execLoop(0)
+	, execLoop(nullptr)
 {
 	setObjectName("Exec Loop");
 }
@@ -16,7 +16,7 @@ bool ExecLoopThreadInterface::startThread()
 	if (!isRunning()) {
 		if (!execLoop) {
 			start();
-			while (!execLoop) ;;
+			while (!execLoop) {;}
 		}
 	}
 

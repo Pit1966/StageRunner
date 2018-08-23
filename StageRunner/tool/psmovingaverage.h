@@ -24,7 +24,7 @@ public:
 
 	~PsMovingAverage()
 	{
-		delete data;
+		delete[] data;
 	}
 
 	void clear()

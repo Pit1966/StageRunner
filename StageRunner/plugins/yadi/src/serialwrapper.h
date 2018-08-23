@@ -29,7 +29,7 @@ private:
 
 #if defined(WIN32)
 	HANDLE serial_handle;
-#elif defined(unix)
+#elif defined(__unix__)
 	int serial_fd;
 #endif
 
