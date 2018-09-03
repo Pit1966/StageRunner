@@ -286,7 +286,7 @@
      <x>0</x>
      <y>0</y>
      <width>888</width>
-     <height>19</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -316,6 +316,7 @@
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
     <addaction name="actionExperimental_audio_mode"/>
+    <addaction name="actionUse_SDL_audio"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">
@@ -480,6 +481,14 @@
    </property>
    <property name="toolTip">
     <string>Open a DMX control monitor for universe 1</string>
+   </property>
+  </action>
+  <action name="actionUse_SDL_audio">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use SDL audio</string>
    </property>
   </action>
  </widget>

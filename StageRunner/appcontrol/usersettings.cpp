@@ -50,6 +50,7 @@ void UserSettings::init()
 	}
 	addExistingVar(pAudioPlayListChannel,"AudioPlayListChannel",0,3,3);
 	addExistingVar(pAltAudioEngine,"AlternativeAudioEngine");
+	addExistingVar(pUseSDLAudio,"UseSDLAudio");
 	addExistingVar(pFFTAudioMask,"FFTAudioMask",0,15,15);
 	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,15);

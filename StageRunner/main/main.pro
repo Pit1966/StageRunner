@@ -36,9 +36,9 @@ DEFINES += USE_SDL
 
 unix {
 INCLUDEPATH += /usr/include/SDL
-# DEFINES += USE_SDL
-# LIBS += -lSDL
-# LIBS += -lSDL_mixer
+DEFINES += USE_SDL
+LIBS += -lSDL2
+LIBS += -lSDL2_mixer
 }
 
 

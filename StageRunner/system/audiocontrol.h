@@ -87,6 +87,9 @@ public:
 private:
 	void run();
 	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+#ifdef USE_SDL
+	static void sdlChannelDone(int chan);
+#endif
 
 private slots:
 	void vu_level_changed_receiver(int slotnum, qreal left, qreal right);

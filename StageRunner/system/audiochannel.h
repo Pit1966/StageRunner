@@ -16,6 +16,11 @@
 #include <QTimeLine>
 #include <QMediaPlayer>
 
+#ifdef USE_SDL
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#endif
+
 using namespace AUDIO;
 
 class FxAudioItem;
@@ -57,10 +62,14 @@ private:
 	int master_volume;								///< This is Master Volume
 
 	bool m_isQMediaPlayerAudio;
+	bool m_isSDLAudio;
 	bool m_isFFTEnabled;
 
 	QString m_lastErrorText;
 	AudioErrorType m_lastAudioError;
+#ifdef USE_SDL
+	Mix_Chunk *m_sdlChunk;
+#endif
 
 public:
 	AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName);
@@ -91,6 +100,12 @@ public:
 	QString currentFxName() const;
 
 	inline AudioErrorType lastAudioError() const {return m_lastAudioError;}
+
+#ifdef USE_SDL
+	bool sdlStartFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
+	bool sdlStopFxAudio();
+	void sdlSetFinished();
+#endif
 
 private:
 	void emit_audio_play_progress();

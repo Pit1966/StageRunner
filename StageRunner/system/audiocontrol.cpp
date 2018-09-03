@@ -418,6 +418,20 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 	}
 }
 
+#ifdef USE_SDL
+void AudioControl::sdlChannelDone(int chan)
+{
+	LOGTEXT(tr("SDL channel %1 ready").arg(chan+1));
+	const AppCentral &app = AppCentral::ref();
+
+	if (chan >= app.unitAudio->audioSlots.size())
+		return;
+
+	AudioSlot *slot = app.unitAudio->audioSlots.at(chan);
+	slot->sdlSetFinished();
+}
+#endif
+
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
 	if (slotnum < 0 || slotnum >= used_slots) return false;
@@ -606,6 +620,9 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 
 bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 {
+	if (!FxItem::exists(fxa))
+		return true;
+
 	switch (fxa->attachedStopCmd) {
 	case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
 		myApp.fadeoutAllFxAudio();
@@ -883,6 +900,11 @@ void AudioControl::createMediaPlayInstances()
 	m_videoWid = new PsVideoWidget;
 	m_videoPlayer = new VideoPlayer(m_videoWid);
 	m_videoWid->setVideoPlayer(m_videoPlayer);
+
+#ifdef USE_SDL
+	Mix_AllocateChannels(used_slots);
+	Mix_ChannelFinished(sdlChannelDone);
+#endif
 }
 
 void AudioControl::destroyMediaPlayInstances()

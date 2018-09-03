@@ -57,6 +57,17 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
 
+#ifndef USE_SDL
+	QAction *act = findChild<QAction*>("actionUse_SDL_audio");
+	if (act) {
+		delete act;
+		myapp->userSettings->pUseSDLAudio = false;
+	}
+#else
+	actionUse_SDL_audio->setChecked(appCentral->userSettings->pUseSDLAudio);
+#endif
+
+
 	fxListWidget->setFxList(appCentral->project->mainFxList());
 
 	debugLevelSpin->setValue(debug);
@@ -938,6 +949,11 @@ void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked
 {
 	appCentral->setExperimentalAudio(checked);
 	appCentral->unitAudio->reCreateMediaPlayerInstances();
+}
+
+void StageRunnerMainWin::on_actionUse_SDL_audio_triggered(bool arg1)
+{
+	appCentral->userSettings->pUseSDLAudio = arg1;
 }
 
 void StageRunnerMainWin::on_actionOpen_FxItem_triggered()

@@ -95,6 +95,7 @@ private slots:
 	void on_actionInfo_triggered();
 	void on_addFxSeqButton_clicked();
 	void on_actionExperimental_audio_mode_triggered(bool checked);
+	void on_actionUse_SDL_audio_triggered(bool arg1);
 	void on_actionOpen_FxItem_triggered();
 	void on_saveTemplatesButton_clicked();
 	void on_loadTemplatesButton_clicked();
@@ -106,6 +107,7 @@ private slots:
 	void on_loadUniverseButton_clicked();
 
 	void on_actionVirtualDmxOutput_triggered(bool checked);
+
 
 private:
 	void init();
