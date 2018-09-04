@@ -25,7 +25,7 @@ macx {
 INCLUDEPATH += ../SDL2/SDL2
 INCLUDEPATH += ../SDL2
 
-INCLUDEPATH += /Library/Frameworks/SDL2.framework/Headers
+INCLUDEPATH += /Library/Frameworks/SDL2.framewor/Headers
 INCLUDEPATH += /Library/Frameworks/SDL2_mixer.framework/Headers
 LIBS += -framework SDL2
 LIBS += -framework SDL2_mixer
@@ -34,7 +34,7 @@ LIBS += -F/Library/Frameworks
 DEFINES += USE_SDL
 }
 
-unix {
+unix:!macx {
 INCLUDEPATH += /usr/include/SDL
 DEFINES += USE_SDL
 LIBS += -lSDL2
