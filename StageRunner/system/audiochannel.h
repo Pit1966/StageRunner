@@ -6,6 +6,7 @@
 
 #ifdef IS_QT5
 #include <QAudioDecoder>
+#include <QMediaPlayer>
 #endif
 
 #include <QObject>
@@ -14,7 +15,6 @@
 #include <QAudioOutput>
 #include <QFile>
 #include <QTimeLine>
-#include <QMediaPlayer>
 
 #ifdef USE_SDL
 #include <SDL2/SDL.h>

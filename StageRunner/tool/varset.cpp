@@ -168,10 +168,12 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 			curIndex = parts[2].remove(QChar(']')).trimmed();
 			b3 = curIndex;
 			if (debug > 2) qDebug() << "VarSet:: Bracket Header 3:" << curIndex;
+			// FALL THROUGH
 		case 2:
 			curProjectid = parts[1].remove(QChar(']')).trimmed();
 			b2 = curProjectid;
 			if (debug > 2) qDebug() << "VarSet:: Bracket Header 2:" << curProjectid;
+			// FALL THROUGH
 		case 1:
 			curClassname = parts[0].remove(QChar(']')).trimmed().mid(1);
 			if (curClassname.contains(QChar('['))) {

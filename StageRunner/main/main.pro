@@ -45,19 +45,16 @@ LIBS += -lSDL2_mixer
 QT += core gui
 QT += sql
 QT += multimedia
-
 # QT		+= network
 
-
 greaterThan(QT_MAJOR_VERSION, 4) {
-QT += widgets
-QT += multimediawidgets
+	QT += widgets
+	QT += multimediawidgets
 
-DEFINES += IS_QT5
-
+	DEFINES += IS_QT5
+} else {
+	message(Compiling with Qt4 is not supported!. Please use Qt5)
 }
-
-lessThan(QT_MAJOR_VERSION, 5): QT += phonon
 
 win32 {
 QMAKE_LFLAGS += /INCREMENTAL:NO
@@ -350,4 +347,5 @@ OTHER_FILES += \
 	version.h.in
 
 DISTFILES += \
-    ../todo.txt
+    ../todo.txt \
+    ../macos_notes.txt

@@ -1,0 +1,25 @@
+In main.pro:
+// The directory where some frameworks are installed. There must
+// exist SDL.framework as a subdirectory of that directory.
+// It's simply to avoid typing the path twice.
+// It's a user variable, not interpreted by qmake
+SDL = -F/Library/Frameworks
+// Let the C/C++ compiler know where to find the frameworks.
+// This is so that when you include <xyz/foo>, it'll be replaced
+// by $$SDL/xyz.framework/Headers/foo
+// $$var is replaced by qmake by the contents of var
+QMAKE_CFLAGS += $$SDL
+QMAKE_CXXFLAGS += $$SDL
+// Since we compile some Objective C code, we need to set
+// the flags there too.
+QMAKE_OBJECTIVE_CFLAGS += $$SDL
+QMAKE_OBJECTIVE_CXXFLAGS += $$SDL
+// Let the linker know where to find the frameworks
+LIBS += $$SDL
+// Tell the linker that we want to use the SDL framework.
+LIBS += -framework SDL
+
+
+
+In source:
+#include <SDL/SDL.h>

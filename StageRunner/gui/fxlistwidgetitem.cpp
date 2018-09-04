@@ -2,13 +2,7 @@
 #include "customwidget/pslineedit.h"
 #include "fxitem.h"
 
-#ifdef IS_QT5
 #include <QtWidgets>
-#else
-#include <QMouseEvent>
-#include <QPaintEvent>
-#include <QPainter>
-#endif
 
 FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype) :
 	QWidget()

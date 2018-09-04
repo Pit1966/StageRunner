@@ -275,7 +275,6 @@ void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
 					if (temp_drag_move_idx >= 0) {
 						QLayoutItem *fillitem;
 						QLayoutItem *overitem;
-#ifdef IS_QT5
 						if (temp_drag_move_idx < i) {
 							overitem = mixerlayout->takeAt(i);
 							fillitem = mixerlayout->takeAt(temp_drag_move_idx);
@@ -287,9 +286,6 @@ void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
 							mixerlayout->insertItem(i,fillitem);
 							mixerlayout->insertItem(temp_drag_move_idx,overitem);
 						}
-#else
-					qDebug("You must have linked against Qt5 to use Drag and Drop in MixerGroup");
-#endif
 
 					} else {
 						qDebug() << "Widget not Found!!";

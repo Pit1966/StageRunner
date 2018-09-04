@@ -6,10 +6,6 @@
 #include "fxitemobj.h"
 #include "fxcontrol.h"
 
-//#ifdef IS_QT5
-//#include <QtWidgets>
-//#endif
-
 
 FxPlayListItem::FxPlayListItem(FxList *fxList)
 	: FxAudioItem(fxList)

@@ -12,19 +12,7 @@
 #include "system/audiocontrol.h"
 #include "variantmapserializer.h"
 
-#ifdef IS_QT5
 #include <QtWidgets>
-#else
-#define setSectionResizeMode setResizeMode
-
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QSpinBox>
-#include <QMessageBox>
-#include <QCheckBox>
-#include <QStyleFactory>
-#include <QComboBox>
-#endif
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	: QDialog(parent)

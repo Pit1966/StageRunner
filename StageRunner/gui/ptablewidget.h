@@ -3,10 +3,7 @@
 
 #include <QTableWidget>
 #include <QList>
-#ifdef IS_QT5
 #include <QtWidgets>
-#endif
-
 
 class PTableWidget : public QTableWidget
 {

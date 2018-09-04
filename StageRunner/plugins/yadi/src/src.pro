@@ -12,7 +12,6 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 QT += widgets
 
 DEFINES += IS_QT5
-
 }
 
 INCLUDEPATH += .
