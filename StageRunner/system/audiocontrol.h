@@ -74,6 +74,8 @@ public:
 	int selectFreeAudioSlot(int slotnum = -1);
 	void setFFTAudioChannelFromMask(qint32 mask);
 	inline bool isValid() const {return m_isValid;}
+	int usedSlots() const {return audioSlots.size();}
+	AudioSlot* audioSlot(int i) const {return audioSlots.at(i);}
 
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
@@ -89,6 +91,7 @@ private:
 	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 #ifdef USE_SDL
 	static void sdlChannelDone(int chan);
+	static void sdlPostMix(void *udata, quint8 *stream, int len);
 #endif
 
 private slots:

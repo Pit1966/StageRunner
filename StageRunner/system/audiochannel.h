@@ -17,8 +17,11 @@
 #include <QTimeLine>
 
 #ifdef USE_SDL
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#  include <SDL2/SDL.h>
+#  include <SDL2/SDL_mixer.h>
+#  define SDL_MAX_VOLUME MIX_MAX_VOLUME
+#else
+#  define SDL_MAX_VOLUME 128
 #endif
 
 using namespace AUDIO;
@@ -68,7 +71,9 @@ private:
 	QString m_lastErrorText;
 	AudioErrorType m_lastAudioError;
 #ifdef USE_SDL
+	QAudioFormat m_sdlAudioFormat;
 	Mix_Chunk *m_sdlChunk;
+	Mix_Chunk m_sdlChunkCopy;
 #endif
 
 public:
@@ -105,6 +110,11 @@ public:
 	bool sdlStartFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool sdlStopFxAudio();
 	void sdlSetFinished();
+	void sdlSetRunStatus(AudioStatus state);
+private:
+	void sdlChannelProcessStream(void *stream, int len, void *udata);
+	static void sdlChannelProcessor(int chan, void *stream, int len, void *udata);
+	static void sdlChannelProcessorFxDone(int chan, void *udata);
 #endif
 
 private:

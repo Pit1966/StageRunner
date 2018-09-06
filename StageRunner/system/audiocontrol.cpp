@@ -430,6 +430,21 @@ void AudioControl::sdlChannelDone(int chan)
 	AudioSlot *slot = app.unitAudio->audioSlots.at(chan);
 	slot->sdlSetFinished();
 }
+
+/**
+ * @brief AudioControl::sdlPostMix
+ * @param udata
+ * @param stream
+ * @param len
+ *
+ * Implement this, if you want to monitor or process the final audio stream after all channels were mixed.
+ */
+void AudioControl::sdlPostMix(void *udata, quint8 *stream, int len)
+{
+	Q_UNUSED(udata)
+	Q_UNUSED(stream)
+	Q_UNUSED(len)
+}
 #endif
 
 bool AudioControl::restartFxAudioInSlot(int slotnum)
@@ -904,6 +919,7 @@ void AudioControl::createMediaPlayInstances()
 #ifdef USE_SDL
 	Mix_AllocateChannels(used_slots);
 	Mix_ChannelFinished(sdlChannelDone);
+	Mix_SetPostMix(sdlPostMix, nullptr);
 #endif
 }
 

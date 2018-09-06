@@ -712,7 +712,7 @@ void AppCentral::init()
 	testsdl = 0;
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
 		/* initialize sdl mixer, open up the audio device */
-		if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,1024) >=0) {
+		if (Mix_OpenAudio(44100,AUDIO_S16SYS,2,1024) >=0) {
 			LOGTEXT("SDL init ok");
 
 			qDebug() << "SDL init ok";

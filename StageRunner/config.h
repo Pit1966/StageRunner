@@ -5,9 +5,9 @@
 #define APP_NAME "StageRunner"
 #define APPNAME "StageRunner"
 #define APP_ORG_STRING "Stonechip"
-#define APP_VERSION "V0.8.0"
-#define APPVERSION "V0.8.0"
-#define APP_MILESTONE "ArtNet"
+#define APP_VERSION "V0.8.1"
+#define APPVERSION "V0.8.1"
+#define APP_MILESTONE "ArtNet & SDL"
 #define APP_PRODUCER "(C) 2018 Stonechip Entertainment"
 #define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
