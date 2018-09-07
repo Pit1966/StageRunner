@@ -349,4 +349,9 @@ OTHER_FILES += \
 DISTFILES += \
     ../todo.txt \
     ../macos_notes.txt \
-    ../platforms/macos/nametool.pri
+    ../platforms/macos/nametool.pri \
+    ../platforms/macos/audioplugins-nametool.pri \
+    ../platforms/macos/libsndfile-nametool.pri \
+    ../platforms/macos/libusb-nametool.pri \
+    ../platforms/macos/mediaservice-nametool.pri \
+    ../platforms/macos/platformplugins-nametool.pri
