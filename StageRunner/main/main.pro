@@ -348,4 +348,5 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../todo.txt \
-    ../macos_notes.txt
+    ../macos_notes.txt \
+    ../platforms/macos/nametool.pri
