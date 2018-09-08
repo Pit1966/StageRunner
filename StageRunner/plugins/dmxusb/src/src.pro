@@ -19,7 +19,7 @@ win32 {
     message(Building with FTD2xx support.)
 }
 
-unix: {
+unix:!macx {
     CONFIG += libftdi
 }
 

@@ -34,7 +34,10 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
-#ifdef WIN32
+#if defined(QTSERIAL)
+	QStringList nodes = SerialWrapper::discoverQtSerialPorts();
+
+#elif defined(WIN32)
 	for (int com=3; com<10; com++) {
 		SerialWrapper ser(QString("com%1").arg(com));
 		if (ser.openSerial()) {
@@ -107,9 +110,8 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 
 	}
 
-#endif
 
-#ifdef __unix__
+#elif defined(__unix__)
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;

@@ -57,6 +57,16 @@ unix:!macx {
 
 }
 
+macx: {
+    CONFIG += qtserial
+}
+
+CONFIG(qtserial) {
+    message(Building with QtSerialport support.)
+    DEFINES += QTSERIAL
+    QT += serialport
+}
+
 PRO_FILE      = src.pro
 
 # This must be after "TARGET = " and before target installation so that

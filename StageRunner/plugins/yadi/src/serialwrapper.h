@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+
 #ifdef WIN32
 // This is a workaround for compiler BUG with MSVC and Qt5
 #define NOMINMAX
@@ -20,6 +21,10 @@
 #include <string.h>
 #endif
 
+#ifdef QTSERIAL
+#include <QtSerialPort>
+#endif
+
 class SerialWrapper : public QObject
 {
 	Q_OBJECT
@@ -27,7 +32,10 @@ private:
 	QString device_node;
 	int error_num;
 
-#if defined(WIN32)
+#if defined (QTSERIAL)
+	QSerialPort *m_serialPort;
+	QSerialPortInfo m_serialInfo;
+#elif defined(WIN32)
 	HANDLE serial_handle;
 #elif defined(__unix__)
 	int serial_fd;
@@ -37,6 +45,10 @@ public:
 	SerialWrapper(const QString & dev_node = "");
 	~SerialWrapper();
 	static bool deviceNodeExists(const QString &dev_node);
+
+#ifdef QTSERIAL
+	static QStringList discoverQtSerialPorts();
+#endif
 
 	bool openSerial(const QString & dev_node = "");
 	void closeSerial();

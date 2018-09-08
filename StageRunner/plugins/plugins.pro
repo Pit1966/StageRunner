@@ -5,16 +5,15 @@ CONFIG  += ordered
 
 SUBDIRS += midi
 SUBDIRS += artnet
+SUBDIRS += dmxusb
 
 unix:!macx {
 SUBDIRS += yadi
-SUBDIRS += dmxusb
 
 # old - substituted by dmxusb
 #SUBDIRS += enttecdmxusb
 }
 
-#SUBDIRS += dmxusb
-#SUBDIRS += midi
 
 
+SUBDIRS += yadi
