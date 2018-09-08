@@ -21,6 +21,8 @@ macx:include(../../../platforms/macos/nametool.pri)
 target.path = $$INSTALLROOT/$$PLUGINDIR
 INSTALLS   += target
 
+message(ARTNET-Plugin: Installroot: $$INSTALLROOT  Plugins: $$INSTALLROOT/$$PLUGINDIR)
+
 TRANSLATIONS += ArtNet_de_DE.ts
 TRANSLATIONS += ArtNet_es_ES.ts
 TRANSLATIONS += ArtNet_fi_FI.ts

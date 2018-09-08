@@ -37,12 +37,18 @@ QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
 
 void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 {
-	if (debug) LOGTEXT(tr("Load QLC plugins from directory '%1'").arg(dir_str));
 
-	QDir dir(dir_str);
+	QString path = dir_str;
+	if (path.startsWith("~"))
+		path = QDir::homePath() + path.mid(1);
+
+	if (debug) LOGTEXT(tr("Load QLC plugins from directory '%1'").arg(path));
+
+	QDir dir(path);
 	dir.setFilter(QDir::Files);
 
-	if (!dir.exists() || !dir.isReadable()) return;
+	if (!dir.exists() || !dir.isReadable())
+		return;
 
 	// Check all files in the given directory
 	QStringListIterator it(dir.entryList());
@@ -50,7 +56,8 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		// determine complete Path
 		QString path(dir.absoluteFilePath(it.next()));
 		QString suf = QFileInfo(path).suffix().toLower();
-		if (suf != "so" && suf != "dll") continue;
+		if (suf != "so" && suf != "dll" && suf != "dylib")
+			continue;
 
 		// and load plugin
 		QPluginLoader load(path, this);
@@ -294,8 +301,11 @@ QString IOPluginCentral::sysPluginDir()
 #ifdef WIN32
 	dir = "../plugins";
 #elif __APPLE__
-	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-								   .arg(PLUGINDIR);
+//	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
+//			.arg("PlugIns/stagerunner");
+	dir = QString("%1/Contents/%2")
+			.arg("~/StageRunner.app")
+			.arg(PLUGINDIR);
 #elif __unix__
 	dir = PLUGINDIR;
 #endif
@@ -460,6 +470,7 @@ bool IOPluginCentral::setPluginParametersFromLineConf(QLCIOPlugin *plugin, Plugi
  */
 void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key)
 {
+	Q_UNUSED(key)
 	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
 	if(sendby) {
 		int i_universe;

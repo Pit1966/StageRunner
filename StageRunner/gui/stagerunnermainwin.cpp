@@ -507,7 +507,7 @@ void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
 
 void StageRunnerMainWin::setProjectName(const QString &path)
 {
-	QString title = QString("%1 %2 ").arg(APP_NAME,APP_VERSION);
+	QString title = QString("%1 %2 ").arg(APPNAME,APPVERSION);
 	if (path.isEmpty()) {
 		title += APP_PRODUCER;
 		appCentral->project->curProjectFilePath.clear();
@@ -932,7 +932,7 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 
 void StageRunnerMainWin::on_actionInfo_triggered()
 {
-	QString msg = QString("%1 %2\n%3\n\n%4\n\n").arg(APP_NAME).arg(APP_VERSION).arg(APP_MILESTONE).arg(APP_PRODUCER);
+	QString msg = QString("%1 %2\n%3\n\n%4\n\n").arg(APPNAME).arg(APPVERSION).arg(APP_MILESTONE).arg(APP_PRODUCER);
 	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
 
 #ifdef __unix__

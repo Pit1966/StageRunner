@@ -1,5 +1,8 @@
+#include "configrev.h"
+
 #include "usersettings.h"
 #include "log.h"
+#include "config.h"
 
 #include <QDir>
 
@@ -23,7 +26,7 @@ UserSettings::~UserSettings()
 void UserSettings::init()
 {
 	QString templatePath = QString("%1/.config/%2/%3.templates")
-			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APP_NAME);
+			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APPNAME);
 
 
 	setClass(PrefVarCore::USER_CONFIG,"UserSettings");

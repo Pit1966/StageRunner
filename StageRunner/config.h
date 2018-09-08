@@ -1,19 +1,19 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "configrev.h"
 
-#define APP_NAME "StageRunner"
-#define APPNAME "StageRunner"
-#define APP_ORG_STRING "Stonechip"
-#define APP_VERSION "V0.8.1"
-#define APPVERSION "V0.8.1"
-#define APP_MILESTONE "ArtNet & SDL"
-#define APP_PRODUCER "(C) 2018 Stonechip Entertainment"
-#define LOG_FILE_PATH "/tmp/StageRunner.log"
 #define MAX_AUDIO_SLOTS 4
 #define MAX_DMX_UNIVERSE 4
 
-#define PLUGINDIR "/usr/lib/qt4/plugins/stagerunner"
+# define APPNAME "StageRunner"
+# define APPVERSION "V0.8.2"
+# define APP_MILESTONE "ArtNet & MAC_SDL"
+# define APP_PRODUCER "2018 Stonechip Entertainment"
+# define APP_ORG_STRING "Stonechip"
+
+
+
 #define MIDITEMPLATEDIR "/usr/share/stagerunner/miditemplates"
 #define USERMIDITEMPLATEDIR ".stagerunner/miditemplates"
 

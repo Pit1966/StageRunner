@@ -24,7 +24,7 @@ void PsInfoDialog::show()
 	QDialog::show();
 }
 
-void PsInfoDialog::closeEvent()
+void PsInfoDialog::closeEvent(QCloseEvent *)
 {
 	this->accept();
 }

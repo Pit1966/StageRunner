@@ -177,6 +177,7 @@ void AppCentral::setEditMode(bool state)
 void AppCentral::setExperimentalAudio(bool state)
 {
 #ifdef __APPLE__
+	Q_UNUSED(state)
 	userSettings->pAltAudioEngine = true;
 #else
 	if (state != userSettings->pAltAudioEngine) {
@@ -214,6 +215,7 @@ void AppCentral::loadPlugins()
 	pluginCentral->pluginMapping->loadFromDefaultFile();
 	// Load the Plugins
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
+//	LOGTEXT(tr("Load plugins from: %1").arg(IOPluginCentral::sysPluginDir()));
 
 	pluginCentral->updatePluginMappingInformation();
 }

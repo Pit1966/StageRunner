@@ -3,6 +3,7 @@
 #include "prefvar.h"
 #include "varset.h"
 #include "log.h"
+#include "configrev.h"
 #include "../config.h"
 
 #include <QSettings>
@@ -213,7 +214,7 @@ bool PrefVarCore::readAllFromPref()
 {
 	bool ok = true;
 
-	QSettings set(APP_ORG_STRING,APP_NAME);
+	QSettings set(APP_ORG_STRING,APPNAME);
 
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
@@ -236,7 +237,7 @@ bool PrefVarCore::writeAllToPref()
 {
 	bool ok = true;
 
-	QSettings set(APP_ORG_STRING,APP_NAME);
+	QSettings set(APP_ORG_STRING,APPNAME);
 	glob_var_list->lock();
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);

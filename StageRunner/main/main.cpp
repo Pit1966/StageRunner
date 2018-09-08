@@ -1,3 +1,5 @@
+#include "configrev.h"
+
 #include <QApplication>
 
 #include "config.h"
@@ -15,7 +17,7 @@ int main(int argc, char *argv[])
 
 	ScApplication app(argc, argv);
 
-	app.setApplicationName(APP_NAME);
+	app.setApplicationName(APPNAME);
 	app.setOrganizationName(APP_ORG_STRING);
 
 	logThread = new Log;

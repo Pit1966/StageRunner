@@ -4,6 +4,8 @@ TEMPLATE = subdirs
 CONFIG  += ordered
 
 SUBDIRS += midi
+SUBDIRS += artnet
+
 unix:!macx {
 SUBDIRS += yadi
 SUBDIRS += dmxusb
@@ -12,7 +14,6 @@ SUBDIRS += dmxusb
 #SUBDIRS += enttecdmxusb
 }
 
-SUBDIRS += artnet
 #SUBDIRS += dmxusb
 #SUBDIRS += midi
 

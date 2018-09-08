@@ -895,7 +895,7 @@ bool VarSet::writeToPref()
 	bool ok = true;
 	bool group_open_f = false;
 
-	QSettings set(APP_ORG_STRING,APP_NAME);
+	QSettings set(APP_ORG_STRING,APPNAME);
 	varList.lock();
 
 	if (myclassname.size()) {
@@ -942,7 +942,7 @@ bool VarSet::readFromPref()
 	bool ok = true;
 	bool group_open_f = false;
 
-	QSettings set(APP_ORG_STRING,APP_NAME);
+	QSettings set(APP_ORG_STRING,APPNAME);
 	varList.lock();
 
 	if (myclassname.size()) {

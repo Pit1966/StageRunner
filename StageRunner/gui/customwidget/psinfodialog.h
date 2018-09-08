@@ -20,7 +20,7 @@ public:
 	void show();
 
 protected:
-	void closeEvent();
+	void closeEvent(QCloseEvent *);
 
 public slots:
 	void setText(const QString &text);

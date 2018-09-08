@@ -152,7 +152,7 @@ SOURCES += 	../system/unixsignalcatcher.cpp
 
 HEADERS  += \
 	../config.h \
-#	../configref.h \
+#    ../configrev.h \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
@@ -300,48 +300,6 @@ INSTALLS   += target
 	QMAKE_SUBSTITUTES += $$PWD/version.h.in
 #	QMAKE_SUBSTITUTES += version.h.in
 
-
-#############################################################################
-# configrev.h generation
-#############################################################################
-
-CONFIGFILE = configrev.h
-conf.target = $$CONFIGFILE
-QMAKE_EXTRA_TARGETS += conf
-PRE_TARGETDEPS += $$CONFIGFILE
-QMAKE_CLEAN += $$CONFIGFILE
-QMAKE_DISTCLEAN += $$CONFIGFILE
-
-macx {
-	conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define CONFIGREV_H\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APPNAME \\\"$$APPNAME\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APPVERSION \\\"$$APPVERSION\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
-}
-unix:!macx {
-	conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define CONFIGREV_H\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APPNAME \\\"$$APPNAME\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APPVERSION \\\"$$APPVERSION\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$INSTALLROOT/$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$INSTALLROOT/$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
-}
-win32 {
-	conf.commands += @echo $$LITERAL_HASH ifndef CONFIG_H > $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define CONFIG_H >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define APPNAME \"$$APPNAME\" >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define APPVERSION \"$$APPVERSION\" >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define DOCSDIR \"$$DOCSDIR\" >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define PLUGINDIR \"$$PLUGINDIR\" >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
-	conf.commands += @echo $$LITERAL_HASH endif >> $$CONFIGFILE
-}
 
 OTHER_FILES += \
 	version.h.in

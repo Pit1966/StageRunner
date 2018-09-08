@@ -3,6 +3,8 @@
 */
 #define LOG_CPP
 
+#include "configrev.h"
+
 #include "log.h"
 #include "../config.h"
 #ifdef __unix__
