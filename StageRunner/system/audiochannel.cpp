@@ -917,7 +917,7 @@ bool AudioSlot::sdlStartFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPo
 
 	Mix_RegisterEffect(slotNumber, AudioSlot::sdlChannelProcessor, NULL, NULL);
 
-	qint64 durationMs = m_sdlChunk->alen * 1000 / (44100 * 4);
+	qint64 durationMs = qint64(m_sdlChunk->alen) * 1000 / (44100 * 4);
 	setAudioDurationMs(durationMs);
 
 	if (startPosMs < 0) {
