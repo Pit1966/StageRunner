@@ -64,9 +64,15 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 		myapp->userSettings->pUseSDLAudio = false;
 	}
 #else
+#  ifdef IS_MAC
 	actionUse_SDL_audio->setChecked(appCentral->userSettings->pUseSDLAudio);
+#  endif
 #endif
 
+#ifdef IS_MAC
+	delete actionExperimental_audio_mode;
+	myapp->userSettings->pAltAudioEngine = true;
+#endif
 
 	fxListWidget->setFxList(appCentral->project->mainFxList());
 

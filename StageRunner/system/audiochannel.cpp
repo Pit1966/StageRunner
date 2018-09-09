@@ -52,6 +52,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 	volset_timer.setInterval(500);
 	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
+	// No AudioIODevice SoundOutputSupport for MAC OS X
 	audio_io = new AudioIODevice(AudioFormat::defaultFormat());
 	if (audio_io->audioError()) {
 		m_lastAudioError = audio_io->audioError();

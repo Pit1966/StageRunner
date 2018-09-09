@@ -15,6 +15,8 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	,currentVolume(100)
 	,m_audioError(AUDIO_ERR_NONE)
 {
+
+#ifndef IS_MAC
 	if (audioProbe->setSource(this)) {
 		connect(audioProbe,SIGNAL(audioBufferProbed(QAudioBuffer)),this,SLOT(calculate_vu_level(QAudioBuffer)));
 	} else {
@@ -22,6 +24,7 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 		LOGERROR("Could not connect AudioProbe to MediaPlayer");
 //		qDebug() << "Could not connect AudioProbe to MediaPlayer";
 	}
+#endif
 
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
 	connect(this,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_play_state_changed(QMediaPlayer::State)),Qt::DirectConnection);
