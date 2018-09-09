@@ -69,17 +69,19 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 #  endif
 #endif
 
-#ifdef IS_MAC
-	delete actionExperimental_audio_mode;
-	myapp->userSettings->pAltAudioEngine = true;
-#endif
-
 	fxListWidget->setFxList(appCentral->project->mainFxList());
 
 	debugLevelSpin->setValue(debug);
 
+#ifdef IS_MAC
+	delete actionExperimental_audio_mode;
+	myapp->userSettings->pAltAudioEngine = true;
+#else
 	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
+#endif
+
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
+
 	actionVirtualDmxOutput->setChecked(false);
 	virtDmxWidget->setVisible(false);
 	virtDmxWidget->setAutoBarsEnabled(true);
