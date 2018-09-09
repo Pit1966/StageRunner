@@ -71,11 +71,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 		}
 	}
 
-//	if (pSlotNumber >= 3 && !parent->extraAudioDevice().isNull()) {
-//		audio_output = new QAudioOutput(parent->extraAudioDevice(), AudioFormat::defaultFormat(),this);
-//	}
-
-	if (m_lastAudioError == AUDIO_ERR_NONE) {
+	if (m_lastAudioError == AUDIO_ERR_NONE || m_lastAudioError == AUDIO_ERR_DECODER ) {
 		audio_player = new AudioPlayer(*this);
 		audio_player->setVolume(100);
 	}
@@ -145,10 +141,16 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	if (AppCentral::instance()->isExperimentalAudio()) {
 		m_isQMediaPlayerAudio = true;
-		if (!audio_player) return -1;
+		if (!audio_player) {
+			run_status = AUDIO_ERROR;
+			return -1;
+		}
 	} else {
 		m_isQMediaPlayerAudio = false;
-		if (!audio_output) return -1;
+		if (!audio_output) {
+			run_status = AUDIO_ERROR;
+			return -1;
+		}
 	}
 
 	current_fx = fxa;

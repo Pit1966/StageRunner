@@ -5,6 +5,7 @@
 #include "executer.h"
 
 #include <QDebug>
+#include <QFontDatabase>
 
 AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	QGroupBox(parent)
@@ -16,6 +17,8 @@ AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	setupUi(this);
 	init_gui();
 
+	QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	setFont(fixedFont);
 }
 
 AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)

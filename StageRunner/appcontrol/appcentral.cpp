@@ -176,14 +176,9 @@ void AppCentral::setEditMode(bool state)
 
 void AppCentral::setExperimentalAudio(bool state)
 {
-#ifdef __APPLE__
-	Q_UNUSED(state)
-	userSettings->pAltAudioEngine = true;
-#else
 	if (state != userSettings->pAltAudioEngine) {
 		userSettings->pAltAudioEngine = state;
 	}
-#endif
 }
 
 void AppCentral::setFFTAudioChannelMask(qint32 mask)
@@ -647,7 +642,6 @@ AppCentral::AppCentral()
 AppCentral::~AppCentral()
 {
 #ifdef USE_SDL
-	Mix_FreeMusic(testsdl);
 	Mix_CloseAudio();
 	SDL_Quit();
 #endif
@@ -673,6 +667,7 @@ void AppCentral::init()
 	input_assign_target_fxitem = nullptr;
 	m_moduleErrorMask = E_NO_ERROR;
 	last_global_selected_fxitem = nullptr;
+	m_isSDLAvailable = false;
 
 	mainWinObj = nullptr;
 
@@ -711,15 +706,14 @@ void AppCentral::init()
 
 
 #ifdef USE_SDL
-	testsdl = 0;
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
 		/* initialize sdl mixer, open up the audio device */
 		if (Mix_OpenAudio(44100,AUDIO_S16SYS,2,1024) >=0) {
 			LOGTEXT("SDL init ok");
-
-			qDebug() << "SDL init ok";
+			m_isSDLAvailable = true;
 		} else {
-			qDebug() << "SDL init failed";
+			LOGERROR("SDL init failed");
+			m_isSDLAvailable = false;
 		}
 	}
 #endif // ifdef USE_SDL

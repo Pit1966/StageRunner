@@ -32,9 +32,13 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc)
 	m_currentFxClipItem = fxc;
 	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
 	m_videoWid->show();
-	m_videoWid->raise();
+	m_videoWid->raise();	
 	this->play();
 
+	if (m_videoWid->size().isNull())
+		m_videoWid->resize(700,500);
+
+//	qDebug() << "videowidget geo" << m_videoWid->geometry();
 //	qDebug() << Q_FUNC_INFO << thread();
 
 	return true;

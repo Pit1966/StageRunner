@@ -356,6 +356,15 @@ void StageRunnerMainWin::showShadowLog()
  */
 void StageRunnerMainWin::showModuleError()
 {
+#ifdef USE_SDL
+	if (appCentral->moduleErrors() == AppCentral::E_NO_AUDIO_DECODER && appCentral->hasSDL()) {
+		appCentral->setModuleError(AppCentral::E_NO_AUDIO_DECODER, false);
+		actionUse_SDL_audio->setChecked(true);
+		appCentral->userSettings->pUseSDLAudio = true;
+		LOGTEXT("<font color=info>Switched to SDL audio, since Qt audio is not available");
+	}
+#endif
+
 	if (!appCentral->hasModuleError())
 		return;
 

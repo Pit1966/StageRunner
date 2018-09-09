@@ -11,6 +11,8 @@ private:
 	VideoPlayer *m_myPlayer;
 public:
 	PsVideoWidget(QWidget *parent = nullptr);
+	void setPrefsSettings();
+	void saveCurrentStateToPrefs();
 	void setVideoPlayer(VideoPlayer *vidplay);
 
 

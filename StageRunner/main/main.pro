@@ -31,6 +31,7 @@ LIBS += -framework SDL2
 LIBS += -framework SDL2_mixer
 LIBS += -F/Library/Frameworks
 
+DEFINES += IS_MAC
 DEFINES += USE_SDL
 }
 

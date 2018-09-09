@@ -12,6 +12,11 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setAutoFillBackground(false);
 
+	setPrefsSettings();
+}
+
+void PsVideoWidget::setPrefsSettings()
+{
 	QSettings set;
 	if (set.contains("VideoWinEnabled")) {
 		set.beginGroup("GuiSettings");
@@ -23,6 +28,18 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 		if (set.value("VideoWinEnabled").toBool() == false)
 			close();
 	}
+}
+
+void PsVideoWidget::saveCurrentStateToPrefs()
+{
+	QSettings set;
+	set.setValue("VideoWinEnabled",!isHidden());
+	set.beginGroup("GuiSettings");
+	set.setValue("VideoWinGeometry",saveGeometry());
+	set.setValue("VideoWinPos",pos());
+	set.setValue("VideoWinIsFullscreen",isFullScreen());
+	set.endGroup();
+
 }
 
 void PsVideoWidget::setVideoPlayer(VideoPlayer *vidplay)
@@ -42,13 +59,7 @@ void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 
 void PsVideoWidget::closeEvent(QCloseEvent *event)
 {
-	QSettings set;
-	set.setValue("VideoWinEnabled",!isHidden());
-	set.beginGroup("GuiSettings");
-	set.setValue("VideoWinGeometry",saveGeometry());
-	set.setValue("VideoWinPos",pos());
-	set.setValue("VideoWinIsFullscreen",isFullScreen());
-	set.endGroup();
+	saveCurrentStateToPrefs();
 
 #if QT_VERSION >= 0x050600
 	hide();

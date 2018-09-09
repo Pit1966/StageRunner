@@ -6,6 +6,7 @@
 
 #include <QHBoxLayout>
 #include <QDebug>
+#include <QFontDatabase>
 
 AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	QGroupBox(parent)
@@ -13,6 +14,8 @@ AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	init();
 	setupUi(this);
 	init_gui();
+
+	statusLabel->setText("");
 }
 
 void AudioControlWidget::setFFTGraphVisibleFromMask(qint32 mask)

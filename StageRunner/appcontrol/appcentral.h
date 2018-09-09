@@ -57,6 +57,7 @@ private:
 	QPointer<DmxMonitor> m_openedOutputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
 
 	int m_moduleErrorMask;
+	bool m_isSDLAvailable;
 
 public:
 	QObject *mainWinObj;
@@ -120,6 +121,8 @@ public:
 	MODUL_ERROR moduleErrors() const;
 	bool hasModuleError() const;
 	static QString moduleErrorText(MODUL_ERROR e);
+
+	inline bool hasSDL() const {return m_isSDLAvailable;}
 
 private:
 	AppCentral();
