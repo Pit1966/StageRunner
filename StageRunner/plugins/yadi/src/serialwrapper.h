@@ -29,7 +29,7 @@ class SerialWrapper : public QObject
 {
 	Q_OBJECT
 private:
-	QString device_node;
+	QString device_node;			// maybe port name for QtSerial, or device path for unix
 	int error_num;
 
 #if defined (QTSERIAL)
@@ -47,7 +47,7 @@ public:
 	static bool deviceNodeExists(const QString &dev_node);
 
 #ifdef QTSERIAL
-	static QStringList discoverQtSerialPorts();
+	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);
 #endif
 
 	bool openSerial(const QString & dev_node = "");

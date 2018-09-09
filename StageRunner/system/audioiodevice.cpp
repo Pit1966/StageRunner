@@ -39,7 +39,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 		audio_error = AUDIO::AUDIO_ERR_DECODER;
 		return;
 	}
-	// qDebug() << "audio:" << audio_decoder->error();
+	qDebug() << "audio:" << audio_decoder->error();
 
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));

@@ -41,9 +41,14 @@ SerialWrapper::~SerialWrapper()
 
 bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 {
-#if defined(WIN32)
-	return true;
+#if defined(QTSERIAL)
+	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+		if (info.portName() == dev_node)
+			return true;
+	}
 
+#elif defined(WIN32)
+	return true;
 
 #elif defined(__unix__)
 	if (dev_node.size() && QFile::exists(dev_node)) {
@@ -57,21 +62,24 @@ bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 }
 
 #ifdef QTSERIAL
-QStringList SerialWrapper::discoverQtSerialPorts()
+/**
+ * @brief Return a list of devices, where the product name starts with the given string
+ * @param productMatch
+ * @return
+ */
+QList<QSerialPortInfo> SerialWrapper::discoverQtSerialPorts(const QString &nameMatch)
 {
-	QStringList devNodes;
+	QList<QSerialPortInfo> matchDevs;
 
 	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
 	{
 		QString serial(info.serialNumber());
 		QString name(info.description());
 		QString vendor(info.manufacturer());
+		QString productID(info.productIdentifier());
 
-		qDebug() << "[QtSerialInterface] Serial: " << serial << "name:" << name << "vendor:" << vendor;
-
-//        // Skip non wanted devices
-//        if (validInterface(info.vendorIdentifier(), info.productIdentifier()) == false)
-//            continue;
+		qDebug() << "[QtSerialInterface] Serial: " << serial << "name:"
+				 << name << "vendor:" << vendor << "productID" << productID;
 
 #if defined(Q_OS_OSX)
 		/* Qt 5.6+ reports the same device as "cu" and "tty". Only the first will be considered */
@@ -79,16 +87,15 @@ QStringList SerialWrapper::discoverQtSerialPorts()
 			continue;
 #endif
 
-		QString devnode = QString("%1_%2")
-				.arg(serial)
-				.arg(name);
-		devNodes.append(devnode);
+		if (name.startsWith(nameMatch))
+			matchDevs.append(info);
+
 	}
 
-	if (devNodes.isEmpty())
+	if (matchDevs.isEmpty())
 		qDebug() << "[QtSerialInterface] Serial: no serial devices discovered";
 
-	return devNodes;
+	return matchDevs;
 }
 #endif
 
@@ -110,6 +117,8 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 	} else {
 		m_serialPort = new QSerialPort(m_serialInfo);
 	}
+
+	m_serialPort->setPortName(dev_node);
 
 	if (m_serialPort->open(QIODevice::ReadWrite) == false) {
 		qWarning() << Q_FUNC_INFO << "cannot open serial driver";
@@ -180,7 +189,11 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 void SerialWrapper::closeSerial()
 {
 	qDebug("Yadi: close serial interface");
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	if (m_serialPort) {
+		m_serialPort->close();
+	}
+#elif defined(WIN32)
 	if (serial_handle) {
 		CloseHandle(serial_handle);
 		serial_handle = 0;
@@ -197,7 +210,19 @@ void SerialWrapper::closeSerial()
 QByteArray SerialWrapper::readSerial(qint64 size)
 {
 	QByteArray in;
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	in = m_serialPort->read(size);
+	if (in.size() > 0) {
+		error_num = 0;
+	}
+	else if (m_serialPort->error()) {
+		error_num = m_serialPort->error();
+	}
+	else {
+		error_num = 0;
+	}
+
+#elif defined(WIN32)
 	char readbuf[600];
 	DWORD bytes_read;
 	if (ReadFile(serial_handle, readbuf, size, &bytes_read, 0)) {
@@ -231,7 +256,9 @@ QByteArray SerialWrapper::readSerial(qint64 size)
 
 qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 {
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	return m_serialPort->read(buf, size);
+#elif defined(WIN32)
 	DWORD bytes_read;
 	if (ReadFile(serial_handle, buf, size, &bytes_read, 0)) {
 		return bytes_read;
@@ -245,7 +272,9 @@ qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 
 qint64 SerialWrapper::writeSerial(const char *buf)
 {
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	qint64 num = m_serialPort->write(buf);
+#elif defined(WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = (DWORD)strlen(buf);
 	if (! WriteFile(serial_handle,buf,bytes_to_write,&num,0)) {
@@ -254,7 +283,6 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 	} else {
 		error_num = 0;
 	}
-	return num;
 #elif defined(__unix__)
 	qint64 num = write(serial_fd, buf, strlen(buf));
 	if (num < 0) {
@@ -262,15 +290,16 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 	} else {
 		error_num = 0;
 	}
-	return num;
 #endif
 
-	return 0;
+	return num;
 }
 
 qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 {
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	qint64 num = m_serialPort->write(buf, size);
+#elif defined(WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = size;
 	if (! WriteFile(serial_handle,buf,bytes_to_write,&num,0)) {
@@ -290,7 +319,7 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 	return num;
 #endif
 
-	return 0;
+	return num;
 }
 
 int SerialWrapper::error()
@@ -300,7 +329,11 @@ int SerialWrapper::error()
 
 QString SerialWrapper::errorString()
 {
-#if defined(__unix__)
+#if defined(QTSERIAL)
+	if (m_serialPort)
+		return m_serialPort->errorString();
+	return "Error: Serial port not open";
+#elif defined(__unix__)
 	return strerror(error_num);
 #elif defined(WIN32)
 	return QString::number(error_num);
@@ -310,7 +343,10 @@ QString SerialWrapper::errorString()
 bool SerialWrapper::isOpen()
 {
 	bool open = false;
-#if defined(WIN32)
+#if defined(QTSERIAL)
+	if (m_serialPort && m_serialPort->isOpen())
+		open = true;
+#elif defined(WIN32)
 	if (serial_handle) {
 		open = true;
 	}

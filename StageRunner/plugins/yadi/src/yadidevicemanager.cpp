@@ -35,7 +35,59 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
 #if defined(QTSERIAL)
-	QStringList nodes = SerialWrapper::discoverQtSerialPorts();
+	QList<QSerialPortInfo>yadidevs = SerialWrapper::discoverQtSerialPorts("YADI DMX");
+
+	for (const QSerialPortInfo &port : yadidevs) {
+		// Check if new or already in known list
+		YadiDevice *yadi = nullptr;
+		bool found = false;
+		for (YadiDevice *t : globYadiDeviceList) {
+			if (port.portName() == t->devNodePath) {
+				yadi = t;
+				found = true;
+				break;
+			}
+		}
+		// new or not?
+		if (!found) {
+			yadi = new YadiDevice(port.portName());
+			globYadiDeviceList.append(yadi);
+		}
+
+		QString product = port.description();
+
+		yadi->devNodePath = port.portName();
+		yadi->deviceProductName = product;
+		yadi->deviceManufacturer = port.manufacturer();
+		yadi->deviceSerial = port.serialNumber();
+		yadi->idVendor = port.vendorIdentifier();
+		yadi->idProduct = port.productIdentifier();
+		yadi->deviceNodePresent = true;
+		if (product.contains("Transceiver")) {
+			yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE | YadiDevice::FL_OUTPUT_UNIVERSE;
+			yadi->maxDeviceDmxInChannels = 512;
+			yadi->maxDeviceDmxOutChannels = 512;
+			if (!found || !update) {
+				yadi->usedDmxOutChannels = 512;
+				yadi->usedDmxInChannels = 512;
+			}
+		}
+		else if (product.contains("Receiver")) {
+			yadi->capabilities = YadiDevice::FL_INPUT_UNIVERSE;
+			yadi->usedDmxOutChannels = 0;
+			yadi->maxDeviceDmxOutChannels = 0;
+			if (!found || !update) {
+				yadi->usedDmxInChannels = 128;
+				yadi->maxDeviceDmxInChannels = 128;
+			}
+		}
+		else if (product.contains("Sender")) {
+			yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
+		}
+		qDebug("YadiDeviceManager: new device at: %s",yadi->devNodePath.toLocal8Bit().data());
+
+
+	}
 
 #elif defined(WIN32)
 	for (int com=3; com<10; com++) {
