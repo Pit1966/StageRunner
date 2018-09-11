@@ -209,8 +209,13 @@ void AppCentral::loadPlugins()
 	// Load Plugin Configuration and DMX Mapping
 	pluginCentral->pluginMapping->loadFromDefaultFile();
 	// Load the Plugins
+
+	QString appdir = QApplication::applicationDirPath();
+	QString loadfrom = QString("%1/../../../../plugins").arg(appdir);
+	pluginCentral->loadQLCPlugins(loadfrom);
+	loadfrom = QString("%1/../PlugIns/stagerunner").arg(appdir);
+	pluginCentral->loadQLCPlugins(loadfrom);
 	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
-//	LOGTEXT(tr("Load plugins from: %1").arg(IOPluginCentral::sysPluginDir()));
 
 	pluginCentral->updatePluginMappingInformation();
 }
