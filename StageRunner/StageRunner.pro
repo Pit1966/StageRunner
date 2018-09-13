@@ -1,4 +1,4 @@
-include(configvars.pri)
+# include(configvars.pri)
 
 TEMPLATE = subdirs
 

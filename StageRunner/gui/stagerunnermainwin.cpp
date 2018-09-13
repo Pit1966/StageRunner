@@ -213,7 +213,7 @@ void StageRunnerMainWin::setup_gui_docks()
 
 void StageRunnerMainWin::restore_window()
 {
-	QSettings set;
+	QSettings set(QSETFORMAT);
 	set.beginGroup("GuiSettings");
 	if (set.contains("MainWinGeometry")) {
 		restoreGeometry(set.value("MainWinGeometry").toByteArray());
@@ -797,7 +797,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 		appCentral->unitAudio->videoWidget()->close();
 
 
-	QSettings set;
+	QSettings set(QSETFORMAT);
 	set.beginGroup("GuiSettings");
 	set.setValue("MainWinGeometry",saveGeometry());
 	set.setValue("MainWinSize",size());

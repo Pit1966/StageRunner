@@ -19,6 +19,7 @@
 */
 
 #include "dmxinterface.h"
+#include "configrev.h"
 
 DMXInterface::DMXInterface(const QString& serial, const QString& name, const QString &vendor,
                            quint16 VID, quint16 PID, quint32 id)
@@ -97,8 +98,8 @@ bool DMXInterface::checkInfo(QString &serial, QString &name, QString &vendor)
 QMap <QString,QVariant> DMXInterface::typeMap()
 {
     QMap <QString,QVariant> typeMap;
-    QSettings settings;
-    QVariant var(settings.value(SETTINGS_TYPE_MAP));
+	QSettings set(QSETFORMAT);
+	QVariant var(set.value(SETTINGS_TYPE_MAP));
     if (var.isValid() == true)
         typeMap = var.toMap();
     return typeMap;
@@ -106,8 +107,8 @@ QMap <QString,QVariant> DMXInterface::typeMap()
 
 void DMXInterface::storeTypeMap(const QMap <QString,QVariant> map)
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_TYPE_MAP, map);
+	QSettings set(QSETFORMAT);
+	set.setValue(SETTINGS_TYPE_MAP, map);
 }
 
 

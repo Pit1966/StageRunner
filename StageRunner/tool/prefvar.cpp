@@ -4,7 +4,7 @@
 #include "varset.h"
 #include "log.h"
 #include "configrev.h"
-#include "../config.h"
+// #include "../config.h"
 
 #include <QSettings>
 #include <QtGlobal>
@@ -214,7 +214,7 @@ bool PrefVarCore::readAllFromPref()
 {
 	bool ok = true;
 
-	QSettings set;
+	QSettings set(QSETFORMAT);
 
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
@@ -237,7 +237,7 @@ bool PrefVarCore::writeAllToPref()
 {
 	bool ok = true;
 
-	QSettings set;
+	QSettings set(QSETFORMAT);
 	glob_var_list->lock();
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
