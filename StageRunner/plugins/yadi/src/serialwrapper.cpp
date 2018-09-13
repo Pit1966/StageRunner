@@ -83,7 +83,7 @@ QList<QSerialPortInfo> SerialWrapper::discoverQtSerialPorts(const QString &nameM
 
 #if defined(Q_OS_OSX)
 		/* Qt 5.6+ reports the same device as "cu" and "tty". Only the first will be considered */
-		if (info.portName().startsWith("tty"))
+		if (info.portName().startsWith("cu"))
 			continue;
 #endif
 
@@ -118,17 +118,18 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 		m_serialPort = new QSerialPort(m_serialInfo);
 	}
 
-	m_serialPort->setPortName(dev_node);
+	qDebug() << "setPort" << device_node;
+	m_serialPort->setPortName(device_node);
 
 	if (m_serialPort->open(QIODevice::ReadWrite) == false) {
-		qWarning() << Q_FUNC_INFO << "cannot open serial driver";
+		qWarning() << "cannot open serial driver:" << device_node;
 		delete m_serialPort;
 		m_serialPort = nullptr;
 		return false;
 	}
 
 	m_serialPort->setReadBufferSize(1024);
-	qDebug() << "Read buffer size:" << m_serialPort->readBufferSize() << m_serialPort->errorString();
+	qDebug() << "Read buffer size:" << m_serialPort->readBufferSize() << m_serialPort->error() << m_serialPort->errorString();
 
 	return true;
 
@@ -274,6 +275,7 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 {
 #if defined(QTSERIAL)
 	qint64 num = m_serialPort->write(buf);
+	qDebug() << "ser write" << buf;
 #elif defined(WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = (DWORD)strlen(buf);

@@ -35,20 +35,22 @@ QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
 	return nullptr;
 }
 
-void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
+int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 {
+	int loadcnt = 0;
 
 	QString path = dir_str;
 	if (path.startsWith("~"))
 		path = QDir::homePath() + path.mid(1);
 
-	if (debug) LOGTEXT(tr("Load QLC plugins from directory '%1'").arg(path));
+	if (debug)
+		LOGTEXT(tr("Load QLC plugins from directory '%1'").arg(path));
 
 	QDir dir(path);
 	dir.setFilter(QDir::Files);
 
 	if (!dir.exists() || !dir.isReadable())
-		return;
+		return 0;
 
 	// Check all files in the given directory
 	QStringListIterator it(dir.entryList());
@@ -72,6 +74,7 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 				qlc_plugins.append(plugin);
 
 				plugin->init();
+				loadcnt++;
 
 				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 				if (obj->metaObject()->indexOfSignal("errorMsgEmitted(QString)") >= 0) {
@@ -94,6 +97,7 @@ void IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		}
 
 	}
+	return loadcnt;
 }
 
 void IOPluginCentral::unloadPlugins()
@@ -134,6 +138,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			lineconf->plugin = plugin;
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Output;
+			// lineconf->pIsUsed = true;
 			if (debug > 1) qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 
 			allOutputNames.append(outputs.at(t));

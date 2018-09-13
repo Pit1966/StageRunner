@@ -211,12 +211,21 @@ void AppCentral::loadPlugins()
 	// Load the Plugins
 
 	QString appdir = QApplication::applicationDirPath();
-	QString loadfrom = QString("%1/../../../../plugins").arg(appdir);
-	pluginCentral->loadQLCPlugins(loadfrom);
-	loadfrom = QString("%1/../PlugIns/stagerunner").arg(appdir);
-	pluginCentral->loadQLCPlugins(loadfrom);
-	pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
 
+#ifdef IS_MAC
+	QString loadfrom = QString("%1/../../../../plugins").arg(appdir);
+	int loadcnt = pluginCentral->loadQLCPlugins(loadfrom);
+	if (loadcnt == 0) {
+		loadfrom = QString("%1/../PlugIns/stagerunner").arg(appdir);
+		loadcnt += pluginCentral->loadQLCPlugins(loadfrom);
+	}
+#else
+	QString loadfrom = QString("%1/../plugins").arg(appdir);
+	int loadcnt = pluginCentral->loadQLCPlugins(loadfrom);
+#endif
+	if (loadcnt == 0) {
+		loadcnt += pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
+	}
 	pluginCentral->updatePluginMappingInformation();
 }
 

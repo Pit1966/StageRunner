@@ -49,7 +49,7 @@ public:
 	~IOPluginCentral();
 
 	QLCIOPlugin * getQLCPluginByName(const QString & name);
-	void loadQLCPlugins(const QString & dir_str);
+	int loadQLCPlugins(const QString & dir_str);
 	void unloadPlugins();
 	bool updatePluginMappingInformation();
 	void closePlugins();
