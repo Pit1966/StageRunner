@@ -19,6 +19,7 @@
 
 #include <QSettings>
 #include "mididevice.h"
+#include "configrev.h"
 #include <QDebug>
 
 #define SETTINGS_MIDICHANNEL "midiplugin/%1/%2/midichannel"
@@ -180,15 +181,15 @@ QString MidiDevice::midiTemplateName() const
 
 void MidiDevice::loadSettings()
 {
-    QSettings settings;
+	QSettings set(QSETFORMAT);
     QString devType = deviceTypeToString(deviceType());
 
     QString key = QString(SETTINGS_MIDICHANNEL).arg(devType, name());
-    QVariant value = settings.value(key);
+	QVariant value = set.value(key);
     if (value.isValid() == false)
     {   // no value, try loading old-style setting
         key = QString(SETTINGS_MIDICHANNEL_OLD).arg(uid().toString());
-        value = settings.value(key);
+		value = set.value(key);
     }
     if (value.isValid() == true)
         setMidiChannel(value.toInt());
@@ -196,11 +197,11 @@ void MidiDevice::loadSettings()
         setMidiChannel(0);
 
     key = QString(SETTINGS_MODE).arg(devType, name());
-    value = settings.value(key);
+	value = set.value(key);
     if (value.isValid() == false)
     {   // no value, try loading old-style setting
         key = QString(SETTINGS_MODE_OLD).arg(uid().toString());
-        value = settings.value(key);
+		value = set.value(key);
     }
     if (value.isValid() == true)
         setMode(stringToMode(value.toString()));
@@ -208,11 +209,11 @@ void MidiDevice::loadSettings()
         setMode(ControlChange);
 
     key = QString(SETTINGS_INITMESSAGE).arg(devType, name());
-    value = settings.value(key);
+	value = set.value(key);
     if (value.isValid() == false)
     {   // no value, try loading old-style setting
         key = QString(SETTINGS_INITMESSAGE_OLD).arg(uid().toString());
-        value = settings.value(key);
+		value = set.value(key);
     }
     if (value.isValid() == true)
         setMidiTemplateName(value.toString());
@@ -222,17 +223,17 @@ void MidiDevice::loadSettings()
 
 void MidiDevice::saveSettings() const
 {
-    QSettings settings;
+	QSettings set(QSETFORMAT);
     QString devType = deviceTypeToString(deviceType());
 
     QString key = QString(SETTINGS_MIDICHANNEL).arg(devType, name());
-    settings.setValue(key, midiChannel());
+	set.setValue(key, midiChannel());
 
     key = QString(SETTINGS_MODE).arg(devType, name());
-    settings.setValue(key, MidiDevice::modeToString(mode()));
+	set.setValue(key, MidiDevice::modeToString(mode()));
 
     key = QString(SETTINGS_INITMESSAGE).arg(devType, name());
-    settings.setValue(key, midiTemplateName());
+	set.setValue(key, midiTemplateName());
 
     qDebug() << "[MIDI] Saving mididevice with template name: " << midiTemplateName();
 }

@@ -29,6 +29,7 @@
 #include "dmxusbconfig.h"
 #include "dmxusbwidget.h"
 #include "dmxusb.h"
+#include "configrev.h"
 
 #define SETTINGS_GEOMETRY "dmxusbconfig/geometry"
 
@@ -65,8 +66,8 @@ DMXUSBConfig::DMXUSBConfig(DMXUSB* plugin, QWidget* parent)
     connect(m_refreshButton, SIGNAL(clicked()), this, SLOT(slotRefresh()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(accept()));
 
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_GEOMETRY);
+	QSettings set(QSETFORMAT);
+	QVariant var = set.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
 
@@ -75,8 +76,8 @@ DMXUSBConfig::DMXUSBConfig(DMXUSB* plugin, QWidget* parent)
 
 DMXUSBConfig::~DMXUSBConfig()
 {
-    QSettings settings;
-    settings.setValue(SETTINGS_GEOMETRY, saveGeometry());
+	QSettings set(QSETFORMAT);
+	set.setValue(SETTINGS_GEOMETRY, saveGeometry());
 }
 
 void DMXUSBConfig::slotTypeComboActivated(int index)

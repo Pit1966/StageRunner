@@ -25,6 +25,7 @@
 
 #include "enttecdmxusbopen.h"
 #include "qlcmacros.h"
+#include "configrev.h"
 
 #define DMX_MAB 16
 #define DMX_BREAK 110
@@ -45,12 +46,12 @@ EnttecDMXUSBOpen::EnttecDMXUSBOpen(DMXInterface *interface,
     , m_frequency(30)
     , m_granularity(Unknown)
 {
-    QSettings settings;
-    QVariant var = settings.value(SETTINGS_FREQUENCY);
-    if (var.isValid() == true)
-        m_frequency = var.toDouble();
+	QSettings set(QSETFORMAT);
+	QVariant var = set.value(SETTINGS_FREQUENCY);
+	if (var.isValid() == true)
+		m_frequency = var.toDouble();
 
-    QVariant var2 = settings.value(SETTINGS_CHANNELS);
+	QVariant var2 = set.value(SETTINGS_CHANNELS);
     if (var2.isValid() == true)
     {
         int channels = var2.toInt();

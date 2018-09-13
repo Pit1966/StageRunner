@@ -12,8 +12,6 @@
 //# define APP_PRODUCER "2018 Stonechip Entertainment"
 //# define APP_ORG_STRING "Stonechip"
 
-
-
 #define MIDITEMPLATEDIR "/usr/share/stagerunner/miditemplates"
 #define USERMIDITEMPLATEDIR ".stagerunner/miditemplates"
 

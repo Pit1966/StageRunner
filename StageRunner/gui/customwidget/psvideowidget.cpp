@@ -4,6 +4,7 @@
 
 #include "psvideowidget.h"
 #include "videoplayer.h"
+#include "configrev.h"
 
 PsVideoWidget::PsVideoWidget(QWidget *parent)
 	: QVideoWidget(parent)
@@ -17,7 +18,7 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 
 void PsVideoWidget::setPrefsSettings()
 {
-	QSettings set;
+	QSettings set(QSETFORMAT);
 	if (set.contains("VideoWinEnabled")) {
 		set.beginGroup("GuiSettings");
 		restoreGeometry(set.value("VideoWinGeometry").toByteArray());
@@ -32,7 +33,7 @@ void PsVideoWidget::setPrefsSettings()
 
 void PsVideoWidget::saveCurrentStateToPrefs()
 {
-	QSettings set;
+	QSettings set(QSETFORMAT);
 	set.setValue("VideoWinEnabled",!isHidden());
 	set.beginGroup("GuiSettings");
 	set.setValue("VideoWinGeometry",saveGeometry());
