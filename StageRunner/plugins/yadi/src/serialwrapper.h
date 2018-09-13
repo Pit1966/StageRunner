@@ -25,12 +25,15 @@
 #include <QtSerialPort>
 #endif
 
+class YadiDevice;
+
 class SerialWrapper : public QObject
 {
 	Q_OBJECT
 private:
 	QString device_node;			// maybe port name for QtSerial, or device path for unix
 	int error_num;
+	YadiDevice *m_yadi;
 
 #if defined (QTSERIAL)
 	QSerialPort *m_serialPort;
@@ -42,7 +45,7 @@ private:
 #endif
 
 public:
-	SerialWrapper(const QString & dev_node = "");
+	SerialWrapper(YadiDevice *dev, const QString & dev_node = "");
 	~SerialWrapper();
 	static bool deviceNodeExists(const QString &dev_node);
 

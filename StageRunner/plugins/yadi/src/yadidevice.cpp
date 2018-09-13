@@ -2,6 +2,7 @@
 #include "yadireceiver.h"
 #include "serialwrapper.h"
 #include "dmxmonitor.h"
+#include "configrev.h"
 
 #include <QFile>
 #include <QSettings>
@@ -78,7 +79,7 @@ bool YadiDevice::activateDevice()
 	// we create the thread object that should read from the device later
 	if (!file) {
 		if (SerialWrapper::deviceNodeExists(devNodePath)) {
-			file = new SerialWrapper(devNodePath);
+			file = new SerialWrapper(this, devNodePath);
 			outUniverse.fill(0,512);
 		} else {
 			ok = false;
@@ -254,7 +255,7 @@ void YadiDevice::saveConfig()
 {
 	if (0 == capabilities || deviceProductName.isEmpty()) return;
 
-	QSettings set("Stonechip","YadiDmxDevice");
+	QSettings set(QSETFORMAT,"YadiDmxDevice");
 
 	QString group = deviceProductName + "_SN" + deviceSerial;
 	group.replace(QChar(' '),QChar('_'));
@@ -274,7 +275,7 @@ void YadiDevice::saveConfig()
 
 void YadiDevice::loadConfig()
 {
-	QSettings set("Stonechip","YadiDmxDevice");
+	QSettings set(QSETFORMAT,"YadiDmxDevice");
 
 	QString group = deviceProductName + "_SN" + deviceSerial;
 	group.replace(QChar(' '),QChar('_'));

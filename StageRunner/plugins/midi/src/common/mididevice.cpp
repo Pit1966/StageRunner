@@ -181,8 +181,8 @@ QString MidiDevice::midiTemplateName() const
 
 void MidiDevice::loadSettings()
 {
-	QSettings set(QSETFORMAT);
-    QString devType = deviceTypeToString(deviceType());
+	QSettings set(QSETFORMAT,APPNAME);
+	QString devType = deviceTypeToString(deviceType());
 
     QString key = QString(SETTINGS_MIDICHANNEL).arg(devType, name());
 	QVariant value = set.value(key);
@@ -223,8 +223,8 @@ void MidiDevice::loadSettings()
 
 void MidiDevice::saveSettings() const
 {
-	QSettings set(QSETFORMAT);
-    QString devType = deviceTypeToString(deviceType());
+	QSettings set(QSETFORMAT,APPNAME);
+	QString devType = deviceTypeToString(deviceType());
 
     QString key = QString(SETTINGS_MIDICHANNEL).arg(devType, name());
 	set.setValue(key, midiChannel());

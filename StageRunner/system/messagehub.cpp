@@ -30,7 +30,7 @@ MessageHub::MessageHub() :
 	init();
 
 	QString path = QString("%1/.config/%2/%3.msg")
-			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APPNAME);
+			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
 	fileLoad(path);
 
 // 	readFromPref();
@@ -39,7 +39,7 @@ MessageHub::MessageHub() :
 MessageHub::~MessageHub()
 {
 	QString path = QString("%1/.config/%2/%3.msg")
-			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APPNAME);
+			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
 	fileSave(path,false,true);
 
 // 	writeToPref();

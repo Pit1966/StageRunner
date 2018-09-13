@@ -66,7 +66,7 @@ DMXUSBConfig::DMXUSBConfig(DMXUSB* plugin, QWidget* parent)
     connect(m_refreshButton, SIGNAL(clicked()), this, SLOT(slotRefresh()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(accept()));
 
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	QVariant var = set.value(SETTINGS_GEOMETRY);
     if (var.isValid() == true)
         restoreGeometry(var.toByteArray());
@@ -76,7 +76,7 @@ DMXUSBConfig::DMXUSBConfig(DMXUSB* plugin, QWidget* parent)
 
 DMXUSBConfig::~DMXUSBConfig()
 {
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	set.setValue(SETTINGS_GEOMETRY, saveGeometry());
 }
 

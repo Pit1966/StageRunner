@@ -1,11 +1,14 @@
 #include "serialwrapper.h"
+#include "yadidevice.h"
+
 #include <QDebug>
 #include <QProcess>
 #include <QMessageBox>
 #include <QFile>
 
-SerialWrapper::SerialWrapper(const QString &dev_node) :
+SerialWrapper::SerialWrapper(YadiDevice *dev, const QString &dev_node) :
 	QObject()
+  , m_yadi(dev)
 {
 	device_node = dev_node;
 	error_num = 0;
@@ -273,9 +276,10 @@ qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 
 qint64 SerialWrapper::writeSerial(const char *buf)
 {
+	if (m_yadi->debug > 2)
+		qDebug() << "Yadi write serial: " << buf;
 #if defined(QTSERIAL)
 	qint64 num = m_serialPort->write(buf);
-	qDebug() << "ser write" << buf;
 #elif defined(WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = (DWORD)strlen(buf);

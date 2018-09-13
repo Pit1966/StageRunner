@@ -98,7 +98,7 @@ bool DMXInterface::checkInfo(QString &serial, QString &name, QString &vendor)
 QMap <QString,QVariant> DMXInterface::typeMap()
 {
     QMap <QString,QVariant> typeMap;
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	QVariant var(set.value(SETTINGS_TYPE_MAP));
     if (var.isValid() == true)
         typeMap = var.toMap();
@@ -107,7 +107,7 @@ QMap <QString,QVariant> DMXInterface::typeMap()
 
 void DMXInterface::storeTypeMap(const QMap <QString,QVariant> map)
 {
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	set.setValue(SETTINGS_TYPE_MAP, map);
 }
 

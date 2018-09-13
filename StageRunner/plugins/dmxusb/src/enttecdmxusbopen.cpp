@@ -46,7 +46,7 @@ EnttecDMXUSBOpen::EnttecDMXUSBOpen(DMXInterface *interface,
     , m_frequency(30)
     , m_granularity(Unknown)
 {
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	QVariant var = set.value(SETTINGS_FREQUENCY);
 	if (var.isValid() == true)
 		m_frequency = var.toDouble();

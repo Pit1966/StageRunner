@@ -50,14 +50,17 @@ PluginMapping::~PluginMapping()
 bool PluginMapping::saveToDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
-			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APPNAME);
+			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+
+	qDebug() << "save pluginmap" << path;
 	return fileSave(path,false,true);
 }
 
 bool PluginMapping::loadFromDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
-			.arg(QDir::homePath()).arg(APP_ORG_STRING).arg(APPNAME);
+			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+	qDebug() << "save pluginmap" << path;
 	bool ok = fileLoad(path);
 	return ok;
 }

@@ -18,7 +18,7 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 
 void PsVideoWidget::setPrefsSettings()
 {
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	if (set.contains("VideoWinEnabled")) {
 		set.beginGroup("GuiSettings");
 		restoreGeometry(set.value("VideoWinGeometry").toByteArray());
@@ -33,7 +33,7 @@ void PsVideoWidget::setPrefsSettings()
 
 void PsVideoWidget::saveCurrentStateToPrefs()
 {
-	QSettings set(QSETFORMAT);
+	QSettings set(QSETFORMAT,APPNAME);
 	set.setValue("VideoWinEnabled",!isHidden());
 	set.beginGroup("GuiSettings");
 	set.setValue("VideoWinGeometry",saveGeometry());
