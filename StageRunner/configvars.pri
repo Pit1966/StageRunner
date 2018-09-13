@@ -3,10 +3,11 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.8.2
+APPVERSION = V0.8.3
 APP_MILESTONE = ArtNet & MAC_SDL
 APP_PRODUCER = 2018 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
+APP_ORG_DOMAIN = stonechip.de
 
 #############################################################################
 # Compiler & linker configuration
@@ -72,7 +73,7 @@ macx:DOCSDIR       = $$DATADIR/Documents
 
 # Plugins
 win32:PLUGINDIR      = Plugins
-unix:!macx:PLUGINDIR = plugins/stagerunner
+unix:!macx:PLUGINDIR = share/stagerunner/plugins
 macx:PLUGINDIR       = PlugIns/stagerunner
 
 # Translations
@@ -105,7 +106,8 @@ macx {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-    conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
@@ -119,7 +121,8 @@ unix:!macx {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-    conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$INSTALLROOT/$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$INSTALLROOT/$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$INSTALLROOT/$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
@@ -133,7 +136,8 @@ win32 {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-    conf.commands += @echo $$LITERAL_HASH define DOCSDIR \"$$DOCSDIR\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+	conf.commands += @echo $$LITERAL_HASH define DOCSDIR \"$$DOCSDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define PLUGINDIR \"$$PLUGINDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&

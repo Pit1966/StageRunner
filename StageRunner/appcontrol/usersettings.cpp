@@ -1,5 +1,3 @@
-#include "configrev.h"
-
 #include "usersettings.h"
 #include "log.h"
 #include "config.h"

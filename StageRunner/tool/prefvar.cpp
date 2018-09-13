@@ -214,7 +214,7 @@ bool PrefVarCore::readAllFromPref()
 {
 	bool ok = true;
 
-	QSettings set(APP_ORG_STRING,APPNAME);
+	QSettings set;
 
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);
@@ -237,7 +237,7 @@ bool PrefVarCore::writeAllToPref()
 {
 	bool ok = true;
 
-	QSettings set(APP_ORG_STRING,APPNAME);
+	QSettings set;
 	glob_var_list->lock();
 	for (int t=0; t<glob_var_list->size(); t++) {
 		PrefVarCore *pvar = glob_var_list->at(t);

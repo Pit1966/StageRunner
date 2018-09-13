@@ -6,11 +6,11 @@
 #define MAX_AUDIO_SLOTS 4
 #define MAX_DMX_UNIVERSE 4
 
-# define APPNAME "StageRunner"
-# define APPVERSION "V0.8.2"
-# define APP_MILESTONE "ArtNet & MAC_SDL"
-# define APP_PRODUCER "2018 Stonechip Entertainment"
-# define APP_ORG_STRING "Stonechip"
+//# define APPNAME "StageRunner"
+//# define APPVERSION "V0.8.2"
+//# define APP_MILESTONE "ArtNet & MAC_SDL"
+//# define APP_PRODUCER "2018 Stonechip Entertainment"
+//# define APP_ORG_STRING "Stonechip"
 
 
 

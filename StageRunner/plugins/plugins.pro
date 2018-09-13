@@ -6,9 +6,9 @@ CONFIG  += ordered
 SUBDIRS += midi
 SUBDIRS += artnet
 SUBDIRS += dmxusb
+SUBDIRS += yadi
 
 unix:!macx {
-SUBDIRS += yadi
 
 # old - substituted by dmxusb
 #SUBDIRS += enttecdmxusb
@@ -16,4 +16,3 @@ SUBDIRS += yadi
 
 
 
-SUBDIRS += yadi
