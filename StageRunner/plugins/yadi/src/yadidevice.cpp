@@ -66,7 +66,7 @@ YadiDevice::YadiDevice(const YadiDevice &other)
 
 bool YadiDevice::activateDevice()
 {
-	qDebug("Yadi: activate device");
+	qDebug("Yadi: %s: activate device",threadNameAsc());
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
 	if (file && file->deviceNode() != devNodePath) {
@@ -119,7 +119,7 @@ void YadiDevice::deActivateDevice()
 
 bool YadiDevice::openOutput()
 {
-	qDebug("Yadi: open output");
+	qDebug("Yadi: %s: open output", threadNameAsc());
 	if (!file) {
 		if (!activateDevice())
 			return false;
@@ -138,7 +138,7 @@ bool YadiDevice::openOutput()
 
 void YadiDevice::closeOutput()
 {
-	qDebug("Yadi: close output");
+	qDebug("Yadi: %s: close output",threadNameAsc());
 	if (file && !input_open_f) {
 		file->closeSerial();
 	}
@@ -300,7 +300,9 @@ void YadiDevice::loadConfig()
 
 void YadiDevice::sendConfigToDevice()
 {
-	/*if (debug)*/ qDebug("YadiDevice::sendConfigToDevice");
+	qDebug("Yadi: %s: YadiDevice::sendConfigToDevice '%s'"
+		   , threadNameAsc()
+		   , devNodePath.toLocal8Bit().constData());
 	/// @todo error checking!
 	bool old_open_output_state = output_open_f;
 
@@ -376,6 +378,18 @@ void YadiDevice::closeDmxOutMonitorWidget()
 		delete dmxOutMonWidget;
 		dmxOutMonWidget = 0;
 	}
+}
+
+QString YadiDevice::threadName()
+{
+	return QThread::currentThread()->objectName();
+}
+
+const char * YadiDevice::threadNameAsc()
+{
+	static char outbuf[200];
+	sprintf(outbuf, "%s", QThread::currentThread()->objectName().toLocal8Bit().constData());
+	return outbuf;
 }
 
 void YadiDevice::init()

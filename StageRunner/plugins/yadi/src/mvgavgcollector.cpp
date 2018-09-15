@@ -38,5 +38,10 @@ void MvgAvgCollector::append(double val, bool &isFilled)
 
 double MvgAvgCollector::value() const
 {
-	return m_sumValues / m_values.size();
+	switch (m_type) {
+	case MT_SMA:
+		return m_sumValues / m_values.size();
+	default:
+		return 0.0;
+	}
 }

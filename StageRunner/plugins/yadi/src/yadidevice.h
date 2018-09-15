@@ -91,6 +91,9 @@ public:
 	void closeDmxInMonitorWidget();
 	void closeDmxOutMonitorWidget();
 
+	static QString threadName();
+	static const char *threadNameAsc();
+
 private:
 	void init();
 

@@ -54,6 +54,9 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     if (debug)
 		srcContext = QString("file: %1 line: %2 : %3").arg(context.file).arg(context.line).arg(context.function);
 
+	if (localMsg.contains("Cannot create"))
+		fprintf(stderr, "Catch: %s\n",localMsg.constData());
+
 	switch (type) {
 	case QtDebugMsg:
 		fprintf(stderr, "Debug: %s\n", localMsg.constData());

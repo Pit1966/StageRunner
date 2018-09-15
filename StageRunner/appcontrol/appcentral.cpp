@@ -676,6 +676,8 @@ AppCentral::~AppCentral()
 
 void AppCentral::init()
 {
+	m_mainThread = QThread::currentThread();
+	m_mainThread->setObjectName("MainThread");
 	edit_mode_f = false;
 	input_assign_mode_f = false;
 	input_assign_target_fxitem = nullptr;

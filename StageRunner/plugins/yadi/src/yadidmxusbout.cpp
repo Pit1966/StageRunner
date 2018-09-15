@@ -86,12 +86,15 @@ bool YadiDMXUSBOut::findDevices(bool update)
 		QString devNode = output_devices.at(t);
 		YadiDevice *yadi = YadiDeviceManager::getDevice(devNode,YadiDevice::FL_OUTPUT_UNIVERSE);
 		if (!yadi) {
-			qDebug("Yadi: Output device %s is gone. No Yadi output found"
-							  ,devNode.toLocal8Bit().data());
+			qDebug("Yadi: %s: Output device %s is gone. No Yadi output found"
+				   ,YadiDevice::threadNameAsc()
+				   ,devNode.toLocal8Bit().data());
 			output_devices.removeAt(t);
 		}
 		else if (!YadiDeviceManager::deviceNodeExists(devNode)) {
-			qDebug("Yadi: Output device %s is gone",devNode.toLocal8Bit().data());
+			qDebug("Yadi: %s: Output device %s is gone"
+				   ,YadiDevice::threadNameAsc()
+				   ,devNode.toLocal8Bit().data());
 			yadi->closeInOut();
 			output_devices.removeAt(t);
 			YadiDeviceManager::removeDevice(devNode);
@@ -103,8 +106,10 @@ bool YadiDMXUSBOut::findDevices(bool update)
 		YadiDevice *device = YadiDeviceManager::globalDeviceList().at(t);
 		if (!output_devices.contains(device->devNodePath)) {
 			if (device->capabilities&YadiDevice::FL_OUTPUT_UNIVERSE) {
-				qDebug() << "YadiDMXUSBOut::Added Output Device: ";
-				qDebug() << "         "  << device->deviceProductName << device->devNodePath;
+				qDebug("Yadi: %s Added Output Device: %s %s"
+					   ,YadiDevice::threadNameAsc()
+					   ,device->deviceProductName.toLocal8Bit().constData()
+					   ,device->devNodePath.toLocal8Bit().constData());
 				output_devices.append(device->devNodePath);
 			}
 		}
@@ -125,13 +130,16 @@ bool YadiDMXUSBOut::findDevices(bool update)
 		if (!input_devices.contains(device->devNodePath)) {
 			if (device->capabilities&YadiDevice::FL_INPUT_UNIVERSE) {
 				input_devices.append(device->devNodePath);
-				qDebug() << "YadiDMXUSBOut::Added input Device: " << device->deviceProductName << device->devNodePath;
+				qDebug("Yadi: %s Added input device '%s' node '%s'"
+					   ,YadiDevice::threadNameAsc()
+					   ,device->deviceProductName.toLocal8Bit().constData()
+					   ,device->devNodePath.toLocal8Bit().constData());
 			}
 		}
 	}
 
 	if (cur_in != input_devices || cur_out != output_devices) {
-		qDebug("Yadi: Find devices: Device list changed");
+		qDebug("Yadi: %s Find devices: Device list changed", YadiDevice::threadNameAsc());
 		return true;
 	} else {
 		return false;
@@ -145,13 +153,16 @@ QString YadiDMXUSBOut::name()
 
 bool YadiDMXUSBOut::openOutput(quint32 output, quint32 universe)
 {
-	qDebug("YadiDMXUSBOut::openOutput(%d), universe %d",output,universe);
+	qDebug("Yadi: %s: openOutput(%d), universe %d"
+		   ,YadiDevice::threadNameAsc(),output,universe);
 	return internOpenOutput(output,universe);
 }
 
 void YadiDMXUSBOut::closeOutput(quint32 output, quint32 universe)
 {
-	if (debug) qDebug("YadiDMXUSBOut::closeOutput(%d), universe %d",output,universe);
+	if (debug)
+		qDebug("Yadi: %s: closeOutput(%d), universe %d"
+			   ,YadiDevice::threadNameAsc(),output,universe);
 	QMutexLocker lock(accessMutex);
 
 	if ((int)output < output_devices.size()) {
@@ -159,7 +170,7 @@ void YadiDMXUSBOut::closeOutput(quint32 output, quint32 universe)
 		if (yadi) {
 			yadi->closeOutput();
 		} else {
-			qDebug("YadiDMXUSBOut::closeOutput(%d) Device not found",output);
+			qDebug("Yadi: %s: closeOutput(%d) Device not found",YadiDevice::threadNameAsc(),output);
 		}
 	}
 
@@ -220,7 +231,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 	if ((int)output >= output_devices.size()) {
 		if (write_universe_debug_out) {
 			write_universe_debug_out = false;
-			qDebug("Yadi DMX plugin::writeUniverse: Non existing device adressed: output line: %d",output);
+			qDebug("Yadi: %s: writeUniverse: Non existing device adressed: output line: %d",YadiDevice::threadNameAsc(),output);
 		}
 		return;
 	}
@@ -229,7 +240,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 	if (!yadi || !yadi->isOutputOpen()) {
 		if (write_universe_debug_out) {
 			write_universe_debug_out = false;
-			qDebug("Yadi DMX plugin:writeUniverse: Device is closed: output line: %d",output);
+			qDebug("Yadi: %s: writeUniverse: Device is closed: output line: %d",YadiDevice::threadNameAsc(),output);
 		}
 		return;
 	}
@@ -239,7 +250,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 
 	if (data.size() >  yadi->outUniverse.size()) {
 		yadi->outUniverse.resize(data.size());
-		qDebug() << "Yadi DMX plugin::writeUniverse:  resize output universe to" << data.size();
+		qDebug() << "Yadi:" << YadiDevice::threadName() << ": writeUniverse:  resize output universe to" << data.size();
 	}
 
 	QTime stop;
@@ -272,7 +283,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 //				qDebug("chan %d: %d->%d",t,quint8(yadi->outUniverse.at(t)),quint8(universe.at(t)));
 //			}
 //		}
-		unsigned char out[] = {'O',0,2};		// 512 Channels
+		unsigned char out[] = {'O',0,2,0};		// 512 Channels
 		out[1] = hi_changed_channel;
 		out[2] = hi_changed_channel>>8;
 		int bytes = yadi->write((char*)out,3);
@@ -363,14 +374,15 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 
 bool YadiDMXUSBOut::openInput(quint32 input, quint32 universe)
 {
-	qDebug("YadiDMXUSBOut::openInput(%d), universe %d",input,universe);
+	qDebug("Yadi: %s: openInput(%d), universe %d",YadiDevice::threadNameAsc(),input,universe);
 	return internOpenInput(input,universe);
 }
 
 void YadiDMXUSBOut::closeInput(quint32 input, quint32 universe)
 {
 	QMutexLocker lock(accessMutex);
-	qDebug("YadiDMXUSBOut::closeInput(%d), universe: %d",input,universe);
+	qDebug("Yadi: %s: closeInput(%d), universe: %d",YadiDevice::threadNameAsc(),input,universe);
+
 
 	if ((int)input < input_devices.size()) {
 		YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
@@ -378,7 +390,7 @@ void YadiDMXUSBOut::closeInput(quint32 input, quint32 universe)
 			// disconnect(yadi->inputThread(),0,this,0);
 			yadi->closeInput();
 		} else {
-			qDebug("YadiDMXUSBOut::closeInput(%d) Device not found",input);
+			qDebug("Yadi: %s: closeInput(%d) Device not found",YadiDevice::threadNameAsc(),input);
 		}
 	}
 
@@ -481,7 +493,7 @@ void YadiDMXUSBOut::configure()
 	dialog.exec();
 
 	if (dialog.configChanged) {
-		qDebug("Dialog Config changed");
+		qDebug("Yadi: Dialog Config changed");
 		emit configurationChanged();
 	}
 
@@ -546,7 +558,7 @@ void YadiDMXUSBOut::handle_output_error(quint32 output)
 
 		yadi->closeInOut();
 
-		qDebug("%s: Device '%s' now closed, due to error"
+		qDebug("Yadi: %s: Device '%s' now closed, due to error"
 			   ,Q_FUNC_INFO,output_devices.at(output).toLocal8Bit().data());
 	}
 
@@ -567,7 +579,7 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 	DmxMonitor *mon = yadi->dmxOutMonWidget;
 
 	if (debug > 1)
-		fprintf(stderr, "update output monitor (cnt:%d) %s\n",universe.size(),universe.toHex().data());
+		fprintf(stderr, "Yadi: update output monitor (cnt:%d) %s\n",universe.size(),universe.toHex().data());
 
 	if (mon) {
 		for (int t=0; t<mon->visibleBars(); t++) {
@@ -595,13 +607,14 @@ bool YadiDMXUSBOut::internOpenOutput(quint32 output, int universe)
 
 		if (ok) {
 			outDevNameTable[output] = output_devices.at(output);
-			if (debug) qDebug("YadiDMXUSBOut::openOutput(%d) successful",output);
+			if (debug)
+				qDebug("Yadi: %s: openOutput(%d) successful",YadiDevice::threadNameAsc(),output);
 		} else {
-			qDebug("YadiDMXUSBOut::openOutput(%d) failed!",output);
+			qDebug("Yadi: %s: openOutput(%d) failed!",YadiDevice::threadNameAsc(),output);
 		}
 
 	} else {
-		qDebug("YadiDMXUSBOut::openOutput(%d) failed! Device list own %d outputs",output+1,output_devices.size());
+		qDebug("Yadi: %s: openOutput(%d) failed! Device list own %d outputs",YadiDevice::threadNameAsc(),output+1,output_devices.size());
 	}
 	return ok;
 }
@@ -632,7 +645,7 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
 			connect(yadi->inputThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
 		} else {
-			qDebug("YadiDMXUSBOut::openInput(%d) failed!",input);
+			qDebug("Yadi: %s: openInput(%d) failed!",YadiDevice::threadNameAsc(),input);
 		}
 	}
 
@@ -647,7 +660,8 @@ void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
 		YadiDevice * yadi = YadiDeviceManager::getDevice(devname,YadiDevice::FL_INPUT_UNIVERSE);
 		if(yadi->dmxInMonWidget == instance) {
 			yadi->closeDmxInMonitorWidget();
-			if (debug) qDebug("Delete DMX In Monitor");
+			if (debug)
+				qDebug("Yadi: %s: Delete DMX In Monitor", YadiDevice::threadNameAsc());
 		}
 	}
 
@@ -655,7 +669,8 @@ void YadiDMXUSBOut::closeMonitorByInstancePointer(DmxMonitor *instance)
 		YadiDevice * yadi = YadiDeviceManager::getDevice(devname,YadiDevice::FL_OUTPUT_UNIVERSE);
 		if(yadi->dmxOutMonWidget == instance) {
 			yadi->closeDmxInMonitorWidget();
-			if (debug) qDebug("Delete DMX Out Monitor");
+			if (debug)
+				qDebug("Yadi: %s: Delete DMX Out Monitor", YadiDevice::threadNameAsc());
 		}
 	}
 }
@@ -665,7 +680,8 @@ void YadiDMXUSBOut::propagateChangedInput(quint32 universe, quint32 input, quint
 	emit valueChanged(universe, input, channel, value);
 	// fprintf(stderr, "propagate changed input %d: %d\n",channel,value);
 
-	if (debug > 1) qDebug("YadiDMXUSBOut::propagateChangedInput %d %d %d", input, channel, value);
+	if (debug > 1)
+		qDebug("Yadi: %s: propagateChangedInput %d %d %d", YadiDevice::threadNameAsc(), input, channel, value);
 }
 
 void YadiDMXUSBOut::propagateReceiverFrameRate(YadiDevice *yadiDev, const QString &text)
@@ -676,7 +692,7 @@ void YadiDMXUSBOut::propagateReceiverFrameRate(YadiDevice *yadiDev, const QStrin
 
 void YadiDMXUSBOut::inputDeviceFailed(int input)
 {
-	qDebug("YadiDMXUSBOut::inputDeviceFailed(%d) failed!",input);
+	qWarning("Yadi: %s: inputDeviceFailed(%d) failed!", YadiDevice::threadNameAsc(),input);
 
 	accessMutex->lock();
 	if (input >= input_devices.size()) {
@@ -700,7 +716,7 @@ void YadiDMXUSBOut::inputDeviceFailed(int input)
 		else
 			m_reOpenInput = -1;
 
-		qDebug("YadiDMXUSBOut::inputDeviceFailed: Close inputs and outputs");
+		qWarning("Yadi: %s :inputDeviceFailed: Close inputs and outputs",YadiDevice::threadNameAsc());
 		yadi->closeInOut();
 	}
 
@@ -731,13 +747,14 @@ void YadiDMXUSBOut::handleCommunicationError()
 		if (internOpenOutput(m_reOpenOutput, -1)) {
 			QString msg(QString("Reopened output %1 after communication error (#%2)")
 				   .arg(m_reOpenOutput+1).arg(m_totalComErrorCounter+1));
-			qDebug() << Q_FUNC_INFO << msg;
+			qDebug() << "Yadi:" << Q_FUNC_INFO << msg;
 			emit errorMsgEmitted(msg);
 			m_reOpenOutput = -1;
 
 		} else {
-			qDebug("%s Error on reopening output %d after communication error"
-				   ,Q_FUNC_INFO,m_reOpenOutput+1);
+			qWarning("Yadi: %s: %s Error on reopening output %d after communication error"
+					 ,YadiDevice::threadNameAsc()
+					 ,Q_FUNC_INFO,m_reOpenOutput+1);
 			tryagain = true;
 		}
 	}
@@ -747,12 +764,13 @@ void YadiDMXUSBOut::handleCommunicationError()
 		if (internOpenInput(m_reOpenInput, -1)) {
 			QString msg(QString("Reopened input %1 after communication error (#%2)")
 				   .arg(m_reOpenInput+1).arg(m_totalComErrorCounter+1));
-			qDebug() << Q_FUNC_INFO << msg;
+			qDebug() << "Yadi:" << Q_FUNC_INFO << msg;
 			emit errorMsgEmitted(msg);
 			m_reOpenInput = -1;
 		} else {
-			qDebug("%s Error on reopening input %d after communication error"
-				   ,Q_FUNC_INFO,m_reOpenInput+1);
+			qWarning("Yadi: %s %s Error on reopening input %d after communication error"
+					 ,YadiDevice::threadNameAsc()
+					 ,Q_FUNC_INFO,m_reOpenInput+1);
 		}
 	}
 

@@ -26,14 +26,16 @@
 #endif
 
 class YadiDevice;
+class QThread;
 
 class SerialWrapper : public QObject
 {
 	Q_OBJECT
 private:
-	QString device_node;			// maybe port name for QtSerial, or device path for unix
+	QString device_node;			// may be port name for QtSerial, or device path for unix
 	int error_num;
 	YadiDevice *m_yadi;
+	QThread *m_openedFromThread;
 
 #if defined (QTSERIAL)
 	QSerialPort *m_serialPort;

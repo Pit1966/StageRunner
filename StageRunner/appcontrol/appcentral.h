@@ -32,6 +32,7 @@ class FxListVarSet;
 class VideoControl;
 class DmxUniverseProperty;
 class FxSceneItem;
+class QThread;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -58,6 +59,8 @@ private:
 
 	int m_moduleErrorMask;
 	bool m_isSDLAvailable;
+
+	QThread *m_mainThread;
 
 public:
 	QObject *mainWinObj;
