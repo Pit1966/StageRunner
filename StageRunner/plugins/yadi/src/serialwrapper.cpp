@@ -75,14 +75,13 @@ QList<QSerialPortInfo> SerialWrapper::discoverQtSerialPorts(const QString &nameM
 {
 	QList<QSerialPortInfo> matchDevs;
 
-	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-	{
+	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
 		QString serial(info.serialNumber());
 		QString name(info.description());
 		QString vendor(info.manufacturer());
 		QString productID(info.productIdentifier());
 
-		qDebug() << "[QtSerialInterface] Serial: " << serial << "name:"
+		qDebug() << "Yadi: [QtSerialInterface] Serial: " << serial << "name:"
 				 << name << "vendor:" << vendor << "productID" << productID;
 
 #if defined(Q_OS_OSX)
@@ -97,41 +96,37 @@ QList<QSerialPortInfo> SerialWrapper::discoverQtSerialPorts(const QString &nameM
 	}
 
 	if (matchDevs.isEmpty())
-		qDebug() << "[QtSerialInterface] Serial: no serial devices discovered";
+		qDebug() << "Yadi: [QtSerialInterface] Serial: no serial devices discovered";
 
 	return matchDevs;
 }
 #endif
 
 
-bool SerialWrapper::openSerial(const QString &dev_node)
+bool SerialWrapper::openSerial()
 {
-	if (dev_node.size()) {
-		device_node = dev_node;
-	}
 	if (!device_node.size()) {
 		return false;
 	}
 
 	bool ok = false;
 
-	m_openedFromThread = QThread::currentThread();
 
 #if defined(QTSERIAL)
 	if (m_serialPort) {
-		m_serialPort->close();
-
-		qDebug("Yadi: %s: SerialWrapper::openSerial reopen '%s'"
+		qWarning("Yadi: %s: SerialWrapper::openSerial: Serial port already open '%s'"
 			   ,YadiDevice::threadNameAsc()
 			   ,device_node.toLocal8Bit().constData());
+		return false;
 
-	} else {
-		m_serialPort = new QSerialPort(m_serialInfo);
-
-		qDebug("Yadi: %s: SerialWrapper::openSerial init '%s'"
-			   ,YadiDevice::threadNameAsc()
-			   ,device_node.toLocal8Bit().constData());
 	}
+
+	m_serialPort = new QSerialPort(m_serialInfo);
+	m_openedFromThread = QThread::currentThread();
+
+	qDebug("Yadi: %s: SerialWrapper::openSerial: Init serial port '%s'"
+		   ,YadiDevice::threadNameAsc()
+		   ,device_node.toLocal8Bit().constData());
 
 
 	m_serialPort->setPortName(device_node);
@@ -147,7 +142,8 @@ bool SerialWrapper::openSerial(const QString &dev_node)
 	}
 
 	m_serialPort->setReadBufferSize(1024);
-	qDebug() << "Yadi: Read buffer size:" << m_serialPort->readBufferSize() << m_serialPort->error() << m_serialPort->errorString();
+	if (m_yadi->debug)
+		qDebug() << "Yadi: Read buffer size:" << m_serialPort->readBufferSize() << m_serialPort->error() << m_serialPort->errorString();
 
 	return true;
 
@@ -210,9 +206,12 @@ void SerialWrapper::closeSerial()
 	qDebug("Yadi: %s: close serial interface for device '%s'"
 		   ,YadiDevice::threadNameAsc()
 		   ,device_node.toLocal8Bit().constData());
+
 #if defined(QTSERIAL)
 	if (m_serialPort) {
 		m_serialPort->close();
+		delete m_serialPort;
+		m_serialPort = nullptr;
 	}
 #elif defined(WIN32)
 	if (serial_handle) {
@@ -277,6 +276,10 @@ QByteArray SerialWrapper::readSerial(qint64 size)
 
 qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 {
+	if (!isOpen())
+		if (!openSerial())
+			return 0;
+
 #if defined(QTSERIAL)
 	return m_serialPort->read(buf, size);
 #elif defined(WIN32)
@@ -297,6 +300,10 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 		qDebug("Yadi: %s write serial: %s"
 			   ,YadiDevice::threadNameAsc()
 			   ,buf);
+
+	if (!isOpen())
+		if (!openSerial())
+			return 0;
 
 #if defined(QTSERIAL)
 	qint64 num = m_serialPort->write(buf);
@@ -328,6 +335,10 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 			   ,YadiDevice::threadNameAsc()
 			   ,buf
 			   ,size);
+
+	if (!isOpen())
+		if (!openSerial())
+			return 0;
 
 #if defined(QTSERIAL)
 	qint64 num = m_serialPort->write(buf, size);

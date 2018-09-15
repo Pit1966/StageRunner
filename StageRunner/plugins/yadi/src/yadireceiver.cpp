@@ -52,10 +52,12 @@ void YadiReceiver::run()
 	bool ok = receiver_loop();
 
 	if (!ok) {
-		if (device->debug) qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
+		if (device->debug)
+			qDebug("YadiReceiver::run: Final exit DMXreceiver thread with failure");
 		emit exitReceiverWithFailure(inputNumber);
 	} else {
-		if (device->debug) qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
+		if (device->debug)
+			qDebug("YadiReceiver::run: exit DMXreceiver thread normaly");
 	}
 
 	cmd = IDLE;
@@ -65,6 +67,14 @@ bool YadiReceiver::receiver_loop()
 {
 	bool ok = true;
 	bool firstloop = true;
+
+#ifdef QTSERIAL
+	while (cmd != STOPPED && !device->serialDev()->isOpen()) {
+		msleep(10);
+	}
+#endif
+
+	qDebug("Yadi: receiver loop enter");
 
 	while (cmd != STOPPED && ok && device->serialDev() && device->serialDev()->isOpen()) {
 		bool emit_all = true;

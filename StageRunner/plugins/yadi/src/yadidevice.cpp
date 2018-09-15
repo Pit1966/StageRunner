@@ -66,7 +66,7 @@ YadiDevice::YadiDevice(const YadiDevice &other)
 
 bool YadiDevice::activateDevice()
 {
-	qDebug("Yadi: %s: activate device",threadNameAsc());
+	qDebug("Yadi: %s: activate device '%s'",threadNameAsc(),deviceProductName.toLocal8Bit().constData());
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
 	if (file && file->deviceNode() != devNodePath) {
@@ -111,15 +111,16 @@ void YadiDevice::deActivateDevice()
 	}
 	if (file) {
 		delete file;
-		file = 0;
+		file = nullptr;
 	}
+
 	input_open_f = false;
 	output_open_f = false;
 }
 
 bool YadiDevice::openOutput()
 {
-	qDebug("Yadi: %s: open output", threadNameAsc());
+	qDebug("Yadi: %s: open output for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
 	if (!file) {
 		if (!activateDevice())
 			return false;
@@ -127,11 +128,15 @@ bool YadiDevice::openOutput()
 
 	outputSendAllData = true;
 
+#ifdef QTSERIAL
+	output_open_f = true;
+#else
 	if (!file->isOpen()) {
 		output_open_f = file->openSerial();
 	} else {
 		output_open_f = true;
 	}
+#endif
 
 	return output_open_f;
 }
@@ -147,16 +152,21 @@ void YadiDevice::closeOutput()
 
 bool YadiDevice::openInput()
 {
+	qDebug("Yadi: %s: open input for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
 	if (!file) {
 		if (!activateDevice())
 			return false;
 	}
 
+#ifdef QTSERIAL
+	input_open_f = true;
+#else
 	if (!file->isOpen()) {
 		input_open_f = file->openSerial();
 	} else {
 		input_open_f = true;
 	}
+#endif
 
 	if (input_open_f && input_thread) {
 		input_thread->startRxDmx(inputId);
@@ -230,7 +240,11 @@ qint64 YadiDevice::write(const char *buf, qint64 size)
 bool YadiDevice::isOutputOpen()
 {
 	if (file) {
+#ifdef QTSERIAL
+		return output_open_f;
+#else
 		return file->isOpen() && output_open_f;
+#endif
 	} else {
 		return false;
 	}

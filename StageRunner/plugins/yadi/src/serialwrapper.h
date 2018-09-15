@@ -55,7 +55,7 @@ public:
 	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);
 #endif
 
-	bool openSerial(const QString & dev_node = "");
+	bool openSerial();
 	void closeSerial();
 	QByteArray readSerial(qint64 size);
 	qint64 readSerial(char *buf, qint64 size);

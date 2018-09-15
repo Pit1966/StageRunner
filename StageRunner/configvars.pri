@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.8.3
+APPVERSION = V0.8.4
 APP_MILESTONE = ArtNet & MAC_SDL
 APP_PRODUCER = 2018 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
