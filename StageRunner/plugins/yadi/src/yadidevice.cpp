@@ -3,6 +3,9 @@
 #include "serialwrapper.h"
 #include "dmxmonitor.h"
 #include "configrev.h"
+#ifdef QTSERIAL
+#  include "qserialportthread.h"
+#endif
 
 #include <QFile>
 #include <QSettings>
@@ -17,11 +20,10 @@ YadiDevice::YadiDevice(const QString &dev_node)
 
 YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 {
-	bool was_activated = (0 != file);
 	bool activate_again = false;
 
 	if (devNodePath != other.devNodePath) {
-		if (was_activated) {
+		if (m_isDeviceActivated) {
 			deActivateDevice();
 			activate_again = true;
 		}
@@ -67,16 +69,37 @@ YadiDevice::YadiDevice(const YadiDevice &other)
 bool YadiDevice::activateDevice()
 {
 	qDebug("Yadi: %s: activate device '%s'",threadNameAsc(),deviceProductName.toLocal8Bit().constData());
+
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
-	if (file && file->deviceNode() != devNodePath) {
+#ifdef QTSERIAL
+	if (m_serialThread && m_serialThread->deviceNode() != devNodePath)
 		deActivateDevice();
-	}
+#else
+	if (file && file->deviceNode() != devNodePath)
+		deActivateDevice();
+#endif
 
 	bool ok = true;
 	// Here we prepare the device
 	// We initiate the access object and if we need
 	// we create the thread object that should read from the device later
+#ifdef QTSERIAL
+	if (!m_serialThread) {
+		if (deviceNodeExists(devNodePath)) {
+			m_serialThread = new QSerialPortThread(this);
+			outUniverse.fill(0,512);
+			inUniverse.fill(0,512);
+		} else {
+			ok = false;
+		}
+	}
+	if (m_serialThread) {
+		m_isDeviceActivated = true;
+		sendConfigToDevice();
+	}
+
+#else
 	if (!file) {
 		if (SerialWrapper::deviceNodeExists(devNodePath)) {
 			file = new SerialWrapper(this, devNodePath);
@@ -85,7 +108,6 @@ bool YadiDevice::activateDevice()
 			ok = false;
 		}
 	}
-
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
 			input_thread = new YadiReceiver(this);
@@ -96,14 +118,23 @@ bool YadiDevice::activateDevice()
 			delete input_thread;
 			input_thread = 0;
 		}
+		m_isDeviceActivated = true;
 		sendConfigToDevice();
 	}
+#endif
+
 
 	return ok;
 }
 
 void YadiDevice::deActivateDevice()
 {
+#ifdef QTSERIAL
+	if (m_serialThread) {
+		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_ALL);
+		m_isDeviceActivated = false;
+	}
+#else
 	if (input_thread) {
 		input_thread->stopRxDmx();
 		delete input_thread;
@@ -116,12 +147,15 @@ void YadiDevice::deActivateDevice()
 
 	input_open_f = false;
 	output_open_f = false;
+	m_isActivated = false;
+#endif
+
 }
 
 bool YadiDevice::openOutput()
 {
 	qDebug("Yadi: %s: open output for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
-	if (!file) {
+	if (!m_isDeviceActivated) {
 		if (!activateDevice())
 			return false;
 	}
@@ -129,66 +163,85 @@ bool YadiDevice::openOutput()
 	outputSendAllData = true;
 
 #ifdef QTSERIAL
-	output_open_f = true;
+	m_serialThread->sendCommand(QSerialPortThread::CMD_START_OUTPUT);
+	m_isOutputOpen = true;
 #else
 	if (!file->isOpen()) {
-		output_open_f = file->openSerial();
+		m_isOutputOpen = file->openSerial();
 	} else {
-		output_open_f = true;
+		m_isOutputOpen = true;
 	}
 #endif
 
-	return output_open_f;
+	return m_isOutputOpen;
 }
 
 void YadiDevice::closeOutput()
 {
 	qDebug("Yadi: %s: close output",threadNameAsc());
+#ifdef QTSERIAL
+	if (m_serialThread) {
+		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_OUTPUT);
+	}
+#else
 	if (file && !input_open_f) {
 		file->closeSerial();
 	}
-	output_open_f = false;
+#endif
+	m_isOutputOpen = false;
 }
 
 bool YadiDevice::openInput()
 {
 	qDebug("Yadi: %s: open input for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
-	if (!file) {
+	if (!m_isDeviceActivated) {
 		if (!activateDevice())
 			return false;
 	}
 
 #ifdef QTSERIAL
-	input_open_f = true;
+	m_serialThread->sendCommand(QSerialPortThread::CMD_START_INPUT);
+	m_isInputOpen = true;
 #else
 	if (!file->isOpen()) {
-		input_open_f = file->openSerial();
+		m_isInputOpen = file->openSerial();
 	} else {
-		input_open_f = true;
+		m_isInputOpen = true;
+	}
+	if (m_isInputOpen && input_thread) {
+		input_thread->startRxDmx(inputId);
 	}
 #endif
 
-	if (input_open_f && input_thread) {
-		input_thread->startRxDmx(inputId);
-	}
-
-	return input_open_f;
+	return m_isInputOpen;
 }
 
 void YadiDevice::closeInput()
 {
+#ifdef QTSERIAL
+	if (m_serialThread) {
+		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_INPUT);
+	}
+#else
 	if (input_thread) {
 		input_thread->stopRxDmx();
 	}
 
-	if (file && !output_open_f) {
+	if (file && !m_isOutputOpen) {
 		file->closeSerial();
 	}
-	input_open_f = false;
+#endif
+
+	m_isInputOpen = false;
 }
 
 void YadiDevice::closeInOut()
 {
+#ifdef QTSERIAL
+	if (m_serialThread) {
+		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_ALL);
+	}
+#else
 	if (input_thread) {
 		input_thread->stopRxDmx();
 	}
@@ -196,72 +249,88 @@ void YadiDevice::closeInOut()
 	if (file) {
 		file->closeSerial();
 	}
-	input_open_f = false;
-	output_open_f = false;
+#endif
+	m_isInputOpen = false;
+	m_isOutputOpen = false;
 
 }
 
 QByteArray YadiDevice::read(qint64 size)
 {
-	if (file) {
+#ifdef QTSERIAL
+	if (m_serialThread)
+		return m_serialThread->read(size);
+#else
+	if (file)
 		return file->readSerial(size);
-	} else {
-		return QByteArray();
-	}
+#endif
+	return QByteArray();
 }
 
 qint64 YadiDevice::read(char *buf, qint64 size)
 {
-	if (file) {
+#ifdef QTSERIAL
+	if (m_serialThread)
+		return m_serialThread->read(buf, size);
+#else
+	if (file)
 		return file->readSerial(buf, size);
-	} else {
-		return -1;
-	}
+#endif
+	return -1;
 }
 
 qint64 YadiDevice::write(const char *buf)
 {
+#ifdef QTSERIAL
+	if (m_serialThread)
+		return m_serialThread->write(buf);
+#else
 	if (file) {
 		return file->writeSerial(buf);
-	} else {
-		return -1;
 	}
+#endif
+	return -1;
 }
 
 qint64 YadiDevice::write(const char *buf, qint64 size)
 {
-	if (file) {
+#ifdef QTSERIAL
+	if (m_serialThread)
+		return m_serialThread->write(buf, size);
+#else
+	if (file)
 		return file->writeSerial(buf,size);
-	} else {
-		return -1;
-	}
+#endif
+	return -1;
 }
 
 bool YadiDevice::isOutputOpen()
 {
-	if (file) {
 #ifdef QTSERIAL
-		return output_open_f;
+	if (m_serialThread)
+		return m_serialThread->isOutputOpen();
 #else
-		return file->isOpen() && output_open_f;
+	if (file) {
+		return file->isOpen() && m_isOutputOpen;
 #endif
-	} else {
-		return false;
-	}
+	return false;
 }
 
 bool YadiDevice::isInputOpen()
 {
-	if (file) {
-		return file->isOpen() && input_open_f;
-	} else {
-		return false;
-	}
+#ifdef QTSERIAL
+	if (m_serialThread)
+		return m_serialThread->isInputOpen();
+#else
+	if (file)
+		return file->isOpen() && m_isInputOpen;
+#endif
+	return false;
 }
 
 bool YadiDevice::checkDeviceNode()
 {
-	deviceNodePresent = SerialWrapper::deviceNodeExists(devNodePath);
+	deviceNodePresent = deviceNodeExists(devNodePath);
 	return deviceNodePresent;
 }
 
@@ -318,7 +387,7 @@ void YadiDevice::sendConfigToDevice()
 		   , threadNameAsc()
 		   , devNodePath.toLocal8Bit().constData());
 	/// @todo error checking!
-	bool old_open_output_state = output_open_f;
+	bool old_open_output_state = m_isOutputOpen;
 
 	if (openOutput()) {
 		QString cmd;
@@ -335,6 +404,8 @@ void YadiDevice::sendConfigToDevice()
 			write(cmd.toLocal8Bit().data());
 		}
 
+		/// @todo wait a little bit, since write command returns immediately in QTSERIAL mode
+
 		if (!old_open_output_state)
 			closeOutput();
 	}
@@ -346,8 +417,15 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 		dmxInMonWidget = new DmxMonitor;
 		dmxInMonWidget->setWindowTitle(QObject::tr("DMX Input Monitor V0.2 - Universe %1").arg(inUniverseNumber+1));
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
+#ifdef QTSERIAL
+		if (m_serialThread) {
+			QObject::connect(m_serialThread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
+			QObject::connect(m_serialThread,SIGNAL(dmxPacketReceived(YadiDevice*,QString)),dmxInMonWidget,SLOT(setFrameRateInfo(YadiDevice*,QString)));
+		}
+#else
 		QObject::connect(input_thread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
 		QObject::connect(input_thread,SIGNAL(dmxPacketReceived(YadiDevice*,QString)),dmxInMonWidget,SLOT(setFrameRateInfo(YadiDevice*,QString)));
+#endif
 	} else {
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 	}
@@ -394,6 +472,28 @@ void YadiDevice::closeDmxOutMonitorWidget()
 	}
 }
 
+bool YadiDevice::deviceNodeExists(const QString &dev_node)
+{
+#if defined(QTSERIAL)
+	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+		if (info.portName() == dev_node)
+			return true;
+	}
+
+#elif defined(WIN32)
+	return true;
+
+#elif defined(__unix__)
+	if (dev_node.size() && QFile::exists(dev_node)) {
+		return true;
+	} else {
+		return false;
+	}
+#endif
+
+	return false;
+}
+
 QString YadiDevice::threadName()
 {
 	return QThread::currentThread()->objectName();
@@ -417,10 +517,15 @@ void YadiDevice::init()
 	usedDmxInChannels = -1;
 	usedDmxOutChannels = -1;
 	capabilities = FL_CLEAR;
-	file = 0;
-	input_thread = 0;
-	input_open_f = 0;
-	output_open_f = 0;
+#ifdef QTSERIAL
+	m_serialThread = nullptr;
+#else
+	input_thread = nullptr;
+	file = nullptr;
+#endif
+	m_isInputOpen = 0;
+	m_isOutputOpen = 0;
+	m_isDeviceActivated = false;
 	outputId = 0;
 	inputId = 0;
 	universeMergeMode = 0;

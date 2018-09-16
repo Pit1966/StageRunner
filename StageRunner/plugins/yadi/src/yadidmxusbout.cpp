@@ -5,6 +5,9 @@
 #include "yadiconfigdialog.h"
 #include "yadireceiver.h"
 #include "dmxmonitor.h"
+#ifdef QTSERIAL
+#  include "qserialportthread.h"
+#endif
 
 #include <QDebug>
 #include <QTime>
@@ -283,7 +286,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 //				qDebug("chan %d: %d->%d",t,quint8(yadi->outUniverse.at(t)),quint8(universe.at(t)));
 //			}
 //		}
-		unsigned char out[] = {'O',0,2,0};		// 512 Channels
+		unsigned char out[] = {'O',0,2};		// 512 Channels
 		out[1] = hi_changed_channel;
 		out[2] = hi_changed_channel>>8;
 		int bytes = yadi->write((char*)out,3);
@@ -638,12 +641,21 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 
 		if (ok) {
 			inDevNameTable[input] = input_devices.at(input);
+#ifdef QTSERIAL
+			connect(yadi->serialPortThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
+					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
+			connect(yadi->serialPortThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
+			connect(yadi->serialPortThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
+			connect(yadi->serialPortThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
+			connect(yadi->serialPortThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
+#else
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
 			connect(yadi->inputThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
+#endif
 		} else {
 			qDebug("Yadi: %s: openInput(%d) failed!",YadiDevice::threadNameAsc(),input+1);
 		}

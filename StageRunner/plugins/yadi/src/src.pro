@@ -32,14 +32,13 @@ HEADERS += \
     mvgavgcollector.h
 
 SOURCES += ../../interfaces/qlcioplugin.cpp \
-    mvgavgcollector.cpp
-SOURCES += \
-	yadidmxusbout.cpp \
-	serialwrapper.cpp \
-	yadidevice.cpp \
-	yadidevicemanager.cpp \
-	yadiconfigdialog.cpp \
-	yadireceiver.cpp \
+    mvgavgcollector.cpp \
+    yadidmxusbout.cpp \
+    serialwrapper.cpp \
+    yadidevice.cpp \
+    yadidevicemanager.cpp \
+    yadiconfigdialog.cpp \
+    yadireceiver.cpp \
     dmxmonitor.cpp
 
 OTHER_FILES += yadi.json
@@ -65,6 +64,12 @@ CONFIG(qtserial) {
     message(Building with QtSerialport support.)
     DEFINES += QTSERIAL
     QT += serialport
+
+    SOURCES += qserialportthread.cpp
+    HEADERS += qserialportthread.h
+
+    SOURCES -= yadireceiver.cpp
+    HEADERS -= yadireceiver.h
 }
 
 PRO_FILE      = src.pro

@@ -7,10 +7,12 @@ class YadiReceiver;
 class SerialWrapper;
 class DmxMonitor;
 class MvgAvgCollector;
+class QSerialPortThread;
 
 
 class YadiDevice
 {
+
 public:
 	enum Flags {
 		FL_CLEAR = 0,
@@ -52,11 +54,15 @@ public:
 	DmxMonitor *dmxOutMonWidget;
 
 private:
-	SerialWrapper *file;
+#ifdef QTSERIAL
+	QSerialPortThread *m_serialThread;
+#else
 	YadiReceiver *input_thread;
-
-	bool input_open_f;
-	bool output_open_f;
+	SerialWrapper *file;
+#endif
+	bool m_isInputOpen;
+	bool m_isOutputOpen;
+	bool m_isDeviceActivated;
 
 public:
 	YadiDevice(const QString & dev_node);
@@ -71,7 +77,13 @@ public:
 	bool openInput();
 	void closeInput();
 	void closeInOut();
+
+#ifdef QTSERIAL
+	QSerialPortThread * serialPortThread() {return m_serialThread;}
+#else
 	inline SerialWrapper *serialDev() const {return file;}
+	YadiReceiver *inputThread() {return input_thread;}
+#endif
 
 	QByteArray read(qint64 size);
 	qint64 read(char *buf, qint64 size);
@@ -80,7 +92,6 @@ public:
 	bool isOutputOpen();
 	bool isInputOpen();
 	bool checkDeviceNode();
-	YadiReceiver *inputThread() {return input_thread;}
 
 	void saveConfig();
 	void loadConfig();
@@ -90,6 +101,8 @@ public:
 	DmxMonitor *openDmxOutMonitorWidget();
 	void closeDmxInMonitorWidget();
 	void closeDmxOutMonitorWidget();
+
+	static bool deviceNodeExists(const QString &dev_node);
 
 	static QString threadName();
 	static const char *threadNameAsc();
