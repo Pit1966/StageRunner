@@ -581,7 +581,7 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 	if (!yadi) return;
 	DmxMonitor *mon = yadi->dmxOutMonWidget;
 
-	if (debug > 1)
+	if (debug > 2)
 		fprintf(stderr, "Yadi: update output monitor (cnt:%d) %s\n",universe.size(),universe.toHex().data());
 
 	if (mon) {

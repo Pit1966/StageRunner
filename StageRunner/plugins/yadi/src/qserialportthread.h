@@ -22,6 +22,8 @@ static const char * _asc_cmds[] = {
 
 class QSerialPortThread : public QThread
 {
+	Q_OBJECT
+
 public:
 	enum CMD
 	{
@@ -74,6 +76,9 @@ private:
 	void _clearSendQueue();
 
 	static const char * ascCmd(int cmdno);
+
+private slots:
+	void onError(const QSerialPort::SerialPortError error);
 
 signals:
 	void dmxInChannelChanged(quint32, uchar);

@@ -20,6 +20,8 @@ QSerialPortThread::QSerialPortThread(YadiDevice *dev)
 		}
 	}
 	setObjectName("QSerialPortThread");
+
+	qRegisterMetaType<QSerialPort::SerialPortError>("QSerialPort::SerialPortError");
 }
 
 QString QSerialPortThread::deviceNode() const
@@ -59,7 +61,7 @@ bool QSerialPortThread::sendCommand(QSerialPortThread::CMD cmd)
 	m_threadCmd = cmd;
 	while (m_threadCmd > CMD_NONE && isRunning()) {;}
 
-	qDebug("Yadi: Thread command %s executed after %dms",ascCmd(cmd),time.elapsed());
+	qDebug("Yadi: Thread command %s executed after %llims",ascCmd(cmd),time.elapsed());
 
 	return true;
 }
@@ -115,11 +117,17 @@ void QSerialPortThread::run()
 	qDebug() << "Yadi: Thread started";
 
 	m_serialPort = new QSerialPort(m_portInfo);
+	connect(m_serialPort,SIGNAL(errorOccurred(QSerialPort::SerialPortError)),this,SLOT(onError(QSerialPort::SerialPortError)));
+
 
 	while (m_threadCmd != CMD_STOP_ALL && m_threadCmd != CMD_STOP_ERROR) {
 		// check for thread command and execute if there is one
-		if (m_threadCmd > CMD_NONE)
-			_executeCurrentCommand();
+		if (m_threadCmd > CMD_NONE) {
+			if (! _executeCurrentCommand()) {
+				m_threadCmd = CMD_STOP_ERROR;
+				break;
+			}
+		}
 
 		// check serial send data queue
 		if (m_isOutputOpen && m_sendDataListHasData == true)
@@ -136,9 +144,13 @@ void QSerialPortThread::run()
 
 	delete m_serialPort;
 	m_serialPort = nullptr;
-	m_threadCmd = CMD_NONE;
 
-	qDebug() << "Yadi: Thread finished";
+	if (m_threadCmd == CMD_STOP_ERROR)
+		qWarning() << "Yadi: Thread exited with error";
+	else
+		qDebug() << "Yadi: Thread finished";
+
+	m_threadCmd = CMD_NONE;
 }
 
 /**
@@ -266,13 +278,19 @@ bool QSerialPortThread::_processSendQueue()
 		m_accessMutex.unlock();
 
 		if (data.size()) {
-//			if (m_yadiDev->debug > 2)
-			if (!data.contains(char(0)))
-				qDebug("Yadi: %s write serial: %s",YadiDevice::threadNameAsc(),data.left(data.size()-1).constData());
-			else
-				qDebug("Yadi: %s write serial: %s",YadiDevice::threadNameAsc(),data.toHex().constData());
+			bool isbin = data.contains(char(0));
+
+			if (m_yadiDev->debug > 1) {
+				if (!isbin)
+					qDebug("Yadi: %s write serial: %s (queued: %d)"
+						   ,YadiDevice::threadNameAsc(),data.left(data.size()-1).constData(),m_sendDataList.size());
+				else
+					qDebug("Yadi: %s write serial: %s",YadiDevice::threadNameAsc(),data.toHex().constData());
+			}
 
 			qint64 written = m_serialPort->write(data);
+			if (!isbin)
+				m_serialPort->flush();
 			if (written != data.size())
 				qWarning("Yadi: %s serial wrote only %lli of %d",YadiDevice::threadNameAsc(),written,data.size());
 		}
@@ -300,4 +318,14 @@ void QSerialPortThread::_clearSendQueue()
 const char *QSerialPortThread::ascCmd(int cmdno)
 {
 	return _asc_cmds[cmdno];
+}
+
+void QSerialPortThread::onError(const QSerialPort::SerialPortError error)
+{
+	if (error == QSerialPort::NoError) {
+		qDebug() << "Yadi: QSerialPort signal received" << error;
+		return;
+	}
+
+	// qWarning() << "Yadi: error occured:" << error << m_serialPort->errorString();
 }
