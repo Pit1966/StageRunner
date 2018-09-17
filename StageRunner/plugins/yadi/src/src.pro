@@ -49,6 +49,8 @@ unix:!macx {
 	DEFINES += DBUS_ENABLED
 	LIBS	+= -ludev
 
+	CONFIG += qtserial
+
 	# Rules to make yadi devices readable & writable by normal users
 #    udev.path  = /etc/udev/rules.d
 #    udev.files = z65-enttec-dmxusb.rules

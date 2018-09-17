@@ -20,7 +20,8 @@ win32 {
 }
 
 unix:!macx {
-    CONFIG += libftdi
+	#CONFIG += libftdi
+	CONFIG += qtserial
 }
 
 macx: {

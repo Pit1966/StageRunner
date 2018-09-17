@@ -10,6 +10,19 @@ class MvgAvgCollector;
 class QSerialPortThread;
 
 
+/**
+ * @brief The YadiDevice class
+ *
+ * working parameter (get with stty -F /dev/ttyACM0)
+ * speed 115200 baud; line = 0;
+ * min = 1; time = 0;
+ * -brkint -icrnl -imaxbel
+ * -opost
+ * -isig -icanon -echo -echoe
+
+ *
+ *
+ */
 class YadiDevice
 {
 

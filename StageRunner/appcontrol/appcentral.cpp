@@ -223,7 +223,7 @@ void AppCentral::loadPlugins()
 	QString loadfrom = QString("%1/../plugins").arg(appdir);
 	int loadcnt = pluginCentral->loadQLCPlugins(loadfrom);
 #endif
-	if (loadcnt == 0) {
+	if (loadcnt < 2) {
 		loadcnt += pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
 	}
 	pluginCentral->updatePluginMappingInformation();

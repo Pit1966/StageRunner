@@ -145,9 +145,9 @@ void YadiDevice::deActivateDevice()
 		file = nullptr;
 	}
 
-	input_open_f = false;
-	output_open_f = false;
-	m_isActivated = false;
+	m_isInputOpen = false;
+	m_isOutputOpen = false;
+	m_isDeviceActivated = false;
 #endif
 
 }
@@ -184,7 +184,7 @@ void YadiDevice::closeOutput()
 		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_OUTPUT);
 	}
 #else
-	if (file && !input_open_f) {
+	if (file && !m_isInputOpen) {
 		file->closeSerial();
 	}
 #endif
@@ -310,7 +310,7 @@ bool YadiDevice::isOutputOpen()
 	if (m_serialThread)
 		return m_serialThread->isOutputOpen();
 #else
-	if (file) {
+	if (file)
 		return file->isOpen() && m_isOutputOpen;
 #endif
 	return false;
