@@ -25,6 +25,9 @@ class QSerialPortThread;
  */
 class YadiDevice
 {
+private:
+	QString m_devNodePath;
+	QString m_devNodeName;
 
 public:
 	enum Flags {
@@ -42,7 +45,6 @@ public:
 	QByteArray outUniverse;
 	QByteArray inUniverse;
 
-	QString devNodePath;
 	QString deviceProductName;
 	QString idVendor;
 	QString idProduct;
@@ -82,6 +84,12 @@ public:
 	~YadiDevice();
 	YadiDevice(const YadiDevice & other);
 	YadiDevice & operator= (const YadiDevice & other);
+
+	inline const QString & devNodeName() const {return m_devNodeName;}
+	inline const QString & devNodePath() const {return m_devNodePath;}
+	const QString & devNode() const;
+	void setDevNodePath(const QString &path);
+
 
 	bool activateDevice();
 	void deActivateDevice();

@@ -4,7 +4,7 @@
 #include <QObject>
 
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 // This is a workaround for compiler BUG with MSVC and Qt5
 #define NOMINMAX
 
@@ -12,16 +12,17 @@
 #include <stdio.h>
 #endif
 
-#ifdef unix
+#if defined(Q_OS_UNIX) || defined(Q_OS_MAC)
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <termios.h>
 #endif
 
-#ifdef USE_QTSERIAL
+#ifdef HAS_QTSERIAL
 #include <QtSerialPort>
 #endif
 
@@ -40,9 +41,9 @@ private:
 #if defined (USE_QTSERIAL)
 	QSerialPort *m_serialPort;
 	QSerialPortInfo m_serialInfo;
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	HANDLE serial_handle;
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)	// this includes LINUX and MAC OSX
 	int serial_fd;
 #endif
 
@@ -51,7 +52,7 @@ public:
 	~SerialWrapper();
 	static bool deviceNodeExists(const QString &dev_node);
 
-#ifdef USE_QTSERIAL
+#ifdef HAS_QTSERIAL
 	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);
 #endif
 
@@ -65,6 +66,8 @@ public:
 	QString errorString();
 	bool isOpen();
 	const QString & deviceNode() {return device_node;}
+
+	bool writeCommand(const QByteArray cmd);
 
 signals:
 

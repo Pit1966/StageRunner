@@ -13,30 +13,30 @@ SerialWrapper::SerialWrapper(YadiDevice *dev, const QString &dev_node) :
 {
 	device_node = dev_node;
 	error_num = 0;
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	m_serialPort = nullptr;
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	serial_handle = 0;
 	if (dev_node.isEmpty()) {
 		device_node = "com3";
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	serial_fd = 0;
 #endif
 }
 
 SerialWrapper::~SerialWrapper()
 {
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	if (m_serialPort) {
 		m_serialPort->close();
 		delete m_serialPort;
 	}
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	if (serial_handle > 0) {
 		CloseHandle(serial_handle);
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (serial_fd) {
 		close(serial_fd);
 	}
@@ -45,16 +45,16 @@ SerialWrapper::~SerialWrapper()
 
 bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 {
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
 		if (info.portName() == dev_node)
 			return true;
 	}
 
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	return true;
 
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (dev_node.size() && QFile::exists(dev_node)) {
 		return true;
 	} else {
@@ -65,7 +65,7 @@ bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 	return false;
 }
 
-#ifdef USE_QTSERIAL
+#ifdef HAS_QTSERIAL
 /**
  * @brief Return a list of devices, where the product name starts with the given string
  * @param productMatch
@@ -81,14 +81,15 @@ QList<QSerialPortInfo> SerialWrapper::discoverQtSerialPorts(const QString &nameM
 		QString vendor(info.manufacturer());
 		QString productID(info.productIdentifier());
 
-		qDebug() << "Yadi: [QtSerialInterface] Serial: " << serial << "name:"
-				 << name << "vendor:" << vendor << "productID" << productID;
 
 #if defined(Q_OS_OSX)
 		/* Qt 5.6+ reports the same device as "cu" and "tty". Only the first will be considered */
 		if (info.portName().startsWith("cu"))
 			continue;
 #endif
+
+		qDebug() << "Yadi: [QtSerialInterface] Serial: " << serial << "name:"
+				 << name << "vendor:" << vendor << "productID" << productID;
 
 		if (name.startsWith(nameMatch))
 			matchDevs.append(info);
@@ -111,8 +112,7 @@ bool SerialWrapper::openSerial()
 
 	bool ok = false;
 
-
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	if (m_serialPort) {
 		qWarning("Yadi: %s: SerialWrapper::openSerial: Serial port already open '%s'"
 			   ,YadiDevice::threadNameAsc()
@@ -147,7 +147,7 @@ bool SerialWrapper::openSerial()
 
 	return true;
 
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	if (serial_handle) {
 		CloseHandle(serial_handle);
 	}
@@ -179,16 +179,52 @@ bool SerialWrapper::openSerial()
 		error_num = GetLastError();
 	}
 
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (serial_fd > 0) {
 		close(serial_fd);
 		serial_fd = 0;
 	}
 
+
+//	   fd = open( argv[1], O_RDONLY | O_NOCTTY | O_NONBLOCK );
+
+//	   for(;;) {
+//		   len = read( fd, &buf[0], 8192 );
+//		   if( len > 0 ) write(1,buf,len);
+//		   sleep(1);
+//	   }
+
+
 	serial_fd = open(device_node.toLocal8Bit().data(), O_RDWR | O_NONBLOCK);
 	if (serial_fd > 0) {
 		ok = true;
 		qDebug("Yadi: %s opened",deviceNode().toLocal8Bit().data());
+
+		struct termios tio;
+		tcgetattr(serial_fd,&tio);
+		cfmakeraw(&tio);
+		tio.c_iflag &= ~(ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXANY | IXOFF);
+		tio.c_lflag &= ~(ISIG | ICANON | ECHO | ECHOE | ECHOK | ECHONL);
+		tio.c_cflag |= CLOCAL;
+		cfsetispeed(&tio,B115200);
+		cfsetospeed(&tio,B115200);
+		tcsetattr(serial_fd,TCSANOW,&tio);   // TCSANOW
+
+
+		QProcess stty;
+//		QString cmd = QString("stty -F %1 115200 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNodePath);
+		QString cmd = QString("stty -f %1").arg(deviceNode());
+		stty.start(cmd);
+		stty.waitForFinished(2000);
+		// qDebug() <<  "QProcess" << cmd;
+		QString out =  QString::fromUtf8(stty.readAllStandardOutput());
+		QString err =  QString::fromUtf8(stty.readAllStandardError().data());
+		qDebug("stty:\n%s\nerr:\n%s\n",out.toLocal8Bit().constData(),err.toLocal8Bit().constData());
+
+		usleep(200000);
+
+		writeCommand("v");
+
 	} else {
 		ok = false;
 		qDebug("Yadi: Device open failed for %s (%s)"
@@ -207,19 +243,19 @@ void SerialWrapper::closeSerial()
 		   ,YadiDevice::threadNameAsc()
 		   ,device_node.toLocal8Bit().constData());
 
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	if (m_serialPort) {
 		m_serialPort->close();
 		delete m_serialPort;
 		m_serialPort = nullptr;
 	}
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	if (serial_handle) {
 		CloseHandle(serial_handle);
 		serial_handle = 0;
 	}
 
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (serial_fd > 0) {
 		close(serial_fd);
 		serial_fd = 0;
@@ -230,7 +266,7 @@ void SerialWrapper::closeSerial()
 QByteArray SerialWrapper::readSerial(qint64 size)
 {
 	QByteArray in;
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	in = m_serialPort->read(size);
 	if (in.size() > 0) {
 		error_num = 0;
@@ -242,7 +278,7 @@ QByteArray SerialWrapper::readSerial(qint64 size)
 		error_num = 0;
 	}
 
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	char readbuf[600];
 	DWORD bytes_read;
 	if (ReadFile(serial_handle, readbuf, size, &bytes_read, 0)) {
@@ -252,7 +288,7 @@ QByteArray SerialWrapper::readSerial(qint64 size)
 			in_char[t] = readbuf[t];
 		}
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	char readbuf[600];
 	ssize_t bytes_read = read(serial_fd, readbuf, size_t(size));
 	if (bytes_read > 0) {
@@ -280,16 +316,16 @@ qint64 SerialWrapper::readSerial(char *buf, qint64 size)
 		if (!openSerial())
 			return 0;
 
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	return m_serialPort->read(buf, size);
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	DWORD bytes_read;
 	if (ReadFile(serial_handle, buf, size, &bytes_read, 0)) {
 		return bytes_read;
 	} else {
 		return -1;
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	return read(serial_fd, buf, size_t(size));
 #endif
 }
@@ -307,7 +343,7 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 
 #if defined(USE_QTSERIAL)
 	qint64 num = m_serialPort->write(buf);
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = (DWORD)strlen(buf);
 	if (! WriteFile(serial_handle,buf,bytes_to_write,&num,0)) {
@@ -316,13 +352,14 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 	} else {
 		error_num = 0;
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	qint64 num = write(serial_fd, buf, strlen(buf));
 	if (num < 0) {
 		error_num = errno;
 	} else {
 		error_num = 0;
 	}
+
 #endif
 
 	return num;
@@ -342,7 +379,7 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 
 #if defined(USE_QTSERIAL)
 	qint64 num = m_serialPort->write(buf, size);
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	DWORD num = 0;
 	DWORD bytes_to_write = size;
 	if (! WriteFile(serial_handle,buf,bytes_to_write,&num,0)) {
@@ -352,7 +389,7 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 		error_num = 0;
 	}
 	return num;
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	qint64 num = write(serial_fd, buf, size_t(size));
 	if (num < 0) {
 		error_num = errno;
@@ -376,7 +413,7 @@ QString SerialWrapper::errorString()
 	if (m_serialPort)
 		return m_serialPort->errorString();
 	return "Error: Serial port not open";
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	return strerror(error_num);
 #elif defined(WIN32)
 	return QString::number(error_num);
@@ -389,14 +426,58 @@ bool SerialWrapper::isOpen()
 #if defined(USE_QTSERIAL)
 	if (m_serialPort && m_serialPort->isOpen())
 		open = true;
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	if (serial_handle) {
 		open = true;
 	}
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (serial_fd > 0) {
 		open = true;
 	}
 #endif
 	return open;
+}
+
+bool SerialWrapper::writeCommand(const QByteArray cmd)
+{
+#if defined(USE_QTSERIAL)
+
+#elif defined(Q_OS_WIN32)
+
+#elif defined(Q_OS_UNIX)
+	if (serial_fd == 0)
+		return false;
+
+	qDebug() << "start ---------------------------------------";
+	int cmdsize = cmd.size();
+	int byteswritten = writeSerial(cmd.constData(), cmdsize);
+	if (byteswritten != cmdsize) {
+		qWarning() << "Could not write serial command" << cmd;
+		qDebug("error: %s",strerror(errno));
+		return false;
+	}
+
+	//tcdrain(serial_fd); // ??
+	//tcflush(serial_fd, TCIOFLUSH);
+
+	usleep(20000);
+
+	QByteArray answer;
+
+	// wait for answer:
+	char * buf[10];
+
+	int bytes = 0;
+	do {
+		bytes = read(serial_fd, buf, 1);
+		if (bytes)
+			answer.append(buf[1]);
+	} while (bytes > 0);
+
+	qDebug() << "Serialcommand" << cmd << answer;
+	qDebug() << "end ---------------------------------------";
+
+#endif
+
+	return true;
 }

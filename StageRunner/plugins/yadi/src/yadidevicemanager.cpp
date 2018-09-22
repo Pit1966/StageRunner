@@ -2,15 +2,15 @@
 #include "yadidevice.h"
 #include "serialwrapper.h"
 
-#ifdef __unix__
+#ifdef Q_OS_LINUX
 #include <libudev.h>
-#include <QProcess>
 #endif
 
 #include <QMessageBox>
 #include <QDebug>
 #include <QFile>
 #include <QTime>
+#include <QProcess>
 
 
 QList<YadiDevice*>YadiDeviceManager::globYadiDeviceList;
@@ -34,7 +34,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
-#if defined(USE_QTSERIAL)
+#if defined(HAS_QTSERIAL)
 	QList<QSerialPortInfo>yadidevs = SerialWrapper::discoverQtSerialPorts("YADI DMX");
 
 	for (const QSerialPortInfo &port : yadidevs) {
@@ -42,7 +42,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 		YadiDevice *yadi = nullptr;
 		bool found = false;
 		for (YadiDevice *t : globYadiDeviceList) {
-			if (port.portName() == t->devNodePath) {
+			if (port.portName() == t->devNodeName()) {
 				yadi = t;
 				found = true;
 				break;
@@ -55,8 +55,11 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 		}
 
 		QString product = port.description();
-
-		yadi->devNodePath = port.portName();
+#ifdef Q_OS_UNIX
+		yadi->setDevNodePath(QString("/dev/%1").arg(port.portName()));
+#else
+		yadi->setDevNodePath(port.portName());
+#endif
 		yadi->deviceProductName = product;
 		yadi->deviceManufacturer = port.manufacturer();
 		yadi->deviceSerial = port.serialNumber();
@@ -84,12 +87,10 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 		else if (product.contains("Sender")) {
 			yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
 		}
-		qDebug("YadiDeviceManager: new device at: %s",yadi->devNodePath.toLocal8Bit().data());
-
-
+		qDebug("YadiDeviceManager: new device at: %s",yadi->devNodePath().toLocal8Bit().data());
 	}
 
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	for (int com=3; com<10; com++) {
 		SerialWrapper ser(QString("com%1").arg(com));
 		if (ser.openSerial()) {
@@ -163,7 +164,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 	}
 
 
-#elif defined(__unix__)
+#elif defined(Q_OS_LINUX)
 	struct udev *udev;
 	struct udev_enumerate *enumerate;
 	struct udev_list_entry *devices, *dev_list_entry;
@@ -330,7 +331,7 @@ void YadiDeviceManager::initYadiDevices()
 YadiDevice *YadiDeviceManager::getDevice(const QString & dev_node, int cap)
 {
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
-		if (globYadiDeviceList.at(t)->devNodePath == dev_node && (globYadiDeviceList.at(t)->capabilities & cap))
+		if (globYadiDeviceList.at(t)->devNode() == dev_node && (globYadiDeviceList.at(t)->capabilities & cap))
 			return globYadiDeviceList.at(t);
 	}
 	return 0;
@@ -342,12 +343,13 @@ void YadiDeviceManager::updateYadiDevicesStatus()
 	enumerateYadiDevices(true);
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		YadiDevice *yadi = globYadiDeviceList.at(t);
-		if (!yadi->deviceNodePresent && QFile::exists(yadi->devNodePath)) {
+		if (!yadi->deviceNodePresent && QFile::exists(yadi->devNodePath())) {
 			yadi->closeInOut();
 			rescan = true;
 		}
 	}
-	if (rescan) enumerateYadiDevices(true);
+	if (rescan)
+		enumerateYadiDevices(true);
 }
 
 bool YadiDeviceManager::yadiDeviceLessThan(const YadiDevice *s1, const YadiDevice *s2)
@@ -363,7 +365,7 @@ bool YadiDeviceManager::deviceNodeExists(const QString &devNode)
 {
 	bool exists = false;
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
-		if (globYadiDeviceList.at(t)->devNodePath == devNode && globYadiDeviceList.at(t)->deviceNodePresent)
+		if (globYadiDeviceList.at(t)->devNode() == devNode && globYadiDeviceList.at(t)->deviceNodePresent)
 			exists = true;
 	}
 	return exists;
@@ -373,7 +375,7 @@ bool YadiDeviceManager::removeDevice(const QString &devNode)
 {
 	bool removed = false;
 	for (int t=globYadiDeviceList.size()-1; t>=0; t--) {
-		if (globYadiDeviceList.at(t)->devNodePath == devNode) {
+		if (globYadiDeviceList.at(t)->devNode() == devNode) {
 			delete globYadiDeviceList.takeAt(t);
 			removed = true;
 		}

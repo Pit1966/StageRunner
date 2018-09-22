@@ -14,7 +14,7 @@
 
 YadiDevice::YadiDevice(const QString &dev_node)
 {
-	devNodePath = dev_node;
+	setDevNodePath(dev_node);
 	init();
 }
 
@@ -22,12 +22,13 @@ YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 {
 	bool activate_again = false;
 
-	if (devNodePath != other.devNodePath) {
+	if (m_devNodePath != other.m_devNodePath) {
 		if (m_isDeviceActivated) {
 			deActivateDevice();
 			activate_again = true;
 		}
-		devNodePath = other.devNodePath;
+		m_devNodePath = other.m_devNodePath;
+		m_devNodeName = other.m_devNodeName;
 	}
 
 	outUniverseNumber = other.outUniverseNumber;
@@ -50,6 +51,26 @@ YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 		activateDevice();
 
 	return *this;
+}
+
+const QString &YadiDevice::devNode() const
+{
+#if defined(USE_QTSERIAL)
+	return devNodeName();
+#else
+	return devNodePath();
+#endif
+}
+
+void YadiDevice::setDevNodePath(const QString &path)
+{
+	m_devNodePath = path;
+	if (path.contains(QChar('/'))) {
+		int i = path.lastIndexOf(QChar('/'));
+		m_devNodeName = path.mid(i+1);
+	} else {
+		m_devNodeName = path;
+	}
 }
 
 YadiDevice::~YadiDevice()
@@ -76,7 +97,7 @@ bool YadiDevice::activateDevice()
 	if (m_serialThread && m_serialThread->deviceNode() != devNodePath)
 		deActivateDevice();
 #else
-	if (file && file->deviceNode() != devNodePath)
+	if (file && file->deviceNode() != devNodePath())
 		deActivateDevice();
 #endif
 
@@ -101,8 +122,8 @@ bool YadiDevice::activateDevice()
 
 #else
 	if (!file) {
-		if (SerialWrapper::deviceNodeExists(devNodePath)) {
-			file = new SerialWrapper(this, devNodePath);
+		if (SerialWrapper::deviceNodeExists(devNode())) {
+			file = new SerialWrapper(this, devNodePath());
 			outUniverse.fill(0,512);
 		} else {
 			ok = false;
@@ -154,7 +175,7 @@ void YadiDevice::deActivateDevice()
 
 bool YadiDevice::openOutput()
 {
-	qDebug("Yadi: %s: open output for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
+	qDebug("Yadi: %s: open output for node '%s'", threadNameAsc(), devNode().toLocal8Bit().constData());
 	if (!m_isDeviceActivated) {
 		if (!activateDevice())
 			return false;
@@ -193,7 +214,7 @@ void YadiDevice::closeOutput()
 
 bool YadiDevice::openInput()
 {
-	qDebug("Yadi: %s: open input for node '%s'", threadNameAsc(), devNodePath.toLocal8Bit().constData());
+	qDebug("Yadi: %s: open input for node '%s'", threadNameAsc(), devNode().toLocal8Bit().constData());
 	if (!m_isDeviceActivated) {
 		if (!activateDevice())
 			return false;
@@ -330,7 +351,7 @@ bool YadiDevice::isInputOpen()
 
 bool YadiDevice::checkDeviceNode()
 {
-	deviceNodePresent = deviceNodeExists(devNodePath);
+	deviceNodePresent = deviceNodeExists(devNode());
 	return deviceNodePresent;
 }
 
@@ -385,7 +406,7 @@ void YadiDevice::sendConfigToDevice()
 {
 	qDebug("Yadi: %s: YadiDevice::sendConfigToDevice '%s'"
 		   , threadNameAsc()
-		   , devNodePath.toLocal8Bit().constData());
+		   , devNode().toLocal8Bit().constData());
 	/// @todo error checking!
 	bool old_open_output_state = m_isOutputOpen;
 
@@ -480,10 +501,10 @@ bool YadiDevice::deviceNodeExists(const QString &dev_node)
 			return true;
 	}
 
-#elif defined(WIN32)
+#elif defined(Q_OS_WIN32)
 	return true;
 
-#elif defined(__unix__)
+#elif defined(Q_OS_UNIX)
 	if (dev_node.size() && QFile::exists(dev_node)) {
 		return true;
 	} else {

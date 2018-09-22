@@ -107,13 +107,14 @@ bool YadiDMXUSBOut::findDevices(bool update)
 	// Add device to output list if it is not already in
 	for (int t=0; t<YadiDeviceManager::globalDeviceList().size(); t++) {
 		YadiDevice *device = YadiDeviceManager::globalDeviceList().at(t);
-		if (!output_devices.contains(device->devNodePath)) {
+		QString node = device->devNode();
+		if (!output_devices.contains(node)) {
 			if (device->capabilities&YadiDevice::FL_OUTPUT_UNIVERSE) {
 				qDebug("Yadi: %s Added Output Device: '%s' node '%s'"
 					   ,YadiDevice::threadNameAsc()
 					   ,device->deviceProductName.toLocal8Bit().constData()
-					   ,device->devNodePath.toLocal8Bit().constData());
-				output_devices.append(device->devNodePath);
+					   ,device->devNode().toLocal8Bit().constData());
+				output_devices.append(node);
 			}
 		}
 	}
@@ -130,13 +131,14 @@ bool YadiDMXUSBOut::findDevices(bool update)
 
 	// Add device to input list if it is not already in
 	foreach(YadiDevice *device, YadiDeviceManager::globalDeviceList()) {
-		if (!input_devices.contains(device->devNodePath)) {
+		QString node = device->devNode();
+		if (!input_devices.contains(node)) {
 			if (device->capabilities&YadiDevice::FL_INPUT_UNIVERSE) {
-				input_devices.append(device->devNodePath);
+				input_devices.append(node);
 				qDebug("Yadi: %s Added input device '%s' node '%s'"
 					   ,YadiDevice::threadNameAsc()
 					   ,device->deviceProductName.toLocal8Bit().constData()
-					   ,device->devNodePath.toLocal8Bit().constData());
+					   ,node.toLocal8Bit().constData());
 			}
 		}
 	}
@@ -213,7 +215,7 @@ QStringList YadiDMXUSBOut::outputs()
 		if (!yadi)
 			continue;
 		QString name = "TX:";
-		name += yadi->devNodePath;
+		name += yadi->devNode();
 		name += ":";
 		name += yadi->deviceProductName;
 		name += "(" + yadi->deviceSerial + ")";
@@ -411,7 +413,7 @@ QStringList YadiDMXUSBOut::inputs()
 		if (!yadi)
 			continue;
 		QString name = "RX:";
-		name += yadi->devNodePath;
+		name += yadi->devNode();
 		name += ":";
 		name += yadi->deviceProductName;
 		name += "(" + yadi->deviceSerial +")";

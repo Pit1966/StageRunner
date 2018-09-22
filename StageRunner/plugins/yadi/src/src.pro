@@ -61,7 +61,8 @@ unix:!macx {
 
 macx: {
     CONFIG += qtserialsupport			# compile QtSerialPort funtions
-    CONFIG += qtserial					# use QtSerial for interface
+#    CONFIG += qtserial					# use QtSerial for interface
+
 }
 
 CONFIG(qtserialsupport) {

@@ -65,7 +65,7 @@ void YadiConfigDialog::show_current_device_list()
 		YadiDevice *yadi = YadiDeviceManager::deviceAt(t);
 		QString dev_str = yadi->deviceProductName;
 		dev_str += tr(" (S/N:%1)").arg(yadi->deviceSerial);
-		dev_str += tr(": %1").arg(yadi->devNodePath);
+		dev_str += tr(": %1").arg(yadi->devNode());
 
 		txt += dev_str;
 		txt += yadi->deviceNodePresent ? tr(" (<font color=darkgreen>online</font>)") : tr(" (<font color=red>offline</font>)");
