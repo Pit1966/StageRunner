@@ -1,0 +1,11 @@
+Output von stty -F /dev/ttyACM0 unter linux:
+
+Debug: stty:
+speed 115200 baud; line = 0;
+eof = ^A; min = 1; time = 0;
+-brkint -icrnl -imaxbel
+-opost -onlcr
+-isig -icanon -iexten -echo -echoe -echok -echoctl -echoke
+
+
+

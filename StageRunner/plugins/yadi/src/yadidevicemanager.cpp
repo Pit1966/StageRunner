@@ -233,7 +233,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 				bool found = false;
 				int idx = 0;
 				while (idx < globYadiDeviceList.size() && !found) {
-					if (globYadiDeviceList.at(idx)->devNodePath == devnode) {
+					if (globYadiDeviceList.at(idx)->devNode() == devnode) {
 						// Ok, is in list
 						found = true;
 					} else {
@@ -249,7 +249,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 					yadi = globYadiDeviceList.at(idx);
 				}
 
-				yadi->devNodePath = devnode;
+				yadi->setDevNodePath(devnode);
 				yadi->deviceProductName = product;
 				yadi->deviceManufacturer = manufacturer;
 				yadi->deviceSerial = serial;
@@ -277,7 +277,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 				else if (product.contains("Sender")) {
 					yadi->capabilities = YadiDevice::FL_OUTPUT_UNIVERSE;
 				}
-				qDebug("YadiDeviceManager: new device at: %s",yadi->devNodePath.toLocal8Bit().data());
+				qDebug("YadiDeviceManager: new device at: %s",yadi->devNode().toLocal8Bit().data());
 
 			}
 		}
@@ -291,20 +291,20 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 	qSort(globYadiDeviceList.begin(),globYadiDeviceList.end(),yadiDeviceLessThan);
 
 	// Now set correct parameters for tty communication
-	for (int t=0; t<globYadiDeviceList.size(); t++) {
-		if (globYadiDeviceList.at(t)->deviceNodePresent) {
-			QProcess stty;
-			QString cmd = QString("stty -F %1 115200 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNodePath);
-			stty.start(cmd);
-			stty.waitForFinished(2000);
-			// qDebug() <<  "QProcess" << cmd;
-			QString err =  QString::fromUtf8(stty.readAllStandardError().data());
-			if (err.size()) {
-				QMessageBox::warning(nullptr,QObject::tr("System error"),QObject::tr("An error occured while setting the device parameter"
-															 "\n\n%1").arg(err));
-			}
-		}
-	}
+//	for (int t=0; t<globYadiDeviceList.size(); t++) {
+//		if (globYadiDeviceList.at(t)->deviceNodePresent) {
+//			QProcess stty;
+//			QString cmd = QString("stty -F %1 115200 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNode());
+//			stty.start(cmd);
+//			stty.waitForFinished(2000);
+//			// qDebug() <<  "QProcess" << cmd;
+//			QString err =  QString::fromUtf8(stty.readAllStandardError().data());
+//			if (err.size()) {
+//				QMessageBox::warning(nullptr,QObject::tr("System error"),QObject::tr("An error occured while setting the device parameter"
+//															 "\n\n%1").arg(err));
+//			}
+//		}
+//	}
 
 #endif
 

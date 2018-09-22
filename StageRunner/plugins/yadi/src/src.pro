@@ -49,7 +49,7 @@ unix:!macx {
 	DEFINES += DBUS_ENABLED
 	LIBS	+= -ludev
 
-    CONFIG += qtserialsupport			# compile QtSerialPort funtions
+#    CONFIG += qtserialsupport			# compile QtSerialPort funtions
 #	CONFIG += qtserial					# use QtSerial for interface
 
 	# Rules to make yadi devices readable & writable by normal users
@@ -94,3 +94,6 @@ INSTALLS   += target
 
 OTHER_FILES += \
 	yadi.json
+
+DISTFILES += \
+    serial_notes.txt

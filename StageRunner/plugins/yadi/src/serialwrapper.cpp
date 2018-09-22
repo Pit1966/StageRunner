@@ -205,24 +205,28 @@ bool SerialWrapper::openSerial()
 		cfmakeraw(&tio);
 		tio.c_iflag &= ~(ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXANY | IXOFF);
 		tio.c_lflag &= ~(ISIG | ICANON | ECHO | ECHOE | ECHOK | ECHONL);
-		tio.c_cflag |= CLOCAL;
+		tio.c_cflag |= CLOCAL;					// this is necessary for mac when using tty.usbModem instead of cu.usbModem
 		cfsetispeed(&tio,B115200);
 		cfsetospeed(&tio,B115200);
 		tcsetattr(serial_fd,TCSANOW,&tio);   // TCSANOW
 
-
+#ifdef DEBUGME
 		QProcess stty;
 //		QString cmd = QString("stty -F %1 115200 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNodePath);
+#ifdef Q_OS_MAC
 		QString cmd = QString("stty -f %1").arg(deviceNode());
+#else
+		QString cmd = QString("stty -F %1").arg(deviceNode());
+#endif
 		stty.start(cmd);
 		stty.waitForFinished(2000);
 		// qDebug() <<  "QProcess" << cmd;
 		QString out =  QString::fromUtf8(stty.readAllStandardOutput());
 		QString err =  QString::fromUtf8(stty.readAllStandardError().data());
 		qDebug("stty:\n%s\nerr:\n%s\n",out.toLocal8Bit().constData(),err.toLocal8Bit().constData());
+#endif
 
-		usleep(200000);
-
+		// Read Version info
 		writeCommand("v");
 
 	} else {
@@ -448,11 +452,10 @@ bool SerialWrapper::writeCommand(const QByteArray cmd)
 	if (serial_fd == 0)
 		return false;
 
-	qDebug() << "start ---------------------------------------";
 	int cmdsize = cmd.size();
 	int byteswritten = writeSerial(cmd.constData(), cmdsize);
 	if (byteswritten != cmdsize) {
-		qWarning() << "Could not write serial command" << cmd;
+		qWarning() << "Could not write serial command: " << strerror(errno);
 		qDebug("error: %s",strerror(errno));
 		return false;
 	}
@@ -465,17 +468,15 @@ bool SerialWrapper::writeCommand(const QByteArray cmd)
 	QByteArray answer;
 
 	// wait for answer:
-	char * buf[10];
-
+	char buf[8];
 	int bytes = 0;
 	do {
 		bytes = read(serial_fd, buf, 1);
 		if (bytes)
-			answer.append(buf[1]);
+			answer.append(buf[0]);
 	} while (bytes > 0);
 
 	qDebug() << "Serialcommand" << cmd << answer;
-	qDebug() << "end ---------------------------------------";
 
 #endif
 

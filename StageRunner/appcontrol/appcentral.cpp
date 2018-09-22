@@ -226,6 +226,7 @@ void AppCentral::loadPlugins()
 	if (loadcnt < 2) {
 		loadcnt += pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
 	}
+	qDebug() << "load plugins" << IOPluginCentral::sysPluginDir();
 	pluginCentral->updatePluginMappingInformation();
 }
 
