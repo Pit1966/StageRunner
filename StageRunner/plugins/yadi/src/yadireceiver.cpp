@@ -68,7 +68,7 @@ bool YadiReceiver::receiver_loop()
 	bool ok = true;
 	bool firstloop = true;
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	while (cmd != STOPPED && !device->serialDev()->isOpen()) {
 		msleep(10);
 	}

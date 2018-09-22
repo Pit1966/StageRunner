@@ -67,7 +67,7 @@ public:
 	DmxMonitor *dmxOutMonWidget;
 
 private:
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	QSerialPortThread *m_serialThread;
 #else
 	YadiReceiver *input_thread;
@@ -91,7 +91,7 @@ public:
 	void closeInput();
 	void closeInOut();
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	QSerialPortThread * serialPortThread() {return m_serialThread;}
 #else
 	inline SerialWrapper *serialDev() const {return file;}

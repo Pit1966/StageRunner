@@ -49,7 +49,8 @@ unix:!macx {
 	DEFINES += DBUS_ENABLED
 	LIBS	+= -ludev
 
-	CONFIG += qtserial
+    CONFIG += qtserialsupport			# compile QtSerialPort funtions
+#	CONFIG += qtserial					# use QtSerial for interface
 
 	# Rules to make yadi devices readable & writable by normal users
 #    udev.path  = /etc/udev/rules.d
@@ -59,19 +60,25 @@ unix:!macx {
 }
 
 macx: {
-    CONFIG += qtserial
+    CONFIG += qtserialsupport			# compile QtSerialPort funtions
+    CONFIG += qtserial					# use QtSerial for interface
 }
 
-CONFIG(qtserial) {
+CONFIG(qtserialsupport) {
     message(Building with QtSerialport support.)
-    DEFINES += QTSERIAL
     QT += serialport
+    DEFINES += HAS_QTSERIAL
 
-    SOURCES += qserialportthread.cpp
-    HEADERS += qserialportthread.h
+    CONFIG(qtserial) {
+    message(  Use QtSerialport for yadi.)
+        DEFINES += USE_QTSERIAL
 
-    SOURCES -= yadireceiver.cpp
-    HEADERS -= yadireceiver.h
+        SOURCES += qserialportthread.cpp
+        HEADERS += qserialportthread.h
+
+        SOURCES -= yadireceiver.cpp
+        HEADERS -= yadireceiver.h
+    }
 }
 
 PRO_FILE      = src.pro

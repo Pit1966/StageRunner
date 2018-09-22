@@ -65,7 +65,7 @@ bool SerialWrapper::deviceNodeExists(const QString &dev_node)
 	return false;
 }
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 /**
  * @brief Return a list of devices, where the product name starts with the given string
  * @param productMatch
@@ -305,7 +305,7 @@ qint64 SerialWrapper::writeSerial(const char *buf)
 		if (!openSerial())
 			return 0;
 
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	qint64 num = m_serialPort->write(buf);
 #elif defined(WIN32)
 	DWORD num = 0;
@@ -340,7 +340,7 @@ qint64 SerialWrapper::writeSerial(const char *buf, qint64 size)
 		if (!openSerial())
 			return 0;
 
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	qint64 num = m_serialPort->write(buf, size);
 #elif defined(WIN32)
 	DWORD num = 0;
@@ -372,7 +372,7 @@ int SerialWrapper::error()
 
 QString SerialWrapper::errorString()
 {
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	if (m_serialPort)
 		return m_serialPort->errorString();
 	return "Error: Serial port not open";
@@ -386,7 +386,7 @@ QString SerialWrapper::errorString()
 bool SerialWrapper::isOpen()
 {
 	bool open = false;
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	if (m_serialPort && m_serialPort->isOpen())
 		open = true;
 #elif defined(WIN32)

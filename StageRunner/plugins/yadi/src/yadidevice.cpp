@@ -3,7 +3,7 @@
 #include "serialwrapper.h"
 #include "dmxmonitor.h"
 #include "configrev.h"
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 #  include "qserialportthread.h"
 #endif
 
@@ -72,7 +72,7 @@ bool YadiDevice::activateDevice()
 
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread && m_serialThread->deviceNode() != devNodePath)
 		deActivateDevice();
 #else
@@ -84,7 +84,7 @@ bool YadiDevice::activateDevice()
 	// Here we prepare the device
 	// We initiate the access object and if we need
 	// we create the thread object that should read from the device later
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (!m_serialThread) {
 		if (deviceNodeExists(devNodePath)) {
 			m_serialThread = new QSerialPortThread(this);
@@ -129,7 +129,7 @@ bool YadiDevice::activateDevice()
 
 void YadiDevice::deActivateDevice()
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread) {
 		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_ALL);
 		m_isDeviceActivated = false;
@@ -162,7 +162,7 @@ bool YadiDevice::openOutput()
 
 	outputSendAllData = true;
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	m_serialThread->sendCommand(QSerialPortThread::CMD_START_OUTPUT);
 	m_isOutputOpen = true;
 #else
@@ -179,7 +179,7 @@ bool YadiDevice::openOutput()
 void YadiDevice::closeOutput()
 {
 	qDebug("Yadi: %s: close output",threadNameAsc());
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread) {
 		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_OUTPUT);
 	}
@@ -199,7 +199,7 @@ bool YadiDevice::openInput()
 			return false;
 	}
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	m_serialThread->sendCommand(QSerialPortThread::CMD_START_INPUT);
 	m_isInputOpen = true;
 #else
@@ -218,7 +218,7 @@ bool YadiDevice::openInput()
 
 void YadiDevice::closeInput()
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread) {
 		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_INPUT);
 	}
@@ -237,7 +237,7 @@ void YadiDevice::closeInput()
 
 void YadiDevice::closeInOut()
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread) {
 		m_serialThread->sendCommand(QSerialPortThread::CMD_STOP_ALL);
 	}
@@ -257,7 +257,7 @@ void YadiDevice::closeInOut()
 
 QByteArray YadiDevice::read(qint64 size)
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->read(size);
 #else
@@ -269,7 +269,7 @@ QByteArray YadiDevice::read(qint64 size)
 
 qint64 YadiDevice::read(char *buf, qint64 size)
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->read(buf, size);
 #else
@@ -281,7 +281,7 @@ qint64 YadiDevice::read(char *buf, qint64 size)
 
 qint64 YadiDevice::write(const char *buf)
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->write(buf);
 #else
@@ -294,7 +294,7 @@ qint64 YadiDevice::write(const char *buf)
 
 qint64 YadiDevice::write(const char *buf, qint64 size)
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->write(buf, size);
 #else
@@ -306,7 +306,7 @@ qint64 YadiDevice::write(const char *buf, qint64 size)
 
 bool YadiDevice::isOutputOpen()
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->isOutputOpen();
 #else
@@ -318,7 +318,7 @@ bool YadiDevice::isOutputOpen()
 
 bool YadiDevice::isInputOpen()
 {
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	if (m_serialThread)
 		return m_serialThread->isInputOpen();
 #else
@@ -404,7 +404,7 @@ void YadiDevice::sendConfigToDevice()
 			write(cmd.toLocal8Bit().data());
 		}
 
-		/// @todo wait a little bit, since write command returns immediately in QTSERIAL mode
+		/// @todo wait a little bit, since write command returns immediately in USE_QTSERIAL mode
 
 		if (!old_open_output_state)
 			closeOutput();
@@ -417,7 +417,7 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 		dmxInMonWidget = new DmxMonitor;
 		dmxInMonWidget->setWindowTitle(QObject::tr("DMX Input Monitor V0.2 - Universe %1").arg(inUniverseNumber+1));
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 		if (m_serialThread) {
 			QObject::connect(m_serialThread,SIGNAL(dmxInChannelChanged(quint32,uchar)),dmxInMonWidget,SLOT(setValueInBar(quint32,uchar)));
 			QObject::connect(m_serialThread,SIGNAL(dmxPacketReceived(YadiDevice*,QString)),dmxInMonWidget,SLOT(setFrameRateInfo(YadiDevice*,QString)));
@@ -474,7 +474,7 @@ void YadiDevice::closeDmxOutMonitorWidget()
 
 bool YadiDevice::deviceNodeExists(const QString &dev_node)
 {
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
 		if (info.portName() == dev_node)
 			return true;
@@ -517,7 +517,7 @@ void YadiDevice::init()
 	usedDmxInChannels = -1;
 	usedDmxOutChannels = -1;
 	capabilities = FL_CLEAR;
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	m_serialThread = nullptr;
 #else
 	input_thread = nullptr;

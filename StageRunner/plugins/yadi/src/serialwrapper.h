@@ -21,7 +21,7 @@
 #include <string.h>
 #endif
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 #include <QtSerialPort>
 #endif
 
@@ -37,7 +37,7 @@ private:
 	YadiDevice *m_yadi;
 	QThread *m_openedFromThread;
 
-#if defined (QTSERIAL)
+#if defined (USE_QTSERIAL)
 	QSerialPort *m_serialPort;
 	QSerialPortInfo m_serialInfo;
 #elif defined(WIN32)
@@ -51,7 +51,7 @@ public:
 	~SerialWrapper();
 	static bool deviceNodeExists(const QString &dev_node);
 
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);
 #endif
 

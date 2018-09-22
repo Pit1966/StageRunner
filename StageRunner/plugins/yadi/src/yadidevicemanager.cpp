@@ -34,7 +34,7 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 	for (int t=0; t<globYadiDeviceList.size(); t++) {
 		globYadiDeviceList.at(t)->deviceNodePresent = false;
 	}
-#if defined(QTSERIAL)
+#if defined(USE_QTSERIAL)
 	QList<QSerialPortInfo>yadidevs = SerialWrapper::discoverQtSerialPorts("YADI DMX");
 
 	for (const QSerialPortInfo &port : yadidevs) {

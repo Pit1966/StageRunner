@@ -5,7 +5,7 @@
 #include "yadiconfigdialog.h"
 #include "yadireceiver.h"
 #include "dmxmonitor.h"
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 #  include "qserialportthread.h"
 #endif
 
@@ -641,7 +641,7 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 
 		if (ok) {
 			inDevNameTable[input] = input_devices.at(input);
-#ifdef QTSERIAL
+#ifdef USE_QTSERIAL
 			connect(yadi->serialPortThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
 			connect(yadi->serialPortThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
