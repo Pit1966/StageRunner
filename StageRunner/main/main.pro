@@ -145,7 +145,8 @@ SOURCES += \
     ../plugins/yadi/src/dmxmonitor.cpp \
 	../gui/customwidget/psinfodialog.cpp \
 	../system/variantmapserializer.cpp \
-    ../gui/customwidget/psdockwidget.cpp
+    ../gui/customwidget/psdockwidget.cpp \
+    ../system/runguard.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -258,7 +259,8 @@ HEADERS  += \
     ../plugins/yadi/src/dmxmonitor.h \
 	../gui/customwidget/psinfodialog.h \
 	../system/variantmapserializer.h \
-    ../gui/customwidget/psdockwidget.h
+    ../gui/customwidget/psdockwidget.h \
+    ../system/runguard.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

@@ -137,7 +137,10 @@ bool YadiReceiver::receiver_loop()
 						return false;
 					in += device->serialDev()->readSerial(channels_to_read);
 					channels_to_read = dmx.dmxDataSize - in.size();
+
 				}
+				// qDebug() << in.toHex();
+
 				if (device->debug > 1 || in.size() != dmx.dmxDataSize)
 					qDebug("YadiReceiver::run: read dmx data size: %d",in.size());
 
@@ -169,7 +172,8 @@ bool YadiReceiver::receiver_loop()
 				if (in.size() && !(transfer--)) {
 					transfer = 0;
 					int max_read = device->maxDeviceDmxInChannels;
-					if (max_read > in.size()) max_read = in.size();
+					if (max_read > in.size())
+						max_read = in.size();
 
 					for (int t=0; t<max_read; t++) {
 						char val = in.at(t);

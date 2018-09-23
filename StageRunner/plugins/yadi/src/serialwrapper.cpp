@@ -185,17 +185,7 @@ bool SerialWrapper::openSerial()
 		serial_fd = 0;
 	}
 
-
-//	   fd = open( argv[1], O_RDONLY | O_NOCTTY | O_NONBLOCK );
-
-//	   for(;;) {
-//		   len = read( fd, &buf[0], 8192 );
-//		   if( len > 0 ) write(1,buf,len);
-//		   sleep(1);
-//	   }
-
-
-	serial_fd = open(device_node.toLocal8Bit().data(), O_RDWR | O_NONBLOCK);
+	serial_fd = open(device_node.toLocal8Bit().data(), O_RDWR | O_NONBLOCK | O_NOCTTY);
 	if (serial_fd > 0) {
 		ok = true;
 		qDebug("Yadi: %s opened",deviceNode().toLocal8Bit().data());
@@ -442,7 +432,7 @@ bool SerialWrapper::isOpen()
 	return open;
 }
 
-bool SerialWrapper::writeCommand(const QByteArray cmd)
+bool SerialWrapper::writeCommand(const QByteArray cmd, QByteArray *serAnswer)
 {
 #if defined(USE_QTSERIAL)
 
@@ -463,22 +453,41 @@ bool SerialWrapper::writeCommand(const QByteArray cmd)
 	//tcdrain(serial_fd); // ??
 	//tcflush(serial_fd, TCIOFLUSH);
 
-	usleep(20000);
+	// usleep(20000);
 
 	QByteArray answer;
 
+	int reply = 0;
+
 	// wait for answer:
+	QElapsedTimer wait;
+	wait.start();
+
 	char buf[8];
 	int bytes = 0;
 	do {
 		bytes = read(serial_fd, buf, 1);
-		if (bytes)
-			answer.append(buf[0]);
-	} while (bytes > 0);
+		if (bytes) {
+			if (buf[0] == '@')
+				reply = 1;
+			else if (reply == 1 && buf[0] == ' ')
+				reply = 2;
+			else if (reply == 1)
+				reply = 0;
+			else if (reply == 2 && buf[0] == '@')
+				reply = 3;
+			else if (reply == 2)
+				answer.append(buf[0]);
+		}
+	} while (bytes > 0 || (answer.isEmpty() && wait.elapsed() < 100));
+
 
 	qDebug() << "Serialcommand" << cmd << answer;
 
 #endif
+
+	if (serAnswer)
+		*serAnswer = answer;
 
 	return true;
 }

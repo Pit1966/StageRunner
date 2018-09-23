@@ -31,6 +31,7 @@ YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 		m_devNodeName = other.m_devNodeName;
 	}
 
+	debug = other.debug;
 	outUniverseNumber = other.outUniverseNumber;
 	inUniverseNumber = other.inUniverseNumber;
 	deviceProductName = other.deviceProductName;

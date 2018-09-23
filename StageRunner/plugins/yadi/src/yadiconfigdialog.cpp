@@ -96,16 +96,18 @@ void YadiConfigDialog::on_selectDeviceCombo_currentIndexChanged(int index)
 		transceiverGroup->show();
 		showDmxOutButton->show();
 		transMergeModeCombo->setCurrentIndex(c_yadi->universeMergeMode);
-		transMaxInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
-		transMaxOutChannelsSpin->setValue(c_yadi->usedDmxOutChannels);
+		transLimitInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
+		transLimitOutChannelsSpin->setValue(c_yadi->usedDmxOutChannels);
+		transMaxInLabel->setText(QString::number(c_yadi->maxDeviceDmxInChannels));
+		transMaxOutLabel->setText(QString::number(c_yadi->maxDeviceDmxOutChannels));
 	}
 	else if ( c_yadi->capabilities & YadiDevice::FL_INPUT_UNIVERSE ) {
 		receiverGroup->show();
 		showDmxOutButton->hide();
-		rxMaxInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
+		rxLimitInChannelsSpin->setValue(c_yadi->usedDmxInChannels);
+		rxMaxChannelsLabel->setText(QString::number(c_yadi->maxDeviceDmxInChannels));
 	}
-
-
+	debugSpin->setValue(c_yadi->debug);
 
 }
 
@@ -125,7 +127,7 @@ void YadiConfigDialog::on_transMergeModeCombo_activated(int index)
 	}
 }
 
-void YadiConfigDialog::on_transMaxOutChannelsSpin_valueChanged(int arg1)
+void YadiConfigDialog::on_transLimitOutChannelsSpin_valueChanged(int arg1)
 {
 	if (!c_yadi) return;
 
@@ -141,7 +143,7 @@ void YadiConfigDialog::on_transMaxOutChannelsSpin_valueChanged(int arg1)
 	}
 }
 
-void YadiConfigDialog::on_transMaxInChannelsSpin_valueChanged(int arg1)
+void YadiConfigDialog::on_transLimitInChannelsSpin_valueChanged(int arg1)
 {
 	if (!c_yadi) return;
 
@@ -157,7 +159,7 @@ void YadiConfigDialog::on_transMaxInChannelsSpin_valueChanged(int arg1)
 	}
 }
 
-void YadiConfigDialog::on_rxMaxInChannelsSpin_valueChanged(int arg1)
+void YadiConfigDialog::on_rxLimitInChannelsSpin_valueChanged(int arg1)
 {
 	if (!c_yadi) return;
 
@@ -205,5 +207,6 @@ void YadiConfigDialog::on_debugSpin_valueChanged(int arg1)
 
 	if (!c_yadi) return;
 	c_yadi->debug = arg1;
+	c_yadi->settingsChanged = true;
 
 }

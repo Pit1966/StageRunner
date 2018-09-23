@@ -6,24 +6,30 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>403</height>
+    <width>629</width>
+    <height>459</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>YADI DMX Configuration</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0" colspan="2">
+   <item row="6" column="0" colspan="3">
     <widget class="QGroupBox" name="transceiverGroup">
      <property name="title">
       <string>Transceiver</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Max DMX Output Channels</string>
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="transLimitInChannelsSpin">
+        <property name="minimum">
+         <number>4</number>
+        </property>
+        <property name="maximum">
+         <number>512</number>
+        </property>
+        <property name="value">
+         <number>512</number>
         </property>
        </widget>
       </item>
@@ -34,7 +40,74 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
+       <widget class="QLabel" name="transMaxOutLabel">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>n/a</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QSpinBox" name="transLimitOutChannelsSpin">
+        <property name="minimum">
+         <number>4</number>
+        </property>
+        <property name="maximum">
+         <number>512</number>
+        </property>
+        <property name="value">
+         <number>512</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Max DMX Output Channels:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Max DMX Input Channels:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="transMaxInLabel">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>n/a</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="transOutLimitToLabel">
+        <property name="text">
+         <string>Limit to:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="transInLimitToLabel">
+        <property name="text">
+         <string>Limit to:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="3">
        <widget class="QComboBox" name="transMergeModeCombo">
         <item>
          <property name="text">
@@ -63,44 +136,22 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Max DMX Input Channels</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="transMaxOutChannelsSpin">
-        <property name="minimum">
-         <number>4</number>
-        </property>
-        <property name="maximum">
-         <number>512</number>
-        </property>
-        <property name="value">
-         <number>512</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="transMaxInChannelsSpin">
-        <property name="minimum">
-         <number>4</number>
-        </property>
-        <property name="maximum">
-         <number>512</number>
-        </property>
-        <property name="value">
-         <number>512</number>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QTextEdit" name="textEdit"/>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="rescanDevButton">
+     <property name="text">
+      <string>Rescan Devices</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="showDmxOutButton">
+     <property name="text">
+      <string>Show DMX Output Monitor</string>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="selectDeviceLabel">
@@ -109,21 +160,64 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="2">
+   <item row="3" column="0" colspan="3">
+    <widget class="QComboBox" name="selectDeviceCombo"/>
+   </item>
+   <item row="5" column="2">
+    <widget class="QSpinBox" name="debugSpin"/>
+   </item>
+   <item row="7" column="2">
     <widget class="QPushButton" name="closeButton">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="2">
+   <item row="1" column="0" colspan="3">
+    <widget class="QTextEdit" name="textEdit"/>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="debugLabel">
+     <property name="text">
+      <string>Debug</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="showDmxInButton">
+     <property name="text">
+      <string>Show DMX Input Monitor</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
     <widget class="QGroupBox" name="receiverGroup">
      <property name="title">
       <string>Receiver</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="rxMaxInChannelsSpin">
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Max DMX Input Channels:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="rxMaxChannelsLabel">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>n/a</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QSpinBox" name="rxLimitInChannelsSpin">
         <property name="minimum">
          <number>4</number>
         </property>
@@ -135,48 +229,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_2">
+      <item row="1" column="1">
+       <widget class="QLabel" name="rxLimitChannelsLabel">
         <property name="text">
-         <string>Max DMX Input Channels</string>
+         <string>Limit channels to:</string>
         </property>
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QPushButton" name="showDmxInButton">
-     <property name="text">
-      <string>Show DMX Input Monitor</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QComboBox" name="selectDeviceCombo"/>
-   </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="showDmxOutButton">
-     <property name="text">
-      <string>Show DMX Output Monitor</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="2">
-    <widget class="QSpinBox" name="debugSpin"/>
-   </item>
-   <item row="4" column="0">
-    <widget class="QPushButton" name="rescanDevButton">
-     <property name="text">
-      <string>Rescan Devices</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QLabel" name="debugLabel">
-     <property name="text">
-      <string>Debug</string>
-     </property>
     </widget>
    </item>
   </layout>

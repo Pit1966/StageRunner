@@ -67,7 +67,7 @@ public:
 	bool isOpen();
 	const QString & deviceNode() {return device_node;}
 
-	bool writeCommand(const QByteArray cmd);
+	bool writeCommand(const QByteArray cmd, QByteArray *serAnswer = nullptr);
 
 signals:
 

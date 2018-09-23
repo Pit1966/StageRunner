@@ -8,11 +8,18 @@
 #include "usersettings.h"
 #include "log.h"
 #include "scapplication.h"
+#include "runguard.h"
 
 #include "ioplugincentral.h"
 
 int main(int argc, char *argv[])
 {
+	RunGuard guard( "Stonechip StageRunner" );
+	if ( !guard.tryToRun() ) {
+		fprintf(stderr, "Tried to run StageRunner twice -> Canceled!");
+		return 0;
+	}
+
 	PrefVarCore::registerVarClasses();
 
 	ScApplication app(argc, argv);

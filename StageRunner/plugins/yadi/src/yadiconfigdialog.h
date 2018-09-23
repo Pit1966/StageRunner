@@ -24,9 +24,9 @@ private slots:
 	void show_current_device_list();
 	void on_selectDeviceCombo_currentIndexChanged(int index);
 	void on_transMergeModeCombo_activated(int index);
-	void on_transMaxOutChannelsSpin_valueChanged(int arg1);
-	void on_transMaxInChannelsSpin_valueChanged(int arg1);
-	void on_rxMaxInChannelsSpin_valueChanged(int arg1);
+	void on_transLimitOutChannelsSpin_valueChanged(int arg1);
+	void on_transLimitInChannelsSpin_valueChanged(int arg1);
+	void on_rxLimitInChannelsSpin_valueChanged(int arg1);
 	void on_showDmxInButton_clicked();
 	void on_showDmxOutButton_clicked();
 	void on_debugSpin_valueChanged(int arg1);
