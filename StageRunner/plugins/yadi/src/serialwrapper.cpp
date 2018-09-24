@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QMessageBox>
 #include <QFile>
+#include <QElapsedTimer>
 
 SerialWrapper::SerialWrapper(YadiDevice *dev, const QString &dev_node) :
 	QObject()

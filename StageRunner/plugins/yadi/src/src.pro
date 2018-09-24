@@ -52,7 +52,7 @@ unix:!macx {
 #    CONFIG += qtserialsupport			# compile QtSerialPort funtions
 #	CONFIG += qtserial					# use QtSerial for interface
 
-	# Rules to make yadi devices readable & writable by normal users
+# Rules to make yadi devices readable & writable by normal users
 #    udev.path  = /etc/udev/rules.d
 #    udev.files = z65-enttec-dmxusb.rules
 #    INSTALLS  += udev

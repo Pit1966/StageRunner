@@ -263,6 +263,7 @@ bool YadiReceiver::detectRxDmxUniverseSize(int *max_universe_size, int *used_uni
 	DmxAnswer stat(DmxAnswer::REQ_CHANNELS);
 	bool ok = waitForAtHeader(stat);
 	if (ok) {
+		// qDebug() << "ui:" << stat.answerString;
 		if (max_universe_size)
 			*max_universe_size = stat.deviceMaxChannels;
 		if (used_universe_size)

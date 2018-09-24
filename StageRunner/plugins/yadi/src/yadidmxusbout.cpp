@@ -464,7 +464,8 @@ QString YadiDMXUSBOut::inputInfo(quint32 input)
 			}
 			str += tr("Serial number: %1<br>").arg(yadi->deviceSerial);
 			str += tr("Max DMX Input Channels: %1<br>").arg(yadi->maxDeviceDmxInChannels);
-			str += tr("Currently used DMX Channels: %1<br>").arg(yadi->usedDmxInChannels);
+			str += tr("Current detected DMX frame size: %1 channels<br>").arg(yadi->currentDetectedDmxInPacketSize);
+			str += tr("Limit used DMX Channels to: %1<br>").arg(yadi->usedDmxInChannels);
 		}
 		str += QString("</P>");
 	}

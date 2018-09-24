@@ -169,7 +169,7 @@ void YadiConfigDialog::on_rxLimitInChannelsSpin_valueChanged(int arg1)
 
 		if (c_yadi->openOutput()) {
 			QString cmd = QString("hi %1").arg(arg1);
-			qDebug() << "YadiConfigDialog::on_rxMaxInChannelsSpin_valueChanged: send" << cmd;
+			qDebug() << "YadiConfigDialog::on_rxLimitInChannelsSpin_valueChanged: send" << cmd;
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}
 	}
