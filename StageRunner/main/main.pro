@@ -36,10 +36,13 @@ DEFINES += USE_SDL
 }
 
 unix:!macx {
-INCLUDEPATH += /usr/include/SDL
-DEFINES += USE_SDL
-LIBS += -lSDL2
-LIBS += -lSDL2_mixer
+	exists(/usr/include/SDL2/SDL.h) {
+		message ("Found SDL2 ...")
+		INCLUDEPATH += /usr/include/SDL2
+		DEFINES += USE_SDL
+		LIBS += -lSDL2
+		LIBS += -lSDL2_mixer
+	}
 }
 
 
