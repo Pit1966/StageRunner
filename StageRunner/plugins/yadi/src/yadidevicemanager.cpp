@@ -225,6 +225,8 @@ int YadiDeviceManager::enumerateYadiDevices(bool update)
 			QString product = udev_device_get_sysattr_value(dev,"product");
 			QString serial = udev_device_get_sysattr_value(dev, "serial");
 
+			qDebug() << "UDEV" << idvendor << idproduct << manufacturer << product << serial;
+
 			udev_device_unref(dev);
 
 			if (product.startsWith("YADI DMX")) {
