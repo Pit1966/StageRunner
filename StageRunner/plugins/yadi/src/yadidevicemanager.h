@@ -19,6 +19,7 @@ public:
 	static void clearYadiDevices();
 	static void initYadiDevices();
 	static YadiDevice * getDevice(const QString &dev_node, int cap);
+	static YadiDevice * getDeviceByDevNodePath(const QString &devpath, int cap);
 	static void updateYadiDevicesStatus();
 	static QList<YadiDevice*> & globalDeviceList() {return globYadiDeviceList;}
 	static bool yadiDeviceLessThan(const YadiDevice * s1, const YadiDevice * s2);

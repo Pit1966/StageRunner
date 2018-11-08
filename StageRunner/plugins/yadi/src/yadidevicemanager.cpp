@@ -339,6 +339,15 @@ YadiDevice *YadiDeviceManager::getDevice(const QString & dev_node, int cap)
 	return 0;
 }
 
+YadiDevice *YadiDeviceManager::getDeviceByDevNodePath(const QString &devpath, int cap)
+{
+	for (int t=0; t<globYadiDeviceList.size(); t++) {
+		if (globYadiDeviceList.at(t)->devNodePath() == devpath && (globYadiDeviceList.at(t)->capabilities & cap))
+			return globYadiDeviceList.at(t);
+	}
+	return 0;
+}
+
 void YadiDeviceManager::updateYadiDevicesStatus()
 {
 	bool rescan = false;

@@ -536,6 +536,8 @@ DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 
 bool YadiDMXUSBOut::setInOutMergeMode(quint32 input, quint32 universe, quint32 mode)
 {
+	Q_UNUSED(universe)
+
 	QMutexLocker lock(accessMutex);
 
 	// qDebug() << "Yadi: set InOut merge mode:" << input << universe << mode;
@@ -545,8 +547,16 @@ bool YadiDMXUSBOut::setInOutMergeMode(quint32 input, quint32 universe, quint32 m
 		qWarning("Yadi: Input #%d not available",input+1);
 		return false;
 	}
-	if (!yadi->isInputOpen()) {
-		qWarning("Yadi: Input #%d is not open",input+1);
+
+	// Find output for this device.
+	yadi = YadiDeviceManager::getDeviceByDevNodePath(yadi->devNodePath(),YadiDevice::FL_OUTPUT_UNIVERSE);
+	if (!yadi) {
+		qWarning("Yadi: Corresponding output for input #%d not available",input+1);
+		return false;
+	}
+
+	if (!yadi->isOutputOpen()) {
+		qWarning("Yadi: Output #%d is not open",input+1);
 		return false;
 	}
 
