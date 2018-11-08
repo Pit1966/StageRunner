@@ -10,6 +10,7 @@ QStringList FxAudioItem::attachedCmdStrings = QStringList()
 		<< QObject::tr("Stop all audio")
 		<< QObject::tr("Stop/BLACK video")
 		<< QObject::tr("Start FX")
+		<< QObject::tr("Stop all SEQ & SCRIPTS")
 		<< QString("DEVELOPER ADD TEXT!");
 
 

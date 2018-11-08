@@ -630,8 +630,9 @@ void AppCentral::testSetDmxChannel(int val, int channel)
 void AppCentral::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
 {
 	/// @implement me: Here we have to provide the selection for different receivers for the signal.
- /// e.g. an Audio Volume slot
- /// For now we forward the signal to the light unit
+	/// e.g. an Audio Volume slot
+	/// For now we forward the signal to the light unit
+	/// some functions like setAudioVol are already implemented in LightControl::onInputUniverseChanged( ... )
 	unitLight->onInputUniverseChannelChanged(universe,channel,value);
 
 }

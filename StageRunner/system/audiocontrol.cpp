@@ -627,6 +627,8 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 		myApp.executeFxCmd(fxa->attachedStartPara1, CMD_FX_START, nullptr);
 //		myApp.unitVideo->startFxClipById(fxa->attachedStartPara1);
 		break;
+	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
+		myApp.stopAllSequencesAndPlaylists();
 	default:
 		break;
 	}
@@ -652,6 +654,8 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 		myApp.executeFxCmd(fxa->attachedStopPara1, CMD_FX_START, nullptr);
 //		myApp.unitVideo->startFxClipById(fxa->attachedStopPara1);
 		break;
+	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
+		myApp.stopAllSequencesAndPlaylists();
 	default:
 		break;
 	}

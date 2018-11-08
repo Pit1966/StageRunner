@@ -28,6 +28,7 @@ public:
 	MutexQList<const FxList*>lightFxLists;
 	MutexQHash<int,FxSceneItem*>activeScenes;
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
+	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 
@@ -47,6 +48,8 @@ public:
 	qint32 blackFxScene(FxSceneItem *scene, qint32 time_ms);
 	qint32 blackFxSequence(FxSeqItem *seq, qint32 time_ms);
 	qint32 blackFxItem(FxItem *fx, qint32 time_ms);
+
+	bool fillSceneFromInputUniverses(FxSceneItem *scene);
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
 

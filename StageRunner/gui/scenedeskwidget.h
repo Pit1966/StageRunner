@@ -74,6 +74,10 @@ private slots:
 	void on_channelCountSpin_valueChanged(int arg1);
 	void on_channelCountSpin_editingFinished();
 
+	void on_cloneCurrentInputButton_clicked();
+
+	void on_cloneCurrentOutputButton_clicked();
+
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
 	void modified();

@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.8.4
-APP_MILESTONE = ArtNet & MAC_SDL
+APPVERSION = V0.9.0
+APP_MILESTONE = Seelenbrecher
 APP_PRODUCER = 2018 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de

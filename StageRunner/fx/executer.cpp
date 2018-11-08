@@ -714,6 +714,16 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 	return returnparas;
 }
 
+QString ScriptExecuter::getFirstParaOfString(QString &parastr)
+{
+	parastr = parastr.simplified();
+
+	QString first = parastr.section(' ', 0, 0);
+	parastr.remove(0, first.size() + 1);
+
+	return first;
+}
+
 
 /**
  * @brief This function does return the temorary copied FxItems for a given parent FxItem
@@ -770,6 +780,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line)
 
 	case KW_YADI_DMX_MERGE:
 		ok = executeYadiDMXMergeMode(line);
+		break;
+
+	case KW_GRAP_SCENE:
+		ok = executeGrapScene(line);
 		break;
 
 	default:
@@ -1045,6 +1059,39 @@ bool ScriptExecuter::executeLoopExt(FxScriptLine *line)
 		line->clearLoopCount();
 	} else {
 		m_currentLineNum = linenum - 2;
+	}
+
+	return true;
+}
+
+bool ScriptExecuter::executeGrapScene(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+
+	QString source = getFirstParaOfString(parastr).toLower();
+	if (!source.startsWith("in") && !source.startsWith("out")) {
+		m_lastScriptError = tr("Missing universe source parameter: [INPUT | OUTPUT]");
+		return false;
+	}
+
+	FxItemList fxlist;
+	parastr = getTargetFxItemFromPara(line, parastr, fxlist);
+	if (fxlist.isEmpty()) {
+		m_lastScriptError = tr("Missing target scene parameter");
+		return false;
+	}
+
+	for (FxItem *fx : fxlist) {
+		FxSceneItem *scene = dynamic_cast<FxSceneItem*>(fx);
+		if (!scene) {
+			LOGERROR(tr("Script '%1': GRAPSCENE must be applied on a SCENE! Line #%2")
+					 .arg(m_fxScriptItem->name())
+					 .arg(line->lineNumber()));
+			continue;
+		}
+
+		myApp.unitLight->fillSceneFromInputUniverses(scene);
+		scene->setModified(false);
 	}
 
 	return true;

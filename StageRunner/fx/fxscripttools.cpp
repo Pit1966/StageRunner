@@ -11,6 +11,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("fadeout",KW_FADEOUT);
 	m_keywordHash.insert("loop",KW_LOOP);
 	m_keywordHash.insert("dmxmerge",KW_YADI_DMX_MERGE);
+	m_keywordHash.insert("grapscene",KW_GRAP_SCENE);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)

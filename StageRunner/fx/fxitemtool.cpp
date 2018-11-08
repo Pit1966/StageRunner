@@ -4,6 +4,7 @@
 #include "fxsceneitem.h"
 #include "fxseqitem.h"
 #include "fxplaylistitem.h"
+#include "fxscriptitem.h"
 
 FxItemTool::FxItemTool()
 {
@@ -49,6 +50,18 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
 			if(renameItem)
 				setClonedFxName(seqitem,new_seqitem);
 			new_seqitem->setKeyCode(0);
+		}
+		break;
+
+	case FX_SCRIPT:
+		{
+			FxScriptItem *scriptitem = reinterpret_cast<FxScriptItem*>(srcItem);
+			FxScriptItem *new_scriptitem = new FxScriptItem(*scriptitem);
+			new_scriptitem->refCount.ref();
+			newFx = new_scriptitem;
+			if (renameItem)
+				setClonedFxName(scriptitem,new_scriptitem);
+			new_scriptitem->setKeyCode(0);
 		}
 		break;
 

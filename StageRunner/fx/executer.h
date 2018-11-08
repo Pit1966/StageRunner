@@ -191,6 +191,7 @@ protected:
 	virtual ~ScriptExecuter();
 
     QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
+	QString getFirstParaOfString(QString &parastr);
 	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line);
@@ -200,6 +201,7 @@ protected:
 	bool executeFadeOut(FxScriptLine *line);
 	bool executeYadiDMXMergeMode(FxScriptLine *line);
 	bool executeLoopExt(FxScriptLine *line);
+	bool executeGrapScene(FxScriptLine *line);
 
 	friend class ExecCenter;
 };

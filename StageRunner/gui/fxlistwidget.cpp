@@ -237,7 +237,11 @@ FxListWidgetItem *FxListWidget::getFxListItemAtPos(QPoint pos)
 	for (int col=0; col<fxTable->columnCount(); col++) {
 		for (int row=0; row<fxTable->rowCount(); row++) {
 			FxListWidgetItem *item = reinterpret_cast<FxListWidgetItem*>(fxTable->cellWidget(row,col));
-			if (item->geometry().contains(pos)) return item;
+			if (!item)
+				continue;
+
+			if (item->geometry().contains(pos))
+				return item;
 		}
 	}
 
@@ -591,6 +595,9 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 
 void FxListWidget::create_fxlist_row(FxItem *fx, FxList *fxlist, int row)
 {
+	if (!fx)
+		return;
+
 	FxListWidgetItem *item;
 
 	QFont key_font;

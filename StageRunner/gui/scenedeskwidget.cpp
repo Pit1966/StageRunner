@@ -655,3 +655,17 @@ void SceneDeskWidget::on_channelCountSpin_editingFinished()
 	origin_fxscene->setTubeCount(channelCountSpin->value());
 	setFxScene(origin_fxscene);
 }
+
+void SceneDeskWidget::on_cloneCurrentInputButton_clicked()
+{
+	if (!origin_fxscene) return;
+	AppCentral::ref().unitLight->fillSceneFromInputUniverses(origin_fxscene);
+
+	setFxScene(origin_fxscene);
+}
+
+void SceneDeskWidget::on_cloneCurrentOutputButton_clicked()
+{
+	if (!origin_fxscene) return;
+
+}

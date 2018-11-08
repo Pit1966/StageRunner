@@ -16,6 +16,7 @@
 #include "execcenter.h"
 #include "executer.h"
 #include "audiocontrol.h"
+#include "dmxchannel.h"
 
 
 LightControl::LightControl(AppCentral &app_central)
@@ -246,6 +247,28 @@ qint32 LightControl::blackFxItem(FxItem *fx, qint32 time_ms)
 	return num;
 }
 
+bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene)
+{
+	bool ok = true;
+	for (int i=0; i<scene->tubeCount(); i++) {
+		DmxChannel *dmxchan = scene->tube(i);
+		quint32 univ = dmxchan->dmxUniverse;
+		quint32 chan = dmxchan->dmxChannel;
+		if (univ >= MAX_DMX_UNIVERSE || chan > 511) {
+			ok = false;
+			continue;
+		}
+
+		// scale dmx value to DmxChannel (tube) output value
+		qint32 dmxVal = uchar(dmxInputValues[univ][chan]);
+		qint32 targetVal = dmxchan->targetFullValue * dmxVal / 255;
+
+		dmxchan->targetValue = targetVal;
+	}
+
+	return ok;
+}
+
 bool LightControl::setYadiInOutMergeMode(quint32 input, quint32 mode)
 {
 	QLCIOPlugin *yadiplugin = myApp.pluginCentral->yadiPlugin();
@@ -269,8 +292,8 @@ void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		dmxOutputChanged[t] = true;
-		dmxOutputValues[t].resize(512);
-		memset(dmxOutputValues[t].data(),0,512);
+		dmxOutputValues[t].fill(0, 512);
+		dmxInputValues[t].fill(0, 512);
 	}
 	// initialize the hidden scene that will catch all scanner events.
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -313,14 +336,17 @@ void LightControl::onSceneCueReady(FxSceneItem *scene)
 /**
  * @brief Handler für reinkommende Inputsignale
  * @param universe
- * @param channel
+ * @param channel dmx-kanal (0-511)
  * @param value dmx-wert (0-255)
  *
  * Diese Funktion stellt die Verbindung einer Eingangsleitung mit einem FxSceneItem dar
  */
 void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
 {
-	if (universe >= MAX_DMX_UNIVERSE) return;
+	if (universe >= MAX_DMX_UNIVERSE || channel > 511) return;
+
+	// store incoming value to dmx input universe array.
+	dmxInputValues[universe][channel] = value;
 
 	if (myApp.isInputAssignMode())
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);

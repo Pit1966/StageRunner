@@ -27,7 +27,16 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>3</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="rightMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
     <number>3</number>
    </property>
    <item>
@@ -86,15 +95,24 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>836</width>
-            <height>496</height>
+            <width>827</width>
+            <height>498</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="scrollAreaLayout">
            <property name="spacing">
             <number>0</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>
@@ -172,14 +190,23 @@
              <string>Hooked to</string>
             </property>
             <layout class="QGridLayout" name="hookedToLayout">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
              <property name="horizontalSpacing">
               <number>2</number>
              </property>
              <property name="verticalSpacing">
               <number>1</number>
-             </property>
-             <property name="margin">
-              <number>2</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="hookedUniverseLabel">
@@ -252,14 +279,23 @@
              <string>Fade times</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
              <property name="horizontalSpacing">
               <number>2</number>
              </property>
              <property name="verticalSpacing">
               <number>0</number>
-             </property>
-             <property name="margin">
-              <number>2</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="fadeInTimeLabel">
@@ -307,11 +343,20 @@
           <string>Tube / Channel</string>
          </property>
          <layout class="QGridLayout" name="tubeGroupLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <property name="verticalSpacing">
            <number>1</number>
-          </property>
-          <property name="margin">
-           <number>2</number>
           </property>
           <item row="1" column="1">
            <widget class="PsLineEdit" name="tubeCommentEdit">
@@ -348,6 +393,26 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cloneCurrentInputButton">
+         <property name="toolTip">
+          <string>Fill scene with current universe input values</string>
+         </property>
+         <property name="text">
+          <string>Clone from input</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cloneCurrentOutputButton">
+         <property name="toolTip">
+          <string>Fill scene from current universe output</string>
+         </property>
+         <property name="text">
+          <string>Clone from output</string>
+         </property>
         </widget>
        </item>
        <item>

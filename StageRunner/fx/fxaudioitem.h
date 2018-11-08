@@ -13,10 +13,11 @@ class FxAudioItem : public FxItem
 public:
 	enum AttachedCmd {
 		ATTACHED_CMD_NONE,
-		ATTACHED_CMD_FADEOUT_ALL,
-		ATTACHED_CMD_STOP_ALL,
+		ATTACHED_CMD_FADEOUT_ALL,					///< Fadeout all audio FX
+		ATTACHED_CMD_STOP_ALL,						///< Stop all audio FX
 		ATTACHED_CMD_STOP_VIDEO,
 		ATTACHED_CMD_START_FX,
+		ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS,
 
 		ATTACHED_CMD_CNT
 	};
