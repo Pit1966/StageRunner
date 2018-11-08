@@ -43,12 +43,13 @@ void FxExecLoop::processPendingEvents()
 	QMutableListIterator<Executer*> it(execlist);
 	while (it.hasNext()) {
 		Executer *exec = it.next();
-		if (exec->isRunning()) {
+//		if (exec->isRunning()) {
 			switch (exec->state()) {
 			case Executer::EXEC_PAUSED:
 				exec->setTargetTimeToCurrent();
 				break;
 			case Executer::EXEC_RUNNING:
+			case Executer::EXEC_FINISH:
 				if (exec->processTimeReached()) {
 					bool active = exec->processExecuter();
 					if (!active) {
@@ -59,7 +60,7 @@ void FxExecLoop::processPendingEvents()
 			default:
 				break;
 			}
-		}
+//		}
 	}
 
 	// Don't forget to unlock the executer list

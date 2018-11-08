@@ -88,6 +88,7 @@ bool Executer::deactivateProcessing()
 	switch (myState) {
 	case EXEC_RUNNING:
 	case EXEC_PAUSED:
+	case EXEC_FINISH:
 		myState = EXEC_IDLE;
 		return true;
 	case EXEC_DELETED:
@@ -118,6 +119,17 @@ bool Executer::setPaused(bool state)
 	default:
 		break;
 	}
+	return false;
+}
+
+bool Executer::setFinish()
+{
+	if (myState != EXEC_FINISH) {
+		myState = EXEC_FINISH;
+		emit changed(this);
+		return true;
+	}
+
 	return false;
 }
 
@@ -595,7 +607,7 @@ ScriptExecuter::~ScriptExecuter()
 			scene->setDeleteOnFinished();
 		}
 	}
-	qDebug() << "script executer destroyed";
+	// qDebug() << "script executer destroyed";
 }
 
 /**
@@ -750,6 +762,16 @@ bool ScriptExecuter::executeLine(FxScriptLine *line)
 		ok = executeFadeOut(line);
 		break;
 
+	case KW_LOOP:
+		if (myState == EXEC_RUNNING) {
+			ok = executeLoopExt(line);
+		}
+		break;
+
+	case KW_YADI_DMX_MERGE:
+		ok = executeYadiDMXMergeMode(line);
+		break;
+
 	default:
 		ok = false;
 		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
@@ -757,10 +779,13 @@ bool ScriptExecuter::executeLine(FxScriptLine *line)
 	}
 
 	if (!ok) {
-		LOGERROR(tr("Failed to execute script line #%1 (%2) in script %3")
+		LOGERROR(tr("Failed to execute script line #%1 (%2) in script %3%4")
 				 .arg(line->lineNumber())
 				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
-				 .arg(m_fxScriptItem->name()));
+				 .arg(m_fxScriptItem->name())
+				 .arg(m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
+
+		m_lastScriptError.clear();
 	}
 
 	return true;
@@ -874,11 +899,21 @@ bool ScriptExecuter::executeFadeIn(FxScriptLine *line)
 			continue;
 		}
 
+		FxItemList clonelist = getExecuterTempCopiesOfFx(scene);
+
 		// now clone FxSceneItem
-		FxSceneItem *clonescene = new FxSceneItem(*scene);
-		clonescene->setName(tr("%1:%2_tmp").arg(originFxItem->name()).arg(scene->name()));
-		clonescene->setIsTempCopyOf(scene);
-		m_clonedSceneList.append(clonescene);
+		FxSceneItem *clonescene = nullptr;
+
+		if (clonelist.size()) {
+			clonescene = dynamic_cast<FxSceneItem*>(clonelist.first());
+		} else {
+			clonescene = new FxSceneItem(*scene);
+			clonescene->setName(tr("%1:%2_tmp").arg(originFxItem->name()).arg(scene->name()));
+			clonescene->setIsTempCopyOf(scene);
+			m_clonedSceneList.append(clonescene);
+		}
+		if (!clonescene)
+			continue;
 
 		bool is_active = clonescene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN, fadein_time_ms);
 		if (is_active)
@@ -935,4 +970,82 @@ bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
 	}
 
 	return ok;
+}
+
+bool ScriptExecuter::executeYadiDMXMergeMode(FxScriptLine *line)
+{
+	QStringList paras = line->parameters().split(" ",QString::SkipEmptyParts);
+
+	if (paras.size() < 2) {
+		m_lastScriptError = tr("Missing parameter. Format is: DMXMERGE <input> <mergemode>");
+		return false;
+	}
+
+	quint32 input = paras[0].toInt()-1;
+	if (input > 4) {
+		m_lastScriptError = tr("Input number should be in range of 1 - 4");
+		return false;
+	}
+	int mode = 0;
+	QString mtxt = paras[1].toLower();
+
+	if (mtxt == "htp" || mtxt.startsWith("def")) {
+		mode = 0;
+	}
+	else if (mtxt == "dmxin") {
+		mode = 3;
+	}
+	else if (mtxt == "usb") {
+		mode = 4;
+	}
+	else {
+		m_lastScriptError = tr("Unknown merge mode %1. Try HTP, DMXIN or USB").arg(paras[1]);
+		return false;
+	}
+
+	bool ok = myApp.unitLight->setYadiInOutMergeMode(input, mode);
+	if (!ok) {
+		m_lastScriptError = tr("Could not send command to yadi device!");
+	}
+
+	return ok;
+}
+
+bool ScriptExecuter::executeLoopExt(FxScriptLine *line)
+{
+	line->incLoopCount();
+
+	QStringList paras = line->parameters().split(" ",QString::SkipEmptyParts);
+	if (paras.isEmpty()) { // simple loop without parameters from beginning
+		m_currentLineNum = -1;
+		return true;
+	}
+
+	QString targetline_str = paras.takeFirst();
+	int linenum = targetline_str.toInt();
+	if (linenum == 0 || linenum > m_script.size()) {
+		m_lastScriptError = tr("Target line number not valid");
+		return false;
+	}
+
+	if (paras.isEmpty()) {
+		m_currentLineNum = linenum - 2;
+		return true;
+	}
+
+	// evaluate loop count;
+	QString targetcnt_str = paras.takeFirst();
+	int targetcount = targetcnt_str.toInt();
+	if (targetcount == 0) {
+		m_lastScriptError = tr("Target loop count not valid");
+		return false;
+	}
+
+	if (line->loopCount() >= targetcount) {			// loop count reached
+		line->clearLoopCount();
+	} else {
+		m_currentLineNum = linenum - 2;
+	}
+
+	return true;
 }

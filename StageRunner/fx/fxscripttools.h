@@ -15,6 +15,8 @@ enum KEY_WORD {
 	KW_STOP,
 	KW_FADEIN,
 	KW_FADEOUT,
+	KW_LOOP,
+	KW_YADI_DMX_MERGE,
 	KW_COUNT
 };
 
@@ -39,6 +41,7 @@ class FxScriptLine
 {
 private:
 	int m_lineNum;
+	int m_loopCount;
 	QString m_cmd;
 	QString m_paras;
 
@@ -49,6 +52,9 @@ public:
 	int lineNumber() const {return m_lineNum;}
 	const QString & command() const {return m_cmd;}
 	const QString & parameters() const {return m_paras;}
+	int loopCount() const {return m_loopCount;}
+	void incLoopCount() {m_loopCount++;}
+	void clearLoopCount() {m_loopCount = 0;}
 
 	friend class FxScriptList;
 };
@@ -67,6 +73,7 @@ public:
 	FxScriptList(const FxScriptList &o);
 	void clear();
 	void append(const FxScriptLine &scriptLine);
+	inline int size() const {return QList::size();}
 	FxScriptLine *at(int lineNum);
 };
 

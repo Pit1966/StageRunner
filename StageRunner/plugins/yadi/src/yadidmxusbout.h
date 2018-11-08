@@ -60,14 +60,15 @@ public:
 	bool canConfigure();				///< @reimp
 	void configure();					///< @reimp
 
-
 	// StageRunner reimplemented functions
 	DmxMonitor *openOutputMonitor(quint32 output);
 	DmxMonitor *openInputMonitor(quint32 input);
 
-
 	inline QStringList outputDeviceList() {return output_devices;}
 	inline QStringList inputDeviceList() {return input_devices;}
+
+	// Special functions only implemented by YADI
+	Q_INVOKABLE bool setInOutMergeMode(quint32 input, quint32 universe, quint32 mode);
 
 private:
 	void handle_output_error(quint32 output);

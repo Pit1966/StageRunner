@@ -534,6 +534,29 @@ DmxMonitor *YadiDMXUSBOut::openInputMonitor(quint32 input)
 	}
 }
 
+bool YadiDMXUSBOut::setInOutMergeMode(quint32 input, quint32 universe, quint32 mode)
+{
+	QMutexLocker lock(accessMutex);
+
+	// qDebug() << "Yadi: set InOut merge mode:" << input << universe << mode;
+
+	YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
+	if (!yadi) {
+		qWarning("Yadi: Input #%d not available",input+1);
+		return false;
+	}
+	if (!yadi->isInputOpen()) {
+		qWarning("Yadi: Input #%d is not open",input+1);
+		return false;
+	}
+
+	QString cmd = QString("m %1").arg(mode);
+	qDebug() << "Yadi: set merge mode:" << cmd;
+	yadi->write(cmd.toLocal8Bit().data());
+
+	return true;
+}
+
 void YadiDMXUSBOut::handle_output_error(quint32 output)
 {
 	accessMutex->lock();

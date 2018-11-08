@@ -159,6 +159,7 @@ void SequenceStatusWidget::propagateExecuter(Executer *exec)
 		switch (exec->state()) {
 		case Executer::EXEC_RUNNING:
 		case Executer::EXEC_PAUSED:
+		case Executer::EXEC_FINISH:
 			updateExecuter(exec);
 			break;
 		default:
@@ -168,6 +169,7 @@ void SequenceStatusWidget::propagateExecuter(Executer *exec)
 		switch (exec->state()) {
 		case Executer::EXEC_RUNNING:
 		case Executer::EXEC_PAUSED:
+		case Executer::EXEC_FINISH:
 			appendExecuter(exec);
 			break;
 		default:

@@ -42,6 +42,7 @@ void SequenceControlWidget::on_ctrlStopButton_clicked()
 {
 	appcentral->unitFx->stopAllFxPlaylists();
 	appcentral->unitFx->stopAllFxSequences();
+	appcentral->unitFx->stopAllFxScripts();
 	appcentral->unitAudio->stopAllFxAudio();
 	appcentral->clearCurrentFx(1);
 }

@@ -9,6 +9,8 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("stop",KW_STOP);
 	m_keywordHash.insert("fadein",KW_FADEIN);
 	m_keywordHash.insert("fadeout",KW_FADEOUT);
+	m_keywordHash.insert("loop",KW_LOOP);
+	m_keywordHash.insert("dmxmerge",KW_YADI_DMX_MERGE);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)
@@ -33,6 +35,7 @@ SCRIPT::KEY_WORD ScriptKeyWord::keyNumber(const QString &text)
 
 FxScriptLine::FxScriptLine(const QString &cmd, const QString &paras)
 	: m_lineNum(0)
+	, m_loopCount(0)
 	, m_cmd(cmd)
 	, m_paras(paras)
 {
@@ -40,6 +43,7 @@ FxScriptLine::FxScriptLine(const QString &cmd, const QString &paras)
 
 FxScriptLine::FxScriptLine(const FxScriptLine &o)
 	: m_lineNum(o.m_lineNum)
+	, m_loopCount(o.m_loopCount)
 	, m_cmd(o.m_cmd)
 	, m_paras(o.m_paras)
 {

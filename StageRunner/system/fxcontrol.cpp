@@ -141,6 +141,29 @@ int FxControl::stopAllFxSequences()
 	return count;
 }
 
+int FxControl::stopAllFxScripts()
+{
+	int count = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->type() == Executer::EXEC_SCRIPT) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				count++;
+				exec->setFinish();
+				// exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return count;
+}
+
 bool FxControl::pauseFxPlaylist(FxPlayListItem *fxplay)
 {
 	if (!FxItem::exists(fxplay)) return false;

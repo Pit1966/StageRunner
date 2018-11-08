@@ -102,7 +102,7 @@ bool YadiReceiver::receiver_loop()
 
 		if (firstloop) {
 			QString msg = tr("<font color=green>YADI started listener</font>: DMX packet size: %1, channels: used %2 / max %3")
-					.arg(rx_dmx_packet_size)
+					.arg(rx_dmx_packet_size - 1)
 					.arg(used_channels)
 					.arg(max_channels);
 			emit statusMsgSent(msg);

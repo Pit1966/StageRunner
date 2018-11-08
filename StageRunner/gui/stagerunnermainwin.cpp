@@ -701,6 +701,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		case Qt::Key_Backspace:
 			appCentral->unitFx->stopAllFxSequences();
+			appCentral->unitFx->stopAllFxScripts();
 			appCentral->lightBlack(0);
 			appCentral->videoBlack(0);
 			break;

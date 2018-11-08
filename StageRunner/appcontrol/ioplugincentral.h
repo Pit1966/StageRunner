@@ -67,6 +67,10 @@ public:
 	bool getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const;
 	bool getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const;
 
+	// Yadi specific
+	QLCIOPlugin * yadiPlugin();
+
+
 	static QStringList outputsOf(QLCIOPlugin *plugin);
 	static QString outputOf(int line, QLCIOPlugin *plugin);
 	static QStringList inputsOf(QLCIOPlugin *plugin);

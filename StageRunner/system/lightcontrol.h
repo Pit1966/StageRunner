@@ -48,6 +48,8 @@ public:
 	qint32 blackFxSequence(FxSeqItem *seq, qint32 time_ms);
 	qint32 blackFxItem(FxItem *fx, qint32 time_ms);
 
+	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
+
 private:
 	void init();
 

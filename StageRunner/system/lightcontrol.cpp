@@ -85,20 +85,20 @@ bool LightControl::sendChangedDmxData()
 	/// @implement me: Plugin <-> output <-> universe Zuordnung
 	bool sent = false;
 
-	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
-		if (dmxOutputChanged[t]) {
+	for (int uni=0; uni<MAX_DMX_UNIVERSE; uni++) {
+		if (dmxOutputChanged[uni]) {
 			QLCIOPlugin *plugin;
 			int output;
-			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(t,plugin,output)) {
-				plugin->writeUniverse(t,output,dmxOutputValues[t]);
-				emit outputUniverseChanged(t,dmxOutputValues[t]);
+			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(uni,plugin,output)) {
+				plugin->writeUniverse(uni,output,dmxOutputValues[uni]);
+				emit outputUniverseChanged(uni,dmxOutputValues[uni]);
 				sent = true;
 			} else {
 				if (myApp.userSettings->pNoInterfaceDmxFeedback) {
-					emit outputUniverseChanged(t,dmxOutputValues[t]);
+					emit outputUniverseChanged(uni,dmxOutputValues[uni]);
 				}
 			}
-			dmxOutputChanged[t] = false;
+			dmxOutputChanged[uni] = false;
 		}
 	}
 
@@ -244,6 +244,25 @@ qint32 LightControl::blackFxItem(FxItem *fx, qint32 time_ms)
 		num = blackFxSequence(static_cast<FxSeqItem*>(fx), time_ms);
 	}
 	return num;
+}
+
+bool LightControl::setYadiInOutMergeMode(quint32 input, quint32 mode)
+{
+	QLCIOPlugin *yadiplugin = myApp.pluginCentral->yadiPlugin();
+	if (!yadiplugin)
+		return false;
+
+	quint32 universe = 0;
+
+	bool ok = false;
+	QMetaObject::invokeMethod(yadiplugin, "setInOutMergeMode", Qt::DirectConnection,
+							  Q_RETURN_ARG(bool, ok),
+							  Q_ARG(quint32, input),
+							  Q_ARG(quint32, universe),
+							  Q_ARG(quint32, mode));
+
+
+	return ok;
 }
 
 void LightControl::init()

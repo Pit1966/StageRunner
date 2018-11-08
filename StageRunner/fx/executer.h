@@ -36,7 +36,8 @@ public:
 		EXEC_IDLE,
 		EXEC_RUNNING,
 		EXEC_PAUSED,
-		EXEC_DELETED
+		EXEC_DELETED,
+		EXEC_FINISH
 	};
 
 protected:
@@ -68,7 +69,8 @@ public:
 	bool activateProcessing();
 	bool deactivateProcessing();
 	bool setPaused(bool state);
-	inline bool isRunning() const {return (myState == EXEC_RUNNING);}
+	bool setFinish();
+	inline bool isRunning() const {return (myState == EXEC_RUNNING || myState == EXEC_FINISH);}
 	inline qint64 currentTargetTimeMs() {return eventTargetTimeMs;}
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
@@ -178,6 +180,7 @@ protected:
 	FxScriptList m_script;
 	int m_currentLineNum;
 	QList<FxSceneItem*> m_clonedSceneList;
+	QString m_lastScriptError;
 
 public:
 	inline TYPE type() {return EXEC_SCRIPT;}
@@ -195,6 +198,8 @@ protected:
 	bool executeCmdStop(FxScriptLine *line);
 	bool executeFadeIn(FxScriptLine * line);
 	bool executeFadeOut(FxScriptLine *line);
+	bool executeYadiDMXMergeMode(FxScriptLine *line);
+	bool executeLoopExt(FxScriptLine *line);
 
 	friend class ExecCenter;
 };

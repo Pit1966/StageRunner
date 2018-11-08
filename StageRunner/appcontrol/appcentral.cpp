@@ -100,6 +100,7 @@ void AppCentral::stopAllSequencesAndPlaylists()
 {
 	unitFx->stopAllFxPlaylists();
 	unitFx->stopAllFxSequences();
+	unitFx->stopAllFxScripts();
 }
 
 

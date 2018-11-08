@@ -36,6 +36,7 @@ public:
 	FxListExecuter * startFxSequence(FxSeqItem *fxseq);
 	bool stopFxSequence(FxSeqItem *fxseq);
 	int stopAllFxSequences();
+	int stopAllFxScripts();
 	bool pauseFxPlaylist(FxPlayListItem *fxplay);
 	bool stopFxPlayList(FxPlayListItem *fxplay);
 	int pauseAllFxPlaylist();

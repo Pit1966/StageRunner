@@ -396,6 +396,16 @@ bool IOPluginCentral::getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output
 	return false;
 }
 
+QLCIOPlugin *IOPluginCentral::yadiPlugin()
+{
+	for (int t=0; t<qlc_plugins.size(); t++) {
+		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		if (plugin->name().startsWith("YADI"))
+			return plugin;
+	}
+	return 0;
+}
+
 QStringList IOPluginCentral::outputsOf(QLCIOPlugin *plugin)
 {
 	QStringList outnames = plugin->outputs();
