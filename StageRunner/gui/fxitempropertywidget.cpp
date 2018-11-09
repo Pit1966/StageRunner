@@ -97,6 +97,8 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
 		audioFilePathEdit->setText(cur_fxa->filePath());
+		if (!QFile::exists(cur_fxa->filePath()))
+				audioFilePathEdit->setStyleSheet("color: darkRed;");
 		audioFilePathEdit->setToolTip(cur_fxa->filePath());
 		audioLoopsSpin->setValue(cur_fxa->loopTimes);
 		audioSlotSpin->setValue(cur_fxa->playBackSlot);
@@ -544,3 +546,23 @@ void FxItemPropertyWidget::on_videoFilePathEdit_doubleClicked()
 }
 
 
+
+void FxItemPropertyWidget::on_findAudioFileButton_clicked()
+{
+	if (!FxItem::exists(cur_fxa)) return;
+
+	QString name = QFileInfo(cur_fxa->filePath()).fileName();
+	static QString dir = QFileInfo(cur_fxa->filePath()).absoluteDir().path();
+
+	QString newpath = QFileDialog::getOpenFileName(this, tr("Choose audio file"), QString("%1/%2").arg(dir,name));
+	if (newpath.isEmpty())
+		return;
+
+	if (cur_fxa->filePath() != newpath) {
+		cur_fxa->setFilePath(newpath);
+		cur_fxa->setModified(true);
+		audioFilePathEdit->setStyleSheet("");
+
+		dir = QFileInfo(newpath).absoluteDir().path();
+	}
+}

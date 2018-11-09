@@ -930,8 +930,11 @@ bool ScriptExecuter::executeFadeIn(FxScriptLine *line)
 			continue;
 
 		bool is_active = clonescene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN, fadein_time_ms);
-		if (is_active)
+		if (is_active) {
 			myApp.unitLight->setSceneActive(clonescene);
+		} else {
+			m_lastScriptError = tr("not active");
+		}
 		ok &= is_active;
 	}
 
@@ -979,7 +982,10 @@ bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
 				continue;
 
 			bool is_active = clonescene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, fadeout_ms);
-			ok &= is_active | fadeout_all;
+			if (! (is_active | fadeout_all) ) {
+				ok = false;
+				m_lastScriptError = tr("not active");
+			}
 		}
 	}
 

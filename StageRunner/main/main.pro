@@ -39,9 +39,9 @@ unix:!macx {
 	exists(/usr/include/SDL2/SDL.h) {
 		message ("Found SDL2 ...")
 		INCLUDEPATH += /usr/include/SDL2
-		DEFINES += USE_SDL
-		LIBS += -lSDL2
-		LIBS += -lSDL2_mixer
+#		DEFINES += USE_SDL
+#		LIBS += -lSDL2
+#		LIBS += -lSDL2_mixer
 	}
 }
 

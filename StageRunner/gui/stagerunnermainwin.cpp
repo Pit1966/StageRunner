@@ -704,6 +704,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			appCentral->unitFx->stopAllFxScripts();
 			appCentral->lightBlack(0);
 			appCentral->videoBlack(0);
+			appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
 			break;
 
 //		case Qt::Key_Q: {

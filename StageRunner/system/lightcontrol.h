@@ -52,6 +52,7 @@ public:
 	bool fillSceneFromInputUniverses(FxSceneItem *scene);
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
+	bool setYadiInOutMergeMode(quint32 mode);
 
 private:
 	void init();

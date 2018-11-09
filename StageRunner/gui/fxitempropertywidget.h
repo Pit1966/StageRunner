@@ -64,6 +64,8 @@ private slots:
 	void on_videoBlackAtEndCheck_clicked(bool checked);
 	void on_videoFilePathEdit_doubleClicked();
 
+	void on_findAudioFileButton_clicked();
+
 signals:
 	void modified(FxItem *fx);
 };

@@ -269,6 +269,12 @@ bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene)
 	return ok;
 }
 
+/**
+ * @brief LightControl::setYadiInOutMergeMode
+ * @param input
+ * @param mode 0: HTP, 1: 2: 3: force app output, 4: force dmx input
+ * @return
+ */
 bool LightControl::setYadiInOutMergeMode(quint32 input, quint32 mode)
 {
 	QLCIOPlugin *yadiplugin = myApp.pluginCentral->yadiPlugin();
@@ -286,6 +292,28 @@ bool LightControl::setYadiInOutMergeMode(quint32 input, quint32 mode)
 
 
 	return ok;
+}
+
+bool LightControl::setYadiInOutMergeMode(quint32 mode)
+{
+	QLCIOPlugin *yadiplugin = myApp.pluginCentral->yadiPlugin();
+	if (!yadiplugin)
+		return false;
+
+	quint32 universe = 0;
+	int incnt = yadiplugin->inputs().size();
+
+	for (int i=0; i<incnt; i++) {
+		bool ok = false;
+		QMetaObject::invokeMethod(yadiplugin, "setInOutMergeMode", Qt::DirectConnection,
+								  Q_RETURN_ARG(bool, ok),
+								  Q_ARG(quint32, i),
+								  Q_ARG(quint32, universe),
+								  Q_ARG(quint32, mode));
+
+	}
+
+	return true;
 }
 
 void LightControl::init()
