@@ -91,3 +91,49 @@ QRect QtStaticTools::stringToQRect(const QString &rs)
 
 	return rect;
 }
+
+/**
+ * @brief Split string into parts seperated by space char, but not if space is escaped by quotation or backslash
+ * @param parastr
+ * @return
+ */
+QStringList QtStaticTools::parameterStringSplit(const QString &parastr)
+{
+	QStringList finalparas;
+	QString para;
+
+	bool quote = false;		// is true, if quotation is active
+	QChar last_c;			// stores character parsed in last loop
+	for (int i=0; i<parastr.size(); i++) {
+		QChar c = parastr.at(i);
+		if (c == '\\') {	// found escape character
+			if (last_c == c) { // escaped escape char :-) -> add this
+				para += c;
+			}
+		}
+		else if (c == '"') {
+			if (last_c == '\\') {		// escaped quote
+				para += c;
+			} else {
+				quote = !quote;
+			}
+		}
+		else if (c == ' ') {					// found parameter seperator
+			if (quote || last_c == '\\') {		// if quote is active or last char was escape, we add this
+				para += c;
+			} else {
+				finalparas << para;
+				para.clear();
+			}
+		} else {
+			para += c;
+		}
+
+		last_c = c;
+	}
+
+	if (!para.isEmpty() && !quote)
+		finalparas << para;
+
+	return finalparas;
+}

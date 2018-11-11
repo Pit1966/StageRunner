@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QRect>
+#include <QStringList>
 
 class QtStaticTools
 {
@@ -16,6 +17,7 @@ public:
 	static QString msToTimeString(qint64 ms);
 	static QString qRectToString(const QRect rect);
 	static QRect stringToQRect(const QString &rs);
+	static QStringList parameterStringSplit(const QString &parastr);
 
 };
 

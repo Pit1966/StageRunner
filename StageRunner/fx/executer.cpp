@@ -629,7 +629,7 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 	QString returnparas;
 
 	// parse parameter string
-	QStringList tlist = paras.split(" ",QString::SkipEmptyParts);
+	QStringList tlist = QtStaticTools::parameterStringSplit(paras);
 
 	int searchmode = 0;
 
