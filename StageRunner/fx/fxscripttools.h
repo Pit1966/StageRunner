@@ -32,6 +32,8 @@ public:
 	ScriptKeyWord();
 	QString keyWord(SCRIPT::KEY_WORD keyword);
 	SCRIPT::KEY_WORD keyNumber(const QString &text);
+
+	QStringList keywordList() const {return m_keywordHash.keys();}
 };
 
 //-----------------------------------------------------------------------------------

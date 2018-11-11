@@ -19,7 +19,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="scriptEdit"/>
+    <widget class="ScriptEditWidget" name="scriptEdit"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -48,6 +48,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScriptEditWidget</class>
+   <extends>QTextEdit</extends>
+   <header>widgets/scripteditwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../gfx_ressource.qrc"/>
  </resources>

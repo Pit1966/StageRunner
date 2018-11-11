@@ -149,7 +149,9 @@ SOURCES += \
 	../gui/customwidget/psinfodialog.cpp \
 	../system/variantmapserializer.cpp \
     ../gui/customwidget/psdockwidget.cpp \
-    ../system/runguard.cpp
+    ../system/runguard.cpp \
+    ../widgets/scripteditwidget.cpp \
+    ../widgets/editormarginwidget.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -263,7 +265,9 @@ HEADERS  += \
 	../gui/customwidget/psinfodialog.h \
 	../system/variantmapserializer.h \
     ../gui/customwidget/psdockwidget.h \
-    ../system/runguard.h
+    ../system/runguard.h \
+    ../widgets/scripteditwidget.h \
+    ../widgets/editormarginwidget.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h
