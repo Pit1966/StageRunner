@@ -22,6 +22,7 @@ Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	, originFxItem(originFx)
 	, parentFxItem(0)
 	, eventTargetTimeMs(0)
+	, lastProgressTimeMs(0)
 	, isWaitingForAudio(false)
 	, myState(EXEC_IDLE)
 	, use_cnt(0)
@@ -48,6 +49,13 @@ void Executer::setIdString(const QString &str)
 bool Executer::processExecuter()
 {
 	return false;
+}
+
+/**
+ * @brief You may want to reimplement this function to perform progress calculation of the executer
+ */
+void Executer::processProgress()
+{
 }
 
 QString Executer::getIdString() const
@@ -588,6 +596,16 @@ bool ScriptExecuter::processExecuter()
 	return active;
 }
 
+void ScriptExecuter::processProgress()
+{
+	if (runTime.elapsed() > lastProgressTimeMs) {
+		lastProgressTimeMs += 50;
+		qint64 timeMs = runTime.elapsed() % m_script.execDuration();
+		int perMille = timeMs * 1000 / m_script.execDuration();
+		emit listProgressStepChanged(perMille, 0);
+	}
+}
+
 ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx)
 	: Executer(app_central,script)
 	, m_fxScriptItem(script)
@@ -595,10 +613,14 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 {
 	parentFxItem = parentFx;
 	FxScriptItem::rawToScript(script->rawScript(), m_script);
+
+	qDebug("new script executer: %s: duration: %llims",script->name().toLocal8Bit().data(),m_script.execDuration());
 }
 
 ScriptExecuter::~ScriptExecuter()
 {
+	emit listProgressStepChanged(0, 0);
+
 	while (!m_clonedSceneList.isEmpty()) {
 		FxSceneItem *scene = m_clonedSceneList.takeFirst();
 		if (!scene->isOnStageIntern() && !scene->isActive()) {
@@ -747,7 +769,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line)
 	bool ok = true;
 
 	const QString &cmd = line->command();
-	KEY_WORD key = FxScriptList::keywords.keyNumber(cmd);
+	KEY_WORD key = FxScriptLine::keywords.keyNumber(cmd);
 	switch (key) {
 	case KW_WAIT:
 		{

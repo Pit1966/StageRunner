@@ -56,6 +56,7 @@ void FxExecLoop::processPendingEvents()
 						exec->destroyLater();
 					}
 				}
+				exec->processProgress();
 				break;
 			default:
 				break;

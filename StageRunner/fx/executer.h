@@ -48,6 +48,7 @@ protected:
 	QString idString;
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
+	qint64 lastProgressTimeMs;					///< May get used by derived classes
 	bool isWaitingForAudio;
 	volatile STATE myState;
 
@@ -64,6 +65,7 @@ public:
 	inline virtual TYPE type() {return EXEC_BASE;}
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
+	virtual void processProgress();
 
 	void destroyLater();
 	bool activateProcessing();
@@ -175,6 +177,7 @@ protected:
 //---------------------------------------------------------------------------------
 class ScriptExecuter : public Executer
 {
+	Q_OBJECT
 protected:
 	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
 	FxScriptList m_script;
@@ -185,6 +188,7 @@ protected:
 public:
 	inline TYPE type() {return EXEC_SCRIPT;}
 	bool processExecuter();
+	void processProgress();
 
 protected:
 	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
@@ -202,6 +206,9 @@ protected:
 	bool executeYadiDMXMergeMode(FxScriptLine *line);
 	bool executeLoopExt(FxScriptLine *line);
 	bool executeGrapScene(FxScriptLine *line);
+
+signals:
+	void listProgressStepChanged(int step1, int step2);
 
 	friend class ExecCenter;
 };

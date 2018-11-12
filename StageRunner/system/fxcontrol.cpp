@@ -289,8 +289,8 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxscript);
 	if (parentwid) {
 		/// @todo script
-		/// FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
-//		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
+		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
 	}
 
 	// Determine the FxScriptWidget that is the editing widget of the current script

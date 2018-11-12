@@ -42,9 +42,14 @@ public:
 
 class FxScriptLine
 {
+public:
+	static ScriptKeyWord keywords;
+
 private:
+	SCRIPT::KEY_WORD m_cmdKey;
 	int m_lineNum;
 	int m_loopCount;
+	int m_execDurationMs;
 	QString m_cmd;
 	QString m_paras;
 
@@ -58,6 +63,10 @@ public:
 	int loopCount() const {return m_loopCount;}
 	void incLoopCount() {m_loopCount++;}
 	void clearLoopCount() {m_loopCount = 0;}
+	int execDuration();
+
+private:
+	void calculateDuration();
 
 	friend class FxScriptList;
 };
@@ -68,8 +77,8 @@ public:
 
 class FxScriptList : protected QList<FxScriptLine>
 {
-public:
-	static ScriptKeyWord keywords;
+private:
+	qint64 m_execDurationMs;
 
 public:
 	FxScriptList();
@@ -78,6 +87,10 @@ public:
 	void append(const FxScriptLine &scriptLine);
 	inline int size() const {return QList::size();}
 	FxScriptLine *at(int lineNum);
+	qint64 execDuration();
+
+private:
+	void calculateDuration();
 };
 
 #endif // FXSCRIPTTOOLS_H

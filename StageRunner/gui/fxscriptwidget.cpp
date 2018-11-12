@@ -59,7 +59,7 @@ FxScriptWidget::FxScriptWidget(FxScriptItem *fxscr, QWidget *parent)
 	setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	scriptEdit->addKeywords(FxScriptList::keywords.keywordList());
+	scriptEdit->addKeywords(FxScriptLine::keywords.keywordList());
 
 	setFxScriptContent(fxscr);
 }
