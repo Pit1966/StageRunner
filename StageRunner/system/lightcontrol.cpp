@@ -281,6 +281,11 @@ bool LightControl::setYadiInOutMergeMode(quint32 input, quint32 mode)
 	if (!yadiplugin)
 		return false;
 
+	if (input >= quint32(yadiplugin->inputs().size())) {
+		LOGERROR(tr("Yadi input #%1 not available for MERGEMODE").arg(input+1));
+		return false;
+	}
+
 	quint32 universe = 0;
 
 	bool ok = false;

@@ -540,6 +540,11 @@ bool YadiDMXUSBOut::setInOutMergeMode(quint32 input, quint32 universe, quint32 m
 
 	QMutexLocker lock(accessMutex);
 
+	if (input >= quint32(input_devices.size())) {
+		qWarning("Yadi: Input #%d not available",input+1);
+		return false;
+	}
+
 	// qDebug() << "Yadi: set InOut merge mode:" << input << universe << mode;
 
 	YadiDevice *yadi = YadiDeviceManager::getDevice(input_devices.at(input),YadiDevice::FL_INPUT_UNIVERSE);
