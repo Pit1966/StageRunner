@@ -17,6 +17,7 @@
 #include "executer.h"
 #include "audiocontrol.h"
 #include "dmxchannel.h"
+#include "qtstatictools.h"
 
 
 LightControl::LightControl(AppCentral &app_central)
@@ -126,9 +127,16 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
 		if (active) {
 			setSceneActive(scene);
+			LOGTEXT(tr("<font color=green>Start FADE IN scene %1</font> Duration: %2")
+					.arg(scene->name())
+					.arg(QtStaticTools::msToTimeString(scene->fadeInTime())));
+
 		}
 	} else {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
+		LOGTEXT(tr("<font color=green>Start FADE OUT scene %1</font> Duration: %2")
+				.arg(scene->name())
+				.arg(QtStaticTools::msToTimeString(scene->fadeOutTime())));
 	}
 
 	return active;

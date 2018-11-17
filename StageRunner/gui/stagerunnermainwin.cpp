@@ -677,9 +677,9 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 	if (event->type() == QEvent::KeyPress) {
 		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
+		bool isAutoRepeat = ev->isAutoRepeat();
 
-		if (debug)
-			DEBUGTEXT("Key pressed: #%d -> '%s'",key, QtStaticTools::keyToString(key,activeKeyModifiers).toLatin1().data());
+		LOGTEXT(tr("Key pressed: #%1 -> '%2'").arg(key).arg(QtStaticTools::keyToString(key,activeKeyModifiers)));
 
 		switch (key) {
 		case Qt::Key_Shift:
@@ -689,22 +689,28 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			activeKeyModifiers |= Qt::CTRL;
 			break;
 		case Qt::Key_Space:
-			appCentral->unitAudio->storeCurrentSeekPositions();
-			appCentral->fadeoutAllFxAudio();
+			if (!isAutoRepeat) {
+				appCentral->unitAudio->storeCurrentSeekPositions();
+				appCentral->fadeoutAllFxAudio();
+			}
 			break;
 		case Qt::Key_Escape:
-			appCentral->unitAudio->storeCurrentSeekPositions();
-			appCentral->stopAllFxAudio();
+			if (!isAutoRepeat) {
+				appCentral->unitAudio->storeCurrentSeekPositions();
+				appCentral->stopAllFxAudio();
+			}
 			break;
 		case Qt::Key_Delete:
 			appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());
 			break;
 		case Qt::Key_Backspace:
-			appCentral->unitFx->stopAllFxSequences();
-			appCentral->unitFx->stopAllFxScripts();
-			appCentral->lightBlack(0);
-			appCentral->videoBlack(0);
-			appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
+			if (!isAutoRepeat) {
+				appCentral->unitFx->stopAllFxSequences();
+				appCentral->unitFx->stopAllFxScripts();
+				appCentral->lightBlack(0);
+				appCentral->videoBlack(0);
+				appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
+			}
 			break;
 
 //		case Qt::Key_Q: {
@@ -726,12 +732,14 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 					return qApp->eventFilter(obj, event);
 				}
 
-				QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
-				if (fxlist.size()) {
-					for (int t=0; t<fxlist.size(); t++) {
-						appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, nullptr);
+				if (!isAutoRepeat) {
+					QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
+					if (fxlist.size()) {
+						for (int t=0; t<fxlist.size(); t++) {
+							appCentral->executeFxCmd(fxlist.at(t), CMD_FX_START, nullptr);
+						}
+						// fxListWidget->selectFx(fx);
 					}
-					// fxListWidget->selectFx(fx);
 				}
 			}
 			break;
