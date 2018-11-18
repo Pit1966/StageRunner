@@ -30,6 +30,7 @@ public:
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
+	bool dmxInputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 
 public:
@@ -62,6 +63,7 @@ signals:
 	void sceneFadeChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void sceneCueReady(FxSceneItem *scene);
 	void outputUniverseChanged(int universe, const QByteArray &dmxValues);
+	void inputUniverseChanged(int universe, const QByteArray &dmxValues);
 	void audioSlotVolChanged(int slot, int value);
 
 public slots:

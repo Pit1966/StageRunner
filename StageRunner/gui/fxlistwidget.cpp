@@ -96,6 +96,7 @@ void FxListWidget::setFxList(FxList *fxlist)
 
 	int col_name = -1;
 	int col_id = -1;
+	int col_hold = -1;
 
 	QStringList header;
 	if (fxlist->showColumnKeyFlag) {
@@ -120,7 +121,8 @@ void FxListWidget::setFxList(FxList *fxlist)
 		header << tr("Move");
 	}
 	if (fxlist->showColumnHoldFlag) {
-		header << tr("Hold");
+		col_hold = header.size();
+		header << tr(" Hold ");
 	}
 	if (fxlist->showColumnFadeoutFlag) {
 		header << tr("FadeOUT");
@@ -139,23 +141,37 @@ void FxListWidget::setFxList(FxList *fxlist)
 	key_font.setPointSize(14);
 	key_font.setBold(true);
 
+
 	for (int t=0; t<rows; t++) {
 		FxItem *fx = fxlist->at(t);
 		create_fxlist_row(fx, fxlist, t);
 		updateFxListRow(fx, fxlist, t);
 	}
 
-	fxTable->resizeColumnsToContents();
+	// fxTable->resizeColumnsToContents();
+	resizeTableElements();
 
 	QHeaderView *hview = fxTable->horizontalHeader();
 	if (col_name >= 0)
 		hview->setSectionResizeMode(col_name,QHeaderView::Stretch);
 	if (col_id >= 0)
 		hview->setSectionResizeMode(col_id,QHeaderView::ResizeToContents);
+	if (col_hold >= 0)
+		hview->setSectionResizeMode(col_hold,QHeaderView::ResizeToContents);
 
 	autoProceedCheck->setChecked(fxlist->autoProceedSequence());
 	loopCheck->setChecked(fxlist->isLooped());
 	randomCheckBox->setChecked(fxlist->isRandomized());
+
+	// resizeTableElements();
+}
+
+void FxListWidget::resizeTableElements()
+{
+	QHeaderView *hview = fxTable->horizontalHeader();
+	for (int t=0; t<hview->count(); t++) {
+		hview->setSectionResizeMode(t,QHeaderView::ResizeToContents);
+	}
 }
 
 

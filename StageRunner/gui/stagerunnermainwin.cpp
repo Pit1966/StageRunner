@@ -85,6 +85,8 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	actionVirtualDmxOutput->setChecked(false);
 	virtDmxWidget->setVisible(false);
 	virtDmxWidget->setAutoBarsEnabled(true);
+	virtDmxWidget->setBarsBordersEnabled(false);
+	virtDmxWidget->setSecondBarGroupEnabled(true);
 
 	// For external access
 	logWidget = logEdit;
@@ -145,6 +147,7 @@ void StageRunnerMainWin::initConnects()
 
 	// Light Control -> virt DMX Monitor
 	connect(appCentral->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),virtDmxWidget,SLOT(setDmxValues(int,QByteArray)));
+	connect(appCentral->unitLight,SIGNAL(inputUniverseChanged(int,QByteArray)),virtDmxWidget,SLOT(setDmxValuesSec(int,QByteArray)));
 
 	// Audio Control -> Project FxListWidget
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));

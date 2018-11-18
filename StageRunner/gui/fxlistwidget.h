@@ -42,6 +42,7 @@ public:
 	FxListWidget(QWidget *parent = 0);
 	~FxListWidget();
 	void setFxList(FxList *fxlist);
+	void resizeTableElements();
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
 	void setLoop(int loops);

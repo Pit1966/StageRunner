@@ -110,8 +110,8 @@ void LightLoop::processPendingEvents()
 		}
 	}
 
-	// For the dmx channel data array should contain valid dmx data for stage output
-	// Checked if the output has changed and give it to the output modules if it has changed
+	// The dmx channel data array should contain valid dmx data for stage output
+	// Check if the output has changed and forward it to the output modules if it has changed
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		for (int chan=0; chan<512; chan++) {
 			if (dmxtout[t].at(chan) != lightCtrlRef.dmxOutputValues[t].at(chan)) {

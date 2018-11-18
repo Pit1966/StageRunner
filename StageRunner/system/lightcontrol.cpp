@@ -82,11 +82,17 @@ bool LightControl::addFxListToControlLoop(const FxList *list)
 	return ok;
 }
 
+
+/**
+ * @brief This function sends universe output data to the connected plugins and emits signals for both output
+ * universe changed or input universe changed
+ * @return true, if something has been sent to the outputs (in the meaning of data has changed)
+ */
 bool LightControl::sendChangedDmxData()
 {
-	/// @implement me: Plugin <-> output <-> universe Zuordnung
 	bool sent = false;
 
+	// Send output universe data
 	for (int uni=0; uni<MAX_DMX_UNIVERSE; uni++) {
 		if (dmxOutputChanged[uni]) {
 			QLCIOPlugin *plugin;
@@ -101,6 +107,14 @@ bool LightControl::sendChangedDmxData()
 				}
 			}
 			dmxOutputChanged[uni] = false;
+		}
+	}
+
+	// Emit input universe data changed signal if something has changed
+	for (int uni=0; uni<MAX_DMX_UNIVERSE; uni++) {
+		if (dmxInputChanged[uni]) {
+			emit inputUniverseChanged(uni,dmxInputValues[uni]);
+			dmxInputChanged[uni] = false;
 		}
 	}
 
@@ -122,6 +136,12 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 	if (scene->preDelay() == -1) {
 		SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene,scene->parentFxItem());
 		active = exec->activateProcessing();
+	}
+	else if (scene->fadeInTime() > 0 && scene->holdTime() > 0 && scene->fadeOutTime() > 0) {
+		SceneExecuter *exec = myApp.execCenter->newSceneExecuter(scene,scene->parentFxItem());
+		active = exec->activateProcessing();
+		LOGTEXT(tr("<font color=green>Start FADE IN -> HOLD -> FADE OUT scene %1</font>, since all values are set!")
+				.arg(scene->name()));
 	}
 	else if (!scene->isOnStageIntern()) {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
@@ -333,6 +353,7 @@ void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		dmxOutputChanged[t] = true;
+		dmxInputChanged[t] = true;
 		dmxOutputValues[t].fill(0, 512);
 		dmxInputValues[t].fill(0, 512);
 	}
@@ -387,7 +408,10 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 	if (universe >= MAX_DMX_UNIVERSE || channel > 511) return;
 
 	// store incoming value to dmx input universe array.
-	dmxInputValues[universe][channel] = value;
+	if (dmxInputValues[universe][channel] != char(value)) {
+		dmxInputValues[universe][channel] = value;
+		dmxInputChanged[universe] = true;
+	}
 
 	if (myApp.isInputAssignMode())
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);

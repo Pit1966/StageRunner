@@ -17,9 +17,14 @@ void DmxMonitor::init()
 	bars = 0;
 	used_bars = 0;
 	m_myUniverse = 0;
-	m_autoBarsEnabled = false;
 	memset(bar_value,0,sizeof(int) * 512);
+	memset(bar_valueSec,0,sizeof(int) * 512);
 	m_frameRateUpdateTimer.start();
+	m_flags = F_ENABLE_BAR_BORDERS | F_ENABLE_BAR_TEXTS;
+
+	m_barsBorderColor = Qt::blue;
+	m_barsColor = Qt::white;
+	m_barsSecColor = Qt::darkGreen;
 }
 
 void DmxMonitor::closeEvent(QCloseEvent *)
@@ -42,6 +47,21 @@ void DmxMonitor::setChannelPeakBars(int num)
 	update();
 }
 
+void DmxMonitor::setAutoBarsEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_AUTO_BARS : m_flags &= ~F_ENABLE_AUTO_BARS;
+}
+
+void DmxMonitor::setBarsBordersEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_BAR_BORDERS : m_flags &= ~F_ENABLE_BAR_BORDERS;
+}
+
+void DmxMonitor::setSecondBarGroupEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_SECOND_BAR_GROUP : m_flags &= ~F_ENABLE_SECOND_BAR_GROUP;
+}
+
 void DmxMonitor::paintEvent(QPaintEvent *)
 {
 	int xsize = width();
@@ -49,33 +69,54 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 
 	QPainter paint(this);
 	// Hintergrund löschen
-	paint.setPen(Qt::blue);
-	paint.setBrush(Qt::white);
 	paint.eraseRect(0,0,xsize,ysize);
 
 	paint.translate(0,ysize-1);
 	paint.scale(1,-1);
 
-
 	if (bars) {
 		int bar_width = xsize / bars;
 		int bar_height = ysize - 20;
 
-		// Balken
-		paint.setPen(Qt::blue);
+		// Second bar group
+		if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
+			paint.setBrush(m_barsSecColor);
+			paint.setPen(Qt::NoPen);
+
+			for (int t=0; t< bars; t++) {
+				if (t >= used_bars) {
+					paint.setPen(Qt::red);
+				}
+				int h = bar_height * bar_valueSec[t] / 255;
+				paint.drawRect(t * bar_width + 1, 0, bar_width/2 - 1, h);
+			}
+		}
+
+		// Main bar group
+		paint.setBrush(m_barsColor);
+		if (m_flags & F_ENABLE_BAR_BORDERS) {
+			paint.setPen(m_barsBorderColor);
+		} else {
+			paint.setPen(Qt::NoPen);
+		}
 		for (int t=0; t< bars; t++) {
 			if (t >= used_bars) {
 				paint.setPen(Qt::red);
 			}
 			int h = bar_height * bar_value[t] / 255;
-			paint.drawRect(t * bar_width + 1, 0, bar_width - 2, h);
+			if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
+				paint.drawRect(t * bar_width + bar_width/2, 0, bar_width/2 - 2, h);
+			} else {
+				paint.drawRect(t * bar_width + 1, 0, bar_width - 2, h);
+			}
 		}
-		// Texte
-		if (bar_width > 14) {
+
+		// Main texts
+		if (bar_width > 14 && (m_flags&F_ENABLE_BAR_TEXTS)) {
 			int yp = height();
 			paint.resetTransform();
 			for (int t=0; t< bars; t++) {
-				if (m_autoBarsEnabled) {
+				if (m_flags & F_ENABLE_AUTO_BARS) {
 					paint.setPen(Qt::white);
 					QString val = QString("%1").arg(t+1,3,10);
 					QRect rect = paint.boundingRect(0,18,bar_width,12,Qt::AlignCenter,val);
@@ -123,13 +164,39 @@ void DmxMonitor::setDmxValues(int universe, const QByteArray &dmxValues)
 			break;
 
 		uchar val = dmxValues.at(t);
-		if (m_autoBarsEnabled && val > 0 && t >= bars) {
-			bars = ((t/12)+1) * 12 + 1;
+		if ( (m_flags&F_ENABLE_AUTO_BARS) && val > 0 && t >= bars) {
+			bars = ((t/12)+1) * 12;
 			used_bars = bars;
 		}
 
 		if (bar_value[t] != val) {
 			bar_value[t] = val;
+			modified = true;
+		}
+	}
+
+	if (modified)
+		update();
+}
+
+void DmxMonitor::setDmxValuesSec(int universe, const QByteArray &dmxValues)
+{
+	if (universe != m_myUniverse)
+		return;
+
+	bool modified = false;
+	for (int t=0; t<dmxValues.size(); t++) {
+		if (t>=512)
+			break;
+
+		uchar val = dmxValues.at(t);
+		if ( (m_flags&F_ENABLE_AUTO_BARS) && val > 0 && t >= bars) {
+			bars = ((t/12)+1) * 12;
+			used_bars = bars;
+		}
+
+		if (bar_valueSec[t] != val) {
+			bar_valueSec[t] = val;
 			modified = true;
 		}
 	}

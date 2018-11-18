@@ -2,6 +2,10 @@
     man SAVE DMX CONFIG drücken muss, nachdem man das Universe für ein Plugin eingestellt hat
 - IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht
 
+Fixme:
+Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
+einfadens drücken
+
 Features:
 
 Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten

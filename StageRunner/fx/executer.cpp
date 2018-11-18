@@ -600,8 +600,11 @@ void ScriptExecuter::processProgress()
 {
 	if (runTime.elapsed() > lastProgressTimeMs) {
 		lastProgressTimeMs += 50;
-		qint64 timeMs = runTime.elapsed() % m_script.execDuration();
-		int perMille = timeMs * 1000 / m_script.execDuration();
+		int perMille = 0;
+		if (m_script.execDuration() > 0) {
+			qint64 timeMs = runTime.elapsed() % m_script.execDuration();
+			perMille = timeMs * 1000 / m_script.execDuration();
+		}
 		emit listProgressStepChanged(perMille, 0);
 	}
 }
