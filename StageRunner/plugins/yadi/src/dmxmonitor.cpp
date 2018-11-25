@@ -66,6 +66,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 {
 	int xsize = width();
 	int ysize = height();
+	int legendYSize = ysize < 40 ? 0 : 20;
 
 	QPainter paint(this);
 	// Hintergrund löschen
@@ -76,7 +77,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 
 	if (bars) {
 		int bar_width = xsize / bars;
-		int bar_height = ysize - 20;
+		int bar_height = ysize - legendYSize;
 
 		// Second bar group
 		if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
@@ -112,7 +113,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 		}
 
 		// Main texts
-		if (bar_width > 14 && (m_flags&F_ENABLE_BAR_TEXTS)) {
+		if (legendYSize > 0 && (m_flags&F_ENABLE_BAR_TEXTS)) {
 			int yp = height();
 			paint.resetTransform();
 			for (int t=0; t< bars; t++) {
@@ -135,8 +136,10 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 	}
 
 	paint.resetTransform();
-	paint.setPen(Qt::white);
-	paint.drawText(5,20, m_displayedFrameRateMsg);
+	if (legendYSize > 0) {
+		paint.setPen(Qt::white);
+		paint.drawText(5,20, m_displayedFrameRateMsg);
+	}
 }
 
 void DmxMonitor::setValueInBar(quint32 bar, uchar value)

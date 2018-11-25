@@ -4,8 +4,9 @@
 #include <QWriteLocker>
 #include <QPainter>
 
-#define READLOCK QReadLocker(*rwlock);Q_UNUSED(rwlock);
-#define WRITELOCK QWriteLocker(*rwlock);Q_UNUSED(rwlock);
+#define READLOCK QReadLocker lock(rwlock);Q_UNUSED(lock);
+#define WRITELOCK QWriteLocker lock(rwlock);Q_UNUSED(lock);
+#define UNLOCK lock.unlock();
 
 SceneStatusWidget::SceneStatusWidget(QWidget *parent)
 	: QWidget(parent)
@@ -26,13 +27,15 @@ bool SceneStatusWidget::appendScene(FxSceneItem *scene)
 {
 	WRITELOCK;
 
-	if (scene_hash.contains(scene))
-		return updateScene(scene);
+	if (!scene_hash.contains(scene)) {
 
-	SceneStatusListItem *item = new SceneStatusListItem(scene,sceneListWidget);
-	item->setText(scene->name());
+		SceneStatusListItem *item = new SceneStatusListItem(scene,sceneListWidget);
+		item->setText(scene->name());
 
-	scene_hash.insert(scene,item);
+		scene_hash.insert(scene,item);
+	}
+
+	UNLOCK;
 
 	updateScene(scene);
 	return true;
@@ -108,15 +111,18 @@ bool SceneStatusWidget::propagateScene(FxSceneItem *scene)
 		// Remove the scene from list if it is not on stage, live or active
 		// Otherwise update the Color in the list view
 		if (!scene->isVisible()) {
+			UNLOCK;
 			removeOrDeactivateScene(scene);
 			return false;
 		} else {
+//			UNLOCK;
 			updateScene(scene);
 			return true;
 		}
 		return false;
 	} else {
 		if (scene->isVisible()) {
+			UNLOCK;
 			return appendScene(scene);
 		} else {
 			return false;
