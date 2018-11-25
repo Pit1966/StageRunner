@@ -4,6 +4,9 @@ TEMPLATE = app
 LANGUAGE = C++
 TARGET   = stagerunner
 
+
+# PKG_CONFIG = /usr/local/bin/pkg-config   #mac
+
 # CONFIG += static
 
 #CONFIG += c++11

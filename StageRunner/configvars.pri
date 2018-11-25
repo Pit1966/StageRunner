@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.0.3
+APPVERSION = V0.9.0.4
 APP_MILESTONE = Seelenbrecher
 APP_PRODUCER = 2018 Stonechip Entertainment
 APP_ORG_STRING = Stonechip

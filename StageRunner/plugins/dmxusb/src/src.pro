@@ -145,8 +145,10 @@ TRANSLATIONS += DMX_USB_ja_JP.ts
 macx {
     # This must be after "TARGET = " and before target installation so that
     # install_name_tool can be run before target installation
-    include(../../../platforms/macos/nametool.pri)
-    nametool.commands += && $$pkgConfigNametool(libftdi, libftdi.1.dylib)
+    CONFIG(libftdi) {
+        include(../../../platforms/macos/nametool.pri)
+        nametool.commands += && $$pkgConfigNametool(libftdi, libftdi.1.dylib)
+    }
 }
 
 # Plugin installation

@@ -27,41 +27,6 @@ void DmxMonitor::init()
 	m_barsSecColor = Qt::darkGreen;
 }
 
-void DmxMonitor::closeEvent(QCloseEvent *)
-{
-	emit monitorClosed(this);
-}
-
-void DmxMonitor::setChannelPeakBars(int num)
-{
-	if (num < 0 || num > 512) num = 512;
-	bars = num;
-	used_bars = num;
-	memset(bar_value,0,sizeof(int)*512);
-
-	if (bars < 48) {
-		setMinimumWidth(bars * 20);
-	}
-	setMaximumWidth(bars * 20);
-
-	update();
-}
-
-void DmxMonitor::setAutoBarsEnabled(bool enable)
-{
-	enable ? m_flags |= F_ENABLE_AUTO_BARS : m_flags &= ~F_ENABLE_AUTO_BARS;
-}
-
-void DmxMonitor::setBarsBordersEnabled(bool enable)
-{
-	enable ? m_flags |= F_ENABLE_BAR_BORDERS : m_flags &= ~F_ENABLE_BAR_BORDERS;
-}
-
-void DmxMonitor::setSecondBarGroupEnabled(bool enable)
-{
-	enable ? m_flags |= F_ENABLE_SECOND_BAR_GROUP : m_flags &= ~F_ENABLE_SECOND_BAR_GROUP;
-}
-
 void DmxMonitor::paintEvent(QPaintEvent *)
 {
 	int xsize = width();
@@ -71,6 +36,8 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 	QPainter paint(this);
 	// Hintergrund löschen
 	paint.eraseRect(0,0,xsize,ysize);
+
+	paint.fillRect(0,legendYSize,xsize,ysize-legendYSize,palette().base().color());
 
 	paint.translate(0,ysize-1);
 	paint.scale(1,-1);
@@ -139,6 +106,59 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 	if (legendYSize > 0) {
 		paint.setPen(Qt::white);
 		paint.drawText(5,20, m_displayedFrameRateMsg);
+	}
+}
+
+void DmxMonitor::closeEvent(QCloseEvent *)
+{
+	emit monitorClosed(this);
+}
+
+void DmxMonitor::mouseDoubleClickEvent(QMouseEvent *)
+{
+	setSmallHeightEnabled(!(m_flags&F_SMALL_HEIGHT));
+}
+
+void DmxMonitor::setChannelPeakBars(int num)
+{
+	if (num < 0 || num > 512) num = 512;
+	bars = num;
+	used_bars = num;
+	memset(bar_value,0,sizeof(int)*512);
+
+	if (bars < 48) {
+		setMinimumWidth(bars * 20);
+	}
+	setMaximumWidth(bars * 20);
+
+	update();
+}
+
+void DmxMonitor::setAutoBarsEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_AUTO_BARS : m_flags &= ~F_ENABLE_AUTO_BARS;
+}
+
+void DmxMonitor::setBarsBordersEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_BAR_BORDERS : m_flags &= ~F_ENABLE_BAR_BORDERS;
+}
+
+void DmxMonitor::setSecondBarGroupEnabled(bool enable)
+{
+	enable ? m_flags |= F_ENABLE_SECOND_BAR_GROUP : m_flags &= ~F_ENABLE_SECOND_BAR_GROUP;
+}
+
+void DmxMonitor::setSmallHeightEnabled(bool enable)
+{
+	if ( (m_flags & F_SMALL_HEIGHT) != enable) {
+		if (enable) {
+			m_flags |= F_SMALL_HEIGHT;
+			setMaximumHeight(25);
+		} else {
+			m_flags &= ~F_SMALL_HEIGHT;
+			setMaximumHeight(20000);
+		}
 	}
 }
 

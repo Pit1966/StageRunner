@@ -56,6 +56,5 @@ void UserSettings::init()
 	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,15);
 	addExistingVar(pIsDarkGuiTheme,"IsDarkGuiTheme",true);
-
-
+	addExistingVar(pShowVirtualDMXMonitor,"ShowVirtualDMXMonitor",false);
 }

@@ -1,8 +1,10 @@
-LIBUSB0_DIR      = $$system("pkg-config --variable libdir libusb")
+PKG_CONFIG = /usr/local/bin/pkg-config
+
+LIBUSB0_DIR      = $$system("$$PKG_CONFIG --variable libdir libusb")
 LIBUSB0_FILE     = libusb-0.1.4.dylib
 LIBUSB0_FILEPATH = $$LIBUSB0_DIR/$$LIBUSB0_FILE
 
-LIBUSB1_DIR      = $$system("pkg-config --variable libdir libusb-1.0")
+LIBUSB1_DIR      = $$system("$$PKG_CONFIG --variable libdir libusb-1.0")
 LIBUSB1_FILE     = libusb-1.0.0.dylib
 LIBUSB1_FILEPATH = $$LIBUSB1_DIR/$$LIBUSB1_FILE
 

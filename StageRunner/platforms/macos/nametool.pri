@@ -3,6 +3,9 @@
 # for the subproject's $$TARGET to replace references to some libraries 
 # with paths within the application bundle.
 
+
+PKG_CONFIG = /usr/local/bin/pkg-config
+
 # Libraries
 contains(TEMPLATE, lib) {
     OUTFILE = libTARGET.dylib
@@ -22,7 +25,7 @@ include(libusb-nametool.pri)
 #############################################################
 defineReplace(pkgConfigNametool) {
 
-    SYSLIB_DIR = $$system("pkg-config --variable libdir $${1}")
+    SYSLIB_DIR = $$system("$$PKG_CONFIG --variable libdir $${1}")
 
     return(install_name_tool -change $$SYSLIB_DIR/$$2 \
             @executable_path/../$$LIBSDIR/$$2 $$OUTFILE)

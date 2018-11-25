@@ -12,10 +12,11 @@ class DmxMonitor : public QWidget
 public:
 	enum FLAGS {
 		F_NONE = 0,
-		F_ENABLE_AUTO_BARS = 1<<0,			///< If set, the used bar count will automatically set to the hightest bar number with a value > 0
-		F_ENABLE_BAR_BORDERS = 1<<1,				///< If set (default), the bars will appear with a thin margin
-		F_ENABLE_SECOND_BAR_GROUP = 1<<2,	///< enable a second bar group
-		F_ENABLE_BAR_TEXTS = 1<<3
+		F_ENABLE_AUTO_BARS = 1<<0,				///< If set, the used bar count will automatically set to the hightest bar number with a value > 0
+		F_ENABLE_BAR_BORDERS = 1<<1,			///< If set (default), the bars will appear with a thin margin
+		F_ENABLE_SECOND_BAR_GROUP = 1<<2,		///< enable a second bar group
+		F_ENABLE_BAR_TEXTS = 1<<3,
+		F_SMALL_HEIGHT = 1<<4
 	};
 
 private:
@@ -39,11 +40,13 @@ public:
 	void setAutoBarsEnabled(bool enable);
 	void setBarsBordersEnabled(bool enable);
 	void setSecondBarGroupEnabled(bool enable);
+	void setSmallHeightEnabled(bool enable);
 
-	void paintEvent(QPaintEvent *);
 private:
 	void init();
+	void paintEvent(QPaintEvent *);
 	void closeEvent(QCloseEvent *);
+	void mouseDoubleClickEvent(QMouseEvent *event);
 
 public slots:
 	void setValueInBar(quint32 bar, uchar value);

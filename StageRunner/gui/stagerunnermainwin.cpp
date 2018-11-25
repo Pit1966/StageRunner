@@ -309,6 +309,11 @@ void StageRunnerMainWin::init()
  */
 void StageRunnerMainWin::initAppDefaults()
 {
+	if (appCentral->userSettings->pShowVirtualDMXMonitor) {
+		virtDmxWidget->show();
+		virtDmxWidget->setSmallHeightEnabled(true);
+	}
+
 	restore_window();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
@@ -1043,4 +1048,6 @@ void StageRunnerMainWin::on_loadUniverseButton_clicked()
 void StageRunnerMainWin::on_actionVirtualDmxOutput_triggered(bool checked)
 {
 	virtDmxWidget->setVisible(checked);
+	virtDmxWidget->setSmallHeightEnabled(true);
+	appCentral->userSettings->pShowVirtualDMXMonitor = checked;
 }
