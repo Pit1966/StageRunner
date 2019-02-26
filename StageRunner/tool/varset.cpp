@@ -283,11 +283,19 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 								}
 								if (item) {
 									varsetlist->append(item);
-									if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
-										return -1;
-									} else {
-										return 0;
+									int err = item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy);
+									FxItem *oitem = FxItem::checkItemUniqueId(item);
+									if (oitem) {
+										LOGERROR(QObject::tr("Loaded Fx '%1' has already used ID (%2) -> Generate new ID for already existing item: '%3'")
+												 .arg(item->name())
+												 .arg(item->id())
+												 .arg(oitem->name()));
+										oitem->generateNewID();
 									}
+									// qDebug() << "Loaded item with ID" << item->id() << "init with" << item->initID();
+									if (err == -1)
+										return err;
+									return 0;
 								}
 							}
 							else if (var->contextClass == PrefVarCore::DMX_CHANNEL_PROPERTY) {

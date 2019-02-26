@@ -115,6 +115,8 @@ public:
 	void postLoadProcess();
 	bool postLoadResetScenes();
 
+	bool recreateFxIDs(int from);
+
 private:
 	void init();
 

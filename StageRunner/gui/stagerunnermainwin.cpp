@@ -1005,6 +1005,7 @@ void StageRunnerMainWin::on_saveTemplatesButton_clicked()
 void StageRunnerMainWin::on_loadTemplatesButton_clicked()
 {
 	appCentral->templateFxList->fileLoad(appCentral->userSettings->pFxTemplatePath);
+	appCentral->templateFxList->fxList()->recreateFxIDs(11000);
 	templateWidget->refreshList();
 }
 

@@ -358,11 +358,13 @@ void LightControl::init()
 		dmxInputValues[t].fill(0, 512);
 	}
 	// initialize the hidden scene that will catch all scanner events.
+	FxItem::setLowestID(10000);
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		hiddenScannerScenes[t] = new FxSceneItem;
 		hiddenScannerScenes[t]->setTubeCount(512);
 		hiddenScannerScenes[t]->setName(QString("ScanMove%1").arg(t+1));
 	}
+	FxItem::setLowestID(1);
 
 	lightLoopInterface = new LightLoopThreadInterface(*this);
 	connect(lightLoopInterface,SIGNAL(wantedDeleteFxScene(FxSceneItem*)),&myApp,SLOT(deleteFxSceneItem(FxSceneItem*)));

@@ -46,10 +46,12 @@ class FxItem : public VarSet
 private:
 	static QList<FxItem*>*global_fx_list;
     static QMutex global_fx_lock;
+	static qint32 m_lowestIdForGenerator;
 
 protected:
 	QAtomicInt refCount;
 	qint32 myId;
+	qint32 myInitId;							// Id, first assigned at object initialisation. the final ID (myID) may change later. e.g. after load
 	qint32 myFxType;
 	QString myName;
 	QString myFile;
@@ -78,7 +80,9 @@ public:
 	static bool exists(FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
 	static FxItem * findFxById(qint32 id);
+	static FxItem *checkItemUniqueId(FxItem *item);
     static QList<FxItem*> findFxByName(const QString &name, FxSearchMode mode = FXSM_EXACT);
+	static void setLowestID(int lowid) {m_lowestIdForGenerator = lowid;}
 
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
@@ -90,10 +94,13 @@ public:
 
 	FxItem * parentFxItem();
 
+	int generateNewID(int from = 0);
+
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
 	void setName(const QString &name);
 	inline int id() const {return myId;}
+	inline int initID() const {return myInitId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
 	void setKeyCode(int code);
@@ -130,7 +137,7 @@ public:
 
 private:
 	void init();
-	int init_generate_id();
+	int init_generate_id(int from = 0);
 
 	friend class FxList;
 	friend class FxItemTool;

@@ -84,6 +84,7 @@ public:
 	void unselect();
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool stopFxAudio();
+	bool pauseFxAudio(bool state);
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
 	void setVolume(qreal vol);

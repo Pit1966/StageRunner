@@ -258,6 +258,25 @@ bool FxList::postLoadResetScenes()
 	return was_on_stage;
 }
 
+bool FxList::recreateFxIDs(int from)
+{
+	for (FxItem *fx : m_fxList.nativeList()) {
+		fx->myId = 0;
+	}
+
+	bool ok = true;
+
+	for (FxItem *fx : m_fxList.nativeList()) {
+		int newid = fx->generateNewID(from);
+		if (from != newid)
+			ok = false;
+
+		from++;
+	}
+
+	return ok;
+}
+
 
 /**
  * @brief Find the follower of an arbitrary FX entry in the list

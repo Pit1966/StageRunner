@@ -51,7 +51,7 @@ void AudioPlayer::start(int loops)
 
 	QMediaPlayer::play();
 
-	LOGTEXT(tr("Play experimental audio: %1 (%2)")
+	LOGTEXT(tr("Play QMediaPlayer audio: %1 (%2)")
 			.arg(mediaPath).arg(errorString()));
 
 }
@@ -61,6 +61,15 @@ void AudioPlayer::stop()
 	loopCnt = loopTarget;
 	QMediaPlayer::pause();
 	// QMediaPlayer::stop();
+}
+
+void AudioPlayer::pause(bool state)
+{
+	if (state) {
+		QMediaPlayer::pause();
+	} else {
+		QMediaPlayer::play();
+	}
 }
 
 qint64 AudioPlayer::currentPlayPosUs() const

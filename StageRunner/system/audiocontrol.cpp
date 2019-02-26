@@ -483,6 +483,21 @@ int AudioControl::stopAllFxAudio()
 	return stopcnt;
 }
 
+void AudioControl::pauseFxAudio(int slot)
+{
+	if (slot < 0 || slot >= used_slots)
+		return;
+
+	QMutexLocker lock(slotMutex);
+	if (audioSlots[slot]->status() <= AUDIO_IDLE) {
+		audioSlots[slot]->unselect();
+	}
+	// We send this via Message to communicate with the thread
+	AudioCtrlMsg msg(slot,CMD_AUDIO_PAUSE);
+	msg.executer = audioSlots[slot]->currentExecuter();
+	emit audioThreadCtrlMsgEmitted(msg);
+}
+
 void AudioControl::stopFxAudio(int slot)
 {
 	if (slot < 0 || slot >= used_slots)
@@ -703,6 +718,10 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 		setVolume(msg.slotNumber,msg.volume);
 		setVolumeInFx(msg.slotNumber,msg.volume, msg.isActive);
 		break;
+	case CMD_AUDIO_PAUSE:
+		pauseFxAudio(msg.slotNumber);
+		break;
+
 	default:
 		DEBUGERROR("AudioControl::audioCtrlReceiver: Unsupported command received: %d",msg.ctrlCmd);
 		break;

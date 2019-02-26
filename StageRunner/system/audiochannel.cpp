@@ -333,6 +333,33 @@ bool AudioSlot::stopFxAudio()
 	return false;
 }
 
+bool AudioSlot::pauseFxAudio(bool state)
+{
+	qDebug() << "pause audio" << state;
+
+	if (state) {
+		if (run_status != AUDIO_RUNNING)
+			return false;
+
+		if (m_isQMediaPlayerAudio) {
+			audio_player->pause(true);
+		} else {
+			audio_output->suspend();
+		}
+		run_status = AUDIO_PAUSED;
+	} else {
+		if (run_status != AUDIO_PAUSED)
+			return false;
+		if (m_isQMediaPlayerAudio) {
+			audio_player->pause(false);
+		} else {
+			audio_output->resume();
+		}
+	}
+
+	return true;
+}
+
 bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 {
 	if (time_ms <= 0) {
@@ -545,6 +572,8 @@ void AudioSlot::on_audio_output_status_changed(QAudio::State state)
 		run_status = AUDIO_IDLE;
 		break;
 	case QAudio::SuspendedState:
+		run_status = AUDIO_PAUSED;
+		break;
 	case QAudio::StoppedState:
 		run_status = AUDIO_IDLE;
 		break;
@@ -636,6 +665,7 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 
 	if (state == QMediaPlayer::PausedState) {
 		run_status = AUDIO_IDLE;
+		// run_status = AUDIO_PAUSED;
 	}
 	else if (state == QMediaPlayer::PlayingState) {
 		run_status = AUDIO_RUNNING;
@@ -776,6 +806,9 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 		break;
 	case CMD_AUDIO_FADEOUT:
 		fadeoutFxAudio(0,msg.fadetime);
+		break;
+	case CMD_AUDIO_PAUSE:
+		pauseFxAudio(!(run_status == AUDIO_PAUSED));
 		break;
 	default:
 		DEBUGERROR("%s: Unsupported command received: %d",Q_FUNC_INFO,msg.ctrlCmd);

@@ -3,6 +3,7 @@
 
 QList<FxItem*>*FxItem::global_fx_list = 0;
 QMutex FxItem::global_fx_lock(QMutex::Recursive);
+qint32 FxItem::m_lowestIdForGenerator = 1;
 
 FxItem::FxItem()
 	: VarSet()
@@ -11,6 +12,7 @@ FxItem::FxItem()
 {
 	init();
 	myId = init_generate_id();
+	myInitId = myId;
 }
 
 FxItem::FxItem(FxList *fxList)
@@ -20,6 +22,7 @@ FxItem::FxItem(FxList *fxList)
 {
 	init();
 	myId = init_generate_id();
+	myInitId = myId;
 }
 
 FxItem::FxItem(const FxItem &o)
@@ -31,6 +34,7 @@ FxItem::FxItem(const FxItem &o)
 
 	cloneFrom(o);
 	myId = init_generate_id();
+	myInitId = myId;
 }
 
 void FxItem::init()
@@ -54,7 +58,7 @@ void FxItem::init()
 	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 }
 
-int FxItem::init_generate_id()
+int FxItem::init_generate_id(int from)
 {
     QMutexLocker lock(&global_fx_lock);
 
@@ -66,13 +70,22 @@ int FxItem::init_generate_id()
 	}
 	global_fx_list->append(this);
 
+	QSet<qint32> ids;
+
 	// generate an unique id for the effect
 	int new_id = 0;
 	for (int t=0; t<global_fx_list->size(); t++) {
 		int t_id = global_fx_list->at(t)->myId;
 		if (t_id >= new_id)
 			new_id = t_id + 1;
+
+		ids.insert(t_id);
 	}
+
+
+	new_id = from>0 ? from : m_lowestIdForGenerator;
+	while (ids.contains(new_id))
+		new_id++;
 
 	return new_id;
 }
@@ -109,7 +122,22 @@ FxItem *FxItem::findFxById(qint32 id)
 		if (global_fx_list->at(t)->myId == id)
 			return global_fx_list->at(t);
 	}
-    return 0;
+	return 0;
+}
+
+/**
+ * @brief Test if ID of FxItem is used in any other FX
+ * @param item
+ * @return NULL, if ID of item is unique. Otherwise the pointer to the FxItem that has the same ID is return.
+ */
+FxItem * FxItem::checkItemUniqueId(FxItem *item)
+{
+	QMutexLocker lock(&global_fx_lock);
+	for (FxItem *o : *global_fx_list) {
+		if (o->myId == item->myId && o != item)
+			return o;
+	}
+	return nullptr;
 }
 
 
@@ -180,6 +208,14 @@ FxItem *FxItem::parentFxItem()
 		parentfx = myParentFxList->parentFx();
 	}
 	return parentfx;
+}
+
+int FxItem::generateNewID(int from)
+{
+	if (from == 0)
+		from = myId;
+	myId = init_generate_id(from);
+	return myId;
 }
 
 void FxItem::setName(const QString &name)
