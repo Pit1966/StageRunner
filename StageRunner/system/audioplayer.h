@@ -18,14 +18,16 @@ protected:
 	QAudioProbe *audioProbe;
 	int loopTarget;
 	int loopCnt;
+	int currentVolume;
+	CtrlCmd currentCtrlCmd;
 	QString mediaPath;
 	QMediaPlayer::State currentState;
-	int currentVolume;
 	AUDIO::AudioErrorType m_audioError;
 
 public:
 	AudioPlayer(AudioSlot &audioChannel);
 	AUDIO::AudioErrorType audioError() const {return m_audioError;}
+	CtrlCmd currentAudioCmd() const {return currentCtrlCmd;}
 	bool setSourceFilename(const QString &path);
 	void start(int loops);
 	void stop();

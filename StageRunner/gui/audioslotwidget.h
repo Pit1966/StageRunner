@@ -18,6 +18,8 @@ public:
 
 private:
 	bool m_volumeDialPressed;
+	bool m_currentPlayState;
+	bool m_currentPauseState;
 
 public:
 	AudioSlotWidget(QWidget *parent = 0);
@@ -30,6 +32,7 @@ protected:
 	void resizeEvent(QResizeEvent *event);
 
 private:
+	void init_vars();
 	void init_gui();
 
 private slots:
@@ -46,6 +49,7 @@ private slots:
 
 public slots:
 	void setPlayState(bool state);
+	void setPauseState(bool state);
 	void updateGuiStatus(AudioCtrlMsg msg);
 	void setVuLevel(qreal left, qreal right);
 	void setFFTSpectrum(FrqSpectrum *spectrum);
@@ -53,6 +57,7 @@ public slots:
 signals:
 	void playClicked(int slotNum);
 	void stopClicked(int slotNum);
+	void pauseClicked(int slotNum);
 	void volumeChanged(int slotNum, int vol);
 	void audioCtrlCmdEmitted(AudioCtrlMsg msg);
 };

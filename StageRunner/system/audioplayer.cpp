@@ -11,8 +11,9 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	,audioProbe(new QAudioProbe(this))
 	,loopTarget(1)
 	,loopCnt(1)
-	,currentState(QMediaPlayer::StoppedState)
 	,currentVolume(100)
+	,currentCtrlCmd(CMD_NONE)
+	,currentState(QMediaPlayer::StoppedState)
 	,m_audioError(AUDIO_ERR_NONE)
 {
 
@@ -49,6 +50,7 @@ void AudioPlayer::start(int loops)
 		loopTarget = 1;
 	}
 
+	currentCtrlCmd = CMD_AUDIO_START;
 	QMediaPlayer::play();
 
 	LOGTEXT(tr("Play QMediaPlayer audio: %1 (%2)")
@@ -59,15 +61,19 @@ void AudioPlayer::start(int loops)
 void AudioPlayer::stop()
 {
 	loopCnt = loopTarget;
+	currentCtrlCmd = CMD_AUDIO_STOP;
 	QMediaPlayer::pause();
 	// QMediaPlayer::stop();
 }
 
 void AudioPlayer::pause(bool state)
 {
+	// qDebug() << "AudioPlayer: set paused" << state;
 	if (state) {
+		currentCtrlCmd = CMD_AUDIO_PAUSE;
 		QMediaPlayer::pause();
 	} else {
+		currentCtrlCmd = CMD_AUDIO_START;
 		QMediaPlayer::play();
 	}
 }

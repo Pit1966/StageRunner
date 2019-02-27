@@ -664,8 +664,12 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 	AudioStatus cur_status = run_status;
 
 	if (state == QMediaPlayer::PausedState) {
-		run_status = AUDIO_IDLE;
-		// run_status = AUDIO_PAUSED;
+		// this distinction is necessary cause we always pause the audio stream even if stop was selected
+		if (audio_player->currentAudioCmd() == CMD_AUDIO_PAUSE) {
+			run_status = AUDIO_PAUSED;
+		} else {
+			run_status = AUDIO_IDLE;
+		}
 	}
 	else if (state == QMediaPlayer::PlayingState) {
 		run_status = AUDIO_RUNNING;
@@ -675,6 +679,8 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 	else if (state == QMediaPlayer::StoppedState) {
 		// run_status = AUDIO_IDLE;
 	}
+
+	// qDebug() << "on_media_playstate_changed" << state << run_status << audio_player->currentAudioCmd();
 
 	if (cur_status != run_status) {
 		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
@@ -686,7 +692,6 @@ void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
 			msg.progress = 0;
 		}
 		emit audioCtrlMsgEmitted(msg);
-
 	}
 }
 

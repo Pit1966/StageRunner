@@ -10,9 +10,7 @@
 AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
-	slotNumber = -1;
-	isAbsoluteTime = false;
-	m_volumeDialPressed = false;
+	init_vars();
 
 	setupUi(this);
 	init_gui();
@@ -23,8 +21,7 @@ AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 
 AudioSlotWidget::AudioSlotWidget(AudioControlWidget *widget)
 {
-	slotNumber = -1;
-
+	init_vars();
 	setupUi(this);
 	init_gui();
 
@@ -50,6 +47,15 @@ void AudioSlotWidget::resizeEvent(QResizeEvent *event)
 	Q_UNUSED(event);
 	// qDebug("Audio Meter width: %d",meterWidget->width());
 
+}
+
+void AudioSlotWidget::init_vars()
+{
+	slotNumber = -1;
+	isAbsoluteTime = false;
+	m_volumeDialPressed = false;
+	m_currentPauseState = false;
+	m_currentPlayState = false;
 }
 
 void AudioSlotWidget::init_gui()
@@ -98,6 +104,7 @@ void AudioSlotWidget::on_slotPauseButton_clicked()
 	msg.ctrlCmd = CMD_AUDIO_PAUSE;
 	msg.slotNumber = slotNumber;
 	emit audioCtrlCmdEmitted(msg);
+	emit pauseClicked(slotNumber);
 }
 
 void AudioSlotWidget::if_meter_volume_changed(float valf)
@@ -134,16 +141,35 @@ void AudioSlotWidget::on_slotVolumeDial_doubleClicked()
 
 void AudioSlotWidget::setPlayState(bool state)
 {
+	if (state == m_currentPlayState)
+		return;
+
 	if (state) {
 		slotPlayButton->setIcon(QIcon(":/gfx/icons/audio_play_green.png"));
 	} else {
 		slotPlayButton->setIcon(QIcon(":/gfx/icons/audio_play.png"));
 	}
+
+	m_currentPlayState = state;
+}
+
+void AudioSlotWidget::setPauseState(bool state)
+{
+	if (state == m_currentPauseState)
+		return;
+
+	if (state) {
+		slotPauseButton->setIcon(QIcon(":/gfx/icons/audio_pause_red.png"));
+	} else {
+		slotPauseButton->setIcon(QIcon(":/gfx/icons/audio_pause.png"));
+	}
+
+	m_currentPauseState = state;
 }
 
 void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 {
-	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
+//	qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
@@ -153,12 +179,18 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 		case AUDIO_IDLE:
 		case AUDIO_ERROR:
 			setPlayState(false);
+			setPauseState(false);
 			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
 				setTitle(msg.fxAudio->name().left(7) + "...");
 			}
 			break;
+		case AUDIO_PAUSED:
+			setPlayState(false);
+			setPauseState(true);
+			break;
 		default:
 			setPlayState(true);
+			setPauseState(false);
 			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
 				// setTitle(msg.fxAudio->name());
 				slotPlayButton->setToolTip(msg.fxAudio->name());

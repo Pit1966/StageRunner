@@ -453,7 +453,14 @@ bool AudioControl::restartFxAudioInSlot(int slotnum)
 
 	QMutexLocker lock(slotMutex);
 
-	if (audioSlots[slotnum]->select()) {
+	if (audioSlots[slotnum]->isPaused()) {
+		// AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_PAUSE);
+		// msg.volume = audioSlots[slotnum]->volume();
+		AudioCtrlMsg msg(slotnum, CMD_AUDIO_PAUSE);
+		emit audioThreadCtrlMsgEmitted(msg);
+		return true;
+	}
+	else if (audioSlots[slotnum]->select()) {
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		FxAudioItem *fxa = audioSlots[slotnum]->currentFxAudio();
 		if (!fxa) {

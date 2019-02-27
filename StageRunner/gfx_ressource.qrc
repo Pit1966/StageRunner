@@ -64,5 +64,6 @@
         <file>gfx/icons/backspace.png</file>
         <file>gfx/icons/video.png</file>
         <file>gfx/icons/script.png</file>
+        <file>gfx/icons/audio_pause_red.png</file>
     </qresource>
 </RCC>

@@ -99,6 +99,7 @@ public:
 	qint64 currentPlayPosMs() const;
 	void storeCurrentSeekPos();
 	inline bool isActive() const {return run_status == AUDIO_RUNNING || run_status == AUDIO_PAUSED;}
+	inline bool isPaused() const {return run_status == AUDIO_PAUSED;}
 	inline AudioStatus status() {return run_status;}
 	int audioOutputBufferSize() const;
 	void setFFTEnabled(bool state);
