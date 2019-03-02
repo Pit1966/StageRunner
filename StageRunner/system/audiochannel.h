@@ -38,6 +38,7 @@ class FrqSpectrum;
 class AudioSlot : public QObject
 {
 	friend class AudioPlayer;
+	friend class MediaPlayerAudioBackend;
 
 	Q_OBJECT
 public:
@@ -45,9 +46,11 @@ public:
 
 private:
 	AudioControl *audio_ctrl;
+
 	AudioIODevice *audio_io;
 	QAudioOutput *audio_output;
-	AudioPlayer *audio_player;
+
+	AudioPlayer *audio_player;				///< base class interface for audio implementation
 	QFile *audio_file;
 
 	AudioStatus run_status;

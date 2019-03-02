@@ -1,6 +1,8 @@
 #include "audiochannel.h"
 #include "audioformat.h"
 
+#include "system/audiooutput/mediaplayeraudiobackend.h"
+
 #include "fxaudioitem.h"
 #include "fxplaylistitem.h"
 #include "system/log.h"
@@ -21,6 +23,7 @@
 #include <QMediaContent>
 #include <QMediaPlayer>
 #endif
+
 
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName)
 	: QObject()
@@ -73,7 +76,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 	}
 
 	if (m_lastAudioError == AUDIO_ERR_NONE || m_lastAudioError == AUDIO_ERR_DECODER ) {
-		audio_player = new AudioPlayer(*this);
+		audio_player = new MediaPlayerAudioBackend(*this);
 		audio_player->setVolume(100);
 	}
 

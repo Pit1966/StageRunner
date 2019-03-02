@@ -153,7 +153,8 @@ SOURCES += \
 	../system/variantmapserializer.cpp \
     ../gui/customwidget/psdockwidget.cpp \
     ../system/runguard.cpp \
-    ../widgets/scripteditwidget.cpp \
+	../system/audiooutput/mediaplayeraudiobackend.cpp \
+	../widgets/scripteditwidget.cpp \
     ../widgets/editormarginwidget.cpp
 
 unix {
@@ -269,7 +270,8 @@ HEADERS  += \
 	../system/variantmapserializer.h \
     ../gui/customwidget/psdockwidget.h \
     ../system/runguard.h \
-    ../widgets/scripteditwidget.h \
+	../system/audiooutput/mediaplayeraudiobackend.h \
+	../widgets/scripteditwidget.h \
     ../widgets/editormarginwidget.h
 
 unix {
