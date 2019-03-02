@@ -1,7 +1,8 @@
 #ifndef PSMOVINGAVERAGE_H
 #define PSMOVINGAVERAGE_H
 
-template < class T > class PsMovingAverage
+template < class T >
+class PsMovingAverage
 {
 private:
 	T *data;

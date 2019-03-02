@@ -1,4 +1,4 @@
-#include "audiochannel.h"
+#include "audioslot.h"
 #include "audioformat.h"
 
 #include "system/audiooutput/mediaplayeraudiobackend.h"
@@ -96,9 +96,12 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devNa
 
 	// QMediaPlayer (experimental audio) connects
 	if (audio_player) {
-		connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
-		connect(audio_player,SIGNAL(durationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
-		connect(audio_player,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_media_playstate_changed(QMediaPlayer::State)));
+		connect(audio_player,SIGNAL(statusChanged(AUDIO::AudioStatus)),this,SLOT(onPlayerStatusChanged(AUDIO::AudioStatus)));
+		connect(audio_player,SIGNAL(mediaDurationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
+		connect(audio_player,SIGNAL(vuLevelChanged(qreal,qreal)),this,SLOT(on_vulevel_changed(qreal,qreal)),Qt::QueuedConnection);
+		connect(audio_player,SIGNAL(frqSpectrumChanged(FrqSpectrum*)),this,SLOT(on_frqSpectrum_changed(FrqSpectrum*)));
+//		connect(audio_player,SIGNAL(statusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)));
+//		connect(audio_player,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_media_playstate_changed(QMediaPlayer::State)));
 	}
 }
 
@@ -377,7 +380,7 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 #endif
 	}
 	else if (m_isQMediaPlayerAudio) {
-		if (audio_player->state() != QMediaPlayer::PlayingState)
+		if (audio_player->state() != AUDIO_PLAYING)
 			return false;
 	}
 	else {
@@ -613,77 +616,110 @@ void AudioSlot::on_audio_io_read_ready()
 	audio_io->stop();
 }
 
-void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
+//void AudioSlot::on_media_status_changed(QMediaPlayer::MediaStatus status)
+//{
+//	AudioStatus cur_status = run_status;
+
+//	if (debug > 1) qDebug("Channel %d: Media Status changed: %d",slotNumber+1,status);
+
+//	switch (status) {
+//	case QMediaPlayer::UnknownMediaStatus:
+//	case QMediaPlayer::NoMedia:
+//		run_status = AUDIO_ERROR;
+//		break;
+//	case QMediaPlayer::LoadingMedia:
+//		run_status = AUDIO_INIT;
+//		break;
+//	case QMediaPlayer::LoadedMedia:
+//		run_status = AUDIO_IDLE;
+//		break;
+//	case QMediaPlayer::StalledMedia:
+//		run_status = AUDIO_ERROR;
+//		DEBUGERROR("Audio has stalled on channel %1. Buffer underrun?",slotNumber+1);
+//		break;
+//	case QMediaPlayer::BufferingMedia:
+//	case QMediaPlayer::BufferedMedia:
+//		run_status = AUDIO_RUNNING;
+//		if (current_fx)
+//			current_fx->startInProgress = false;
+//		break;
+//	case QMediaPlayer::EndOfMedia:
+//		run_status = AUDIO_IDLE;
+//		break;
+//	case QMediaPlayer::InvalidMedia:
+//		run_status = AUDIO_ERROR;
+//		break;
+//	}
+
+//	if (cur_status != run_status) {
+//		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
+//		msg.fxAudio = current_fx;
+
+//		if (run_status == AUDIO_IDLE) {
+//			emit vuLevelChanged(slotNumber,0.0,0.0);
+//			emit audioProgressChanged(slotNumber,current_fx,0);
+//			msg.progress = 0;
+//		}
+//		emit audioCtrlMsgEmitted(msg);
+
+//	}
+//}
+
+//void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
+//{
+//	AudioStatus cur_status = run_status;
+
+//	if (state == QMediaPlayer::PausedState) {
+//		// this distinction is necessary cause we always pause the audio stream even if stop was selected
+//		if (audio_player->currentAudioCmd() == CMD_AUDIO_PAUSE) {
+//			run_status = AUDIO_PAUSED;
+//		} else {
+//			run_status = AUDIO_IDLE;
+//		}
+//	}
+//	else if (state == QMediaPlayer::PlayingState) {
+//		run_status = AUDIO_RUNNING;
+//		if (current_fx)
+//			current_fx->startInProgress = false;
+//	}
+//	else if (state == QMediaPlayer::StoppedState) {
+//		// run_status = AUDIO_IDLE;
+//	}
+
+//	// qDebug() << "on_media_playstate_changed" << state << run_status << audio_player->currentAudioCmd();
+
+//	if (cur_status != run_status) {
+//		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
+//		msg.fxAudio = current_fx;
+
+//		if (run_status == AUDIO_IDLE) {
+//			emit vuLevelChanged(slotNumber,0.0,0.0);
+//			emit audioProgressChanged(slotNumber,current_fx,0);
+//			msg.progress = 0;
+//		}
+//		emit audioCtrlMsgEmitted(msg);
+//	}
+//}
+
+void AudioSlot::onPlayerStatusChanged(AudioStatus status)
 {
 	AudioStatus cur_status = run_status;
+	if (status != cur_status) {
+		qDebug() << "onPlayerStatusChanged" << status << cur_status << audio_player->currentAudioCmd();
 
-	if (debug > 1) qDebug("Channel %d: Media Status changed: %d",slotNumber+1,status);
-
-	switch (status) {
-	case QMediaPlayer::UnknownMediaStatus:
-	case QMediaPlayer::NoMedia:
-		run_status = AUDIO_ERROR;
-		break;
-	case QMediaPlayer::LoadingMedia:
-		run_status = AUDIO_INIT;
-		break;
-	case QMediaPlayer::LoadedMedia:
-		run_status = AUDIO_IDLE;
-		break;
-	case QMediaPlayer::StalledMedia:
-		run_status = AUDIO_ERROR;
-		DEBUGERROR("Audio has stalled on channel %1. Buffer underrun?",slotNumber+1);
-		break;
-	case QMediaPlayer::BufferingMedia:
-	case QMediaPlayer::BufferedMedia:
-		run_status = AUDIO_RUNNING;
-		if (current_fx)
-			current_fx->startInProgress = false;
-		break;
-	case QMediaPlayer::EndOfMedia:
-		run_status = AUDIO_IDLE;
-		break;
-	case QMediaPlayer::InvalidMedia:
-		run_status = AUDIO_ERROR;
-		break;
-	}
-
-	if (cur_status != run_status) {
-		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
-		msg.fxAudio = current_fx;
-
-		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0.0,0.0);
-			emit audioProgressChanged(slotNumber,current_fx,0);
-			msg.progress = 0;
-		}
-		emit audioCtrlMsgEmitted(msg);
-
-	}
-}
-
-void AudioSlot::on_media_playstate_changed(QMediaPlayer::State state)
-{
-	AudioStatus cur_status = run_status;
-
-	if (state == QMediaPlayer::PausedState) {
-		// this distinction is necessary cause we always pause the audio stream even if stop was selected
-		if (audio_player->currentAudioCmd() == CMD_AUDIO_PAUSE) {
-			run_status = AUDIO_PAUSED;
-		} else {
-			run_status = AUDIO_IDLE;
+		switch (status) {
+		case AUDIO_MEDIA_STALLED:
+			DEBUGERROR("Audio has stalled on channel %1. Buffer underrun?",slotNumber+1);
+			run_status = AUDIO_ERROR;
+			break;
+		case AUDIO_RUNNING:
+			if (current_fx)
+				current_fx->startInProgress = false;
+		default:
+			run_status = status;
 		}
 	}
-	else if (state == QMediaPlayer::PlayingState) {
-		run_status = AUDIO_RUNNING;
-		if (current_fx)
-			current_fx->startInProgress = false;
-	}
-	else if (state == QMediaPlayer::StoppedState) {
-		// run_status = AUDIO_IDLE;
-	}
 
-	// qDebug() << "on_media_playstate_changed" << state << run_status << audio_player->currentAudioCmd();
 
 	if (cur_status != run_status) {
 		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
@@ -903,6 +939,8 @@ void AudioSlot::setFFTEnabled(bool state)
 		m_isFFTEnabled = state;
 		if (audio_io)
 			audio_io->setFFTEnabled(state);
+		if (audio_player)
+			audio_player->setFFTEnabled(state);
 	}
 }
 

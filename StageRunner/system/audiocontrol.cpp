@@ -1,7 +1,7 @@
 #include "audiocontrol.h"
 #include "config.h"
 #include "log.h"
-#include "audiochannel.h"
+#include "audioslot.h"
 #include "appcentral.h"
 #include "usersettings.h"
 #include "fxaudioitem.h"

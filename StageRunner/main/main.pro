@@ -74,7 +74,6 @@ SOURCES += \
 	../fx/fxlist.cpp \
 	../fx/fxaudioitem.cpp \
 	../system/audiocontrol.cpp \
-	../system/audiochannel.cpp \
 	../system/log.cpp \
 	../system/audioiodevice.cpp \
 	../system/audioformat.cpp \
@@ -155,7 +154,8 @@ SOURCES += \
     ../system/runguard.cpp \
 	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../widgets/scripteditwidget.cpp \
-    ../widgets/editormarginwidget.cpp
+    ../widgets/editormarginwidget.cpp \
+    ../system/audioslot.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -168,7 +168,6 @@ HEADERS  += \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
 	../system/audiocontrol.h \
-	../system/audiochannel.h \
 	../system/log.h \
 	../system/commandsystem.h \
 	../system/audioiodevice.h \
@@ -272,7 +271,8 @@ HEADERS  += \
     ../system/runguard.h \
 	../system/audiooutput/mediaplayeraudiobackend.h \
 	../widgets/scripteditwidget.h \
-    ../widgets/editormarginwidget.h
+    ../widgets/editormarginwidget.h \
+    ../system/audioslot.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

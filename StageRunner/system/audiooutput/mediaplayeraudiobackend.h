@@ -5,6 +5,7 @@
 #include "commandsystem.h"
 
 #include <QMediaPlayer>
+#include <QAudioBuffer>
 #include <QObject>
 
 
@@ -17,6 +18,7 @@ private:
 	QMediaPlayer *m_mediaPlayer;
 	QAudioProbe *m_audioProbe;
 	QMediaPlayer::State m_currentMediaPlayerState;
+	AUDIO::AudioStatus m_currentAudioStatus;			///< This is QMediaPlayer::State and QMediaPlayer::MediaStatus translated to StageRunner status
 
 public:
 	MediaPlayerAudioBackend(AudioSlot &audioChannel);
@@ -30,10 +32,13 @@ public:
 	qint64 currentPlayPosMs() const override;
 	bool seekPlayPosMs(qint64 posMs) override;
 	void setVolume(int vol) override;
+	int volume() const override;
+	AUDIO::AudioStatus state() const override;
 
 private slots:
 	void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 	void onPlayerStateChanged(QMediaPlayer::State state);
+	void onMediaDuratinChanged(qint64 ms);
 	void calculateVuLevel(QAudioBuffer buffer);
 
 };

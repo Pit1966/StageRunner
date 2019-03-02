@@ -1,15 +1,19 @@
 #ifndef AUDIOPLAYER_H
 #define AUDIOPLAYER_H
 
-#include "commandsystem.h"
+#include <QObject>
+#include <QAudioFormat>
 
-#include <QMediaPlayer>
-#include <QAudioProbe>
-#include <QAudioBuffer>
+#include "commandsystem.h"
+#include "fftrealfixlenwrapper.h"
+#include "frqspectrum.h"
+
 
 class AudioSlot;
 
-class AudioPlayer : public QMediaPlayer
+template <class T> class PsMovingAverage;
+
+class AudioPlayer : public QObject
 {
 	Q_OBJECT
 
@@ -21,6 +25,22 @@ protected:
 	CtrlCmd m_currentCtrlCmd;
 	AUDIO::AudioErrorType m_audioError;
 	QString m_mediaPath;
+
+	// run time
+	int m_currentPlaybackSamplerate;
+
+	// VU meter
+	double frame_energy_peak;
+	double sample_peak;
+
+	// FFT
+	PsMovingAverage<qreal> *m_leftAvg;
+	PsMovingAverage<qreal> *m_rightAvg;
+	FFTRealFixLenWrapper m_leftFFT;
+	FFTRealFixLenWrapper m_rightFFT;
+	FrqSpectrum m_leftSpectrum;
+	FrqSpectrum m_rightSpectrum;
+	bool m_fftEnabled;
 
 public:
 	AudioPlayer(AudioSlot &audioChannel);
@@ -36,9 +56,22 @@ public:
 	virtual qint64 currentPlayPosMs() const = 0;
 	virtual bool seekPlayPosMs(qint64 posMs) = 0;
 	virtual void setVolume(int vol) = 0;
+	virtual int volume() const = 0;
+	virtual AUDIO::AudioStatus state() const = 0;
+
+	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
+	inline bool isFFTEnabled() const {return m_fftEnabled;}
+
+protected:
+	// some helper fucntions, that can be used by any backend implementation
+	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+
 
 signals:
-	void statusChanged(QMediaPlayer::MediaStatus status);
+	void statusChanged(AUDIO::AudioStatus status);
+	void mediaDurationChanged(qint64 ms);
+	void vuLevelChanged(qreal left, qreal right);
+	void frqSpectrumChanged(FrqSpectrum *spec);
 
 };
 
