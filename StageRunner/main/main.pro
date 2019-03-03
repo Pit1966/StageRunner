@@ -155,7 +155,8 @@ SOURCES += \
 	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../widgets/scripteditwidget.cpp \
     ../widgets/editormarginwidget.cpp \
-    ../system/audioslot.cpp
+    ../system/audioslot.cpp \
+    ../system/audiooutput/iodeviceaudiobackend.cpp
 
 unix {
 SOURCES += 	../system/unixsignalcatcher.cpp
@@ -272,7 +273,8 @@ HEADERS  += \
 	../system/audiooutput/mediaplayeraudiobackend.h \
 	../widgets/scripteditwidget.h \
     ../widgets/editormarginwidget.h \
-    ../system/audioslot.h
+    ../system/audioslot.h \
+    ../system/audiooutput/iodeviceaudiobackend.h
 
 unix {
 HEADERS +=	../system/unixsignalcatcher.h

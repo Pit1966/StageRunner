@@ -130,6 +130,14 @@ void AudioControl::getAudioDevices()
 		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
 }
 
+/**
+ * @brief AudioControl::getAudioDeviceInfo
+ * @param devName
+ * @param found
+ * @return
+ *
+ * @todo remove me, is AudioIODevice::getAudioDeviceInfo
+ */
 QAudioDeviceInfo AudioControl::getAudioDeviceInfo(const QString &devName, bool *found)
 {
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -928,7 +936,7 @@ void AudioControl::createMediaPlayInstances()
 
 	// This is for audio use
 	for (int t=0; t<used_slots; t++) {
-		AudioSlot *slot = new AudioSlot(this,t,set->pSlotAudioDevice[t]);
+		AudioSlot *slot = new AudioSlot(this, t, myApp.usedAudioOutputType(), set->pSlotAudioDevice[t]);
 		audioSlots.append(slot);
 		AudioErrorType aerror = slot->lastAudioError();
 		if (aerror == AUDIO_ERR_DECODER) {

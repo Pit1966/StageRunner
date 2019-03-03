@@ -24,6 +24,7 @@ protected:
 	int m_currentVolume;
 	CtrlCmd m_currentCtrlCmd;
 	AUDIO::AudioErrorType m_audioError;
+	QString m_audioErrorString;
 	QString m_mediaPath;
 
 	// run time
@@ -44,7 +45,10 @@ protected:
 
 public:
 	AudioPlayer(AudioSlot &audioChannel);
+	virtual AUDIO::AudioOutputType outputType() const = 0;
+
 	inline AUDIO::AudioErrorType audioError() const {return m_audioError;}
+	inline const QString & audioErrorString() const {return m_audioErrorString;}
 	inline CtrlCmd currentAudioCmd() const {return m_currentCtrlCmd;}
 	inline int currentLoop() const {return m_loopCnt;}
 
@@ -55,9 +59,12 @@ public:
 	virtual qint64 currentPlayPosUs() const = 0;
 	virtual qint64 currentPlayPosMs() const = 0;
 	virtual bool seekPlayPosMs(qint64 posMs) = 0;
-	virtual void setVolume(int vol) = 0;
+	virtual void setVolume(int vol, int maxvol) = 0;
 	virtual int volume() const = 0;
 	virtual AUDIO::AudioStatus state() const = 0;
+
+	virtual void setAudioBufferSize(int bytes) = 0;
+	virtual int audioBufferSize() const = 0;
 
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}

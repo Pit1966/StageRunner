@@ -125,6 +125,9 @@ public:
 	bool hasModuleError() const;
 	static QString moduleErrorText(MODUL_ERROR e);
 
+
+	// Audio
+	AUDIO::AudioOutputType usedAudioOutputType() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 
 private:

@@ -25,7 +25,7 @@ MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 
 	connect(m_mediaPlayer,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
 	connect(m_mediaPlayer,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(onPlayerStateChanged(QMediaPlayer::State)),Qt::DirectConnection);
-	connect(m_mediaPlayer,SIGNAL(durationChanged(qint64)),this,SLOT(onMediaDuratinChanged(qint64)));
+	connect(m_mediaPlayer,SIGNAL(durationChanged(qint64)),this,SLOT(onMediaDurationChanged(qint64)));
 }
 
 MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
@@ -108,15 +108,16 @@ bool MediaPlayerAudioBackend::seekPlayPosMs(qint64 posMs)
 	return seekok;
 }
 
-void MediaPlayerAudioBackend::setVolume(int vol)
+void MediaPlayerAudioBackend::setVolume(int vol, int maxvol)
 {
+	int v = vol * 100 / maxvol;
 	m_currentVolume = vol;
 	m_mediaPlayer->setVolume(vol);
 }
 
 int MediaPlayerAudioBackend::volume() const
 {
-	return m_mediaPlayer->volume();
+	return m_currentVolume;
 }
 
 AudioStatus MediaPlayerAudioBackend::state() const
@@ -129,6 +130,17 @@ AudioStatus MediaPlayerAudioBackend::state() const
 	case QMediaPlayer::PausedState:
 		return AUDIO_PAUSED;
 	}
+}
+
+void MediaPlayerAudioBackend::setAudioBufferSize(int bytes)
+{
+	Q_UNUSED(bytes)
+	/// @todo implement me, if possible and useful
+}
+
+int MediaPlayerAudioBackend::audioBufferSize() const
+{
+	return 0;
 }
 
 /**
@@ -217,7 +229,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 	}
 }
 
-void MediaPlayerAudioBackend::onMediaDuratinChanged(qint64 ms)
+void MediaPlayerAudioBackend::onMediaDurationChanged(qint64 ms)
 {
 	emit mediaDurationChanged(ms);
 }

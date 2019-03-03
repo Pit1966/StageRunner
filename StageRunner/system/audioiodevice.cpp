@@ -387,7 +387,7 @@ bool AudioIODevice::seekPlayPosMs(qint64 posMs)
 	return seekok;
 }
 
-void AudioIODevice::start(int loops)
+void AudioIODevice::setLoopCount(int loops)
 {
 	if (loops < 0) {
 		loop_target = -1;
@@ -399,7 +399,28 @@ void AudioIODevice::start(int loops)
 		loop_target = 1;
 	}
 	loop_count = 1;
+}
 
+QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
+{
+	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	for (int t=0; t<devList.size(); t++) {
+		if (devList.at(t).deviceName() == devName) {
+			if (found)
+				*found = true;
+			return devList.at(t);
+		}
+	}
+
+	if (found)
+		*found = false;
+
+	return QAudioDeviceInfo();
+}
+
+void AudioIODevice::start(int loops)
+{
+	setLoopCount(loops);
 
 	if (!open(QIODevice::ReadOnly)) {
 		DEBUGERROR("Could not open Audio IO device");

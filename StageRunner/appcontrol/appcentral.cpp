@@ -453,6 +453,18 @@ QString AppCentral::moduleErrorText(AppCentral::MODUL_ERROR e)
 	return estr;
 }
 
+AudioOutputType AppCentral::usedAudioOutputType() const
+{
+	if (m_isSDLAvailable && userSettings->pUseSDLAudio) {
+		return AUDIO::OUT_SDL2;
+	}
+	else if (userSettings->pAltAudioEngine) {
+		return AUDIO::OUT_MEDIAPLAYER;
+	}
+	else {
+		return AUDIO::OUT_DEVICE;
+	}
+}
 
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)

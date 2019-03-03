@@ -9,6 +9,7 @@
 
 #include <QIODevice>
 #include <QTime>
+#include <QAudioDeviceInfo>
 
 #ifdef IS_QT5
 #include <QAudioDecoder>
@@ -48,6 +49,8 @@ private:
 	double sample_peak;
 
 	int m_currentPlaybackSamplerate;
+
+	/// @todo move this to AudioPlayer
 	int loop_target;							// How many loops of the sound to play
 	int loop_count;								// Amount of loops the sound has been played already
 
@@ -78,6 +81,10 @@ public:
 	inline static qreal realNormToReal(qreal realnorm, const QAudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
 
 	inline static qreal pcm32ToReal(qint64 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
+
+	void setLoopCount(int loops);
+
+	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
 
 public slots:
 	void start(int loops = 1);

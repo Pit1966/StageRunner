@@ -68,6 +68,13 @@ enum AudioErrorType {
 	AUDIO_ERR_PROBE
 };
 
+enum AudioOutputType {
+	OUT_NONE,
+	OUT_DEVICE,
+	OUT_MEDIAPLAYER,
+	OUT_SDL2
+};
+
 class AudioCtrlMsg {
 public:
 	int slotNumber;

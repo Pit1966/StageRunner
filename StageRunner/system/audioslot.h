@@ -47,14 +47,13 @@ public:
 private:
 	AudioControl *audio_ctrl;
 
-	AudioIODevice *audio_io;
-	QAudioOutput *audio_output;
+//	AudioIODevice *audio_io;
+//	QAudioOutput *audio_output;
 
 	AudioPlayer *audio_player;				///< base class interface for audio implementation
-	QFile *audio_file;
 
 	AudioStatus run_status;
-	FxAudioItem *current_fx;						///< The current/last Fx loaded into this audio slot
+	FxAudioItem *current_fx;				///< The current/last Fx loaded into this audio slot
 	Executer *current_executer;				///< A Pointer to an Executor if the sound was started by one
 
 	QTimer volset_timer;
@@ -80,7 +79,7 @@ private:
 #endif
 
 public:
-	AudioSlot(AudioControl *parent, int pSlotNumber, const QString &devName);
+	AudioSlot(AudioControl *parent, int pSlotNumber, AUDIO::AudioOutputType audioEngineType, const QString &devName);
 	~AudioSlot();
 
 	bool select();
@@ -126,13 +125,6 @@ private:
 	void emit_audio_play_progress();
 
 private slots:
-	// legacy audio slots
-	void on_audio_output_status_changed(QAudio::State state);
-	void on_audio_io_read_ready();
-	// qmediaplayer audio slots
-//	void on_media_status_changed(QMediaPlayer::MediaStatus status);
-//	void on_media_playstate_changed(QMediaPlayer::State state);
-
 	// new base class concept slots
 	void onPlayerStatusChanged(AUDIO::AudioStatus status);
 

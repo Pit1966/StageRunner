@@ -22,7 +22,8 @@ private:
 
 public:
 	MediaPlayerAudioBackend(AudioSlot &audioChannel);
-	virtual ~MediaPlayerAudioBackend();
+	~MediaPlayerAudioBackend() override;
+	AUDIO::AudioOutputType outputType() const override {return AUDIO::OUT_MEDIAPLAYER;}
 
 	bool setSourceFilename(const QString &path) override;
 	void start(int loops) override;
@@ -31,14 +32,16 @@ public:
 	qint64 currentPlayPosUs() const override;
 	qint64 currentPlayPosMs() const override;
 	bool seekPlayPosMs(qint64 posMs) override;
-	void setVolume(int vol) override;
+	void setVolume(int vol, int maxvol) override;
 	int volume() const override;
 	AUDIO::AudioStatus state() const override;
+	void setAudioBufferSize(int bytes) override;
+	int audioBufferSize() const override;
 
 private slots:
 	void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 	void onPlayerStateChanged(QMediaPlayer::State state);
-	void onMediaDuratinChanged(qint64 ms);
+	void onMediaDurationChanged(qint64 ms);
 	void calculateVuLevel(QAudioBuffer buffer);
 
 };
