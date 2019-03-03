@@ -18,7 +18,7 @@ class AudioPlayer : public QObject
 	Q_OBJECT
 
 protected:
-	AudioSlot & myChannel;
+	AudioSlot & m_parentAudioSlot;
 	int m_loopTarget;
 	int m_loopCnt;
 	int m_currentVolume;
@@ -69,7 +69,7 @@ public:
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
-protected:
+//protected:
 	// some helper fucntions, that can be used by any backend implementation
 	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
 

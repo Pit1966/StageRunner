@@ -1,7 +1,7 @@
 #ifndef MEDIAPLAYERAUDIOBACKEND_H
 #define MEDIAPLAYERAUDIOBACKEND_H
 
-#include "system/audioplayer.h"
+#include "audioplayer.h"
 #include "commandsystem.h"
 
 #include <QMediaPlayer>

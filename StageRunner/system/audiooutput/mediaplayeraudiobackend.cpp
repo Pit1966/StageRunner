@@ -112,7 +112,7 @@ void MediaPlayerAudioBackend::setVolume(int vol, int maxvol)
 {
 	int v = vol * 100 / maxvol;
 	m_currentVolume = vol;
-	m_mediaPlayer->setVolume(vol);
+	m_mediaPlayer->setVolume(v);
 }
 
 int MediaPlayerAudioBackend::volume() const
@@ -130,6 +130,8 @@ AudioStatus MediaPlayerAudioBackend::state() const
 	case QMediaPlayer::PausedState:
 		return AUDIO_PAUSED;
 	}
+
+	return AUDIO_STOPPED;
 }
 
 void MediaPlayerAudioBackend::setAudioBufferSize(int bytes)

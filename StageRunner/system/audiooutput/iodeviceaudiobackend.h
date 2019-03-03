@@ -39,6 +39,7 @@ public:
 	void setAudioBufferSize(int bytes) override;
 	int audioBufferSize() const override;
 
+
 private slots:
 	void onAudioOutputStatusChanged(QAudio::State state);
 	void onAudioIODevReadReady();

@@ -10,7 +10,7 @@ using namespace AUDIO;
 
 AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	: QObject()
-	, myChannel(audioChannel)
+	, m_parentAudioSlot(audioChannel)
 	, m_loopTarget(1)
 	, m_loopCnt(1)
 	, m_currentVolume(100)

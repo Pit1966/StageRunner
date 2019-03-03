@@ -42,9 +42,9 @@ unix:!macx {
 	exists(/usr/include/SDL2/SDL.h) {
 		message ("Found SDL2 ...")
 		INCLUDEPATH += /usr/include/SDL2
-#		DEFINES += USE_SDL
-#		LIBS += -lSDL2
-#		LIBS += -lSDL2_mixer
+		DEFINES += USE_SDL
+		LIBS += -lSDL2
+		LIBS += -lSDL2_mixer
 	}
 }
 
@@ -156,10 +156,10 @@ SOURCES += \
 	../widgets/scripteditwidget.cpp \
     ../widgets/editormarginwidget.cpp \
     ../system/audioslot.cpp \
-    ../system/audiooutput/iodeviceaudiobackend.cpp
+	../system/audiooutput/iodeviceaudiobackend.cpp
 
 unix {
-SOURCES += 	../system/unixsignalcatcher.cpp
+	SOURCES += 	../system/unixsignalcatcher.cpp
 }
 
 HEADERS  += \
@@ -274,10 +274,10 @@ HEADERS  += \
 	../widgets/scripteditwidget.h \
     ../widgets/editormarginwidget.h \
     ../system/audioslot.h \
-    ../system/audiooutput/iodeviceaudiobackend.h
+	../system/audiooutput/iodeviceaudiobackend.h
 
 unix {
-HEADERS +=	../system/unixsignalcatcher.h
+	HEADERS +=	../system/unixsignalcatcher.h
 }
 
 FORMS    += \
@@ -302,6 +302,11 @@ RESOURCES += \
 	../gfx_ressource.qrc
 
 
+contains(DEFINES,USE_SDL) {
+	message("use SDL2")
+	SOURCES +=  ../system/audiooutput/sdl2audiobackend.cpp
+	HEADERS += ../system/audiooutput/sdl2audiobackend.h
+}
 
 # Installation
 target.path = $$INSTALLROOT/$$BINDIR

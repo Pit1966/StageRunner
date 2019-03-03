@@ -3,6 +3,8 @@
 #include "log.h"
 #include "audioiodevice.h"
 
+#include <QAudioOutput>
+
 using namespace AUDIO;
 
 IODeviceAudioBackend::IODeviceAudioBackend(AudioSlot &audioChannel, const QString &devName)
@@ -124,6 +126,8 @@ AudioStatus IODeviceAudioBackend::state() const
 	case QAudio::StoppedState:
 		return AUDIO_STOPPED;
 	}
+
+	return AUDIO_STOPPED;
 }
 
 void IODeviceAudioBackend::setAudioBufferSize(int bytes)

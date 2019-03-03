@@ -29,7 +29,9 @@
 #include <QThread>
 #endif
 
-
+#ifdef USE_SDL
+#include "audiooutput/sdl2audiobackend.h"
+#endif
 
 AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 	: QThread()
@@ -232,6 +234,14 @@ void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
 			audioSlots[t]->setFFTEnabled(false);
 		}
 	}
+}
+
+AudioPlayer *AudioControl::audioPlayer(int i) const
+{
+	if (i < 0 || i >= usedSlots())
+		return nullptr;
+
+	return audioSlots.at(i)->audioPlayer();
 }
 
 /**
@@ -956,8 +966,11 @@ void AudioControl::createMediaPlayInstances()
 
 #ifdef USE_SDL
 	Mix_AllocateChannels(used_slots);
-	Mix_ChannelFinished(sdlChannelDone);
-	Mix_SetPostMix(sdlPostMix, nullptr);
+//	Mix_ChannelFinished(SDL2sdlChannelDone);
+//	Mix_SetPostMix(sdlPostMix, nullptr);
+	Mix_ChannelFinished(SDL2AudioBackend::sdlChannelDone);
+	Mix_SetPostMix(SDL2AudioBackend::sdlPostMix, nullptr);
+
 #endif
 }
 

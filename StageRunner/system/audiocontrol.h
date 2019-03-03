@@ -12,6 +12,7 @@
 using namespace AUDIO;
 
 class AudioSlot;
+class AudioPlayer;
 class FxAudioItem;
 class AppCentral;
 class FxPlayListItem;
@@ -76,6 +77,7 @@ public:
 	inline bool isValid() const {return m_isValid;}
 	int usedSlots() const {return audioSlots.size();}
 	AudioSlot* audioSlot(int i) const {return audioSlots.at(i);}
+	AudioPlayer* audioPlayer(int i) const;
 
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}

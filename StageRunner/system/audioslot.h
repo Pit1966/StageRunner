@@ -4,17 +4,12 @@
 #include "commandsystem.h"
 #include "psmovingaverage.h"
 
-#ifdef IS_QT5
-#include <QAudioDecoder>
-#include <QMediaPlayer>
-#endif
-
 #include <QObject>
 #include <QTime>
 #include <QTimer>
-#include <QAudioOutput>
 #include <QFile>
 #include <QTimeLine>
+#include <QAudioFormat>
 
 #ifdef USE_SDL
 #  include <SDL2/SDL.h>
@@ -66,7 +61,6 @@ private:
 	int current_volume;								///< Volume the audio slot is set to
 	int master_volume;								///< This is Master Volume
 
-	bool m_isQMediaPlayerAudio;
 	bool m_isSDLAudio;
 	bool m_isFFTEnabled;
 
@@ -89,7 +83,6 @@ public:
 	bool pauseFxAudio(bool state);
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
-	void setVolume(qreal vol);
 	void setVolume(int vol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
@@ -109,12 +102,14 @@ public:
 	QString currentFxName() const;
 
 	inline AudioErrorType lastAudioError() const {return m_lastAudioError;}
+	AudioPlayer * audioPlayer() const {return audio_player;}
 
 #ifdef USE_SDL
 	bool sdlStartFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool sdlStopFxAudio();
 	void sdlSetFinished();
 	void sdlSetRunStatus(AudioStatus state);
+	void sdlEmitProgress();
 private:
 	void sdlChannelProcessStream(void *stream, int len, void *udata);
 	static void sdlChannelProcessor(int chan, void *stream, int len, void *udata);
@@ -127,7 +122,6 @@ private:
 private slots:
 	// new base class concept slots
 	void onPlayerStatusChanged(AUDIO::AudioStatus status);
-
 
 	void on_vulevel_changed(qreal left, qreal right);
 	void on_frqSpectrum_changed(FrqSpectrum *spec);
