@@ -35,12 +35,8 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 	, fade_target_vol(0)
 	, current_volume(0)
 	, master_volume(MAX_VOLUME)
-	, m_isSDLAudio(false)
 	, m_isFFTEnabled(false)
 	, m_lastAudioError(AUDIO_ERR_NONE)
-#ifdef USE_SDL
-	, m_sdlChunk(nullptr)
-#endif
 {
 //	qDebug() << "init AudioSlot" << pSlotNumber;
 
@@ -124,13 +120,6 @@ void AudioSlot::unselect()
 
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
 {
-#ifdef USE_SDL
-//	if (AppCentral::instance()->userSettings->pUseSDLAudio)
-//		return sdlStartFxAudio(fxa, exec, startPosMs, initVol);
-
-//	m_isSDLAudio = false;
-#endif
-
 	if (!audio_player) {
 		run_status = AUDIO_ERROR;
 		return -1;
@@ -258,11 +247,6 @@ bool AudioSlot::stopFxAudio()
 
 	emit vuLevelChanged(slotNumber,0.0,0.0);
 
-#ifdef USE_SDL
-//	if (m_isSDLAudio)
-//		return sdlStopFxAudio();
-#endif
-
 	if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
 		audio_player->stop();
@@ -300,17 +284,9 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 		qDebug("Fade out time = %d",time_ms);
 		return false;
 	}
-	// Fadeout only possible if audio is running
-//	if (m_isSDLAudio) {
-//#ifdef USE_SDL
-//		if (Mix_Playing(slotNumber) != 1)
-//			return false;
-//#endif
-//	}
-//	else {
-		if (audio_player->state() != AUDIO_PLAYING)
-			return false;
-//	}
+
+	if (audio_player->state() != AUDIO_PLAYING)
+		return false;
 
 	if (!FxItem::exists(current_fx)) return false;
 
@@ -359,31 +335,14 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 
 void AudioSlot::setVolume(int vol)
 {
-	int level;
-	if (m_isSDLAudio) {
-		level = vol * SDL_MAX_VOLUME / MAX_VOLUME;
-		if (master_volume >= 0) {
-			level = level * master_volume / MAX_VOLUME;
-		}
-	}
-	else {
-		level = vol;
-		if (master_volume >= 0) {
-			level = level * master_volume / MAX_VOLUME;
-		}
+	if (!audio_player) return;
+
+	int level = vol;
+	if (master_volume >= 0) {
+		level = level * master_volume / MAX_VOLUME;
 	}
 
-//#ifdef IS_QT5
-//	if (m_isSDLAudio) {
-//#ifdef USE_SDL
-//		Mix_Volume(slotNumber, int(level));
-//#endif
-//	}
-//	else {
-		if (!audio_player) return;
-		audio_player->setVolume(level,MAX_VOLUME);
-//	}
-//#endif
+	audio_player->setVolume(level,MAX_VOLUME);
 
 	current_volume = vol;
 
@@ -440,17 +399,9 @@ void AudioSlot::emit_audio_play_progress()
 	qint64 per_mille;
 	qint64 time_ms;
 
-	if (m_isSDLAudio) {
-		loop = 1;
-		time_ms = run_time.elapsed();
-		per_mille = time_ms * 1000 / soundlen;
-	}
-	else {
-		loop = audio_player->currentLoop();
-		time_ms = audio_player->currentPlayPosMs();
-		per_mille = time_ms * 1000 / soundlen;
-
-	}
+	loop = audio_player->currentLoop();
+	time_ms = audio_player->currentPlayPosMs();
+	per_mille = time_ms * 1000 / soundlen;
 
 	emit audioProgressChanged(slotNumber, current_fx, int(per_mille));
 
@@ -705,200 +656,7 @@ QString AudioSlot::currentFxName() const
 	}
 }
 
-#ifdef USE_SDL
-bool AudioSlot::sdlStartFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
-{
-	m_isSDLAudio = true;
-	m_sdlAudioFormat.setChannelCount(2);
-	m_sdlAudioFormat.setSampleSize(16);
-	m_sdlAudioFormat.setSampleType(QAudioFormat::SignedInt);
-	m_sdlAudioFormat.setSampleRate(44100);
-
-	current_fx = fxa;
-	current_executer = exec;
-	sdlSetRunStatus(AUDIO_BUFFERING);
-	run_time.start();
-
-	// Find out what the initial volume for audio is
-	qint32 targetVolume = fxa->initialVolume;
-	if (initVol >= 0) {
-		targetVolume = initVol;
-	}
-	else if (fxa->parentFxList() && fxa->parentFxList()->parentFx()) {
-		FxItem *fx = fxa->parentFxList()->parentFx();
-		if (FxItem::exists(fx) && fx->fxType() == FX_AUDIO_PLAYLIST) {
-			FxPlayListItem *play = reinterpret_cast<FxPlayListItem*>(fx);
-			targetVolume = play->initialVolume;
-			LOGTEXT(tr("Set initial volume for audio playlist member to %1").arg(targetVolume));
-		}
-	}
-
-	if (m_sdlChunk) {
-		*m_sdlChunk = m_sdlChunkCopy;
-		Mix_FreeChunk(m_sdlChunk);
-	}
-
-	// Load audio data
-	m_sdlChunk = Mix_LoadWAV(fxa->filePath().toLocal8Bit().data());	// 1 means, automatically free the source
-	if (m_sdlChunk) {
-		m_sdlChunkCopy = *m_sdlChunk;
-		qDebug() << "Loaded SDL sound:" << fxa->filePath();
-	} else {
-		LOGERROR(tr("Could not load SDL file: %1").arg(fxa->fileName()));
-		sdlSetRunStatus(AUDIO_ERROR);
-		return false;
-	}
-
-	Mix_RegisterEffect(slotNumber, AudioSlot::sdlChannelProcessor, NULL, NULL);
-
-	qint64 durationMs = qint64(m_sdlChunk->alen) * 1000 / (44100 * 4);
-	setAudioDurationMs(durationMs);
-
-	if (startPosMs < 0) {
-		// We get the start play position in ms from the last played seek position in the FxAudio instance
-		if (fxa->seekPosition() == 0) {
-			startPosMs = 0;
-		}
-		else if (fxa->seekPosition() > 0) {
-			startPosMs = fxa->seekPosition();
-		}
-		// Reset the seek position to zero
-		fxa->setSeekPosition(0);
-	}
-	uint seekpos = uint( (44100 * startPosMs / 1000) * 4 );
-	if (seekpos >= m_sdlChunk->alen)
-		return false;
-
-	m_sdlChunk->abuf = m_sdlChunk->abuf + seekpos;
-	m_sdlChunk->alen = m_sdlChunk->alen - seekpos;
-
-	// set initial Volume
-	if (fxa->fadeInTime() > 0) {
-		setVolume(0);
-		fadeinFxAudio(targetVolume,fxa->fadeInTime());
-	}
-	else if (startPosMs > 0 && initVol == -1) {
-		setVolume(0);
-		fadeinFxAudio(targetVolume,200);
-	}
-	else {
-		setVolume(targetVolume);
-	}
-
-	// Play audio data
-	int res = Mix_PlayChannel(slotNumber, m_sdlChunk, fxa->loopValue());
-	if (res == -1) {
-		LOGERROR(tr("SDL error: %1").arg(Mix_GetError()));
-		sdlSetRunStatus(AUDIO_ERROR);
-		return false;
-	}
-
-	sdlSetRunStatus(AUDIO_RUNNING);
-
-	// Emit Control Msg to send Status of Volume and Name
-	AudioCtrlMsg msg(fxa,slotNumber);
-	msg.volume = current_volume;
-	msg.executer = exec;
-	emit audioCtrlMsgEmitted(msg);
-
-	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
-		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> with Executer: %3 at position %4 with volume %5")
-				.arg(fxa->name())
-				.arg(slotNumber+1)
-				.arg(exec->getIdString())
-				.arg(QtStaticTools::msToTimeString(startPosMs))
-				.arg(targetVolume));
-	} else {
-		exec = nullptr;
-		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> at time %3 with volume %4")
-				.arg(fxa->name())
-				.arg(slotNumber+1)
-				.arg(QtStaticTools::msToTimeString(startPosMs))
-				.arg(targetVolume));
-	}
-
-	bool ok = false;
-	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
-		QApplication::processEvents();
-		if (run_status == AUDIO_RUNNING) {
-			current_fx->startInProgress = false;
-			qreal vol = 0;
-			/*if (debug > 1) */DEBUGTEXT("FxAudio started: '%s'' (%dms delayed, vol: %f)"
-									 ,fxa->name().toLocal8Bit().data(),run_time.elapsed(),vol);
-			ok = true;
-			run_time.start();
-			current_fx = fxa;
-		}
-		else if (run_status == AUDIO_ERROR) {
-			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLocal8Bit().data());
-			current_fx = nullptr;
-			break;
-		}
-
-	}
-
-	if (exec)
-		AppCentral::instance()->execCenter->freeExecuter(exec);
-
-	return true;
-}
-
-bool AudioSlot::sdlStopFxAudio()
-{
-	Mix_HaltChannel(slotNumber);
-
-	return true;
-}
-
-void AudioSlot::sdlSetFinished()
-{
-	*m_sdlChunk = m_sdlChunkCopy;
-
-	sdlSetRunStatus(AUDIO_IDLE);
-}
-
-void AudioSlot::sdlSetRunStatus(AudioStatus state)
-{
-	if (state != run_status) {
-		run_status = state;
-		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
-		msg.fxAudio = current_fx;
-
-		if (run_status == AUDIO_IDLE) {
-			emit vuLevelChanged(slotNumber,0.0,0.0);
-			emit audioProgressChanged(slotNumber,current_fx,0);
-			msg.progress = 0;
-		}
-		emit audioCtrlMsgEmitted(msg);
-	}
-}
-
 void AudioSlot::sdlEmitProgress()
 {
 	emit_audio_play_progress();
 }
-
-void AudioSlot::sdlChannelProcessStream(void *stream, int len, void *udata)
-{
-	Q_UNUSED(udata)
-	audio_player->calcVuLevel(reinterpret_cast<const char*>(stream), len, m_sdlAudioFormat);
-	emit_audio_play_progress();
-}
-
-void AudioSlot::sdlChannelProcessor(int chan, void *stream, int len, void *udata)
-{
-	const AppCentral &app = AppCentral::ref();
-	if (chan < 0 || chan >= app.unitAudio->usedSlots())
-		return;
-
-	AudioSlot *slot = app.unitAudio->audioSlot(chan);
-	slot->sdlChannelProcessStream(stream, len, udata);
-}
-
-void AudioSlot::sdlChannelProcessorFxDone(int chan, void *udata)
-{
-	Q_UNUSED(chan)
-	Q_UNUSED(udata)
-}
-#endif
-

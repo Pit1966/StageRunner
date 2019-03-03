@@ -59,13 +59,13 @@ void SDL2AudioBackend::start(int loops)
 		sdlSetRunStatus(AUDIO_ERROR);
 	} else {
 		sdlSetRunStatus(AUDIO_RUNNING);
+		m_runtime.start();
 	}
 }
 
 void SDL2AudioBackend::stop()
 {
 	Mix_HaltChannel(m_parentAudioSlot.slotNumber);
-
 }
 
 void SDL2AudioBackend::pause(bool state)
@@ -86,7 +86,7 @@ qint64 SDL2AudioBackend::currentPlayPosUs() const
 qint64 SDL2AudioBackend::currentPlayPosMs() const
 {
 	/// @todo implement me
-	return 0;
+	return m_runtime.elapsed();
 }
 
 bool SDL2AudioBackend::seekPlayPosMs(qint64 posMs)

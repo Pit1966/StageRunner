@@ -436,35 +436,6 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 	}
 }
 
-#ifdef USE_SDL
-void AudioControl::sdlChannelDone(int chan)
-{
-	LOGTEXT(tr("SDL channel %1 ready").arg(chan+1));
-	const AppCentral &app = AppCentral::ref();
-
-	if (chan >= app.unitAudio->audioSlots.size())
-		return;
-
-	AudioSlot *slot = app.unitAudio->audioSlots.at(chan);
-	slot->sdlSetFinished();
-}
-
-/**
- * @brief AudioControl::sdlPostMix
- * @param udata
- * @param stream
- * @param len
- *
- * Implement this, if you want to monitor or process the final audio stream after all channels were mixed.
- */
-void AudioControl::sdlPostMix(void *udata, quint8 *stream, int len)
-{
-	Q_UNUSED(udata)
-	Q_UNUSED(stream)
-	Q_UNUSED(len)
-}
-#endif
-
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
 	if (slotnum < 0 || slotnum >= used_slots) return false;

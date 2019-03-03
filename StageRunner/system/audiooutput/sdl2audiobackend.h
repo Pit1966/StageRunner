@@ -4,6 +4,8 @@
 #include "audioplayer.h"
 #include "commandsystem.h"
 
+#include <QTime>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
@@ -18,6 +20,8 @@ private:
 	Mix_Chunk *m_sdlChunk;
 	Mix_Chunk m_sdlChunkCopy;
 	AUDIO::AudioStatus m_currentStatus;
+
+	QTime m_runtime;
 
 public:
 	SDL2AudioBackend(AudioSlot &audioSlot);
