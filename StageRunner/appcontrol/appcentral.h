@@ -143,7 +143,7 @@ public slots:
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);
-	void setExperimentalAudio(bool state);
+	void setAudioOutputType(AUDIO::AudioOutputType type);
 	void setFFTAudioChannelMask(qint32 mask);
 
 	void testSetDmxChannel(int val, int channel);

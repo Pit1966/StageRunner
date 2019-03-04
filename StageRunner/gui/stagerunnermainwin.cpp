@@ -75,9 +75,10 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 #ifdef IS_MAC
 	delete actionExperimental_audio_mode;
-	myapp->userSettings->pAltAudioEngine = true;
+	myapp->setAudioOutputType(OUT_MEDIAPLAYER);
+	guiSetAudioOutput(OUT_MEDIAPLAYER);
 #else
-	actionExperimental_audio_mode->setChecked(appCentral->userSettings->pAltAudioEngine);
+	guiSetAudioOutput(myapp->usedAudioOutputType());
 #endif
 
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
@@ -376,7 +377,7 @@ void StageRunnerMainWin::showModuleError()
 	if (appCentral->moduleErrors() == AppCentral::E_NO_AUDIO_DECODER && appCentral->hasSDL()) {
 		appCentral->setModuleError(AppCentral::E_NO_AUDIO_DECODER, false);
 		actionUse_SDL_audio->setChecked(true);
-		appCentral->userSettings->pUseSDLAudio = true;
+		appCentral->setAudioOutputType(OUT_SDL2);
 		LOGTEXT("<font color=info>Switched to SDL audio, since Qt audio is not available");
 	}
 #endif
@@ -423,6 +424,13 @@ void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
 {
 	audioCtrlGroup->setFFTGraphVisibleFromMask(set->pFFTAudioMask);
 	audioCtrlGroup->setVolumeDialVisibleFromMask(set->pVolumeDialMask);
+}
+
+void StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
+{
+	actionExperimental_audio_mode->setChecked(type == OUT_MEDIAPLAYER || type == OUT_NONE);
+	actionUse_SDL_audio->setChecked(type == OUT_SDL2);
+	actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
 }
 
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
@@ -982,13 +990,33 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 
 void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
 {
-	appCentral->setExperimentalAudio(checked);
-	appCentral->unitAudio->reCreateMediaPlayerInstances();
+	if (checked) {
+		appCentral->setAudioOutputType(OUT_MEDIAPLAYER);
+		actionClassic_audio_mode->setChecked(false);
+		actionUse_SDL_audio->setChecked(false);
+		appCentral->unitAudio->reCreateMediaPlayerInstances();
+	}
+
+}
+
+void StageRunnerMainWin::on_actionClassic_audio_mode_triggered(bool checked)
+{
+	if (checked) {
+		appCentral->setAudioOutputType(OUT_DEVICE);
+		actionExperimental_audio_mode->setChecked(false);
+		actionUse_SDL_audio->setChecked(false);
+		appCentral->unitAudio->reCreateMediaPlayerInstances();
+	}
 }
 
 void StageRunnerMainWin::on_actionUse_SDL_audio_triggered(bool arg1)
 {
-	appCentral->userSettings->pUseSDLAudio = arg1;
+	if (arg1) {
+		appCentral->setAudioOutputType(OUT_SDL2);
+		actionExperimental_audio_mode->setChecked(false);
+		actionClassic_audio_mode->setChecked(false);
+		appCentral->unitAudio->reCreateMediaPlayerInstances();
+	};
 }
 
 void StageRunnerMainWin::on_actionOpen_FxItem_triggered()

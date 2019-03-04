@@ -59,7 +59,6 @@ public:
 	void openFxScriptPanel(FxScriptItem *fx);
 	void setProjectName(const QString &path);
 
-
 private:
 	bool eventFilter(QObject *obj, QEvent *event);
 	void closeEvent(QCloseEvent *event);
@@ -72,6 +71,7 @@ public slots:
 	void openFxPropertyEditor(FxItem *item);
 	void openFxItemPanel(FxItem *fx);
 	void applyUserSettingsToGui(UserSettings *set);
+	void guiSetAudioOutput(AUDIO::AudioOutputType type);
 
 private slots:
 	void on_addAudioFxButton_clicked();
@@ -108,6 +108,8 @@ private slots:
 
 	void on_actionVirtualDmxOutput_triggered(bool checked);
 
+
+	void on_actionClassic_audio_mode_triggered(bool checked);
 
 private:
 	void init();

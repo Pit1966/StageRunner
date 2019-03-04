@@ -315,6 +315,7 @@
     </property>
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
+    <addaction name="actionClassic_audio_mode"/>
     <addaction name="actionExperimental_audio_mode"/>
     <addaction name="actionUse_SDL_audio"/>
    </widget>
@@ -436,7 +437,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Experimental audio mode</string>
+    <string>Default audio mode</string>
    </property>
   </action>
   <action name="actionOpen_FxItem">
@@ -489,6 +490,14 @@
    </property>
    <property name="text">
     <string>Use SDL audio</string>
+   </property>
+  </action>
+  <action name="actionClassic_audio_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Classic audio mode</string>
    </property>
   </action>
  </widget>

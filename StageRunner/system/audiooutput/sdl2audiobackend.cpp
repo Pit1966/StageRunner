@@ -164,6 +164,8 @@ void SDL2AudioBackend::sdlChannelProcessStream(void *stream, int len, void *udat
  */
 void SDL2AudioBackend::sdlSetFinished()
 {
+	qDebug() << "set sdl channel finished" << m_parentAudioSlot.slotNumber+1;
+
 	*m_sdlChunk = m_sdlChunkCopy;
 	sdlSetRunStatus(AUDIO_IDLE);
 }

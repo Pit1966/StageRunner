@@ -175,11 +175,10 @@ void AppCentral::setEditMode(bool state)
 	}
 }
 
-void AppCentral::setExperimentalAudio(bool state)
+void AppCentral::setAudioOutputType(AudioOutputType type)
 {
-	if (state != userSettings->pAltAudioEngine) {
-		userSettings->pAltAudioEngine = state;
-	}
+	userSettings->pAltAudioEngine = (type == OUT_MEDIAPLAYER || type == OUT_NONE);
+	userSettings->pUseSDLAudio = (type == OUT_SDL2);
 }
 
 void AppCentral::setFFTAudioChannelMask(qint32 mask)
@@ -723,7 +722,7 @@ void AppCentral::init()
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 	qRegisterMetaType<CtrlCmd>("CtrlCmd");
-
+	qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
 	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules
