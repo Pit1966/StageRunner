@@ -49,12 +49,14 @@ private:
 	SCRIPT::KEY_WORD m_cmdKey;
 	int m_lineNum;
 	int m_loopCount;
+	int m_execTimeMs;
 	int m_execDurationMs;
 	QString m_cmd;
 	QString m_paras;
 
 public:
 	FxScriptLine(const QString &cmd, const QString &paras);
+	FxScriptLine(const QString &time, const QString &cmd, const QString &paras);
 	FxScriptLine(const FxScriptLine &o);
 
 	int lineNumber() const {return m_lineNum;}
@@ -64,6 +66,7 @@ public:
 	void incLoopCount() {m_loopCount++;}
 	void clearLoopCount() {m_loopCount = 0;}
 	int execDuration();
+	inline int execTimeMs() const {return m_execTimeMs;}
 
 private:
 	void calculateDuration();

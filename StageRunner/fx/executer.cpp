@@ -583,9 +583,12 @@ bool ScriptExecuter::processExecuter()
 	while (proceed) {
 		FxScriptLine *line = m_script.at(m_currentLineNum);
 		if (line) {
+			bool reExecLineDelayed = false;
 			if (line->command().size() > 2 && !line->command().startsWith("#"))
-				proceed = executeLine(line);
-			m_currentLineNum++;
+				proceed = executeLine(line, reExecLineDelayed);
+
+			if (!reExecLineDelayed)
+				m_currentLineNum++;
 		} else {
 			proceed = false;
 			active = false;
@@ -767,9 +770,21 @@ FxItemList ScriptExecuter::getExecuterTempCopiesOfFx(FxItem *fx) const
     return list;
 }
 
-bool ScriptExecuter::executeLine(FxScriptLine *line)
+bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 {
 	bool ok = true;
+
+	if (line->execTimeMs() >= 0) {
+		if (line->execTimeMs() <= currentRunTimeMs()) {
+			reExecDelayed = false;
+		} else {
+			reExecDelayed = true;
+			setEventTargetTimeAbsolute(line->execTimeMs());
+			return false;
+		}
+	} else {
+		reExecDelayed = false;
+	}
 
 	const QString &cmd = line->command();
 	KEY_WORD key = FxScriptLine::keywords.keyNumber(cmd);
@@ -777,7 +792,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line)
 	case KW_WAIT:
 		{
 			qint64 delayMs = QtStaticTools::timeStringToMS(line->parameters());
-			setEventTargetTime(delayMs);
+			setEventTargetTimeRelative(delayMs);
 		}
 		return false;
 

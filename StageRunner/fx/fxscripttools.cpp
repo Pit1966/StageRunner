@@ -41,6 +41,7 @@ FxScriptLine::FxScriptLine(const QString &cmd, const QString &paras)
 	: m_cmdKey(KW_NONE)
 	, m_lineNum(0)
 	, m_loopCount(0)
+	, m_execTimeMs(-1)
 	, m_execDurationMs(-1)
 	, m_cmd(cmd)
 	, m_paras(paras)
@@ -48,10 +49,23 @@ FxScriptLine::FxScriptLine(const QString &cmd, const QString &paras)
 	m_cmdKey = FxScriptLine::keywords.keyNumber(cmd);
 }
 
+FxScriptLine::FxScriptLine(const QString &time, const QString &cmd, const QString &paras)
+	: m_cmdKey(KW_NONE)
+	, m_lineNum(0)
+	, m_loopCount(0)
+	, m_execDurationMs(-1)
+	, m_cmd(cmd)
+	, m_paras(paras)
+{
+	m_cmdKey = FxScriptLine::keywords.keyNumber(cmd);
+	m_execTimeMs = QtStaticTools::timeStringToMS(time);
+}
+
 FxScriptLine::FxScriptLine(const FxScriptLine &o)
 	: m_cmdKey(o.m_cmdKey)
 	, m_lineNum(o.m_lineNum)
 	, m_loopCount(o.m_loopCount)
+	, m_execTimeMs(o.m_execTimeMs)
 	, m_execDurationMs(o.m_execDurationMs)
 	, m_cmd(o.m_cmd)
 	, m_paras(o.m_paras)

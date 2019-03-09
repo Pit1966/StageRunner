@@ -282,6 +282,8 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 //		myApp.lightBlack(200);
 //	}
 
+	LOGTEXT(tr("<font color=green>Start script</font> %1").arg(fxscript->name()));
+
 	// Create an executor for the script
 	ScriptExecuter *fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
 

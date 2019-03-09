@@ -80,13 +80,14 @@ void SDL2AudioBackend::pause(bool state)
 qint64 SDL2AudioBackend::currentPlayPosUs() const
 {
 	/// @todo implement me
-	return 0;
+
+	return qint64(m_runtime.elapsed()) * 1000;
 }
 
 qint64 SDL2AudioBackend::currentPlayPosMs() const
 {
 	/// @todo implement me
-	return m_runtime.elapsed();
+	return qint64(m_runtime.elapsed());
 }
 
 bool SDL2AudioBackend::seekPlayPosMs(qint64 posMs)

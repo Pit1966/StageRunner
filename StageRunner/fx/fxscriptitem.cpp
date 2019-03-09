@@ -45,10 +45,18 @@ int FxScriptItem::rawToScript(const QString &rawlines, FxScriptList &scriptlist)
 	QStringList lines = rawlines.split(';');
 	int linecnt = 0;
 	foreach (QString line, lines) {
-		QString cmd = line.section(' ',0,0,QString::SectionSkipEmpty);
-		QString paras = line.section(' ',1,-1,QString::SectionSkipEmpty);
-		FxScriptLine sl(cmd,paras);
-		scriptlist.append(sl);
+		if (!line.isEmpty() && line.at(0).isDigit()) {
+			QString time = line.section(' ',0,0,QString::SectionSkipEmpty);
+			QString cmd = line.section(' ',1,1,QString::SectionSkipEmpty);
+			QString paras = line.section(' ',2,-1,QString::SectionSkipEmpty);
+			FxScriptLine sl(time,cmd,paras);
+			scriptlist.append(sl);
+		} else {
+			QString cmd = line.section(' ',0,0,QString::SectionSkipEmpty);
+			QString paras = line.section(' ',1,-1,QString::SectionSkipEmpty);
+			FxScriptLine sl(cmd,paras);
+			scriptlist.append(sl);
+		}
 		linecnt++;
 	}
 

@@ -77,7 +77,8 @@ public:
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}
 	inline void setTargetTimeToCurrent() {eventTargetTimeMs = runTime.elapsed();}
-	inline void setEventTargetTime(qint64 ms) {eventTargetTimeMs = runTime.elapsed() + ms;}
+	inline void setEventTargetTimeRelative(qint64 ms) {eventTargetTimeMs = runTime.elapsed() + ms;}
+	inline void setEventTargetTimeAbsolute(qint64 ms) {eventTargetTimeMs = ms;}
 	QString getIdString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
@@ -198,7 +199,7 @@ protected:
 	QString getFirstParaOfString(QString &parastr);
 	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 
-	bool executeLine(FxScriptLine *line);
+	bool executeLine(FxScriptLine *line, bool & reExecDelayed);
 	bool executeCmdStart(FxScriptLine *line);
 	bool executeCmdStop(FxScriptLine *line);
 	bool executeFadeIn(FxScriptLine * line);
