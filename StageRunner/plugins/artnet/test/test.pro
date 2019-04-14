@@ -7,7 +7,9 @@ TARGET   = artnet_test
 
 QT      += core testlib network
 QT      -= gui
-LIBS    += -L../src -lartnet
+#LIBS    += -L../src -lartnet
+LIBS    += -L../../ -lartnet
+
 
 INCLUDEPATH += ../../interfaces
 INCLUDEPATH += ../src

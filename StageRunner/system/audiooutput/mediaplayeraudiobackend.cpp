@@ -222,6 +222,9 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 				audiostatus = AUDIO_STOPPED;
 			}
 		}
+		else {
+			audiostatus == AUDIO_IDLE;
+		}
 		m_currentMediaPlayerState = state;
 
 		if (m_currentAudioStatus != audiostatus) {
