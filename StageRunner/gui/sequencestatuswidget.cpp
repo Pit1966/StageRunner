@@ -2,8 +2,8 @@
 #include "fxseqitem.h"
 #include "executer.h"
 
-#define READLOCK QReadLocker(*rwlock);Q_UNUSED(rwlock);
-#define WRITELOCK QWriteLocker(*rwlock);Q_UNUSED(rwlock);
+#define READLOCK QReadLocker lock(rwlock);Q_UNUSED(lock);
+#define WRITELOCK QWriteLocker lock(rwlock);Q_UNUSED(lock);
 
 
 SeqStatusListItem::SeqStatusListItem(Executer *exec, FxItem *fx, QListWidget *list)

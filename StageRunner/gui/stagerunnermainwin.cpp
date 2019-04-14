@@ -63,10 +63,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 		delete act;
 		myapp->userSettings->pUseSDLAudio = false;
 	}
-#else
-#  ifdef IS_MAC
-	actionUse_SDL_audio->setChecked(appCentral->userSettings->pUseSDLAudio);
-#  endif
 #endif
 
 	fxListWidget->setFxList(appCentral->project->mainFxList());
@@ -74,12 +70,12 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	debugLevelSpin->setValue(debug);
 
 #ifdef IS_MAC
-	delete actionExperimental_audio_mode;
-	myapp->setAudioOutputType(OUT_MEDIAPLAYER);
-	guiSetAudioOutput(OUT_MEDIAPLAYER);
-#else
-	guiSetAudioOutput(myapp->usedAudioOutputType());
+//	delete actionExperimental_audio_mode;
+//	actionExperimental_audio_mode = nullptr;
+	myapp->userSettings->pUseSDLAudio = true;
+	myapp->userSettings->pAltAudioEngine = true;
 #endif
+	guiSetAudioOutput(myapp->usedAudioOutputType());
 
 	actionEnable_audio_FFT->setChecked(appCentral->userSettings->pFFTAudioMask > 0);
 
@@ -428,9 +424,12 @@ void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
 
 void StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
 {
-	actionExperimental_audio_mode->setChecked(type == OUT_MEDIAPLAYER || type == OUT_NONE);
-	actionUse_SDL_audio->setChecked(type == OUT_SDL2);
-	actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
+	if (actionExperimental_audio_mode)
+		actionExperimental_audio_mode->setChecked(type == OUT_MEDIAPLAYER || type == OUT_NONE);
+	if (actionUse_SDL_audio)
+		actionUse_SDL_audio->setChecked(type == OUT_SDL2);
+	if (actionClassic_audio_mode)
+		actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
 }
 
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
@@ -1003,7 +1002,8 @@ void StageRunnerMainWin::on_actionClassic_audio_mode_triggered(bool checked)
 {
 	if (checked) {
 		appCentral->setAudioOutputType(OUT_DEVICE);
-		actionExperimental_audio_mode->setChecked(false);
+		if (actionExperimental_audio_mode)
+			actionExperimental_audio_mode->setChecked(false);
 		actionUse_SDL_audio->setChecked(false);
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	}
@@ -1013,7 +1013,8 @@ void StageRunnerMainWin::on_actionUse_SDL_audio_triggered(bool arg1)
 {
 	if (arg1) {
 		appCentral->setAudioOutputType(OUT_SDL2);
-		actionExperimental_audio_mode->setChecked(false);
+		if (actionExperimental_audio_mode)
+			actionExperimental_audio_mode->setChecked(false);
 		actionClassic_audio_mode->setChecked(false);
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	};

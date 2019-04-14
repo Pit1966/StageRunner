@@ -697,7 +697,21 @@ void AppCentral::init()
 	input_assign_target_fxitem = nullptr;
 	m_moduleErrorMask = E_NO_ERROR;
 	last_global_selected_fxitem = nullptr;
+#ifdef USE_SDL
+	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
+		/* initialize sdl mixer, open up the audio device */
+		if (Mix_OpenAudio(44100,AUDIO_S16SYS,2,1024) >=0) {
+			LOGTEXT("SDL init ok");
+			m_isSDLAvailable = true;
+		} else {
+			LOGERROR("SDL init failed");
+			m_isSDLAvailable = false;
+		}
+	}
+#else
 	m_isSDLAvailable = false;
+#endif // ifdef USE_SDL
+
 
 	mainWinObj = nullptr;
 
@@ -735,17 +749,5 @@ void AppCentral::init()
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 
 
-#ifdef USE_SDL
-	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
-		/* initialize sdl mixer, open up the audio device */
-		if (Mix_OpenAudio(44100,AUDIO_S16SYS,2,1024) >=0) {
-			LOGTEXT("SDL init ok");
-			m_isSDLAvailable = true;
-		} else {
-			LOGERROR("SDL init failed");
-			m_isSDLAvailable = false;
-		}
-	}
-#endif // ifdef USE_SDL
 
 }
