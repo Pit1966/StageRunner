@@ -223,7 +223,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 			}
 		}
 		else {
-			audiostatus == AUDIO_IDLE;
+			audiostatus = AUDIO_IDLE;
 		}
 		m_currentMediaPlayerState = state;
 
