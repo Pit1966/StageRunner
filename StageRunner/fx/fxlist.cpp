@@ -99,8 +99,15 @@ void FxList::clear()
 		m_isModified = true;
 		// remove effect from list and delete it if there is no more reference
 		FxItem *fx = m_fxList.takeFirst();
-		if (!fx->refCount.deref()) {
+		if (fx->refCount == 0) {
+			qDebug() << "delete project fx" << fx->name() << "unreferenced!!";
 			delete fx;
+		}
+		else if (!fx->refCount.deref()) {
+			delete fx;
+		}
+		else {
+			qDebug() << "delete project fx" << fx->name() << "ref count:" << fx->refCount;
 		}
 	}
 }

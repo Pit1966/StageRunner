@@ -4,7 +4,10 @@
 
 #define READLOCK QReadLocker lock(rwlock);Q_UNUSED(lock);
 #define WRITELOCK QWriteLocker lock(rwlock);Q_UNUSED(lock);
+#define UNLOCK lock.unlock();
 
+/// @todo this class uses locking, but this is probably not necessary, cause this is
+/// a widget class. We do not need locking if all functions are called from main thread only.
 
 SeqStatusListItem::SeqStatusListItem(Executer *exec, FxItem *fx, QListWidget *list)
 	: QListWidgetItem(list)
@@ -57,7 +60,6 @@ bool SequenceStatusWidget::updateSequence(FxSeqItem *seq)
 	WRITELOCK;
 	SeqStatusListItem *item = fx_hash.value(seq);
 	if (item) {
-
 
 		return true;
 	}
@@ -160,9 +162,11 @@ void SequenceStatusWidget::propagateExecuter(Executer *exec)
 		case Executer::EXEC_RUNNING:
 		case Executer::EXEC_PAUSED:
 		case Executer::EXEC_FINISH:
+			UNLOCK;
 			updateExecuter(exec);
 			break;
 		default:
+			UNLOCK;
 			removeExecuter(exec);
 		}
 	} else {
@@ -170,6 +174,7 @@ void SequenceStatusWidget::propagateExecuter(Executer *exec)
 		case Executer::EXEC_RUNNING:
 		case Executer::EXEC_PAUSED:
 		case Executer::EXEC_FINISH:
+			UNLOCK;
 			appendExecuter(exec);
 			break;
 		default:
