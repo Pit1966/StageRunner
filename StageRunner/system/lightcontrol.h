@@ -50,7 +50,7 @@ public:
 	qint32 blackFxSequence(FxSeqItem *seq, qint32 time_ms);
 	qint32 blackFxItem(FxItem *fx, qint32 time_ms);
 
-	bool fillSceneFromInputUniverses(FxSceneItem *scene);
+	bool fillSceneFromInputUniverses(FxSceneItem *scene, int *feedbackActiveChannels = nullptr);
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
 	bool setYadiInOutMergeMode(quint32 mode);

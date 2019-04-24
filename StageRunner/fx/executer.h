@@ -206,7 +206,7 @@ protected:
 	bool executeFadeOut(FxScriptLine *line);
 	bool executeYadiDMXMergeMode(FxScriptLine *line);
 	bool executeLoopExt(FxScriptLine *line);
-	bool executeGrapScene(FxScriptLine *line);
+	bool executeGrabScene(FxScriptLine *line);
 
 signals:
 	void listProgressStepChanged(int step1, int step2);

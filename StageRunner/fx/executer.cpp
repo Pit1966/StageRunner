@@ -11,6 +11,7 @@
 #include "fxscriptitem.h"
 #include "usersettings.h"
 #include "qtstatictools.h"
+#include "dmxchannel.h"
 
 #include <QStringList>
 
@@ -823,7 +824,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		break;
 
 	case KW_GRAP_SCENE:
-		ok = executeGrapScene(line);
+		ok = executeGrabScene(line);
 		break;
 
 	default:
@@ -833,10 +834,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 	}
 
 	if (!ok) {
-		LOGERROR(tr("Failed to execute script line #%1 (%2) in script %3%4")
+		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': <font color=darkOrange>Failed to execute script</font> line #%2 ('<font color=#6666ff>%3</font>')%4")
+				 .arg(m_fxScriptItem->name())
 				 .arg(line->lineNumber())
 				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
-				 .arg(m_fxScriptItem->name())
 				 .arg(m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
 
 		m_lastScriptError.clear();
@@ -1110,7 +1111,7 @@ bool ScriptExecuter::executeLoopExt(FxScriptLine *line)
 	return true;
 }
 
-bool ScriptExecuter::executeGrapScene(FxScriptLine *line)
+bool ScriptExecuter::executeGrabScene(FxScriptLine *line)
 {
 	QString parastr = line->parameters();
 
@@ -1136,7 +1137,13 @@ bool ScriptExecuter::executeGrapScene(FxScriptLine *line)
 			continue;
 		}
 
-		myApp.unitLight->fillSceneFromInputUniverses(scene);
+		int backActiveChannels = 0;
+		myApp.unitLight->fillSceneFromInputUniverses(scene, &backActiveChannels);
+		if (backActiveChannels == 0) {
+			LOGTEXT(tr("Grab into scene '%1': No tube was active -> set last tube to 1!")
+					.arg(scene->name()));
+			scene->tube(scene->tubeCount()-1)->targetValue = 1;
+		}
 		scene->setModified(false);
 	}
 

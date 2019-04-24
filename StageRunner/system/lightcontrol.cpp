@@ -275,9 +275,10 @@ qint32 LightControl::blackFxItem(FxItem *fx, qint32 time_ms)
 	return num;
 }
 
-bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene)
+bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene, int *feedbackActiveChannels)
 {
 	bool ok = true;
+	feedbackActiveChannels = 0;
 	for (int i=0; i<scene->tubeCount(); i++) {
 		DmxChannel *dmxchan = scene->tube(i);
 		quint32 univ = dmxchan->dmxUniverse;
@@ -292,6 +293,8 @@ bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene)
 		qint32 targetVal = dmxchan->targetFullValue * dmxVal / 255;
 
 		dmxchan->targetValue = targetVal;
+		if (targetVal > 0 && feedbackActiveChannels)
+			*feedbackActiveChannels = *feedbackActiveChannels + 1;
 	}
 
 	return ok;

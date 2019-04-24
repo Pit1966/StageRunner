@@ -659,6 +659,7 @@ void SceneDeskWidget::on_channelCountSpin_editingFinished()
 void SceneDeskWidget::on_cloneCurrentInputButton_clicked()
 {
 	if (!origin_fxscene) return;
+
 	AppCentral::ref().unitLight->fillSceneFromInputUniverses(origin_fxscene);
 
 	setFxScene(origin_fxscene);
