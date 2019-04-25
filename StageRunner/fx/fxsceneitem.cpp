@@ -7,18 +7,21 @@
 
 FxSceneItem::FxSceneItem()
 	:FxItem()
+	,tubes(this)
 {
 	init();
 }
 
 FxSceneItem::FxSceneItem(FxList *fxList)
 	:FxItem(fxList)
+	,tubes(this)
 {
 	init();
 }
 
 FxSceneItem::FxSceneItem(const FxSceneItem &o)
 	: FxItem(o.myParentFxList)
+	, tubes(this)
 {
 	init();
 	cloneFrom(o);

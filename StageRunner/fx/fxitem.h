@@ -92,7 +92,8 @@ public:
     FxItem *tempCopyOrigin() const {return m_isTempCopyOf;}
 	static FxItemList getTempCopiesOfFx(FxItem *fx);
 
-	FxItem * parentFxItem();
+	FxItem * parentFxItem() const;
+	QString fxNamePath() const;
 
 	int generateNewID(int from = 0);
 

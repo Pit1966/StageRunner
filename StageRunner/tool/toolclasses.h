@@ -8,10 +8,6 @@
 #include <QString>
 
 
-/**
-	@author QASS GmbH <steinmeyer@qass.net>
-*/
-
 template <class Key, class T> class MutexQHash : public QHash <Key, T>
 {
 private:

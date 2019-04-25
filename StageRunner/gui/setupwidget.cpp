@@ -438,6 +438,7 @@ void SetupWidget::on_addDmxUniverseToTemplateButton_clicked()
 	fxlist->addFxScene(channels,&fxc);
 	if (fxc) {
 		fxc->setName(tr("Universe%1_%2Ch").arg(1).arg(channels));
+		fxc->generateNewID(11000);
 	}
 	fxlist->emitListChangedSignal();
 }

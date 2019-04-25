@@ -26,6 +26,7 @@ void VMsg::init()
 MessageHub::MessageHub() :
 	QObject()
   , VarSet()
+  , msglist(this)
 {
 	init();
 

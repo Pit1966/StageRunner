@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QStringList>
+#include <QDir>
 
 QtStaticTools::QtStaticTools()
 {
@@ -136,4 +137,28 @@ QStringList QtStaticTools::parameterStringSplit(const QString &parastr)
 		finalparas << para;
 
 	return finalparas;
+}
+
+/**
+ * \brief Prüfen, ob Pfad existiert und anlegen, falls nicht [static]
+ * @param path (const QString &) Pfadnahme
+ * @param ok [default: 0] Pointer auf Bool Variable. Falls != 0 wird darin vermerkt, ob der Pfad schon existiert
+ * @return true bei Erfolg bzw. wenn Pfad schon existiert
+ *
+ */
+bool QtStaticTools::checkCreateDir(const QString & path, bool * dirAlreadyExists)
+{
+	QDir dir(path);
+	if (!dir.exists()) { // Directory anlegen
+		if (dirAlreadyExists)
+			*dirAlreadyExists = false;
+		if (!dir.mkpath(path)) {
+			qWarning("Could not create path: %s",path.toLocal8Bit().data());
+			return false;
+		}
+	} else {
+		if (dirAlreadyExists)
+			*dirAlreadyExists = true;
+	}
+	return true;
 }

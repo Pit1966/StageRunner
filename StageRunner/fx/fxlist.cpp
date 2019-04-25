@@ -12,16 +12,18 @@
 #include <QDateTime>
 
 
-FxList::FxList(FxItem *parentFx) :
-	QObject()
+FxList::FxList(FxItem *parentFx)
+	: QObject()
+	, m_fxList(this)
 {
 	m_fxParent = parentFx;
 
 	init();
 }
 
-FxList::FxList(const FxList &o) :
-	QObject()
+FxList::FxList(const FxList &o)
+	: QObject()
+	, m_fxList(this)
 {
 	m_fxParent = o.m_fxParent;
 
@@ -58,8 +60,18 @@ void FxList::init()
 	showColumnMoveFlag = false;
 }
 
-void FxList::copyFrom(const FxList &o)
+/**
+ * @brief FxList::copyFrom
+ * @param o
+ * @param exactClone 1: clone keyCodes in FxItems too!
+ * @return
+ *
+ * @note By default keyCodes and fxIDs are not cloned
+ */
+bool FxList::copyFrom(const FxList &o, int exactClone)
 {
+	bool ok = true;
+
 	regid = 0;
 
 	m_fxLast = 0;
@@ -84,9 +96,15 @@ void FxList::copyFrom(const FxList &o)
 
 	// Copy Sequence FX items
 	for (int t=0; t<o.m_fxList.size(); t++) {
-		FxItem *newfx = FxItemTool::cloneFxItem(o.m_fxList.at(t),false);
-		m_fxList.append(newfx);
+		FxItem *newfx = FxItemTool::cloneFxItem(o.m_fxList.at(t), false, exactClone);
+		if (newfx) {
+			m_fxList.append(newfx);
+		} else {
+			ok = false;
+		}
 	}
+
+	return ok;
 }
 
 void FxList::clear()
@@ -265,6 +283,16 @@ bool FxList::postLoadResetScenes()
 	return was_on_stage;
 }
 
+/**
+ * @brief Generate new IDs for all FxItems in the list.
+ * @param from Begin ID creation with this ID value.
+ * @return true, if there were no conflicts with existing IDs during creation.
+ *
+ * The function takes every FxItem, one after the other and tries to generate a new
+ * ID based on the given "from" lowest ID value.
+ * If from is > NULL, it will be incremented for each list member.
+ * If the given "from" ID is already used, the next free ID is taken.
+ */
 bool FxList::recreateFxIDs(int from)
 {
 	for (FxItem *fx : m_fxList.nativeList()) {
@@ -278,7 +306,8 @@ bool FxList::recreateFxIDs(int from)
 		if (from != newid)
 			ok = false;
 
-		from++;
+		if (from != 0)
+			from++;
 	}
 
 	return ok;
@@ -380,6 +409,7 @@ bool FxList::addFxScene(int tubes, FxItem **addedFxPointer)
 {
 	FxItem *fx = addFx(FX_SCENE,tubes);
 	if (fx) {
+		fx->refCount.ref();
 		fx->setName("New Scene");
 		m_isModified = true;
 
@@ -396,6 +426,7 @@ bool FxList::addFxAudioPlayList()
 {
 	FxItem *fx = addFx(FX_AUDIO_PLAYLIST);
 	if (fx) {
+		fx->refCount.ref();
 		fx->setName("Audio play list");
 		m_isModified = true;
 		return true;
@@ -407,6 +438,7 @@ bool FxList::addFxSequence()
 {
 	FxItem *fx = addFx(FX_SEQUENCE);
 	if (fx) {
+		fx->refCount.ref();
 		fx->setName("FX Sequence");
 		m_isModified = true;
 		return true;
@@ -418,6 +450,7 @@ bool FxList::addFxScript()
 {
 	FxItem *fx = addFx(FX_SCRIPT);
 	if (fx) {
+		fx->refCount.ref();
 		fx->setName("FX Script");
 		m_isModified = true;
 		return true;
@@ -430,6 +463,7 @@ bool FxList::addFxCue()
 {
 	FxItem *fx = addFx(Fx_CUE);
 	if (fx) {
+		fx->refCount.ref();
 		fx->setName("FX Cue");
 		m_isModified = true;
 		return true;
@@ -632,4 +666,16 @@ void FxList::addFx(FxItem *newfx)
 	newfx->refCount.ref();
 	m_fxList.append(newfx);
 	m_isModified = true;
+}
+
+/**
+ * @brief Increment ref counter for all members in this list.
+ *
+ * This funktion is called after load a project.
+ */
+void FxList::refAllMembers()
+{
+	for (int t=0; t<m_fxList.size(); t++) {
+		m_fxList.at(t)->refCount.ref();
+	}
 }

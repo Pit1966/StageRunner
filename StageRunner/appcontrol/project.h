@@ -5,8 +5,28 @@
 
 class FxList;
 
-class Project : public VarSet
+class Project : public QObject, public VarSet
 {
+	Q_OBJECT
+
+public:
+	class EXPORT_RESULT {
+	public:
+		bool wasCompletelySuccessful;
+		QStringList resultMessageList;
+		QStringList errorMessageList;
+		int audioFileCopyCount;
+		int audioFileExistCount;
+		int clipFileCount;
+	public:
+		EXPORT_RESULT()
+			: wasCompletelySuccessful(true)
+			, audioFileCopyCount(0)
+			, audioFileExistCount(0)
+			, clipFileCount(0)
+		{}
+	};
+
 public:
 	pbool pAutoProceedSequence;
 	QString curProjectFilePath;					///< Stores the location of the project file, is previously saved or loaded from disk (used for project-save)
@@ -26,7 +46,10 @@ private:
 
 public:
 	Project();
+	Project(const Project &o);
 	~Project();
+
+	bool cloneProjectFrom(const Project &o);
 
 	void clear();
 
@@ -40,8 +63,13 @@ public:
 
 	inline FxList *mainFxList() {return fxList;}
 
+	bool consolidateToDir(const QString &dirname, QWidget *parentWid);
+	bool copyAllAudioItemFiles(FxList * srcFxList, const QString & destDir, EXPORT_RESULT &result);
+	bool checkFxItemList(FxList * srcFxList, EXPORT_RESULT &result);
+
 private:
 	void init();
+	bool generateProjectNameFromPath();
 };
 
 #endif // PROJECT_H

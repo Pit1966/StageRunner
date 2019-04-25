@@ -10,11 +10,18 @@ FxItemTool::FxItemTool()
 {
 }
 
-FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
+/**
+ * @brief FxItemTool::cloneFxItem
+ * @param srcItem
+ * @param renameItem
+ * @param exactClone 0 [default]: id and keyCode is not cloned, 1: keyCode is cloned
+ * @return
+ */
+FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone)
 {
-	if (!FxItem::exists(srcItem)) return 0;
+	if (!FxItem::exists(srcItem)) return nullptr;
 
-	FxItem *newFx = 0;
+	FxItem *newFx = nullptr;
 
 	switch (srcItem->fxType()) {
 	case FX_AUDIO:
@@ -23,9 +30,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
 			FxAudioItem *new_fxaudio = new FxAudioItem(*fxaudio);
 			new_fxaudio->refCount.ref();
 			newFx = new_fxaudio;
-			if(renameItem)
+			if (renameItem)
 				setClonedFxName(fxaudio,new_fxaudio);
-			new_fxaudio->setKeyCode(0);
 		}
 		break;
 	case FX_SCENE:
@@ -34,12 +40,12 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
 			FxSceneItem *new_scene = new FxSceneItem(*scene);
 			new_scene->refCount.ref();
 			newFx = new_scene;
-			if(renameItem)
+			if (renameItem)
 				setClonedFxName(scene,new_scene);
-			new_scene->setKeyCode(0);
 		}
 		break;
 	case FX_AUDIO_PLAYLIST:
+		qWarning() << __PRETTY_FUNCTION__ << "implement me!!";
 		break;
 	case FX_SEQUENCE:
 		{
@@ -47,9 +53,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
 			FxSeqItem *new_seqitem = new FxSeqItem(*seqitem);
 			new_seqitem->refCount.ref();
 			newFx = new_seqitem;
-			if(renameItem)
+			if (renameItem)
 				setClonedFxName(seqitem,new_seqitem);
-			new_seqitem->setKeyCode(0);
 		}
 		break;
 
@@ -61,13 +66,17 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem)
 			newFx = new_scriptitem;
 			if (renameItem)
 				setClonedFxName(scriptitem,new_scriptitem);
-			new_scriptitem->setKeyCode(0);
 		}
 		break;
 
 	default:
 		break;
 
+	}
+
+	if (newFx) {
+		if (exactClone == 0)
+			newFx->setKeyCode(0);
 	}
 
 	return newFx;

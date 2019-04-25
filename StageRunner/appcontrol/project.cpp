@@ -4,21 +4,51 @@
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
-#include "fxsceneitem.h"
+#include "../fx/fxsceneitem.h"
+#include "../fx/fxaudioitem.h"
+#include "../fx/fxplaylistitem.h"
 
 #include <QDateTime>
 #include <QFile>
+#include <QDir>
 
 Project::Project()
-	: VarSet()
+	: QObject()
+	, VarSet()
 {
 	init();
 	clear();
 }
 
+Project::Project(const Project &o)
+	: QObject()
+	, VarSet()
+{
+	init();
+	cloneProjectFrom(o);
+}
+
 Project::~Project()
 {
 	delete fxList;
+}
+
+bool Project::cloneProjectFrom(const Project &o)
+{
+	pAutoProceedSequence = o.pAutoProceedSequence;
+	curProjectFilePath = o.curProjectFilePath;
+	loadErrorLineNumber = 0;  // o.loadErrorLineNumber;
+	loadErrorLineString = QString(); // o.loadErrorLineString;
+	loadErrorFileNotExisting = false;
+
+	pProjectId = o.pProjectId;
+	pProjectFormat = o.pProjectFormat;
+	pProjectName = o.pProjectName;
+	pComment = o.pComment;
+
+	bool ok = fxList->copyFrom(*o.fxList, 1);
+
+	return ok;
 }
 
 void Project::clear()
@@ -49,6 +79,7 @@ bool Project::saveToFile(const QString &path)
 		curProjectFilePath = path;
 		fxList->setModified(false);
 		setModified(false);
+		generateProjectNameFromPath();
 	}
 
 
@@ -68,16 +99,35 @@ bool Project::loadFromFile(const QString &path)
 
 	bool ok = fileLoad(path,&file_exists,&line_number,&line_copy);
 
+	fxList->refAllMembers();
+
 	if (pProjectFormat >= 2) {
 		if (!ok) {
 			loadErrorLineNumber = line_number;
 			loadErrorLineString = line_copy;
 			loadErrorFileNotExisting = !file_exists;
 		} else {
+			curProjectFilePath = path;
+			generateProjectNameFromPath();
 			setModified(false);
+
+			// check project consistance and health
+			EXPORT_RESULT result;
+			ok = checkFxItemList(fxList, result);
+			if (!ok) {
+				QString msg = QString("Project load was ok, but <font color=darkOrange>consistance check found some errors</font>:<br>");
+				for (const QString &txt : result.errorMessageList) {
+					msg += QString("- %1<br>").arg(txt);
+				}
+				POPUPINFOMSG("Load project",msg);
+				ok = true;
+			}
 		}
+
 		return ok;
 	}
+
+	// this is old stuff for project file versions < 2 !!
 
 	// Now try to load FxItem VarSets (with classname "FxItem")
 	QFile file(path);
@@ -160,6 +210,179 @@ bool Project::postLoadResetFxScenes()
 	return fxList->postLoadResetScenes();
 }
 
+bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
+{
+	// First we clone the current project in order to have a playground without messing up the project.
+	Project tpro(*this);
+
+	// this will be given to export subroutines and stores export summary and messages
+	EXPORT_RESULT result;
+
+	QString proname = tpro.pProjectName;
+	proname.remove(".srp");
+	proname.remove(".SRP");
+
+	tpro.pComment = QString("Consolidated from: %1, at: %2")
+			.arg(curProjectFilePath).arg(QDateTime::currentDateTime().toString());
+	tpro.pProjectId = QDateTime::currentDateTime().toTime_t();
+
+
+	QString exportbasedir = QString("%1/SRP_%2").arg(dirname, proname);
+	if (QFile::exists(exportbasedir)) {
+		POPUPERRORMSG("Consolidate to dir"
+					  ,tr("There is already a consolidated project\n with the name \"%1\""
+						  "in directory \"%2\"")
+					  .arg(proname, dirname));
+		// return false;
+	}
+
+	QDir dir(exportbasedir);
+	if (!dir.mkpath(exportbasedir)) {
+		POPUPERRORMSG("Consolidate to dir"
+					  ,tr("Could not create target directory '%1'!")
+					  .arg(exportbasedir));
+		return false;
+	}
+
+	if (!dir.exists("audio"))
+		dir.mkdir("audio");
+
+	QString audiodir = dir.absolutePath() + QDir::separator() + "audio";
+	bool ok = tpro.copyAllAudioItemFiles(tpro.fxList, audiodir, result);
+
+	// save project file
+	QString destProFilePath = QString("%1/%2.srp").arg(exportbasedir, proname);
+	ok &= tpro.saveToFile(destProFilePath);
+
+	QString msg;
+	if (ok) {
+		msg = tr("Project export <font color=green>successfully</font>!<br><br>");
+	} else {
+		msg = tr("<font color=darkOrange>An error occured</font> during export<br>");
+	}
+
+	msg += tr("Audio files consolidated: %1<br>").arg(result.audioFileCopyCount);
+	msg += tr("Audio files references: %1<br>").arg(result.audioFileExistCount);
+
+	msg += tr("Project file location: <font color=#6666ff>%1</font><br>").arg(destProFilePath);
+
+	if (ok) {
+		POPUPINFOMSG("Consolidate",msg);
+	} else {
+		POPUPERRORMSG("Consolidate",msg);
+	}
+	return ok;
+}
+
+bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, EXPORT_RESULT &result)
+{
+	bool ok = true;
+	for (int t=0; t<srcFxList->size(); t++) {
+		FxItem *fx = srcFxList->at(t);
+		if (fx->fxType() == FX_AUDIO) {
+			FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
+			if (!fxa) continue;
+			QString srcpath = fxa->filePath();
+
+			qDebug() << "export audio" << fxa->filePath();
+
+			QString basename = QFileInfo(fxa->fileName()).completeBaseName();
+			QString suffix = QFileInfo(fxa->fileName()).suffix();
+
+			QString destpath;
+			bool done = false;
+			bool copyme = false;
+			int suffix_num = 0;
+			while (!done) {
+				destpath = QString("%1/%2%3.%4")
+						.arg(destDir)
+						.arg(basename)
+						.arg(suffix_num>0 ? QString::number(suffix_num) : QString())
+						.arg(suffix.toLower());
+
+				if (QFile::exists(destpath)) {
+					if (QFileInfo(destpath).size() == QFileInfo(srcpath).size()) {
+						// file does already exist in target dir but size is the same
+						// we assume that this file contains the same content.
+						done = true;
+						result.audioFileExistCount++;
+					} else {
+						// change target file name, since there is already a file with this name
+						suffix_num++;
+					}
+				} else {
+					copyme = true;
+					done = true;
+				}
+			}
+
+			// Change filepath to new location
+			fxa->setFilePath(destpath);
+			qDebug() << "  -->" << fxa->filePath();
+
+			if (copyme) {
+				QFile file(srcpath);
+				if (!file.copy(destpath)) {
+					ok = false;
+					result.errorMessageList.append(tr("Could not create audio file %1 (%2)")
+												   .arg(destpath)
+												   .arg(file.errorString()));
+				} else {
+					result.audioFileCopyCount++;
+				}
+			}
+		}
+	}
+
+	if (!ok)
+		result.wasCompletelySuccessful = false;
+
+	return ok;
+}
+
+/**
+ * @brief Check all FxItems belonging to the project for proper init state;
+ * @param srcFxList
+ * @param result
+ * @return true, if ALL FxItems found to be healthy and functional
+ *
+ */
+bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
+{
+	bool ok = true;
+
+	for (int t=0; t<srcFxList->size(); t++) {
+		FxItem *fx = srcFxList->at(t);
+		if (fx->fxType() == FX_AUDIO) {
+			FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
+			if (!fxa) {
+				ok = false;
+				continue;
+			}
+
+			// check if media file exists
+			QString filepath = fxa->filePath();
+			if (!QFile::exists(filepath)) {
+				ok = false;
+				result.errorMessageList.append(tr("FX: %1: Could not found media file '%2' ")
+											   .arg(fxa->fxNamePath())
+											   .arg(filepath));
+			}
+		}
+		else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
+			FxPlayListItem *fxp = dynamic_cast<FxPlayListItem*>(fx);
+			if (!fxp) {
+				ok = false;
+				continue;
+			}
+
+			// call check function recursively for list in FxPlayListItem
+			ok &= checkFxItemList(fxp->fxPlayList, result);
+		}
+	}
+
+	return ok;
+}
 
 
 void Project::init()
@@ -183,5 +406,19 @@ void Project::init()
 
 
 	addExistingVarSetList(fxList->nativeFxList(),"MainFxList",PrefVarCore::FX_ITEM);
+}
+
+bool Project::generateProjectNameFromPath()
+{
+	if (!QString(pProjectName).startsWith("Default Project"))
+		return false;
+
+	if (curProjectFilePath.isEmpty())
+		return false;
+
+	QFileInfo fi(curProjectFilePath);
+	QString name = fi.completeBaseName();
+	pProjectName = name;
+	return true;
 }
 

@@ -15,6 +15,7 @@
 #include "fxclipitem.h"
 #include "fxscriptitem.h"
 #include "dmxchanproperty.h"
+#include "fxlist.h"
 
 #include <QSettings>
 #include <QDebug>
@@ -257,26 +258,27 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							}
 							else if (var->contextClass == PrefVarCore::FX_ITEM) {
 								VarSetList<FxItem*> *varsetlist = reinterpret_cast<VarSetList<FxItem*>*>(var->p_refvar);
-								FxItem *item = 0;
+								FxList *fxlist = reinterpret_cast<FxList*>(varsetlist->parentVoid);
+								FxItem *item = nullptr;
 								PrefVarCore::VarClass contextclass = PrefVarCore::getVarClass(curContextClassName);
 								switch (contextclass) {
 								case PrefVarCore::FX_AUDIO_ITEM:
-									item = new FxAudioItem(0);
+									item = new FxAudioItem(fxlist);
 									break;
 								case PrefVarCore::FX_SCENE_ITEM:
-									item = new FxSceneItem(0);
+									item = new FxSceneItem(fxlist);
 									break;
 								case PrefVarCore::FX_PLAYLIST_ITEM:
-									item = new FxPlayListItem(0);
+									item = new FxPlayListItem(fxlist);
 									break;
 								case PrefVarCore::FX_SEQUENCE_ITEM:
-									item = new FxSeqItem(0);
+									item = new FxSeqItem(fxlist);
 									break;
 								case PrefVarCore::FX_CLIP_ITEM:
-									item = new FxClipItem(0);
+									item = new FxClipItem(fxlist);
 									break;
 								case PrefVarCore::FX_SCRIPT_ITEM:
-									item = new FxScriptItem(0);
+									item = new FxScriptItem(fxlist);
 									break;
 								default:
 									break;

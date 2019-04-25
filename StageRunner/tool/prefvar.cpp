@@ -139,14 +139,14 @@ void PrefVarCore::init()
 
 QVariant PrefVarCore::get_value() const
 {
-	if (debug)
+	if (debug > 1 || function == FUNC_NORMAL)
 		qDebug() << Q_FUNC_INFO << "'get_value' not implemented by" << myname;
 	return QVariant();
 }
 
 void PrefVarCore::set_value(QVariant val)
 {
-	if (debug)
+	if (debug > 1 || function == FUNC_NORMAL)
 		qDebug() << Q_FUNC_INFO << "'set_value' not implemented by" << myname << " set:" << val;
 }
 

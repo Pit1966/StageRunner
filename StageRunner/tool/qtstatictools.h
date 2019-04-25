@@ -19,6 +19,7 @@ public:
 	static QRect stringToQRect(const QString &rs);
 	static QStringList parameterStringSplit(const QString &parastr);
 
+	static bool checkCreateDir(const QString &path, bool *dirAlreadyExists);
 };
 
 #endif // QTSTATICTOOLS_H

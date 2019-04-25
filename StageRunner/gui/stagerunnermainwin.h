@@ -75,12 +75,13 @@ public slots:
 
 private slots:
 	void on_addAudioFxButton_clicked();
-	void on_actionSave_Project_as_triggered();
 	void on_actionLoad_Project_triggered();
 	void on_actionNew_Project_triggered();
 	void on_actionEdit_Mode_toggled(bool arg1);
 	void on_actionSetup_triggered();
 	void on_actionSave_Project_triggered();
+	void on_actionSave_Project_as_triggered();
+	void on_actionConsolidate_Project_triggered();
 	void on_actionExit_StageRunner_triggered();
 	void on_addFxSceneButton_clicked();
 	void on_debugLevelSpin_valueChanged(int arg1);
@@ -95,6 +96,7 @@ private slots:
 	void on_actionInfo_triggered();
 	void on_addFxSeqButton_clicked();
 	void on_actionExperimental_audio_mode_triggered(bool checked);
+	void on_actionClassic_audio_mode_triggered(bool checked);
 	void on_actionUse_SDL_audio_triggered(bool arg1);
 	void on_actionOpen_FxItem_triggered();
 	void on_saveTemplatesButton_clicked();
@@ -105,11 +107,8 @@ private slots:
 	void on_actionShow_Sequence_Status_triggered();
 	void on_saveUniverseButton_clicked();
 	void on_loadUniverseButton_clicked();
-
 	void on_actionVirtualDmxOutput_triggered(bool checked);
 
-
-	void on_actionClassic_audio_mode_triggered(bool checked);
 
 private:
 	void init();

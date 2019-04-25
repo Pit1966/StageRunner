@@ -1,6 +1,7 @@
 #include "dmxuniverseproperty.h"
 
 DmxUniverseProperty::DmxUniverseProperty()
+	: dmxChanLayout(this)
 {
 	init();
 }

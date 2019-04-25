@@ -38,6 +38,7 @@ void PluginConfig::init()
 
 
 PluginMapping::PluginMapping()
+	: pluginLineConfigs(this)
 {
 	init();
 }

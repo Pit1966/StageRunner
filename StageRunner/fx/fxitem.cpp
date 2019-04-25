@@ -198,16 +198,33 @@ FxItemList FxItem::getTempCopiesOfFx(FxItem *fx)
  * @brief Get the parent FxItem
  * @return Pointer to FxItem or NULL if no parent exists (e.g. FxItem is part of main fx list)
  *
- * If an FxItem is in the FxList of a FxSeqItem or FxAudioItem than it has a parent FxItem that contains
+ * If an FxItem is in the FxList of a FxSeqItem or FxPlayListItem than it has a parent FxItem that contains
  * this list. So this function evaluates if a parent FxItem exists and returns a pointer to it
  */
-FxItem *FxItem::parentFxItem()
+FxItem *FxItem::parentFxItem() const
 {
 	FxItem *parentfx = 0;
 	if (myParentFxList) {
 		parentfx = myParentFxList->parentFx();
 	}
 	return parentfx;
+}
+
+/**
+ * @brief Returns complete FxItem name path, if FxItems are nested.
+ *
+ * e.G. "Playlist Pause" -> "Song 1"
+ */
+QString FxItem::fxNamePath() const
+{
+	QString pname = name();
+
+	if (parentFxItem()) {
+		pname.prepend(" > ");
+		pname.prepend(parentFxItem()->fxNamePath());
+	}
+
+	return pname;
 }
 
 int FxItem::generateNewID(int from)

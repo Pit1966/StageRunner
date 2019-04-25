@@ -686,7 +686,7 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 	}
 
 	if (tlist.isEmpty()) {
-		LOGERROR(tr("Script '%1': Target parameter missing! Line #%2")
+		LOGERROR(tr("Script '%1':  Line #%2: <font color=darkOrange>Target parameter missing!</font>")
 				 .arg(m_fxScriptItem->name())
 				 .arg(line->lineNumber()));
 
@@ -699,10 +699,10 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 		FxItem *fx = FxItem::findFxById(id);
 		if (!fx) {
 			searchmode = 0;
-			LOGTEXT(tr("Script '%1': <font color=darkOrange>FX with ID #%2 not found!</font> Line #%3")
+			LOGTEXT(tr("Script '%1':  Line #%2: <font color=darkOrange>FX with ID #%3 not found!</font>")
 					.arg(m_fxScriptItem->name())
-					.arg(id)
-					.arg(line->lineNumber()));
+					.arg(line->lineNumber())
+					.arg(id));
 		} else {
 			fxList.append(fx);
 		}
@@ -724,10 +724,10 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 		}
 		QList<FxItem*>list = FxItem::findFxByName(sname,sm);
 		if (list.isEmpty()) {
-			LOGTEXT(tr("Script '%1': <font color=darkOrange>No FX with name '%2' found!</font> Line #%3")
+			LOGTEXT(tr("Script '<font color=#6666ff>%1</font>': Line #%2:  <font color=darkOrange>No FX with name '%3' found!</font>")
 					.arg(m_fxScriptItem->name())
-					.arg(name)
-					.arg(line->lineNumber()));
+					.arg(line->lineNumber())
+					.arg(name));
 		}
 		else {
 			fxList.append(list);
@@ -834,7 +834,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 	}
 
 	if (!ok) {
-		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': <font color=darkOrange>Failed to execute script</font> line #%2 ('<font color=#6666ff>%3</font>')%4")
+		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': Line #%2: <font color=darkOrange>Failed to execute script line</font> ('<font color=#6666ff>%3</font>')%4")
 				 .arg(m_fxScriptItem->name())
 				 .arg(line->lineNumber())
 				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))

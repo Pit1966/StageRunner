@@ -151,8 +151,9 @@ private:
 //  class pbool
 // -------------------------------------------------------------------------------------------------------------------
 
-class pbool : public PrefVarCore {
-	Q_OBJECT;
+class pbool : public PrefVarCore
+{
+	Q_OBJECT
 private:
 	bool pvalue;
 	bool pdefault;
@@ -164,14 +165,18 @@ public:
 	inline operator bool () { return pvalue; }								///< Zuweisung (Type conversion):  qint64 val = pint64
 	inline operator QObject * () { return this; }
 	inline bool value() {return pvalue;}
+	/// Zuweisung: pbool val = pbool
+	inline pbool & operator = (const pbool &o) {
+		if (pvalue != o.pvalue) {
+			pvalue = o.pvalue;
+			modified_f = true;
+		}
+		pdefault = o.pdefault;
+		return *this;
+	}
 	/// Zuweisung: pbool val = bool
 	inline pbool & operator= (bool val) {
 		if (val!=pvalue) {pvalue=val;modified_f=true;}
-		return *this;
-	}
-	/// Zuweisung: pbool val = pbool
-	inline pbool & operator= (const pbool &o) {
-		if (o.pvalue != pvalue) {pvalue = o.pvalue;modified_f=true;}
 		return *this;
 	}
 
@@ -195,8 +200,9 @@ public slots:
 //  class pint64
 // -------------------------------------------------------------------------------------------------------------------
 
-class pint64 : public PrefVarCore {
-	Q_OBJECT;
+class pint64 : public PrefVarCore
+{
+	Q_OBJECT
 private:
 	qint64 pmin;
 	qint64 pmax;
@@ -207,9 +213,19 @@ public:
 	pint64();
 	~pint64();
 	void initPara(const QString & name, qint64 p_min, qint64 p_max, qint64 p_default, const QString & descrip = "");
-	inline operator qint64 () { return pvalue; }								///< Zuweisung (Type conversion):  qint64 val = pint64
+	inline operator qint64 () { return pvalue; }			///< Zuweisung (Type conversion):  qint64 val = pint64
 	inline operator QObject * () { return this; }
 	inline qint64 value() {return pvalue;}
+	inline pint64 & operator = (const pint64 &o) {
+		pmin = o.pmin;
+		pmax = o.pmax;
+		if (pvalue != o.pvalue) {
+			pvalue = o.pvalue;
+			modified_f = true;
+		}
+		pdefault = o.pdefault;
+		return *this;
+	}
 	/// Zuweisung: pint64 val = qint64
 	inline pint64 & operator = (qint64 val) {
 		if (pvalue!=val) {pvalue=val;modified_f=true;}
@@ -220,9 +236,9 @@ public:
 	void cloneFrom(const PrefVarCore &other);
 
 private:
-	void set_value(QVariant val);								/// Implementierung der virtuellen Methode aus der Basisklasse
-	QVariant get_value() const;									///< Implementierung der virtuellen Methode aus der Basisklasse
-	QVariant get_default() const {return pdefault;} 			///< Implementierung der virtuellen Methode aus der Basisklasse
+	void set_value(QVariant val);							/// Implementierung der virtuellen Methode aus der Basisklasse
+	QVariant get_value() const;								///< Implementierung der virtuellen Methode aus der Basisklasse
+	QVariant get_default() const {return pdefault;} 		///< Implementierung der virtuellen Methode aus der Basisklasse
 
 public slots:
 	void setValue(qint64 val);
@@ -235,8 +251,9 @@ public slots:
 //  class pint32
 // -------------------------------------------------------------------------------------------------------------------
 
-class pint32 : public PrefVarCore {
-	Q_OBJECT;
+class pint32 : public PrefVarCore
+{
+	Q_OBJECT
 private:
 	qint32 pmin;
 	qint32 pmax;
@@ -250,6 +267,16 @@ public:
 	inline operator qint32 () { return pvalue; }				///< Zuweisung (Type conversion):  qint32 val = pint32
 	inline operator QObject * () { return this; }
 	inline qint32 value() {return pvalue;}
+	inline pint32 & operator = (const pint32 &o) {
+		pmin = o.pmin;
+		pmax = o.pmax;
+		pdefault = o.pdefault;
+		if (pvalue != o.pvalue) {
+			pvalue = o.pvalue;
+			modified_f = true;
+		}
+		return *this;
+	}
 	/// Zuweisung: pint64 val = qint32
 	inline pint32 & operator = (qint32 val) {
 		if (pvalue != val) {pvalue=val;modified_f=true;}
@@ -274,8 +301,9 @@ public slots:
 //  class pstring
 // -------------------------------------------------------------------------------------------------------------------
 
-class pstring : public PrefVarCore {
-	Q_OBJECT;
+class pstring : public PrefVarCore
+{
+	Q_OBJECT
 private:
 	QString pvalue;
 	QString pdefault;
@@ -287,6 +315,14 @@ public:
 	inline QString value() {return pvalue;}
 	inline int size() {return pvalue.size();}
 	inline operator QString () {return pvalue;}
+	inline pstring & operator = (const pstring &o) {
+		pdefault = o.pdefault;
+		if (pvalue != o.pvalue) {
+			pvalue = o.pvalue;
+			modified_f = true;
+		}
+		return *this;
+	}
 	inline bool operator == (const QString & str) {return pvalue == str;}
 	inline pstring & operator = (const QString val) {
 		if (pvalue != val) {pvalue=val;modified_f=true;}

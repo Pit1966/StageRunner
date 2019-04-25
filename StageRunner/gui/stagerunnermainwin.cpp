@@ -309,6 +309,7 @@ void StageRunnerMainWin::initAppDefaults()
 	if (appCentral->userSettings->pShowVirtualDMXMonitor) {
 		virtDmxWidget->show();
 		virtDmxWidget->setSmallHeightEnabled(true);
+		actionVirtualDmxOutput->setChecked(true);
 	}
 
 	restore_window();
@@ -548,6 +549,7 @@ void StageRunnerMainWin::setProjectName(const QString &path)
 		title += QFileInfo(path).baseName();
 		appCentral->project->curProjectFilePath = path;
 	}
+
 	QWidget::setWindowTitle(title);
 }
 
@@ -587,7 +589,6 @@ void StageRunnerMainWin::on_actionSave_Project_triggered()
 
 }
 
-
 void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 {
 	QString path = QFileDialog::getSaveFileName(this,tr("Choose Project save path")
@@ -608,6 +609,19 @@ void StageRunnerMainWin::on_actionSave_Project_as_triggered()
 	}
 
 }
+
+void StageRunnerMainWin::on_actionConsolidate_Project_triggered()
+{
+	Project *pro = appCentral->project;
+	if (pro->curProjectFilePath.isEmpty())
+		return;
+
+	QString path = QFileDialog::getExistingDirectory(this,tr("Choose Consolidate folder")
+												,QDir::homePath());
+
+	pro->consolidateToDir(path, this);
+}
+
 
 void StageRunnerMainWin::on_actionLoad_Project_triggered()
 {
@@ -1081,3 +1095,4 @@ void StageRunnerMainWin::on_actionVirtualDmxOutput_triggered(bool checked)
 	virtDmxWidget->setSmallHeightEnabled(true);
 	appCentral->userSettings->pShowVirtualDMXMonitor = checked;
 }
+

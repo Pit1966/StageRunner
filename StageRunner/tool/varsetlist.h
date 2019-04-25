@@ -9,8 +9,14 @@ class VarSetList
 {
 private:
 	QList <T>list;
+
 public:
-	VarSetList() {
+	void *parentVoid;
+
+public:
+	VarSetList(void *parent)
+		: parentVoid(parent)
+	{
 		// Lets test if the template class is derived from VarSet and is a Pointer
 		// Should cause a compilation error if not
 		VarSet *test = (T)0;

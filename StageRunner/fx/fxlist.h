@@ -52,7 +52,7 @@ public:
 	FxList(const FxList &o);
 	~FxList();
 
-	void copyFrom(const FxList &o);
+	bool copyFrom(const FxList &o, int exactClone = 0);
 
 	void clear();
 
@@ -106,6 +106,7 @@ public:
 
 	FxItem * addFx(int fxtype, int option = -1);
 	void addFx(FxItem *newfx);
+	void refAllMembers();
 	FxItem * findSequenceFollower(FxItem *curfx = 0);
 	FxItem * findSequenceForerunner(FxItem *curfx = 0);
 	FxItem * findSequenceRandomFxItem();
