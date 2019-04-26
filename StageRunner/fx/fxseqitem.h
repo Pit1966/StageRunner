@@ -36,7 +36,7 @@ public:
 	void setRandomized(bool state);
 	QString widgetPosition() {return widgetPos;}
 	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
-
+	FxList *fxList() const override {return seqList;}
 
 private:
 	void init();

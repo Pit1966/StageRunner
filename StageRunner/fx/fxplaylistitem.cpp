@@ -15,10 +15,25 @@ FxPlayListItem::FxPlayListItem(FxList *fxList)
 	init();
 }
 
+FxPlayListItem::FxPlayListItem(const FxPlayListItem &o)
+	: FxAudioItem(o.myParentFxList)
+	, fxPlayList(new FxList(this))
+	, itemObj(new FxItemObj(this))
+{
+	init();
+	copyFrom(o);
+}
+
 FxPlayListItem::~FxPlayListItem()
 {
 	delete fxPlayList;
 	delete itemObj;
+}
+
+void FxPlayListItem::copyFrom(const FxPlayListItem &o)
+{
+	cloneFrom(o);
+	fxPlayList->copyFrom(*o.fxPlayList);
 }
 
 void FxPlayListItem::setLoopValue(qint32 val)

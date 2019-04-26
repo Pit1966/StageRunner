@@ -162,8 +162,10 @@ void StageRunnerMainWin::initConnects()
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
 	connect(logThread,SIGNAL(errorMsgReceived(QString,QString)),this,SLOT(showErrorMsg(QString,QString)));
 
-	qApp->installEventFilter(this);
+	// Project <-> Mainwindow
+	connect(appCentral->project, SIGNAL(projectLoadedOrSaved(QString,bool)), this, SLOT(addRecentProject(QString)));
 
+	qApp->installEventFilter(this);
 }
 
 void StageRunnerMainWin::setup_gui_docks()
@@ -221,6 +223,21 @@ void StageRunnerMainWin::restore_window()
 		restoreState(set.value("MainWinDocks").toByteArray());
 		resize(set.value("MainWinSize").toSize());
 	}
+
+	// Get recent projects
+//	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("PROJECT");
+	set.beginReadArray("RecentProjects");
+	for (int t=0; t<20; t++) {
+		set.setArrayIndex(t);
+		QString path = set.value("Path").toString();
+		if (path.size() && !m_recentProjectPaths.contains(path))
+			m_recentProjectPaths.append(path);
+	}
+	set.endArray();
+	set.endGroup();
+	// update Menu -> Recent Projects
+	addRecentProject("");
 }
 
 void StageRunnerMainWin::updateButtonStyles(QString style)
@@ -434,6 +451,65 @@ void StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
 		actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
 }
 
+/**
+ * @brief Manage recent project list (both internal and GUI)
+ * @param pathname Project path you wish to add to recent project list
+ *
+ * Max. 10 Projects are hold in the list.
+ */
+void StageRunnerMainWin::addRecentProject(const QString &pathname)
+{
+	bool updateGuiOnly = pathname.isEmpty();
+
+	if (!updateGuiOnly) {
+		// this brings current pathname to front without producing doubles
+		m_recentProjectPaths.removeAll(pathname);
+		m_recentProjectPaths.prepend(pathname);
+		while (m_recentProjectPaths.size() > 20)
+			m_recentProjectPaths.removeLast();
+
+		QSettings set(QSETFORMAT,APPNAME);
+		set.beginGroup("PROJECT");
+		set.beginWriteArray("RecentProjects");
+		for (int t=0; t<m_recentProjectPaths.size(); t++) {
+			set.setArrayIndex(t);
+			set.setValue("Path",m_recentProjectPaths.at(t));
+		}
+		for (int t=m_recentProjectPaths.size(); t<20; t++) {
+			set.setArrayIndex(t);
+			set.remove("Path");
+		}
+		set.endArray();
+		set.endGroup();
+	}
+
+	QAction *ma = findChild<QAction*>("actionFileRecentProjects");
+	if (ma) {
+		QMenu *m = ma->menu();
+		if (!m) {
+			m = new QMenu();
+			m->setToolTipsVisible(true);
+			ma->setMenu(m);
+		} else {
+			m->clear();
+		}
+
+		for (int t=0; t<m_recentProjectPaths.size(); t++) {
+			QString path = m_recentProjectPaths.at(t);
+			QString name = QFileInfo(path).completeBaseName();
+			QAction *a = new QAction(name, this);
+			a->setToolTip(path);
+			a->setObjectName(path);
+			connect(a, SIGNAL(triggered(bool)), this, SLOT(onRecentProjectActionSelected()));
+//			QIcon icon;
+//			icon.addFile(QString::fromUtf8(":/button/images48/drive-harddisk.png"), QSize(20,20), QIcon::Normal, QIcon::Off);
+//			a->setIcon(icon);
+
+			m->addAction(a);
+		}
+	}
+}
+
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
 {
 	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
@@ -554,6 +630,33 @@ void StageRunnerMainWin::setProjectName(const QString &path)
 	QWidget::setWindowTitle(title);
 }
 
+void StageRunnerMainWin::loadProject(const QString &path)
+{
+	clearProject();
+
+	appCentral->userSettings->pLastProjectLoadPath = path;
+	Project *pro = appCentral->project;
+	if ( !pro->loadFromFile(path) ) {
+		QMessageBox::critical(this,tr("Load error")
+							  ,tr("An error occured while loading file:\n\n%1\n\nLine %2:'%3'")
+							  .arg(appCentral->userSettings->pLastProjectLoadPath)
+							  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
+		setProjectName("");
+
+		// Remove from recent project list
+		m_recentProjectPaths.removeAll(path);
+		addRecentProject("");
+	} else {
+		pro->postLoadProcessFxList();
+		pro->postLoadResetFxScenes();
+
+		fxListWidget->setFxList(pro->mainFxList());
+		copyProjectSettingsToGui();
+		setProjectName(path);
+
+	}
+}
+
 void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 {
 	LOGTEXT(tr("Set Application GUI style to '%1'").arg(style));
@@ -630,26 +733,8 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Project")
 												,appCentral->userSettings->pLastProjectLoadPath
 												,tr("StageRunner projects (*.srp);;All files (*)"));
-	if (path.size()) {
-		clearProject();
-
-		appCentral->userSettings->pLastProjectLoadPath = path;
-		Project *pro = appCentral->project;
-		if ( !pro->loadFromFile(path) ) {
-			QMessageBox::critical(this,tr("Load error")
-								  ,tr("An error occured while loading file:\n\n%1\n\nLine %2:'%3'")
-								  .arg(appCentral->userSettings->pLastProjectLoadPath)
-								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
-			setProjectName("");
-		} else {
-			pro->postLoadProcessFxList();
-			pro->postLoadResetFxScenes();
-
-			fxListWidget->setFxList(pro->mainFxList());
-			copyProjectSettingsToGui();
-			setProjectName(path);
-		}
-	}
+	if (path.size())
+		loadProject(path);
 }
 
 void StageRunnerMainWin::on_actionNew_Project_triggered()
@@ -851,24 +936,23 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 
 }
 
-void StageRunnerMainWin::showInfoMsg(QString where, QString text)
+void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 {
-	Q_UNUSED(where);
 	QString msg = QString("<font color=#222222>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
 	msg_dialog->setStyleSheet("");
 	msg_dialog->showMessage(text,where);
-	msg_dialog->resize(600,200);
+	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("Information"));
 }
 
-void StageRunnerMainWin::showErrorMsg(QString where, QString text)
+void StageRunnerMainWin::showErrorMsg(const QString &where, const QString &text)
 {
 	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
 	msg_dialog->setStyleSheet("color:#ff7722;");
 	msg_dialog->showMessage(text,where);
-	msg_dialog->resize(600,200);
+	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
 }
 
@@ -1050,6 +1134,7 @@ void StageRunnerMainWin::on_loadTemplatesButton_clicked()
 {
 	appCentral->templateFxList->fileLoad(appCentral->userSettings->pFxTemplatePath);
 	appCentral->templateFxList->fxList()->recreateFxIDs(11000);
+	appCentral->templateFxList->fxList()->refAllMembers();
 	templateWidget->refreshList();
 }
 
@@ -1095,5 +1180,10 @@ void StageRunnerMainWin::on_actionVirtualDmxOutput_triggered(bool checked)
 	virtDmxWidget->setVisible(checked);
 	virtDmxWidget->setSmallHeightEnabled(true);
 	appCentral->userSettings->pShowVirtualDMXMonitor = checked;
+}
+
+void StageRunnerMainWin::onRecentProjectActionSelected()
+{
+	loadProject(sender()->objectName());
 }
 

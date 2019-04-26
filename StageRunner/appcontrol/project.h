@@ -16,6 +16,7 @@ public:
 		bool wasCompletelySuccessful;
 		bool allowUserInteraction;
 		bool setModified;
+		bool exportWithRelativeFxFilePaths;
 		QStringList resultMessageList;
 		QStringList errorMessageList;
 		int audioFileCopyCount;
@@ -26,6 +27,7 @@ public:
 			: wasCompletelySuccessful(true)
 			, allowUserInteraction(false)
 			, setModified(false)
+			, exportWithRelativeFxFilePaths(false)
 			, audioFileCopyCount(0)
 			, audioFileExistCount(0)
 			, clipFileCount(0)
@@ -45,6 +47,7 @@ protected:
 	pint32 pProjectFormat;
 	pstring pProjectName;
 	pstring pComment;
+	pstring pProjectBaseDir;					///< this is the base directory for relative path names in FXs
 
 private:
 	FxList *fxList;
@@ -79,6 +82,9 @@ public:
 private:
 	void init();
 	bool generateProjectNameFromPath();
+
+signals:
+	void projectLoadedOrSaved(const QString &path, bool ok);
 };
 
 #endif // PROJECT_H

@@ -26,46 +26,43 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone
 	switch (srcItem->fxType()) {
 	case FX_AUDIO:
 		{
-			FxAudioItem *fxaudio = reinterpret_cast<FxAudioItem*>(srcItem);
+			FxAudioItem *fxaudio = static_cast<FxAudioItem*>(srcItem);
 			FxAudioItem *new_fxaudio = new FxAudioItem(*fxaudio);
 			new_fxaudio->refCount.ref();
 			newFx = new_fxaudio;
-			if (renameItem)
-				setClonedFxName(fxaudio,new_fxaudio);
 		}
 		break;
 	case FX_SCENE:
 		{
-			FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(srcItem);
+			FxSceneItem *scene = static_cast<FxSceneItem*>(srcItem);
 			FxSceneItem *new_scene = new FxSceneItem(*scene);
 			new_scene->refCount.ref();
 			newFx = new_scene;
-			if (renameItem)
-				setClonedFxName(scene,new_scene);
 		}
 		break;
 	case FX_AUDIO_PLAYLIST:
-		qWarning() << __PRETTY_FUNCTION__ << "implement me!!";
+		{
+			FxPlayListItem *fxplay = static_cast<FxPlayListItem*>(srcItem);
+			FxPlayListItem *new_fxplay = new FxPlayListItem(*fxplay);
+			new_fxplay->refCount.ref();
+			newFx = new_fxplay;
+		}
 		break;
 	case FX_SEQUENCE:
 		{
-			FxSeqItem *seqitem = reinterpret_cast<FxSeqItem*>(srcItem);
+			FxSeqItem *seqitem = static_cast<FxSeqItem*>(srcItem);
 			FxSeqItem *new_seqitem = new FxSeqItem(*seqitem);
 			new_seqitem->refCount.ref();
 			newFx = new_seqitem;
-			if (renameItem)
-				setClonedFxName(seqitem,new_seqitem);
 		}
 		break;
 
 	case FX_SCRIPT:
 		{
-			FxScriptItem *scriptitem = reinterpret_cast<FxScriptItem*>(srcItem);
+			FxScriptItem *scriptitem = static_cast<FxScriptItem*>(srcItem);
 			FxScriptItem *new_scriptitem = new FxScriptItem(*scriptitem);
 			new_scriptitem->refCount.ref();
 			newFx = new_scriptitem;
-			if (renameItem)
-				setClonedFxName(scriptitem,new_scriptitem);
 		}
 		break;
 
@@ -75,6 +72,8 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone
 	}
 
 	if (newFx) {
+		if (renameItem)
+			setClonedFxName(srcItem,newFx);
 		if (exactClone == 0)
 			newFx->setKeyCode(0);
 	}

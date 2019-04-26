@@ -64,7 +64,7 @@ FxSceneItem::~FxSceneItem()
 		delete tubes.takeFirst();
 	}
 
-	qDebug() << "FxSceneItem deleted" << name();
+	// qDebug() << "FxSceneItem deleted" << name();
 }
 
 void FxSceneItem::setLoopValue(qint32 val)

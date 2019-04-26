@@ -77,7 +77,7 @@ public:
 		return list.isEmpty();
 	}
 
-	inline int indexOf(const T &t, int from = 0) {
+	inline int indexOf(const T &t, int from = 0) const {
 		return list.indexOf(t, from);
 	}
 

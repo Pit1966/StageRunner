@@ -137,6 +137,11 @@ public:
 	virtual void resetFx() = 0;
 	virtual QString widgetPosition() {return QString();}
 	virtual void setWidgetPosition(const QString &geometry) {Q_UNUSED(geometry);}
+	/**
+	 * @brief Reimplement this if your derived Fx class provides an FxList. (e.g. FxPlayList)
+	 * @return
+	 */
+	virtual FxList * fxList() const {return nullptr;}
 
 private:
 	void init();

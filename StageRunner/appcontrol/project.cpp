@@ -83,8 +83,8 @@ bool Project::saveToFile(const QString &path)
 		fxList->setModified(false);
 		setModified(false);
 		generateProjectNameFromPath();
+		emit projectLoadedOrSaved(path, ok);
 	}
-
 
 	return ok;
 }
@@ -112,7 +112,6 @@ bool Project::loadFromFile(const QString &path)
 		} else {
 			curProjectFilePath = path;
 			generateProjectNameFromPath();
-			setModified(false);
 
 			// check project consistance and health
 			EXPORT_RESULT result;
@@ -125,6 +124,16 @@ bool Project::loadFromFile(const QString &path)
 				POPUPINFOMSG("Load project",msg);
 				ok = true;
 			}
+			else if (result.resultMessageList.size()) {
+				QString msg = QString("<font color=green>Project loaded successfully!</font><br>");
+				for (const QString &txt : result.resultMessageList) {
+					msg += QString("- %1<br>").arg(txt);
+				}
+				POPUPINFOMSG("Load project",msg);
+			}
+
+			setModified(result.setModified);
+			emit projectLoadedOrSaved(path, ok);
 		}
 
 		return ok;
@@ -220,6 +229,7 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 
 	// this will be given to export subroutines and stores export summary and messages
 	EXPORT_RESULT result;
+	result.exportWithRelativeFxFilePaths = true;
 
 	QString proname = tpro.pProjectName;
 	proname.remove(".srp");
@@ -229,7 +239,6 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 			.arg(curProjectFilePath).arg(QDateTime::currentDateTime().toString());
 	tpro.pProjectId = QDateTime::currentDateTime().toTime_t();
 
-
 	QString exportbasedir = QString("%1/SRP_%2").arg(dirname, proname);
 	if (QFile::exists(exportbasedir)) {
 		POPUPERRORMSG("Consolidate to dir"
@@ -238,6 +247,8 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 					  .arg(proname, dirname));
 		// return false;
 	}
+
+	tpro.pProjectBaseDir = exportbasedir;
 
 	QDir dir(exportbasedir);
 	if (!dir.mkpath(exportbasedir)) {
@@ -254,7 +265,7 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 	bool ok = tpro.copyAllAudioItemFiles(tpro.fxList, audiodir, result);
 
 	// save project file
-	QString destProFilePath = QString("%1/%2.srp").arg(exportbasedir, proname);
+	QString destProFilePath = QString("%1/%2 (consolidated).srp").arg(exportbasedir, proname);
 	ok &= tpro.saveToFile(destProFilePath);
 
 	QString msg;
@@ -320,7 +331,18 @@ bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, 
 			}
 
 			// Change filepath to new location
-			fxa->setFilePath(destpath);
+			if (result.exportWithRelativeFxFilePaths) {
+				QString basedir = pProjectBaseDir;
+				QString relpath = destpath;
+				if (basedir.size() && relpath.startsWith(basedir)) {
+					relpath.remove(0,basedir.size());
+					if (relpath.startsWith("/"))
+						relpath.remove(0,1);
+				}
+				fxa->setFilePath(relpath);
+			} else {
+				fxa->setFilePath(destpath);
+			}
 			qDebug() << "  -->" << fxa->filePath();
 
 			if (copyme) {
@@ -334,6 +356,16 @@ bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, 
 					result.audioFileCopyCount++;
 				}
 			}
+		}
+		else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
+			FxPlayListItem *fxp = dynamic_cast<FxPlayListItem*>(fx);
+			if (!fxp) {
+				ok = false;
+				continue;
+			}
+
+			// call export function recursively for list in FxPlayListItem
+			ok &= copyAllAudioItemFiles(fxp->fxPlayList, destDir, result);
 		}
 	}
 
@@ -359,38 +391,45 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 	for (int t=0; t<srcFxList->size(); t++) {
 		FxItem *fx = srcFxList->at(t);
 		if (fx->fxType() == FX_AUDIO) {
-			FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
-			if (!fxa) {
-				ok = false;
-				continue;
-			}
 
 			// check if media file exists
-			QString filepath = fxa->filePath();
+			QString filepath = fx->filePath();
 			bool foundfile = QFile::exists(filepath);
+			if (!foundfile && pProjectBaseDir.size() && !filepath.startsWith("/")) {
+				QFileInfo fi(curProjectFilePath);
+				QString pbasedir = fi.absoluteDir().path();
+				QString fullpath = QString("%1/%2").arg(pbasedir, filepath);
+				foundfile = QFile::exists(fullpath);
+				if (foundfile) {
+					fx->setFilePath(fullpath);
+					result.setModified = true;
+				}
+			}
+
 			if (!foundfile) {
 				// try to find in media dirs first.
 				for (const QString &dirname : m_mediaFileSearchDirs) {
-					QString newpath = QString("%1/%2").arg(dirname, fxa->fileName());
+					QString newpath = QString("%1/%2").arg(dirname, fx->fileName());
 					if (QFile::exists(newpath)) {
 						foundfile = true;
-						fxa->setFilePath(newpath);
+						fx->setFilePath(newpath);
 						break;
 					}
 				}
 
 				if (foundfile) {
-					LOGTEXT(tr("Auto changed file path for FX: %1 to %2").arg(fxa->name(),fxa->filePath()));
+					result.resultMessageList.append(tr("Auto corrected file path for FX: %1 to %2")
+													.arg(fx->name(),fx->filePath()));
 				}
 				else if (always_open_find_file_dialog) {
-					foundfile = showFindFileDialog(fxa);
+					foundfile = showFindFileDialog(fx);
 				}
 				else if (never_open_find_file_dialog) {
 
 				}
 				else {
 					int ret = 0;
-					foundfile = askForFindFileDialog(fxa, &ret);
+					foundfile = askForFindFileDialog(fx, &ret);
 					if (ret == QMessageBox::YesToAll)
 						always_open_find_file_dialog = true;
 					else if (ret == QMessageBox::NoToAll)
@@ -400,7 +439,7 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 				if (!foundfile) {
 					ok = false;
 					result.errorMessageList.append(tr("%1: Could not found media file '%2' ")
-												   .arg(fxa->fxNamePath())
+												   .arg(fx->fxNamePath())
 												   .arg(filepath));
 				} else {
 					result.setModified = true;
@@ -498,6 +537,7 @@ void Project::init()
 	addExistingVar(pProjectFormat,"ProjectFormat");
 	addExistingVar(pProjectName,"ProjectName");
 	addExistingVar(pComment,"Comment");
+	addExistingVar(pProjectBaseDir,"ProjectBaseDir");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
 	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");

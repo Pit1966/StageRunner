@@ -32,6 +32,7 @@ FxSeqItem::~FxSeqItem()
 
 void FxSeqItem::copyFrom(const FxSeqItem &o)
 {
+	cloneFrom(o);
 	seqList->copyFrom(*o.seqList);
 	setLoopValue(o.loopValue());
 	blackOtherSeqOnStart = o.blackOtherSeqOnStart;

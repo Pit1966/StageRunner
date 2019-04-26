@@ -129,7 +129,7 @@ unix:!macx {
     conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$INSTALLROOT/$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::NativeFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
+	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::NativeFormat,QSettings::UserScope,APP_ORG_STRING\" >> $$CONFIGFILE &&
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 win32 {

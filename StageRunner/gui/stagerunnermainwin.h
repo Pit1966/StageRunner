@@ -30,6 +30,8 @@ private:
 	PsDockWidget *sequence_status_dock;
 	PsDockWidget *template_dock;
 
+	QStringList m_recentProjectPaths;				///< This list holds the pathnames of last used projects (max. 10)
+
 public:
 	QStyle *dialWidgetStyle;
 	QTextEdit *logWidget;
@@ -58,20 +60,22 @@ public:
 	void openFxSeqItemPanel(FxSeqItem *fx);
 	void openFxScriptPanel(FxScriptItem *fx);
 	void setProjectName(const QString &path);
+	void loadProject(const QString &path);
 
 private:
 	bool eventFilter(QObject *obj, QEvent *event);
 	void closeEvent(QCloseEvent *event);
 
 public slots:
-	void showInfoMsg(QString where, QString text);
-	void showErrorMsg(QString where, QString text);
+	void showInfoMsg(const QString &where, const QString &text);
+	void showErrorMsg(const QString &where, const QString &text);
 	void setApplicationGuiStyle(QString style);
 	void updateButtonStyles(QString style = "");
 	void openFxPropertyEditor(FxItem *item);
 	void openFxItemPanel(FxItem *fx);
 	void applyUserSettingsToGui(UserSettings *set);
 	void guiSetAudioOutput(AUDIO::AudioOutputType type);
+	void addRecentProject(const QString &pathname);
 
 private slots:
 	void on_addAudioFxButton_clicked();
@@ -108,6 +112,7 @@ private slots:
 	void on_saveUniverseButton_clicked();
 	void on_loadUniverseButton_clicked();
 	void on_actionVirtualDmxOutput_triggered(bool checked);
+	void onRecentProjectActionSelected();
 
 
 private:

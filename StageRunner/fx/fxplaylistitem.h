@@ -20,12 +20,16 @@ private:
 
 public:
 	FxPlayListItem(FxList *fxList);
+	FxPlayListItem(const FxPlayListItem &o);
 	~FxPlayListItem();
+
+	void copyFrom(const FxPlayListItem &o);
 
 	void setLoopValue(qint32 val);
 	qint32 loopValue() const;
 	bool isRandomized();
 	void setRandomized(bool state);
+	FxList *fxList() const override {return fxPlayList;}
 
 
 	bool addAudioTrack(const QString & path);

@@ -182,6 +182,11 @@ FxItem *FxList::getFxByListIndex(int idx) const
 	return 0;
 }
 
+int FxList::indexOf(const FxItem *fx) const
+{
+	return m_fxList.indexOf(const_cast<FxItem *>(fx));
+}
+
 int FxList::loopTimes()
 {
 	if (m_fxParent) {
@@ -677,5 +682,8 @@ void FxList::refAllMembers()
 {
 	for (int t=0; t<m_fxList.size(); t++) {
 		m_fxList.at(t)->refCount.ref();
+		// check if FxItem has a child list
+		if (m_fxList.at(t)->fxList())
+			m_fxList.at(t)->fxList()->refAllMembers();
 	}
 }

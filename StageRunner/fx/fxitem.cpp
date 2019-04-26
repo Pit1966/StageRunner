@@ -9,7 +9,7 @@ qint32 FxItem::m_lowestIdForGenerator = 1;
 
 FxItem::FxItem()
 	: VarSet()
-	, myParentFxList(0)
+	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {
 	init();
@@ -29,7 +29,7 @@ FxItem::FxItem(FxList *fxList)
 
 FxItem::FxItem(const FxItem &o)
 	: VarSet()
-	, myParentFxList(0)
+	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {
 	init();
@@ -224,6 +224,11 @@ QString FxItem::fxNamePath() const
 	if (parentFxItem()) {
 		pname.prepend(" > FX:");
 		pname.prepend(parentFxItem()->fxNamePath());
+	}
+	else if (parentFxList()) {
+		int pos = parentFxList()->indexOf(this) + 1;
+		if (pos > 0)
+			pname.prepend(QString("<b>%1</b> : ").arg(pos,3,10,QLatin1Char('0')));
 	}
 
 	return pname;

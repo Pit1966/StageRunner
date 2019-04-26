@@ -72,7 +72,7 @@ FxListWidget::~FxListWidget()
 	// Remove tracking information in global FxListWidget list
 	globalFxListWidgetList.removeOne(this);
 
-	qDebug("FxListWidget destroyed");
+	// qDebug("FxListWidget destroyed");
 }
 
 void FxListWidget::setFxList(FxList *fxlist)

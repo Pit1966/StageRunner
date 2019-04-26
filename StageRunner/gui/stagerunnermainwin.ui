@@ -302,6 +302,7 @@
     <addaction name="actionNew_Project"/>
     <addaction name="separator"/>
     <addaction name="actionLoad_Project"/>
+    <addaction name="actionFileRecentProjects"/>
     <addaction name="separator"/>
     <addaction name="actionSave_Project"/>
     <addaction name="actionSave_Project_as"/>
@@ -511,6 +512,11 @@
   <action name="actionConsolidate_Project">
    <property name="text">
     <string>Consolidate Project</string>
+   </property>
+  </action>
+  <action name="actionFileRecentProjects">
+   <property name="text">
+    <string>Recent Projects</string>
    </property>
   </action>
  </widget>

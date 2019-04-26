@@ -74,6 +74,8 @@ public:
 	FxItem * getFxByListIndex(int idx) const;
 	FxItem * getFirstFx() const {return getFxByListIndex(0);}
 
+	int indexOf(const FxItem *fx) const;
+
 	inline int regId() const {return regid;}
 	inline void setRegId(int new_id) {regid = new_id;}
 	inline void setAutoProceedSequence(bool state) {myAutoProceedFlag = state;}
