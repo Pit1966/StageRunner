@@ -51,7 +51,6 @@ public:
 	FxAudioItem(FxList *fxList);
 	FxAudioItem(const FxAudioItem &o);
 	FxAudioItem(const QString &path, FxList *fxList);
-	void setFilePath(const QString &path);
 	AudioSeqState seqStatus() const {return mySeqStatus;}
 	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
 	qint32 loopValue() const {return loopTimes;}

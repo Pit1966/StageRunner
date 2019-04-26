@@ -713,6 +713,7 @@ void AppCentral::init()
 #endif // ifdef USE_SDL
 
 
+	mainwinWidget = nullptr;
 	mainWinObj = nullptr;
 
 	userSettings = new UserSettings;
@@ -747,7 +748,4 @@ void AppCentral::init()
 
 	// AppCentral -> AudioControl Thread (unitAudio)
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-
-
-
 }

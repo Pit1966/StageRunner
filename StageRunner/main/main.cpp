@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
 	mywin->updateButtonStyles(myapp->userSettings->pDialKnobStyle);
 	mywin->show();
 	mywin->initConnects();
+	// Bring to top
+	mywin->raise();
 	// This also loads the last project
 	mywin->initAppDefaults();
 

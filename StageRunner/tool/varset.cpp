@@ -248,7 +248,8 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							}
 							else if (var->contextClass == PrefVarCore::FX_AUDIO_ITEM) {
 								VarSetList<FxAudioItem*> *varsetlist = reinterpret_cast<VarSetList<FxAudioItem*>*>(var->p_refvar);
-								FxAudioItem *item = new FxAudioItem(0);
+								FxList *fxlist = reinterpret_cast<FxList*>(varsetlist->parentVoid);
+								FxAudioItem *item = new FxAudioItem(fxlist);
 								varsetlist->append(item);
 								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;

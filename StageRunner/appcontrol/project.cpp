@@ -1,6 +1,7 @@
 #include "project.h"
 #include "config.h"
 #include "log.h"
+#include "appcentral.h"
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
@@ -11,6 +12,8 @@
 #include <QDateTime>
 #include <QFile>
 #include <QDir>
+#include <QMessageBox>
+#include <QFileDialog>
 
 Project::Project()
 	: QObject()
@@ -350,6 +353,8 @@ bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, 
 bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 {
 	bool ok = true;
+	bool always_open_find_file_dialog = false;
+	bool never_open_find_file_dialog = false;
 
 	for (int t=0; t<srcFxList->size(); t++) {
 		FxItem *fx = srcFxList->at(t);
@@ -362,11 +367,44 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 
 			// check if media file exists
 			QString filepath = fxa->filePath();
-			if (!QFile::exists(filepath)) {
-				ok = false;
-				result.errorMessageList.append(tr("FX: %1: Could not found media file '%2' ")
-											   .arg(fxa->fxNamePath())
-											   .arg(filepath));
+			bool foundfile = QFile::exists(filepath);
+			if (!foundfile) {
+				// try to find in media dirs first.
+				for (const QString &dirname : m_mediaFileSearchDirs) {
+					QString newpath = QString("%1/%2").arg(dirname, fxa->fileName());
+					if (QFile::exists(newpath)) {
+						foundfile = true;
+						fxa->setFilePath(newpath);
+						break;
+					}
+				}
+
+				if (foundfile) {
+					LOGTEXT(tr("Auto changed file path for FX: %1 to %2").arg(fxa->name(),fxa->filePath()));
+				}
+				else if (always_open_find_file_dialog) {
+					foundfile = showFindFileDialog(fxa);
+				}
+				else if (never_open_find_file_dialog) {
+
+				}
+				else {
+					int ret = 0;
+					foundfile = askForFindFileDialog(fxa, &ret);
+					if (ret == QMessageBox::YesToAll)
+						always_open_find_file_dialog = true;
+					else if (ret == QMessageBox::NoToAll)
+						never_open_find_file_dialog = true;
+				}
+
+				if (!foundfile) {
+					ok = false;
+					result.errorMessageList.append(tr("%1: Could not found media file '%2' ")
+												   .arg(fxa->fxNamePath())
+												   .arg(filepath));
+				} else {
+					result.setModified = true;
+				}
 			}
 		}
 		else if (fx->fxType() == FX_AUDIO_PLAYLIST) {
@@ -382,6 +420,70 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 	}
 
 	return ok;
+}
+
+bool Project::askForFindFileDialog(FxItem *fx, int *ret)
+{
+
+	QMessageBox dialog(AppCentral::ref().mainwinWidget);
+	dialog.setTextFormat(Qt::RichText);
+	dialog.setText(tr("Could not find media file: <font color=orange>%1</font>").arg(fx->fileName()));
+	dialog.setInformativeText(tr("Do you want to search for it now?"));
+	dialog.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::YesToAll | QMessageBox::NoToAll);
+	dialog.setDetailedText(tr("File is referenced by:\n"
+							  "%1\n"
+							  "Full media file path is:\n"
+							  "%2\n").arg(fx->name(),fx->filePath()));
+
+	int retval = dialog.exec();
+
+	if (ret)
+		*ret = retval;
+
+	switch (retval) {
+	case QMessageBox::Yes:
+	case QMessageBox::YesAll:
+		return showFindFileDialog(fx);
+
+	default:
+		break;
+	}
+
+	return false;
+}
+
+bool Project::showFindFileDialog(FxItem *fx)
+{
+	QFileInfo fi(fx->filePath());
+	QStringList filters;
+	filters << QString("Media file (*.%1)").arg(fi.suffix());
+	filters << QString("All (*)");
+
+	QFileDialog dialog(AppCentral::ref().mainwinWidget);
+	dialog.setFileMode(QFileDialog::ExistingFile);
+	dialog.setViewMode(QFileDialog::Detail);
+	dialog.setNameFilters(filters);
+	dialog.setDirectory(fi.absoluteDir());
+	dialog.selectFile(fx->fileName());
+	dialog.setOption(QFileDialog::ReadOnly);
+	dialog.setWindowTitle(tr("Locate file: %1").arg(fx->fileName()));
+	dialog.setLabelText(QFileDialog::Accept,tr("Apply to FX"));
+
+	dialog.exec();
+
+	QStringList sel = dialog.selectedFiles();
+	if (sel.size()) {
+		QString newpath = sel.first();
+		if (QFile::exists(newpath)) {
+			fx->setFilePath(newpath);
+			QString newdir = QFileInfo(newpath).absolutePath();
+			if (!m_mediaFileSearchDirs.contains(newdir))
+				m_mediaFileSearchDirs.append(newdir);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 

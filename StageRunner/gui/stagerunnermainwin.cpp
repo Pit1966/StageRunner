@@ -91,6 +91,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 		DEBUGERROR("There seems to be more than one StageRunnerMainWin instance!");
 	}
 	myapp->mainWinObj = this;
+	myapp->mainwinWidget = this;
 }
 
 StageRunnerMainWin::~ StageRunnerMainWin()

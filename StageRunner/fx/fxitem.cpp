@@ -1,6 +1,8 @@
 #include "fxitem.h"
 #include "fxlist.h"
 
+#include <QFileInfo>
+
 QList<FxItem*>*FxItem::global_fx_list = 0;
 QMutex FxItem::global_fx_lock(QMutex::Recursive);
 qint32 FxItem::m_lowestIdForGenerator = 1;
@@ -220,7 +222,7 @@ QString FxItem::fxNamePath() const
 	QString pname = name();
 
 	if (parentFxItem()) {
-		pname.prepend(" > ");
+		pname.prepend(" > FX:");
 		pname.prepend(parentFxItem()->fxNamePath());
 	}
 
@@ -242,6 +244,14 @@ void FxItem::setName(const QString &name)
 		setModified(true);
 	}
 }
+
+void FxItem::setFilePath(const QString &path)
+{
+	QFileInfo fi(path);
+	myPath = path;
+	myFile = fi.fileName();
+}
+
 
 void FxItem::setKeyCode(int code)
 {

@@ -63,6 +63,7 @@ private:
 	QThread *m_mainThread;
 
 public:
+	QWidget *mainwinWidget;
 	QObject *mainWinObj;
 	AudioControl *unitAudio;
 	LightControl *unitLight;

@@ -37,13 +37,6 @@ FxAudioItem::FxAudioItem(const QString &path, FxList *fxList)
 	myName = fi.completeBaseName();
 }
 
-void FxAudioItem::setFilePath(const QString &path)
-{
-	QFileInfo fi(path);
-	myPath = path;
-	myFile = fi.fileName();
-}
-
 /**
  * @brief Initialize the FxAudioItem for executing it in a sequence
  *

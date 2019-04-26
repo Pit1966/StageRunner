@@ -104,6 +104,8 @@ public:
 	inline int initID() const {return myInitId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}
+	void setFilePath(const QString &path);
+
 	void setKeyCode(int code);
 	inline int keyCode() const {return myKey;}
 

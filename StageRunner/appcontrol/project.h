@@ -4,6 +4,7 @@
 #include "tool/varset.h"
 
 class FxList;
+class FxItem;
 
 class Project : public QObject, public VarSet
 {
@@ -13,6 +14,8 @@ public:
 	class EXPORT_RESULT {
 	public:
 		bool wasCompletelySuccessful;
+		bool allowUserInteraction;
+		bool setModified;
 		QStringList resultMessageList;
 		QStringList errorMessageList;
 		int audioFileCopyCount;
@@ -21,6 +24,8 @@ public:
 	public:
 		EXPORT_RESULT()
 			: wasCompletelySuccessful(true)
+			, allowUserInteraction(false)
+			, setModified(false)
 			, audioFileCopyCount(0)
 			, audioFileExistCount(0)
 			, clipFileCount(0)
@@ -43,6 +48,7 @@ protected:
 
 private:
 	FxList *fxList;
+	QStringList m_mediaFileSearchDirs;			///< these are temporary entries for directories which will be scanned, if a file is not found on load
 
 public:
 	Project();
@@ -66,6 +72,9 @@ public:
 	bool consolidateToDir(const QString &dirname, QWidget *parentWid);
 	bool copyAllAudioItemFiles(FxList * srcFxList, const QString & destDir, EXPORT_RESULT &result);
 	bool checkFxItemList(FxList * srcFxList, EXPORT_RESULT &result);
+
+	bool askForFindFileDialog(FxItem *fx, int *ret);
+	bool showFindFileDialog(FxItem *fx);
 
 private:
 	void init();
