@@ -432,6 +432,7 @@ void AudioSlot::onPlayerStatusChanged(AudioStatus status)
 		case AUDIO_RUNNING:
 			if (current_fx)
 				current_fx->startInProgress = false;
+			//fall through
 		default:
 			run_status = status;
 		}
