@@ -12,11 +12,13 @@ LightDeskStyle::LightDeskStyle(const QString &basekey) :
 	pixButtonL = QPixmap(":/gfx/customwidget/desk_knob_left.png");
 	pixButtonM = QPixmap(":/gfx/customwidget/desk_knob_mid.png");
 	pixButtonR = QPixmap(":/gfx/customwidget/desk_knob_right.png");
+
+	setObjectName("lightdesk");
 }
 
 LightDeskStyle::~LightDeskStyle()
 {
-	qDebug("LightDeskStyle destroyed");
+	// qDebug("LightDeskStyle destroyed");
 }
 
 void LightDeskStyle::polish(QPalette &pal)

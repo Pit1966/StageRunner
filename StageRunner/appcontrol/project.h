@@ -1,7 +1,7 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
-#include "tool/varset.h"
+#include "../tool/varset.h"
 
 class FxList;
 class FxItem;
@@ -58,6 +58,8 @@ public:
 	Project(const Project &o);
 	~Project();
 
+	inline QString projectName() const {return pProjectName;}
+
 	bool cloneProjectFrom(const Project &o);
 
 	void clear();
@@ -72,7 +74,7 @@ public:
 
 	inline FxList *mainFxList() {return fxList;}
 
-	bool consolidateToDir(const QString &dirname, QWidget *parentWid);
+	bool consolidateToDir(const QString &exportProName, const QString &dirname, QWidget *parentWid);
 	bool copyAllAudioItemFiles(FxList * srcFxList, const QString & destDir, EXPORT_RESULT &result);
 	bool checkFxItemList(FxList * srcFxList, EXPORT_RESULT &result);
 
@@ -85,6 +87,8 @@ private:
 
 signals:
 	void projectLoadedOrSaved(const QString &path, bool ok);
+	void progressWanted(int loRange, int hiRange);
+	void progressed(int val);
 };
 
 #endif // PROJECT_H

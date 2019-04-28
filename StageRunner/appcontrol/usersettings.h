@@ -14,6 +14,7 @@ public:
 	pstring pLastProjectSavePath;
 	pstring pLastProjectLoadPath;
 	pstring pLastAudioTrackImportPath;
+	pstring pLastCondolidatePath;
 	pint32 pAudioBufferSize;
 	pbool pProhibitAudioDoubleStart;
 	pint32 pAudioAllowReactivateTime;

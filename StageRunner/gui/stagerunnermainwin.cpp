@@ -34,7 +34,7 @@
 #include "fxscriptwidget.h"
 #include "gui/customwidget/psinfodialog.h"
 #include "gui/customwidget/psdockwidget.h"
-// #include "configrev.h"
+#include "gui/consolidatedialog.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -223,6 +223,7 @@ void StageRunnerMainWin::restore_window()
 		restoreState(set.value("MainWinDocks").toByteArray());
 		resize(set.value("MainWinSize").toSize());
 	}
+	set.endGroup();
 
 	// Get recent projects
 //	QSettings set(QSETFORMAT,APPNAME);
@@ -660,6 +661,7 @@ void StageRunnerMainWin::loadProject(const QString &path)
 void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 {
 	LOGTEXT(tr("Set Application GUI style to '%1'").arg(style));
+
 	if (style == "" || style == "LightDesk") {
 		QApplication::setStyle(new LightDeskStyle);
 	}
@@ -720,10 +722,14 @@ void StageRunnerMainWin::on_actionConsolidate_Project_triggered()
 	if (pro->curProjectFilePath.isEmpty())
 		return;
 
-	QString path = QFileDialog::getExistingDirectory(this,tr("Choose Consolidate folder")
-												,QDir::homePath());
+	ConsolidateDialog dialog(pro, this);
 
-	pro->consolidateToDir(path, this);
+	int ret = dialog.exec();
+
+	if (ret == QDialog::Accepted) {
+
+	}
+
 }
 
 
@@ -944,6 +950,7 @@ void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 	msg_dialog->showMessage(text,where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("Information"));
+
 }
 
 void StageRunnerMainWin::showErrorMsg(const QString &where, const QString &text)

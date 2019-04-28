@@ -156,7 +156,8 @@ SOURCES += \
 	../widgets/scripteditwidget.cpp \
     ../widgets/editormarginwidget.cpp \
     ../system/audioslot.cpp \
-	../system/audiooutput/iodeviceaudiobackend.cpp
+	../system/audiooutput/iodeviceaudiobackend.cpp \
+    ../gui/consolidatedialog.cpp
 
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
@@ -274,7 +275,8 @@ HEADERS  += \
 	../widgets/scripteditwidget.h \
     ../widgets/editormarginwidget.h \
     ../system/audioslot.h \
-	../system/audiooutput/iodeviceaudiobackend.h
+	../system/audiooutput/iodeviceaudiobackend.h \
+    ../gui/consolidatedialog.h
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h
@@ -296,7 +298,8 @@ FORMS    += \
 	../gui/fxplaylistwidget.ui \
 	../gui/sequencestatuswidget.ui \
 	../gui/customwidget/psinfodialog.ui \
-	../gui/fxscriptwidget.ui
+	../gui/fxscriptwidget.ui \
+    ../gui/consolidatedialog.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

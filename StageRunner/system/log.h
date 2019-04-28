@@ -123,8 +123,8 @@ public:
 	void appendLogStdError(const QString & where, int e_num , const QString & para = "");
 	void setColor(const QColor &col);
 	QWidget *setStatusWidget(QWidget * wid);
-	void errorPopupMsg(const QString & where, const QString & text);
-	void infoPopupMsg(const QString & where, const QString & text);
+	void errorPopupMsg(const QString & where, const QString & text, QWidget *parentWid = nullptr);
+	void infoPopupMsg(const QString & where, const QString & text, QWidget *parentWid = nullptr);
 	bool openLogfileAppend();
 	void closeLogfile();
 	void flushLogfile();

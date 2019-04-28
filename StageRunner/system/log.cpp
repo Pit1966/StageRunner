@@ -18,7 +18,8 @@
 #include <QProgressDialog>
 #include <QTime>
 #include <QApplication>
-
+#include <QMessageBox>
+#include <QStyle>
 
 
 /// Statics
@@ -561,21 +562,37 @@ void Log::closeLogfile()
 	logfile_mutex.unlock();
 }
 
-void Log::errorPopupMsg(const QString & where, const QString & text)
+void Log::errorPopupMsg(const QString & where, const QString & text, QWidget *parentWid)
 {
-	// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
-	QString logtext = text;
-	logtext.replace("\n"," > ");
-	LOGERROR(QString("%1: %2").arg(where,logtext));
-	emit errorMsgReceived(where, text);
+	if (parentWid) {
+		QMessageBox mb(QMessageBox::Information, where, text, 0, parentWid);
+
+		if (QApplication::style()->objectName() == "lightdesk")
+			mb.setStyleSheet("background: #444444");
+		mb.exec();
+	} else {
+		// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
+		QString logtext = text;
+		logtext.replace("\n"," > ");
+		LOGERROR(QString("%1: %2").arg(where,logtext));
+		emit errorMsgReceived(where, text);
+	}
 }
-void Log::infoPopupMsg(const QString & where, const QString & text)
+
+void Log::infoPopupMsg(const QString & where, const QString & text, QWidget *parentWid)
 {
-	// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
-	QString logtext = text;
-	logtext.replace("\n"," > ");
-	LOGTEXT(QString("%1: %2").arg(where,logtext));
-	emit infoMsgReceived(where, text);
+	if (parentWid) {
+		QMessageBox mb(QMessageBox::Critical, where, text, 0, parentWid);
+		if (QApplication::style()->objectName() == "lightdesk")
+			mb.setStyleSheet("background: #444444");
+		mb.exec();
+	} else {
+		// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
+		QString logtext = text;
+		logtext.replace("\n"," > ");
+		LOGTEXT(QString("%1: %2").arg(where,logtext));
+		emit infoMsgReceived(where, text);
+	}
 }
 
 

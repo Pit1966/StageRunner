@@ -222,8 +222,10 @@ bool Project::postLoadResetFxScenes()
 	return fxList->postLoadResetScenes();
 }
 
-bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
+bool Project::consolidateToDir(const QString &exportProName, const QString &dirname, QWidget *parentWid)
 {
+	QString where = tr("Consolidate");
+
 	// First we clone the current project in order to have a playground without messing up the project.
 	Project tpro(*this);
 
@@ -231,30 +233,34 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 	EXPORT_RESULT result;
 	result.exportWithRelativeFxFilePaths = true;
 
-	QString proname = tpro.pProjectName;
+	QString proname = exportProName;
 	proname.remove(".srp");
 	proname.remove(".SRP");
 
 	tpro.pComment = QString("Consolidated from: %1, at: %2")
 			.arg(curProjectFilePath).arg(QDateTime::currentDateTime().toString());
 	tpro.pProjectId = QDateTime::currentDateTime().toTime_t();
+	tpro.pProjectName = proname;
+
 
 	QString exportbasedir = QString("%1/SRP_%2").arg(dirname, proname);
 	if (QFile::exists(exportbasedir)) {
-		POPUPERRORMSG("Consolidate to dir"
+		POPUPERRORMSG(where
 					  ,tr("There is already a consolidated project\n with the name \"%1\""
 						  "in directory \"%2\"")
-					  .arg(proname, dirname));
-		// return false;
+					  .arg(proname, dirname)
+					  ,parentWid);
+		return false;
 	}
 
 	tpro.pProjectBaseDir = exportbasedir;
 
 	QDir dir(exportbasedir);
 	if (!dir.mkpath(exportbasedir)) {
-		POPUPERRORMSG("Consolidate to dir"
+		POPUPERRORMSG(where
 					  ,tr("Could not create target directory '%1'!")
-					  .arg(exportbasedir));
+					  .arg(exportbasedir)
+					  ,parentWid);
 		return false;
 	}
 
@@ -265,12 +271,12 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 	bool ok = tpro.copyAllAudioItemFiles(tpro.fxList, audiodir, result);
 
 	// save project file
-	QString destProFilePath = QString("%1/%2 (consolidated).srp").arg(exportbasedir, proname);
+	QString destProFilePath = QString("%1/%2.srp").arg(exportbasedir, proname);
 	ok &= tpro.saveToFile(destProFilePath);
 
 	QString msg;
 	if (ok) {
-		msg = tr("Project export <font color=green>successfully</font>!<br><br>");
+		msg = tr("Project export <font color=green><b>successfully</b></font>!<br><br>");
 	} else {
 		msg = tr("<font color=darkOrange>An error occured</font> during export<br>");
 	}
@@ -278,20 +284,22 @@ bool Project::consolidateToDir(const QString &dirname, QWidget *parentWid)
 	msg += tr("Audio files consolidated: %1<br>").arg(result.audioFileCopyCount);
 	msg += tr("Audio files references: %1<br>").arg(result.audioFileExistCount);
 
-	msg += tr("Project file location: <font color=#6666ff>%1</font><br>").arg(destProFilePath);
+	msg += tr("Project file location: <font color=#8888ff>%1</font><br>").arg(destProFilePath);
 
 	if (ok) {
-		POPUPINFOMSG("Consolidate",msg);
+		POPUPINFOMSG(where,msg,parentWid);
 	} else {
-		POPUPERRORMSG("Consolidate",msg);
+		POPUPERRORMSG(where,msg,parentWid);
 	}
 	return ok;
 }
 
 bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, EXPORT_RESULT &result)
 {
+	emit progressWanted(0, srcFxList->size());
 	bool ok = true;
 	for (int t=0; t<srcFxList->size(); t++) {
+		emit progressed(t);
 		FxItem *fx = srcFxList->at(t);
 		if (fx->fxType() == FX_AUDIO) {
 			FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);

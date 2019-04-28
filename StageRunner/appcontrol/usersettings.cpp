@@ -37,6 +37,7 @@ void UserSettings::init()
 	addExistingVar(pLastAudioTrackImportPath,"LastAudioTrackImportPath");
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
+	addExistingVar(pLastCondolidatePath,"LastConsolidatePath");
 	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,5000);
 //				   ,QObject::tr("Audio buffer size for audio playback in the audio slots"));
 	addExistingVar(pProhibitAudioDoubleStart,"ProhibitAudioDoubleStart",true);
