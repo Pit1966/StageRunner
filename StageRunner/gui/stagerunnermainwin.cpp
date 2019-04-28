@@ -935,6 +935,9 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	set.setValue("MainWinDocks",saveState());
 	set.endGroup();
 
+	bool videoWinEnabled = appCentral->unitAudio->videoWidget() && appCentral->unitAudio->videoWidget()->isVisible();
+	set.setValue("VideoWinEnabled",videoWinEnabled);
+
 	QMainWindow::closeEvent(event);
 
 	FxListWidget::destroyAllFxListWidgets();

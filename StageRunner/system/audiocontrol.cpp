@@ -914,10 +914,11 @@ void AudioControl::init()
 void AudioControl::createMediaPlayInstances()
 {
 	UserSettings *set = myApp.userSettings;
+	AudioOutputType outputType = myApp.usedAudioOutputType();
 
 	// This is for audio use
 	for (int t=0; t<used_slots; t++) {
-		AudioSlot *slot = new AudioSlot(this, t, myApp.usedAudioOutputType(), set->pSlotAudioDevice[t]);
+		AudioSlot *slot = new AudioSlot(this, t, outputType, set->pSlotAudioDevice[t]);
 		audioSlots.append(slot);
 		AudioErrorType aerror = slot->lastAudioError();
 		if (aerror == AUDIO_ERR_DECODER) {

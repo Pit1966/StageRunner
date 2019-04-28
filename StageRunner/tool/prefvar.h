@@ -163,7 +163,6 @@ public:
 	~pbool();
 	void initPara(const QString & name, bool p_default, const QString & descrip = "");
 	inline operator bool () const { return pvalue; }								///< Zuweisung (Type conversion):  qint64 val = pint64
-	inline operator QObject * () { return this; }
 	inline bool value() {return pvalue;}
 	/// Zuweisung: pbool val = pbool
 	inline pbool & operator = (const pbool &o) {
@@ -214,7 +213,6 @@ public:
 	~pint64();
 	void initPara(const QString & name, qint64 p_min, qint64 p_max, qint64 p_default, const QString & descrip = "");
 	inline operator qint64 () const { return pvalue; }			///< Zuweisung (Type conversion):  qint64 val = pint64
-	inline operator QObject * () { return this; }
 	inline qint64 value() {return pvalue;}
 	inline pint64 & operator = (const pint64 &o) {
 		pmin = o.pmin;
@@ -265,7 +263,6 @@ public:
 	~pint32();
 	void initPara(const QString & name, qint32 p_min, qint32 p_max, qint32 p_default, const QString & descrip = "");
 	inline operator qint32 () const { return pvalue; }				///< Zuweisung (Type conversion):  qint32 val = pint32
-	inline operator QObject * () { return this; }
 	inline qint32 value() {return pvalue;}
 	inline pint32 & operator = (const pint32 &o) {
 		pmin = o.pmin;

@@ -34,7 +34,6 @@ void PsVideoWidget::setPrefsSettings()
 void PsVideoWidget::saveCurrentStateToPrefs()
 {
 	QSettings set(QSETFORMAT,APPNAME);
-	set.setValue("VideoWinEnabled",!isHidden());
 	set.beginGroup("GuiSettings");
 	set.setValue("VideoWinGeometry",saveGeometry());
 	set.setValue("VideoWinPos",pos());
