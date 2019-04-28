@@ -92,6 +92,7 @@ public:
 	FxScriptLine *at(int lineNum);
 	qint64 execDuration();
 
+
 private:
 	void calculateDuration();
 };

@@ -6,8 +6,19 @@ Fixme:
 Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
 einfadens drücken
 
+Projekt Kopie (durch Verwendung des CopyConstructors):
+Falls nicht die Option "keep FxItemIds" angewählt ist, müssen in den FxScriptItems,
+die Kommandos wie "start id 7" verwenden, die IDs umgerechnet werden.
+Es existiert schon eine Map, die die alten IDs auf die neuen abbildet, aber ein
+Scriptparser muss hierfür noch integriert werden.
+
+Start FxAudioItem im Script:
+In der GUI (AudioControl) wird die Ablaufzeit der Sounddatei nicht zurückgesetzt.
+
+
 Features:
 
-Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten
+(ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten
 als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewartet und dann ausgefadet
+
 
