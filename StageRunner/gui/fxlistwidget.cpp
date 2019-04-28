@@ -588,7 +588,11 @@ void FxListWidget::init()
 void FxListWidget::closeEvent(QCloseEvent *)
 {
 	if (origin_fxitem) {
-		origin_fxitem->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
+		if (FxItem::exists(origin_fxitem)) {
+			origin_fxitem->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
+		} else {
+			qWarning() << Q_FUNC_INFO << "origin fxitem not existing, but pointer is not NULL";
+		}
 	}
 }
 
@@ -1443,13 +1447,17 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
 			AppCentral::instance()->unitLight->blackFxItem(fx,200);
 			break;
-		case 9:
-			fx->setName(QInputDialog::getText(this
-											  ,tr("Edit")
-											  ,tr("Enter name label for Fx")
-											  ,QLineEdit::Normal
-											  ,fx->name()));
-			refreshList();
+		case 9: {
+				QString newname = QInputDialog::getText(this
+														,tr("Edit")
+														,tr("Enter name label for Fx")
+														,QLineEdit::Normal
+														,fx->name());
+				if (newname.size()) {
+					fx->setName(newname);
+					refreshList();
+				}
+			}
 			break;
 		case 10:
 			fxList()->cloneSelectedSeqItem();

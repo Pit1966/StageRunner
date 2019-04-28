@@ -17,6 +17,7 @@ public:
 		bool allowUserInteraction;
 		bool setModified;
 		bool exportWithRelativeFxFilePaths;
+		bool forceKeepFxItemIDs;
 		QStringList resultMessageList;
 		QStringList errorMessageList;
 		int audioFileCopyCount;
@@ -28,6 +29,7 @@ public:
 			, allowUserInteraction(false)
 			, setModified(false)
 			, exportWithRelativeFxFilePaths(false)
+			, forceKeepFxItemIDs(false)
 			, audioFileCopyCount(0)
 			, audioFileExistCount(0)
 			, clipFileCount(0)
@@ -55,12 +57,12 @@ private:
 
 public:
 	Project();
-	Project(const Project &o);
+	Project(const Project &o, bool keepAllFxIitemIDs = false);
 	~Project();
 
 	inline QString projectName() const {return pProjectName;}
 
-	bool cloneProjectFrom(const Project &o);
+	bool cloneProjectFrom(const Project &o, bool keepAllFxIitemIDs = false);
 
 	void clear();
 
@@ -74,7 +76,7 @@ public:
 
 	inline FxList *mainFxList() {return fxList;}
 
-	bool consolidateToDir(const QString &exportProName, const QString &dirname, QWidget *parentWid);
+	bool consolidateToDir(const QString &exportProName, const QString &dirname, EXPORT_RESULT &result, QWidget *parentWid);
 	bool copyAllAudioItemFiles(FxList * srcFxList, const QString & destDir, EXPORT_RESULT &result);
 	bool checkFxItemList(FxList * srcFxList, EXPORT_RESULT &result);
 

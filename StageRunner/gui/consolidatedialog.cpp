@@ -82,7 +82,12 @@ void ConsolidateDialog::on_okButton_clicked()
 {
 	progressBar->show();
 
-	if (!m_project->consolidateToDir(targetProjectNameEdit->text(), targetPathEdit->text(), this)) {
+	// this will be given to export subroutines and stores export summary and messages
+	Project::EXPORT_RESULT result;
+	result.forceKeepFxItemIDs = keepFxIDsCheck->isChecked();
+	result.exportWithRelativeFxFilePaths = true;
+
+	if (!m_project->consolidateToDir(targetProjectNameEdit->text(), targetPathEdit->text(), result, this)) {
 
 	} else {
 		AppCentral::ref().userSettings->pLastCondolidatePath = targetPathEdit->text();

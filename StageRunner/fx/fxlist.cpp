@@ -63,12 +63,12 @@ void FxList::init()
 /**
  * @brief FxList::copyFrom
  * @param o
- * @param exactClone 1: clone keyCodes in FxItems too!
+ * @param exactClone 1: clone keyCodes in FxItems too!, 2: Additionally keep all FxItem IDs
  * @return
  *
  * @note By default keyCodes and fxIDs are not cloned
  */
-bool FxList::copyFrom(const FxList &o, int exactClone)
+bool FxList::copyFrom(const FxList &o, int exactClone, FxIdMap *oldNewIdMap)
 {
 	bool ok = true;
 
@@ -96,7 +96,7 @@ bool FxList::copyFrom(const FxList &o, int exactClone)
 
 	// Copy Sequence FX items
 	for (int t=0; t<o.m_fxList.size(); t++) {
-		FxItem *newfx = FxItemTool::cloneFxItem(o.m_fxList.at(t), false, exactClone);
+		FxItem *newfx = FxItemTool::cloneFxItem(o.m_fxList.at(t), false, exactClone, oldNewIdMap);
 		if (newfx) {
 			m_fxList.append(newfx);
 		} else {

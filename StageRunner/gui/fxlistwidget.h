@@ -32,7 +32,7 @@ private:
 	FxList * myfxlist;
 	FxItem * cur_selected_item;
 	FxListWidgetItem* cur_clicked_item;
-	FxItem * origin_fxitem;
+	FxItem * origin_fxitem;					///< todo shared pointer?
 	QList<int>selected_rows;
 	int upper_context_menu_split;
 

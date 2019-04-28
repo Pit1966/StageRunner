@@ -8,6 +8,7 @@
 
 
 class FxItem;
+class FxIdMap;
 
 class FxList : public QObject
 {
@@ -52,7 +53,7 @@ public:
 	FxList(const FxList &o);
 	~FxList();
 
-	bool copyFrom(const FxList &o, int exactClone = 0);
+	bool copyFrom(const FxList &o, int exactClone = 0, FxIdMap *oldNewIdMap = nullptr);
 
 	void clear();
 

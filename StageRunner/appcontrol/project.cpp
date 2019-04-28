@@ -2,6 +2,7 @@
 #include "config.h"
 #include "log.h"
 #include "appcentral.h"
+#include "fxitemtool.h"
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
@@ -23,12 +24,12 @@ Project::Project()
 	clear();
 }
 
-Project::Project(const Project &o)
+Project::Project(const Project &o, bool keepAllFxIitemIDs)
 	: QObject()
 	, VarSet()
 {
 	init();
-	cloneProjectFrom(o);
+	cloneProjectFrom(o, keepAllFxIitemIDs);
 }
 
 Project::~Project()
@@ -36,7 +37,7 @@ Project::~Project()
 	delete fxList;
 }
 
-bool Project::cloneProjectFrom(const Project &o)
+bool Project::cloneProjectFrom(const Project &o, bool keepAllFxIitemIDs)
 {
 	pAutoProceedSequence = o.pAutoProceedSequence;
 	curProjectFilePath = o.curProjectFilePath;
@@ -49,7 +50,14 @@ bool Project::cloneProjectFrom(const Project &o)
 	pProjectName = o.pProjectName;
 	pComment = o.pComment;
 
-	bool ok = fxList->copyFrom(*o.fxList, 1);
+
+	FxIdMap idmap;
+
+	int mode = 1;
+	if (keepAllFxIitemIDs)
+		mode = 2;
+
+	bool ok = fxList->copyFrom(*o.fxList, mode, &idmap);
 
 	return ok;
 }
@@ -222,16 +230,12 @@ bool Project::postLoadResetFxScenes()
 	return fxList->postLoadResetScenes();
 }
 
-bool Project::consolidateToDir(const QString &exportProName, const QString &dirname, QWidget *parentWid)
+bool Project::consolidateToDir(const QString &exportProName, const QString &dirname, EXPORT_RESULT &result, QWidget *parentWid)
 {
 	QString where = tr("Consolidate");
 
 	// First we clone the current project in order to have a playground without messing up the project.
-	Project tpro(*this);
-
-	// this will be given to export subroutines and stores export summary and messages
-	EXPORT_RESULT result;
-	result.exportWithRelativeFxFilePaths = true;
+	Project tpro(*this, result.forceKeepFxItemIDs);
 
 	QString proname = exportProName;
 	proname.remove(".srp");

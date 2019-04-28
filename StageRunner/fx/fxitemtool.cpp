@@ -14,10 +14,10 @@ FxItemTool::FxItemTool()
  * @brief FxItemTool::cloneFxItem
  * @param srcItem
  * @param renameItem
- * @param exactClone 0 [default]: id and keyCode is not cloned, 1: keyCode is cloned
- * @return
+ * @param exactClone 0 [default]: id and keyCode is not cloned, 1: keyCode is cloned, 2: FxID and keyCode is cloned
+ * @return Pointer to new FxItem or NULL on failure
  */
-FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone)
+FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone, FxIdMap *oldNewMap)
 {
 	if (!FxItem::exists(srcItem)) return nullptr;
 
@@ -76,6 +76,17 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone
 			setClonedFxName(srcItem,newFx);
 		if (exactClone == 0)
 			newFx->setKeyCode(0);
+		else if (exactClone > 1)
+			newFx->myId = srcItem->myId;
+
+
+		if (oldNewMap) {
+			if (!oldNewMap->contains(srcItem->id())) {
+				oldNewMap->insert(srcItem->id(), newFx->id());
+			} else {
+				qWarning("FxItem ID %d used more than once!",srcItem->id());
+			}
+		}
 	}
 
 	return newFx;

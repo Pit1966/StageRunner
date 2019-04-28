@@ -124,10 +124,10 @@ void FxScriptList::append(const FxScriptLine &scriptLine)
 	QList::append(scriptLine);
 	last().m_lineNum = QList::size();
 
-	if (m_execDurationMs == -1)
+	if (m_execDurationMs == -1 || last().execTimeMs() > 0)
 		calculateDuration();
-
-	m_execDurationMs += last().execDuration();
+	else
+		m_execDurationMs += last().execDuration();
 }
 
 FxScriptLine *FxScriptList::at(int lineNum)
@@ -151,7 +151,13 @@ void FxScriptList::calculateDuration()
 {
 	int ms = 0;;
 	for (FxScriptLine &line : *this) {
-		ms += line.execDuration();
+		if (line.execTimeMs() > 0) {	// seems to be an absulute execution time for this line
+			ms = line.execTimeMs();
+			qDebug("duration %d", ms);
+		} else {
+			ms += line.execDuration();
+			qDebug(" ++ %d", ms);
+		}
 	}
 
 	m_execDurationMs = ms;
