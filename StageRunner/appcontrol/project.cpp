@@ -133,79 +133,76 @@ bool Project::loadFromFile(const QString &path)
 
 	bool ok = fileLoad(path,&file_exists,&line_number,&line_copy);
 
-	fxList->refAllMembers();
-
 	if (pProjectFormat >= 2) {
+		fxList->refAllMembers();
 		if (!ok) {
 			loadErrorLineNumber = line_number;
 			loadErrorLineString = line_copy;
 			loadErrorFileNotExisting = !file_exists;
+		}
+	}
+	else {
+		// this is old stuff for project file versions < 2 !!
+
+		// Now try to load FxItem VarSets (with classname "FxItem")
+		QFile file(path);
+		FxItem *fx = 0;
+		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+			QTextStream read(&file);
+			while (!read.atEnd() && ok) {
+				int child_level = 0;
+				int ret = analyzeLine(read,fx,child_level,&line_number,&line_copy);
+				if (ret < 0) {
+					qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
+					ok = false;
+				}
+				// Wait for ClassName matching FxItem Type
+				if (curClassname == "FxItem" && !curChildActive) {
+					// An opening bracket could mean a new instance will come
+					if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
+					// We have to wait for FxType to determine what kind of Fx we
+					// have to initialize
+					if (curKey == "FxType") {
+						fx = fxList->addFx(curValue.toInt());
+						if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list -> analyze sub class",fx->fxType());
+					}
+				}
+			}
+			file.close();
+
+			fxList->refAllMembers();
 		} else {
-			curProjectFilePath = path;
-			generateProjectNameFromPath();
-
-			// check project consistance and health
-			EXPORT_RESULT result;
-			ok = checkFxItemList(fxList, result);
-			if (!ok) {
-				QString msg = QString("Project load was ok, but <font color=darkOrange>consistance check found some errors</font>:<br>");
-				for (const QString &txt : result.errorMessageList) {
-					msg += QString("- %1<br>").arg(txt);
-				}
-				POPUPINFOMSG("Load project",msg);
-				ok = true;
-			}
-			else if (result.resultMessageList.size()) {
-				QString msg = QString("<font color=green>Project loaded successfully!</font><br>");
-				for (const QString &txt : result.resultMessageList) {
-					msg += QString("- %1<br>").arg(txt);
-				}
-				POPUPINFOMSG("Load project",msg);
-			}
-
-			setModified(result.setModified);
-			emit projectLoadedOrSaved(path, ok);
+			ok = false;
+			loadErrorLineNumber = line_number;
 		}
-
-		return ok;
 	}
 
-	// this is old stuff for project file versions < 2 !!
-
-	// Now try to load FxItem VarSets (with classname "FxItem")
-	QFile file(path);
-	FxItem *fx = 0;
-	if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
-		QTextStream read(&file);
-		while (!read.atEnd() && ok) {
-			int child_level = 0;
-			int ret = analyzeLine(read,fx,child_level,&line_number,&line_copy);
-			if (ret < 0) {
-				qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
-				ok = false;
-			}
-			// Wait for ClassName matching FxItem Type
-			if (curClassname == "FxItem" && !curChildActive) {
-				// An opening bracket could mean a new instance will come
-				if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
-				// We have to wait for FxType to determine what kind of Fx we
-				// have to initialize
-				if (curKey == "FxType") {
-					fx = fxList->addFx(curValue.toInt());
-					if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list -> analyze sub class",fx->fxType());
-				}
-			}
-		}
-		file.close();
+	if (ok) {
 		curProjectFilePath = path;
-		fxList->setModified(false);
-		setModified(false);
-	} else {
-		ok = false;
-		loadErrorLineNumber = line_number;
-	}
+		generateProjectNameFromPath();
 
-	// FxSceneItem *scene = (FxSceneItem*)fxList->at(9);
+		// check project consistance and health
+		EXPORT_RESULT result;
+		ok = checkFxItemList(fxList, result);
+		if (!ok) {
+			QString msg = QString("Project load was ok, but <font color=darkOrange>consistance check found some errors</font>:<br>");
+			for (const QString &txt : result.errorMessageList) {
+				msg += QString("- %1<br>").arg(txt);
+			}
+			POPUPINFOMSG("Load project",msg);
+			ok = true;
+		}
+		else if (result.resultMessageList.size()) {
+			QString msg = QString("<font color=green>Project loaded successfully!</font><br>");
+			for (const QString &txt : result.resultMessageList) {
+				msg += QString("- %1<br>").arg(txt);
+			}
+			POPUPINFOMSG("Load project",msg);
+		}
+
+		setModified(result.setModified);
+		emit projectLoadedOrSaved(path, ok);
+	}
 
 	return ok;
 }
