@@ -26,7 +26,10 @@
 
 #include "system/audiooutput/mediaplayeraudiobackend.h"
 #include "system/audiooutput/iodeviceaudiobackend.h"
-#include "system/audiooutput/sdl2audiobackend.h"
+
+#ifdef USE_SDL
+#  include "system/audiooutput/sdl2audiobackend.h"
+#endif
 
 #include "fxaudioitem.h"
 #include "fxplaylistitem.h"
@@ -70,7 +73,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 
 
 	if (audioEngineType == OUT_SDL2) {
+#ifdef USE_SDL
 		audio_player = new SDL2AudioBackend(*this);
+#else
+		qWarning("Configured SDL output is not compiled in!");
+#endif
 	}
 	else if (audioEngineType == OUT_DEVICE) {
 		audio_player = new IODeviceAudioBackend(*this, devName);
