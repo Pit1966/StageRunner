@@ -287,6 +287,13 @@ DmxMonitor * AppCentral::openDmxInMonitor(int universe)
 	return nullptr;
 }
 
+/**
+ * @brief AppCentral::openDmxOutMonitor
+ * @param universe
+ * @return
+ *
+ * @todo this opens the monitor for the first output only! Multiple outputs per universe is not supported here
+ */
 DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
 {
 	if (m_openedOutputDmxMonitorWidgets[universe]) {
@@ -296,11 +303,13 @@ DmxMonitor * AppCentral::openDmxOutMonitor(int universe)
 
 	QLCIOPlugin *plugin;
 	int output;
-	if ( pluginCentral->getPluginAndOutputForDmxUniverse(universe,plugin,output) ) {
+	int conNum = 0;
+	while ( pluginCentral->getPluginAndOutputForDmxUniverse(universe,conNum,plugin,output) ) {
 		if (plugin->capabilities() & QLCIOPlugin::Monitor) {
 			m_openedOutputDmxMonitorWidgets[universe] = plugin->openOutputMonitor(uint(output));
 			return m_openedOutputDmxMonitorWidgets[universe];
 		}
+		conNum++;
 	}
 	return nullptr;
 }

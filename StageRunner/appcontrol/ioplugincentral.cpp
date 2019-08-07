@@ -190,7 +190,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	// Clear current fast access tables
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		fastMapInUniverse[t].plugin = nullptr;
-		fastMapOutUniverse[t].plugin = nullptr;
+		mapOutUniverse[t].clear();
 	}
 
 	// Create fast access tables for universe to plugin mapping
@@ -202,16 +202,12 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			continue;
 
 		if (lineconf->deviceIoType == QLCIOPlugin::Output) {
-			if (fastMapOutUniverse[univ].plugin) {
-				POPUPERRORMSG(tr("Plugin Settings")
-							  ,tr("Output universe %1 is assigned to multiple plugin lines -> this is not implemted yet")
-						 .arg(univ+1));
-			} else {
-				fastMapOutUniverse[univ].deviceUniverse = univ;
-				fastMapOutUniverse[univ].plugin = lineconf->plugin;
-				fastMapOutUniverse[univ].deviceNumber = lineconf->deviceNumber;
-				fastMapOutUniverse[univ].responseTime = lineconf->pResponseTime;
-			}
+			PluginEntry uniEntry;
+			uniEntry.deviceUniverse = univ;
+			uniEntry.plugin = lineconf->plugin;
+			uniEntry.deviceNumber = lineconf->deviceNumber;
+			uniEntry.responseTime = lineconf->pResponseTime;
+			mapOutUniverse[univ].append(uniEntry);
 		}
 		else if (lineconf->deviceIoType == QLCIOPlugin::Input) {
 			if (fastMapInUniverse[univ].plugin) {
@@ -341,11 +337,33 @@ QString IOPluginCentral::sysPluginDir()
 	return dir;
 }
 
-bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int &output)
+bool IOPluginCentral::hasOutputs(int universe) const
 {
-	if (fastMapOutUniverse[universe].plugin) {
-		plugin = fastMapOutUniverse[universe].plugin;
-		output = fastMapOutUniverse[universe].deviceNumber;
+	if (universe < 0 || universe >= MAX_DMX_UNIVERSE)
+		return false;
+
+	if (mapOutUniverse[universe].size() > 0)
+		return true;
+
+	return false;
+}
+
+/**
+ * @brief Get pointer to plugin and output number for a given universe and output index.
+ * @param universe
+ * @param connectNumber
+ * @param plugin
+ * @param output
+ * @return true, if found.
+ *
+ * since Aug. 2019 more than one single output can be connected to a universe. Therefor you have to call this function
+ * with increasing connectNumber (beginning with 0) until it returns false
+ */
+bool IOPluginCentral::getPluginAndOutputForDmxUniverse(int universe, int connectNumber, QLCIOPlugin *&plugin, int &output)
+{
+	if (connectNumber >= 0 && connectNumber < mapOutUniverse[universe].size()) {
+		plugin = mapOutUniverse[universe].at(connectNumber).plugin;
+		output = mapOutUniverse[universe].at(connectNumber).deviceNumber;
 		return true;
 	} else {
 		plugin = nullptr;

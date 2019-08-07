@@ -389,6 +389,7 @@ QSharedPointer<QUdpSocket> ArtNetPlugin::getUdpSocket()
     {
         connect(udpSocket.data(), SIGNAL(readyRead()),
                 this, SLOT(slotReadyRead()));
+		qInfo() << "ArtNet: bind to port" << ARTNET_PORT;
     }
     else
     {

@@ -120,14 +120,18 @@ bool LightControl::sendChangedDmxData()
 		if (dmxOutputChanged[uni]) {
 			QLCIOPlugin *plugin;
 			int output;
-			if (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(uni,plugin,output)) {
-				plugin->writeUniverse(uni,output,dmxOutputValues[uni]);
-				emit outputUniverseChanged(uni,dmxOutputValues[uni]);
-				sent = true;
-			} else {
-				if (myApp.userSettings->pNoInterfaceDmxFeedback) {
-					emit outputUniverseChanged(uni,dmxOutputValues[uni]);
+			bool univsent = false;
+			if (myApp.pluginCentral->hasOutputs(uni)) {
+				int conNum = 0;
+				while (myApp.pluginCentral->getPluginAndOutputForDmxUniverse(uni, conNum, plugin, output)) {
+					plugin->writeUniverse(uni,output,dmxOutputValues[uni]);
+					sent = true;
+					univsent = true;
+					conNum++;
 				}
+			}
+			if (univsent || myApp.userSettings->pNoInterfaceDmxFeedback) {
+				emit outputUniverseChanged(uni,dmxOutputValues[uni]);
 			}
 			dmxOutputChanged[uni] = false;
 		}
