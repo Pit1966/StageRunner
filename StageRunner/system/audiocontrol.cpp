@@ -156,31 +156,6 @@ void AudioControl::getAudioDevices()
 }
 
 /**
- * @brief AudioControl::getAudioDeviceInfo
- * @param devName
- * @param found
- * @return
- *
- * @todo remove me, is AudioIODevice::getAudioDeviceInfo
- */
-QAudioDeviceInfo AudioControl::getAudioDeviceInfo(const QString &devName, bool *found)
-{
-	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-	for (int t=0; t<devList.size(); t++) {
-		if (devList.at(t).deviceName() == devName) {
-			if (found)
-				*found = true;
-			return devList.at(t);
-		}
-	}
-
-	if (found)
-		*found = false;
-
-	return QAudioDeviceInfo();
-}
-
-/**
  * @brief Check if FxAudioItem is active (means Playing or Paused)
  * @param fxa Pointer to FxAudioItem instance
  * @return true, if audio is in RUNNING state or PAUSED state

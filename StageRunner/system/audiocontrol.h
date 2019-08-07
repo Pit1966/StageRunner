@@ -91,7 +91,6 @@ public:
 	void reCreateMediaPlayerInstances();
 
 	void getAudioDevices();
-	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
 	bool isFxAudioActive(FxAudioItem *fxa);
 	bool isFxAudioActive(int slotnum);
 	int findAudioSlot(FxAudioItem *fxa);
