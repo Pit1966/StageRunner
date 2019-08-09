@@ -23,6 +23,7 @@
 
 #include "mixerchannel.h"
 #include "customwidget/extmimedata.h"
+#include "dmxchannel.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -36,12 +37,13 @@
 #define LO_POS_PERCENT 85
 #define HI_POS_PERCENT 15
 
-MixerChannel::MixerChannel(QWidget *parent) :
-	QAbstractSlider(parent)
+MixerChannel::MixerChannel(QWidget *parent)
+	: QAbstractSlider(parent)
 {
 	my_id = -1;
 	my_universe = -1;
 	my_dmx_channel = -1;
+	my_dmx_channel_ref = nullptr;
 
 	prop_channel_shown_f = false;
 	prop_selectable_f = false;
@@ -77,6 +79,13 @@ MixerChannel::MixerChannel(QWidget *parent) :
 MixerChannel::~MixerChannel()
 {
 	// qDebug("destroy mixer: %d", my_dmx_channel+1);
+}
+
+void MixerChannel::setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP)
+{
+	my_universe = universe;
+	my_dmx_channel = dmx_channel;
+	my_dmx_channel_ref = dmxChP;
 }
 
 void MixerChannel::setRange(int min, int max)
@@ -300,6 +309,30 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		QRect bound(QPoint(0,y1),QPoint(width(),height()));
 		p.drawText(bound,label,QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 	}
+
+//	{   // For drag/drop position debugging
+//		QFont font(p.font());
+//		font.setFixedPitch(true);
+//		font.setItalic(false);
+//		font.setPixelSize(9);
+//		p.setFont(font);
+//		p.setPen(Qt::yellow);
+//		QRect bound(QPoint(0,y1),QPoint(width(),height()));
+//		QString s = QString("%1").arg(my_id);
+//		p.drawText(bound,s,QTextOption(Qt::AlignLeft | Qt::AlignBottom));
+//	}
+
+//	if (my_dmx_channel_ref && my_dmx_channel_ref->deskPositionIndex >= 0) {
+//		QFont font(p.font());
+//		font.setFixedPitch(true);
+//		font.setItalic(false);
+//		font.setPixelSize(9);
+//		p.setFont(font);
+//		p.setPen(Qt::black);
+//		QRect bound(QPoint(0,y1),QPoint(width()-1,height()));
+//		QString s = QString("%1").arg(my_dmx_channel_ref->deskPositionIndex);
+//		p.drawText(bound,s,QTextOption(Qt::AlignRight | Qt::AlignBottom));
+//	}
 
 	if (my_dmx_type > DMX_GENERIC) {
 		QString tstr;

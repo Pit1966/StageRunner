@@ -48,17 +48,17 @@ public:
 
 	void copyFrom(const FxSeqItem &o);
 
-	qint32 fadeInTime();
-	void setFadeInTime(qint32 val);
-	qint32 fadeOutTime();
-	void setFadeOutTime(qint32 val);
-	qint32 loopValue() const;
-	void setLoopValue(qint32 val);
-	void resetFx();
-	bool isRandomized();
-	void setRandomized(bool state);
-	QString widgetPosition() {return widgetPos;}
-	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
+	qint32 fadeInTime() const override;
+	void setFadeInTime(qint32 val) override;
+	qint32 fadeOutTime() const override;
+	void setFadeOutTime(qint32 val) override;
+	qint32 loopValue() const override;
+	void setLoopValue(qint32 val) override;
+	void resetFx() override;
+	bool isRandomized() const override;
+	void setRandomized(bool state) override;
+	QString widgetPosition() const override {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 	FxList *fxList() const override {return seqList;}
 
 private:

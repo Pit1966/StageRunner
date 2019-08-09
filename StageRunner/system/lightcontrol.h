@@ -49,7 +49,7 @@ public:
 	AppCentral &myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
-	MutexQHash<int,FxSceneItem*>activeScenes;
+	mutable MutexQHash<int,FxSceneItem*>activeScenes;
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
@@ -66,7 +66,7 @@ public:
 	bool startFxSceneSimple(FxSceneItem *scene);
 	bool startFxScene(FxSceneItem *scene);
 	bool stopFxScene(FxSceneItem *scene);
-	bool setSceneActive(FxSceneItem *scene);
+	bool setSceneActive(FxSceneItem *scene) const;
 	bool setSceneIdle(FxSceneItem * scene);
 	qint32 black(qint32 time_ms);
 	qint32 blackFxScene(FxSceneItem *scene, qint32 time_ms);

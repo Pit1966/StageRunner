@@ -50,7 +50,7 @@ public:
 	static void destroyAllSceneDesks();
 
 	~SceneDeskWidget();
-	bool setFxScene(FxSceneItem *scene);
+	bool setFxScene(const FxSceneItem *scene);
 	void setControlKey(bool state);
 	void setShiftKey(bool state);
 	DmxChannel * getTubeFromMixer(const MixerChannel * mixer) const;

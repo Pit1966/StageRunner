@@ -40,9 +40,9 @@ public:
 	FxCueItem(const FxCueItem &o);
 	~FxCueItem();
 
-	qint32 loopValue() const;
-	void setLoopValue(qint32 val);
-	void resetFx();
+	qint32 loopValue() const override;
+	void setLoopValue(qint32 val) override;
+	void resetFx() override;
 };
 
 #endif // FXCUEITEM_H

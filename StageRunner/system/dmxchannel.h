@@ -59,8 +59,7 @@ public:
 	qint32 deskPositionIndex;			///< The Index the Channel will be positioned in the DeskSceneWidget
 	QString labelText;					///< Spezielle Beschriftung des Kanals
 
-	int tempTubeListIdx;
-	int tempDeskPosIdx;
+	int tempTubeListIdx;				///< index in tubeList of scene, which is the parent for this DmxChannel
 	bool curValueChanged[MIX_LINES];
 
 protected:

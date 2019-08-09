@@ -145,6 +145,7 @@ AudioStatus IODeviceAudioBackend::state() const
 		return AUDIO_PLAYING;
 	case QAudio::SuspendedState:
 		return AUDIO_PAUSED;
+	case QAudio::InterruptedState:
 	case QAudio::IdleState:
 	case QAudio::StoppedState:
 		return AUDIO_STOPPED;

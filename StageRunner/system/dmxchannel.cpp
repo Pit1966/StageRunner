@@ -52,7 +52,6 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 
 void DmxChannel::init()
 {
-	tempDeskPosIdx = 0;
 	tempTubeListIdx = 0;
 	for (int i=0; i<MIX_LINES; i++) {
 		fadeStartValue[i] = 0;

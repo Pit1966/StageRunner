@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.1.0
-APP_MILESTONE = Post Seelenbrecher
+APPVERSION = V0.9.2.0
+APP_MILESTONE = MultiOutput
 APP_PRODUCER = 2019 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de

@@ -76,10 +76,10 @@ public:
 	FxAudioItem(const QString &path, FxList *fxList);
 	AudioSeqState seqStatus() const {return mySeqStatus;}
 	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
-	qint32 loopValue() const {return loopTimes;}
-	void setLoopValue(qint32 val) {loopTimes = val;}
-	void initForSequence();
-	void resetFx();
+	qint32 loopValue() const override {return loopTimes;}
+	void setLoopValue(qint32 val) override {loopTimes = val;}
+	void initForSequence() override;
+	void resetFx() override;
 	inline qint64 seekPosition() const {return mySeekPosition;}
 	inline int seekPosPerMille() const {return mySeekPosPerMille;}
 	void setSeekPosition(qint64 posMs);

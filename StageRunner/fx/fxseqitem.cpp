@@ -62,7 +62,7 @@ void FxSeqItem::copyFrom(const FxSeqItem &o)
 	stopOtherSeqOnStart = o.stopOtherSeqOnStart;
 }
 
-qint32 FxSeqItem::fadeInTime()
+qint32 FxSeqItem::fadeInTime() const
 {
 	return 0;
 }
@@ -72,7 +72,7 @@ void FxSeqItem::setFadeInTime(qint32 val)
 	Q_UNUSED(val);
 }
 
-qint32 FxSeqItem::fadeOutTime()
+qint32 FxSeqItem::fadeOutTime() const
 {
 	return 0;
 }
@@ -97,7 +97,7 @@ void FxSeqItem::resetFx()
 
 }
 
-bool FxSeqItem::isRandomized()
+bool FxSeqItem::isRandomized() const
 {
 	return seqList->myRandomizedFlag;
 }

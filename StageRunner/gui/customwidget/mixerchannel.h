@@ -31,6 +31,8 @@
 
 #include "dmxtypes.h"
 
+class DmxChannel;
+
 class MixerChannel : public QAbstractSlider
 {
 	Q_OBJECT
@@ -39,11 +41,13 @@ public:
 	Q_PROPERTY(bool selectable READ isSelectable WRITE setSelectable)
 	Q_PROPERTY(bool selected READ isSelected WRITE setSelected)
 
+	int myLayoutIndex;				///< Index in parent layout
 
 private:
 	int my_id;						///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
 	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
 	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
+	DmxChannel *my_dmx_channel_ref;	///< not realy used, only for debug
 	QString label;
 	DmxChannelType my_dmx_type;		///< The type of the dmx channel
 
@@ -88,7 +92,7 @@ public:
 	~MixerChannel();
 	inline void setId(int id) {my_id = id;}
 	inline int id() {return my_id;}
-	inline void setDmxId(int universe, int dmx_channel) {my_universe = universe; my_dmx_channel = dmx_channel;}
+	void setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP);
 	inline int dmxUniverse() const {return my_universe;}
 	inline int dmxChannel() const {return my_dmx_channel;}
 	void setRange(int min, int max);

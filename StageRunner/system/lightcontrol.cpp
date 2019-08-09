@@ -215,9 +215,10 @@ bool LightControl::stopFxScene(FxSceneItem *scene)
  * The function assures that the scene is not already in the list. So the scene will not be
  * added double.
  */
-bool LightControl::setSceneActive(FxSceneItem *scene)
+bool LightControl::setSceneActive(FxSceneItem *scene) const
 {
-	if (activeScenes.lockContains(scene->id())) return false;
+	if (activeScenes.lockContains(scene->id()))
+		return false;
 
 	activeScenes.lockInsert(scene->id(),scene);
 	return true;

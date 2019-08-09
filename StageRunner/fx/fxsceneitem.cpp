@@ -309,7 +309,7 @@ bool FxSceneItem::loopFunction()
 	return active_auto || active_direct;
 }
 
-void FxSceneItem::setLive(bool state)
+void FxSceneItem::setLive(bool state) const
 {
 	if (state) {
 		myStatus |= SCENE_STAGE_LIVE;
@@ -411,9 +411,10 @@ bool FxSceneItem::postLoadInitTubes(bool restore_light)
 	return was_on_stage;
 }
 
-DmxChannel *FxSceneItem::tube(int id)
+DmxChannel *FxSceneItem::tube(int id) const
 {
-	if (id < 0 || id >= tubes.size()) return 0;
+	if (id < 0 || id >= tubes.size())
+		return 0;
 
 	return tubes.at(id);
 }

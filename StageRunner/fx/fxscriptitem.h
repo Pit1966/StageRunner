@@ -37,9 +37,9 @@ public:
 	FxScriptItem(FxList *fxList);
 	FxScriptItem(const FxScriptItem &o);
 
-	qint32 loopValue() const;
-	void setLoopValue(qint32 val);
-	void resetFx();
+	qint32 loopValue() const override;
+	void setLoopValue(qint32 val) override;
+	void resetFx() override;
 
 	inline const QString & rawScript() const {return m_scriptRaw;}
 	bool updateScript();

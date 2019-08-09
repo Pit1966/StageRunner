@@ -67,8 +67,8 @@ typedef QList<FxItem*> FxItemList;
 class FxItem : public VarSet
 {
 private:
-	static QList<FxItem*>*global_fx_list;
-    static QMutex global_fx_lock;
+	static QList<FxItem*> *global_fx_list;
+	static QMutex global_fx_lock;
 	static qint32 m_lowestIdForGenerator;
 
 protected:
@@ -101,6 +101,7 @@ public:
 	~FxItem();
 
 	static bool exists(FxItem *item);
+	static bool exists(const FxItem *item);
 	static inline QList<FxItem*> & globalFxList() {return *global_fx_list;}
 	static FxItem * findFxById(qint32 id);
 	static FxItem *checkItemUniqueId(FxItem *item);
@@ -132,33 +133,33 @@ public:
 	void setKeyCode(int code);
 	inline int keyCode() const {return myKey;}
 
-	bool isHookedToInput(qint32 universe, qint32 channel);
-	inline qint32 hookedUniverse() {return hookedToInputUniverse;}
-	inline qint32 hookedChannel() {return hookedToInputDmxChannel;}
+	bool isHookedToInput(qint32 universe, qint32 channel) const;
+	inline qint32 hookedUniverse() const {return hookedToInputUniverse;}
+	inline qint32 hookedChannel() const {return hookedToInputDmxChannel;}
 	void hookToInput(qint32 universe, qint32 channel);
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
 	inline bool playedRandom() const {return playedInRandomList;}
 
 	virtual void initForSequence() {;}
-	virtual qint32 fadeInTime() {return defaultFadeInTime;}
+	virtual qint32 fadeInTime() const {return defaultFadeInTime;}
 	virtual	void setFadeInTime(qint32 val);
-	virtual qint32 moveTime() {return defaultMoveTime;}
+	virtual qint32 moveTime() const {return defaultMoveTime;}
 	virtual void setMoveTime(qint32 val);
-	virtual qint32 fadeOutTime() {return defaultFadeOutTime;}
+	virtual qint32 fadeOutTime() const {return defaultFadeOutTime;}
 	virtual void setFadeOutTime(qint32 val);
-	virtual qint32 preDelay() {return defaultPreDelay;}
+	virtual qint32 preDelay() const {return defaultPreDelay;}
 	virtual void setPreDelay(qint32 val);
-	virtual qint32 postDelay() {return defaultPostDelay;}
+	virtual qint32 postDelay() const {return defaultPostDelay;}
 	virtual void setPostDelay(qint32 val);
-	virtual qint32 holdTime() {return defaultHoldTime;}
+	virtual qint32 holdTime() const {return defaultHoldTime;}
 	virtual void setHoldTime(qint32 val);
 	virtual qint32 loopValue() const = 0;
 	virtual void setLoopValue(qint32 val) = 0;
-	virtual bool isRandomized() {return false;}
+	virtual bool isRandomized() const {return false;}
 	virtual void setRandomized(bool state) {Q_UNUSED(state);}
 	virtual void resetFx() = 0;
-	virtual QString widgetPosition() {return QString();}
+	virtual QString widgetPosition() const {return QString();}
 	virtual void setWidgetPosition(const QString &geometry) {Q_UNUSED(geometry);}
 	/**
 	 * @brief Reimplement this if your derived Fx class provides an FxList. (e.g. FxPlayList)
