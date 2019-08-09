@@ -568,13 +568,21 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		emit modified();
 		break;
 
-	case 3:
+	case 3: {
 		mixer->setLabelText(QInputDialog::getText(this
 												  ,tr("Edit")
 												  ,tr("Enter text for channel")
 												  ,QLineEdit::Normal
 												  ,mixer->labelText()));
+
+		DmxChannel *tube = origin_fxscene->tube(mixer->id());
+		if (tube && tube->labelText != mixer->labelText()) {
+			tube->labelText = mixer->labelText();
+			origin_fxscene->setModified(true);
+			emit modified();
+		}
 		break;
+	}
 
 	case 4:
 		unhideAllTubes();
