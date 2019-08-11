@@ -61,6 +61,9 @@ void SceneDeskWidget::init_gui()
 	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
 	connect(faderAreaWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
 	connect(faderAreaWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
+
+	connect(channelCountSpin,SIGNAL(clickedAndChanged(int)),this,SLOT(onChannelCountSpinClickedAndChanged(int)),Qt::QueuedConnection);
+	connect(channelCountSpin,SIGNAL(editingFinished()),this,SLOT(onChannelCountSpinEditingFinished()),Qt::QueuedConnection);
 }
 
 
@@ -77,7 +80,7 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 	setSceneEditable(false);
 	selected_tube_ids.clear();
 	faderAreaWidget->clear();
-	qDebug() << "set fxScene" << scene->tubeCount() << "tubes in scene";
+	// qDebug() << "set fxScene" << scene->tubeCount() << "tubes in scene";
 
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
@@ -95,8 +98,9 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 		DmxChannel *tube = scene->tubes.at(t);
 		tube->tempTubeListIdx = t;
 		if (tube->deskPositionIndex >= 0) {
-			if (sort.size() < tube->deskPositionIndex) {
-				qWarning("position %d not available for tube %d",tube->deskPositionIndex, t);
+			if (tube->deskPositionIndex >= sort.size()) {
+				qWarning("%s position %d not available for tube %d",Q_FUNC_INFO, tube->deskPositionIndex, t);
+				tube->deskPositionIndex = -1;
 			} else {
 				sort[tube->deskPositionIndex] = tube;
 			}
@@ -115,9 +119,12 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 		}
 	}
 
-
 	for (int t=0; t<sort.size(); t++) {
 		DmxChannel *dmx = sort.at(t);
+		if (!dmx) {
+			qWarning() << Q_FUNC_INFO << "Missing DmxChannel instance:" << t;
+			continue;
+		}
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
 			// Create a new Mixer an fill in relevant data
@@ -223,7 +230,7 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 		selected_tube_ids.removeAll(id);
 		copyTubeSettingsToGui(-1);
 	}
-	qDebug() << "tubes selected:" << selected_tube_ids;
+	qDebug() << "tubes selected:" << selected_tube_ids << "id:" << id << state;
 }
 
 void SceneDeskWidget::setSceneEditable(bool state)
@@ -673,20 +680,20 @@ void SceneDeskWidget::destroyAllSceneDesks()
 	}
 }
 
-void SceneDeskWidget::on_channelCountSpin_valueChanged(int arg1)
-{
-	Q_UNUSED(arg1)
-
-//	if (!origin_fxscene) return;
-//	origin_fxscene->setTubeCount(arg1);
-//	setFxScene(origin_fxscene);
-}
-
-void SceneDeskWidget::on_channelCountSpin_editingFinished()
+void SceneDeskWidget::onChannelCountSpinClickedAndChanged(int arg1)
 {
 	if (!origin_fxscene) return;
-	origin_fxscene->setTubeCount(channelCountSpin->value());
+	origin_fxscene->setTubeCount(arg1);
 	setFxScene(origin_fxscene);
+}
+
+void SceneDeskWidget::onChannelCountSpinEditingFinished()
+{
+	if (!origin_fxscene) return;
+	if (channelCountSpin->value() != origin_fxscene->tubeCount()) {
+		origin_fxscene->setTubeCount(channelCountSpin->value());
+		setFxScene(origin_fxscene);
+	}
 }
 
 void SceneDeskWidget::on_cloneCurrentInputButton_clicked()

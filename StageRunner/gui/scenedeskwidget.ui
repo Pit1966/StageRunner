@@ -380,7 +380,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QSpinBox" name="channelCountSpin">
+           <widget class="PsSpinBox" name="channelCountSpin">
             <property name="minimum">
              <number>2</number>
             </property>
@@ -452,6 +452,11 @@
    <class>PsLineEdit</class>
    <extends>QLineEdit</extends>
    <header>customwidget/pslineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PsSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>customwidget/psspinbox.h</header>
   </customwidget>
  </customwidgets>
  <resources>

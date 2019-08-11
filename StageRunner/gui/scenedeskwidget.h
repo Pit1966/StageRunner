@@ -94,11 +94,10 @@ private slots:
 	void on_sceneNameEdit_textEdited(const QString &arg1);
 	void on_autoHookButton_clicked();
 	void on_tubeCommentEdit_textEdited(const QString &arg1);
-	void on_channelCountSpin_valueChanged(int arg1);
-	void on_channelCountSpin_editingFinished();
+	void onChannelCountSpinClickedAndChanged(int arg1);
+	void onChannelCountSpinEditingFinished();
 
 	void on_cloneCurrentInputButton_clicked();
-
 	void on_cloneCurrentOutputButton_clicked();
 
 signals:

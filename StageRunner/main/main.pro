@@ -157,7 +157,8 @@ SOURCES += \
     ../widgets/editormarginwidget.cpp \
     ../system/audioslot.cpp \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
-    ../gui/consolidatedialog.cpp
+	../gui/consolidatedialog.cpp \
+	../gui/customwidget/psspinbox.cpp
 
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
@@ -276,7 +277,8 @@ HEADERS  += \
     ../widgets/editormarginwidget.h \
     ../system/audioslot.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
-    ../gui/consolidatedialog.h
+	../gui/consolidatedialog.h \
+	../gui/customwidget/psspinbox.h
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h

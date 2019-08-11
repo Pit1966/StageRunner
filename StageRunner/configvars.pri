@@ -149,3 +149,4 @@ win32 {
 	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
+

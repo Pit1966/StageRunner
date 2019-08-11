@@ -62,8 +62,8 @@ private:
 
 	int knob_xsize;					///< Width of scaled knob without shadow border
 	int knob_ysize;					///< Height of scaled knob without shadow border
-	int knob_scaled_xsize;			///< Width of scaled knob including shadow border
-	int knob_scaled_ysize;			///< Heigh of scaled knob including shadow border
+	float knob_scaled_xsize;		///< Width of scaled knob including shadow border
+	float knob_scaled_ysize;		///< Height of scaled knob including shadow border
 	int knob_xoffset;
 	int knob_yoffset;
 	QRect knob_scaled_rect;			///< The position of the knob on screen
