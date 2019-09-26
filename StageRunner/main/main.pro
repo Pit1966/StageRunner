@@ -69,6 +69,7 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 
 SOURCES += \
+	../system/dmx/fixture.cpp \
 	main.cpp \
 	../fx/fxitem.cpp \
 	../fx/fxlist.cpp \
@@ -171,6 +172,8 @@ HEADERS  += \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
 	../system/audiocontrol.h \
+	../system/dmx/fixture.h \
+	../system/importfxmaster/fxMaster.h \
 	../system/log.h \
 	../system/commandsystem.h \
 	../system/audioiodevice.h \

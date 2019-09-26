@@ -122,7 +122,11 @@ bool Project::saveToFile(const QString &path)
 
 bool Project::loadFromFile(const QString &path)
 {
-	LOGTEXT(QObject::tr("<font color=green>Load project</font> '%1'").arg(path));
+	LOGTEXT(tr("<font color=green>Load project</font> '%1'").arg(path));
+	if (path.toLower().endsWith(".fxm")) {
+		LOGTEXT(tr("<font color=orange> -> maybe fxMaster project file"));
+		return loadFxMasterProject(path);
+	}
 
 	int line_number = 0;
 	QString line_copy;
@@ -555,6 +559,142 @@ bool Project::showFindFileDialog(FxItem *fx)
 	}
 
 	return false;
+}
+
+bool Project::loadFxMasterProject(const QString &path)
+{
+	QFile file(path);
+	if (!file.open(QIODevice::ReadOnly)) {
+		LOGERROR(tr("Failed to open file %1").arg(path));
+		return false;
+	}
+
+	QDataStream in(&file);
+	in.setByteOrder(QDataStream::LittleEndian);
+
+	// Read version chung and test if this is an fxm file
+	quint32 vers[4];
+	for (int i=0; i<4; i++) {
+		in >> vers[i];
+	}
+	if ((vers[0] != FXM::SAVE_CHUNK_TYPE_VERSION && vers[0] != FXM::old_SAVE_CHUNK_TYPE_VERSION) || vers[1] != sizeof(FXM::SAVE_CHUNK_VERSION)) {
+		LOGERROR(tr("Not a fxMaster project file: %1").arg(path));
+		return false;
+	}
+
+	// Read all chunks
+	bool ok = true;
+	while (!in.atEnd() && ok) {
+		quint32 type;
+		quint32 size;
+		in >> type >> size;
+		size -= 2 * sizeof(quint32);
+
+		if (size > 2000) {
+			LOGERROR("Chunk size too big!");
+			ok = false;
+			break;
+		}
+
+		switch (type) {
+		case FXM::SAVE_CHUNK_TYPE_NULL:
+		case FXM::old_SAVE_CHUNK_TYPE_NULL:
+			break;
+		case FXM::SAVE_CHUNK_TYPE_FX_AUDIO:
+		case FXM::old_SAVE_CHUNK_TYPE_FX_AUDIO:
+			ok = fxmLoadChunkAudio(in, size);
+			break;
+		case FXM::SAVE_CHUNK_TYPE_USERNAME:
+		case FXM::old_SAVE_CHUNK_TYPE_USERNAME:
+			ok = fxmLoadChunkUserName(in, size);
+			break;
+		case FXM::SAVE_CHUNK_TYPE_AUDIO_SETTING:
+		case FXM::old_SAVE_CHUNK_TYPE_AUDIO_SETTING:
+			ok = fxmLoadChunkAudioSetting(in, size);
+			break;
+		case FXM::SAVE_CHUNK_TYPE_DMX_SETTING:
+		case FXM::old_SAVE_CHUNK_TYPE_DMX_SETTING:
+			ok = fxmLoadChunkDMXSetting(in, size);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool Project::fxmLoadChunkName(QDataStream &in, FXM::FX &mem)
+{
+	quint32 type;
+	quint32 size;
+	quint32 ext;
+	in >> type >> size >> ext;
+
+	if (type != FXM::SAVE_CHUNK_TYPE_FILENAME && type != FXM::old_SAVE_CHUNK_TYPE_FILENAME) {
+		LOGERROR(QString("FX: SAVE_CHUNK_FILENAME expected while loading FX with ID %1").arg(mem.fx_id));
+		mem.fx_name = nullptr;
+		return false;
+	}
+
+	int namesize = size - (3*sizeof(quint32));
+	QByteArray namedat(256,0);
+	in.readRawData(namedat.data(),namesize);
+	mem.fx_name = strdup(namedat.data());
+	return true;
+}
+
+bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
+{
+	FXM::FX mem;
+	char *raw_p = reinterpret_cast<char*>(&mem) + 2*sizeof(quint32);
+
+	if (size > sizeof(mem)) {
+		LOGERROR("FXM: Audio chunk size greater as expected!");
+		return false;
+	}
+	mem.sc_type = FXM::SAVE_CHUNK_TYPE_FX_AUDIO;
+	mem.sc_len = size;
+	if (in.readRawData(raw_p, size) != int(size)) {
+		LOGERROR("FXM: Audio could not read audio chunk");
+		return false;
+	}
+
+	if (mem.fx_name) {
+		if (fxmLoadChunkName(in, mem)) {
+			qDebug() << "Loaded audio chunk" << mem.fx_name;
+			free(mem.fx_name);
+		}
+	}
+
+	return true;
+}
+
+bool Project::fxmLoadChunkUserName(QDataStream &in, quint32 size)
+{
+	QByteArray read(2000,0);
+	in.readRawData(read.data(), size);
+
+
+	return true;
+}
+
+bool Project::fxmLoadChunkAudioSetting(QDataStream &in, quint32 size)
+{
+	QByteArray read(2000,0);
+	in.readRawData(read.data(), size);
+
+
+	return true;
+}
+
+bool Project::fxmLoadChunkDMXSetting(QDataStream &in, quint32 size)
+{
+	QByteArray read(2000,0);
+	in.readRawData(read.data(), size);
+
+
+	return true;
 }
 
 

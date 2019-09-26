@@ -761,7 +761,7 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Project")
 												,appCentral->userSettings->pLastProjectLoadPath
-												,tr("StageRunner projects (*.srp);;All files (*)"));
+												,tr("StageRunner projects (*.srp);;FxMaster projects (*.fxm);;All files (*)"));
 	if (path.size())
 		loadProject(path);
 }
