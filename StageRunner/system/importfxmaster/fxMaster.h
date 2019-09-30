@@ -46,6 +46,10 @@ enum {
 	FX_TYPE_AUDIO			//Achtung !! nicht mit SAVE_CHUNK_TYPE_FX_AUDIO verwechseln
 };
 
+
+
+// For 64 bit systems, this struct is 104 bytes tall
+// For 32 bit systems, maybe its only 68
 typedef struct {
 	quint32 sc_type;			// Save Chunk Type
 	quint32 sc_len;				// Länge des Chunks (ohne sc_type und sc_len)
@@ -65,7 +69,7 @@ typedef struct {
 	qint8 *fx_username;			// vom Benutzer eingegebener Name, der angezeigt wird
 	quint8 fx_Audio_pfd;		// soll Sample von Disk abgespielt werden? (Nur bei WAVE möglich)
 	quint8 fx_Loop;				// FX soll loopen
-	quint8 fx_Offset_Vol;		// Volume for Chunk data (not channel!)
+	quint8 fx_Offset_Vol;		// Volume for Chunk data (not channel!) (range 0 -128)
 	quint8 fx_preFX;
 	quint32 fx_prePara;
 	quint8 fx_postFX;
@@ -79,10 +83,45 @@ typedef struct {
 	quint8 relink_post_flag;
 }FX;
 
+// This is FX struct constructed for loading data from 32bit systems
 typedef struct {
-	quint32 key;
+	quint32 sc_type;			// Save Chunk Type
+	quint32 sc_len;				// Länge des Chunks (ohne sc_type und sc_len)
+	quint32 fx_key;				// Taste, die dem Effekt zugeordnet ist (NR, die durch Tabelle zugeordnet wird
+	quint32 fx_name;			// Zeiger auf Dateiname incl. vollem Pfad (im Moment)
+	quint32	fx_type;			// Type des Effektes
+	quint32 fx_type_extra;		// Zusatz Info
+	quint32 fx_id;				// ID einmalige ID des Effektes
+	quint32 fx_pos;				// Position in Liste auf Screen (-1 = nicht auf Screen)
+	quint32 fx_usersort;		// Feld nach dem Sortiert wird
+	quint32 fx_Mix_Chunk;			// was Mix_Chunk ... Pointer auf geladene Sounddatei, falls 0, wurde Sample noch nicht geladen
+	quint8 fx_Audio_fap;		// Soll abgespieltes Sample im Speicher bleiben (FREE AFTER PLAY)
+	quint8 fx_Audio_preload;	// Ist Sample schon geladen worden, soll Sample beim Project einlesen geladen werden?
+	quint8 fx_Audio_Vol;
+	quint8 fx_keygroup;			// Tasten Gruppe, es können mehrere Tastengruppen definiert werden, damit Tasten mehrfach verwendet werden können (noch nicht aktiviert)
+	quint32 fx_Audio_len;
+	quint32 fx_username;			// vom Benutzer eingegebener Name, der angezeigt wird
+	quint8 fx_Audio_pfd;		// soll Sample von Disk abgespielt werden? (Nur bei WAVE möglich)
+	quint8 fx_Loop;				// FX soll loopen
+	quint8 fx_Offset_Vol;		// Volume for Chunk data (not channel!) (range 0 -128)
+	quint8 fx_preFX;
+	quint32 fx_prePara;
+	quint8 fx_postFX;
+	quint32 fx_postPara;
+	quint8 fx_next_Slot;		// slot where audio fx will be played
+	quint8 dummy5;
+	quint8 dummy6;
+	quint8 dummy7;
+	quint32 dummy8;
+	quint8 relink_pre_flag;
+	quint8 relink_post_flag;
+}FX32BIT;
+
+
+typedef struct {
+	int glibkey;
 	qint8 txt[6];
-	qint8 used;
+	int qtkey;
 }KEY_TXT;
 
 /* Projekt Datei Chunks */

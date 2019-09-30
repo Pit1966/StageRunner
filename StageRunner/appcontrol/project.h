@@ -111,11 +111,13 @@ public:
 	bool loadFxMasterProject(const QString &path);
 
 private:
-	bool fxmLoadChunkName(QDataStream &in, FXM::FX &mem);
+	bool fxmLoadChunkName(QDataStream &in, QString &name);
 	bool fxmLoadChunkAudio(QDataStream &in, quint32 size);
 	bool fxmLoadChunkUserName(QDataStream &in, quint32 size);
 	bool fxmLoadChunkAudioSetting(QDataStream &in, quint32 size);
 	bool fxmLoadChunkDMXSetting(QDataStream &in, quint32 size);
+	int fxmKeyToQtKey(int keyidx);
+	int glibKeyToQtKey(int key);
 
 	void init();
 	bool generateProjectNameFromPath();

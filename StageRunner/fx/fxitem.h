@@ -125,6 +125,7 @@ public:
 	inline const QString & name() const {return myName;}
 	void setName(const QString &name);
 	inline int id() const {return myId;}
+	inline void setMyId(int id) {myId = id; myInitId = id;}		///< Do not use this, unless you know what you do!
 	inline int initID() const {return myInitId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}

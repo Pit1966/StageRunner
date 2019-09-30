@@ -39,6 +39,31 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
+
+
+namespace FXM {
+KEY_TXT keyTab[104] = {
+	{0,"-=-",0},{65470,"F1",16777264},{65471,"F2",16777265},{65472,"F3",16777266},{65473,"F4",16777267},
+	{65474,"F5",16777268},{65475,"F6",16777269},{65476,"F7",16777270},{65477,"F8",16777271},
+	{65478,"F9",16777272},{65479,"F10",16777273},{65480,"F11",16777274},{65481,"F12",16777275},
+	{49," 1 ",49},{50," 2 ",50},{51," 3 ",51},{52," 4 ",52},{53," 5 ",53},
+	{54," 6 ",54},{55," 7 ",55},{56," 8 ",56},{57," 9 ",57},{48," 0 ",48},{223," ß ",223},
+	{113," Q ",81},{119," W ",87},{101," E ",69},{114," R ",82},{116," T ",84},{122," Z ",90},
+	{117," U ",85},{105," I ",73},{111," O ",79},{112," P ",80},{97," A ",65},{115," S ",83},
+	{94," ^ ",94},{100," D ",68},{102," F ",70},{103," G ",71},{104," H ",72},{106," J ",74},
+	{107," K ",75},{108," L ",76},{121," Y ",89},{120," X ",88},{99," C ",67},{118," V ",86},
+	{98," B ",66},{110," N ",78},{109," M ",77},{44," , ",44},{46," . ",46},{45," - ",45},
+	{16777222,"ZB0",0},{65436,"ZB1",16777233},{65433,"ZB2",16777237},{65435,"ZB3",16777239},{65430,"ZB4",16777234},
+	{65437,"ZB5",16777227},{65432,"ZB6",16777236},{65429,"ZB7",16777232},{65431,"ZB8",16777235},{65434,"ZB9",16777238},
+	{65455,"ZB/",47},{65450,"ZB*",42},{65453,"ZB-",45},{65451,"ZB+",43},{65421,"ENT",16777221},
+	{65439,"ZBd",16777223},{65377,"PRI",0},{65300,"ROL",16777254},{65299,"PAU",16777224},
+	{65379,"INS",16777222},{65360,"POS",16777232},{65365," UP",16777238},{65535,"DEL",16777223},{65367,"END",16777233},{65366,"DOW",16777239},
+	{252," Ü ",110},{43," + ",43},{246," Ö ",214},{228," Ä ",196},{35," # ",35},{-1,"xxx",-1}
+};
+}
+
+
+
 Project::Project()
 	: QObject()
 	, VarSet()
@@ -106,15 +131,20 @@ void Project::clear()
 bool Project::saveToFile(const QString &path)
 {
 	pProjectFormat = PROJECT_FORMAT;
+	QString modpath = path;
+	if (modpath.toLower().endsWith(".fxm")) {
+		modpath.chop(4);
+		modpath.append(".srp");
+	}
 
-	bool ok = fileSave(path, false, true);
+	bool ok = fileSave(modpath, false, true);
 
 	if (ok) {
-		curProjectFilePath = path;
+		curProjectFilePath = modpath;
 		fxList->setModified(false);
 		setModified(false);
 		generateProjectNameFromPath();
-		emit projectLoadedOrSaved(path, ok);
+		emit projectLoadedOrSaved(modpath, ok);
 	}
 
 	return ok;
@@ -624,7 +654,7 @@ bool Project::loadFxMasterProject(const QString &path)
 	return true;
 }
 
-bool Project::fxmLoadChunkName(QDataStream &in, FXM::FX &mem)
+bool Project::fxmLoadChunkName(QDataStream &in, QString &name)
 {
 	quint32 type;
 	quint32 size;
@@ -632,38 +662,68 @@ bool Project::fxmLoadChunkName(QDataStream &in, FXM::FX &mem)
 	in >> type >> size >> ext;
 
 	if (type != FXM::SAVE_CHUNK_TYPE_FILENAME && type != FXM::old_SAVE_CHUNK_TYPE_FILENAME) {
-		LOGERROR(QString("FX: SAVE_CHUNK_FILENAME expected while loading FX with ID %1").arg(mem.fx_id));
-		mem.fx_name = nullptr;
+		LOGERROR(QString("FX: SAVE_CHUNK_FILENAME expected while loading FX"));
 		return false;
 	}
 
 	int namesize = size - (3*sizeof(quint32));
 	QByteArray namedat(256,0);
 	in.readRawData(namedat.data(),namesize);
-	mem.fx_name = strdup(namedat.data());
+	name = QString::fromLocal8Bit(namedat);
 	return true;
 }
 
 bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 {
 	FXM::FX mem;
+	FXM::FX32BIT mem32;
 	char *raw_p = reinterpret_cast<char*>(&mem) + 2*sizeof(quint32);
+	char *raw_p32 = reinterpret_cast<char*>(&mem32) + 2*sizeof(quint32);
+
+	fprintf(stderr, "chunk audio: size of mem: %lu, mem32: %lu, size of chunk: %d\n",sizeof(mem),sizeof(mem32),size);
 
 	if (size > sizeof(mem)) {
 		LOGERROR("FXM: Audio chunk size greater as expected!");
 		return false;
 	}
+
 	mem.sc_type = FXM::SAVE_CHUNK_TYPE_FX_AUDIO;
 	mem.sc_len = size;
-	if (in.readRawData(raw_p, size) != int(size)) {
-		LOGERROR("FXM: Audio could not read audio chunk");
-		return false;
-	}
 
-	if (mem.fx_name) {
-		if (fxmLoadChunkName(in, mem)) {
-			qDebug() << "Loaded audio chunk" << mem.fx_name;
-			free(mem.fx_name);
+	if (size <= 80) { // Maybe this was saved on a 32bit system
+		if (in.readRawData(raw_p32, size) != int(size)) {
+			LOGERROR("FXM: Audio could not read audio chunk from 32bit system");
+			return false;
+		}
+		if (mem32.fx_name) {
+			QString name;
+			if (fxmLoadChunkName(in, name)) {
+				qDebug() << "Loaded audio chunk" << name << "id" << mem32.fx_id;
+
+				FxAudioItem *fxa = fxList->addFxAudioSimple(name.toLocal8Bit().data());
+				fxa->setMyId(mem32.fx_id+1);
+				fxa->initialVolume = mem32.fx_Audio_Vol * MAX_VOLUME / 128;
+				fxa->loopTimes = mem32.fx_Loop;
+				fxa->setKeyCode(fxmKeyToQtKey(mem32.fx_key));
+			}
+		}
+	} else {
+		// load data saved by 64bit system
+		if (in.readRawData(raw_p, size) != int(size)) {
+			LOGERROR("FXM: Audio could not read audio chunk");
+			return false;
+		}
+		if (mem.fx_name) {
+			QString name;
+			if (fxmLoadChunkName(in, name)) {
+				qDebug() << "Loaded audio chunk" << name << "id" << mem.fx_id;
+
+				FxAudioItem *fxa = fxList->addFxAudioSimple(name.toLocal8Bit().data());
+				fxa->setMyId(mem.fx_id+1);
+				fxa->initialVolume = mem.fx_Audio_Vol * MAX_VOLUME / 128;
+				fxa->loopTimes = mem.fx_Loop;
+				fxa->setKeyCode(fxmKeyToQtKey(mem.fx_key));
+			}
 		}
 	}
 
@@ -672,9 +732,13 @@ bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 
 bool Project::fxmLoadChunkUserName(QDataStream &in, quint32 size)
 {
-	QByteArray read(2000,0);
-	in.readRawData(read.data(), size);
+	int id;
+	in >> id;
 
+	size -= sizeof(quint32);
+	QByteArray read(size+1, 0);
+	in.readRawData(read.data(), size);
+	qDebug() << "Found CHUNK_USERNAME:" << read.data() << "id:" << id;
 
 	return true;
 }
@@ -693,8 +757,33 @@ bool Project::fxmLoadChunkDMXSetting(QDataStream &in, quint32 size)
 	QByteArray read(2000,0);
 	in.readRawData(read.data(), size);
 
-
 	return true;
+}
+
+int Project::fxmKeyToQtKey(int keyidx)
+{
+	if (keyidx > 0 && keyidx < 104) {
+		return FXM::keyTab[keyidx].qtkey;
+	}
+	return 0;
+}
+
+int Project::glibKeyToQtKey(int key)
+{
+	int i = 0;
+	while (1) {
+		int gkey = FXM::keyTab[i].glibkey;
+		int qtkey = FXM::keyTab[i].qtkey;
+		if (gkey == -1)
+			break;
+
+		if (gkey == key)
+			return qtkey;
+
+		i++;
+	}
+
+	return 0;
 }
 
 
