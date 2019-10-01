@@ -153,61 +153,66 @@ bool Project::saveToFile(const QString &path)
 bool Project::loadFromFile(const QString &path)
 {
 	LOGTEXT(tr("<font color=green>Load project</font> '%1'").arg(path));
-	if (path.toLower().endsWith(".fxm")) {
-		LOGTEXT(tr("<font color=orange> -> maybe fxMaster project file"));
-		return loadFxMasterProject(path);
-	}
 
 	int line_number = 0;
 	QString line_copy;
 	bool file_exists;
 
 	clearCurrentVars();
-	setFileLoadCancelOnEmptyLine(false);
+	bool ok = true;
 
-	bool ok = fileLoad(path,&file_exists,&line_number,&line_copy);
-
-	if (pProjectFormat >= 2) {
-		fxList->refAllMembers();
-		if (!ok) {
-			loadErrorLineNumber = line_number;
-			loadErrorLineString = line_copy;
-			loadErrorFileNotExisting = !file_exists;
-		}
+	if (path.toLower().endsWith(".fxm")) {
+		LOGTEXT(tr("<font color=orange> -> maybe fxMaster project file"));
+		ok = loadFxMasterProject(path);
 	}
 	else {
-		// this is old stuff for project file versions < 2 !!
 
-		// Now try to load FxItem VarSets (with classname "FxItem")
-		QFile file(path);
-		FxItem *fx = 0;
-		if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
-			QTextStream read(&file);
-			while (!read.atEnd() && ok) {
-				int child_level = 0;
-				int ret = analyzeLine(read,fx,child_level,&line_number,&line_copy);
-				if (ret < 0) {
-					qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
-					ok = false;
-				}
-				// Wait for ClassName matching FxItem Type
-				if (curClassname == "FxItem" && !curChildActive) {
-					// An opening bracket could mean a new instance will come
-					if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
-					// We have to wait for FxType to determine what kind of Fx we
-					// have to initialize
-					if (curKey == "FxType") {
-						fx = fxList->addFx(curValue.toInt());
-						if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list -> analyze sub class",fx->fxType());
+		setFileLoadCancelOnEmptyLine(false);
+
+		ok = fileLoad(path,&file_exists,&line_number,&line_copy);
+
+		if (pProjectFormat >= 2) {
+			fxList->refAllMembers();
+			if (!ok) {
+				loadErrorLineNumber = line_number;
+				loadErrorLineString = line_copy;
+				loadErrorFileNotExisting = !file_exists;
+			}
+		}
+		else {
+			// this is old stuff for project file versions < 2 !!
+
+			// Now try to load FxItem VarSets (with classname "FxItem")
+			QFile file(path);
+			FxItem *fx = 0;
+			if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ) {
+				QTextStream read(&file);
+				while (!read.atEnd() && ok) {
+					int child_level = 0;
+					int ret = analyzeLine(read,fx,child_level,&line_number,&line_copy);
+					if (ret < 0) {
+						qDebug() << "Project::loadFromFile: AnalyzeLine failed while searching for fxItem";
+						ok = false;
+					}
+					// Wait for ClassName matching FxItem Type
+					if (curClassname == "FxItem" && !curChildActive) {
+						// An opening bracket could mean a new instance will come
+						if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
+						// We have to wait for FxType to determine what kind of Fx we
+						// have to initialize
+						if (curKey == "FxType") {
+							fx = fxList->addFx(curValue.toInt());
+							if (debug > 2) DEBUGTEXT("Added FxItem Type:%d to Fx list -> analyze sub class",fx->fxType());
+						}
 					}
 				}
-			}
-			file.close();
+				file.close();
 
-			fxList->refAllMembers();
-		} else {
-			ok = false;
-			loadErrorLineNumber = line_number;
+				fxList->refAllMembers();
+			} else {
+				ok = false;
+				loadErrorLineNumber = line_number;
+			}
 		}
 	}
 
@@ -670,6 +675,16 @@ bool Project::fxmLoadChunkName(QDataStream &in, QString &name)
 	QByteArray namedat(256,0);
 	in.readRawData(namedat.data(),namesize);
 	name = QString::fromLocal8Bit(namedat);
+
+#ifdef __unix__
+	if (name.contains(QRegExp("^.:\\\\"))) {
+		name = name.remove(0,2);
+		name.replace("\\","/");
+		// fprintf(stderr, "match");
+	}
+
+#endif
+
 	return true;
 }
 
@@ -705,6 +720,26 @@ bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 				fxa->initialVolume = mem32.fx_Audio_Vol * MAX_VOLUME / 128;
 				fxa->loopTimes = mem32.fx_Loop;
 				fxa->setKeyCode(fxmKeyToQtKey(mem32.fx_key));
+
+				switch (mem32.fx_preFX) {
+				case FXM::PREFX_FADEOUT_ALL:
+					fxa->attachedStartCmd = FxAudioItem::ATTACHED_CMD_FADEOUT_ALL;
+					break;
+				case FXM::PREFX_STOP_ALL:
+					fxa->attachedStartCmd = FxAudioItem::ATTACHED_CMD_STOP_ALL;
+					break;
+				case FXM::PREFX_FADEOUT:
+					/// @implement me
+					fxa->attachedStartPara1 = mem32.fx_prePara+1;
+					break;
+				case FXM::PREFX_STOP:
+					/// @implement me
+					fxa->attachedStartPara1 = mem32.fx_prePara+1;
+					break;
+				default:
+					break;
+				}
+
 			}
 		}
 	} else {
@@ -723,6 +758,25 @@ bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 				fxa->initialVolume = mem.fx_Audio_Vol * MAX_VOLUME / 128;
 				fxa->loopTimes = mem.fx_Loop;
 				fxa->setKeyCode(fxmKeyToQtKey(mem.fx_key));
+
+				switch (mem.fx_preFX) {
+				case FXM::PREFX_FADEOUT_ALL:
+					fxa->attachedStartCmd = FxAudioItem::ATTACHED_CMD_FADEOUT_ALL;
+					break;
+				case FXM::PREFX_STOP_ALL:
+					fxa->attachedStartCmd = FxAudioItem::ATTACHED_CMD_STOP_ALL;
+					break;
+				case FXM::PREFX_FADEOUT:
+					/// @implement me
+					fxa->attachedStartPara1 = mem.fx_prePara+1;
+					break;
+				case FXM::PREFX_STOP:
+					/// @implement me
+					fxa->attachedStartPara1 = mem.fx_prePara+1;
+					break;
+				default:
+					break;
+				}
 			}
 		}
 	}
@@ -738,9 +792,19 @@ bool Project::fxmLoadChunkUserName(QDataStream &in, quint32 size)
 	size -= sizeof(quint32);
 	QByteArray read(size+1, 0);
 	in.readRawData(read.data(), size);
-	qDebug() << "Found CHUNK_USERNAME:" << read.data() << "id:" << id;
+	fprintf(stderr, "Found CHUNK_USERNAME: %s: id: %d\n",read.data(),id);
+	QString uname = QString::fromLocal8Bit(read);
+	if (uname.contains(QRegExp("(\\.wav|\\.ogg|\\.WAV|\\.OGG)$")))
+		uname.chop(4);
 
-	return true;
+
+	FxItem *fx = FxItem::findFxById(id+1);
+	if (fx) {
+		fx->setName(uname);
+		return true;
+	}
+
+	return false;
 }
 
 bool Project::fxmLoadChunkAudioSetting(QDataStream &in, quint32 size)
