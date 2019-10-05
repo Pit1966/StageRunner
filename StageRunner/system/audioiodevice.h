@@ -33,12 +33,14 @@
 #include <QIODevice>
 #include <QTime>
 #include <QAudioDeviceInfo>
-
-#ifdef IS_QT5
 #include <QAudioDecoder>
-#endif // IS_QT5
 
 class QAudioFormat;
+
+class AudioDecoder : public QAudioDecoder
+{
+
+};
 
 class AudioIODevice : public QIODevice
 {
@@ -47,6 +49,7 @@ public:
 	AudioIODevice(AudioFormat format, QObject *parent = nullptr);
 	~AudioIODevice();
 
+	bool open(OpenMode mode) override;
 	qint64 readData(char *data, qint64 maxlen);
 	qint64 writeData(const char *data, qint64 len);
 	qint64 bytesAvailable() const;
@@ -60,9 +63,7 @@ private:
 	QTime run_time;
 	AUDIO::AudioErrorType audio_error;
 	AudioFormat *audio_format;
-#ifdef IS_QT5
-	QAudioDecoder *audio_decoder;
-#endif
+	AudioDecoder *audio_decoder;
 	QByteArray *audio_buffer;
 	qint64 bytes_avail;
 	qint64 bytes_read;
@@ -118,9 +119,7 @@ private slots:
 	void process_decoder_buffer();
 	void on_decoding_finished();
 	void if_audio_duration_changed(qint64 duration);
-#ifdef IS_QT5
 	void if_error_occurred(QAudioDecoder::Error error);
-#endif
 
 signals:
 	void readReady();

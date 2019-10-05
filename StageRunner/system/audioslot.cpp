@@ -178,8 +178,13 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Filename of audio file
-	audio_player->setSourceFilename(fxa->filePath());
-
+	if (!audio_player->setSourceFilename(fxa->filePath())) {
+		QString msg = tr("FX '%1': Could not start FX audio with file '%2'")
+				.arg(fxa->fxNamePath())
+				.arg(fxa->filePath());
+		POPUPERRORMSG(__func__, msg);
+		return false;
+	}
 
 	// Set Audio Buffer Size
 	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 16384) {

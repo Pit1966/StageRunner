@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.2.0
+APPVERSION = V0.9.3.0
 APP_MILESTONE = MultiOutput
 APP_PRODUCER = 2019 Stonechip Entertainment
 APP_ORG_STRING = Stonechip

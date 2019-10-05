@@ -718,6 +718,8 @@ bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 				FxAudioItem *fxa = fxList->addFxAudioSimple(name.toLocal8Bit().data());
 				fxa->setMyId(mem32.fx_id+1);
 				fxa->initialVolume = mem32.fx_Audio_Vol * MAX_VOLUME / 128;
+				if (fxa->initialVolume == 0)
+					fxa->initialVolume = MAX_VOLUME / 3;
 				fxa->loopTimes = mem32.fx_Loop;
 				fxa->setKeyCode(fxmKeyToQtKey(mem32.fx_key));
 
@@ -756,6 +758,8 @@ bool Project::fxmLoadChunkAudio(QDataStream &in, quint32 size)
 				FxAudioItem *fxa = fxList->addFxAudioSimple(name.toLocal8Bit().data());
 				fxa->setMyId(mem.fx_id+1);
 				fxa->initialVolume = mem.fx_Audio_Vol * MAX_VOLUME / 128;
+				if (fxa->initialVolume == 0)
+					fxa->initialVolume = MAX_VOLUME / 3;
 				fxa->loopTimes = mem.fx_Loop;
 				fxa->setKeyCode(fxmKeyToQtKey(mem.fx_key));
 

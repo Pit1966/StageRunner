@@ -60,6 +60,9 @@ MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
 bool MediaPlayerAudioBackend::setSourceFilename(const QString &path)
 {
 	if (path != m_mediaPath) {
+		if (!QFile::exists(path))
+			return false;
+
 		m_mediaPlayer->setMedia(QUrl::fromLocalFile(path));
 		m_mediaPath = path;
 	}
