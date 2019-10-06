@@ -58,6 +58,7 @@
 #include "gui/customwidget/psinfodialog.h"
 #include "gui/customwidget/psdockwidget.h"
 #include "gui/consolidatedialog.h"
+#include "gui/universeeditorwidget.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -335,6 +336,7 @@ void StageRunnerMainWin::init()
 	scene_status_dock = nullptr;
 	sceneStatusDisplay = nullptr;
 	sequence_status_dock = nullptr;
+	m_universeEditor = nullptr;
 	seqStatusDisplay = nullptr;
 }
 
@@ -1221,3 +1223,13 @@ void StageRunnerMainWin::onRecentProjectActionSelected()
 	loadProject(sender()->objectName());
 }
 
+
+void StageRunnerMainWin::on_actionOpen_universe_layout_editor_triggered()
+{
+	if (!m_universeEditor) {
+		m_universeEditor = new UniverseEditorWidget();
+	}
+
+	m_universeEditor->show();
+	m_universeEditor->raise();
+}

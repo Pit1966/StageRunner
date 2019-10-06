@@ -159,6 +159,7 @@ SOURCES += \
     ../system/audioslot.cpp \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
 	../gui/consolidatedialog.cpp \
+	../gui/universeeditorwidget.cpp \
 	../gui/customwidget/psspinbox.cpp
 
 unix {
@@ -281,6 +282,7 @@ HEADERS  += \
     ../system/audioslot.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
 	../gui/consolidatedialog.h \
+	../gui/universeeditorwidget.h \
 	../gui/customwidget/psspinbox.h
 
 unix {
@@ -304,7 +306,8 @@ FORMS    += \
 	../gui/sequencestatuswidget.ui \
 	../gui/customwidget/psinfodialog.ui \
 	../gui/fxscriptwidget.ui \
-    ../gui/consolidatedialog.ui
+	../gui/consolidatedialog.ui \
+	../gui/universeeditorwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

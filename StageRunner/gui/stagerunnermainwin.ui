@@ -286,7 +286,7 @@
      <x>0</x>
      <y>0</y>
      <width>888</width>
-     <height>19</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -327,6 +327,8 @@
     <addaction name="actionClassic_audio_mode"/>
     <addaction name="actionExperimental_audio_mode"/>
     <addaction name="actionUse_SDL_audio"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_universe_layout_editor"/>
    </widget>
    <widget class="QMenu" name="menuMonitor">
     <property name="title">
@@ -517,6 +519,11 @@
   <action name="actionFileRecentProjects">
    <property name="text">
     <string>Recent Projects</string>
+   </property>
+  </action>
+  <action name="actionOpen_universe_layout_editor">
+   <property name="text">
+    <string>Open universe layout editor</string>
    </property>
   </action>
  </widget>

@@ -4,15 +4,42 @@
 #include <QFile>
 #include <QDebug>
 
+SR_Channel::SR_Channel(SR_Fixture *parent)
+	: m_parentFixture(parent)
+{
+}
+
 bool SR_Channel::loadQLCChannel(QXmlStreamReader &xml)
 {
+	if (xml.name() != SR_CHANNEL) {
+		qWarning() << __func__ << "Channel node not found";
+		return false;
+	}
 
+	QXmlStreamAttributes attrs = xml.attributes();
+
+	// channel name
+	m_name = attrs.value(SR_CHANNEL_NAME).toString();
+	if (m_name.isEmpty()) {
+		qWarning() << __func__ << "Missing channel name";
+		return false;
+	}
+
+	while (xml.readNextStartElement()) {
+		if (xml.name() == SR_CHANNEL_GROUP) {
+			m_dmxFineOffset = xml.attributes().value(SR_CHANNEL_GROUPBYTE).toInt();
+			m_group = xml.readElementText();
+		}
+		else {
+			xml.skipCurrentElement();
+		}
+	}
 	return true;
 }
 
-SR_Channel *SR_Channel::createLoadQLCChannel(QXmlStreamReader &xml)
+SR_Channel *SR_Channel::createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReader &xml)
 {
-	SR_Channel *ch = new SR_Channel();
+	SR_Channel *ch = new SR_Channel(parent);
 	if (!ch->loadQLCChannel(xml)) {
 		delete ch;
 		return nullptr;
@@ -20,10 +47,104 @@ SR_Channel *SR_Channel::createLoadQLCChannel(QXmlStreamReader &xml)
 	return ch;
 }
 
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
+
+
+SR_Mode::SR_Mode(SR_Fixture *parent)
+	: m_parentFixture(parent)
+{
+}
+
+bool SR_Mode::loadQLCMode(QXmlStreamReader &xml)
+{
+	if (xml.name() != SR_FIXTURE_MODE) {
+		qWarning() << __func__ << "Mode node not found";
+		return false;
+	}
+
+	// mode name
+	m_name = xml.attributes().value(SR_FIXTURE_MODE_NAME).toString();
+	if (m_name.isEmpty()) {
+		qWarning() << __func__ << "Mode name not found";
+		return false;
+	}
+
+	while (xml.readNextStartElement()) {
+		if (xml.name() == SR_FIXTURE_MODE_CHANNEL) {
+			int chanNum = xml.attributes().value(SR_FIXTURE_MODE_CANNEL_NUM).toInt();
+			SR_Channel *ch = m_parentFixture->getChannelByName(xml.readElementText());
+			if (!insertChannelAt(chanNum, ch)) {
+				qWarning() << __func__ << m_name << ": Failure on inserting channel" << xml.readElementText();
+				return false;
+			}
+		}
+		else if (xml.name() == SR_FIXTURE_HEAD) {
+			/// @todo implement me
+			xml.skipCurrentElement();
+		}
+		else if (xml.name() == SR_FIXTURE_PHYSICAL) {
+			/// @todo implement me
+			xml.skipCurrentElement();
+		}
+		else {
+			xml.skipCurrentElement();
+		}
+
+	}
+	return true;
+}
+
+bool SR_Mode::insertChannelAt(int pos, SR_Channel *srChan)
+{
+	if (!srChan) {
+		qWarning() << __func__ << "Tried to add null pointer channel";
+		return false;
+	}
+
+	if (!m_parentFixture->containsChannel(srChan)) {
+		qWarning() << __func__ << srChan->name() << "is not part of parent fixture";
+		return false;
+	}
+
+	if (m_channels.contains(srChan)) {
+		qWarning() << __func__ << srChan->name() << "was already added to mode" << m_name;
+		return false;
+	}
+
+	m_channels.insert(pos, srChan);
+	return true;
+}
+
+SR_Mode *SR_Mode::createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml)
+{
+	SR_Mode *m = new SR_Mode(parent);
+	if (!m->loadQLCMode(xml)) {
+		delete m;
+		return nullptr;
+	}
+	return m;
+}
+
+
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
 
 SR_Fixture::SR_Fixture()
+	: m_fixtureType(FT_OTHER)
+	, m_curMode(-1)
 {
+}
 
+SR_Fixture::~SR_Fixture()
+{
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+
+	while (!m_modes.isEmpty())
+		delete m_modes.takeFirst();
 }
 
 SR_Fixture::Type SR_Fixture::stringToType(const QString& type)
@@ -100,6 +221,20 @@ bool SR_Fixture::loadQLCFixture(const QString &path)
 	return true;
 }
 
+SR_Channel *SR_Fixture::getChannelByName(const QString &name)
+{
+	for (auto *ch : m_channels) {
+		if (ch->name() == name)
+			return ch;
+	}
+	return nullptr;
+}
+
+bool SR_Fixture::containsChannel(SR_Channel *srChan)
+{
+	return m_channels.contains(srChan);
+}
+
 bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
 {
 	if (!xml.readNextStartElement())
@@ -126,12 +261,23 @@ bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
 			m_fixtureType = stringToType(xml.readElementText());
 		}
 		else if (name == SR_CHANNEL) {
-			SR_Channel *ch = SR_Channel::createLoadQLCChannel(xml);
-			if (!ch)
+			SR_Channel *ch = SR_Channel::createLoadQLCChannel(this, xml);
+			if (!ch) {
 				subok = false;
+			}
+			else {
+				ch->setDmxOffset(m_channels.size());
+				m_channels.append(ch);
+			}
 		}
 		else if (name == SR_FIXTURE_MODE) {
-
+			SR_Mode *mode = SR_Mode::createLoadQLCMode(this, xml);
+			if (!mode) {
+				subok = false;
+			}
+			else {
+				m_modes.append(mode);
+			}
 		}
 
 	}
@@ -155,4 +301,34 @@ bool SR_Fixture::subLoadCreator(QXmlStreamReader &xml)
 	}
 
 	return true;
+}
+
+
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
+
+
+
+SR_FixtureList::~SR_FixtureList()
+{
+	while (!m_list.isEmpty())
+		delete m_list.takeFirst();
+}
+
+void SR_FixtureList::addFixture(SR_Fixture *fix)
+{
+	m_list.append(fix);
+}
+
+bool SR_FixtureList::addQLCFixture(const QString &path)
+{
+	SR_Fixture *fix = new SR_Fixture();
+	if (fix->loadQLCFixture(path)) {
+		addFixture(fix);
+		return true;
+	} else {
+		delete fix;
+		return false;
+	}
 }

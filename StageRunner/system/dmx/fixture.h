@@ -15,6 +15,8 @@ class QXmlStreamReader;
 #define SR_FIXTURE_DEF_MODEL "Model"
 #define SR_FIXTURE_DEF_TYPE "Type"
 
+#define SR_FIXTURE_PHYSICAL	"Physical"
+
 // Fixture instance XML tags
 #define SR_FIXTURE_NAME "Name"
 #define SR_FIXTURE_ID "ID"
@@ -42,18 +44,56 @@ class QXmlStreamReader;
 #define SR_FIXTURE_MODE_CHANNEL       "Channel"
 #define SR_FIXTURE_MODE_CANNEL_NUM    "Number"
 
+#define SR_FIXTURE_HEAD				"Head"
+#define SR_FIXTURE_HEAD_CHANNEL		"Channel"
+
+
+class SR_Fixture;
 
 class SR_Channel
 {
+private:
+	SR_Fixture *m_parentFixture;
+	QString m_name;
+	QString m_group;
+	int m_dmxOffset = 0;		///< not used
+	int m_dmxFineOffset = 0;	///< used for dmx devices using 2 channels (or more) for a function with 16bit (or more)
+
 public:
+	SR_Channel(SR_Fixture *parent);
+	inline const QString & name() const {return m_name;}
+	inline const QString & group() const {return m_group;}
+
 	bool loadQLCChannel(QXmlStreamReader &xml);
-	static SR_Channel * createLoadQLCChannel(QXmlStreamReader &xml);
+	inline void setDmxOffset(int chanoffset) {m_dmxOffset = chanoffset;}
+	int dmxOffset() const {return m_dmxOffset;}
+
+	static SR_Channel * createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReader &xml);
 };
+
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
 
 class SR_Mode
 {
+private:
+	SR_Fixture *m_parentFixture;
+	QString m_name;
+	QList<SR_Channel*> m_channels;				///< list of channels used by this mode (channel pointers not owned!! They are managed by parent SR_Fixture)
 
+public:
+	SR_Mode(SR_Fixture *parent);
+	bool loadQLCMode(QXmlStreamReader &xml);
+
+	bool insertChannelAt(int pos, SR_Channel *srChan);
+
+	static SR_Mode * createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml);
 };
+
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
 
 class SR_Fixture
 {
@@ -80,14 +120,19 @@ private:
 	QString m_manufacturer;
 	QString m_modelName;
 	Type m_fixtureType;
+	int m_curMode;						///< current active mode.
 
 	QList<SR_Channel*>m_channels;
 	QList<SR_Mode*>m_modes;
 
 public:
 	SR_Fixture();
+	~SR_Fixture();
 
 	bool loadQLCFixture(const QString &path);
+	SR_Channel *getChannelByName(const QString &name);
+	bool containsChannel(SR_Channel *srChan);
+
 
 	SR_Fixture::Type stringToType(const QString &type);
 	QString typeToString(SR_Fixture::Type type);
@@ -95,6 +140,25 @@ public:
 private:
 	bool loadQLCFixture(QXmlStreamReader &xml);
 	bool subLoadCreator(QXmlStreamReader &xml);
+};
+
+// ------------------------------------------------------------------------------------------
+//
+// ------------------------------------------------------------------------------------------
+
+class SR_FixtureList
+{
+private:
+	QList <SR_Fixture*> m_list;
+
+public:
+	~SR_FixtureList();
+	inline int size() const {return m_list.size();}
+	inline SR_Fixture * at(int i) {return m_list.at(i);}
+	inline const SR_Fixture * at(int i) const {return m_list.at(i);}
+
+	void addFixture(SR_Fixture *fix);
+	bool addQLCFixture(const QString &path);
 };
 
 #endif // FIXTURE_H

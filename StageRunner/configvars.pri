@@ -150,3 +150,4 @@ win32 {
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 
+

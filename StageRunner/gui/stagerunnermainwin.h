@@ -41,6 +41,7 @@ class FxListWidget;
 class UserSettings;
 class FxScriptItem;
 class PsDockWidget;
+class UniverseEditorWidget;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -52,6 +53,7 @@ private:
 	PsDockWidget *scene_status_dock;
 	PsDockWidget *sequence_status_dock;
 	PsDockWidget *template_dock;
+	UniverseEditorWidget *m_universeEditor;
 
 	QStringList m_recentProjectPaths;				///< This list holds the pathnames of last used projects (max. 10)
 
@@ -137,6 +139,8 @@ private slots:
 	void on_actionVirtualDmxOutput_triggered(bool checked);
 	void onRecentProjectActionSelected();
 
+
+	void on_actionOpen_universe_layout_editor_triggered();
 
 private:
 	void init();
