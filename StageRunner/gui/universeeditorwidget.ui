@@ -15,11 +15,76 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <layout class="QHBoxLayout" name="middleLayout">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="middleLeftLayout">
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="chooseFixtureLayout">
+         <item>
+          <widget class="QPushButton" name="selectDeviceButton">
+           <property name="text">
+            <string>Select Device</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="DeviceInfoWidget" name="deviceInfoWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QTableWidget" name="universeTable">
+       <attribute name="horizontalHeaderCascadingSectionResizes">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Device Type</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>DMX</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Channel Mode</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Description</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton_addFixture">
+      <widget class="QPushButton" name="addDeviceButton">
        <property name="text">
-        <string>Add Fixture</string>
+        <string>Add Device</string>
        </property>
       </widget>
      </item>
@@ -37,43 +102,13 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_removeFixture">
+      <widget class="QPushButton" name="removeDeviceButton">
        <property name="text">
-        <string>Remove Fixture</string>
+        <string>Remove Device</string>
        </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="universeTable">
-     <attribute name="horizontalHeaderCascadingSectionResizes">
-      <bool>true</bool>
-     </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Device Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>DMX</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Channel Mode</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Description</string>
-      </property>
-     </column>
-    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -101,6 +136,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DeviceInfoWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/deviceinfowidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

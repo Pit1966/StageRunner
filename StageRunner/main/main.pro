@@ -69,6 +69,7 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 
 SOURCES += \
+	../gui/deviceinfowidget.cpp \
 	../system/dmx/fixture.cpp \
 	main.cpp \
 	../fx/fxitem.cpp \
@@ -172,6 +173,7 @@ HEADERS  += \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
+	../gui/deviceinfowidget.h \
 	../system/audiocontrol.h \
 	../system/dmx/fixture.h \
 	../system/importfxmaster/fxMaster.h \
@@ -290,6 +292,7 @@ unix {
 }
 
 FORMS    += \
+	../gui/deviceinfowidget.ui \
 	../gui/fxlistwidget.ui \
 	../gui/stagerunnermainwin.ui \
 	../gui/sequencecontrolwidget.ui \

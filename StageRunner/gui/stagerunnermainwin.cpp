@@ -120,6 +120,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 StageRunnerMainWin::~ StageRunnerMainWin()
 {
+	delete m_universeEditor;
 	delete dialWidgetStyle;
 	delete msg_dialog;
 	delete fxitem_editor_dock;

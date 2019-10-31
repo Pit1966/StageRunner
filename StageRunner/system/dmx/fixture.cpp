@@ -9,6 +9,15 @@ SR_Channel::SR_Channel(SR_Fixture *parent)
 {
 }
 
+SR_Channel::SR_Channel(SR_Fixture *parent, SR_Channel *op)
+	: m_parentFixture(parent)
+	, m_name(op->m_name)
+	, m_group(op->m_group)
+	, m_dmxOffset(op->m_dmxOffset)
+	, m_dmxFineOffset(op->m_dmxFineOffset)
+{
+}
+
 bool SR_Channel::loadQLCChannel(QXmlStreamReader &xml)
 {
 	if (xml.name() != SR_CHANNEL) {
@@ -55,6 +64,16 @@ SR_Channel *SR_Channel::createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReade
 SR_Mode::SR_Mode(SR_Fixture *parent)
 	: m_parentFixture(parent)
 {
+}
+
+SR_Mode::SR_Mode(SR_Fixture *parent, SR_Mode *op)
+	: m_parentFixture(parent)
+	, m_name(op->name())
+{
+	for (auto chan : op->channels()) {
+		SR_Channel *ownch = parent->getChannelByName(chan->name());
+		m_channels.append(ownch);
+	}
 }
 
 bool SR_Mode::loadQLCMode(QXmlStreamReader &xml)
@@ -117,6 +136,17 @@ bool SR_Mode::insertChannelAt(int pos, SR_Channel *srChan)
 	return true;
 }
 
+QStringList SR_Mode::getChannelTexts() const
+{
+	QStringList list;
+	int chanNum = 0;
+	for (auto chan : m_channels) {
+		QString s = QString("%1: %2").arg(++chanNum).arg(chan->name());
+		list.append(s);
+	}
+	return list;
+}
+
 SR_Mode *SR_Mode::createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml)
 {
 	SR_Mode *m = new SR_Mode(parent);
@@ -131,11 +161,17 @@ SR_Mode *SR_Mode::createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml)
 // ------------------------------------------------------------------------------------------
 //
 // ------------------------------------------------------------------------------------------
-
 SR_Fixture::SR_Fixture()
 	: m_fixtureType(FT_OTHER)
 	, m_curMode(-1)
+	, m_universe(0)
+	, m_dmxAdr(0)
 {
+}
+
+SR_Fixture::SR_Fixture(const SR_Fixture &o)
+{
+	cloneFrom(o);
 }
 
 SR_Fixture::~SR_Fixture()
@@ -145,6 +181,32 @@ SR_Fixture::~SR_Fixture()
 
 	while (!m_modes.isEmpty())
 		delete m_modes.takeFirst();
+}
+
+void SR_Fixture::cloneFrom(const SR_Fixture &o)
+{
+	m_manufacturer = o.m_manufacturer;
+	m_modelName = o.m_modelName;
+	m_fixtureType = o.m_fixtureType;
+	m_curMode = o.m_curMode;
+	m_universe = o.m_universe;
+	m_dmxAdr = o.m_dmxAdr;
+
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+
+	while (!m_modes.isEmpty())
+		delete m_modes.takeFirst();
+
+	for (auto chan : o.m_channels) {
+		SR_Channel *newchan = new SR_Channel(this, chan);
+		m_channels.append(newchan);
+	}
+
+	for (auto mode : o.m_modes) {
+		SR_Mode *newmode = new SR_Mode(this, mode);
+		m_modes.append(newmode);
+	}
 }
 
 SR_Fixture::Type SR_Fixture::stringToType(const QString& type)
@@ -230,9 +292,45 @@ SR_Channel *SR_Fixture::getChannelByName(const QString &name)
 	return nullptr;
 }
 
-bool SR_Fixture::containsChannel(SR_Channel *srChan)
+bool SR_Fixture::containsChannel(SR_Channel *srChan) const
 {
 	return m_channels.contains(srChan);
+}
+
+int SR_Fixture::modeCount() const
+{
+	return m_modes.size();
+}
+
+QStringList SR_Fixture::modeList() const
+{
+	QStringList modenames;
+	for (auto mode : m_modes) {
+		modenames.append(mode->name());
+	}
+	return modenames;
+}
+
+SR_Mode *SR_Fixture::mode(int num)
+{
+	if (num >= 0 && num < m_modes.size())
+		return m_modes.at(num);
+
+	return nullptr;
+}
+
+void SR_Fixture::setCurrentMode(int num)
+{
+	if (num < m_modes.size())
+		m_curMode = num;
+}
+
+QStringList SR_Fixture::getChannelTexts(int mode)
+{
+	if (mode >= m_modes.size())
+		return QStringList();
+
+	return m_modes.at(mode)->getChannelTexts();
 }
 
 bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)

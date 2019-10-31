@@ -61,6 +61,7 @@ private:
 
 public:
 	SR_Channel(SR_Fixture *parent);
+	SR_Channel(SR_Fixture *parent, SR_Channel *op);
 	inline const QString & name() const {return m_name;}
 	inline const QString & group() const {return m_group;}
 
@@ -84,9 +85,13 @@ private:
 
 public:
 	SR_Mode(SR_Fixture *parent);
+	SR_Mode(SR_Fixture *parent, SR_Mode *op);
+	inline const QString & name() const {return m_name;}
+	inline QList<SR_Channel*> & channels() {return m_channels;}
 	bool loadQLCMode(QXmlStreamReader &xml);
-
 	bool insertChannelAt(int pos, SR_Channel *srChan);
+
+	QStringList getChannelTexts() const;
 
 	static SR_Mode * createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml);
 };
@@ -122,20 +127,42 @@ private:
 	Type m_fixtureType;
 	int m_curMode;						///< current active mode.
 
+	// for universe layout
+	int m_universe = 0;
+	int m_dmxAdr = 0;
+
 	QList<SR_Channel*>m_channels;
 	QList<SR_Mode*>m_modes;
 
 public:
 	SR_Fixture();
+	SR_Fixture(const SR_Fixture &o);
 	~SR_Fixture();
+
+
+	void cloneFrom(const SR_Fixture &o);
+
+	inline const QString &manufacturer() const {return m_manufacturer;}
+	inline const QString & modelName() const {return m_modelName;}
 
 	bool loadQLCFixture(const QString &path);
 	SR_Channel *getChannelByName(const QString &name);
-	bool containsChannel(SR_Channel *srChan);
+	bool containsChannel(SR_Channel *srChan) const;
+
+	int modeCount() const;
+	QStringList modeList() const;
+	SR_Mode * mode(int num);
+	void setCurrentMode(int num);
+	inline int currentMode() const {return m_curMode;}
+
+	QStringList getChannelTexts(int mode = 0);
 
 
 	SR_Fixture::Type stringToType(const QString &type);
 	QString typeToString(SR_Fixture::Type type);
+
+	inline int dmxAdr() const {return m_dmxAdr;}
+	void setDmxAdr(int dmxAdr) {m_dmxAdr = dmxAdr;}
 
 private:
 	bool loadQLCFixture(QXmlStreamReader &xml);
