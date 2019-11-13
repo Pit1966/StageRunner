@@ -85,6 +85,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	QAction *act = findChild<QAction*>("actionUse_SDL_audio");
 	if (act) {
 		delete act;
+        actionUse_SDL_audio = nullptr;
 		myapp->userSettings->pUseSDLAudio = false;
 	}
 #endif
