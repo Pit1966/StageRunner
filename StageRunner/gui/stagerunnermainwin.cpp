@@ -469,8 +469,10 @@ void StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
 {
 	if (actionExperimental_audio_mode)
 		actionExperimental_audio_mode->setChecked(type == OUT_MEDIAPLAYER || type == OUT_NONE);
+#ifdef USE_SDL
 	if (actionUse_SDL_audio)
 		actionUse_SDL_audio->setChecked(type == OUT_SDL2);
+#endif
 	if (actionClassic_audio_mode)
 		actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
 }
