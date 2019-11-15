@@ -860,6 +860,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 				appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
 			}
 			break;
+		case Qt::Key_Right:
+			if (!appCentral->isEditMode()) {
+				appCentral->executeNextFx(1);
+			}
+			break;
 
 //		case Qt::Key_Q: {
 //			QList<QTabWidget*> list = findChildren<QTabWidget*>();

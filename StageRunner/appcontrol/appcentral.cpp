@@ -617,7 +617,8 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
 	if (cur_fx && cur_fx != next_fx) {
-		executeFxCmd(cur_fx,CMD_FX_STOP,nullptr);
+		if (cur_fx->holdTime() == 0)
+			executeFxCmd(cur_fx,CMD_FX_STOP,nullptr);
 	}
 	if (next_fx) {
 		executeFxCmd(next_fx,CMD_FX_START,nullptr);
