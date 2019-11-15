@@ -61,51 +61,70 @@ void SceneDeskWidget::init_gui()
 	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
 	connect(faderAreaWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
 	connect(faderAreaWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
+
+	connect(channelCountSpin,SIGNAL(clickedAndChanged(int)),this,SLOT(onChannelCountSpinClickedAndChanged(int)),Qt::QueuedConnection);
+	connect(channelCountSpin,SIGNAL(editingFinished()),this,SLOT(onChannelCountSpinEditingFinished()),Qt::QueuedConnection);
 }
 
 
 
-bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
+/**
+ * @brief SceneDeskWidget::setFxScene
+ * @param scene
+ * @return
+ *
+ * @todo make FxSceneItem *scene const. Scene can not be edited by multiple Widget Instances
+ */
+bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 {
 	setSceneEditable(false);
 	selected_tube_ids.clear();
 	faderAreaWidget->clear();
+	// qDebug() << "set fxScene" << scene->tubeCount() << "tubes in scene";
 
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
 	// First we save the pointer to the scene;
-	origin_fxscene = scene;
+	origin_fxscene = const_cast<FxSceneItem*>(scene);
 
 	if (!FxItem::exists(scene)) return false;
 
-	QList<DmxChannel*>sort;
-	for (int t=0; t<scene->tubes.size(); t++) {
-		sort.append(0);
-	}
+	this->blockSignals(true);
+
+	QVector<DmxChannel*>sort;
+	sort.fill(nullptr, scene->tubeCount());
 
 	for (int t=0; t<scene->tubes.size(); t++) {
 		DmxChannel *tube = scene->tubes.at(t);
+		tube->tempTubeListIdx = t;
 		if (tube->deskPositionIndex >= 0) {
-			tube->tempTubeListIdx = t;
-			sort[tube->deskPositionIndex] = tube;
+			if (tube->deskPositionIndex >= sort.size()) {
+				qWarning("%s position %d not available for tube %d",Q_FUNC_INFO, tube->deskPositionIndex, t);
+				tube->deskPositionIndex = -1;
+			} else {
+				sort[tube->deskPositionIndex] = tube;
+			}
 		}
 	}
 
 	int posindex = 0;
-	for (int t=0; t<scene->tubes.size(); t++) {
+	for (int t=0; t<scene->tubeCount(); t++) {
 		DmxChannel *tube = scene->tubes.at(t);
 		if (tube->deskPositionIndex < 0) {
-			tube->tempTubeListIdx = t;
-			while (sort.at(posindex) != 0) {
+			while (posindex < sort.size() && sort.at(posindex) != nullptr) {
 				posindex++;
 			}
-			sort[posindex] = tube;
+			if (posindex < sort.size())
+				sort[posindex] = tube;
 		}
 	}
 
-
 	for (int t=0; t<sort.size(); t++) {
 		DmxChannel *dmx = sort.at(t);
+		if (!dmx) {
+			qWarning() << Q_FUNC_INFO << "Missing DmxChannel instance:" << t;
+			continue;
+		}
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
 			// Create a new Mixer an fill in relevant data
@@ -113,8 +132,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 			// We will need the Id to determine which DmxChannel an incoming fader signal belongs to
 			// We have to keep the Id of the mixer channel in sync with Tubes list index!
 			fader->setId(dmx->tempTubeListIdx);
-			dmx->tempDeskPosIdx = t;
-			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel);
+			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel, dmx);
 			fader->setRange(0,dmx->targetFullValue);
 			fader->setValue(dmx->targetValue);
 			fader->setChannelShown(true);
@@ -146,7 +164,7 @@ bool SceneDeskWidget::setFxScene(FxSceneItem *scene)
 		setGeometry(rect);
 	}
 
-
+	this->blockSignals(false);
 	return true;
 }
 
@@ -212,7 +230,7 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 		selected_tube_ids.removeAll(id);
 		copyTubeSettingsToGui(-1);
 	}
-	qDebug() << "tubes selected:" << selected_tube_ids;
+	qDebug() << "tubes selected:" << selected_tube_ids << "id:" << id << state;
 }
 
 void SceneDeskWidget::setSceneEditable(bool state)
@@ -355,37 +373,28 @@ void SceneDeskWidget::on_hookedChannelSpin_valueChanged(int arg1)
 void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 {
 	if (!FxItem::exists(origin_fxscene)) return;
-
 	qDebug("Mixer moved from position %d to %d",fromIdx,toIdx);
-	DmxChannel *from_tube = 0;
-	DmxChannel *to_tube = 0;
-	for (int t=0; t<origin_fxscene->tubeCount(); t++) {
-		DmxChannel *tube = origin_fxscene->tubes.at(t);
-		if (tube->tempDeskPosIdx == fromIdx) {
-			from_tube = tube;
-		}
-		if (tube->tempDeskPosIdx == toIdx) {
-			to_tube = tube;
+
+	QHBoxLayout *mixlayout = faderAreaWidget->mixerLayout();
+	for (int pos=0; pos<mixlayout->count(); pos++) {
+		MixerChannel *mix = qobject_cast<MixerChannel*>(mixlayout->itemAt(pos)->widget());
+		if (!mix)
+			continue;
+
+		for (int t=0; t<origin_fxscene->tubeCount(); t++) {
+			DmxChannel *tube = origin_fxscene->tubes.at(t);
+			if (tube->tempTubeListIdx == mix->id()) {
+				if (tube->tube != pos) {
+					tube->deskPositionIndex = pos;
+				} else {
+					tube->deskPositionIndex = -1;
+				}
+				continue;
+			}
 		}
 	}
 
-	if (from_tube && to_tube) {
-		from_tube->tempDeskPosIdx = toIdx;
-		if (from_tube->tempTubeListIdx == toIdx) {
-			from_tube->deskPositionIndex = -1;
-		} else {
-			from_tube->deskPositionIndex = toIdx;
-		}
-
-		to_tube->tempDeskPosIdx = fromIdx;
-		if (to_tube->tempTubeListIdx == fromIdx) {
-			to_tube->deskPositionIndex = -1;
-		} else {
-			to_tube->deskPositionIndex = fromIdx;
-		}\
-		origin_fxscene->setModified(true);
-	}
-
+	origin_fxscene->setModified(true);
 }
 
 
@@ -566,13 +575,21 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		emit modified();
 		break;
 
-	case 3:
+	case 3: {
 		mixer->setLabelText(QInputDialog::getText(this
 												  ,tr("Edit")
 												  ,tr("Enter text for channel")
 												  ,QLineEdit::Normal
 												  ,mixer->labelText()));
+
+		DmxChannel *tube = origin_fxscene->tube(mixer->id());
+		if (tube && tube->labelText != mixer->labelText()) {
+			tube->labelText = mixer->labelText();
+			origin_fxscene->setModified(true);
+			emit modified();
+		}
 		break;
+	}
 
 	case 4:
 		unhideAllTubes();
@@ -663,20 +680,20 @@ void SceneDeskWidget::destroyAllSceneDesks()
 	}
 }
 
-void SceneDeskWidget::on_channelCountSpin_valueChanged(int arg1)
+void SceneDeskWidget::onChannelCountSpinClickedAndChanged(int arg1)
 {
-	Q_UNUSED(arg1)
-
 	if (!origin_fxscene) return;
-	// origin_fxscene->setTubeCount(arg1);
-	// setFxScene(origin_fxscene);
+	origin_fxscene->setTubeCount(arg1);
+	setFxScene(origin_fxscene);
 }
 
-void SceneDeskWidget::on_channelCountSpin_editingFinished()
+void SceneDeskWidget::onChannelCountSpinEditingFinished()
 {
 	if (!origin_fxscene) return;
-	origin_fxscene->setTubeCount(channelCountSpin->value());
-	setFxScene(origin_fxscene);
+	if (channelCountSpin->value() != origin_fxscene->tubeCount()) {
+		origin_fxscene->setTubeCount(channelCountSpin->value());
+		setFxScene(origin_fxscene);
+	}
 }
 
 void SceneDeskWidget::on_cloneCurrentInputButton_clicked()

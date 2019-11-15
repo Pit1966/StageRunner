@@ -136,7 +136,14 @@ bool FxItem::exists(FxItem *item)
 {
     QMutexLocker lock(&global_fx_lock);
 
-    return global_fx_list->contains(item);
+	return global_fx_list->contains(item);
+}
+
+bool FxItem::exists(const FxItem *item)
+{
+	QMutexLocker lock(&global_fx_lock);
+
+	return global_fx_list->contains(const_cast<FxItem*>(item));
 }
 
 FxItem *FxItem::findFxById(qint32 id)
@@ -291,7 +298,7 @@ void FxItem::setKeyCode(int code)
 	}
 }
 
-bool FxItem::isHookedToInput(qint32 universe, qint32 channel)
+bool FxItem::isHookedToInput(qint32 universe, qint32 channel) const
 {
 	return hookedToInputUniverse == universe && hookedToInputDmxChannel == channel;
 }

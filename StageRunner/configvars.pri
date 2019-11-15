@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.1.0
-APP_MILESTONE = Post Seelenbrecher
+APPVERSION = V0.9.3.0
+APP_MILESTONE = MultiOutput
 APP_PRODUCER = 2019 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
@@ -149,3 +149,5 @@ win32 {
 	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
+
+

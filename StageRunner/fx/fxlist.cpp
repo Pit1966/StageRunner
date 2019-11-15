@@ -417,7 +417,7 @@ FxItem *FxList::findSequenceFirstItem()
 	return fx;
 }
 
-bool FxList::addFxAudioSimple(const QString &path, int pos)
+FxAudioItem *FxList::addFxAudioSimple(const QString &path, int pos)
 {
 	FxAudioItem *fx = new FxAudioItem(path,this);
 	fx->refCount.ref();
@@ -430,7 +430,7 @@ bool FxList::addFxAudioSimple(const QString &path, int pos)
 
 	fx->checkForVideoClip();
 
-	return true;
+	return fx;
 }
 
 bool FxList::addFxScene(int tubes, FxItem **addedFxPointer)

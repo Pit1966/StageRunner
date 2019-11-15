@@ -165,9 +165,8 @@ MixerChannel *MixerGroup::getMixerById(int id)
 
 bool MixerGroup::selectMixer(MixerChannel *mixer, int id, bool state)
 {
-	if (!mixerlist.contains(mixer)) return false;
-
-
+	if (!mixerlist.contains(mixer))
+		return false;
 
 	if (state) {
 		if (!selected_mixer.contains(mixer)) {
@@ -218,8 +217,12 @@ bool MixerGroup::selectMixerRange(MixerChannel *fromMixer, MixerChannel *toMixer
 
 void MixerGroup::unselectAllMixers()
 {
-	for (int t=0; t<selected_mixer.size(); t++) {
-		selected_mixer.takeFirst()->setSelected(false);
+	while (!selectedMixer().isEmpty()) {
+		MixerChannel *mix = selected_mixer.takeFirst();
+		if (mixerlist.contains(mix)) {
+			mix->setSelected(false);
+			emit mixerSelected(false, mix->id());
+		}
 	}
 }
 
@@ -373,6 +376,12 @@ void MixerGroup::on_mixer_moved(int val, int id)
 
 void MixerGroup::on_mixer_selected(bool state, int id)
 {
+	static bool recursive_blocker = false;
+	if (recursive_blocker == true)
+		return;
+
+	recursive_blocker = true;
+//	qDebug() << Q_FUNC_INFO << "mix:" << id << state;
 	MixerChannel *mixer = qobject_cast<MixerChannel*>(sender());
 	if (!mixer) return;
 
@@ -382,10 +391,12 @@ void MixerGroup::on_mixer_selected(bool state, int id)
 		}
 	}
 
-	if (!m_propEnableMultiSelect && !m_propEnableRangeSelect)
+	if (state && !m_propEnableMultiSelect && !m_propEnableRangeSelect)
 		unselectAllMixers();
 
 	selectMixer(mixer,id,state);
+
+	recursive_blocker = false;
 }
 
 void MixerGroup::notifyChangedDmxUniverse(int universe, const QByteArray &dmxValues)

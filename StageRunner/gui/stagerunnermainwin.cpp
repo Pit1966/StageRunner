@@ -58,6 +58,7 @@
 #include "gui/customwidget/psinfodialog.h"
 #include "gui/customwidget/psdockwidget.h"
 #include "gui/consolidatedialog.h"
+#include "gui/universeeditorwidget.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -84,6 +85,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	QAction *act = findChild<QAction*>("actionUse_SDL_audio");
 	if (act) {
 		delete act;
+        actionUse_SDL_audio = nullptr;
 		myapp->userSettings->pUseSDLAudio = false;
 	}
 #endif
@@ -119,6 +121,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 StageRunnerMainWin::~ StageRunnerMainWin()
 {
+	delete m_universeEditor;
 	delete dialWidgetStyle;
 	delete msg_dialog;
 	delete fxitem_editor_dock;
@@ -335,6 +338,7 @@ void StageRunnerMainWin::init()
 	scene_status_dock = nullptr;
 	sceneStatusDisplay = nullptr;
 	sequence_status_dock = nullptr;
+	m_universeEditor = nullptr;
 	seqStatusDisplay = nullptr;
 }
 
@@ -763,7 +767,7 @@ void StageRunnerMainWin::on_actionLoad_Project_triggered()
 
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Project")
 												,appCentral->userSettings->pLastProjectLoadPath
-												,tr("StageRunner projects (*.srp);;All files (*)"));
+												,tr("StageRunner projects (*.srp);;FxMaster projects (*.fxm);;All files (*)"));
 	if (path.size())
 		loadProject(path);
 }
@@ -826,6 +830,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		bool isAutoRepeat = ev->isAutoRepeat();
 
 		LOGTEXT(tr("Key pressed: #%1 -> '%2'").arg(key).arg(QtStaticTools::keyToString(key,activeKeyModifiers)));
+		qInfo() << "key pressed" << key;
 
 		switch (key) {
 		case Qt::Key_Shift:
@@ -856,6 +861,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 				appCentral->lightBlack(0);
 				appCentral->videoBlack(0);
 				appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
+			}
+			break;
+		case Qt::Key_Right:
+			if (!appCentral->isEditMode()) {
+				appCentral->executeNextFx(1);
 			}
 			break;
 
@@ -1222,3 +1232,13 @@ void StageRunnerMainWin::onRecentProjectActionSelected()
 	loadProject(sender()->objectName());
 }
 
+
+void StageRunnerMainWin::on_actionOpen_universe_layout_editor_triggered()
+{
+	if (!m_universeEditor) {
+		m_universeEditor = new UniverseEditorWidget();
+	}
+
+	m_universeEditor->show();
+	m_universeEditor->raise();
+}

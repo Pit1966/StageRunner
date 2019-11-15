@@ -55,8 +55,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	// qDebug("init FFT Size: %d",m_leftFFT.fftDimension());
 	m_leftFFT.setOversampling(4);
 
-#ifdef IS_QT5
-	audio_decoder = new QAudioDecoder;
+	audio_decoder = new AudioDecoder;
 	if (audio_decoder->error() == QAudioDecoder::ServiceMissingError) {
 		m_lastErrorText = tr("Audio decoder not initialized. No decode/play service available");
 		audio_error = AUDIO::AUDIO_ERR_DECODER;
@@ -70,19 +69,26 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
 	connect(this,SIGNAL(rawDataProcessed(const char*,int,QAudioFormat)),this,SLOT(calcVuLevel(const char*,int,QAudioFormat)),Qt::QueuedConnection);
 
-#endif
 }
 
 AudioIODevice::~AudioIODevice()
 {
 
-#ifdef IS_QT5
 	delete audio_decoder;
-#endif
 	delete audio_buffer;
 	delete audio_format;
 	delete m_leftAvg;
 	delete m_rightAvg;
+}
+
+bool AudioIODevice::open(QIODevice::OpenMode mode)
+{
+	bool ok = QIODevice::open(mode);
+	if (!ok) {
+		LOGERROR(tr("Could not open audio file: %1!").arg(errorString()));
+		audio_error = AUDIO::AUDIO_ERR_FILE_NOT_OPENED;
+	}
+	return ok;
 }
 
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
@@ -170,10 +176,8 @@ qint64 AudioIODevice::bytesAvailable() const
 
 bool AudioIODevice::setSourceFilename(const QString &filename)
 {
-#ifdef IS_QT5
 	audio_decoder->setSourceFilename(filename);
 	audio_decoder->setAudioFormat(*audio_format);
-#endif
 	current_filename = filename;
 	m_currentPlaybackSamplerate = 0;
 	return true;
@@ -459,31 +463,25 @@ void AudioIODevice::start(int loops)
 	sample_peak = 0;
 	run_time.start();
 
-#ifdef IS_QT5
 	// Now start reading and decoding of sound file. Signal "bufferReady" will be
 	// emitted when an audio portion is decoded. Audio data will be processed in
 	// process_decoder_buffer
 	decoding_finished_f = false;
 	audio_decoder->start();
-#endif
 	LOGTEXT(tr("Decoding of audio file '%1' started").arg(current_filename));
-
 }
 
 void AudioIODevice::stop()
 {
-#ifdef IS_QT5
 	decoding_finished_f = true;
 	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
 		audio_decoder->stop();
 	}
-#endif
 	close();
 }
 
 void AudioIODevice::process_decoder_buffer()
 {
-#ifdef IS_QT5
 	if (!isOpen()) return;
 
 	QAudioBuffer audiobuf = audio_decoder->read();
@@ -494,7 +492,6 @@ void AudioIODevice::process_decoder_buffer()
 
 	// qDebug("processAudio %d: size: %d",audio_buffer_count, frames);
 	audio_buffer_count++;
-#endif
 }
 
 void AudioIODevice::on_decoding_finished()
@@ -513,7 +510,6 @@ void AudioIODevice::if_audio_duration_changed(qint64 duration)
 }
 
 
-#ifdef IS_QT5
 void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 {
 	DEBUGERROR("An error occurred while decoding audio: %s (error: %d)"
@@ -521,5 +517,4 @@ void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 	LOGERROR(tr("Failed file was: %1").arg(audio_decoder->sourceFilename()));
 	audio_error = AUDIO::AUDIO_ERR_DECODER;
 }
-#endif
 

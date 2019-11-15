@@ -94,6 +94,8 @@ void IODeviceAudioBackend::start(int loops)
 	m_audioIODev->setLoopCount(loops);
 
 	m_audioOutput->start(m_audioIODev);
+	if (m_audioOutput->error() != QAudio::NoError)
+		qWarning() << "start audio" << m_audioOutput->error();
 }
 
 void IODeviceAudioBackend::stop()
@@ -145,6 +147,9 @@ AudioStatus IODeviceAudioBackend::state() const
 		return AUDIO_PLAYING;
 	case QAudio::SuspendedState:
 		return AUDIO_PAUSED;
+#if QT_VERSION >= 0x050b00
+	case QAudio::InterruptedState:
+#endif
 	case QAudio::IdleState:
 	case QAudio::StoppedState:
 		return AUDIO_STOPPED;
@@ -166,6 +171,7 @@ int IODeviceAudioBackend::audioBufferSize() const
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
+	// qDebug() << "QAudioDevice state changed" << state;
 
 	AudioStatus audiostatus;
 

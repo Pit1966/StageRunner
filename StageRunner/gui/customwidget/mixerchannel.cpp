@@ -23,6 +23,7 @@
 
 #include "mixerchannel.h"
 #include "customwidget/extmimedata.h"
+#include "dmxchannel.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -36,12 +37,13 @@
 #define LO_POS_PERCENT 85
 #define HI_POS_PERCENT 15
 
-MixerChannel::MixerChannel(QWidget *parent) :
-	QAbstractSlider(parent)
+MixerChannel::MixerChannel(QWidget *parent)
+	: QAbstractSlider(parent)
 {
 	my_id = -1;
 	my_universe = -1;
 	my_dmx_channel = -1;
+	my_dmx_channel_ref = nullptr;
 
 	prop_channel_shown_f = false;
 	prop_selectable_f = false;
@@ -77,6 +79,13 @@ MixerChannel::MixerChannel(QWidget *parent) :
 MixerChannel::~MixerChannel()
 {
 	// qDebug("destroy mixer: %d", my_dmx_channel+1);
+}
+
+void MixerChannel::setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP)
+{
+	my_universe = universe;
+	my_dmx_channel = dmx_channel;
+	my_dmx_channel_ref = dmxChP;
 }
 
 void MixerChannel::setRange(int min, int max)
@@ -122,6 +131,7 @@ int MixerChannel::refValue()
 void MixerChannel::setSelected(bool state)
 {
 	if (prop_selected_f != state) {
+//		qDebug() << Q_FUNC_INFO << "mixer" << my_id << state;
 		prop_selected_f = state;
 		update();
 		emit mixerSelected(state,int(my_id));
@@ -138,6 +148,7 @@ void MixerChannel::setSelectable(bool state)
 
 void MixerChannel::mousePressEvent(QMouseEvent *event)
 {
+	qDebug() << "left click";
 	if (knob_rect.contains(event->pos() )) {
 		knob_selected_f = true;
 		knob_over_f = true;
@@ -301,6 +312,30 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawText(bound,label,QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 	}
 
+//	{   // For drag/drop position debugging
+//		QFont font(p.font());
+//		font.setFixedPitch(true);
+//		font.setItalic(false);
+//		font.setPixelSize(9);
+//		p.setFont(font);
+//		p.setPen(Qt::yellow);
+//		QRect bound(QPoint(0,y1),QPoint(width(),height()));
+//		QString s = QString("%1").arg(my_id);
+//		p.drawText(bound,s,QTextOption(Qt::AlignLeft | Qt::AlignBottom));
+//	}
+
+//	if (my_dmx_channel_ref && my_dmx_channel_ref->deskPositionIndex >= 0) {
+//		QFont font(p.font());
+//		font.setFixedPitch(true);
+//		font.setItalic(false);
+//		font.setPixelSize(9);
+//		p.setFont(font);
+//		p.setPen(Qt::black);
+//		QRect bound(QPoint(0,y1),QPoint(width()-1,height()));
+//		QString s = QString("%1").arg(my_dmx_channel_ref->deskPositionIndex);
+//		p.drawText(bound,s,QTextOption(Qt::AlignRight | Qt::AlignBottom));
+//	}
+
 	if (my_dmx_type > DMX_GENERIC) {
 		QString tstr;
 		switch (my_dmx_type) {
@@ -359,10 +394,10 @@ bool MixerChannel::generate_scaled_knob()
 
 	// Calc original proportion between slider knob and slider background taken
 	// from the images
-	float yprop = org_pix_back.height() / org_pix_knob.height();
-	float xprop = org_pix_back.width() / org_pix_knob.width();
-	// Proportion of the know. We will try to keep this value
-	float knobprob = org_pix_knob.height() / org_pix_knob.width();
+	float yprop = float(org_pix_back.height()) / org_pix_knob.height();
+	float xprop = float(org_pix_back.width()) / org_pix_knob.width();
+	// Proportion of the knob. We will try to keep this value
+	float knobprob = float(org_pix_knob.height()) / org_pix_knob.width();
 
 	// Height of the knob will be scaled to fit original proportion
 	knob_scaled_xsize = float(width()) / xprop;
@@ -370,9 +405,9 @@ bool MixerChannel::generate_scaled_knob()
 	if (knob_scaled_ysize > knobprob * knob_scaled_xsize) {
 		knob_scaled_ysize = knobprob * knob_scaled_xsize;
 	}
-	if (float(org_pix_back.width()) / width() > 2.0f) {
-		knob_scaled_ysize *= 2;
-	}
+//	if (float(org_pix_back.width()) / width() > 2.0f) {
+//		knob_scaled_ysize *= 2;
+//	}
 
 	// Calculate an offset to adjust the misallignment caused by the shadow in the image
 	knob_xoffset = knob_scaled_xsize * SHADOW_X_PERCENT / 100;
@@ -380,7 +415,7 @@ bool MixerChannel::generate_scaled_knob()
 	knob_xsize = knob_scaled_xsize - knob_xoffset;
 	knob_ysize = knob_scaled_ysize - knob_yoffset;
 
-	if (knob_scaled_xsize && knob_scaled_ysize) {
+	if (knob_scaled_xsize > 5 && knob_scaled_ysize > 5) {
 		return true;
 	} else {
 		return false;

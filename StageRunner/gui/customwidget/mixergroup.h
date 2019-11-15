@@ -67,6 +67,7 @@ public:
 	bool selectMixerRange(MixerChannel *fromMixer, MixerChannel *toMixer, bool state);
 	QList<MixerChannel*> & selectedMixer() {return selected_mixer;}
 	void unselectAllMixers();
+	QHBoxLayout * mixerLayout() const {return mixerlayout;}
 
 protected:
 	void resizeEvent(QResizeEvent *event);

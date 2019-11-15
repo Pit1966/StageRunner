@@ -49,7 +49,7 @@ public:
 protected:
 
 	pstring widgetPos;
-	quint32 myStatus;
+	mutable quint32 myStatus;
 	SceneSeqState mySeqStatus;
 
 private:
@@ -63,22 +63,22 @@ public:
 	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
 
-	qint32 loopValue() const {return 0;}
-	void setLoopValue(qint32 val);
-	void resetFx();
-	QString widgetPosition() {return widgetPos;}
-	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
+	qint32 loopValue() const override{return 0;}
+	void setLoopValue(qint32 val) override;
+	void resetFx() override;
+	QString widgetPosition() const override {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
-	DmxChannel *tube(int id);
+	DmxChannel *tube(int id) const;
 	bool removeTube(int id);
 
 	bool initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime = 0);
 	bool directFadeToDmx(qint32 dmxval, qint32 time_ms);
 	bool loopFunction();
-	void setLive(bool state);
+	void setLive(bool state) const;
 	void setBlacked(int mixline, bool state);
 	bool isBlacked(int mixline) const {return wasBlacked[mixline];}
 	inline bool isActive() const {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}

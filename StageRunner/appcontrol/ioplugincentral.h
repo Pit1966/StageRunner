@@ -44,7 +44,7 @@ public:
 	public:
 		QLCIOPlugin * plugin;						///< Pointer to loaded Plugin
 		int deviceNumber;							///< The output/input number from plugin for the universe
-		int deviceUniverse;
+		int deviceUniverse;							///< Universe number used by the plugin
 		int responseTime;
 		int dummy;
 	public:
@@ -58,9 +58,10 @@ public:
 		}
 	};
 
-	PluginMapping *pluginMapping;						///< This VarSet holds the configuration of plugins and DMX universe mapping
-	PluginEntry fastMapOutUniverse[MAX_DMX_UNIVERSE];	///< Array that connects output universe Number to configured Plugin and Output
-	PluginEntry fastMapInUniverse[MAX_DMX_UNIVERSE];	///< Array that connects input universe Number to configured Plugin and Output
+	PluginMapping *pluginMapping;							///< This VarSet holds the configuration of plugins and DMX universe mapping
+	QList<PluginEntry> mapOutUniverse[MAX_DMX_UNIVERSE];	///< mapping of output universe to connected plugins (since Aug.2019 it is possible to connect more than 1 output to the same universe)
+	// PluginEntry fastMapOutUniverse[MAX_DMX_UNIVERSE];		///< Array that connects output universe Number to configured Plugin and Output
+	PluginEntry fastMapInUniverse[MAX_DMX_UNIVERSE];		///< Array that connects input universe Number to configured Plugin and Output
 
 private:
 	QList<QLCIOPlugin*>qlc_plugins;						///< A list of loaded QLCIOPlugin type plugins
@@ -85,7 +86,8 @@ public:
 	 */
 	static QString sysPluginDir();
 
-	bool getPluginAndOutputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & output);
+	bool hasOutputs(int universe) const;
+	bool getPluginAndOutputForDmxUniverse(int universe, int connectNumber, QLCIOPlugin *&plugin, int & output);
 	bool getPluginAndInputForDmxUniverse(int universe, QLCIOPlugin *&plugin, int & input);
 	bool getInputUniverseForPlugin(QLCIOPlugin *plugin, int input, int &universe) const;
 	bool getOutputUniverseForPlugin(QLCIOPlugin *plugin, int output, int &universe) const;

@@ -25,9 +25,11 @@
 #define PROJECT_H
 
 #include "../tool/varset.h"
+#include "system/importfxmaster/fxMaster.h"
 
 class FxList;
 class FxItem;
+
 
 class Project : public QObject, public VarSet
 {
@@ -106,7 +108,17 @@ public:
 	bool askForFindFileDialog(FxItem *fx, int *ret);
 	bool showFindFileDialog(FxItem *fx);
 
+	bool loadFxMasterProject(const QString &path);
+
 private:
+	bool fxmLoadChunkName(QDataStream &in, QString &name);
+	bool fxmLoadChunkAudio(QDataStream &in, quint32 size);
+	bool fxmLoadChunkUserName(QDataStream &in, quint32 size);
+	bool fxmLoadChunkAudioSetting(QDataStream &in, quint32 size);
+	bool fxmLoadChunkDMXSetting(QDataStream &in, quint32 size);
+	int fxmKeyToQtKey(int keyidx);
+	int glibKeyToQtKey(int key);
+
 	void init();
 	bool generateProjectNameFromPath();
 

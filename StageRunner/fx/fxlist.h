@@ -31,6 +31,7 @@
 
 
 class FxItem;
+class FxAudioItem;
 class FxIdMap;
 
 class FxList : public QObject
@@ -114,7 +115,7 @@ public:
 	void setLoopTimes(int loops);
 	void emitListChangedSignal();
 
-	bool addFxAudioSimple(const QString & path, int pos = -1);
+	FxAudioItem * addFxAudioSimple(const QString & path, int pos = -1);
 	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);
 	bool addFxAudioPlayList();
 	bool addFxSequence();

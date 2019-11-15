@@ -69,6 +69,8 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 
 SOURCES += \
+	../gui/deviceinfowidget.cpp \
+	../system/dmx/fixture.cpp \
 	main.cpp \
 	../fx/fxitem.cpp \
 	../fx/fxlist.cpp \
@@ -157,7 +159,9 @@ SOURCES += \
     ../widgets/editormarginwidget.cpp \
     ../system/audioslot.cpp \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
-    ../gui/consolidatedialog.cpp
+	../gui/consolidatedialog.cpp \
+	../gui/universeeditorwidget.cpp \
+	../gui/customwidget/psspinbox.cpp
 
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
@@ -169,7 +173,10 @@ HEADERS  += \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
+	../gui/deviceinfowidget.h \
 	../system/audiocontrol.h \
+	../system/dmx/fixture.h \
+	../system/importfxmaster/fxMaster.h \
 	../system/log.h \
 	../system/commandsystem.h \
 	../system/audioiodevice.h \
@@ -276,13 +283,16 @@ HEADERS  += \
     ../widgets/editormarginwidget.h \
     ../system/audioslot.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
-    ../gui/consolidatedialog.h
+	../gui/consolidatedialog.h \
+	../gui/universeeditorwidget.h \
+	../gui/customwidget/psspinbox.h
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h
 }
 
 FORMS    += \
+	../gui/deviceinfowidget.ui \
 	../gui/fxlistwidget.ui \
 	../gui/stagerunnermainwin.ui \
 	../gui/sequencecontrolwidget.ui \
@@ -299,7 +309,8 @@ FORMS    += \
 	../gui/sequencestatuswidget.ui \
 	../gui/customwidget/psinfodialog.ui \
 	../gui/fxscriptwidget.ui \
-    ../gui/consolidatedialog.ui
+	../gui/consolidatedialog.ui \
+	../gui/universeeditorwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc
