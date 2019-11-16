@@ -149,6 +149,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 			videoFilePathEdit->setToolTip(cur_fxclip->filePath());
 			videoLoopsSpin->setValue(cur_fxclip->loopTimes);
 			videoBlackAtEndCheck->setChecked(cur_fxclip->blackAtVideoEnd);
+			videoInitialVolDial->setValue(cur_fxclip->initialVolume);
 		} else {
 			videoGroup->setVisible(false);
 		}
@@ -224,6 +225,15 @@ void FxItemPropertyWidget::on_initialVolDial_sliderMoved(int position)
 		emit modified(cur_fxa);
 	}
 
+}
+
+void FxItemPropertyWidget::on_videoInitialVolDial_sliderMoved(int position)
+{
+	if (FxItem::exists(cur_fxclip)) {
+		cur_fxclip->initialVolume = position;
+		cur_fxclip->setModified(true);
+		emit modified(cur_fxclip);
+	}
 }
 
 void FxItemPropertyWidget::on_nameEdit_textEdited(const QString &arg1)

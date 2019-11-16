@@ -56,6 +56,7 @@ public slots:
 
 private slots:
 	void on_initialVolDial_sliderMoved(int position);
+	void on_videoInitialVolDial_sliderMoved(int position);
 	void on_nameEdit_textEdited(const QString &arg1);
 	void on_keyEdit_textEdited(const QString &arg1);
 	void on_faderCountEdit_textEdited(const QString &arg1);
@@ -88,6 +89,7 @@ private slots:
 	void on_videoFilePathEdit_doubleClicked();
 
 	void on_findAudioFileButton_clicked();
+
 
 signals:
 	void modified(FxItem *fx);

@@ -509,7 +509,13 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 	case FX_AUDIO:
 		if (static_cast<FxAudioItem*>(fx)->isFxClip) {
 			FxClipItem *fxc = static_cast<FxClipItem*>(fx);
-			unitVideo->startFxClip(fxc);
+			switch (cmd) {
+			case CMD_FX_STOP:
+				unitVideo->videoBlack(fx->fadeOutTime());
+				break;
+			default:
+				unitVideo->startFxClip(fxc);
+			}
 		} else {
 			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
 			switch (cmd) {
