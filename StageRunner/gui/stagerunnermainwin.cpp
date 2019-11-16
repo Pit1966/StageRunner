@@ -1136,7 +1136,10 @@ void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked
 	if (checked) {
 		appCentral->setAudioOutputType(OUT_MEDIAPLAYER);
 		actionClassic_audio_mode->setChecked(false);
-		actionUse_SDL_audio->setChecked(false);
+#ifdef USE_SDL
+		if (actionUse_SDL_audio)
+			actionUse_SDL_audio->setChecked(false);
+#endif
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	}
 
@@ -1148,7 +1151,10 @@ void StageRunnerMainWin::on_actionClassic_audio_mode_triggered(bool checked)
 		appCentral->setAudioOutputType(OUT_DEVICE);
 		if (actionExperimental_audio_mode)
 			actionExperimental_audio_mode->setChecked(false);
-		actionUse_SDL_audio->setChecked(false);
+#ifdef USE_SDL
+		if (actionUse_SDL_audio)
+			actionUse_SDL_audio->setChecked(false);
+#endif
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	}
 }
