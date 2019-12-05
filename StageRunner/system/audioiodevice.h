@@ -34,6 +34,7 @@
 #include <QTime>
 #include <QAudioDeviceInfo>
 #include <QAudioDecoder>
+#include <QMutex>
 
 class QAudioFormat;
 
@@ -50,9 +51,9 @@ public:
 	~AudioIODevice();
 
 	bool open(OpenMode mode) override;
-	qint64 readData(char *data, qint64 maxlen);
-	qint64 writeData(const char *data, qint64 len);
-	qint64 bytesAvailable() const;
+	qint64 readData(char *data, qint64 maxlen) override;
+	qint64 writeData(const char *data, qint64 len) override;
+	qint64 bytesAvailable() const override;
 
 	bool setSourceFilename(const QString & filename);
 	void examineQAudioFormat(AudioFormat & form);
@@ -61,6 +62,7 @@ public:
 private:
 	QString current_filename;
 	QTime run_time;
+	QMutex m_mutex;
 	AUDIO::AudioErrorType audio_error;
 	AudioFormat *audio_format;
 	AudioDecoder *audio_decoder;
@@ -88,7 +90,8 @@ private:
 	QString m_lastErrorText;					// last error that occured. At the moment this is only audio service missing at startup
 
 public:
-	inline bool isDecodingFinished() {return decoding_finished_f;}
+	inline bool isDecodingFinished() const {return decoding_finished_f;}
+	bool isDecoding() const;
 	inline int currentLoop() const {return loop_count;}
 	inline const QString &lastErrorText() const {return m_lastErrorText;}
 	qint64 currentPlayPosMs() const;

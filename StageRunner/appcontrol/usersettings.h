@@ -39,6 +39,7 @@ public:
 	pstring pLastAudioTrackImportPath;
 	pstring pLastCondolidatePath;
 	pint32 pAudioBufferSize;
+	pint32 pDefaultAudioFadeoutTimeMs;
 	pbool pProhibitAudioDoubleStart;
 	pint32 pAudioAllowReactivateTime;
 	pbool pNoInterfaceDmxFeedback;

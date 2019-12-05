@@ -93,6 +93,7 @@ void SetupWidget::copy_settings_to_gui()
 	UserSettings *set = myapp->userSettings;
 
 	audioBufferSizeEdit->setText(QString::number(set->pAudioBufferSize));
+	defaultAudioFadeOutMsSpin->setValue(set->pDefaultAudioFadeoutTimeMs);
 
 	// Styles
 	int idx;
@@ -153,6 +154,7 @@ void SetupWidget::copy_gui_to_settings()
 {
 	UserSettings *set = myapp->userSettings;
 	set->pAudioBufferSize = audioBufferSizeEdit->text().toInt();
+	set->pDefaultAudioFadeoutTimeMs = defaultAudioFadeOutMsSpin->value();
 
 	set->pApplicationGuiStyle = appStyleCombo->currentText();
 	set->pDialKnobStyle = dialKnobStyleCombo->currentText();

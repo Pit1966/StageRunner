@@ -52,6 +52,14 @@ enum CtrlCmd {
 	CMD_SCENE_STOP = CMD_AUDIO_STOP
 };
 
+class CtrlMsg {
+public:
+	int fadeTimeMs;
+
+	CtrlMsg()
+		: fadeTimeMs(0)
+	{}
+};
 
 namespace AUDIO {
 

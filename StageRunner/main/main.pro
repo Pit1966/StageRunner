@@ -341,6 +341,7 @@ OTHER_FILES += \
 	version.h.in
 
 DISTFILES += \
+    ../devel.txt \
     ../todo.txt \
     ../macos_notes.txt \
     ../platforms/macos/nametool.pri \

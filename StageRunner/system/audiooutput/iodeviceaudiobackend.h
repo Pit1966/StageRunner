@@ -29,6 +29,7 @@
 
 #include <QObject>
 #include <QAudio>
+#include <QMutex>
 
 class AudioIODevice;
 class QAudioOutput;

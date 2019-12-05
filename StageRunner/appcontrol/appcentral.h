@@ -115,7 +115,7 @@ public:
 	bool setFxExecLoopEnabled(bool state);
 
 	void stopAllFxAudio();
-	void fadeoutAllFxAudio();
+	void fadeoutAllFxAudio(int fadeoutTimeMs = 5000);
 	void stopAllSequencesAndPlaylists();
 
 	void lightBlack(qint32 time_ms = 0);

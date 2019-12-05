@@ -110,10 +110,10 @@ void AppCentral::stopAllFxAudio()
  *
  * The fadeouttime is the default time that can be configured in setup
  */
-void AppCentral::fadeoutAllFxAudio()
+void AppCentral::fadeoutAllFxAudio(int fadeoutTimeMs)
 {
 	unitFx->pauseAllFxPlaylist();
-	unitAudio->fadeoutAllFxAudio();
+	unitAudio->fadeoutAllFxAudio(fadeoutTimeMs);
 }
 
 /**

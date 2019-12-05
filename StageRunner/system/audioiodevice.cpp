@@ -176,6 +176,11 @@ qint64 AudioIODevice::bytesAvailable() const
 
 bool AudioIODevice::setSourceFilename(const QString &filename)
 {
+	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
+		qWarning() << "audio decoding while starting" << filename;
+	} else {
+		qWarning() << "start audio" << filename;
+	}
 	audio_decoder->setSourceFilename(filename);
 	audio_decoder->setAudioFormat(*audio_format);
 	current_filename = filename;
@@ -195,6 +200,11 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
 	}
 
+}
+
+bool AudioIODevice::isDecoding() const
+{
+	return audio_decoder->state() == QAudioDecoder::DecodingState;
 }
 
 
@@ -447,6 +457,8 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 
 void AudioIODevice::start(int loops)
 {
+	QMutexLocker lock(&m_mutex);
+
 	setLoopCount(loops);
 
 	if (!open(QIODevice::ReadOnly)) {
@@ -473,25 +485,37 @@ void AudioIODevice::start(int loops)
 
 void AudioIODevice::stop()
 {
-	decoding_finished_f = true;
+	m_mutex.lock();
+
 	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
 		audio_decoder->stop();
+		while (audio_decoder->state() == QAudioDecoder::DecodingState) {
+			fprintf(stderr, "wait for stop");
+		}
 	}
 	close();
+
+	decoding_finished_f = true;
+
+	m_mutex.unlock();
 }
 
 void AudioIODevice::process_decoder_buffer()
 {
-	if (!isOpen()) return;
+	m_mutex.lock();
 
-	QAudioBuffer audiobuf = audio_decoder->read();
-	// AudioFormat form = audiobuf.format();
-	const char *data = audiobuf.constData<char>();
-	audio_buffer->append(data,audiobuf.byteCount());
-	bytes_avail += audiobuf.byteCount();
+	if (isOpen()) {
+		QAudioBuffer audiobuf = audio_decoder->read();
+		// AudioFormat form = audiobuf.format();
+		const char *data = audiobuf.constData<char>();
+		audio_buffer->append(data,audiobuf.byteCount());
+		bytes_avail += audiobuf.byteCount();
 
-	// qDebug("processAudio %d: size: %d",audio_buffer_count, frames);
-	audio_buffer_count++;
+		// qDebug("processAudio %d: size: %d",audio_buffer_count, frames);
+		audio_buffer_count++;
+	}
+
+	m_mutex.unlock();
 }
 
 void AudioIODevice::on_decoding_finished()
@@ -499,7 +523,8 @@ void AudioIODevice::on_decoding_finished()
 	decoding_finished_f = true;
 	LOGTEXT(tr("Decoding of audio file '%1' finished (<font color=green>%2ms</font>")
 			.arg(current_filename).arg(run_time.elapsed()));
-	if (debug) qDebug("Audio decoding finished");
+	if (debug)
+		qDebug("Audio decoding finished: %s",current_filename.toLocal8Bit().data());
 }
 
 void AudioIODevice::if_audio_duration_changed(qint64 duration)

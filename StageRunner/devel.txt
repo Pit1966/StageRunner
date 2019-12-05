@@ -1,0 +1,23 @@
+Audio Start Call Stack
+
+1   AudioSlot::startFxAudio                      audioslot.cpp            153  0x510c7b
+2   AudioSlot::audioCtrlReceiver                 audioslot.cpp            596  0x51331b
+3   AudioSlot::qt_static_metacall                moc_audioslot.cpp        141  0x52bc9b
+4   QMetaObject::activate                        qobject.cpp              3801 0x7ffff57d54e9
+5   AudioControl::audioThreadCtrlMsgEmitted      moc_audiocontrol.cpp     370  0x51ae15
+6   AudioControl::start_fxaudio_in_slot          audiocontrol.cpp         423  0x446777
+7   AudioControl::startFxAudio                   audiocontrol.cpp         365  0x446498
+8   AppCentral::executeFxCmd                     appcentral.cpp           526  0x45412a
+9   AppCentral::qt_static_metacall               moc_appcentral.cpp       166  0x51c51b
+10  QMetaObject::activate                        qobject.cpp              3801 0x7ffff57d54e9
+11  FxListWidget::fxCmdActivated                 moc_fxlistwidget.cpp     403  0x51e97a
+12  FxListWidget::column_name_double_clicked     fxlistwidget.cpp         1214 0x484889
+13  FxListWidget::if_fxitemwidget_doubleclicked  fxlistwidget.cpp         1509 0x48689c
+14  FxListWidget::qt_static_metacall             moc_fxlistwidget.cpp     276  0x51e2ad
+15  QMetaObject::activate                        qobject.cpp              3801 0x7ffff57d54e9
+16  FxListWidgetItem::itemDoubleClicked          moc_fxlistwidgetitem.cpp 333  0x5255d3
+17  FxListWidgetItem::if_edit_item_doubleclicked fxlistwidgetitem.cpp     293  0x4e01c5
+18  FxListWidgetItem::qt_static_metacall         moc_fxlistwidgetitem.cpp 166  0x524f07
+19  QMetaObject::activate                        qobject.cpp              3801 0x7ffff57d54e9
+20  PsLineEdit::doubleClicked                    moc_pslineedit.cpp       224  0x523753
+... <Mehr>

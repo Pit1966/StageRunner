@@ -100,8 +100,9 @@ void IODeviceAudioBackend::start(int loops)
 
 void IODeviceAudioBackend::stop()
 {
-	m_audioOutput->stop();
+
 	m_audioIODev->stop();
+	m_audioOutput->stop();
 }
 
 void IODeviceAudioBackend::pause(bool state)
