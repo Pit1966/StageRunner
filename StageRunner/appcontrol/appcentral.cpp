@@ -518,6 +518,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			}
 		} else {
 			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+
 			switch (cmd) {
 			case CMD_AUDIO_START:
 				if (fxa->initialSeekPos) {

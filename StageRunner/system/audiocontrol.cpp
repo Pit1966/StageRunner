@@ -329,9 +329,7 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 {
 	QMutexLocker lock(slotMutex);
 
-	CtrlMsg cm;
-	cm.fadeTimeMs = myApp.userSettings->pDefaultAudioFadeoutTimeMs;
-	executeAttachedAudioStartCmd(fxa,cm);
+	executeAttachedAudioStartCmd(fxa);
 
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
 	if (!exec && myApp.userSettings->pProhibitAudioDoubleStart) {
@@ -370,10 +368,8 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
 	QMutexLocker lock(slotMutex);
-	CtrlMsg cm;
-	cm.fadeTimeMs = myApp.userSettings->pDefaultAudioFadeoutTimeMs;
 
-	executeAttachedAudioStartCmd(fxa,cm);
+	executeAttachedAudioStartCmd(fxa);
 
 	int slot = selectFreeAudioSlot();
 	if (slot < 0) {
@@ -624,11 +620,11 @@ bool AudioControl::seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille)
 	return seek;
 }
 
-bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa, const CtrlMsg &msg)
+bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 {
 	switch (fxa->attachedStartCmd) {
 	case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
-		myApp.fadeoutAllFxAudio(msg.fadeTimeMs);
+		myApp.fadeoutAllFxAudio(fxa->attachedStartPara2 > 0 ? fxa->attachedStartPara2 : myApp.userSettings->pDefaultAudioFadeoutTimeMs);
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL:
 		myApp.stopAllFxAudio();
@@ -655,7 +651,7 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 
 	switch (fxa->attachedStopCmd) {
 	case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
-		myApp.fadeoutAllFxAudio();
+		myApp.fadeoutAllFxAudio(fxa->attachedStopPara2 > 0 ? fxa->attachedStopPara2 : myApp.userSettings->pDefaultAudioFadeoutTimeMs);
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL:
 		myApp.stopAllFxAudio();

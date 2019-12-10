@@ -131,9 +131,21 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
 		audioOnStartCombo->setCurrentIndex(cur_fxa->attachedStartCmd);
 		audioOnStopCombo->setCurrentIndex(cur_fxa->attachedStopCmd);
-		audioOnStartEdit->setText(QString::number(cur_fxa->attachedStartPara1));
-		audioOnStopEdit->setText(QString::number(cur_fxa->attachedStopPara1));
+		switch (cur_fxa->attachedStartCmd) {
+		case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
+			audioOnStartEdit->setText(QtStaticTools::msToTimeString(cur_fxa->attachedStartPara2));
+			break;
+		default:
+			audioOnStartEdit->setText(QString::number(cur_fxa->attachedStartPara1));
+		}
 
+		switch (cur_fxa->attachedStopCmd) {
+		case FxAudioItem::ATTACHED_CMD_FADEOUT_ALL:
+			audioOnStopEdit->setText(QtStaticTools::msToTimeString(cur_fxa->attachedStopPara2));
+			break;
+		default:
+			audioOnStopEdit->setText(QString::number(cur_fxa->attachedStopPara1));
+		}
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(true);
@@ -456,14 +468,22 @@ void FxItemPropertyWidget::on_audioOnStartEdit_textEdited(const QString &arg1)
 {
 	if (!FxItem::exists(cur_fxa)) return;
 
-	bool ok;
-	int fxid = arg1.toInt(&ok);
-	if (!ok) return;
+	if  (cur_fxa->attachedStartCmd == FxAudioItem::ATTACHED_CMD_FADEOUT_ALL) {
+		if (cur_fxa->attachedStartPara2 != QtStaticTools::timeStringToMS(arg1)) {
+			cur_fxa->attachedStartPara2 = QtStaticTools::timeStringToMS(arg1);
+			emit modified(cur_fxa);
+		}
+	}
+	else {
+		bool ok;
+		int fxid = arg1.toInt(&ok);
+		if (!ok) return;
 
-	if (cur_fxa->attachedStartPara1 != fxid) {
-		cur_fxa->attachedStartPara1 = fxid;
-		cur_fxa->setModified(true);
-		emit modified(cur_fxa);
+		if (cur_fxa->attachedStartPara1 != fxid) {
+			cur_fxa->attachedStartPara1 = fxid;
+			cur_fxa->setModified(true);
+			emit modified(cur_fxa);
+		}
 	}
 }
 
@@ -471,14 +491,22 @@ void FxItemPropertyWidget::on_audioOnStopEdit_textEdited(const QString &arg1)
 {
 	if (!FxItem::exists(cur_fxa)) return;
 
-	bool ok;
-	int fxid = arg1.toInt(&ok);
-	if (!ok) return;
+	if (cur_fxa->attachedStopCmd == FxAudioItem::ATTACHED_CMD_FADEOUT_ALL) {
+		if (cur_fxa->attachedStopPara2 != QtStaticTools::timeStringToMS(arg1)) {
+			cur_fxa->attachedStopPara2 = QtStaticTools::timeStringToMS(arg1);
+			emit modified(cur_fxa);
+		}
+	}
+	else {
+		bool ok;
+		int fxid = arg1.toInt(&ok);
+		if (!ok) return;
 
-	if (cur_fxa->attachedStopPara1 != fxid) {
-		cur_fxa->attachedStopPara1 = fxid;
-		cur_fxa->setModified(true);
-		emit modified(cur_fxa);
+		if (cur_fxa->attachedStopPara1 != fxid) {
+			cur_fxa->attachedStopPara1 = fxid;
+			cur_fxa->setModified(true);
+			emit modified(cur_fxa);
+		}
 	}
 }
 
