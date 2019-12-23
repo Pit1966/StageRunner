@@ -224,7 +224,7 @@ void FxItemPropertyWidget::setEditable(bool state, bool once)
 	once_edit_f = once;
 	if (!state) {
 		editOnceButton->setText(tr("Edit once"));
-
+	} else {
 	}
 }
 
@@ -381,6 +381,8 @@ void FxItemPropertyWidget::on_editOnceButton_clicked()
 {
 	if (AppCentral::instance()->isEditMode()) return;
 
+	// qDebug() << "edit clicked" << once_edit_f;
+
 	if (!once_edit_f) {
 		editOnceButton->setText(tr("Cancel Edit Mode"));
 	}
@@ -390,6 +392,13 @@ void FxItemPropertyWidget::on_editOnceButton_clicked()
 
 void FxItemPropertyWidget::finish_edit()
 {
+	// qDebug() << "finish edit";
+	if (editOnceButton->lastEventWasInputMethodQuery)
+		return;
+
+	if (AppCentral::ref().isEditMode())
+		return;
+
 	setEditable(false,false);
 }
 

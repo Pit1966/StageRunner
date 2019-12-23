@@ -211,7 +211,7 @@
        <widget class="PsLineEdit" name="nameEdit"/>
       </item>
       <item row="1" column="0" colspan="3">
-       <widget class="QPushButton" name="editOnceButton">
+       <widget class="PsPushButton" name="editOnceButton">
         <property name="text">
          <string>Edit once</string>
         </property>
@@ -679,6 +679,11 @@ on start</string>
    <class>PsLineEdit</class>
    <extends>QLineEdit</extends>
    <header>customwidget/pslineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PsPushButton</class>
+   <extends>QPushButton</extends>
+   <header>customwidget/pspushbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

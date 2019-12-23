@@ -69,6 +69,7 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 
 SOURCES += \
+	../gui/customwidget/pspushbutton.cpp \
 	../gui/deviceinfowidget.cpp \
 	../system/dmx/fixture.cpp \
 	main.cpp \
@@ -173,6 +174,7 @@ HEADERS  += \
 	../fx/fxitem.h \
 	../fx/fxlist.h \
 	../fx/fxaudioitem.h \
+	../gui/customwidget/pspushbutton.h \
 	../gui/deviceinfowidget.h \
 	../system/audiocontrol.h \
 	../system/dmx/fixture.h \
