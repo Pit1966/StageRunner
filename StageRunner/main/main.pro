@@ -162,7 +162,9 @@ SOURCES += \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
 	../gui/consolidatedialog.cpp \
 	../gui/universeeditorwidget.cpp \
-	../gui/customwidget/psspinbox.cpp
+	../gui/customwidget/psspinbox.cpp \
+	../system/fxtimer.cpp
+
 
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
@@ -287,7 +289,8 @@ HEADERS  += \
 	../system/audiooutput/iodeviceaudiobackend.h \
 	../gui/consolidatedialog.h \
 	../gui/universeeditorwidget.h \
-	../gui/customwidget/psspinbox.h
+	../gui/customwidget/psspinbox.h \
+	../system/fxtimer.h
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h

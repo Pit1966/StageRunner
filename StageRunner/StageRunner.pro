@@ -16,3 +16,4 @@ translations.files += stagerunner_de_DE.qm
 translations.path   = $$INSTALLROOT/$$TRANSLATIONDIR
 INSTALLS           += translations
 
+

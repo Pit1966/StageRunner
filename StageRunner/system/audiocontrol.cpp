@@ -39,6 +39,7 @@
 #include "customwidget/psvideowidget.h"
 #include "videoplayer.h"
 #include "videocontrol.h"
+#include "system/fxtimer.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -324,12 +325,9 @@ void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)
 	emit fftSpectrumChanged(slotnum,spec);
 }
 
-
-bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
+bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec)
 {
 	QMutexLocker lock(slotMutex);
-
-	executeAttachedAudioStartCmd(fxa);
 
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
 	if (!exec && myApp.userSettings->pProhibitAudioDoubleStart) {
@@ -365,11 +363,9 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 	return start_fxaudio_in_slot(fxa, slot, exec, 0);
 }
 
-bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
+bool AudioControl::startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
 	QMutexLocker lock(slotMutex);
-
-	executeAttachedAudioStartCmd(fxa);
 
 	int slot = selectFreeAudioSlot();
 	if (slot < 0) {
@@ -377,6 +373,38 @@ bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs,
 	} else {
 		return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
 	}
+}
+
+void AudioControl::startFxAudioFromTimer(FxItem *fx)
+{
+	FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
+	if (!fxa) return;
+
+	startFxAudioStage2(fxa, nullptr);
+}
+
+
+bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
+{
+	QMutexLocker lock(slotMutex);
+	executeAttachedAudioStartCmd(fxa);
+
+//	if (fxa->preDelay() > 0) {
+//		FxTimer *fxt = new FxTimer(fxa);
+//		connect(fxt, SIGNAL(fxTimeout(FxItem*)),this,SLOT(startFxAudioFromTimer(FxItem*)));
+//		fxt->start(fxa->preDelay());
+//		return true;
+//	}
+
+	return startFxAudioStage2(fxa, exec);
+}
+
+bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
+{
+	QMutexLocker lock(slotMutex);
+
+	executeAttachedAudioStartCmd(fxa);
+	return startFxAudioAtStage2(fxa, exec, atMs, initVol);
 }
 
 bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)

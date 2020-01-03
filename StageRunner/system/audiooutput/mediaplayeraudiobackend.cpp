@@ -80,19 +80,34 @@ void MediaPlayerAudioBackend::start(int loops)
 	}
 
 	m_currentCtrlCmd = CMD_AUDIO_START;
-	m_mediaPlayer->play();
 
-	LOGTEXT(tr("Play QMediaPlayer audio: %1 (%2)")
-			.arg(m_mediaPath).arg(m_mediaPlayer->errorString()));
+	if (m_startDelayedTimerId == 0) {
+		m_mediaPlayer->play();
+
+		LOGTEXT(tr("Play QMediaPlayer audio: %1 (%2)")
+				.arg(m_mediaPath).arg(m_mediaPlayer->errorString()));
+	} else {
+		m_mediaPlayer->play();
+		pause(true);
+		// m_mediaPlayer->pause();
+
+		LOGTEXT(tr("Start QMediaPlayer audio in delay mode: %1 (%2)")
+				.arg(m_mediaPath).arg(m_mediaPlayer->errorString()));
+	}
 
 }
 
 void MediaPlayerAudioBackend::stop()
 {
+	bool waspaused = m_currentMediaPlayerState == QMediaPlayer::PausedState;
+
 	m_loopCnt = m_loopTarget;
 	m_currentCtrlCmd = CMD_AUDIO_STOP;
 	m_mediaPlayer->pause();
 	// m_mediaPlayer->stop();
+
+	if (waspaused)
+		emit statusChanged(AUDIO_IDLE);
 }
 
 void MediaPlayerAudioBackend::pause(bool state)
@@ -171,6 +186,11 @@ int MediaPlayerAudioBackend::audioBufferSize() const
 	return 0;
 }
 
+void MediaPlayerAudioBackend::delayedStartEvent()
+{
+	pause(false);
+}
+
 /**
  * @brief Slot that is called, if media status of player changes
  * @param status
@@ -199,7 +219,8 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		break;
 	case QMediaPlayer::BufferingMedia:
 	case QMediaPlayer::BufferedMedia:
-		audiostatus = AUDIO_RUNNING;
+		if (m_startDelayedTimerId == 0)
+			audiostatus = AUDIO_RUNNING;
 		m_mediaPlayer->setVolume(m_currentVolume);
 		break;
 	case QMediaPlayer::EndOfMedia:
@@ -211,14 +232,17 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		audiostatus = AUDIO_ERROR;
 	}
 
+	// qDebug() << "mediaStatusChanged" << status << "audiostat old" << m_currentAudioStatus << "new" << audiostatus;;
 	if (m_currentAudioStatus != audiostatus) {
 		m_currentAudioStatus = audiostatus;
+		// qDebug() << "status changed (from media)" << audiostatus;
 		emit statusChanged(audiostatus);
 	}
 }
 
 void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 {
+	//qDebug() << "playerStateChanged" << m_currentMediaPlayerState << state;
 	if (state != m_currentMediaPlayerState) {
 		AUDIO::AudioStatus audiostatus;
 
@@ -255,6 +279,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 
 		if (m_currentAudioStatus != audiostatus) {
 			m_currentAudioStatus = audiostatus;
+			//qDebug() << "status changed (from player)" << audiostatus;
 			emit statusChanged(audiostatus);
 		}
 	}

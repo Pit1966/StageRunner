@@ -4,7 +4,7 @@ TEMPLATE = subdirs
 CONFIG  += ordered
 
 SUBDIRS += midi
-SUBDIRS += artnet
+#SUBDIRS += artnet
 SUBDIRS += dmxusb
 SUBDIRS += yadi
 

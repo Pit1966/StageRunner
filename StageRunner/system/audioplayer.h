@@ -66,6 +66,9 @@ protected:
 	FrqSpectrum m_rightSpectrum;
 	bool m_fftEnabled;
 
+	// delayed start of audio fx
+	int m_startDelayedTimerId;
+
 public:
 	AudioPlayer(AudioSlot &audioChannel);
 	virtual AUDIO::AudioOutputType outputType() const = 0;
@@ -74,6 +77,8 @@ public:
 	inline const QString & audioErrorString() const {return m_audioErrorString;}
 	inline CtrlCmd currentAudioCmd() const {return m_currentCtrlCmd;}
 	inline int currentLoop() const {return m_loopCnt;}
+	bool setStartDelay(int ms);
+
 
 	virtual bool setSourceFilename(const QString &path);
 	virtual void start(int loops) = 0;
@@ -89,12 +94,17 @@ public:
 	virtual void setAudioBufferSize(int bytes) = 0;
 	virtual int audioBufferSize() const = 0;
 
+	virtual void delayedStartEvent() {;}
+
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
 //protected:
 	// some helper fucntions, that can be used by any backend implementation
 	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+
+protected:
+	void timerEvent(QTimerEvent *event);
 
 
 signals:

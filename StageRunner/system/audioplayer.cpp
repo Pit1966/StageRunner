@@ -45,7 +45,23 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	, m_leftAvg(new PsMovingAverage<qreal>(4))
 	, m_rightAvg(new PsMovingAverage<qreal>(4))
 	, m_fftEnabled(false)
+	, m_startDelayedTimerId(0)
 {
+}
+
+bool AudioPlayer::setStartDelay(int ms)
+{
+	if (ms <= 0)
+		return true;
+
+	if (m_startDelayedTimerId) {
+		qWarning() << Q_FUNC_INFO << "timer for start delay already set";
+		return false;
+	}
+
+	m_startDelayedTimerId = startTimer(ms, Qt::PreciseTimer);
+
+	return (m_startDelayedTimerId > 0);
 }
 
 bool AudioPlayer::setSourceFilename(const QString &path)
@@ -228,5 +244,16 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &au
 		}
 	} else {
 		m_rightFFT.clearBuffer();
+	}
+}
+
+void AudioPlayer::timerEvent(QTimerEvent *event)
+{
+	int id = event->timerId();
+	if (id == m_startDelayedTimerId) {
+		m_startDelayedTimerId = 0;
+		killTimer(id);
+		qDebug() << "Start Delay Timer killed";
+		delayedStartEvent();
 	}
 }

@@ -61,6 +61,8 @@ public:
 	void setAudioBufferSize(int bytes) override;
 	int audioBufferSize() const override;
 
+	void delayedStartEvent() override;
+
 private slots:
 	void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 	void onPlayerStateChanged(QMediaPlayer::State state);

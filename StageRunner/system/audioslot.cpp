@@ -221,6 +221,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Start playing
+	audio_player->setStartDelay(fxa->preDelay());
 	audio_player->start(fxa->loopTimes);
 
 	// Emit Control Msg to send Status of Volume and Name
@@ -262,7 +263,11 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 			current_fx = nullptr;
 			break;
 		}
-
+		else if (run_status == AUDIO_PAUSED) {
+			ok = true;
+			current_fx = fxa;
+			qDebug() << Q_FUNC_INFO << "Audio paused on start";
+		}
 	}
 
 	if (exec)
