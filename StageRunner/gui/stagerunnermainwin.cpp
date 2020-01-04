@@ -829,8 +829,10 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		int key = ev->key();
 		bool isAutoRepeat = ev->isAutoRepeat();
 
-		LOGTEXT(tr("Key pressed: #%1 -> '%2'").arg(key).arg(QtStaticTools::keyToString(key,activeKeyModifiers)));
-		qInfo() << "key pressed" << key;
+		LOGTEXT(tr("<font color=green>Key pressed</font>: #%1 -> '<b><font color=orange>%2</font></b>'")
+				.arg(key)
+				.arg(QtStaticTools::keyToString(key,activeKeyModifiers)));
+		// qInfo() << "key pressed" << key;
 
 		switch (key) {
 		case Qt::Key_Shift:

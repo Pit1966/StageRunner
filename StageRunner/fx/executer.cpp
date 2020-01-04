@@ -616,7 +616,8 @@ bool ScriptExecuter::processExecuter()
 		} else {
 			proceed = false;
 			active = false;
-			LOGTEXT(tr("Script <font color=darkGreen>'%1'</font> finished").arg(m_fxScriptItem->name()));
+			LOGTEXT(tr("<font color=darkGreen>Script</font> '%1' <font color=darkGreen>finished</font>")
+					.arg(m_fxScriptItem->name()));
 		}
 	}
 

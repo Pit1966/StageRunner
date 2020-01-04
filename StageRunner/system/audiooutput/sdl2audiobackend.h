@@ -66,6 +66,8 @@ public:
 	void setAudioBufferSize(int bytes) override;
 	int audioBufferSize() const override;
 
+	void delayedStartEvent() override;
+
 	// SDL Callbacks
 	static void sdlChannelDone(int chan);
 	static void sdlPostMix(void *udata, quint8 *stream, int len);

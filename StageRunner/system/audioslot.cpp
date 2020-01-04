@@ -296,10 +296,11 @@ bool AudioSlot::stopFxAudio()
 		audio_player->stop();
 		return true;
 	} else {
-		if (audio_player->state() == AUDIO_PAUSED) {
+		AudioStatus s = audio_player->state();
+		if (s == AUDIO_PAUSED || s == AUDIO_NO_STATE) {
 			return true;
 		}
-		else if (audio_player->state() != AUDIO_IDLE) {
+		else if (s != AUDIO_IDLE) {
 			LOGERROR(tr("Stop Audio playing in slot %1: But audio channel is idle").arg(slotNumber+1));
 			audio_player->stop();
 		}

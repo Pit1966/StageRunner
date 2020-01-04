@@ -83,8 +83,13 @@ void SDL2AudioBackend::start(int loops)
 		LOGERROR(tr("SDL error: %1").arg(Mix_GetError()));
 		sdlSetRunStatus(AUDIO_ERROR);
 	} else {
-		sdlSetRunStatus(AUDIO_RUNNING);
-		m_runtime.start();
+		if (m_startDelayedTimerId == 0) {
+			sdlSetRunStatus(AUDIO_RUNNING);
+			m_runtime.start();
+		} else {
+			sdlSetRunStatus(AUDIO_PAUSED);
+			pause(true);
+		}
 	}
 }
 
@@ -95,23 +100,28 @@ void SDL2AudioBackend::stop()
 
 void SDL2AudioBackend::pause(bool state)
 {
+	int c = m_parentAudioSlot.slotNumber;
+
 	if (state) {
-		Mix_Pause(m_parentAudioSlot.slotNumber);
+		if (Mix_Playing(c)) {
+			Mix_Pause(c);
+			sdlSetRunStatus(AUDIO_PAUSED);
+		}
 	} else {
-		Mix_Resume(m_parentAudioSlot.slotNumber);
+		if (Mix_Paused(c)) {
+			Mix_Resume(c);
+			sdlSetRunStatus(AUDIO_RUNNING);
+		}
 	}
 }
 
 qint64 SDL2AudioBackend::currentPlayPosUs() const
 {
-	/// @todo implement me
-
 	return qint64(m_runtime.elapsed()) * 1000;
 }
 
 qint64 SDL2AudioBackend::currentPlayPosMs() const
 {
-	/// @todo implement me
 	return qint64(m_runtime.elapsed());
 }
 
@@ -158,6 +168,13 @@ void SDL2AudioBackend::setAudioBufferSize(int bytes)
 int SDL2AudioBackend::audioBufferSize() const
 {
 	return 0;
+}
+
+void SDL2AudioBackend::delayedStartEvent()
+{
+	pause(false);
+	sdlSetRunStatus(AUDIO_RUNNING);
+	LOGTEXT(tr("<font color=green> Started delayed audio:</font> %1").arg(m_fxName));
 }
 
 void SDL2AudioBackend::sdlSetRunStatus(AudioStatus state)
