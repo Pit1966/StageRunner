@@ -47,6 +47,7 @@ public:
 	bool startFxClip(FxClipItem *fxc);
 
 	void videoBlack(qint32 time_ms);
+	bool setVideoVolume(int slotnum, int vol);
 
 signals:
 

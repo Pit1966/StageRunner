@@ -32,11 +32,13 @@
 #endif
 
 #include "fxaudioitem.h"
+#include "fxclipitem.h"
 #include "fxplaylistitem.h"
 #include "system/log.h"
 #include "config.h"
 #include "audioiodevice.h"
 #include "audiocontrol.h"
+#include "videocontrol.h"
 #include "appcentral.h"
 #include "usersettings.h"
 #include "executer.h"
@@ -121,7 +123,8 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 AudioSlot::~AudioSlot()
 {
 	if (run_status != AUDIO_IDLE) {
-		stopFxAudio();
+		if (run_status < VIDEO_INIT)
+			stopFxAudio();
 	}
 
 	delete audio_player;
@@ -291,11 +294,16 @@ bool AudioSlot::stopFxAudio()
 
 	emit vuLevelChanged(slotNumber,0.0,0.0);
 
-	if (run_status > AUDIO_IDLE) {
+	if (run_status >= VIDEO_RUNNING) {
+		AudioCtrlMsg msg(slotNumber, CMD_AUDIO_STATUS_CHANGED, AUDIO_IDLE);
+		emit audioCtrlMsgEmitted(msg);
+	}
+	else if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
 		audio_player->stop();
 		return true;
-	} else {
+	}
+	else {
 		AudioStatus s = audio_player->state();
 		if (s == AUDIO_PAUSED || s == AUDIO_NO_STATE) {
 			return true;
@@ -383,6 +391,11 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 
 void AudioSlot::setVolume(int vol)
 {
+	if (run_status == VIDEO_RUNNING) {
+		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, vol);
+		return;
+	}
+
 	if (!audio_player) return;
 
 	int level = vol;
@@ -620,6 +633,10 @@ void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
 	case CMD_AUDIO_PAUSE:
 		pauseFxAudio(!(run_status == AUDIO_PAUSED));
 		break;
+	case CMD_VIDEO_START:
+		startFxClipVideoControls(msg.fxAudio, msg.executer);
+		break;
+
 	default:
 		DEBUGERROR("%s: Unsupported command received: %d",Q_FUNC_INFO,msg.ctrlCmd);
 		break;
@@ -708,4 +725,41 @@ QString AudioSlot::currentFxName() const
 void AudioSlot::sdlEmitProgress()
 {
 	emit_audio_play_progress();
+}
+
+/**
+ * @brief Prepare audio slot for video control
+ * @param fxc
+ * @return
+ */
+void AudioSlot::selectFxClipVideo()
+{
+	run_status = VIDEO_INIT;
+}
+
+/**
+ * @brief Start FxClipItem audio portion.
+ * @param fx
+ *
+ * The FxClip video/audio is not really handled here. This is only to deal with volume and progress.
+ */
+void AudioSlot::startFxClipVideoControls(FxAudioItem *fx, Executer *exec)
+{
+	current_fx = fx;			// this is an FxClipItem !!
+	run_status = VIDEO_RUNNING;
+	current_volume = fx->initialVolume;
+
+	// Emit Control Msg to send Status of Volume and Name
+	AudioCtrlMsg msg(fx,slotNumber, CMD_VIDEO_STATUS_CHANGED, exec);
+	msg.volume = current_volume;
+	msg.executer = exec;
+	msg.currentAudioStatus = VIDEO_RUNNING;
+	emit audioCtrlMsgEmitted(msg);
+}
+
+void AudioSlot::setFxClipVideoCtrlStatus(AudioStatus stat)
+{
+	run_status = stat;
+	if (stat = AUDIO_IDLE)
+		current_fx = nullptr;
 }

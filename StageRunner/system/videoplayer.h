@@ -40,12 +40,14 @@ protected:
 	PsVideoWidget *m_videoWid;
 	int loopTarget;
 	int loopCnt;
+	int m_slotNumber;
 	QMediaPlayer::State currentState;
 	FxClipItem *m_currentFxClipItem;
 
 public:
 	VideoPlayer(PsVideoWidget *videoWid);
-	bool playFxClip(FxClipItem *fxc);
+	bool playFxClip(FxClipItem *fxc, int slotNum);
+	inline int slotNumber() const {return m_slotNumber;}
 	void stop();
 
 private slots:
@@ -57,6 +59,7 @@ signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);
 	void clipCtrlMsgEmitted(AudioCtrlMsg msg);
 	void clipProgressChanged(FxClipItem *fxclip, int perMille);
+	void audioCtrlMsgEmitted(const AudioCtrlMsg &msg);
 
 	void endReached(qint64 ms);
 	void seekMe(qint64 ms);

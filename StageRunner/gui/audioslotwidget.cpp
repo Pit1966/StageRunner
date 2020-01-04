@@ -192,7 +192,7 @@ void AudioSlotWidget::setPauseState(bool state)
 
 void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 {
-//	qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
+	qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
@@ -243,7 +243,57 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 			}
 			break;
 		}
-		if (msg.volume >= 0) slotVolumeDial->setValue(msg.volume);
+		if (msg.volume >= 0)
+			slotVolumeDial->setValue(msg.volume);
+	}
+	else if (msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
+		// Set Play-Status Buttons in Audio Slot Panel
+		switch (msg.currentAudioStatus) {
+		case AUDIO_IDLE:
+			setPlayState(false);
+			setPauseState(false);
+			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
+				setTitle(msg.fxAudio->name().left(7) + "...");
+			}
+			break;
+		case VIDEO_RUNNING:
+			setPlayState(true);
+			setPauseState(false);
+			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
+				// setTitle(msg.fxAudio->name());
+				slotPlayButton->setToolTip(msg.fxAudio->name());
+				slotStopButton->setToolTip(msg.fxAudio->name());
+			}
+			if (msg.progress >= 0) {
+				QString time;
+				int min = msg.progressTime / 60000;
+				int sec = ( msg.progressTime - (min * 60000) ) / 1000;
+				int ms = (( msg.progressTime - (min * 60000)) % 1000) / 100;
+				time = QString("%1m%2.%3s")
+						.arg(min, 1, 10, QLatin1Char('0'))
+						.arg(sec, 2, 10, QLatin1Char('0'))
+						.arg(ms, 1, 10, QLatin1Char('0'));
+				slotAbsButton->setToolTip(time);
+				if (isAbsoluteTime) {
+					setTitle(time);
+				} else {
+					time = QString("%1.%2")
+							.arg(msg.progress/10, 3, 10, QLatin1Char('0'))
+							.arg(msg.progress%10, 1, 10, QLatin1Char('0'));
+					if (msg.maxloop > 0) {
+						time += QString(" L%1/%2").arg(msg.loop).arg(msg.maxloop);
+					}
+					setTitle(time);
+				}
+			}
+			else if (msg.fxAudio) {
+				setTitle(msg.fxAudio->name().left(7) + "...");
+			}
+			break;
+		}
+		if (msg.volume >= 0)
+			slotVolumeDial->setValue(msg.volume);
+
 	}
 }
 

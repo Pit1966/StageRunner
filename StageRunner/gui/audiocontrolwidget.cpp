@@ -103,6 +103,7 @@ void AudioControlWidget::audioCtrlReceiver(AudioCtrlMsg msg)
 	switch (msg.ctrlCmd) {
 	case CMD_AUDIO_STATUS_CHANGED:
 	case CMD_STATUS_REPORT:
+	case CMD_VIDEO_STATUS_CHANGED:
 		audioSlotWidgets[msg.slotNumber]->updateGuiStatus(msg);
 		break;
 	default:

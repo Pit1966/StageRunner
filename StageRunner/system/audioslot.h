@@ -48,6 +48,7 @@ class Executer;
 class AudioPlayer;
 class FFTRealWrapper;
 class FrqSpectrum;
+class FxClipItem;
 
 
 class AudioSlot : public QObject
@@ -119,6 +120,9 @@ public:
 	AudioPlayer * audioPlayer() const {return audio_player;}
 
 	void sdlEmitProgress();
+	void selectFxClipVideo();
+	void startFxClipVideoControls(FxAudioItem *fx, Executer *exec);
+	void setFxClipVideoCtrlStatus(AudioStatus stat);
 
 private:
 	void emit_audio_play_progress();

@@ -33,6 +33,7 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	, m_videoWid(videoWid)
 	, loopTarget(1)
 	, loopCnt(1)
+	, m_slotNumber(-1)
 	, currentState(QMediaPlayer::StoppedState)
 	, m_currentFxClipItem(nullptr)
 {
@@ -47,10 +48,11 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
 }
 
-bool VideoPlayer::playFxClip(FxClipItem *fxc)
+bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 {
 	loopTarget = fxc->loopTimes;
 	loopCnt = 1;
+	m_slotNumber = slotNum;
 
 	m_currentFxClipItem = fxc;
 	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
@@ -102,9 +104,10 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 {
 	bool restart = false;
+	AudioStatus stat = AudioStatus::AUDIO_NO_STATE;
 
 	if (state != currentState) {
-//		qDebug() << Q_FUNC_INFO << state << thread();
+		// qDebug() << Q_FUNC_INFO << state << thread();
 		if (state == QMediaPlayer::StoppedState) {
 			if (currentState == QMediaPlayer::PlayingState) {
 				if (loopCnt < loopTarget) {
@@ -115,18 +118,25 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 						QMediaPlayer::stop();
 						m_videoWid->update();
 					}
+					stat = AUDIO_IDLE;
 				}
 			}
 		}
 		else if (state == QMediaPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
 			// QMediaPlayer::setVolume(currentVolume);
+			stat = VIDEO_RUNNING;
 		}
 		currentState = state;
 	}
 
 	if (restart)
 		QMediaPlayer::play();
+
+	if (stat > AUDIO_NO_STATE) {
+		AudioCtrlMsg msg(m_slotNumber, CMD_VIDEO_STATUS_CHANGED, stat);
+		emit audioCtrlMsgEmitted(msg);
+	}
 }
 
 void VideoPlayer::on_playback_position_changed(qint64 pos)

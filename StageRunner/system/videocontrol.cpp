@@ -72,3 +72,23 @@ void VideoControl::videoBlack(qint32 time_ms)
 	myApp.unitAudio->videoWidget()->update();
 
 }
+
+/**
+ * @brief VideoControl::setVideoVolume
+ * @param slotnum
+ * @param vol
+ * @return
+ *
+ * @note there is only one video player for now, therefor slotnum is not used
+ */
+bool VideoControl::setVideoVolume(int slotnum, int vol)
+{
+	Q_UNUSED(slotnum)
+	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
+	if (vp) {
+		vp->setVolume(vol);
+		return true;
+	}
+
+	return false;
+}

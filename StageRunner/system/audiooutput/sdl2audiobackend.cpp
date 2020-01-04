@@ -52,6 +52,7 @@ bool SDL2AudioBackend::setSourceFilename(const QString &path, const QString &fxN
 	if (m_sdlChunk) {
 		*m_sdlChunk = m_sdlChunkCopy;
 		Mix_FreeChunk(m_sdlChunk);
+		m_sdlChunkCopy.alen = 0;
 	}
 
 	setFxName(fxName);
@@ -130,12 +131,17 @@ bool SDL2AudioBackend::seekPlayPosMs(qint64 posMs)
 	if (!m_sdlChunk)
 		return false;
 
+	qDebug() << "seek" << posMs;
 	uint seekpos = uint( (44100 * posMs / 1000) * 4 );
-	if (seekpos >= m_sdlChunk->alen)
+	if (seekpos >= m_sdlChunkCopy.alen)
 		return false;
 
-	m_sdlChunk->abuf = m_sdlChunk->abuf + seekpos;
-	m_sdlChunk->alen = m_sdlChunk->alen - seekpos;
+	m_sdlChunk->abuf = m_sdlChunkCopy.abuf + seekpos;
+	m_sdlChunk->alen = m_sdlChunkCopy.alen - seekpos;
+	qDebug() << "   seekps" << seekpos;
+
+	//m_sdlChunk->abuf = m_sdlChunk->abuf + seekpos;
+	//m_sdlChunk->alen = m_sdlChunk->alen - seekpos;
 
 	return true;
 }

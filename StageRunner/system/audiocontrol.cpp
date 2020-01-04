@@ -255,10 +255,16 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 	QMultimedia::AvailabilityStatus astat = m_videoPlayer->availability();
 	Q_UNUSED(astat)
 
-	qDebug() << "Start FxClip"<< fxc->name();
+	QMutexLocker lock(slotMutex);
+	int slot = selectFreeAudioSlot();
+	qDebug() << "Start FxClip" << fxc->name() << "slot" << slot;
+	if (slot >= 0) {
+		setVideoPlayerVolume(fxc->initialVolume);
+		audioSlots[slot]->selectFxClipVideo();
+		startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume);
 
-	setVideoPlayerVolume(fxc->initialVolume);
-	m_videoPlayer->playFxClip(fxc);
+		m_videoPlayer->playFxClip(fxc, slot);
+	}
 
 	return true;
 }
@@ -462,6 +468,21 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 	}
 }
 
+bool AudioControl::startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec, qint64 atMs, int initVol)
+{
+	Q_UNUSED(atMs)
+
+	if (audioSlots[slotnum]->status() == VIDEO_INIT) {
+		AudioCtrlMsg msg(fxc, slotnum, CMD_VIDEO_START, exec);
+		msg.volume = initVol >=0 ? initVol : fxc->initialVolume;
+		emit audioThreadCtrlMsgEmitted(msg);
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
 	if (slotnum < 0 || slotnum >= used_slots) return false;
@@ -526,9 +547,13 @@ void AudioControl::stopFxAudio(int slot)
 		return;
 
 	QMutexLocker lock(slotMutex);
-	if (audioSlots[slot]->status() <= AUDIO_IDLE) {
+	if (audioSlots[slot]->status() <= AUDIO_IDLE || audioSlots[slot]->status() == VIDEO_INIT) {
 		audioSlots[slot]->unselect();
 	}
+	else if (audioSlots[slot]->status() == VIDEO_RUNNING) {
+		return;
+	}
+
 	// We send this via Message to communicate with the thread
 	AudioCtrlMsg msg(slot,CMD_AUDIO_STOP);
 	msg.executer = audioSlots[slot]->currentExecuter();
@@ -704,7 +729,7 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
  * @param msg
  *
  * This slot is used to repeat the audio control messages from all existing audio slots (channels)
- * So you do not habe to connect on each audio channel
+ * So you do not have to connect on each audio channel
  */
 void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 {
@@ -716,6 +741,11 @@ void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 
 	if (msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED && msg.currentAudioStatus == AUDIO_IDLE)
 		executeAttachedAudioStopCmd(msg.fxAudio);
+
+	if (msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
+		if (msg.slotNumber >= 0 && msg.slotNumber < usedSlots())
+			audioSlots[msg.slotNumber]->setFxClipVideoCtrlStatus(msg.currentAudioStatus);
+	}
 
 	emit audioCtrlMsgEmitted(msg);
 }
@@ -961,6 +991,7 @@ void AudioControl::createMediaPlayInstances()
 	m_videoWid = new PsVideoWidget;
 	m_videoPlayer = new VideoPlayer(m_videoWid);
 	m_videoWid->setVideoPlayer(m_videoPlayer);
+	connect(m_videoPlayer, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), this, SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 
 #ifdef USE_SDL
 	Mix_AllocateChannels(used_slots);
