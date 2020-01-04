@@ -49,7 +49,7 @@ public:
 	~IODeviceAudioBackend() override;
 	AUDIO::AudioOutputType outputType() const override {return AUDIO::OUT_DEVICE;}
 
-	bool setSourceFilename(const QString &path) override;
+	bool setSourceFilename(const QString &path, const QString &fxName) override;
 	void start(int loops) override;
 	void stop() override;
 	void pause(bool state) override;
@@ -62,6 +62,8 @@ public:
 
 	void setAudioBufferSize(int bytes) override;
 	int audioBufferSize() const override;
+
+	void delayedStartEvent();
 
 
 private slots:

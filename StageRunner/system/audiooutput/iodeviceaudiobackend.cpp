@@ -70,13 +70,17 @@ IODeviceAudioBackend::~IODeviceAudioBackend()
 	delete m_audioIODev;
 }
 
-bool IODeviceAudioBackend::setSourceFilename(const QString &path)
+bool IODeviceAudioBackend::setSourceFilename(const QString &path, const QString &fxName)
 {
 	if (!QFile::exists(path))
 		return false;
 
+	// for information set fx name
+	setFxName(fxName);
+
 	// Set filename
 	m_audioIODev->setSourceFilename(path);
+	m_mediaPath = path;
 	// and implicitely start decoding
 	m_audioIODev->start(1);			// set loop count to 1 for now. Later in start function this will be set again
 
@@ -93,7 +97,15 @@ void IODeviceAudioBackend::start(int loops)
 	}
 	m_audioIODev->setLoopCount(loops);
 
-	m_audioOutput->start(m_audioIODev);
+	if (m_startDelayedTimerId == 0) {
+		m_audioOutput->start(m_audioIODev);
+	} else {
+		m_audioOutput->start(m_audioIODev);
+		pause(true);
+		LOGTEXT(tr("Start IODeviceBackend audio in delay mode: %1 (%2)")
+				.arg(m_mediaPath).arg(m_audioErrorString));
+	}
+
 	if (m_audioOutput->error() != QAudio::NoError)
 		qWarning() << "start audio" << m_audioOutput->error();
 }
@@ -167,6 +179,12 @@ void IODeviceAudioBackend::setAudioBufferSize(int bytes)
 int IODeviceAudioBackend::audioBufferSize() const
 {
 	return m_audioOutput->bufferSize();
+}
+
+void IODeviceAudioBackend::delayedStartEvent()
+{
+	pause(false);
+	LOGTEXT(tr("<font color=green> Started delayed audio:</font> %1").arg(m_fxName));
 }
 
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)

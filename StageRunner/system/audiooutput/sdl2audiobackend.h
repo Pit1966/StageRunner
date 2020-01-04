@@ -52,7 +52,7 @@ public:
 
 	AUDIO::AudioOutputType outputType() const override {return AUDIO::OUT_SDL2;}
 
-	bool setSourceFilename(const QString &path) override;
+	bool setSourceFilename(const QString &path, const QString &fxName) override;
 	void start(int loops) override;
 	void stop() override;
 	void pause(bool state) override;

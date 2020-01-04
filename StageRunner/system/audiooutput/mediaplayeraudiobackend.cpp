@@ -58,8 +58,10 @@ MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
 	delete m_mediaPlayer;
 }
 
-bool MediaPlayerAudioBackend::setSourceFilename(const QString &path)
+bool MediaPlayerAudioBackend::setSourceFilename(const QString &path, const QString &fxName)
 {
+	setFxName(fxName);
+
 	if (path != m_mediaPath) {
 		if (!QFile::exists(path))
 			return false;
@@ -67,6 +69,7 @@ bool MediaPlayerAudioBackend::setSourceFilename(const QString &path)
 		m_mediaPlayer->setMedia(QUrl::fromLocalFile(path));
 		m_mediaPath = path;
 	}
+
 	return true;
 }
 
@@ -92,7 +95,7 @@ void MediaPlayerAudioBackend::start(int loops)
 		pause(true);
 		// m_mediaPlayer->pause();
 
-		LOGTEXT(tr("Start QMediaPlayer audio in delay mode: %1 (%2)")
+		LOGTEXT(tr("Start MediaPlayerBackend audio in delay mode: %1 (%2)")
 				.arg(m_mediaPath).arg(m_mediaPlayer->errorString()));
 
 	}
@@ -196,6 +199,7 @@ int MediaPlayerAudioBackend::audioBufferSize() const
 void MediaPlayerAudioBackend::delayedStartEvent()
 {
 	pause(false);
+	LOGTEXT(tr("<font color=green> Started delayed audio:</font> %1").arg(m_fxName));
 }
 
 /**

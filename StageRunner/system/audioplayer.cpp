@@ -64,11 +64,14 @@ bool AudioPlayer::setStartDelay(int ms)
 	return (m_startDelayedTimerId > 0);
 }
 
-bool AudioPlayer::setSourceFilename(const QString &path)
+bool AudioPlayer::setSourceFilename(const QString &path, const QString &fxName)
 {
-	if (path != m_mediaPath) {
+	if (path != m_mediaPath)
 		m_mediaPath = path;
-	}
+
+	if (m_fxName != fxName)
+		m_fxName = fxName;
+
 	return true;
 }
 

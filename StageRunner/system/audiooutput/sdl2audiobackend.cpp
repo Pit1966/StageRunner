@@ -47,12 +47,14 @@ SDL2AudioBackend::~SDL2AudioBackend()
 
 }
 
-bool SDL2AudioBackend::setSourceFilename(const QString &path)
+bool SDL2AudioBackend::setSourceFilename(const QString &path, const QString &fxName)
 {
 	if (m_sdlChunk) {
 		*m_sdlChunk = m_sdlChunkCopy;
 		Mix_FreeChunk(m_sdlChunk);
 	}
+
+	setFxName(fxName);
 
 	// Load audio data
 	m_sdlChunk = Mix_LoadWAV(path.toLocal8Bit().data());	// 1 means, automatically free the source

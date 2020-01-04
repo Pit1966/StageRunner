@@ -178,7 +178,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Filename of audio file
-	if (!audio_player->setSourceFilename(fxa->filePath())) {
+	if (!audio_player->setSourceFilename(fxa->filePath(), fxa->name())) {
 		QString msg = tr("FX '%1': Could not start FX audio with file '%2'")
 				.arg(fxa->fxNamePath())
 				.arg(fxa->filePath());
@@ -230,20 +230,24 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	msg.executer = exec;
 	emit audioCtrlMsgEmitted(msg);
 
+	QString delayMsg = fxa->preDelay() > 0 ? tr(" with <font color=orange>%1ms delay</font>").arg(fxa->preDelay()) : QString();
+
 	if (exec && AppCentral::instance()->execCenter->useExecuter(exec)) {
-		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> with Executer: %3 at position %4 with volume %5")
+		LOGTEXT(tr("<font color=green>Start</font> <b>%1</b> <font color=green>in audio slot %2</font> with Executer: %3 at %4 with volume %5%6")
 				.arg(fxa->name())
 				.arg(slotNumber+1)
 				.arg(exec->getIdString())
 				.arg(QtStaticTools::msToTimeString(target_pos_ms))
-				.arg(targetVolume));
+				.arg(targetVolume)
+				.arg(delayMsg));
 	} else {
 		exec = nullptr;
-		LOGTEXT(tr("<font color=green>Start %1 in audio slot %2</font> at time %3 with volume %4")
+		LOGTEXT(tr("<font color=green>Start</font> <b>%1</b> <font color=green>in audio slot %2</font> at time %3 with volume %4%5")
 				.arg(fxa->name())
 				.arg(slotNumber+1)
 				.arg(QtStaticTools::msToTimeString(target_pos_ms))
-				.arg(targetVolume));
+				.arg(targetVolume)
+				.arg(delayMsg));
 	}
 
 	bool ok = false;

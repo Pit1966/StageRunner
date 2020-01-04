@@ -49,6 +49,7 @@ protected:
 	AUDIO::AudioErrorType m_audioError;
 	QString m_audioErrorString;
 	QString m_mediaPath;
+	QString m_fxName;						///< name of FxAudioItem (this is not the filename of audio, but may be)
 
 	// run time
 	int m_currentPlaybackSamplerate;
@@ -78,9 +79,9 @@ public:
 	inline CtrlCmd currentAudioCmd() const {return m_currentCtrlCmd;}
 	inline int currentLoop() const {return m_loopCnt;}
 	bool setStartDelay(int ms);
+	inline void setFxName(const QString &name) {m_fxName = name;}
 
-
-	virtual bool setSourceFilename(const QString &path);
+	virtual bool setSourceFilename(const QString &path, const QString &fxName);
 	virtual void start(int loops) = 0;
 	virtual void stop() = 0;
 	virtual void pause(bool state) = 0;

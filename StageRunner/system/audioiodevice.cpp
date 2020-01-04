@@ -179,7 +179,8 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
 		qWarning() << "audio decoding while starting" << filename;
 	} else {
-		qWarning() << "start audio" << filename;
+		if (debug > 1)
+			qWarning() << "start audio" << filename;
 	}
 	audio_decoder->setSourceFilename(filename);
 	audio_decoder->setAudioFormat(*audio_format);
