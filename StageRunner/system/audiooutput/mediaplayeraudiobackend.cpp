@@ -26,6 +26,7 @@
 #include "audioslot.h"
 
 #include <QAudioProbe>
+#include <QApplication>
 
 using namespace AUDIO;
 
@@ -93,6 +94,7 @@ void MediaPlayerAudioBackend::start(int loops)
 
 		LOGTEXT(tr("Start QMediaPlayer audio in delay mode: %1 (%2)")
 				.arg(m_mediaPath).arg(m_mediaPlayer->errorString()));
+
 	}
 
 }
@@ -108,6 +110,11 @@ void MediaPlayerAudioBackend::stop()
 
 	if (waspaused)
 		emit statusChanged(AUDIO_IDLE);
+
+	if (m_startDelayedTimerId) {
+		killTimer(m_startDelayedTimerId);
+		m_startDelayedTimerId = 0;
+	}
 }
 
 void MediaPlayerAudioBackend::pause(bool state)
@@ -219,8 +226,11 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		break;
 	case QMediaPlayer::BufferingMedia:
 	case QMediaPlayer::BufferedMedia:
-		if (m_startDelayedTimerId == 0)
+		if (m_startDelayedTimerId == 0) {
 			audiostatus = AUDIO_RUNNING;
+		} else {
+			audiostatus = m_currentAudioStatus;
+		}
 		m_mediaPlayer->setVolume(m_currentVolume);
 		break;
 	case QMediaPlayer::EndOfMedia:
@@ -230,13 +240,16 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		break;
 	case QMediaPlayer::InvalidMedia:
 		audiostatus = AUDIO_ERROR;
+		break;
+	default:
+		audiostatus = m_currentAudioStatus;
 	}
 
 	// qDebug() << "mediaStatusChanged" << status << "audiostat old" << m_currentAudioStatus << "new" << audiostatus;;
 	if (m_currentAudioStatus != audiostatus) {
 		m_currentAudioStatus = audiostatus;
-		// qDebug() << "status changed (from media)" << audiostatus;
 		emit statusChanged(audiostatus);
+		// qDebug() << "status changed (from media)" << audiostatus;
 	}
 }
 
@@ -279,7 +292,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 
 		if (m_currentAudioStatus != audiostatus) {
 			m_currentAudioStatus = audiostatus;
-			//qDebug() << "status changed (from player)" << audiostatus;
+			// qDebug() << "status changed (from player)" << audiostatus;
 			emit statusChanged(audiostatus);
 		}
 	}
