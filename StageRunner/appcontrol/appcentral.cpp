@@ -624,10 +624,13 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
 	if (cur_fx && cur_fx != next_fx) {
-		if (cur_fx->holdTime() == 0)
+		if (cur_fx->holdTime() == 0) {
+			LOGTEXT(tr("<font color=green>SEQ NEXT: Stop current FX</font> <b>%1</b> since HOLD time is 0").arg(cur_fx->name()));
 			executeFxCmd(cur_fx,CMD_FX_STOP,nullptr);
+		}
 	}
 	if (next_fx) {
+		LOGTEXT(tr("<font color=green>SEQ NEXT: Start FX</font> <b>%1</b>").arg(next_fx->name()));
 		executeFxCmd(next_fx,CMD_FX_START,nullptr);
 		if (next_fx->preDelay() == -1) {
 			QTimer::singleShot(next_fx->postDelay(),this,SLOT(executeNextFx()));

@@ -141,6 +141,8 @@ private slots:
 
 	void on_actionOpen_universe_layout_editor_triggered();
 
+	void on_actionNotes_triggered();
+
 private:
 	void init();
 	void setup_gui_docks();

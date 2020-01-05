@@ -33,6 +33,7 @@ class FxClipItem;
 class QMediaPlayer;
 class QMediaPlaylist;
 class PsVideoWidget;
+class VideoPlayer;
 
 using namespace AUDIO;
 
@@ -46,6 +47,8 @@ public:
 	VideoControl(AppCentral &app_central);
 	int masterVolume() const;
 	int maxVolume() const;
+
+	VideoPlayer * videoSlot(int slotNum);
 
 	bool startFxClipById(qint32 id);
 	bool startFxClip(FxClipItem *fxc);

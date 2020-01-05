@@ -343,6 +343,7 @@
      <string>About</string>
     </property>
     <addaction name="actionInfo"/>
+    <addaction name="actionNotes"/>
    </widget>
    <widget class="QMenu" name="menuDocks">
     <property name="title">
@@ -524,6 +525,11 @@
   <action name="actionOpen_universe_layout_editor">
    <property name="text">
     <string>Open universe layout editor</string>
+   </property>
+  </action>
+  <action name="actionNotes">
+   <property name="text">
+    <string>Notes</string>
    </property>
   </action>
  </widget>

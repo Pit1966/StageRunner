@@ -347,6 +347,7 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../devel.txt \
+    ../docs/help.txt \
     ../todo.txt \
     ../macos_notes.txt \
     ../platforms/macos/nametool.pri \

@@ -53,7 +53,9 @@ public:
 
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
+	bool isRunning() const;
 	void stop();
+	bool stopAndWait();
 	void setVolume(int vol);
 	void setMasterVolume(int vol);
 

@@ -224,6 +224,48 @@ int AudioControl::selectFreeAudioSlot(int slotnum)
 	return slot;
 }
 
+int AudioControl::selectFreeVideoSlot(bool *isVideoRunning)
+{
+	int slot = -1;
+	slotMutex->lock();
+
+	int i = -1;
+	while (slot < 0 && ++i < usedSlots()) {
+		if (audioSlots[i]->status() >= VIDEO_INIT && audioSlots[i]->status() <= VIDEO_RUNNING) {
+			slot = i;
+			*isVideoRunning = true;
+		}
+	}
+
+	i = -1;
+	while (slot < 0 && ++i < usedSlots()) {
+		if (audioSlots[i]->status() <= AUDIO_IDLE) {
+			audioSlots[i]->selectFxClipVideo();
+			slot = i;
+			*isVideoRunning = false;
+		}
+	}
+
+	slotMutex->unlock();
+	return slot;
+}
+
+/**
+ * @brief Select video slot and prepare it for video start
+ * @param slotnum
+ * @return true on succuss. If false, no further video actions are allowed
+ */
+bool AudioControl::selectVideoSlot(int slotnum)
+{
+	bool ok = false;
+	slotMutex->lock();
+	if (audioSlots[slotnum]->status() <= AUDIO_IDLE) {
+		ok = audioSlots[slotnum]->selectFxClipVideo();
+	}
+	slotMutex->unlock();
+	return ok;
+}
+
 void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {

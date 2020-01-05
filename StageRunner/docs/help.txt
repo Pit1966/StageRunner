@@ -1,0 +1,10 @@
+Tips and tricks
+---------------------------------------------------------------------------------------------------
+Meaning of FX attributes in SEQUENCE MODE.
+
+Automatic next step execution on "Start next FX" :
+Set preDelay to -1 and postDelay to desired pause time in ms. This will execute next FX in sequence automatically when started by sequence execute button.
+
+Prevent current FX of being stopped when "Start next FX" was clicked or executed:
+Set Hold time of FX that must not be stopped to -1.
+

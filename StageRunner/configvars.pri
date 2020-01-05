@@ -3,9 +3,9 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.3.0
-APP_MILESTONE = MultiOutput
-APP_PRODUCER = 2019 Stonechip Entertainment
+APPVERSION = V0.9.4.0
+APP_MILESTONE = AfterHAMS_VideoPlus
+APP_PRODUCER = 2020 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
 

@@ -28,6 +28,8 @@
 #include "fxclipitem.h"
 
 #include <QMediaPlayer>
+#include <QElapsedTimer>
+#include <QApplication>
 
 VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	: QMediaPlayer()
@@ -76,10 +78,31 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 	return true;
 }
 
+bool VideoPlayer::isRunning() const
+{
+	return currentState == QMediaPlayer::PlayingState;
+}
+
 void VideoPlayer::stop()
 {
 	loopCnt = loopTarget;
 	QMediaPlayer::stop();
+}
+
+/**
+ * @brief Stop video and wait for stopped;
+ * @return true, if video was stopped within 500ms.
+ */
+bool VideoPlayer::stopAndWait()
+{
+	stop();
+	QElapsedTimer time;
+	time.start();
+	while (isRunning() && time.elapsed() < 500) {
+		QApplication::processEvents();
+	}
+
+	return time.elapsed() < 500;
 }
 
 /**

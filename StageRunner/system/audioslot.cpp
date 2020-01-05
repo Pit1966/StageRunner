@@ -731,12 +731,15 @@ void AudioSlot::sdlEmitProgress()
 
 /**
  * @brief Prepare audio slot for video control
- * @param fxc
- * @return
+ * @return true on success (means slot was free)
  */
-void AudioSlot::selectFxClipVideo()
+bool AudioSlot::selectFxClipVideo()
 {
-	run_status = VIDEO_INIT;
+	if (run_status <= AUDIO_IDLE) {
+		run_status = VIDEO_INIT;
+		return true;
+	}
+	return false;
 }
 
 /**

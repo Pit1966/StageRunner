@@ -30,6 +30,9 @@
 #include "videoplayer.h"
 #include "customwidget/psvideowidget.h"
 
+#include <QElapsedTimer>
+#include <QApplication>
+
 VideoControl::VideoControl(AppCentral &app_central)
 	: QObject()
 	, myApp(app_central)
@@ -54,6 +57,13 @@ int VideoControl::maxVolume() const
 	return MAX_VOLUME;
 }
 
+VideoPlayer *VideoControl::videoSlot(int slotNum)
+{
+	Q_UNUSED(slotNum)
+
+	return myApp.unitAudio->videoPlayer();
+}
+
 bool VideoControl::startFxClipById(qint32 id)
 {
 	FxItem *fx = FxItem::findFxById(id);
@@ -74,8 +84,40 @@ bool VideoControl::startFxClipById(qint32 id)
 bool VideoControl::startFxClip(FxClipItem *fxc)
 {
 	qDebug() << "Start FxAudio as FxClip"<< fxc->name();
+	// return myApp.unitAudio->startFxClip(fxc);
 
-	return myApp.unitAudio->startFxClip(fxc);
+	bool videoRunning = false;
+	int slot = myApp.unitAudio->selectFreeVideoSlot(&videoRunning);
+	if (slot < 0) {
+		POPUPERRORMSG(Q_FUNC_INFO,tr("No free slot available for video playback!"));
+		return false;
+	}
+
+	VideoPlayer *vp = videoSlot(slot);
+	if (!vp)
+		return false;
+
+	// check if there is already a video running in this slot.
+	// If so, we have to stop the video first.
+	if (videoRunning) {
+		if (!vp->stopAndWait())
+			return false;
+
+		// select it
+		if (!myApp.unitAudio->selectVideoSlot(slot))
+			return false;
+	}
+
+	QMultimedia::AvailabilityStatus astat = vp->availability();
+	Q_UNUSED(astat)
+
+	vp->setVolume(fxc->initialVolume);
+	if (!myApp.unitAudio->startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume))
+		return false;
+
+	vp->playFxClip(fxc, slot);
+
+	return true;
 }
 
 void VideoControl::videoBlack(qint32 time_ms)

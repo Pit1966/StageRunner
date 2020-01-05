@@ -120,7 +120,7 @@ public:
 	AudioPlayer * audioPlayer() const {return audio_player;}
 
 	void sdlEmitProgress();
-	void selectFxClipVideo();
+	bool selectFxClipVideo();
 	void startFxClipVideoControls(FxAudioItem *fx, Executer *exec);
 	void setFxClipVideoCtrlStatus(AudioStatus stat);
 

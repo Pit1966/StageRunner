@@ -64,6 +64,7 @@
 
 #include <QFileDialog>
 #include <QErrorMessage>
+#include <QTextEdit>
 
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
@@ -1249,4 +1250,19 @@ void StageRunnerMainWin::on_actionOpen_universe_layout_editor_triggered()
 
 	m_universeEditor->show();
 	m_universeEditor->raise();
+}
+
+void StageRunnerMainWin::on_actionNotes_triggered()
+{
+	QTextEdit *edit = new QTextEdit();
+	edit->resize(1000,700);
+	edit->setAttribute(Qt::WA_DeleteOnClose);
+	edit->setReadOnly(true);
+
+	QFile file(":/docs/help.txt");
+	if (file.open(QFile::ReadOnly | QFile::Text)) {
+		QTextStream in(&file);
+		edit->setPlainText(in.readAll());
+	}
+	edit->show();
 }

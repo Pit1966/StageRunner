@@ -95,6 +95,8 @@ public:
 	bool isFxAudioActive(int slotnum);
 	int findAudioSlot(FxAudioItem *fxa);
 	int selectFreeAudioSlot(int slotnum = -1);
+	int selectFreeVideoSlot(bool *isVideoRunning);
+	bool selectVideoSlot(int slotnum);
 	void setFFTAudioChannelFromMask(qint32 mask);
 	inline bool isValid() const {return m_isValid;}
 	int usedSlots() const {return audioSlots.size();}
@@ -107,6 +109,7 @@ public:
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
+	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 
 	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
@@ -114,7 +117,6 @@ public:
 private:
 	void run();
 	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
-	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 #ifdef USE_SDL
 	static void sdlChannelDone(int chan);
 	static void sdlPostMix(void *udata, quint8 *stream, int len);
