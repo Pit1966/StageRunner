@@ -192,7 +192,7 @@ void AudioSlotWidget::setPauseState(bool state)
 
 void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 {
-	qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
+	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
@@ -249,7 +249,7 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 	else if (msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
-		case AUDIO_IDLE:
+		case VIDEO_IDLE:
 			setPlayState(false);
 			setPauseState(false);
 			if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
@@ -289,6 +289,8 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 			else if (msg.fxAudio) {
 				setTitle(msg.fxAudio->name().left(7) + "...");
 			}
+			break;
+		default:
 			break;
 		}
 		if (msg.volume >= 0)

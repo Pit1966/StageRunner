@@ -177,7 +177,7 @@ AudioStatus MediaPlayerAudioBackend::state() const
 	case QMediaPlayer::StoppedState:
 		return AUDIO_STOPPED;
 	case QMediaPlayer::PlayingState:
-		return AUDIO_PLAYING;
+		return AUDIO_RUNNING;
 	case QMediaPlayer::PausedState:
 		return AUDIO_PAUSED;
 	}
@@ -268,7 +268,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 				if (m_loopCnt < m_loopTarget) {
 					m_loopCnt++;
 					m_mediaPlayer->play();
-					audiostatus = AUDIO_PLAYING;
+					audiostatus = AUDIO_RUNNING;
 				} else {
 					audiostatus = AUDIO_IDLE;
 				}
@@ -279,7 +279,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 		else if (state == QMediaPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
 			// QMediaPlayer::setVolume(currentVolume);
-			audiostatus = AUDIO_PLAYING;
+			audiostatus = AUDIO_RUNNING;
 		}
 		else if (state == QMediaPlayer::PausedState) {
 			if (currentAudioCmd() == CMD_AUDIO_PAUSE) {

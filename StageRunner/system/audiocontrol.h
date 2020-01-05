@@ -57,7 +57,7 @@ public:
 
 protected:
 	QList<AudioSlot*> audioSlots;
-	int masterVolume;
+	int m_masterVolume;
 	bool m_isValid;
 	bool m_initInThread;
 	QAudioDeviceInfo m_extraDevice;
@@ -68,7 +68,6 @@ protected:
 	VideoPlayer *m_videoPlayer;
 	QMediaPlaylist *m_playlist;
 	PsVideoWidget *m_videoWid;
-	int m_videoPlayerCurrentVolume;
 
 private:
 	enum {
@@ -101,11 +100,12 @@ public:
 	int usedSlots() const {return audioSlots.size();}
 	AudioSlot* audioSlot(int i) const {return audioSlots.at(i);}
 	AudioPlayer* audioPlayer(int i) const;
+	inline int masterVolume() const {return m_masterVolume;}
+	inline int maxVolume() const {return MAX_VOLUME;}
 
 	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
-	void setVideoPlayerVolume(int vol);
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 
 	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}

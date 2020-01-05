@@ -295,8 +295,10 @@ bool AudioSlot::stopFxAudio()
 	emit vuLevelChanged(slotNumber,0.0,0.0);
 
 	if (run_status >= VIDEO_RUNNING) {
-		AudioCtrlMsg msg(slotNumber, CMD_AUDIO_STATUS_CHANGED, AUDIO_IDLE);
-		emit audioCtrlMsgEmitted(msg);
+		// do not stop video here. Uncomment next 2 lines, if you want to stop video too
+		// AudioCtrlMsg msg(slotNumber, CMD_AUDIO_STATUS_CHANGED, AUDIO_IDLE);
+		// emit audioCtrlMsgEmitted(msg);
+		return true;
 	}
 	else if (run_status > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
@@ -341,7 +343,7 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 		return false;
 	}
 
-	if (audio_player->state() != AUDIO_PLAYING)
+	if (audio_player->state() != AUDIO_RUNNING)
 		return false;
 
 	if (!FxItem::exists(current_fx)) return false;
@@ -414,7 +416,7 @@ void AudioSlot::setVolume(int vol)
 void AudioSlot::setMasterVolume(int vol)
 {
 	master_volume = vol;
-	if (run_status > AUDIO_IDLE) {
+	if (run_status > AUDIO_IDLE && run_status < VIDEO_INIT) {
 		setVolume(current_volume);
 	}
 }
@@ -597,7 +599,7 @@ void AudioSlot::on_volset_timer_finished()
 	LOGTEXT(volset_text);
 }
 
-void AudioSlot::audioCtrlReceiver(AudioCtrlMsg msg)
+void AudioSlot::audioCtrlReceiver(const AudioCtrlMsg &msg)
 {
 	// Test if Message is for me
 	if (msg.slotNumber != slotNumber) return;
@@ -760,6 +762,6 @@ void AudioSlot::startFxClipVideoControls(FxAudioItem *fx, Executer *exec)
 void AudioSlot::setFxClipVideoCtrlStatus(AudioStatus stat)
 {
 	run_status = stat;
-	if (stat = AUDIO_IDLE)
+	if (stat == AUDIO_IDLE)
 		current_fx = nullptr;
 }

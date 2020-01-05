@@ -259,7 +259,7 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 	int slot = selectFreeAudioSlot();
 	qDebug() << "Start FxClip" << fxc->name() << "slot" << slot;
 	if (slot >= 0) {
-		setVideoPlayerVolume(fxc->initialVolume);
+		myApp.unitVideo->setVideoVolume(slot, fxc->initialVolume);
 		audioSlots[slot]->selectFxClipVideo();
 		startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume);
 
@@ -267,16 +267,6 @@ bool AudioControl::startFxClip(FxClipItem *fxc)
 	}
 
 	return true;
-}
-
-void AudioControl::setVideoPlayerVolume(int vol)
-{
-	float audiolevel = float(vol) * 100 / MAX_VOLUME;
-	if (masterVolume >= 0)
-		audiolevel *= float(masterVolume) / MAX_VOLUME;
-
-	m_videoPlayer->setVolume(int(audiolevel));
-	m_videoPlayerCurrentVolume = vol;
 }
 
 /**
@@ -790,12 +780,15 @@ void AudioControl::setMasterVolume(int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	masterVolume = vol;
+	m_masterVolume = vol;
+
+	// Set master volume for video players too
+	myApp.unitVideo->setVideoMasterVolume(vol);
+
+	// And now update the volume settings in all active audioslots
 	for (int t=0; t<used_slots; t++) {
 		audioSlots[t]->setMasterVolume(vol);
 	}
-	if (m_videoPlayer)
-		setVideoPlayerVolume(m_videoPlayerCurrentVolume);
 }
 
 void AudioControl::setVolume(int slot, int vol)
@@ -957,10 +950,9 @@ void AudioControl::init()
 	m_playlist = nullptr;
 	m_videoPlayer = nullptr;
 	m_videoWid = nullptr;
-	m_videoPlayerCurrentVolume = 0;
 
 	setObjectName("Audio Control");
-	masterVolume = MAX_VOLUME;
+	m_masterVolume = MAX_VOLUME;
 	for (int t=0; t<used_slots; t++) {
 		dmx_audio_ctrl_last_vol[t] = 0;
 		dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
@@ -989,9 +981,8 @@ void AudioControl::createMediaPlayInstances()
 
 	// This is for video playback
 	m_videoWid = new PsVideoWidget;
-	m_videoPlayer = new VideoPlayer(m_videoWid);
-	m_videoWid->setVideoPlayer(m_videoPlayer);
-	connect(m_videoPlayer, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), this, SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+	m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+	// m_videoWid->setVideoPlayer(m_videoPlayer);
 
 #ifdef USE_SDL
 	Mix_AllocateChannels(used_slots);

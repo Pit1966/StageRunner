@@ -1006,9 +1006,9 @@ void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA,
 	}
 }
 
-void FxListWidget::propagateAudioStatus(AudioCtrlMsg msg)
+void FxListWidget::propagateAudioStatus(const AudioCtrlMsg &msg)
 {
-	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
+	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED || msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
 		int row = getRowThatContainsFxItem(msg.fxAudio);
 		WidItemList widlist = getItemListForRow(row);
 		if (widlist.size()) {

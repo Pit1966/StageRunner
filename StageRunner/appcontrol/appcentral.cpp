@@ -788,4 +788,7 @@ void AppCentral::init()
 
 	// AppCentral -> AudioControl Thread (unitAudio)
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+
+	///todo video	move signal/slots to videoctrl
+	connect(unitVideo,SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 }

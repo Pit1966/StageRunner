@@ -34,6 +34,8 @@ class QMediaPlayer;
 class QMediaPlaylist;
 class PsVideoWidget;
 
+using namespace AUDIO;
+
 class VideoControl : public QObject
 {
 	Q_OBJECT
@@ -42,14 +44,19 @@ private:
 
 public:
 	VideoControl(AppCentral &app_central);
+	int masterVolume() const;
+	int maxVolume() const;
 
 	bool startFxClipById(qint32 id);
 	bool startFxClip(FxClipItem *fxc);
 
 	void videoBlack(qint32 time_ms);
 	bool setVideoVolume(int slotnum, int vol);
+	bool setVideoMasterVolume(int vol);
 
 signals:
+	void videoCtrlMsgEmitted(const AudioCtrlMsg &msg);
+
 
 public slots:
 

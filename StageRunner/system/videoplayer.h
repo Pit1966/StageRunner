@@ -32,28 +32,39 @@ using namespace AUDIO;
 
 class PsVideoWidget;
 class FxClipItem;
+class VideoControl;
 
-class VideoPlayer : public QMediaPlayer
+class VideoPlayer : protected QMediaPlayer
 {
 	Q_OBJECT
 protected:
+	VideoControl *m_videoCtrl;
 	PsVideoWidget *m_videoWid;
 	int loopTarget;
 	int loopCnt;
 	int m_slotNumber;
+	int m_currentVolume;					///< current volume in StageRunner range (0 - MAX_VOLUME)
+	int m_currentMasterVolume;
 	QMediaPlayer::State currentState;
 	FxClipItem *m_currentFxClipItem;
 
 public:
-	VideoPlayer(PsVideoWidget *videoWid);
+	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
+
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
 	void stop();
+	void setVolume(int vol);
+	void setMasterVolume(int vol);
+
+	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
+	inline QMediaPlayer * mediaPlayer() {return this;}
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
 	void on_play_state_changed(QMediaPlayer::State state);
 	void on_playback_position_changed(qint64 pos);
+	void onVideoEnd();
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);

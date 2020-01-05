@@ -22,18 +22,22 @@
 //=======================================================================
 
 #include "videoplayer.h"
+#include "videocontrol.h"
 #include "customwidget/psvideowidget.h"
 #include "log.h"
 #include "fxclipitem.h"
 
 #include <QMediaPlayer>
 
-VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
+VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	: QMediaPlayer()
+	, m_videoCtrl(parent)
 	, m_videoWid(videoWid)
 	, loopTarget(1)
 	, loopCnt(1)
 	, m_slotNumber(-1)
+	, m_currentVolume(-1)
+	, m_currentMasterVolume(-1)
 	, currentState(QMediaPlayer::StoppedState)
 	, m_currentFxClipItem(nullptr)
 {
@@ -44,8 +48,11 @@ VideoPlayer::VideoPlayer(PsVideoWidget *videoWid)
 	connect(this,SIGNAL(positionChanged(qint64)),this,SLOT(on_playback_position_changed(qint64)));
 	setNotifyInterval(20);
 
-	connect(this,SIGNAL(endReached(qint64)),this,SLOT(pause()),Qt::QueuedConnection);
 	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
+
+	connect(this, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), m_videoCtrl, SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)));
+
+	m_videoWid->setVideoPlayer(this);
 }
 
 bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
@@ -73,6 +80,32 @@ void VideoPlayer::stop()
 {
 	loopCnt = loopTarget;
 	QMediaPlayer::stop();
+}
+
+/**
+ * @brief Set volume of video player
+ * @param vol value in application range (0 - MAX_VOLUME)
+ *
+ * The volume value will be translated to QMediaPlayer range and also the master volume is taken into account
+ */
+void VideoPlayer::setVolume(int vol)
+{
+	float level = float(vol * 100) / m_videoCtrl->maxVolume();
+	if (m_currentMasterVolume >= 0) {
+		level = level * m_currentMasterVolume / m_videoCtrl->maxVolume();
+	}
+
+	// qDebug() << "set volume" << vol << "master" << m_currentMasterVolume << "final" << level;
+
+	QMediaPlayer::setVolume(level);
+	m_currentVolume = vol;
+}
+
+void VideoPlayer::setMasterVolume(int vol)
+{
+	// qDebug() << "set master volume" << vol << "current vol" << m_currentVolume;
+	m_currentMasterVolume = vol;
+	setVolume(m_currentVolume);
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
@@ -107,7 +140,7 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 	AudioStatus stat = AudioStatus::AUDIO_NO_STATE;
 
 	if (state != currentState) {
-		// qDebug() << Q_FUNC_INFO << state << thread();
+		qDebug() << Q_FUNC_INFO << state << thread();
 		if (state == QMediaPlayer::StoppedState) {
 			if (currentState == QMediaPlayer::PlayingState) {
 				if (loopCnt < loopTarget) {
@@ -118,7 +151,7 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 						QMediaPlayer::stop();
 						m_videoWid->update();
 					}
-					stat = AUDIO_IDLE;
+					stat = VIDEO_IDLE;
 				}
 			}
 		}
@@ -127,6 +160,9 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 			// QMediaPlayer::setVolume(currentVolume);
 			stat = VIDEO_RUNNING;
 		}
+		else if (state == QMediaPlayer::PausedState) {
+			stat = VIDEO_IDLE;
+		}
 		currentState = state;
 	}
 
@@ -134,8 +170,14 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 		QMediaPlayer::play();
 
 	if (stat > AUDIO_NO_STATE) {
-		AudioCtrlMsg msg(m_slotNumber, CMD_VIDEO_STATUS_CHANGED, stat);
-		emit audioCtrlMsgEmitted(msg);
+		if (stat == VIDEO_IDLE) {
+			onVideoEnd();
+		} else {
+			qDebug() << "1 video stat" << stat;
+			AudioCtrlMsg msg(m_slotNumber, CMD_VIDEO_STATUS_CHANGED, stat);
+			msg.fxAudio = m_currentFxClipItem;
+			emit audioCtrlMsgEmitted(msg);
+		}
 	}
 }
 
@@ -143,26 +185,58 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 {
 	if (!m_currentFxClipItem) return;
 
+	if (currentState != QMediaPlayer::PlayingState)
+		return;
+
 	qint64 dur = duration();
 	if (dur <= 0) return;
 
 	int permille = int(pos * 1000 / dur);
 
-//	qDebug() << "pos" << pos << dur << permille/10 << thread();
+	// qDebug() << "pos" << pos << dur << permille/10 << thread();
 
 	if (!m_currentFxClipItem->blackAtVideoEnd) {
+		// This is a workaround, for holding the last video frame at video end.
+		// What we do is, stopping the video 120ms before end is reached!
 		if (pos >= dur - 120) {
 			if (loopCnt < loopTarget) {
 				loopCnt++;
 				emit seekMe(0);
 			} else {
 				if (currentState != QMediaPlayer::PausedState) {
-					emit endReached(pos);
-					//				emit seekMe(100);
+					QMediaPlayer::pause();
+					return;
 				}
 			}
 		}
 	}
 
 	emit clipProgressChanged(m_currentFxClipItem, permille);
+
+	AudioCtrlMsg msg(m_currentFxClipItem, m_slotNumber, CMD_VIDEO_STATUS_CHANGED);
+	msg.currentAudioStatus = currentState == QMediaPlayer::PlayingState ? VIDEO_RUNNING : VIDEO_IDLE;
+	msg.progress = permille;
+	msg.progressTime = int(pos);
+	msg.loop = loopCnt;
+	// msg.executer = nullptr;
+	if (m_currentFxClipItem->loopTimes > 1) {
+		msg.maxloop = m_currentFxClipItem->loopTimes;
+	}
+
+	// qDebug() << "2 video stat" << currentState << currentState << permille;
+
+	emit audioCtrlMsgEmitted(msg);
+}
+
+void VideoPlayer::onVideoEnd()
+{
+	qDebug() << "3 video stat" << VIDEO_IDLE;
+
+	AudioCtrlMsg msg(m_currentFxClipItem, m_slotNumber, CMD_VIDEO_STATUS_CHANGED);
+	msg.currentAudioStatus = VIDEO_IDLE;
+	msg.progress = 1000;
+	// msg.progressTime = int(pos);
+	msg.loop = loopCnt;
+	// msg.executer = nullptr;
+	emit audioCtrlMsgEmitted(msg);
 }

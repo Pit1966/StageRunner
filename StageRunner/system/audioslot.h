@@ -138,12 +138,12 @@ private slots:
 	void on_volset_timer_finished();
 
 public slots:
-	void audioCtrlReceiver(AudioCtrlMsg msg);
+	void audioCtrlReceiver(const AudioCtrlMsg &msg);
 	void setAudioDurationMs(qint64 ms);
 
 signals:
-	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
-	void audioProgressChanged(int slotnum, FxAudioItem *fxaudio, int perMille);
+	void audioCtrlMsgEmitted(const AudioCtrlMsg &msg);
+	void audioProgressChanged(int slotnum, FxAudioItem *fxaudio, int perMille);			///< this is not used for now!!
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void frqSpectrumChanged(int slotnum, FrqSpectrum *spec);
 };

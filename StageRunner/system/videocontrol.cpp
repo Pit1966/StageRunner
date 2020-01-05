@@ -36,6 +36,24 @@ VideoControl::VideoControl(AppCentral &app_central)
 {
 }
 
+/**
+ * @brief Get master volume from audio control
+ * @return 0 - MAX_VOLUME
+ */
+int VideoControl::masterVolume() const
+{
+	return myApp.unitAudio->masterVolume();
+}
+
+/**
+ * @brief Get max volume range (convenience function)
+ * @return MAX_VOLUME
+ */
+int VideoControl::maxVolume() const
+{
+	return MAX_VOLUME;
+}
+
 bool VideoControl::startFxClipById(qint32 id)
 {
 	FxItem *fx = FxItem::findFxById(id);
@@ -84,9 +102,21 @@ void VideoControl::videoBlack(qint32 time_ms)
 bool VideoControl::setVideoVolume(int slotnum, int vol)
 {
 	Q_UNUSED(slotnum)
+
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	if (vp) {
 		vp->setVolume(vol);
+		return true;
+	}
+
+	return false;
+}
+
+bool VideoControl::setVideoMasterVolume(int vol)
+{
+	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
+	if (vp) {
+		vp->setMasterVolume(vol);
 		return true;
 	}
 

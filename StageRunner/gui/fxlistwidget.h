@@ -115,7 +115,7 @@ public slots:
 	void unselectRows();
 	void propagateSceneStatus(FxSceneItem *scene);
 	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
-	void propagateAudioStatus(AudioCtrlMsg msg);
+	void propagateAudioStatus(const AudioCtrlMsg &msg);
 	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc);
 	void onFxItemSelectedInChildWidget(FxItem *fx);
 

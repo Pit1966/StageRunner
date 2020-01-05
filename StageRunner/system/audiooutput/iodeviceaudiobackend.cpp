@@ -157,7 +157,7 @@ AudioStatus IODeviceAudioBackend::state() const
 {
 	switch (m_currentOutputState) {
 	case QAudio::ActiveState:
-		return AUDIO_PLAYING;
+		return AUDIO_RUNNING;
 	case QAudio::SuspendedState:
 		return AUDIO_PAUSED;
 #if QT_VERSION >= 0x050b00

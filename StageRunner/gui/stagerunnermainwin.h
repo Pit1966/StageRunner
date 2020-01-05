@@ -139,7 +139,6 @@ private slots:
 	void on_actionVirtualDmxOutput_triggered(bool checked);
 	void onRecentProjectActionSelected();
 
-
 	void on_actionOpen_universe_layout_editor_triggered();
 
 private:
