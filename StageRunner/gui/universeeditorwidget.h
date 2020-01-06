@@ -27,6 +27,11 @@ public:
 	explicit UniverseEditorWidget(QWidget *parent = nullptr);
 	~UniverseEditorWidget();
 
+	bool saveToFilesystem(const QString &path);
+	bool loadFromFilesystem(const QString &path);
+
+	static QString defaultFilepath();
+
 private:
 	bool copyFixturesToGui(SR_FixtureList *fixlist);
 
@@ -35,6 +40,8 @@ private slots:
 	void on_selectDeviceButton_clicked();
 	void on_addDeviceButton_clicked();
 	void on_removeDeviceButton_clicked();
+	void on_pushButton_saveLayout_clicked();
+	void on_pushButton_loadLayout_clicked();
 };
 
 #endif // UNIVERSEEDITORWIDGET_H

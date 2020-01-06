@@ -6,6 +6,8 @@
 
 #include <QSettings>
 #include <QFileDialog>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 
 #define COL_DEVICE 0
@@ -45,6 +47,46 @@ UniverseEditorWidget::UniverseEditorWidget(QWidget *parent)
 UniverseEditorWidget::~UniverseEditorWidget()
 {
 	delete m_fixtureList;
+}
+
+bool UniverseEditorWidget::saveToFilesystem(const QString &path)
+{
+	bool ok = false;
+
+	QJsonObject json = m_fixtureList->toJson();
+	QByteArray jsonstr = QJsonDocument(json).toJson(QJsonDocument::Indented);
+	QFile file(path);
+	if (file.open(QFile::WriteOnly)) {
+		file.write(jsonstr);
+		ok = true;
+	}
+
+	return ok;
+}
+
+bool UniverseEditorWidget::loadFromFilesystem(const QString &path)
+{
+	QFile file(path);
+	if (!file.open(QFile::ReadOnly))
+		return false;
+
+	QByteArray dat = file.readAll();
+
+	QJsonParseError error;
+	QJsonObject json = QJsonDocument::fromJson(dat, &error).object();
+	m_fixtureList->setFromJson(json);
+
+	return true;
+}
+
+QString UniverseEditorWidget::defaultFilepath()
+{
+	QString defaultpath = QString("%1/.config/%2/%3.dmx.default")
+			.arg(QDir::homePath())
+			.arg(APP_CONFIG_PATH)
+			.arg(APPNAME);
+
+	return defaultpath;
 }
 
 bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
@@ -121,6 +163,19 @@ void UniverseEditorWidget::on_addDeviceButton_clicked()
 
 void UniverseEditorWidget::on_removeDeviceButton_clicked()
 {
-
 }
 
+
+void UniverseEditorWidget::on_pushButton_saveLayout_clicked()
+{
+	bool ok = saveToFilesystem(defaultFilepath());
+	if (ok)
+		POPUPINFOMSG(Q_FUNC_INFO, "Default DMX layout saved!");
+}
+
+void UniverseEditorWidget::on_pushButton_loadLayout_clicked()
+{
+	bool ok = loadFromFilesystem(defaultFilepath());
+
+	copyFixturesToGui(m_fixtureList);
+}

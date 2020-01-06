@@ -3,6 +3,8 @@
 #include <QXmlStreamReader>
 #include <QFile>
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 SR_Channel::SR_Channel(SR_Fixture *parent)
 	: m_parentFixture(parent)
@@ -43,6 +45,26 @@ bool SR_Channel::loadQLCChannel(QXmlStreamReader &xml)
 			xml.skipCurrentElement();
 		}
 	}
+	return true;
+}
+
+QJsonObject SR_Channel::toJson() const
+{
+	QJsonObject json;
+	json["name"] = m_name;
+	json["group"] = m_group;
+	json["dmxoffset"] = m_dmxOffset;
+	json["dmxfineoffseet"] = m_dmxFineOffset;
+
+	return json;
+}
+
+bool SR_Channel::setFromJson(const QJsonObject &json)
+{
+	m_name = json["name"].toString();
+	m_group = json["group"].toString();
+	m_dmxOffset = json["dmxoffset"].toInt();
+	m_dmxFineOffset = json["dmxfineoffseet"].toInt();
 	return true;
 }
 
@@ -147,6 +169,53 @@ QStringList SR_Mode::getChannelTexts() const
 	return list;
 }
 
+QJsonObject SR_Mode::toJson() const
+{
+	QJsonObject json;
+	json["modename"] = m_name;
+
+	QStringList channels = getChannelTexts();
+	QJsonArray jsonchannelarray;
+	for (const auto & str : channels) {
+		jsonchannelarray.append(str);
+	}
+	json["modechannels"] = jsonchannelarray;
+
+	return json;
+}
+
+bool SR_Mode::setFromJson(const QJsonObject &json)
+{
+	m_name = json["modename"].toString();
+
+	m_channels.clear();
+
+	bool ok = true;
+	QJsonArray jsonchannelarray = json["modechannels"].toArray();
+	for (const auto & jsonvalue : jsonchannelarray) {
+		// get channel name
+		QString str = jsonvalue.toString();
+		QString numstr = str.section(":",0,0);
+		QString channame = str.section(":",1).trimmed();
+
+		// now we have the channel name. We get the channel object from parent SR_Fixture.
+		SR_Channel *chan = m_parentFixture->getChannelByName(channame);
+		if (!chan) {
+			ok = false;
+			continue;
+		}
+
+		if (m_channels.contains(chan)) {
+			ok = false;
+			continue;
+		}
+
+		m_channels.append(chan);
+	}
+
+	return ok;
+}
+
 SR_Mode *SR_Mode::createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml)
 {
 	SR_Mode *m = new SR_Mode(parent);
@@ -232,21 +301,94 @@ QString SR_Fixture::typeToString(SR_Fixture::Type type)
 {
 	switch(type)
 	{
-		case FT_COLOR_CHANGER: return "Color Changer";
-		case FT_DIMMER: return "Dimmer";
-		case FT_EFFECT: return "Effect";
-		case FT_FAN: return "Fan";
-		case FT_FLOWER: return "Flower";
-		case FT_HAZER: return "Hazer";
-		case FT_LASER: return "Laser";
-		case FT_MOVING_HEAD: return "Moving Head";
-		case FT_SCANNER: return "Scanner";
-		case FT_SMOKE: return "Smoke";
-		case FT_STROBE: return "Strobe";
-		case FT_LEDBAR_BEAMS: return "LED Bar (Beams)";
-		case FT_LEDBAR_PIXELS: return "LED Bar (Pixels)";
-		default: return "Other";
+	case FT_COLOR_CHANGER: return "Color Changer";
+	case FT_DIMMER: return "Dimmer";
+	case FT_EFFECT: return "Effect";
+	case FT_FAN: return "Fan";
+	case FT_FLOWER: return "Flower";
+	case FT_HAZER: return "Hazer";
+	case FT_LASER: return "Laser";
+	case FT_MOVING_HEAD: return "Moving Head";
+	case FT_SCANNER: return "Scanner";
+	case FT_SMOKE: return "Smoke";
+	case FT_STROBE: return "Strobe";
+	case FT_LEDBAR_BEAMS: return "LED Bar (Beams)";
+	case FT_LEDBAR_PIXELS: return "LED Bar (Pixels)";
+	default: return "Other";
 	}
+}
+
+/**
+ * @brief Convert SR_Fixture object to a JSON object
+ * @return
+ */
+QJsonObject SR_Fixture::toJson() const
+{
+	QJsonObject json;
+	json["universe"] = m_universe;
+	json["dmxadr"] = m_dmxAdr;
+	json["manufacturer"] = m_manufacturer;
+	json["modelname"] = m_modelName;
+	json["fixturetype"] = int(m_fixtureType);
+	json["curmode"] = m_curMode;
+
+	// Channels:
+	QJsonArray jsonchanarray;
+	for (SR_Channel *chan : m_channels) {
+		QJsonObject jsonchan = chan->toJson();
+		jsonchanarray.append(jsonchan);
+	}
+
+	// Modes:
+	QJsonArray jsonmodearray;
+	for (SR_Mode *mode : m_modes) {
+		QJsonObject jsonmode = mode->toJson();
+		jsonmodearray.append(jsonmode);
+	}
+
+	json["channels"] = jsonchanarray;
+	json["modes"] = jsonmodearray;
+
+	return json;
+}
+
+bool SR_Fixture::setFromJson(const QJsonObject &json)
+{
+	m_universe = json["universe"].toInt();
+	m_dmxAdr = json["dmxadr"].toInt();
+	m_manufacturer = json["manufacturer"].toString();
+	m_modelName = json["modelname"].toString();
+	m_fixtureType = Type(json["fixturetype"].toInt());
+	m_curMode = json["curmode"].toInt();
+
+	while (!m_channels.isEmpty())
+		delete m_channels.takeFirst();
+	while (!m_modes.isEmpty())
+		delete m_modes.takeFirst();
+
+	QJsonArray jsonchannelarray = json["channels"].toArray();
+	for (const auto & jsonvalue : jsonchannelarray) {
+		QJsonObject jsonchannel = jsonvalue.toObject();
+		SR_Channel *chan = new SR_Channel(this);
+		if (chan->setFromJson(jsonchannel)) {
+			m_channels.append(chan);
+		} else {
+			delete chan;
+		}
+	}
+
+	QJsonArray jsonmodearray = json["modes"].toArray();
+	for (const auto & jsonvalue : jsonmodearray) {
+		QJsonObject jsonmode = jsonvalue.toObject();
+		SR_Mode *mode = new SR_Mode(this);
+		if (mode->setFromJson(jsonmode)) {
+			m_modes.append(mode);
+		} else {
+			delete mode;
+		}
+	}
+
+	return true;
 }
 
 
@@ -430,3 +572,40 @@ bool SR_FixtureList::addQLCFixture(const QString &path)
 		return false;
 	}
 }
+
+QJsonObject SR_FixtureList::toJson() const
+{
+	QJsonObject json;
+	QJsonArray jsonfixturearray;
+	for (SR_Fixture *fix : m_list) {
+		QJsonObject jsonfixture = fix->toJson();
+		jsonfixturearray.append(jsonfixture);
+	}
+	json["fixtures"] = jsonfixturearray;
+
+	return json;
+}
+
+int SR_FixtureList::setFromJson(const QJsonObject &json)
+{
+	while (!m_list.isEmpty())
+		delete m_list.takeFirst();
+
+	QJsonArray jsonfixturearray = json["fixtures"].toArray();
+
+	int cnt = 0;
+	for (const auto & jsonfix : jsonfixturearray) {
+		QJsonObject jsonfixture = jsonfix.toObject();
+		qDebug() << "element:" << jsonfixture["modelname"].toString();
+		SR_Fixture *fixture = new SR_Fixture();
+		if (fixture->setFromJson(jsonfixture)) {
+			addFixture(fixture);
+			cnt++;
+		} else {
+			delete fixture;
+		}
+	}
+
+	return cnt;
+}
+

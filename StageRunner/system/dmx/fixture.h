@@ -5,6 +5,7 @@ class QXmlStreamReader;
 
 #include <QString>
 #include <QList>
+#include <QJsonObject>
 
 // Fixture document type
 #define SR_FIXTURE_DEF_DOCUMENT "FixtureDefinition"
@@ -69,6 +70,9 @@ public:
 	inline void setDmxOffset(int chanoffset) {m_dmxOffset = chanoffset;}
 	int dmxOffset() const {return m_dmxOffset;}
 
+	QJsonObject toJson() const;
+	bool setFromJson(const QJsonObject &json);
+
 	static SR_Channel * createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReader &xml);
 };
 
@@ -92,6 +96,9 @@ public:
 	bool insertChannelAt(int pos, SR_Channel *srChan);
 
 	QStringList getChannelTexts() const;
+
+	QJsonObject toJson() const;
+	bool setFromJson(const QJsonObject &json);
 
 	static SR_Mode * createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml);
 };
@@ -164,6 +171,9 @@ public:
 	inline int dmxAdr() const {return m_dmxAdr;}
 	void setDmxAdr(int dmxAdr) {m_dmxAdr = dmxAdr;}
 
+	QJsonObject toJson() const;
+	bool setFromJson(const QJsonObject &json);
+
 private:
 	bool loadQLCFixture(QXmlStreamReader &xml);
 	bool subLoadCreator(QXmlStreamReader &xml);
@@ -186,6 +196,10 @@ public:
 
 	void addFixture(SR_Fixture *fix);
 	bool addQLCFixture(const QString &path);
+
+	QJsonObject toJson() const;
+	int setFromJson(const QJsonObject &json);
+
 };
 
 #endif // FIXTURE_H
