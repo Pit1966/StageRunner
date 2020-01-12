@@ -127,6 +127,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton_createTemplate">
+       <property name="text">
+        <string>Create Template Scene</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

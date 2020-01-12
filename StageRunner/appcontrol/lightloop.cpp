@@ -127,7 +127,7 @@ void LightLoop::processPendingEvents()
 
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		for (int chan=0; chan<512; chan++) {
-			if (lightCtrlRef.hiddenScannerScenes[t]->tube(chan)->dmxType >= DMX_PAN) {
+			if (lightCtrlRef.hiddenScannerScenes[t]->tube(chan)->dmxType >= DMX_POSITION_PAN) {
 	//			dmxtout[t][chan] = lightCtrlRef.hiddenScannerScenes[t]->tube(chan)->dmxValue;
 			}
 		}

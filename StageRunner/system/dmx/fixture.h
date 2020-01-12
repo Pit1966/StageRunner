@@ -51,12 +51,104 @@ class QXmlStreamReader;
 
 class SR_Fixture;
 
-class SR_Channel
+class SR_Channel : public QObject
 {
+	Q_OBJECT
+public:
+	/*********************************************************************
+	 * Presets: These Presets are taken from QLCPLUS Project
+	 *
+	 * please see
+	 * https://github.com/mcallegari/qlcplus/wiki/Fixture-definition-presets
+	 * when changing this list
+	 *********************************************************************/
+	enum Preset
+	{
+		Custom = 0,
+		IntensityMasterDimmer,
+		IntensityMasterDimmerFine,
+		IntensityDimmer,
+		IntensityDimmerFine,
+		IntensityRed,
+		IntensityRedFine,
+		IntensityGreen,
+		IntensityGreenFine,
+		IntensityBlue,
+		IntensityBlueFine,
+		IntensityCyan,
+		IntensityCyanFine,
+		IntensityMagenta,
+		IntensityMagentaFine,
+		IntensityYellow,
+		IntensityYellowFine,
+		IntensityAmber,
+		IntensityAmberFine,
+		IntensityWhite,
+		IntensityWhiteFine,
+		IntensityUV,
+		IntensityUVFine,
+		IntensityIndigo,
+		IntensityIndigoFine,
+		IntensityLime,
+		IntensityLimeFine,
+		IntensityHue,
+		IntensityHueFine,
+		IntensitySaturation,
+		IntensitySaturationFine,
+		IntensityLightness,
+		IntensityLightnessFine,
+		IntensityValue,
+		IntensityValueFine,
+		PositionPan,
+		PositionPanFine,
+		PositionTilt,
+		PositionTiltFine,
+		PositionXAxis,
+		PositionYAxis,
+		SpeedPanSlowFast,
+		SpeedPanFastSlow,
+		SpeedTiltSlowFast,
+		SpeedTiltFastSlow,
+		SpeedPanTiltSlowFast,
+		SpeedPanTiltFastSlow,
+		ColorMacro,
+		ColorWheel,
+		ColorWheelFine,
+		ColorRGBMixer,
+		ColorCTOMixer,
+		ColorCTCMixer,
+		ColorCTBMixer,
+		GoboWheel,
+		GoboWheelFine,
+		GoboIndex,
+		GoboIndexFine,
+		ShutterStrobeSlowFast,
+		ShutterStrobeFastSlow,
+		ShutterIrisMinToMax,
+		ShutterIrisMaxToMin,
+		ShutterIrisFine,
+		BeamFocusNearFar,
+		BeamFocusFarNear,
+		BeamFocusFine,
+		BeamZoomSmallBig,
+		BeamZoomBigSmall,
+		BeamZoomFine,
+		PrismRotationSlowFast,
+		PrismRotationFastSlow,
+		NoFunction,
+		LastPreset // dummy for cycles
+	};
+#if QT_VERSION >= 0x050500
+	Q_ENUM(Preset)
+#else
+	Q_ENUMS(Preset)
+#endif
+
 private:
 	SR_Fixture *m_parentFixture;
 	QString m_name;
 	QString m_group;
+	QString m_preset;
 	int m_dmxOffset = 0;		///< not used
 	int m_dmxFineOffset = 0;	///< used for dmx devices using 2 channels (or more) for a function with 16bit (or more)
 
@@ -65,6 +157,7 @@ public:
 	SR_Channel(SR_Fixture *parent, SR_Channel *op);
 	inline const QString & name() const {return m_name;}
 	inline const QString & group() const {return m_group;}
+	inline const QString & preset() const {return m_preset;}
 
 	bool loadQLCChannel(QXmlStreamReader &xml);
 	inline void setDmxOffset(int chanoffset) {m_dmxOffset = chanoffset;}
@@ -74,6 +167,9 @@ public:
 	bool setFromJson(const QJsonObject &json);
 
 	static SR_Channel * createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReader &xml);
+	static QString presetToString(Preset preset);
+	static Preset stringToPreset(const QString &preset);
+
 };
 
 // ------------------------------------------------------------------------------------------
@@ -95,7 +191,9 @@ public:
 	bool loadQLCMode(QXmlStreamReader &xml);
 	bool insertChannelAt(int pos, SR_Channel *srChan);
 
+	int channelCount() const;
 	QStringList getChannelTexts() const;
+	QStringList getChannelAndPresetTexts() const;
 
 	QJsonObject toJson() const;
 	bool setFromJson(const QJsonObject &json);
@@ -162,7 +260,9 @@ public:
 	void setCurrentMode(int num);
 	inline int currentMode() const {return m_curMode;}
 
-	QStringList getChannelTexts(int mode = 0);
+	int usedChannelCount() const;
+	QStringList getChannelTexts(int mode = 0) const;
+	QStringList getChannelAndPresetTexts(int mode = 0) const;
 
 
 	SR_Fixture::Type stringToType(const QString &type);
@@ -194,8 +294,10 @@ public:
 	inline SR_Fixture * at(int i) {return m_list.at(i);}
 	inline const SR_Fixture * at(int i) const {return m_list.at(i);}
 
-	void addFixture(SR_Fixture *fix);
-	bool addQLCFixture(const QString &path);
+	int lastUsedDmxAddr() const;
+
+	void addFixture(SR_Fixture *fix, int dmxAddr = 0);
+	bool addQLCFixture(const QString &path, int dmxAddr = 0);
 
 	QJsonObject toJson() const;
 	int setFromJson(const QJsonObject &json);

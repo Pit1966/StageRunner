@@ -107,7 +107,7 @@ void FxSceneItem::createDefaultTubes(int tubecount)
 		dmx->tube = t;
 		dmx->dmxUniverse = 0;
 		dmx->dmxChannel = t;
-		dmx->dmxType = DMX_INTENSITY;
+		dmx->dmxType = DMX_INTENSITY_DIMMER;
 		tubes.append(dmx);
 	}
 }
@@ -123,7 +123,7 @@ void FxSceneItem::setTubeCount(int tubecount)
 		dmx->tube = tubes.size();
 		dmx->dmxUniverse = 0;
 		dmx->dmxChannel = tubes.size();
-		dmx->dmxType = DMX_INTENSITY;
+		dmx->dmxType = DMX_INTENSITY_DIMMER;
 		tubes.append(dmx);
 	}
 }
@@ -175,7 +175,8 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	}
 
 
-	if (cmdTime) cmd_time = cmdTime;
+	if (cmdTime)
+		cmd_time = cmdTime;
 
 	// qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
@@ -186,13 +187,13 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
 		switch (tube->dmxType) {
-		case DMX_INTENSITY:
+		case DMX_INTENSITY_DIMMER:
 			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
 				active = true;
 			}
 			break;
-		case DMX_PAN:
-		case DMX_TILT:
+		case DMX_POSITION_PAN:
+		case DMX_POSITION_TILT:
 			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
 				scanscene = lightctrl->hiddenScannerScenes[tube->dmxUniverse];
 				DmxChannel *scantube = scanscene->tube(tube->dmxChannel);
@@ -241,7 +242,7 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		if (tube->dmxType == DMX_INTENSITY) {
+		if (tube->dmxType == DMX_INTENSITY_DIMMER) {
 			qint32 target_value = tube->targetValue * dmxval / 255;
 			if (tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO,time_ms,target_value)) {
 				active = true;

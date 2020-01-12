@@ -5,6 +5,7 @@
 #include <QTableWidgetItem>
 
 class SR_FixtureList;
+class FxSceneItem;
 
 class DMXTableWidgetItem : public QTableWidgetItem
 {
@@ -23,6 +24,8 @@ private:
 	SR_FixtureList *m_fixtureList;
 	QString m_lastFixturePath;
 
+	int m_currentTargetDmxAddr = 0;
+
 public:
 	explicit UniverseEditorWidget(QWidget *parent = nullptr);
 	~UniverseEditorWidget();
@@ -31,6 +34,7 @@ public:
 	bool loadFromFilesystem(const QString &path);
 
 	static QString defaultFilepath();
+	static FxSceneItem * createSceneFromFixtureList(SR_FixtureList *fixList);
 
 private:
 	bool copyFixturesToGui(SR_FixtureList *fixlist);
@@ -42,6 +46,10 @@ private slots:
 	void on_removeDeviceButton_clicked();
 	void on_pushButton_saveLayout_clicked();
 	void on_pushButton_loadLayout_clicked();
+	void on_pushButton_createTemplate_clicked();
+	void on_universeTable_cellClicked(int row, int column);
+	void on_universeTable_cellChanged(int row, int column);
+	void on_universeTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
 };
 
 #endif // UNIVERSEEDITORWIDGET_H

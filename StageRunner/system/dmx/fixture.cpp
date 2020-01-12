@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMetaEnum>
 
 SR_Channel::SR_Channel(SR_Fixture *parent)
 	: m_parentFixture(parent)
@@ -15,6 +16,7 @@ SR_Channel::SR_Channel(SR_Fixture *parent, SR_Channel *op)
 	: m_parentFixture(parent)
 	, m_name(op->m_name)
 	, m_group(op->m_group)
+	, m_preset(op->m_preset)
 	, m_dmxOffset(op->m_dmxOffset)
 	, m_dmxFineOffset(op->m_dmxFineOffset)
 {
@@ -35,6 +37,9 @@ bool SR_Channel::loadQLCChannel(QXmlStreamReader &xml)
 		qWarning() << __func__ << "Missing channel name";
 		return false;
 	}
+	m_preset = attrs.value(SR_CHANNEL_PRESET).toString();
+	if (m_preset.size())
+		qDebug() << "preset" << m_preset;
 
 	while (xml.readNextStartElement()) {
 		if (xml.name() == SR_CHANNEL_GROUP) {
@@ -53,8 +58,11 @@ QJsonObject SR_Channel::toJson() const
 	QJsonObject json;
 	json["name"] = m_name;
 	json["group"] = m_group;
+	json["preset"] = m_preset;
+	json["dmxtype"] = int(stringToPreset(m_preset));
 	json["dmxoffset"] = m_dmxOffset;
 	json["dmxfineoffseet"] = m_dmxFineOffset;
+
 
 	return json;
 }
@@ -63,6 +71,7 @@ bool SR_Channel::setFromJson(const QJsonObject &json)
 {
 	m_name = json["name"].toString();
 	m_group = json["group"].toString();
+	m_preset =json["preset"].toString();
 	m_dmxOffset = json["dmxoffset"].toInt();
 	m_dmxFineOffset = json["dmxfineoffseet"].toInt();
 	return true;
@@ -76,6 +85,18 @@ SR_Channel *SR_Channel::createLoadQLCChannel(SR_Fixture *parent, QXmlStreamReade
 		return nullptr;
 	}
 	return ch;
+}
+
+QString SR_Channel::presetToString(SR_Channel::Preset preset)
+{
+	int index = staticMetaObject.indexOfEnumerator("Preset");
+	return staticMetaObject.enumerator(index).valueToKey(preset);
+}
+
+SR_Channel::Preset SR_Channel::stringToPreset(const QString &preset)
+{
+	int index = staticMetaObject.indexOfEnumerator("Preset");
+	return Preset(staticMetaObject.enumerator(index).keyToValue(preset.toStdString().c_str()));
 }
 
 // ------------------------------------------------------------------------------------------
@@ -158,12 +179,31 @@ bool SR_Mode::insertChannelAt(int pos, SR_Channel *srChan)
 	return true;
 }
 
+int SR_Mode::channelCount() const
+{
+	return m_channels.size();
+}
+
 QStringList SR_Mode::getChannelTexts() const
 {
 	QStringList list;
 	int chanNum = 0;
 	for (auto chan : m_channels) {
 		QString s = QString("%1: %2").arg(++chanNum).arg(chan->name());
+		list.append(s);
+	}
+	return list;
+}
+
+QStringList SR_Mode::getChannelAndPresetTexts() const
+{
+	QStringList list;
+	int chanNum = 0;
+	for (auto chan : m_channels) {
+		QString s = QString("%1: %2%3")
+				.arg(++chanNum)
+				.arg(chan->name())
+				.arg(chan->preset().size() ? QString(" (%1)").arg(chan->preset()) : QString());
 		list.append(s);
 	}
 	return list;
@@ -467,12 +507,28 @@ void SR_Fixture::setCurrentMode(int num)
 		m_curMode = num;
 }
 
-QStringList SR_Fixture::getChannelTexts(int mode)
+int SR_Fixture::usedChannelCount() const
+{
+	if (m_curMode >= m_modes.size())
+		return 0;
+
+	return m_modes.at(m_curMode)->channelCount();
+}
+
+QStringList SR_Fixture::getChannelTexts(int mode) const
 {
 	if (mode >= m_modes.size())
 		return QStringList();
 
 	return m_modes.at(mode)->getChannelTexts();
+}
+
+QStringList SR_Fixture::getChannelAndPresetTexts(int mode) const
+{
+	if (mode >= m_modes.size())
+		return QStringList();
+
+	return m_modes.at(mode)->getChannelAndPresetTexts();
 }
 
 bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
@@ -556,16 +612,35 @@ SR_FixtureList::~SR_FixtureList()
 		delete m_list.takeFirst();
 }
 
-void SR_FixtureList::addFixture(SR_Fixture *fix)
+int SR_FixtureList::lastUsedDmxAddr() const
 {
+	if (m_list.isEmpty())
+		return 0;
+
+	return m_list.last()->dmxAdr() + m_list.last()->usedChannelCount() -1;
+}
+
+void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
+{
+	int nextFreeDmxAddr = 1;
+	if (m_list.size())
+		nextFreeDmxAddr = m_list.last()->dmxAdr() + m_list.last()->usedChannelCount();
+
+	if (dmxAddr == 0)
+		dmxAddr = nextFreeDmxAddr;
+
+	if (dmxAddr < nextFreeDmxAddr)
+		return;
+
+	fix->setDmxAdr(dmxAddr);
 	m_list.append(fix);
 }
 
-bool SR_FixtureList::addQLCFixture(const QString &path)
+bool SR_FixtureList::addQLCFixture(const QString &path, int dmxAddr)
 {
 	SR_Fixture *fix = new SR_Fixture();
 	if (fix->loadQLCFixture(path)) {
-		addFixture(fix);
+		addFixture(fix, dmxAddr);
 		return true;
 	} else {
 		delete fix;
@@ -599,7 +674,7 @@ int SR_FixtureList::setFromJson(const QJsonObject &json)
 		qDebug() << "element:" << jsonfixture["modelname"].toString();
 		SR_Fixture *fixture = new SR_Fixture();
 		if (fixture->setFromJson(jsonfixture)) {
-			addFixture(fixture);
+			addFixture(fixture, fixture->dmxAdr());
 			cnt++;
 		} else {
 			delete fixture;

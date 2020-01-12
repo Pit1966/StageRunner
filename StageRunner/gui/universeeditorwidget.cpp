@@ -3,16 +3,24 @@
 #include "log.h"
 #include "system/dmx/fixture.h"
 #include "deviceinfowidget.h"
+#include "fxsceneitem.h"
+#include "dmxchannel.h"
+
+#include "appcentral.h"
+#include "fxlist.h"
+#include "fxlistvarset.h"
 
 #include <QSettings>
 #include <QFileDialog>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QDebug>
 
 
 #define COL_DEVICE 0
 #define COL_DMX 1
 #define COL_CHANNEL_MODE 2
+#define COL_CHANNEL_DESC 3
 
 
 DMXTableWidgetItem::DMXTableWidgetItem(int type)
@@ -89,6 +97,40 @@ QString UniverseEditorWidget::defaultFilepath()
 	return defaultpath;
 }
 
+FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fixList)
+{
+	FxSceneItem *sc = new FxSceneItem();
+	int tubes = fixList->lastUsedDmxAddr();
+	if (tubes == 0)
+		return nullptr;
+
+	sc->createDefaultTubes(tubes);
+
+	// Loop over fixtures and add them to scene
+	int dmx = 0;
+	for (int t=0; t<fixList->size(); t++) {
+		SR_Fixture *fix = fixList->at(t);
+		SR_Mode *mode = fix->mode(fix->currentMode());
+		int c = 0;
+		for (SR_Channel *chan : mode->channels()) {
+			if (c++ == 0) {
+				if (fix->dmxAdr()-1 > dmx)
+					dmx = fix->dmxAdr()-1;
+			}
+			DmxChannel *tube = sc->tube(dmx);
+			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
+			qDebug() << "type" << chan->preset() << type;
+			if (type >= DMX_GENERIC)
+				tube->dmxType = int(type);
+
+			dmx++;
+		}
+	}
+
+
+	return sc;
+}
+
 bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 {
 	universeTable->clearContents();
@@ -100,23 +142,33 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 		int c = 0;
 		for (auto chan : mode->channels()) {
 			if (c++ == 0) {
+				if (fix->dmxAdr()-1 > dmx)
+					dmx = fix->dmxAdr()-1;
+
 				QString device = QString("%1: %2").arg(fix->manufacturer(), fix->modelName());
 				DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, device);
 				universeTable->setItem(dmx, COL_DEVICE, item);
 			}
 
-			DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(dmx+1,3,10,QLatin1Char('0')));
-			item->setTextAlignment(Qt::AlignCenter);
-			universeTable->setItem(dmx, COL_DMX, item);
 
-			item = new DMXTableWidgetItem(dmx, QString("%1").arg(chan->name()));
+//			DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(dmx+1,3,10,QLatin1Char('0')));
+//			item->setTextAlignment(Qt::AlignCenter);
+//			universeTable->setItem(dmx, COL_DMX, item);
+
+			DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(chan->name()));
 			// item->setTextAlignment(Qt::AlignCenter);
 			universeTable->setItem(dmx, COL_CHANNEL_MODE, item);
+
+			item = new DMXTableWidgetItem(dmx, QString("%1").arg(chan->preset()));
+			// item->setTextAlignment(Qt::AlignCenter);
+			universeTable->setItem(dmx, COL_CHANNEL_DESC, item);
+
 			dmx++;
 		}
 	}
 
 	// fill channels
+	dmx = 0;
 	while (dmx < 512) {
 		DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(dmx+1,3,10,QLatin1Char('0')));
 		item->setTextAlignment(Qt::AlignCenter);
@@ -125,6 +177,7 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 	}
 
 	universeTable->resizeColumnsToContents();
+	m_currentTargetDmxAddr = 0;
 
 	return true;
 }
@@ -156,7 +209,7 @@ void UniverseEditorWidget::on_addDeviceButton_clicked()
 	if (deviceInfoWidget->isValid()) {
 		SR_Fixture *newfix = new SR_Fixture(*deviceInfoWidget->device());
 		newfix->setCurrentMode(deviceInfoWidget->modeNumber());
-		m_fixtureList->addFixture(newfix);
+		m_fixtureList->addFixture(newfix, m_currentTargetDmxAddr);
 		copyFixturesToGui(m_fixtureList);
 	}
 }
@@ -179,3 +232,32 @@ void UniverseEditorWidget::on_pushButton_loadLayout_clicked()
 
 	copyFixturesToGui(m_fixtureList);
 }
+
+void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
+{
+	FxSceneItem *sc = createSceneFromFixtureList(m_fixtureList);
+	if (!sc) return;
+
+	sc->setName("Default_Universe_0");
+	sc->generateNewID(11000);
+	AppCentral::ref().templateFxList->fxList()->addFx(sc);
+	AppCentral::ref().templateFxList->fxList()->emitListChangedSignal();
+}
+
+void UniverseEditorWidget::on_universeTable_cellClicked(int row, int column)
+{
+	qDebug() << Q_FUNC_INFO << row << column;
+	m_currentTargetDmxAddr = row +1;
+}
+
+void UniverseEditorWidget::on_universeTable_cellChanged(int row, int column)
+{
+	Q_UNUSED(row)
+	Q_UNUSED(column)
+}
+
+void UniverseEditorWidget::on_universeTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+	qDebug() << Q_FUNC_INFO << currentRow << currentColumn;
+}
+

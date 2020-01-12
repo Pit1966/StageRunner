@@ -338,19 +338,17 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	if (my_dmx_type > DMX_GENERIC) {
 		QString tstr;
-		switch (my_dmx_type) {
-		case DMX_INTENSITY:
+
+		if (my_dmx_type >= DMX_INTENSITY_MASTER_DIMMER && my_dmx_type <= DMX_INTENSITY_VALUE_FINE)
 			tstr = "I";
-			break;
-		case DMX_PAN:
+		else if (my_dmx_type >= DMX_POSITION_PAN && my_dmx_type <= DMX_POSITION_PAN_FINE)
 			tstr = "PAN";
-			break;
-		case DMX_TILT:
+		else if (my_dmx_type >= DMX_POSITION_TILT && my_dmx_type <= DMX_POSITION_TILT_FINE)
 			tstr = "TILT";
-			break;
-		default:
+		else if (my_dmx_type >= DMX_COLOR_MACRO && my_dmx_type <= DMX_COLOR_CTB_MIXER)
+			tstr = "COL";
+		else
 			tstr.clear();
-		}
 
 		QFont font(p.font());
 		font.setFixedPitch(true);

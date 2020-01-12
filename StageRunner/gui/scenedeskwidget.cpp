@@ -409,10 +409,13 @@ void SceneDeskWidget::keyPressEvent(QKeyEvent *event)
 		setShiftKey(true);
 		break;
 	case Qt::Key_F5:
-		setTypeOfSelectedTubes(DMX_PAN);
+		setTypeOfSelectedTubes(DMX_POSITION_PAN);
 		break;
 	case Qt::Key_F6:
-		setTypeOfSelectedTubes(DMX_INTENSITY);
+		setTypeOfSelectedTubes(DMX_POSITION_TILT);
+		break;
+	case Qt::Key_F7:
+		setTypeOfSelectedTubes(DMX_INTENSITY_DIMMER);
 		break;
 	case Qt::Key_Delete:
 		deleteSelectedTubes();

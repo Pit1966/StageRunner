@@ -35,7 +35,7 @@ bool DeviceInfoWidget::setDeviceDefinition(SR_Fixture *fix, int mode)
 		return false;
 
 	modeCombo->setCurrentIndex(mode);
-	QStringList chtexts = fix->getChannelTexts(mode);
+	QStringList chtexts = fix->getChannelAndPresetTexts(mode);
 
 	for (auto s : chtexts) {
 		channelsList->addItem(s);
