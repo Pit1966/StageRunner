@@ -33,6 +33,7 @@
 #include "../fx/fxaudioitem.h"
 #include "../fx/fxplaylistitem.h"
 
+
 #include <QDateTime>
 #include <QFile>
 #include <QDir>
@@ -526,6 +527,16 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 
 			// call check function recursively for list in FxPlayListItem
 			ok &= checkFxItemList(fxp->fxPlayList, result);
+		}
+		else if (fx->fxType() == FX_SCENE) {
+			if (pProjectFormat < PROJECT_FORMAT) {
+				FxSceneItem *fxs = dynamic_cast<FxSceneItem*>(fx);
+				if (!fxs) {
+					ok = false;
+					continue;
+				}
+				ok &= fxs->updateSceneFromOlderProjectVersion(pProjectFormat);
+			}
 		}
 	}
 

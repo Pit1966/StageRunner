@@ -98,6 +98,7 @@ public:
 	inline void setSeqStatus(SceneSeqState status) {mySeqStatus = status;}
 	QString statusString();
 	bool postLoadInitTubes(bool restore_light);
+	bool updateSceneFromOlderProjectVersion(int oldVer);
 
 private:
 	~FxSceneItem();

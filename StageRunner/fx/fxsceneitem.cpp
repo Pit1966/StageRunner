@@ -412,6 +412,28 @@ bool FxSceneItem::postLoadInitTubes(bool restore_light)
 	return was_on_stage;
 }
 
+bool FxSceneItem::updateSceneFromOlderProjectVersion(int oldVer)
+{
+	if (oldVer < 3) {
+		for (int t = 0; t < tubeCount(); ++t) {
+			DmxChannel *tu = tube(t);
+			switch (tu->dmxType) {
+			case 0: tu->dmxType = DMX_GENERIC; break;
+			case 1: tu->dmxType = DMX_INTENSITY_DIMMER; break;
+			case 2: tu->dmxType = DMX_POSITION_PAN; break;
+			case 3: tu->dmxType = DMX_POSITION_TILT; break;
+			case 4: tu->dmxType = DMX_GOBO_INDEX; break;
+			case 5: tu->dmxType = DMX_COLOR_WHEEL; break;
+			default:
+				qWarning() << "Unknown dmxType while upgrading a scene from project format" << oldVer;
+				return false;
+			}
+
+		}
+	}
+	return true;
+}
+
 DmxChannel *FxSceneItem::tube(int id) const
 {
 	if (id < 0 || id >= tubes.size())
