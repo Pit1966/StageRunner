@@ -28,6 +28,7 @@
 
 #include <QString>
 #include <QStyle>
+#include <QTextEdit>
 
 
 class AppCentral;
@@ -42,6 +43,8 @@ class UserSettings;
 class FxScriptItem;
 class PsDockWidget;
 class UniverseEditorWidget;
+class FxPlayListItem;
+class FxSeqItem;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {

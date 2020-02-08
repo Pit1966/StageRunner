@@ -31,7 +31,6 @@
 #include "log.h"
 #include "scapplication.h"
 #include "runguard.h"
-
 #include "ioplugincentral.h"
 
 int main(int argc, char *argv[])
