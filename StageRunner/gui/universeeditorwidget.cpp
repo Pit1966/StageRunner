@@ -120,7 +120,7 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 			DmxChannel *tube = sc->tube(dmx);
 			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
 			qDebug() << "type" << chan->preset() << type;
-			if (type >= DMX_GENERIC)
+			if (type >= SR_Channel::Custom /*DMX_GENERIC*/)
 				tube->dmxType = int(type);
 
 			dmx++;
