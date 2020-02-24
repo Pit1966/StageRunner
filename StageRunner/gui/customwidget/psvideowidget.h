@@ -43,6 +43,7 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent *);
 	void mousePressEvent(QMouseEvent *ev);
 	void closeEvent(QCloseEvent *event);
+	void paintEvent(QPaintEvent *event);
 };
 
 #endif // PSVIDEOWIDGET_H

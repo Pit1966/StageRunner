@@ -24,6 +24,7 @@
 #include <QSettings>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QPainter>
 
 #include "psvideowidget.h"
 #include "videoplayer.h"
@@ -91,4 +92,21 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 #else
 	QVideoWidget::closeEvent(event);
 #endif
+}
+
+void PsVideoWidget::paintEvent(QPaintEvent *event)
+{
+
+	QPainter painter(this);
+//	painter.setRenderHint(QPainter::Antialiasing);
+//	painter.setPen(Qt::NoPen);
+//	QLinearGradient gradient(QPointF(100,100),QPointF(100,400));
+//	gradient.setColorAt(0,QColor::fromRgbF(0.37f,0.55f,0.64f,0.9f));
+//	gradient.setColorAt(1,QColor::fromRgbF(0.27f,0.35f,0.54f,0.9f));
+//	painter.setBrush(gradient);
+
+	painter.setBrush(Qt::black);
+	painter.drawRect(0, 0, width(), height());
+
+	// qDebug() << "paintEvent";
 }
