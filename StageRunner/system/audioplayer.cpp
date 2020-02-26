@@ -27,6 +27,7 @@
 #include "psmovingaverage.h"
 
 #include <math.h>
+#include <QTimerEvent>
 
 /// @todo remove me
 #include "audioiodevice.h"

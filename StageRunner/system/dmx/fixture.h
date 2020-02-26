@@ -3,6 +3,7 @@
 
 class QXmlStreamReader;
 
+#include <QObject>
 #include <QString>
 #include <QList>
 #include <QJsonObject>
