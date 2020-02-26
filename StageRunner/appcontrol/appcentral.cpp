@@ -581,6 +581,7 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			DEBUGERROR("Execute FX: Unimplemented Command: %d for sequence",cmd);
 			break;
 		}
+		break;
 
 	case FX_SCRIPT:
 		switch (cmd) {
