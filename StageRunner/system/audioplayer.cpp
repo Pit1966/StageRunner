@@ -26,6 +26,8 @@
 #include "audioslot.h"
 #include "psmovingaverage.h"
 
+#include <math.h>
+
 /// @todo remove me
 #include "audioiodevice.h"
 
