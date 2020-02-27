@@ -892,14 +892,19 @@ void Project::init()
 
 bool Project::generateProjectNameFromPath()
 {
-	if (!QString(pProjectName).startsWith("Default Project"))
-		return false;
-
 	if (curProjectFilePath.isEmpty())
 		return false;
 
+
 	QFileInfo fi(curProjectFilePath);
 	QString name = fi.completeBaseName();
+	QString folder = fi.absoluteDir().absolutePath() + "/audio";
+	if (!m_mediaFileSearchDirs.contains(folder) && QFile::exists(folder))
+		m_mediaFileSearchDirs.append(folder);
+
+	if (!QString(pProjectName).startsWith("Default Project"))
+		return false;
+
 	pProjectName = name;
 	return true;
 }
