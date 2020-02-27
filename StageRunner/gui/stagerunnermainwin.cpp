@@ -201,16 +201,29 @@ void StageRunnerMainWin::setup_gui_docks()
 	setDockNestingEnabled(true);
 
 	fxitem_editor_dock = new PsDockWidget(this);
+
 	fxItemEditor = new FxItemPropertyWidget();
 	connect(appCentral,SIGNAL(editModeChanged(bool)),fxItemEditor,SLOT(setEditable(bool)));
 	fxItemEditor->setEditable(false);
 	fxItemEditor->closeButton->hide();
-
 	fxitem_editor_dock->setObjectName("Fx Editor");
 	fxitem_editor_dock->setWindowTitle("Fx Editor");
 	fxitem_editor_dock->setWidget(fxItemEditor);
 	fxitem_editor_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,fxitem_editor_dock);
+
+	template_dock = new PsDockWidget(this);
+	templateWidget =new FxListWidget();
+	template_dock->setObjectName("Fx Templates");
+	template_dock->setWindowTitle("Fx Templates");
+	template_dock->setWidget(templateWidget);
+	template_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	this->addDockWidget(Qt::RightDockWidgetArea,template_dock);
+	templateWidget->setFxList(appCentral->templateFxList->fxList());
+	templateWidget->setAutoProceedCheckVisible(false);
+	connect(templateWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
+	this->tabifyDockWidget(fxitem_editor_dock, template_dock);
+	fxitem_editor_dock->raise();
 
 	scene_status_dock = new PsDockWidget(this);
 	sceneStatusDisplay = new SceneStatusWidget();
@@ -227,17 +240,8 @@ void StageRunnerMainWin::setup_gui_docks()
 	sequence_status_dock->setWidget(seqStatusDisplay);
 	sequence_status_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	this->addDockWidget(Qt::RightDockWidgetArea,sequence_status_dock);
+	this->tabifyDockWidget(sequence_status_dock, scene_status_dock);
 
-	template_dock = new PsDockWidget(this);
-	templateWidget =new FxListWidget();
-	template_dock->setObjectName("Fx Templates");
-	template_dock->setWindowTitle("Fx Templates");
-	template_dock->setWidget(templateWidget);
-	template_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-	this->addDockWidget(Qt::RightDockWidgetArea,template_dock);
-	templateWidget->setFxList(appCentral->templateFxList->fxList());
-	templateWidget->setAutoProceedCheckVisible(false);
-	connect(templateWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 
 }
 
@@ -956,9 +960,10 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	if (appCentral->unitAudio->isValid()) {
 		if (appCentral->unitAudio->fadeoutAllFxAudio(1000)) {
 			hide();
-			QTime wait;
+			QElapsedTimer wait;
 			wait.start();
-			while (wait.elapsed() < 1500) QApplication::processEvents();
+			while (wait.elapsed() < 1500)
+				QApplication::processEvents();
 		}
 	}
 
@@ -1043,7 +1048,7 @@ void StageRunnerMainWin::on_debugLevelSpin_valueChanged(int arg1)
 void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 {
 	qDebug() << "Mainloop stopped";
-	QTime wait;
+	QElapsedTimer wait;
 	wait.start();
 	while (wait.elapsed() < 3000) {
 		;
@@ -1265,4 +1270,13 @@ void StageRunnerMainWin::on_actionNotes_triggered()
 		edit->setPlainText(in.readAll());
 	}
 	edit->show();
+}
+
+void StageRunnerMainWin::on_actionFullscreen_triggered(bool checked)
+{
+	if (checked) {
+		this->showFullScreen();
+	} else {
+		this->showNormal();
+	}
 }

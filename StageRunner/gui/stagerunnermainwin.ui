@@ -327,6 +327,7 @@
     <addaction name="actionClassic_audio_mode"/>
     <addaction name="actionExperimental_audio_mode"/>
     <addaction name="actionUse_SDL_audio"/>
+    <addaction name="actionFullscreen"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_universe_layout_editor"/>
    </widget>
@@ -530,6 +531,14 @@
   <action name="actionNotes">
    <property name="text">
     <string>Notes</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Fullscreen</string>
    </property>
   </action>
  </widget>

@@ -146,6 +146,8 @@ private slots:
 
 	void on_actionNotes_triggered();
 
+	void on_actionFullscreen_triggered(bool checked);
+
 private:
 	void init();
 	void setup_gui_docks();
