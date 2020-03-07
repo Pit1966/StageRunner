@@ -27,7 +27,7 @@
 #include "audioplayer.h"
 #include "commandsystem.h"
 
-#include <QTime>
+#include <QElapsedTimer>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -44,7 +44,7 @@ private:
 	Mix_Chunk m_sdlChunkCopy;
 	AUDIO::AudioStatus m_currentStatus;
 
-	QTime m_runtime;
+	QElapsedTimer m_runtime;
 
 public:
 	SDL2AudioBackend(AudioSlot &audioSlot);

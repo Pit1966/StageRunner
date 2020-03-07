@@ -32,7 +32,7 @@
 #include <QTranslator>
 #include <QProgressDialog>
 #include <QApplication>
-#include <QTime>
+#include <QElapsedTimer>
 
 //=========================================================================
 // Database
@@ -129,7 +129,7 @@ void Database::closeConnection()
 		}
 	}
 	for (int t=0; t<MAX_DATABASE_CONNECTIONS; t++) {
-		LOGTEXT(QObject::trUtf8("Remove database connection #%1").arg(connection_names[t]));
+		LOGTEXT(QObject::tr("Remove database connection #%1").arg(connection_names[t]));
 		QSqlDatabase::removeDatabase(connection_names[t]);
 		connection_names[t].clear();
 		s_valid_f[t] = false;
@@ -260,7 +260,7 @@ bool Database::connectToDatabase() {
 		int max_trys = max_connect_tries;
 		bool cancel = false;
 
-		QProgressDialog progress(QObject::trUtf8("Connect to database ..."), QObject::trUtf8("Cancel"), 1, max_trys, 0);
+		QProgressDialog progress(QObject::tr("Connect to database ..."), QObject::tr("Cancel"), 1, max_trys, 0);
 		progress.setWindowModality(Qt::WindowModal);
 		int loop = 0;
 		while (!open_ok && !cancel && ++loop <= max_trys) {
@@ -270,8 +270,8 @@ bool Database::connectToDatabase() {
 			open_ok = db.open();
 			if (!open_ok) {
 				err = db.lastError();
-				progress.setLabelText(QObject::trUtf8("Connect to database ...\n\n%1").arg(err.text()));
-				QTime wait;
+				progress.setLabelText(QObject::tr("Connect to database ...\n\n%1").arg(err.text()));
+				QElapsedTimer wait;
 				wait.start();
 				while (wait.elapsed() < 500 && !cancel) {
 					if (logThread->isMainThread()) QApplication::processEvents();
@@ -285,8 +285,8 @@ bool Database::connectToDatabase() {
 
 		LOGTEXT(QString("Connected to MySQL database '%1:%2' as user '%3' connection:%4")
 				.arg(hostName).arg(databaseName).arg(userName).arg(con_name));
-		if (debug) LOGTEXT(QObject::trUtf8("Found %1 tables in database table list").arg(table_list->size()-dyn_table_list->size()));
-		if (debug) LOGTEXT(QObject::trUtf8("Found %1 dynamic tables in VarSets").arg(dyn_table_list->size()));
+		if (debug) LOGTEXT(QObject::tr("Found %1 tables in database table list").arg(table_list->size()-dyn_table_list->size()));
+		if (debug) LOGTEXT(QObject::tr("Found %1 dynamic tables in VarSets").arg(dyn_table_list->size()));
 
 		s_valid_f[0] = true;
 		error = ERR_NONE;
@@ -306,8 +306,8 @@ bool Database::connectToDatabase() {
 		}
 		return true;
 	} else {
-		QMessageBox::critical(0, QObject::trUtf8("Database Error"),
-							  QObject::trUtf8("Could not establish connection to database!\n\n%1").arg(err.text()));
+		QMessageBox::critical(0, QObject::tr("Database Error"),
+							  QObject::tr("Could not establish connection to database!\n\n%1").arg(err.text()));
 		ERRORNOP("Database::connectToDatabase",ERR_DB_OPEN_FAILED);
 		LOGERROR(QString("Connection to MySQL database '%1:%2' as user '%3' failed! Error: '%4'").arg(hostName).arg(databaseName).arg(userName).arg(err.text()));
 		s_valid_f[0] = false;
@@ -637,7 +637,7 @@ bool Database::updateTable(DBfield *entrys) {
 	if (!ok) {
 		ERRORNOP("Database::updateTable",ERR_DB_UPDATE_TABLE_FAILED);
 	} else {
-		LOGTEXT(QTranslator::trUtf8("Begin update of database table '%1' which yet has %2 records").arg(tablename).arg(qq.size()));
+		LOGTEXT(QTranslator::tr("Begin update of database table '%1' which yet has %2 records").arg(tablename).arg(qq.size()));
 
 		// Jetzt prüfen, ob neue Spalten dazugekommen sind
 		for (int col=0; col<cols.size(); col++) {
@@ -645,7 +645,7 @@ bool Database::updateTable(DBfield *entrys) {
 			QString field = cols[col].com;
 			int col_no = qq.record().indexOf(field);
 			if (col_no < 0) {
-				LOGERROR(QTranslator::trUtf8("  Column '%1' not available in table").arg(field));
+				LOGERROR(QTranslator::tr("  Column '%1' not available in table").arg(field));
 				addflags[col] = 1;
 				not_present_cnt++;
 			} else {
@@ -697,7 +697,7 @@ bool Database::updateTable(DBfield *entrys) {
 					// Hinter dem vorhergehendem einfügen
 					wheretoins = " AFTER `" + QString(cols[col-1].com) + "`";
 				}
-				LOGTEXT(QTranslator::trUtf8("    Insert database table '%1' of type '%2' %3").arg(com).arg(type).arg(wheretoins));
+				LOGTEXT(QTranslator::tr("    Insert database table '%1' of type '%2' %3").arg(com).arg(type).arg(wheretoins));
 
 				QString sql = "ALTER TABLE `" + tablename + "` ADD `" + com + "` " + type + " " + wheretoins;
 				if (debug > 4) DEBUGTEXT("DB->exec: %s",sql.toUtf8().data());
@@ -712,9 +712,9 @@ bool Database::updateTable(DBfield *entrys) {
 			}
 			col++;
 		}
-		LOGTEXT(QTranslator::trUtf8("  <font color=darkblue>%1 new fields inserted in table</font> '%2'").arg(insert_cnt).arg(tablename));
+		LOGTEXT(QTranslator::tr("  <font color=darkblue>%1 new fields inserted in table</font> '%2'").arg(insert_cnt).arg(tablename));
 	} else {
-		LOGTEXT(QTranslator::trUtf8("  Table '%1' <font color=darkgreen>is up to date</font>").arg(tablename));
+		LOGTEXT(QTranslator::tr("  Table '%1' <font color=darkgreen>is up to date</font>").arg(tablename));
 	}
 
 	// Index Spalten prüfen
@@ -801,7 +801,7 @@ bool Database::checkTable(DBfield *entrys)
 	bool ok = q.exec(sql);
 
 	if (!ok) {
-		LOGERROR(QTranslator::trUtf8("Check database table '%1': %2").arg(tablename).arg(q.lastError().text()));
+		LOGERROR(QTranslator::tr("Check database table '%1': %2").arg(tablename).arg(q.lastError().text()));
 	} else {
 		bool is_ok = false;
 		while (q.next()) {
@@ -809,11 +809,11 @@ bool Database::checkTable(DBfield *entrys)
 			QString msg_text = q.value(3).toString();
 			if (debug > 1) LOGTEXT(QString("Table:%1 '%2' '%3'").arg(tablename).arg(msg_type).arg(msg_text));
 			if (msg_type.toLower().contains("status") && msg_text.toLower() == "ok") {
-				LOGTEXT(QTranslator::trUtf8("Check database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
+				LOGTEXT(QTranslator::tr("Check database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
 				is_ok = true;
 			} else {
 				// Tabelle ist scheinbar nicht in Ordnung
-				LOGERROR(QTranslator::trUtf8("Bad check database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
+				LOGERROR(QTranslator::tr("Bad check database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
 			}
 			ok = is_ok;
 		}
@@ -837,17 +837,17 @@ bool Database::repairTable(DBfield *entrys)
 	bool ok = q.exec(sql);
 
 	if (!ok) {
-		LOGERROR(QTranslator::trUtf8("Repair database table '%1': %2").arg(tablename).arg(q.lastError().text()));
+		LOGERROR(QTranslator::tr("Repair database table '%1': %2").arg(tablename).arg(q.lastError().text()));
 	} else {
 		while (q.next()) {
 			QString msg_type = q.value(2).toString();
 			QString msg_text = q.value(3).toString();
 			if (msg_type.toLower() == "status" && msg_text.toLower() != "ok") {
 				// Tabelle ist scheinbar nicht in Ordnung
-				LOGERROR(QTranslator::trUtf8("Repair database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
+				LOGERROR(QTranslator::tr("Repair database table '%1': Status: %2").arg(tablename).arg(q.value(3).toString()));
 				ok = false;
 			} else {
-				LOGTEXT(QTranslator::trUtf8("<font color=darkgreen>Repair database table '%1': Status: %2</font>").arg(tablename).arg(q.value(3).toString()));
+				LOGTEXT(QTranslator::tr("<font color=darkgreen>Repair database table '%1': Status: %2</font>").arg(tablename).arg(q.value(3).toString()));
 			}
 
 		}
@@ -1023,7 +1023,7 @@ bool Database::copyTableToRemoteDb(Database *target_db, DBfield *entrys, QList<D
 
 void Database::displayDatabaseNotAvailable(const QString & where)
 {
-	QString msg = QObject::trUtf8("Connection to database not available.\n\nAction aborted.\n\nPlease check the configuration of your database settings");
+	QString msg = QObject::tr("Connection to database not available.\n\nAction aborted.\n\nPlease check the configuration of your database settings");
 	POPUPERRORMSG( where,msg );
 }
 

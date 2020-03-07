@@ -720,7 +720,7 @@ QString AudioSlot::currentFxName() const
 	if (FxItem::exists(current_fx)) {
 		return current_fx->name();
 	} else {
-		return trUtf8("No FX was set");
+		return tr("No FX was set");
 	}
 }
 

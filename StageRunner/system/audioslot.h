@@ -28,7 +28,7 @@
 #include "psmovingaverage.h"
 
 #include <QObject>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QFile>
 #include <QTimeLine>
@@ -74,7 +74,7 @@ private:
 
 	QTimer volset_timer;
 	QString volset_text;
-	QTime run_time;
+	QElapsedTimer run_time;
 	QTimeLine fade_timeline;
 	AudioFadeMode fade_mode;
 	int fade_initial_vol;							///< The Volume the fadeout/in starts with

@@ -37,7 +37,7 @@
 #include <QTextEdit>
 #include <QDateTime>
 #include <QProgressDialog>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QApplication>
 #include <QMessageBox>
 #include <QStyle>
@@ -160,7 +160,7 @@ bool Log::stopLog()
 		stopThreadFlag = true;
 
 		// 5 Sekunden auf Beendigung des Threads warten
-		QTime wait;
+		QElapsedTimer wait;
 		wait.start();
 		while (wait.elapsed() < 5000 && isRunning()) {};
 
@@ -269,7 +269,7 @@ void Log::do_append_log_text (const QString & txt, int level, MsgLogType type, b
 		if (log_line_cnt++ > MAX_LOG_LINES) {
 			emit clearlog();
 			log_line_cnt = 0;
-			emit newtext(trUtf8("Log display cleared (exceeds max lines limit)\n\n"));
+			emit newtext(tr("Log display cleared (exceeds max lines limit)\n\n"));
 		}
 		emit newtext(msg);
 
@@ -634,18 +634,18 @@ bool Log::rotateLog()
 			old_path += ".old";
 			if ( QFile::exists(old_path) ) {
 				if (QFile::remove(old_path) ) {
-					messages.append(trUtf8("Logfile: Remove: '%1'\n").arg(old_path));
+					messages.append(tr("Logfile: Remove: '%1'\n").arg(old_path));
 				} else {
-					messages.append(trUtf8("Logfile: Could not remove: '%1'\n").arg(old_path));
+					messages.append(tr("Logfile: Could not remove: '%1'\n").arg(old_path));
 				}
 			}
 
 			if ( QFile::exists(log_path) ) {
 				if (QFile::rename(log_path,old_path) ) {
-					messages.append(trUtf8("Logfile: Rename: '%1' to '%2'\n").arg(log_path).arg(old_path));
+					messages.append(tr("Logfile: Rename: '%1' to '%2'\n").arg(log_path).arg(old_path));
 					rotate = true;
 				} else {
-					messages.append(trUtf8("Logfile: Could not rename: '%1'\n").arg(log_path));
+					messages.append(tr("Logfile: Could not rename: '%1'\n").arg(log_path));
 					rotate = false;
 				}
 			}
@@ -681,7 +681,7 @@ int Log::readAppendLogFile(const QString & path)
 	emit newtext(QString("Read StageRunner Log ---------------------------------------- %1").arg(path));
 	QFile file(path);
 	QProgressDialog progress(tr("Load StageRunner log files...")
-							 ,trUtf8("Cancel")
+							 ,tr("Cancel")
 							 ,0,int(file.size()));
 	progress.setWindowModality(Qt::WindowModal);
 	progress.show();

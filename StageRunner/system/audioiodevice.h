@@ -31,7 +31,7 @@
 #include "fftrealfixlenwrapper.h"
 
 #include <QIODevice>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QAudioDeviceInfo>
 #include <QAudioDecoder>
 #include <QMutex>
@@ -61,7 +61,7 @@ public:
 
 private:
 	QString current_filename;
-	QTime run_time;
+	QElapsedTimer run_time;
 	QMutex m_mutex;
 	AUDIO::AudioErrorType audio_error;
 	AudioFormat *audio_format;
