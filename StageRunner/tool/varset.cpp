@@ -1269,7 +1269,7 @@ void VarSet::clear_var_list()
 	while (varList.size()) {
 		PrefVarCore * varcore = varList.lockTakeFirst();
 		// qDebug() << "var" << varcore->myname << varcore->refcnt;
-#if QT_VERSION >= 0x050c00
+#if QT_VERSION >= 0x050e00
 		if (varcore->refcnt.loadRelaxed() == 1) {
 			// qDebug() << "delete" << varcore->myname;
 			delete varcore;
