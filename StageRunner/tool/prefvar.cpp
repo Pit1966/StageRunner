@@ -80,7 +80,8 @@ PrefVarCore::~PrefVarCore()
 
 	if (refcnt.deref()) {
 #ifdef IS_QT5
-		int r = refcnt.load();
+		// int r = refcnt.load();
+		int r = refcnt.loadRelaxed();
 #else
 		int r = refcnt;
 #endif

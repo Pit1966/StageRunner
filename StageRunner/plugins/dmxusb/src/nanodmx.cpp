@@ -75,7 +75,7 @@ bool NanoDMX::sendChannelValue(int channel, uchar value)
 {
     QByteArray chanMsg;
     QString msg;
-    chanMsg.append(msg.sprintf("C%03dL%03d", channel, value));
+	chanMsg.append(msg.sprintf("C%03dL%03d", channel, value).toLatin1());
     return interface()->write(chanMsg);
 }
 

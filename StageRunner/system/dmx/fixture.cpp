@@ -578,6 +578,9 @@ bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
 
 	}
 
+	if (!subok)
+		qWarning() << Q_FUNC_INFO << "has errors";
+
 	return ok;
 }
 

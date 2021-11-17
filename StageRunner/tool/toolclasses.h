@@ -58,9 +58,9 @@ public:
 			qDebug("MutexQHash is locked %d times while deleting: '%s'"
 					   ,int(lockCount), myName.toLocal8Bit().data());
 #else
-		if (lockCount.load()) {
+		if (lockCount.loadRelaxed()) {
 			qDebug("MutexQHash is locked %d times while deleting: '%s'"
-					   ,lockCount.load(), myName.toLocal8Bit().data());
+					   ,lockCount.loadRelaxed(), myName.toLocal8Bit().constData());
 #endif
 		} else {
 			delete myLock;

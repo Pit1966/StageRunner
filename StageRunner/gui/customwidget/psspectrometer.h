@@ -27,7 +27,7 @@
 #include "frqspectrum.h"
 
 #include <QWidget>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QVector>
 
 #define BANDS_NORMAL 40
@@ -58,7 +58,7 @@ private:
 	int m_idleTimerId;
 	int m_idleCount;
 	int m_idleBar;
-	QTime m_timer;
+	QElapsedTimer m_timer;
 	bool m_isZoomed;
 
 public:

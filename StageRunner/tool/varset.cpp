@@ -1270,7 +1270,7 @@ void VarSet::clear_var_list()
 		PrefVarCore * varcore = varList.lockTakeFirst();
 		// qDebug() << "var" << varcore->myname << varcore->refcnt;
 #ifdef IS_QT5
-		if (varcore->refcnt.load() == 1) {
+		if (varcore->refcnt.loadRelaxed() == 1) {
 			// qDebug() << "delete" << varcore->myname;
 			delete varcore;
 		}
@@ -1337,7 +1337,7 @@ bool VarSet::dbLoadGlobal(Database *db)
 	}
 
 	if (debug) {
-		LOGTEXT(QObject::trUtf8("Load global VarSet '%1' from database").arg(myclassname));
+		LOGTEXT(QObject::tr("Load global VarSet '%1' from database").arg(myclassname));
 	}
 
 	DBquery q(db,DBquery::SELECT,"vset_global");

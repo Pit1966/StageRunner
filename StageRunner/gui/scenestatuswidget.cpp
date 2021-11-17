@@ -73,7 +73,7 @@ bool SceneStatusWidget::removeOrDeactivateScene(FxSceneItem *scene)
 	SceneStatusListItem *item = scene_hash.value(scene);
 	if (item) {
 		if (m_doNotRemove) {
-			item->setBackgroundColor(palette().base().color());
+			item->setBackground(palette().base().color());
 			item->setForeground(Qt::darkGray);
 			item->setIcon(QPixmap());
 		} else {
@@ -107,16 +107,16 @@ bool SceneStatusWidget::updateScene(FxSceneItem *scene)
 	if (item && scene) {
 		quint32 flags = scene->status();
 		if (flags & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN)) {
-			item->setBackgroundColor(Qt::green);
+			item->setBackground(Qt::green);
 		}
 		else if (flags & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN)) {
-			item->setBackgroundColor(palette().base().color());
+			item->setBackground(palette().base().color());
 		}
 		else if (flags & SCENE_STAGE_LIVE) {
-			item->setBackgroundColor(Qt::red);
+			item->setBackground(Qt::red);
 		}
 		else {
-			item->setBackgroundColor(Qt::yellow);
+			item->setBackground(Qt::yellow);
 		}
 		return true;
 	}
