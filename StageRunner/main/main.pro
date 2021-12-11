@@ -40,11 +40,15 @@ DEFINES += USE_SDL
 
 unix:!macx {
 	exists(/usr/include/SDL2/SDL.h) {
-		message ("Found SDL2 ...")
-		INCLUDEPATH += /usr/include/SDL2
-		DEFINES += USE_SDL
-		LIBS += -lSDL2
-		LIBS += -lSDL2_mixer
+		exists(/usr/include/SDL2/SDL_mixer.h) {
+			message ("Found SDL2 ...")
+			INCLUDEPATH += /usr/include/SDL2
+			DEFINES += USE_SDL
+			LIBS += -lSDL2
+			LIBS += -lSDL2_mixer
+		} else {
+			message("Found SDL2 ... but not SDL_Mixer2")
+		}
 	}
 }
 
