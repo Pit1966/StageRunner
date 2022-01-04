@@ -285,15 +285,10 @@ bool Database::connectToDatabase() {
 
 		LOGTEXT(QString("Connected to MySQL database '%1:%2' as user '%3' connection:%4")
 				.arg(hostName).arg(databaseName).arg(userName).arg(con_name));
-<<<<<<< HEAD
-		if (debug) LOGTEXT(QObject::tr("Found %1 tables in database table list").arg(table_list->size()-dyn_table_list->size()));
-		if (debug) LOGTEXT(QObject::tr("Found %1 dynamic tables in VarSets").arg(dyn_table_list->size()));
-=======
 		if (debug)
 			LOGTEXT(QObject::tr("Found %1 tables in database table list").arg(table_list->size()-dyn_table_list->size()));
 		if (debug)
 			LOGTEXT(QObject::tr("Found %1 dynamic tables in VarSets").arg(dyn_table_list->size()));
->>>>>>> c52458b36c86141f8fc1b602a9e1e3695939f7e1
 
 		s_valid_f[0] = true;
 		error = ERR_NONE;
