@@ -36,6 +36,7 @@
 #include <QTime>
 #include <QMutexLocker>
 #include <QTimer>
+#include <QElapsedTimer>
 
 
 #ifdef __unix__
@@ -281,7 +282,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 		qDebug() << "Yadi:" << YadiDevice::threadName() << ": writeUniverse:  resize output universe to" << data.size();
 	}
 
-	QTime stop;
+	QElapsedTimer stop;
 	stop.restart();
 	// qDebug() << QTime::currentTime().msec();
 
@@ -325,7 +326,13 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 		} else {
 			yadi->outUniverse = data;
 		}
-		if (debug > 2) qDebug("Yadi: out burst %dms hi_changed:%d(%d) %d %d",stop.elapsed(),hi_changed_channel,data.size(),out[1],out[2]);
+		if (debug > 2)
+			qDebug("Yadi: out burst %dms hi_changed:%d(%d) %d %d",
+				   int(stop.elapsed()),
+				   hi_changed_channel,
+				   data.size(),
+				   out[1],
+					out[2]);
 	} else {
 		for (int t=0; t<hi_changed_channel; t++) {
 			if (data.at(t) != yadi->outUniverse.at(t) || yadi->outputSendAllData) {
@@ -344,7 +351,8 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 				}
 			}
 		}
-		if (debug > 2) qDebug("Yadi: out single %dms",stop.elapsed());
+		if (debug > 2)
+			qDebug("Yadi: out single %dms",int(stop.elapsed()));
 	}
 	update_output_monitor(output,data);
 }

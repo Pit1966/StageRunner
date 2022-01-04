@@ -76,7 +76,7 @@ void qsynthMeterScale::drawLineLabel ( QPainter *p,
 	int iMidHeight = (fm.height() >> 1);
 
 	if (iCurrY < iMidHeight || iCurrY > m_iLastY + iMidHeight) {
-		if (fm.width(sLabel) < iWidth - 5) {
+		if (fm.horizontalAdvance(sLabel) < iWidth - 5) {
 			p->drawLine(0, iCurrY, 2, iCurrY);
 			if (m_pMeter->portCount() > 1)
 				p->drawLine(iWidth - 3, iCurrY, iWidth - 1, iCurrY);
@@ -95,7 +95,7 @@ void qsynthMeterScale::paintEvent ( QPaintEvent * )
 
 	m_iLastY = 0;
 
-	p.setPen(QWidget::palette().mid().color().dark(140));
+	p.setPen(QWidget::palette().mid().color().darker(140));
 
 	drawLineLabel(&p, m_pMeter->iec_level(qsynthMeter::Color0dB),   "0");
 	drawLineLabel(&p, m_pMeter->iec_level(qsynthMeter::Color3dB),   "3");

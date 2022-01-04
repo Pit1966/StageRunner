@@ -23,8 +23,8 @@
 
 #include "psdockwidget.h"
 
-PsDockWidget::PsDockWidget(QWidget *parent, Qt::WindowFlags flags)
-	: QDockWidget(parent, flags)
+PsDockWidget::PsDockWidget(QWidget *parent)
+	: QDockWidget(parent)
 {
 	// setAutoFillBackground(true);
 }

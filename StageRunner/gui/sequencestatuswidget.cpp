@@ -156,13 +156,13 @@ bool SequenceStatusWidget::updateExecuter(Executer *exec)
 		}
 		switch (exec->state()) {
 		case Executer::EXEC_RUNNING:
-			item->setBackgroundColor(Qt::green);
+			item->setBackground(Qt::green);
 			break;
 		case Executer::EXEC_PAUSED:
-			item->setBackgroundColor(Qt::red);
+			item->setBackground(Qt::red);
 			break;
 		default:
-			item->setBackgroundColor(palette().base().color());
+			item->setBackground(palette().base().color());
 		}
 		return true;
 	}

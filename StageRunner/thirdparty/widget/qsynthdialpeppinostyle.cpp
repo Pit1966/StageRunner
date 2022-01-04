@@ -85,8 +85,8 @@ inline void paintArc(QPainter *p, const QStyleOptionSlider *dial)
 	QPalette pal = dial->palette;
 	QColor arcColor = (dial->state & QStyle::State_Enabled) ? pal.highlight().color() : pal.mid().color();
 	QLinearGradient linGrad(80, 100, 140, 140);
-	linGrad.setColorAt(0, arcColor.dark(140));
-	linGrad.setColorAt(1, arcColor.light().light());
+	linGrad.setColorAt(0, arcColor.darker(140));
+	linGrad.setColorAt(1, arcColor.lighter().lighter());
 	linGrad.setSpread(QGradient::PadSpread);
 	p->setBrush(linGrad);
 

@@ -228,7 +228,7 @@ bool YadiReceiver::stopRxDmx()
 	bool ok = true;
 	if (isRunning()) {
 		cmd = STOPPED;
-		QTime wait;
+		QElapsedTimer wait;
 		wait.start();
 		while (wait.elapsed() < 800) {;}
 

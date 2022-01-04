@@ -586,7 +586,7 @@ void Log::closeLogfile()
 void Log::errorPopupMsg(const QString & where, const QString & text, QWidget *parentWid)
 {
 	if (parentWid) {
-		QMessageBox mb(QMessageBox::Critical, where, text, 0, parentWid);
+		QMessageBox mb(QMessageBox::Critical, where, text, QMessageBox::NoButton, parentWid);
 
 		if (QApplication::style()->objectName() == "lightdesk")
 			mb.setStyleSheet("background: #444444");
@@ -603,7 +603,7 @@ void Log::errorPopupMsg(const QString & where, const QString & text, QWidget *pa
 void Log::infoPopupMsg(const QString & where, const QString & text, QWidget *parentWid)
 {
 	if (parentWid) {
-		QMessageBox mb(QMessageBox::Information, where, text, 0, parentWid);
+		QMessageBox mb(QMessageBox::Information, where, text, QMessageBox::NoButton, parentWid);
 		if (QApplication::style()->objectName() == "lightdesk")
 			mb.setStyleSheet("background: #444444");
 		mb.exec();

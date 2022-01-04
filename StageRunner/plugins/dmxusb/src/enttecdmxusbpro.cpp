@@ -240,15 +240,16 @@ bool EnttecDMXUSBPro::extractSerial()
         if (uchar(reply[0]) == 0x7e && uchar(reply[1]) == 0x0a &&
             uchar(reply[2]) == 0x04 && uchar(reply[3]) == 0x00 &&
             uchar(reply[8]) == 0xe7)
-        {
-            m_proSerial.sprintf("%x%.2x%.2x%.2x", uchar(reply[7]),
-                                                  uchar(reply[6]),
-                                                  uchar(reply[5]),
-                                                  uchar(reply[4]));
-            qDebug() << Q_FUNC_INFO << "Serial number OK: " << m_proSerial;
-            return true;
-        }
-        else
+		{
+			m_proSerial.asprintf("%x%.2x%.2x%.2x",
+								 uchar(reply[7]),
+					uchar(reply[6]),
+					uchar(reply[5]),
+					uchar(reply[4]));
+			qDebug() << Q_FUNC_INFO << "Serial number OK: " << m_proSerial;
+			return true;
+		}
+		else
         {
             qWarning() << Q_FUNC_INFO << name() << "gave malformed serial reply:"
                        << QString::number(reply[0], 16) << QString::number(reply[1], 16)

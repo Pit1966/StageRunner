@@ -1269,6 +1269,7 @@ void VarSet::clear_var_list()
 	while (varList.size()) {
 		PrefVarCore * varcore = varList.lockTakeFirst();
 		// qDebug() << "var" << varcore->myname << varcore->refcnt;
+<<<<<<< HEAD
 #if QT_VERSION >= 0x050e00
 		if (varcore->refcnt.loadRelaxed() == 1) {
 			// qDebug() << "delete" << varcore->myname;
@@ -1276,6 +1277,10 @@ void VarSet::clear_var_list()
 		}
 #elif QT_VERSION >= 0x050000
 		if (varcore->refcnt.load() == 1) {
+=======
+#ifdef IS_QT5
+		if (varcore->refcnt.loadRelaxed() == 1) {
+>>>>>>> c52458b36c86141f8fc1b602a9e1e3695939f7e1
 			// qDebug() << "delete" << varcore->myname;
 			delete varcore;
 		}

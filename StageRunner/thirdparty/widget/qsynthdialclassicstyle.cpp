@@ -95,8 +95,8 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 	p->setPen(pen);
 
 	QRadialGradient gradient(size/2, size/2, size-indent, size/2-indent, size/2-indent);
-	gradient.setColorAt(0, knobColor.light());
-	gradient.setColorAt(1, knobColor.dark());
+	gradient.setColorAt(0, knobColor.lighter());
+	gradient.setColorAt(1, knobColor.darker());
 	p->setBrush(gradient);
 	p->drawEllipse(indent, indent, width-2*indent, width-2*indent);
 
@@ -134,7 +134,7 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 	// Knob shadow...
 
 	int shadowAngle = -720;
-	c = knobColor.dark();
+	c = knobColor.darker();
 	for (int arc = 120; arc < 2880; arc += 240)
 	{
 		pen.setColor(c);
@@ -143,7 +143,7 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 				+ arc, 240);
 		p->drawArc(indent, indent, width-2*indent, width-2*indent, shadowAngle
 				- arc, 240);
-		c = c.light(110);
+		c = c.lighter(110);
 	}
 
 	// Scale shadow...
@@ -158,12 +158,12 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 				width-scale, width-scale, shadowAngle + arc, 240);
 		p->drawArc(scale/2, scale/2,
 				width-scale, width-scale, shadowAngle - arc, 240);
-		c = c.light(108);
+		c = c.lighter(108);
 	}
 
 	// Undraw the bottom part...
 
-	pen.setColor(pal.background().color());
+	pen.setColor(pal.window().color());
 	pen.setWidth(scale * 4);
 	p->setPen(pen);
 	p->drawArc(scale/2, scale/2,
@@ -182,7 +182,7 @@ qsynthDialClassicStyle::drawComplexControl(ComplexControl cc, const QStyleOption
 	float y = hyp + len * cos(angle);
 
 	c = pal.dark().color();
-	pen.setColor((dial->state & State_Enabled) ? c.dark(130) : c);
+	pen.setColor((dial->state & State_Enabled) ? c.darker(130) : c);
 	pen.setWidth(scale * 2);
 	p->setPen(pen);
 	p->drawLine(int(x0), int(y0), int(x), int(y));
