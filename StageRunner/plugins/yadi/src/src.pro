@@ -49,7 +49,7 @@ unix:!macx {
 	DEFINES += DBUS_ENABLED
 	LIBS	+= -ludev
 
-#    CONFIG += qtserialsupport			# compile QtSerialPort funtions
+	CONFIG += qtserialsupport			# compile QtSerialPort funtions
 #	CONFIG += qtserial					# use QtSerial for interface
 
 # Rules to make yadi devices readable & writable by normal users
@@ -60,7 +60,7 @@ unix:!macx {
 }
 
 macx: {
-    CONFIG += qtserialsupport			# compile QtSerialPort funtions
+#    CONFIG += qtserialsupport			# compile QtSerialPort funtions
 #    CONFIG += qtserial					# use QtSerial for interface
 
 }

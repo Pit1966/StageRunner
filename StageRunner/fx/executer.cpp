@@ -688,11 +688,12 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 
 	if (tlist.size()) {
 		QString p1 = tlist.first();
-		if (p1.toLower() == "id") {
+		QString p1low = p1.toLower();
+		if (p1low == "id") {
 			searchmode = 1;
 			tlist.removeFirst();
 		}
-		else if (p1.toLower() == "text") {
+		else if (p1low == "text" || p1low == "name") {
 			searchmode = 2;
 			tlist.removeFirst();
 		}
@@ -915,7 +916,7 @@ bool ScriptExecuter::executeCmdStop(FxScriptLine *line)
 			{
 				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 				if (!scene->isOnStageIntern()) {
-					LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Target '%2' not on stage. Line %3")
+					LOGTEXT(tr("<font color=darkGreen>Script</font> '%1': Target '%2' not on stage. Line %3")
 							.arg(originFxItem->name())
 							.arg(scene->name())
 							.arg(line->lineNumber()));
@@ -923,7 +924,7 @@ bool ScriptExecuter::executeCmdStop(FxScriptLine *line)
 					foreach (FxItem *fx_cp, fxlist) {
 						FxSceneItem *fxsc_cp = dynamic_cast<FxSceneItem*>(fx_cp);
 						if (fxsc_cp) {
-							LOGTEXT(tr("Script <font color=darkGreen>'%1'</font>: Stop temp copy of '%2' -> '%3'")
+							LOGTEXT(tr("<font color=darkGreen>Script</font> '%1': Stop temp copy of '%2' -> '%3'")
 									.arg(originFxItem->name())
 									.arg(scene->name())
 									.arg(fxsc_cp->name()));
@@ -937,8 +938,20 @@ bool ScriptExecuter::executeCmdStop(FxScriptLine *line)
 				}
 			}
 			break;
+
+		case FX_AUDIO:
+			if (myApp.unitAudio->stopFxAudioWithID(fx->id())) {
+				LOGTEXT(tr("<font color=darkGreen>Script</font> '%1': Stopped FX audio '%2'")
+						.arg(originFxItem->name()).arg(fx->name()));
+			}
+			else {
+				LOGTEXT(tr("<font color=darkGreen>Script</font> '%1': FX audio '%2' not stopped, cause is already idle")
+						.arg(originFxItem->name()).arg(fx->name()));
+			}
+			break;
+
 		default:
-			LOGERROR(tr("Script '%1': Executing of target is not supported! Line #%2")
+			LOGERROR(tr("Script '%1': Execute stop command on target is not supported! Line #%2")
 					 .arg(m_fxScriptItem->name())
 					 .arg(line->lineNumber()));
 		}

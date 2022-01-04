@@ -558,6 +558,19 @@ int AudioControl::stopAllFxAudio()
 	return stopcnt;
 }
 
+bool AudioControl::stopFxAudioWithID(int fxID)
+{
+	QMutexLocker lock(slotMutex);
+	bool found = false;
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->status() > AUDIO_IDLE && audioSlots[t]->currentFxAudio()->id() == fxID) {
+			found = true;
+			stopFxAudio(t);
+		}
+	}
+	return found;
+}
+
 void AudioControl::pauseFxAudio(int slot)
 {
 	if (slot < 0 || slot >= used_slots)

@@ -3,9 +3,9 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.4.0
-APP_MILESTONE = AfterHAMS_VideoPlus
-APP_PRODUCER = 2020 Stonechip Entertainment
+APPVERSION = V0.9.5.0
+APP_MILESTONE = Kekse Edition
+APP_PRODUCER = 2022 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
 
