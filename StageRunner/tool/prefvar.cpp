@@ -79,9 +79,10 @@ PrefVarCore::~PrefVarCore()
 	glob_var_list->lockRemoveOne(this);
 
 	if (refcnt.deref()) {
-#ifdef IS_QT5
-		// int r = refcnt.load();
+#if QT_VERSION >= 0x050f00
 		int r = refcnt.loadRelaxed();
+#elif QT_VERSION >= 0x050000
+		int r = refcnt.load();
 #else
 		int r = refcnt;
 #endif

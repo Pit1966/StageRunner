@@ -44,23 +44,27 @@ private:
 public:
 	MutexQHash()
 		: myLock(new QReadWriteLock(QReadWriteLock::Recursive))
-	{
-	}
+	{}
+
 	MutexQHash(const MutexQHash & other)
 		: QHash<Key, T>(other)
 		,myLock(new QReadWriteLock(QReadWriteLock::Recursive))
-	{
-	}
+	{}
 
 	~MutexQHash() {
 #if QT_VERSION < 0x050000
 		if (lockCount > 0) {
 			qDebug("MutexQHash is locked %d times while deleting: '%s'"
 					   ,int(lockCount), myName.toLocal8Bit().data());
-#else
+#elif QT_VERSION >= 0x050f00
 		if (lockCount.loadRelaxed()) {
 			qDebug("MutexQHash is locked %d times while deleting: '%s'"
 					   ,lockCount.loadRelaxed(), myName.toLocal8Bit().constData());
+#else
+		if (lockCount.load()) {
+			qDebug("MutexQHash is locked %d times while deleting: '%s'"
+					   ,lockCount.load(), myName.toLocal8Bit().constData());
+
 #endif
 		} else {
 			delete myLock;

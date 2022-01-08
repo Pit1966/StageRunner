@@ -94,7 +94,7 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 #endif
 }
 
-void PsVideoWidget::paintEvent(QPaintEvent *event)
+void PsVideoWidget::paintEvent(QPaintEvent */*event*/)
 {
 
 	QPainter painter(this);

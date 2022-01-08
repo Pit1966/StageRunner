@@ -778,6 +778,39 @@ QString ScriptExecuter::getFirstParaOfString(QString &parastr)
 	return first;
 }
 
+int ScriptExecuter::getPos(QString &restPara)
+{
+	QStringList paras = restPara.split(' ', QString::SkipEmptyParts);
+	int pos = -2;
+
+	QMutableListIterator<QString> it(paras);
+	while (it.hasNext()) {
+		QString tag = it.next();
+		if (tag.toLower() == "pos") {
+			pos = -1;
+			it.remove();
+			if (it.hasNext()) {
+				QString timestr = it.next();
+				int time = QtStaticTools::timeStringToMS(timestr);
+				pos = time;
+				it.remove();
+			}
+			break;
+		}
+	}
+
+	if (pos > -2) {
+		restPara.clear();
+		for (const QString &val : paras) {
+			if (restPara.size())
+				restPara += " ";
+			restPara += val;
+		}
+	}
+
+	return pos;
+}
+
 
 /**
  * @brief This function does return the temorary copied FxItems for a given parent FxItem
@@ -879,12 +912,23 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
 	if (fxlist.isEmpty()) return false;
 
+	qDebug() << Q_FUNC_INFO << restparas;
+
 	bool ok = true;
 
 	foreach (FxItem *fx, fxlist) {
 		switch (fx->fxType()) {
 		case FX_AUDIO:
-			ok &= myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this);
+		{
+			int pos = getPos(restparas);
+			qDebug() << "pos" << pos << "restparas" << restparas;
+
+			if (pos >= -1) {
+				ok &= myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this, pos);
+			} else {
+				ok &= myApp.unitAudio->startFxAudio(static_cast<FxAudioItem*>(fx), this);
+			}
+		}
 			break;
 		case FX_SCENE:
 			/// @todo it would be better to copy the scene and actually fade in the new instance here

@@ -220,6 +220,8 @@ protected:
 
     QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
 	QString getFirstParaOfString(QString &parastr);
+	int getPos(QString &restPara);
+
 	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line, bool & reExecDelayed);

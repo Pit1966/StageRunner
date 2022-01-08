@@ -229,6 +229,7 @@ void UniverseEditorWidget::on_pushButton_saveLayout_clicked()
 void UniverseEditorWidget::on_pushButton_loadLayout_clicked()
 {
 	bool ok = loadFromFilesystem(defaultFilepath());
+	Q_UNUSED(ok)
 
 	copyFixturesToGui(m_fixtureList);
 }
@@ -258,6 +259,9 @@ void UniverseEditorWidget::on_universeTable_cellChanged(int row, int column)
 
 void UniverseEditorWidget::on_universeTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
+	Q_UNUSED(previousRow)
+	Q_UNUSED(previousColumn)
+
 	qDebug() << Q_FUNC_INFO << currentRow << currentColumn;
 }
 
