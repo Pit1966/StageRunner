@@ -101,9 +101,18 @@ bool FxAudioItem::checkForVideoClip()
 			|| suf == "m4v"
 			|| suf == "mov") {
 		isFxClip = true;
+		isPicClip = false;
 		qDebug() << fileName() << " is video file";
-	} else {
+	}
+	else if (suf == "jpg"
+			 || suf == "png") {
+		isFxClip = true;
+		isPicClip = true;
+		qDebug() << fileName() << " is picture file";
+	}
+	else {
 		isFxClip = false;
+		isPicClip = false;
 	}
 
 	return isFxClip;
@@ -115,6 +124,7 @@ void FxAudioItem::init()
 	startInProgress = false;
 	isDmxStarted = false;
 	isFxClip = false;
+	isPicClip = false;
 	mySeekPosition = 0;
 	mySeekPosPerMille = -1;
 	myFxType = FX_AUDIO;

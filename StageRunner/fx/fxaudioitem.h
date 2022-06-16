@@ -64,6 +64,7 @@ public:
 	bool startInProgress;					///< set this Flag to give a hint, that this effect will start in a short time
 	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)
 	bool isFxClip;							///< True, if Audio is recognized to be a video clip
+	bool isPicClip;							///< True, if Audio is recognized as still picture
 
 protected:
 	AudioSeqState mySeqStatus;

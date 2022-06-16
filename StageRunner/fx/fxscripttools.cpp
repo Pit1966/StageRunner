@@ -36,6 +36,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("loop",KW_LOOP);
 	m_keywordHash.insert("dmxmerge",KW_YADI_DMX_MERGE);
 	m_keywordHash.insert("grapscene",KW_GRAP_SCENE);
+	m_keywordHash.insert("black",KW_BLACK);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)
