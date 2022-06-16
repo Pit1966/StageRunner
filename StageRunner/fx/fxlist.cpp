@@ -33,8 +33,9 @@
 
 #include <QMutableListIterator>
 #include <QDateTime>
-#include <QRandomGenerator>
-
+#if QT_VERSION >= 0x050a00
+#  include <QRandomGenerator>
+#endif
 
 FxList::FxList(FxItem *parentFx)
 	: QObject()
@@ -388,11 +389,19 @@ FxItem *FxList::findSequenceRandomFxItem()
 {
 	int cnt = m_fxList.size();
 	FxItem *fx = 0;
+#if QT_VERSION >= 0x050a00
 	QRandomGenerator::global()->seed(QDateTime::currentDateTime().toTime_t());
+#else
+    qsrand(QDateTime::currentDateTime().toTime_t());
+#endif
 	int tries = 0;
 	while (!fx && tries++ < 1000) {
-		int rnd = QRandomGenerator::global()->generate() % cnt;
-		// int rnd = double(qrand()) * cnt / RAND_MAX;
+#if QT_VERSION >= 0x050a00
+        int rnd = QRandomGenerator::global()->generate() % cnt;
+#else
+        int rnd = qrand() % cnt;
+#endif
+        // int rnd = double(qrand()) * cnt / RAND_MAX;
 		if (!m_fxList.at(rnd)->playedInRandomList) {
 			fx = m_fxList.at(rnd);
 			fx->playedInRandomList = true;
