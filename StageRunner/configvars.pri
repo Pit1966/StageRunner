@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.5.0
-APP_MILESTONE = Kekse Edition
+APPVERSION = V0.9.6.0
+APP_MILESTONE = K4 Loriot
 APP_PRODUCER = 2022 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
