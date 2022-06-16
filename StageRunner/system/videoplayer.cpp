@@ -62,12 +62,17 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 	loopTarget = fxc->loopTimes;
 	loopCnt = 1;
 	m_slotNumber = slotNum;
+	// qDebug() << "playFxClip" << fxc->name();
 
 	m_currentFxClipItem = fxc;
 	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
 	m_videoWid->show();
-	m_videoWid->raise();	
+	m_videoWid->raise();
 	this->play();
+
+	// pause playback, if it is a picture in order to get a still image
+	if (fxc->isPicClip)
+		this->pause();
 
 	if (m_videoWid->size().isNull())
 		m_videoWid->resize(700,500);

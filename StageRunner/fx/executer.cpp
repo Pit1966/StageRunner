@@ -28,6 +28,7 @@
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "lightcontrol.h"
+#include "videocontrol.h"
 #include "fxitem.h"
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
@@ -885,6 +886,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		ok = executeGrabScene(line);
 		break;
 
+	case KW_BLACK:
+		ok = executeBlack(line);
+		break;
+
 	default:
 		ok = false;
 		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
@@ -912,7 +917,7 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 	QString restparas = getTargetFxItemFromPara(line, line->parameters(), fxlist);
 	if (fxlist.isEmpty()) return false;
 
-	qDebug() << Q_FUNC_INFO << restparas;
+	// qDebug() << Q_FUNC_INFO << restparas;
 
 	bool ok = true;
 
@@ -921,7 +926,7 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 		case FX_AUDIO:
 		{
 			int pos = getPos(restparas);
-			qDebug() << "pos" << pos << "restparas" << restparas;
+			// qDebug() << "pos" << pos << "restparas" << restparas;
 
 			if (pos >= -1) {
 				ok &= myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this, pos);
@@ -1229,4 +1234,30 @@ bool ScriptExecuter::executeGrabScene(FxScriptLine *line)
 	}
 
 	return true;
+}
+
+bool ScriptExecuter::executeBlack(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+
+	QString type = getFirstParaOfString(parastr).toLower();
+
+	if (type == "video") {
+		if (myApp.unitVideo) {
+			myApp.unitVideo->videoBlack(0);
+		}
+
+		return true;
+	}
+	else if (type == "scene" || type == "light") {
+		int timems = 0;
+		if (parastr.size())
+			timems = QtStaticTools::timeStringToMS(parastr);
+
+		myApp.unitLight->black(timems);
+		return true;
+	}
+
+	m_lastScriptError = tr("Unknown parameter type '%1' for BLACK command").arg(type);
+	return false;
 }

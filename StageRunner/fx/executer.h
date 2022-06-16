@@ -232,6 +232,7 @@ protected:
 	bool executeYadiDMXMergeMode(FxScriptLine *line);
 	bool executeLoopExt(FxScriptLine *line);
 	bool executeGrabScene(FxScriptLine *line);
+	bool executeBlack(FxScriptLine *line);
 
 signals:
 	void listProgressStepChanged(int step1, int step2);
