@@ -213,6 +213,13 @@ void ExecCenter::deleteExecuter(Executer *exec)
 	}
 }
 
+bool ExecCenter::executeScriptCmd(const QString &cmd)
+{
+	qDebug() << "execute script command" << cmd;
+
+	return ScriptExecuter::executeSingleCmd(cmd);
+}
+
 void ExecCenter::test_remove_queue()
 {
 	removeQueue.lock();

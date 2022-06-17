@@ -22,6 +22,7 @@
 //=======================================================================
 
 #include "config.h"
+#include "configrev.h"
 #include "version.h"
 #include "log.h"
 #include "stagerunnermainwin.h"

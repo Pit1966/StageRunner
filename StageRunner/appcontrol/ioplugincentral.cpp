@@ -25,6 +25,7 @@
 #include "log.h"
 #include "qlcioplugin.h"
 #include "config.h"
+#include "configrev.h"
 #include "pluginmapping.h"
 #include "messagedialog.h"
 #include "variantmapserializer.h"

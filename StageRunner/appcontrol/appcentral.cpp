@@ -46,6 +46,7 @@
 #include "videocontrol.h"
 #include "dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
+#include "netserver.h"
 
 #include <QFileDialog>
 
@@ -225,6 +226,11 @@ void AppCentral::setInputAssignMode(FxItem *fx)
 {
 	setInputAssignMode(true);
 	input_assign_target_fxitem = fx;
+}
+
+bool AppCentral::startTcpServer()
+{
+	return tcpServer->startTCPServer();
 }
 
 void AppCentral::loadPlugins()
@@ -706,6 +712,48 @@ void AppCentral::deleteFxSceneItem(FxSceneItem *scene)
 	}
 }
 
+void AppCentral::connectToRemote(const QString &host, quint16 port, const QString &cmd)
+{
+	if (!logThread->isMainThread()) {
+		QMetaObject::invokeMethod(this, "connectToRemote", Qt::QueuedConnection,
+								  Q_ARG(QString, host),
+								  Q_ARG(quint16, port),
+								  Q_ARG(QString, cmd));
+		return;
+	}
+
+	if (m_remoteSocket->state() == QAbstractSocket::ConnectedState && host == m_lastRemote) {
+		m_remoteSocket->write(cmd.toLocal8Bit());
+		return;
+	}
+
+	if (cmd.size())
+		m_pendingRemoteCmdList.append(cmd);
+
+	m_lastRemote = host;
+	m_remoteSocket->connectToHost(host, port);
+}
+
+void AppCentral::onRemoteConnected()
+{
+}
+
+void AppCentral::onRemoteStateChanged(QAbstractSocket::SocketState state)
+{
+	LOGTEXT(tr("Remote socket state: %1").arg(state));
+
+	if (state == QAbstractSocket::ConnectedState) {
+		m_remoteOk = true;
+		while (!m_pendingRemoteCmdList.isEmpty()) {
+			QString cmd = m_pendingRemoteCmdList.takeFirst();
+			m_remoteSocket->write(cmd.toLocal8Bit());
+		}
+	}
+	else {
+		m_remoteOk = false;
+	}
+}
+
 AppCentral::AppCentral()
 {
 	init();
@@ -719,6 +767,7 @@ AppCentral::~AppCentral()
 #endif
 
 	delete templateFxList;
+	delete tcpServer;
 	delete unitVideo;
 	delete unitFx;
 	delete execCenter;
@@ -759,15 +808,17 @@ void AppCentral::init()
 
 	mainwinWidget = nullptr;
 	mainWinObj = nullptr;
+	m_remoteSocket = nullptr;
 
 	userSettings = new UserSettings;
 	project = new Project;
 	universeLayout = new DmxUniverseProperty;
 	pluginCentral = new IOPluginCentral;
 	unitVideo = new VideoControl(*this);
-
 	unitAudio = new AudioControl(*this,false);
 	unitLight = new LightControl(*this);
+	tcpServer = new NetServer(*this);
+
 	execCenter = new ExecCenter(*this);
 	unitFx = new FxControl(*this, *execCenter);
 	templateFxList = new FxListVarSet;
@@ -777,11 +828,14 @@ void AppCentral::init()
 	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);
 	unitLight->addFxListToControlLoop(project->mainFxList());
 
-
+	m_remoteSocket = new QTcpSocket(this);
+	connect(m_remoteSocket, SIGNAL(connected()), this, SLOT(onRemoteConnected()));
+	connect(m_remoteSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onRemoteStateChanged(QAbstractSocket::SocketState)));
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 	qRegisterMetaType<CtrlCmd>("CtrlCmd");
 	qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
+	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
 	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules
@@ -795,4 +849,7 @@ void AppCentral::init()
 
 	///todo video	move signal/slots to videoctrl
 	connect(unitVideo,SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+
+	// TCP server -> Script Executer
+	connect(tcpServer, SIGNAL(remoteCmdReceived(QString)), execCenter, SLOT(executeScriptCmd(QString)));
 }

@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
 	myapp->loadPlugins();
 	myapp->openPlugins();
 
+	// start TCP server
+	myapp->startTcpServer();
+
 	// Start the world :-)
 	myapp->setLightLoopEnabled(true);
 	myapp->setFxExecLoopEnabled(true);

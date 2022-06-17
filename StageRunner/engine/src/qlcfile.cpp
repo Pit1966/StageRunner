@@ -39,6 +39,7 @@
 #endif
 
 #include "../../config.h"
+#include "configrev.h"
 #include "qlcfile.h"
 
 bool QLCFile::m_hasWindowManager = true;

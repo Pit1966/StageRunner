@@ -76,6 +76,7 @@ SOURCES += \
 	../gui/customwidget/pspushbutton.cpp \
 	../gui/deviceinfowidget.cpp \
 	../system/dmx/fixture.cpp \
+	../system/netserver.cpp \
 	main.cpp \
 	../fx/fxitem.cpp \
 	../fx/fxlist.cpp \
@@ -192,6 +193,7 @@ HEADERS  += \
 	../appcontrol/appcentral.h \
 	../appcontrol/project.h \
 	../appcontrol/usersettings.h \
+	../system/netserver.h \
 	../tool/toolclasses.h \
 	../tool/prefvar.h \
 	../tool/dbquery.h \

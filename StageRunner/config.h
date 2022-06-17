@@ -24,7 +24,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "configrev.h"
+// #include "configrev.h"
 
 /**
   * For basic defines, settings, application name and so far
@@ -33,6 +33,8 @@
 
 #define MAX_AUDIO_SLOTS 4
 #define MAX_DMX_UNIVERSE 4
+#define NET_UDP_PORT 11101
+#define NET_TCP_PORT 11102
 
 #define MIDITEMPLATEDIR "/usr/share/stagerunner/miditemplates"
 #define USERMIDITEMPLATEDIR ".stagerunner/miditemplates"

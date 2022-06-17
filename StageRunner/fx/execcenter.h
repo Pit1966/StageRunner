@@ -68,10 +68,8 @@ public:
 	FxListExecuter * getCreateFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(FxList *fxlist);
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
-
 	SceneExecuter * newSceneExecuter(FxSceneItem *scene, FxItem *parentFx);
 	ScriptExecuter * newScriptExecuter(FxScriptItem *script, FxItem *parentFx);
-
 
 	void queueRemove(Executer *exec);
 
@@ -82,6 +80,9 @@ signals:
 
 public slots:
 	void deleteExecuter(Executer *exec);
+
+	// remote
+	bool executeScriptCmd(const QString &cmd);
 
 private slots:
 	void test_remove_queue();

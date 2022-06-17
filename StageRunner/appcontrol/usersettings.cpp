@@ -24,6 +24,7 @@
 #include "usersettings.h"
 #include "log.h"
 #include "config.h"
+#include "configrev.h"
 
 #include <QDir>
 

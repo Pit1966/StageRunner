@@ -233,6 +233,9 @@ protected:
 	bool executeLoopExt(FxScriptLine *line);
 	bool executeGrabScene(FxScriptLine *line);
 	bool executeBlack(FxScriptLine *line);
+	bool executeRemote(FxScriptLine *line);
+
+	static bool executeSingleCmd(const QString &linestr);
 
 signals:
 	void listProgressStepChanged(int step1, int step2);

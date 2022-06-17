@@ -32,6 +32,7 @@
 #include <QByteArray>
 #include <QWidget>
 #include <QPointer>
+#include <QTcpSocket>
 
 #ifdef USE_SDL
 #include <SDL2/SDL.h>
@@ -56,6 +57,7 @@ class VideoControl;
 class DmxUniverseProperty;
 class FxSceneItem;
 class QThread;
+class NetServer;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -85,6 +87,12 @@ private:
 
 	QThread *m_mainThread;
 
+	// network
+	QTcpSocket *m_remoteSocket;
+	QString m_lastRemote;
+	QStringList m_pendingRemoteCmdList;
+	bool m_remoteOk			= false;
+
 public:
 	QWidget *mainwinWidget;
 	QObject *mainWinObj;
@@ -92,6 +100,7 @@ public:
 	LightControl *unitLight;
 	FxControl *unitFx;
 	VideoControl *unitVideo;
+	NetServer *tcpServer;
 	Project *project;
 	DmxUniverseProperty *universeLayout;
 	UserSettings *userSettings;
@@ -130,6 +139,8 @@ public:
 	void setInputAssignMode(bool state);
 	void setInputAssignMode(FxItem *fx);
 
+	bool startTcpServer();
+
 	void loadPlugins();
 	void openPlugins();
 	void reOpenPlugins();
@@ -148,7 +159,6 @@ public:
 	MODUL_ERROR moduleErrors() const;
 	bool hasModuleError() const;
 	static QString moduleErrorText(MODUL_ERROR e);
-
 
 	// Audio
 	AUDIO::AudioOutputType usedAudioOutputType() const;
@@ -175,6 +185,12 @@ public slots:
 	void setGlobalSelectedFx(FxItem *item);
 
 	void deleteFxSceneItem(FxSceneItem *scene);
+
+	void connectToRemote(const QString &host, quint16 port, const QString &cmd);
+
+private slots:
+	void onRemoteConnected();
+	void onRemoteStateChanged(QAbstractSocket::SocketState state);
 
 signals:
 	void audioCtrlMsgEmitted(AudioCtrlMsg msg);

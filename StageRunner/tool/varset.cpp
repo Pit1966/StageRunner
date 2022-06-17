@@ -24,6 +24,7 @@
 #include "varset.h"
 #include "varsetlist.h"
 #include "config.h"
+#include "configrev.h"
 #include "database.h"
 #include "dbquery.h"
 #include "log.h"

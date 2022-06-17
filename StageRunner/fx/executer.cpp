@@ -33,6 +33,7 @@
 #include "fxaudioitem.h"
 #include "fxsceneitem.h"
 #include "fxscriptitem.h"
+#include "fxclipitem.h"
 #include "usersettings.h"
 #include "qtstatictools.h"
 #include "dmxchannel.h"
@@ -644,9 +645,10 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 	, m_currentLineNum(0)
 {
 	parentFxItem = parentFx;
-	FxScriptItem::rawToScript(script->rawScript(), m_script);
+	if (script)
+		FxScriptItem::rawToScript(script->rawScript(), m_script);
 
-	qDebug("new script executer: %s: duration: %llims",script->name().toLocal8Bit().data(),m_script.execDuration());
+	// qDebug("new script executer: %s: duration: %llims",script->name().toLocal8Bit().data(),m_script.execDuration());
 }
 
 ScriptExecuter::~ScriptExecuter()
@@ -751,7 +753,7 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 		QList<FxItem*>list = FxItem::findFxByName(sname,sm);
 		if (list.isEmpty()) {
 			LOGTEXT(tr("Script '<font color=#6666ff>%1</font>': Line #%2:  <font color=darkOrange>No FX with name '%3' found!</font>")
-					.arg(m_fxScriptItem->name())
+					.arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no fxitem"))
 					.arg(line->lineNumber())
 					.arg(name));
 		}
@@ -890,6 +892,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		ok = executeBlack(line);
 		break;
 
+	case KW_REMOTE:
+		ok = executeRemote(line);
+		break;
+
 	default:
 		ok = false;
 		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
@@ -898,7 +904,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 
 	if (!ok) {
 		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': Line #%2: <font color=darkOrange>Failed to execute script line</font> ('<font color=#6666ff>%3</font>')%4")
-				 .arg(m_fxScriptItem->name())
+				 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script name"))
 				 .arg(line->lineNumber())
 				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
 				 .arg(m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
@@ -925,13 +931,18 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 		switch (fx->fxType()) {
 		case FX_AUDIO:
 		{
+			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
 			int pos = getPos(restparas);
 			// qDebug() << "pos" << pos << "restparas" << restparas;
 
-			if (pos >= -1) {
-				ok &= myApp.unitAudio->startFxAudioAt(static_cast<FxAudioItem*>(fx), this, pos);
-			} else {
-				ok &= myApp.unitAudio->startFxAudio(static_cast<FxAudioItem*>(fx), this);
+			if (fxa->isFxClip) {
+				ok &= myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
+			}
+			else if (pos >= -1) {
+				ok &= myApp.unitAudio->startFxAudioAt(fxa, this, pos);
+			}
+			else {
+				ok &= myApp.unitAudio->startFxAudio(fxa, this);
 			}
 		}
 			break;
@@ -1260,4 +1271,27 @@ bool ScriptExecuter::executeBlack(FxScriptLine *line)
 
 	m_lastScriptError = tr("Unknown parameter type '%1' for BLACK command").arg(type);
 	return false;
+}
+
+bool ScriptExecuter::executeRemote(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+	QString host = getFirstParaOfString(parastr);
+
+	myApp.connectToRemote(host, NET_TCP_PORT, parastr);
+
+	return true;
+}
+
+bool ScriptExecuter::executeSingleCmd(const QString &linestr)
+{
+	QString cmd = linestr.section(' ',0,0);
+	QString paras = linestr.section(' ',1);
+	FxScriptLine line(cmd, paras);
+	ScriptExecuter exe(AppCentral::ref(), nullptr, nullptr);
+
+	bool reexecdelayed = false;
+	bool ok = exe.executeLine(&line, reexecdelayed);
+
+	return ok;
 }

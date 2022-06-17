@@ -23,6 +23,8 @@
 
 #include "pluginmapping.h"
 #include "config.h"
+#include "configrev.h"
+
 #include <QDir>
 
 

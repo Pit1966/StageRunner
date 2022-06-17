@@ -1,5 +1,6 @@
 #include "universeeditorwidget.h"
 #include "config.h"
+#include "configrev.h"
 #include "log.h"
 #include "system/dmx/fixture.h"
 #include "deviceinfowidget.h"
