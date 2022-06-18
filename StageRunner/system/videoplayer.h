@@ -54,10 +54,12 @@ public:
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
 	bool isRunning() const;
+	bool isCurrentPicture() const;
 	void stop();
 	bool stopAndWait();
 	void setVolume(int vol);
 	void setMasterVolume(int vol);
+	void setOverlayDisabled();
 
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}

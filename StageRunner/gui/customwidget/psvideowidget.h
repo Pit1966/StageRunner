@@ -1,4 +1,4 @@
-//=======================================================================
+﻿//=======================================================================
 //  StageRunner
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
@@ -27,23 +27,41 @@
 #include <QVideoWidget>
 
 class VideoPlayer;
+class PsOverlayLabel;
 
 class PsVideoWidget : public QVideoWidget
 {
+	Q_OBJECT
 private:
 	VideoPlayer *m_myPlayer;
+	PsOverlayLabel *m_overlay;
+	bool m_isOverlayVisible;
+	qreal m_overlayOpaticity;
+
 public:
 	PsVideoWidget(QWidget *parent = nullptr);
+	~PsVideoWidget();
 	void setPrefsSettings();
 	void saveCurrentStateToPrefs();
 	void setVideoPlayer(VideoPlayer *vidplay);
-
+	void raiseOverlay();
+	bool isOverlayVisible() const {return m_isOverlayVisible;}
+	void setOverlayVisible(bool state);
+	bool setOverlayImage(const QString &path);
 
 protected:
+	void checkOverlayShow();
 	void mouseDoubleClickEvent(QMouseEvent *);
 	void mousePressEvent(QMouseEvent *ev);
 	void closeEvent(QCloseEvent *event);
 	void paintEvent(QPaintEvent *event);
+	void moveEvent(QMoveEvent *event);
+	void resizeEvent(QResizeEvent *event);
+	void showEvent(QShowEvent *event);
+	void hideEvent(QHideEvent *event);
+
+public slots:
+	void toggleFullScreen();
 };
 
 #endif // PSVIDEOWIDGET_H

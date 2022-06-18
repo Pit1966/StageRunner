@@ -100,7 +100,10 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 	// check if there is already a video running in this slot.
 	// If so, we have to stop the video first.
 	if (videoRunning) {
-		if (!vp->stopAndWait())
+		if (vp->isCurrentPicture()) {
+			vp->stop();
+		}
+		else if (!vp->stopAndWait())
 			return false;
 
 		// select it
@@ -108,12 +111,14 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 			return false;
 	}
 
-	QMultimedia::AvailabilityStatus astat = vp->availability();
-	Q_UNUSED(astat)
+	if (!fxc->isPicClip) {
+		QMultimedia::AvailabilityStatus astat = vp->availability();
+		Q_UNUSED(astat)
 
-	vp->setVolume(fxc->initialVolume);
-	if (!myApp.unitAudio->startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume))
-		return false;
+		vp->setVolume(fxc->initialVolume);
+		if (!myApp.unitAudio->startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume))
+			return false;
+	}
 
 	vp->playFxClip(fxc, slot);
 
@@ -128,6 +133,7 @@ void VideoControl::videoBlack(qint32 time_ms)
 
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	vp->stop();
+	vp->setOverlayDisabled();
 
 	myApp.unitAudio->videoWidget()->update();
 

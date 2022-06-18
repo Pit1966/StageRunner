@@ -65,14 +65,21 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 	// qDebug() << "playFxClip" << fxc->name();
 
 	m_currentFxClipItem = fxc;
-	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
-	m_videoWid->show();
-	m_videoWid->raise();
-	this->play();
 
 	// pause playback, if it is a picture in order to get a still image
-	if (fxc->isPicClip)
-		this->pause();
+	if (fxc->isPicClip) {
+		m_videoWid->setOverlayImage(fxc->filePath());
+		m_videoWid->setOverlayVisible(true);
+		m_videoWid->raiseOverlay();
+	}
+	else {
+		this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+		m_videoWid->setOverlayVisible(false);
+		m_videoWid->show();
+		m_videoWid->raise();
+		this->play();
+	}
+
 
 	if (m_videoWid->size().isNull())
 		m_videoWid->resize(700,500);
@@ -88,10 +95,23 @@ bool VideoPlayer::isRunning() const
 	return currentState == QMediaPlayer::PlayingState;
 }
 
+bool VideoPlayer::isCurrentPicture() const
+{
+	if (m_currentFxClipItem)
+		return m_currentFxClipItem->isPicClip;
+
+	return false;
+}
+
 void VideoPlayer::stop()
 {
 	loopCnt = loopTarget;
-	QMediaPlayer::stop();
+	if (m_currentFxClipItem && m_currentFxClipItem->isPicClip) {
+		onVideoEnd();
+	}
+	else {
+		QMediaPlayer::stop();
+	}
 }
 
 /**
@@ -134,6 +154,11 @@ void VideoPlayer::setMasterVolume(int vol)
 	// qDebug() << "set master volume" << vol << "current vol" << m_currentVolume;
 	m_currentMasterVolume = vol;
 	setVolume(m_currentVolume);
+}
+
+void VideoPlayer::setOverlayDisabled()
+{
+	m_videoWid->setOverlayVisible(false);
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
