@@ -630,6 +630,12 @@ void AppCentral::executeNextFx(int listID)
 	FxItem *cur_fx = fxlist->currentFx();
 	FxItem *next_fx = fxlist->stepToSequenceNext();
 
+	if (next_fx == nullptr && fxlist->size() > 0) {
+		fxlist->setNextFx(fxlist->getFirstFx());
+		executeNextFx(listID);
+		return;
+	}
+
 	if (cur_fx && cur_fx != next_fx) {
 		if (cur_fx->holdTime() == 0) {
 			LOGTEXT(tr("<font color=green>SEQ NEXT: Stop current FX</font> <b>%1</b> since HOLD time is 0").arg(cur_fx->name()));
