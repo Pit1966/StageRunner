@@ -645,6 +645,31 @@ void AppCentral::executeNextFx(int listID)
 	}
 }
 
+void AppCentral::executePrevFx(int listID)
+{
+	if (debug) DEBUGTEXT("Execute previous FX in Sequence for list Id: %d",listID);
+	FxList *fxlist = getRegisteredFxList(listID);
+	if (!fxlist) return;
+
+
+	FxItem *cur_fx = fxlist->currentFx();
+	FxItem *prev_fx = fxlist->stepToSequencePrev();
+
+	if (cur_fx && cur_fx != prev_fx) {
+		if (cur_fx->holdTime() == 0) {
+			LOGTEXT(tr("<font color=green>SEQ NEXT: Stop current FX</font> <b>%1</b> since HOLD time is 0").arg(cur_fx->name()));
+			executeFxCmd(cur_fx,CMD_FX_STOP,nullptr);
+		}
+	}
+	if (prev_fx) {
+		LOGTEXT(tr("<font color=green>SEQ NEXT: Start FX</font> <b>%1</b>").arg(prev_fx->name()));
+		executeFxCmd(prev_fx,CMD_FX_START,nullptr);
+		if (prev_fx->preDelay() == -1) {
+			QTimer::singleShot(prev_fx->postDelay(),this,SLOT(executeNextFx()));
+		}
+	}
+}
+
 void AppCentral::clearCurrentFx(int listID)
 {
 	FxList *fxlist = getRegisteredFxList(listID);

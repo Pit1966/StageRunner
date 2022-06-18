@@ -860,7 +860,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			}
 			break;
 		case Qt::Key_Delete:
-			appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());
+			on_actionDelete_FX_Item_triggered();
 			break;
 		case Qt::Key_Backspace:
 			if (!isAutoRepeat) {
@@ -874,6 +874,11 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		case Qt::Key_Right:
 			if (!appCentral->isEditMode()) {
 				appCentral->executeNextFx(1);
+			}
+			break;
+		case Qt::Key_Left:
+			if (!appCentral->isEditMode()) {
+				appCentral->executePrevFx(1);
 			}
 			break;
 
@@ -1281,3 +1286,12 @@ void StageRunnerMainWin::on_actionFullscreen_triggered(bool checked)
 		this->showNormal();
 	}
 }
+
+void StageRunnerMainWin::on_actionDelete_FX_Item_triggered()
+{
+	if (QMessageBox::question(this,tr("Attention"),tr("Do you want to delete current selected FX from play?"))
+			== QMessageBox::Yes) {
+		appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());
+	}
+}
+

@@ -286,7 +286,7 @@
      <x>0</x>
      <y>0</y>
      <width>888</width>
-     <height>23</height>
+     <height>32</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -317,6 +317,7 @@
     <addaction name="actionEdit_Mode"/>
     <addaction name="actionInput_Assign_Mode"/>
     <addaction name="actionOpen_FxItem"/>
+    <addaction name="actionDelete_FX_Item"/>
    </widget>
    <widget class="QMenu" name="menuConfiguration">
     <property name="title">
@@ -455,7 +456,7 @@
   </action>
   <action name="actionOpen_FxItem">
    <property name="text">
-    <string>Open FxItem</string>
+    <string>Open Fx Item</string>
    </property>
   </action>
   <action name="actionEnable_audio_FFT">
@@ -539,6 +540,11 @@
    </property>
    <property name="text">
     <string>Fullscreen</string>
+   </property>
+  </action>
+  <action name="actionDelete_FX_Item">
+   <property name="text">
+    <string>Delete FX Item</string>
    </property>
   </action>
  </widget>

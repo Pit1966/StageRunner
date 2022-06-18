@@ -107,6 +107,9 @@ public:
 	inline T first() {
 		return list.first();
 	}
+	inline T last() {
+		return list.last();
+	}
 
 
 };

@@ -148,6 +148,8 @@ private slots:
 
 	void on_actionFullscreen_triggered(bool checked);
 
+	void on_actionDelete_FX_Item_triggered();
+
 private:
 	void init();
 	void setup_gui_docks();

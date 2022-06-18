@@ -49,6 +49,7 @@ private:
 	VarSetList<FxItem*>m_fxList;
 	FxItem * m_fxLast;
 	FxItem * m_fxNext;
+	FxItem * m_fxPrev;
 	FxItem * m_fxCurrent;
 
 	bool m_isModified;
@@ -95,6 +96,7 @@ public:
 	inline void setParentFx(FxItem *fx) {m_fxParent = fx;}
 	inline FxItem * parentFx() const {return m_fxParent;}
 	FxItem * stepToSequenceNext();
+	FxItem * stepToSequencePrev();
 	FxItem * getFxByKeyCode(int keycode) const;
 	FxItem * getFxByListIndex(int idx) const;
 	FxItem * getFirstFx() const {return getFxByListIndex(0);}
@@ -134,8 +136,8 @@ public:
 	FxItem * addFx(int fxtype, int option = -1);
 	void addFx(FxItem *newfx);
 	void refAllMembers();
-	FxItem * findSequenceFollower(FxItem *curfx = 0);
-	FxItem * findSequenceForerunner(FxItem *curfx = 0);
+	FxItem * findSequenceFollower(FxItem *curfx = 0, bool turnover = true);
+	FxItem * findSequenceForerunner(FxItem *curfx = 0, bool turnover = true);
 	FxItem * findSequenceRandomFxItem();
 	FxItem * findSequenceFirstItem();
 
@@ -150,11 +152,13 @@ private:
 
 signals:
 	void fxNextChanged(FxItem *nextfx);
+	void fxPrevChanged(FxItem *prevfx);
 	void fxListChanged();
 	void fxCurrentChanged(FxItem *curfx, FxItem *oldcurfx);
 
 public slots:
 	void setNextFx(FxItem *nfx);
+	void setPrevFx(FxItem *nfx);
 	void setCurrentFx(FxItem *curfx);
 
 };

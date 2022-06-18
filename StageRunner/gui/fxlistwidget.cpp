@@ -1187,6 +1187,7 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 	case FxListWidgetItem::CT_KEY:
 	case FxListWidgetItem::CT_NAME:
 		myfxlist->setNextFx(fx);
+		myfxlist->setPrevFx(myfxlist->findSequenceForerunner(fx));
 		if (cur_selected_item != fx) {
 			cur_selected_item = fx;
 			emit fxItemSelected(fx);

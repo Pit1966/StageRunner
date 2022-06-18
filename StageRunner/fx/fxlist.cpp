@@ -66,6 +66,7 @@ void FxList::init()
 
 	m_fxLast = 0;
 	m_fxNext = 0;
+	m_fxPrev = 0;
 	m_fxCurrent = 0;
 	m_isModified = false;
 
@@ -163,6 +164,14 @@ void FxList::setNextFx(FxItem *nfx)
 	}
 }
 
+void FxList::setPrevFx(FxItem *nfx)
+{
+	if (nfx != m_fxPrev) {
+		m_fxPrev = nfx;
+		emit fxPrevChanged(m_fxPrev);
+	}
+}
+
 void FxList::setCurrentFx(FxItem *curfx)
 {
 	if (!FxItem::exists(curfx)) curfx = 0;
@@ -176,6 +185,7 @@ void FxList::setCurrentFx(FxItem *curfx)
 FxItem *FxList::stepToSequenceNext()
 {
 	if (!m_fxNext) return 0;
+
 	m_fxLast = m_fxCurrent;
 	if (m_fxCurrent != m_fxNext) {
 		emit fxCurrentChanged(m_fxNext, m_fxCurrent);
@@ -185,6 +195,26 @@ FxItem *FxList::stepToSequenceNext()
 	// Now check if auto proceed is selected and find next entry in list
 	if (myAutoProceedFlag) {
 		setNextFx( findSequenceFollower(m_fxCurrent) );
+		setPrevFx( findSequenceForerunner(m_fxCurrent) );
+	}
+	return m_fxCurrent;
+}
+
+FxItem *FxList::stepToSequencePrev()
+{
+	if (!m_fxPrev)
+		return 0;
+
+	m_fxLast = m_fxCurrent;
+	if (m_fxCurrent != m_fxPrev) {
+		emit fxCurrentChanged(m_fxPrev, m_fxCurrent);
+		m_fxCurrent = m_fxPrev;
+	}
+
+	// Now check if auto proceed is selected and find next entry in list
+	if (myAutoProceedFlag) {
+		setNextFx( findSequenceFollower(m_fxCurrent) );
+		setPrevFx( findSequenceForerunner(m_fxCurrent) );
 	}
 	return m_fxCurrent;
 }
@@ -351,16 +381,22 @@ bool FxList::recreateFxIDs(int from)
  *
  * If curfx parameter is NULL the current nextFx() Pointer is taken as search begin
  */
-FxItem *FxList::findSequenceFollower(FxItem *curfx)
+FxItem *FxList::findSequenceFollower(FxItem *curfx, bool turnover)
 {
-	if (!curfx) curfx = m_fxNext;
+	if (m_fxList.size() < 2)
+		return nullptr;
+
+	if (!curfx)
+		curfx = m_fxNext;
 
 	FxItem *followfx = 0;
 	int idx_cur = m_fxList.indexOf(curfx);
 	if (idx_cur >= 0) {
 		if (idx_cur+1 < m_fxList.size()) {
 			followfx = m_fxList.at(idx_cur+1);
-
+		}
+		else if (turnover) {
+			followfx = m_fxList.first();
 		}
 	}
 	return followfx;
@@ -371,16 +407,25 @@ FxItem *FxList::findSequenceFollower(FxItem *curfx)
  * @param curfx Pointer to the FxItem the Predecessor is search for or NULL
  * @return Pointer to FxItem or 0, if there is no Predecessor cause list is at head
  *
- * If curfx parameter is NULL the current nextFx() Pointer is taken as search begin
+ * If curfx parameter is NULL the current prevFx() Pointer is taken as search begin
  */
-FxItem *FxList::findSequenceForerunner(FxItem *curfx)
+FxItem *FxList::findSequenceForerunner(FxItem *curfx, bool turnover)
 {
-	if (!curfx) curfx = m_fxNext;
+	if (m_fxList.size() < 2)
+		return nullptr;
+
+	if (!curfx)
+		curfx = m_fxPrev;
 
 	FxItem *prevfx = 0;
 	int idx_cur = m_fxList.indexOf(curfx);
-	if (idx_cur > 0) {
-		prevfx = m_fxList.at(idx_cur-1);
+	if (idx_cur >= 0) {
+		if (idx_cur > 0) {
+			prevfx = m_fxList.at(idx_cur-1);
+		}
+		else if (turnover) {
+			prevfx = m_fxList.last();
+		}
 	}
 	return prevfx;
 }
