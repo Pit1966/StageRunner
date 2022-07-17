@@ -81,7 +81,7 @@ private:
 	int dmx_audio_ctrl_last_vol[MAX_AUDIO_SLOTS];
 	int used_slots;
 
-	QMutex *slotMutex;
+	QRecursiveMutex *slotMutex;
 
 
 public:

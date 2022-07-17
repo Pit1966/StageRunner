@@ -47,7 +47,9 @@ protected:
 	int m_currentVolume;					///< current volume in StageRunner range (0 - MAX_VOLUME)
 	int m_currentMasterVolume;
 	QMediaPlayer::State currentState;
+	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
 	FxClipItem *m_currentFxClipItem;
+
 	QTimeLine m_overlayFadeTimeLine;		///< used to fade in and out the overlay picture
 	bool m_overlayFadeOutFirst;
 
@@ -62,7 +64,10 @@ public:
 	bool stopAndWait();
 	void setVolume(int vol);
 	void setMasterVolume(int vol);
-	void setOverlayDisabled();
+	void setPicClipOverlayDisabled();
+	bool isPicClipOverlayVisible();
+	bool fadePicClipOverlayOut(int ms);
+	bool fadePicClipOverlayIn(int ms);
 
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}

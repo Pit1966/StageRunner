@@ -44,11 +44,11 @@ public:
 	void setPrefsSettings();
 	void saveCurrentStateToPrefs();
 	void setVideoPlayer(VideoPlayer *vidplay);
-	void raiseOverlay();
-	bool isOverlayVisible() const {return m_isOverlayVisible;}
-	void setOverlayVisible(bool state);
-	bool setOverlayImage(const QString &path);
-	void setOverlayOpacity(qreal val);
+	void raisePicClipOverlay();
+	bool isPicClipOverlayVisible() const {return m_isOverlayVisible;}
+	void setPicClipOverlayVisible(bool state);
+	bool setPicClipOverlayImage(const QString &path);
+	void setPicClipOverlayOpacity(qreal val);
 
 protected:
 	void checkOverlayShow();

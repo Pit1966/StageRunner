@@ -29,6 +29,7 @@
 #include <QHash>
 #include <QReadWriteLock>
 #include <QString>
+#include <QRecursiveMutex>
 
 
 template <class Key, class T> class MutexQHash : public QHash <Key, T>
@@ -141,7 +142,11 @@ template <class T> class MutexQList : public QList <T>
 public:
 	MutexQList() {
 		is_modified_f = false;
+#if QT_VERSION < 0x050e00
 		mutex = new QMutex(QMutex::Recursive);
+#else
+		mutex = new QRecursiveMutex();
+#endif
 		lock_cnt = 0;
 		ci = 0;
 		co = 0;
@@ -159,7 +164,11 @@ public:
 	MutexQList(const MutexQList & other)
 		: QList<T>() {
 		is_modified_f = false;
+#if QT_VERSION < 0x050e00
 		mutex = new QMutex(QMutex::Recursive);
+#else
+		mutex = new QRecursiveMutex();
+#endif
 		lock_cnt = 0;
 		ci = 0;
 		co = 0;
@@ -174,7 +183,11 @@ public:
 
 private:
 
+#if QT_VERSION < 0x050e00
 	QMutex * mutex;						///< Mutex, mit dessen Hilfe die Liste gelockt wird
+#else
+	QRecursiveMutex * mutex;
+#endif
 	bool is_modified_f;					///< Liste ist modifiziert
 	QString name;						///< Listenname
 	int lock_cnt;
@@ -330,7 +343,11 @@ public:
 class MutexQListLocker
 {
 private:
+#if QT_VERSION < 0x050e00
 	QMutex * mutexRef;
+#else
+	QRecursiveMutex * mutexRef;
+#endif
 
 public:
 	template <typename T> MutexQListLocker ( MutexQList<T> & list)

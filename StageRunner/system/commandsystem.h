@@ -172,5 +172,21 @@ enum SceneSeqState {
 };
 }
 
+namespace VIDEO {
+/**
+ * @brief Flags for VideoPlayer and PicClip (video overlay) status
+ */
+enum VideoViewStatus {
+	VIEW_UNUSED			= 0,
+	VIEW_BLACK			= 1<<0,
+	VIEW_VIDEO_VISIBLE	= 1<<1,
+	VIEW_VIDEO_FADEIN	= 1<<2,
+	VIEW_VIDEO_FADEOUT	= 1<<3,
+	VIEW_PIC_FADEIN		= 1<<4,
+	VIEW_PIC_FADEOUT	= 1<<5,
+
+};
+}
+
 
 #endif // COMMANDSYSTEM_H

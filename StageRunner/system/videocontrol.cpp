@@ -81,6 +81,16 @@ bool VideoControl::startFxClipById(qint32 id)
 	return startFxClip(fxclip);
 }
 
+
+/**
+ * @brief VideoControl::startFxClip
+ * @param fxc
+ * @return
+ *
+ * There are two types of video clips now. A normal video, played by QVideoPlayer, on one hand and and still pictures, which are
+ * overlayed in an extra widget on the other hand.
+ * Both are based on functions and the FxItem of an FxAudio item.
+ */
 bool VideoControl::startFxClip(FxClipItem *fxc)
 {
 	qDebug() << "Start FxAudio as FxClip"<< fxc->name();
@@ -129,11 +139,19 @@ void VideoControl::videoBlack(qint32 time_ms)
 {
 	Q_UNUSED(time_ms)
 
-	if (!myApp.unitAudio->isValid()) return;
+	if (!myApp.unitAudio->isValid())
+		return;
 
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
-	vp->stop();
-	vp->setOverlayDisabled();
+	Q_ASSERT(vp);
+
+	if (vp->isPicClipOverlayVisible()) {
+		vp->fadePicClipOverlayOut(time_ms);
+	}
+	else {
+		vp->stop();
+		vp->setPicClipOverlayDisabled();
+	}
 
 	myApp.unitAudio->videoWidget()->update();
 

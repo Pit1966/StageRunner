@@ -31,6 +31,8 @@
 #include <QElapsedTimer>
 #include <QApplication>
 
+using namespace VIDEO;
+
 VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	: QMediaPlayer()
 	, m_videoCtrl(parent)
@@ -41,6 +43,7 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	, m_currentVolume(-1)
 	, m_currentMasterVolume(-1)
 	, currentState(QMediaPlayer::StoppedState)
+	, m_viewState(VIEW_UNUSED)
 	, m_currentFxClipItem(nullptr)
 	, m_overlayFadeOutFirst(false)
 {
@@ -60,6 +63,17 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	m_videoWid->setVideoPlayer(this);
 }
 
+
+/**
+ * @brief VideoPlayer::playFxClip
+ * @param fxc
+ * @param slotNum
+ * @return
+ *
+ * Not only pure videos are started here. A FxClipItem can also be a still picture.
+ * This is handled differnt. The picture will be displayed in an overlay QWidget over the VideoPlayer widget.
+ * An still image has set the property isPicClip.
+ */
 bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 {
 	loopTarget = fxc->loopTimes;
@@ -74,23 +88,24 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 		if (m_overlayFadeTimeLine.state() == QTimeLine::Running) {
 			m_overlayFadeTimeLine.stop();
 		}
-		if (m_videoWid->isOverlayVisible()) {
+
+		if (m_videoWid->isPicClipOverlayVisible()) {
 			m_overlayFadeTimeLine.setDirection(QTimeLine::Backward);
 			m_overlayFadeOutFirst = true;
 		} else {
-			m_videoWid->setOverlayImage(fxc->filePath());
-			m_videoWid->setOverlayVisible(true);
-			m_videoWid->raiseOverlay();
+			m_videoWid->setPicClipOverlayImage(fxc->filePath());
+			m_videoWid->setPicClipOverlayVisible(true);
+			m_videoWid->raisePicClipOverlay();
 
 			m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
-			m_videoWid->setOverlayOpacity(0.0);
+			m_videoWid->setPicClipOverlayOpacity(0.0);
 		}
 		m_overlayFadeTimeLine.setDuration(3000);
 		m_overlayFadeTimeLine.start();
 	}
 	else {
 		this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
-		m_videoWid->setOverlayVisible(false);
+		m_videoWid->setPicClipOverlayVisible(false);
 		m_videoWid->show();
 		m_videoWid->raise();
 		this->play();
@@ -172,9 +187,44 @@ void VideoPlayer::setMasterVolume(int vol)
 	setVolume(m_currentVolume);
 }
 
-void VideoPlayer::setOverlayDisabled()
+void VideoPlayer::setPicClipOverlayDisabled()
 {
-	m_videoWid->setOverlayVisible(false);
+	m_videoWid->setPicClipOverlayVisible(false);
+}
+
+bool VideoPlayer::isPicClipOverlayVisible()
+{
+	return m_videoWid->isPicClipOverlayVisible();
+}
+
+bool VideoPlayer::fadePicClipOverlayOut(int ms)
+{
+	if (!m_videoWid->isPicClipOverlayVisible())
+		return false;
+
+	if (ms < 0)
+		ms = 0;
+
+	m_overlayFadeTimeLine.setDirection(QTimeLine::Backward);
+	m_overlayFadeTimeLine.setDuration(ms);
+	m_overlayFadeTimeLine.start();
+
+	return true;
+}
+
+bool VideoPlayer::fadePicClipOverlayIn(int ms)
+{
+	if (m_videoWid->isPicClipOverlayVisible())
+		return false;
+
+	if (ms < 0)
+		ms = 0;
+
+	m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
+	m_overlayFadeTimeLine.setDuration(ms);
+	m_overlayFadeTimeLine.start();
+
+	return true;
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
@@ -312,7 +362,7 @@ void VideoPlayer::onVideoEnd()
 
 void VideoPlayer::setOverlayFade(qreal val)
 {
-	m_videoWid->setOverlayOpacity(val);
+	m_videoWid->setPicClipOverlayOpacity(val);
 }
 
 void VideoPlayer::setOverlayFadeFinished()
@@ -321,7 +371,7 @@ void VideoPlayer::setOverlayFadeFinished()
 		m_overlayFadeOutFirst = false;
 		m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
 		if (m_currentFxClipItem)
-			m_videoWid->setOverlayImage(m_currentFxClipItem->filePath());
+			m_videoWid->setPicClipOverlayImage(m_currentFxClipItem->filePath());
 		m_overlayFadeTimeLine.start();
 	} else {
 		// m_videoWid->setOverlayOpacity(1);

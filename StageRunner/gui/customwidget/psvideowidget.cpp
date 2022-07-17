@@ -92,7 +92,7 @@ void PsVideoWidget::setVideoPlayer(VideoPlayer *vidplay)
 	m_myPlayer = vidplay;
 }
 
-void PsVideoWidget::raiseOverlay()
+void PsVideoWidget::raisePicClipOverlay()
 {
 	if (m_overlay) {
 		if (m_overlay->size() != size())
@@ -102,7 +102,7 @@ void PsVideoWidget::raiseOverlay()
 	}
 }
 
-void PsVideoWidget::setOverlayVisible(bool state)
+void PsVideoWidget::setPicClipOverlayVisible(bool state)
 {
 	if (m_overlay) {
 		m_isOverlayVisible = state;
@@ -114,7 +114,7 @@ void PsVideoWidget::setOverlayVisible(bool state)
 	}
 }
 
-bool PsVideoWidget::setOverlayImage(const QString &path)
+bool PsVideoWidget::setPicClipOverlayImage(const QString &path)
 {
 	if (!m_overlay)
 		return true;
@@ -132,7 +132,7 @@ bool PsVideoWidget::setOverlayImage(const QString &path)
 	return true;
 }
 
-void PsVideoWidget::setOverlayOpacity(qreal val)
+void PsVideoWidget::setPicClipOverlayOpacity(qreal val)
 {
 	m_overlay->setWindowOpacity(val);
 }

@@ -53,7 +53,7 @@ private:
 	QStringList output_devices;
 	QStringList input_devices;
 
-	QMutex *accessMutex;
+	QRecursiveMutex *accessMutex;
 	bool write_universe_debug_out;
 	int m_reOpenOutput;
 	int m_reOpenInput;

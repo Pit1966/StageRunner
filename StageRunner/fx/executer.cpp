@@ -37,6 +37,7 @@
 #include "usersettings.h"
 #include "qtstatictools.h"
 #include "dmxchannel.h"
+#include "system/qt_versions.h"
 
 #include <QStringList>
 
@@ -783,7 +784,7 @@ QString ScriptExecuter::getFirstParaOfString(QString &parastr)
 
 int ScriptExecuter::getPos(QString &restPara)
 {
-	QStringList paras = restPara.split(' ', QString::SkipEmptyParts);
+	QStringList paras = restPara.split(' ', Qt::SkipEmptyParts);
 	int pos = -2;
 
 	QMutableListIterator<QString> it(paras);
@@ -1132,7 +1133,7 @@ bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
 
 bool ScriptExecuter::executeYadiDMXMergeMode(FxScriptLine *line)
 {
-	QStringList paras = line->parameters().split(" ",QString::SkipEmptyParts);
+	QStringList paras = line->parameters().split(" ",Qt::SkipEmptyParts);
 
 	if (paras.size() < 2) {
 		m_lastScriptError = tr("Missing parameter. Format is: DMXMERGE <input> <mergemode>");
@@ -1173,7 +1174,7 @@ bool ScriptExecuter::executeLoopExt(FxScriptLine *line)
 {
 	line->incLoopCount();
 
-	QStringList paras = line->parameters().split(" ",QString::SkipEmptyParts);
+	QStringList paras = line->parameters().split(" ",Qt::SkipEmptyParts);
 	if (paras.isEmpty()) { // simple loop without parameters from beginning
 		m_currentLineNum = -1;
 		return true;

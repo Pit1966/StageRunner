@@ -45,7 +45,7 @@
 #endif
 
 YadiDMXUSBOut::YadiDMXUSBOut()
-	: accessMutex(new QMutex(QMutex::Recursive))
+	: accessMutex(new QRecursiveMutex())
 	, write_universe_debug_out(false)
 	, m_reOpenOutput(-1)
 	, m_reOpenInput(-1)

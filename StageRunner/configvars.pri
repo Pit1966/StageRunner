@@ -150,4 +150,7 @@ win32 {
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 
+HEADERS += \
+	$$PWD/system/qt_versions.h
+
 

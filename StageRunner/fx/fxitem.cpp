@@ -27,7 +27,7 @@
 #include <QFileInfo>
 
 QList<FxItem*>*FxItem::global_fx_list = 0;
-QMutex FxItem::global_fx_lock(QMutex::Recursive);
+QRecursiveMutex FxItem::global_fx_lock;
 qint32 FxItem::m_lowestIdForGenerator = 1;
 
 FxItem::FxItem()

@@ -41,6 +41,8 @@
 #include "dmxchanproperty.h"
 #include "fxlist.h"
 
+#include "qt_versions.h"
+
 #include <QSettings>
 #include <QDebug>
 
@@ -187,7 +189,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 		QString b2;
 		QString b3;
 		QString b1a;
-		QStringList parts = key.split("][",QString::SkipEmptyParts);
+		QStringList parts = key.split("][",Qt::SkipEmptyParts);
 		switch (parts.size()) {
 		case 3:
 			curIndex = parts[2].remove(QChar(']')).trimmed();

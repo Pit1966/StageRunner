@@ -68,7 +68,7 @@ class FxItem : public VarSet
 {
 private:
 	static QList<FxItem*> *global_fx_list;
-	static QMutex global_fx_lock;
+	static QRecursiveMutex global_fx_lock;
 	static qint32 m_lowestIdForGenerator;
 
 protected:

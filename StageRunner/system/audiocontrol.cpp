@@ -62,7 +62,7 @@ AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 	,myApp(app_central)
 	,m_initInThread(initInThread)
 	,used_slots(MAX_AUDIO_SLOTS)
-	,slotMutex(new QMutex(QMutex::Recursive))
+	,slotMutex(new QRecursiveMutex())
 {
 	init();
 	getAudioDevices();
