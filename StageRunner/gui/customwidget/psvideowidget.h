@@ -48,6 +48,7 @@ public:
 	bool isOverlayVisible() const {return m_isOverlayVisible;}
 	void setOverlayVisible(bool state);
 	bool setOverlayImage(const QString &path);
+	void setOverlayOpacity(qreal val);
 
 protected:
 	void checkOverlayShow();

@@ -132,6 +132,11 @@ bool PsVideoWidget::setOverlayImage(const QString &path)
 	return true;
 }
 
+void PsVideoWidget::setOverlayOpacity(qreal val)
+{
+	m_overlay->setWindowOpacity(val);
+}
+
 void PsVideoWidget::checkOverlayShow()
 {
 	if (!m_overlay)

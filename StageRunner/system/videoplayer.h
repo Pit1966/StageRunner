@@ -25,6 +25,7 @@
 #define VIDEOPLAYER_H
 
 #include <QMediaPlayer>
+#include <QTimeLine>
 
 #include "commandsystem.h"
 
@@ -47,6 +48,8 @@ protected:
 	int m_currentMasterVolume;
 	QMediaPlayer::State currentState;
 	FxClipItem *m_currentFxClipItem;
+	QTimeLine m_overlayFadeTimeLine;		///< used to fade in and out the overlay picture
+	bool m_overlayFadeOutFirst;
 
 public:
 	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
@@ -69,6 +72,8 @@ private slots:
 	void on_play_state_changed(QMediaPlayer::State state);
 	void on_playback_position_changed(qint64 pos);
 	void onVideoEnd();
+	void setOverlayFade(qreal val);
+	void setOverlayFadeFinished();
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);
