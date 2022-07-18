@@ -52,8 +52,11 @@ public:
 private:
 	QStringList output_devices;
 	QStringList input_devices;
-
+#if QT_VERSION >= 0x050e00
 	QRecursiveMutex *accessMutex;
+#else
+	QMutex *accessMutex;
+#endif
 	bool write_universe_debug_out;
 	int m_reOpenOutput;
 	int m_reOpenInput;

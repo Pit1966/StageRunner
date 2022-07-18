@@ -26,6 +26,7 @@
 
 #include "commandsystem.h"
 #include "config.h"
+#include "qt_versions.h"
 
 #include <QThread>
 #include <QList>

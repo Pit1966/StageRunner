@@ -29,7 +29,9 @@
 #include <QHash>
 #include <QReadWriteLock>
 #include <QString>
-#include <QRecursiveMutex>
+#if QT_VERSION >= 0x050e00
+#  include <QRecursiveMutex>
+#endif
 
 
 template <class Key, class T> class MutexQHash : public QHash <Key, T>

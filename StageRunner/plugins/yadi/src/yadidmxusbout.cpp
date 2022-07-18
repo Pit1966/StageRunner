@@ -45,13 +45,19 @@
 #endif
 
 YadiDMXUSBOut::YadiDMXUSBOut()
-	: accessMutex(new QRecursiveMutex())
+	: accessMutex(nullptr)
 	, write_universe_debug_out(false)
 	, m_reOpenOutput(-1)
 	, m_reOpenInput(-1)
 	, m_comErrorCounter(0)
 	, m_totalComErrorCounter(0)
 {
+#if QT_VERSION >= 0x050e00
+	accessMutex = new QRecursiveMutex();
+#else
+	accessMutex = new QMutex(QMutex::Recursive);
+#endif
+
 	connect (this,SIGNAL(communicationErrorDetected()),this,SLOT(handleCommunicationError()),Qt::QueuedConnection);
 }
 

@@ -26,6 +26,7 @@
 
 #include "../tool/varset.h"
 #include "../system/commandsystem.h"
+#include "../system/qt_versions.h"
 
 #include <QString>
 #include <QList>
