@@ -35,21 +35,26 @@
 PsVideoWidget::PsVideoWidget(QWidget *parent)
 	: QVideoWidget(parent)
 	, m_myPlayer(nullptr)
-	, m_overlay(nullptr)
+	, m_overlay{nullptr,}
+	, m_hasOverlays(false)
 	, m_isOverlayVisible(false)
-	, m_overlayOpaticity(1.0)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setAutoFillBackground(false);
 
-	m_overlay = new PsOverlayLabel();
-	connect(m_overlay, SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		m_overlay[i] = new PsOverlayLabel();
+		m_overlay[i]->setWindowFlags(Qt::ToolTip);		// this prevents windows from being listed in task bar
 
-	m_overlay->move(pos());
-	m_overlay->resize(size());
-	m_overlay->raise();
-	m_overlay->show();
+		connect(m_overlay[i], SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
 
+		m_overlay[i]->move(pos());
+		m_overlay[i]->resize(size());
+		m_overlay[i]->raise();
+		m_overlay[i]->show();
+		m_overlay[i]->setWindowOpacity(0.0);
+	}
+	m_hasOverlays = true;
 
 	setPrefsSettings();
 
@@ -58,7 +63,9 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 
 PsVideoWidget::~PsVideoWidget()
 {
-	delete m_overlay;
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		delete m_overlay[i];
+	}
 }
 
 void PsVideoWidget::setPrefsSettings()
@@ -92,34 +99,44 @@ void PsVideoWidget::setVideoPlayer(VideoPlayer *vidplay)
 	m_myPlayer = vidplay;
 }
 
-void PsVideoWidget::raisePicClipOverlay()
+void PsVideoWidget::raisePicClipOverlay(int layer)
 {
-	if (m_overlay) {
-		if (m_overlay->size() != size())
-			m_overlay->resize(size());
-		m_overlay->raise();
-		m_overlay->update();
+	if (layer >= PIC_OVERLAY_COUNT || !m_hasOverlays)
+		return;
+
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		if (m_overlay[i]->size() != size())
+			m_overlay[i]->resize(size());
+		m_overlay[i]->raise();
+		m_overlay[i]->update();
 	}
+
+	if (layer >= 0)
+		m_overlay[layer]->raise();
 }
 
-void PsVideoWidget::setPicClipOverlayVisible(bool state)
+void PsVideoWidget::setPicClipOverlaysActive(bool state)
 {
-	if (m_overlay) {
-		m_isOverlayVisible = state;
-		// overlay is only visible, if videowidget is also visible
-		this->show();
-		this->raise();
-		checkOverlayShow();
-		m_overlay->update();
-	}
+	m_isOverlayVisible = state;
+	// overlay is only visible, if videowidget is also visible
+	this->show();
+	this->raise();
+	// now raise and show pic overlays
+	checkOverlayShow();
+
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++)
+		m_overlay[i]->update();
 }
 
-bool PsVideoWidget::setPicClipOverlayImage(const QString &path)
+bool PsVideoWidget::setPicClipOverlayImage(const QString &path, int layer, qreal opacity)
 {
-	if (!m_overlay)
+	if (!m_hasOverlays)
 		return true;
 
-	m_overlay->setText(QString());
+	if (layer >= PIC_OVERLAY_COUNT)
+		return false;
+
+	m_overlay[layer]->setText(QString());
 
 	// get label dimensions
 	int w = width();
@@ -127,30 +144,89 @@ bool PsVideoWidget::setPicClipOverlayImage(const QString &path)
 	QPixmap p(path);
 
 	// set a scaled pixmap to a w x h window keeping its aspect ratio
-	m_overlay->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio,Qt::SmoothTransformation));
-	m_overlay->update();
+	m_overlay[layer]->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio,Qt::SmoothTransformation));
+	m_overlay[layer]->setWindowOpacity(opacity);
+	m_overlay[layer]->update();
+	m_currentPicPaths[layer] = path;
 	return true;
 }
 
-void PsVideoWidget::setPicClipOverlayOpacity(qreal val)
+const QString &PsVideoWidget::overlayPicPath(int layer)
 {
-	m_overlay->setWindowOpacity(val);
+	return m_currentPicPaths[layer];
+}
+
+void PsVideoWidget::setPicClipOverlayOpacity(qreal val, int layer)
+{
+	if (layer >= PIC_OVERLAY_COUNT)
+		return;
+
+	if (layer < 0) {
+		for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+			m_overlay[i]->setWindowOpacity(val);
+			m_overlay[i]->update();
+		}
+	}
+	else {
+		m_overlay[layer]->setWindowOpacity(val);
+		m_overlay[layer]->update();
+	}
+}
+
+bool PsVideoWidget::isPicClipVisible(int layer)
+{
+	if (layer >= PIC_OVERLAY_COUNT)
+		return false;
+
+	if (m_overlay[layer]->windowOpacity() > 0.0)
+		return true;
+
+	return false;
+}
+
+bool PsVideoWidget::isPicPathVisible(const QString &path)
+{
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		if (m_currentPicPaths[i] == path && isPicClipVisible(i))
+			return true;
+	}
+
+	return false;
 }
 
 void PsVideoWidget::checkOverlayShow()
 {
-	if (!m_overlay)
+	if (!m_hasOverlays)
 		return;
 
 	if (isVisible()) {
 		if (m_isOverlayVisible) {
-			m_overlay->show();
-			m_overlay->raise();
+			for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+				m_overlay[i]->show();
+				m_overlay[i]->raise();
+			}
 		} else {
-			m_overlay->hide();
+			hideOverlays();
 		}
 	} else {
-		m_overlay->hide();
+		hideOverlays();
+	}
+}
+
+void PsVideoWidget::hideOverlays()
+{
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		m_overlay[i]->setWindowOpacity(0.0);
+		m_overlay[i]->hide();
+		m_currentPicPaths[i].clear();
+	}
+}
+
+void PsVideoWidget::closeOverlays()
+{
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		m_overlay[i]->close();
+		m_currentPicPaths[i].clear();
 	}
 }
 
@@ -172,15 +248,15 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 		m_myPlayer->stop();
 
 #if QT_VERSION >= 0x050600
-	if (m_overlay)
-		m_overlay->hide();
+	if (m_hasOverlays)
+		hideOverlays();
 	hide();
 	event->ignore();
 	return;
 #else
 	QVideoWidget::closeEvent(event);
-	if (m_overlay)
-		m_overlay->close();
+	if (m_hasOverlays)
+		closeOverlays();
 #endif
 }
 
@@ -189,12 +265,12 @@ void PsVideoWidget::paintEvent(QPaintEvent */*event*/)
 
 	QPainter painter(this);
 
-//	painter.setRenderHint(QPainter::Antialiasing);
-//	painter.setPen(Qt::NoPen);
-//	QLinearGradient gradient(QPointF(100,100),QPointF(100,400));
-//	gradient.setColorAt(0,QColor::fromRgbF(0.37f,0.55f,0.64f,0.9f));
-//	gradient.setColorAt(1,QColor::fromRgbF(0.27f,0.35f,0.54f,0.9f));
-//	painter.setBrush(gradient);
+	//	painter.setRenderHint(QPainter::Antialiasing);
+	//	painter.setPen(Qt::NoPen);
+	//	QLinearGradient gradient(QPointF(100,100),QPointF(100,400));
+	//	gradient.setColorAt(0,QColor::fromRgbF(0.37f,0.55f,0.64f,0.9f));
+	//	gradient.setColorAt(1,QColor::fromRgbF(0.27f,0.35f,0.54f,0.9f));
+	//	painter.setBrush(gradient);
 
 	painter.setBrush(Qt::black);
 	painter.drawRect(0, 0, width(), height());
@@ -204,25 +280,32 @@ void PsVideoWidget::paintEvent(QPaintEvent */*event*/)
 
 void PsVideoWidget::moveEvent(QMoveEvent *event)
 {
-	if (m_overlay) {
-		m_overlay->move(event->pos());
-		checkOverlayShow();
+	if (!m_hasOverlays)
+		return;
+
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		m_overlay[i]->move(event->pos());
 	}
+	checkOverlayShow();
 }
 
 void PsVideoWidget::resizeEvent(QResizeEvent *event)
 {
-	if (m_overlay) {
-		m_overlay->resize(event->size());
+	if (m_hasOverlays) {
+		for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+			m_overlay[i]->resize(event->size());
+		}
 		checkOverlayShow();
 	}
 }
 
 void PsVideoWidget::showEvent(QShowEvent *)
 {
-	if (m_overlay) {
+	if (m_hasOverlays) {
 		checkOverlayShow();
-		m_overlay->update();
+		for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+			m_overlay[i]->update();
+		}
 	}
 }
 

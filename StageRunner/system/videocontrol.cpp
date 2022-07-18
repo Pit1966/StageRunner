@@ -145,8 +145,29 @@ void VideoControl::videoBlack(qint32 time_ms)
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	Q_ASSERT(vp);
 
-	if (vp->isPicClipOverlayVisible()) {
-		vp->fadePicClipOverlayOut(time_ms);
+	qDebug() << "videoBlack PicOverlayActive" << vp->isPicClipOverlaysActive();
+
+	if (vp->isPicClipOverlaysActive()) {
+
+		if (vp->fadePicClipOverlayOut(time_ms, 0)) {
+			if (time_ms > 0) {
+				LOGTEXT(tr("<font color=green>Fade to BLACK back overlay</font>: %1ms").arg(time_ms));
+			} else {
+				LOGTEXT(tr("<font color=green>BLACK back overlay</font>"));
+			}
+		}
+		if (vp->fadePicClipOverlayOut(time_ms, 1)) {
+			if (time_ms > 0) {
+				LOGTEXT(tr("<font color=green>Fade to BLACK top overlay</font>: %1ms").arg(time_ms));
+			} else {
+				LOGTEXT(tr("<font color=green>BLACK top overlay</font>"));
+			}
+		}
+
+		if (vp->isRunning()) {
+			LOGTEXT(tr("<font color=orange>BLACK video</font>"));
+			vp->stop();
+		}
 	}
 	else {
 		vp->stop();

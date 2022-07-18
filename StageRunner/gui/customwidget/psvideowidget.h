@@ -29,14 +29,17 @@
 class VideoPlayer;
 class PsOverlayLabel;
 
+#define PIC_OVERLAY_COUNT 2
+
 class PsVideoWidget : public QVideoWidget
 {
 	Q_OBJECT
 private:
 	VideoPlayer *m_myPlayer;
-	PsOverlayLabel *m_overlay;
+	PsOverlayLabel *m_overlay[PIC_OVERLAY_COUNT];
+	QString m_currentPicPaths[PIC_OVERLAY_COUNT];
+	bool m_hasOverlays;
 	bool m_isOverlayVisible;
-	qreal m_overlayOpaticity;
 
 public:
 	PsVideoWidget(QWidget *parent = nullptr);
@@ -44,14 +47,19 @@ public:
 	void setPrefsSettings();
 	void saveCurrentStateToPrefs();
 	void setVideoPlayer(VideoPlayer *vidplay);
-	void raisePicClipOverlay();
-	bool isPicClipOverlayVisible() const {return m_isOverlayVisible;}
-	void setPicClipOverlayVisible(bool state);
-	bool setPicClipOverlayImage(const QString &path);
-	void setPicClipOverlayOpacity(qreal val);
+	void raisePicClipOverlay(int layer = -1);
+	bool isPicClipOverlaysActive() const {return m_isOverlayVisible;}
+	void setPicClipOverlaysActive(bool state);
+	bool setPicClipOverlayImage(const QString &path, int layer, qreal opacity);
+	const QString &overlayPicPath(int layer);
+	void setPicClipOverlayOpacity(qreal val, int layer = -1);
+	bool isPicClipVisible(int layer);
+	bool isPicPathVisible(const QString &path);
 
 protected:
 	void checkOverlayShow();
+	void hideOverlays();
+	void closeOverlays();
 	void mouseDoubleClickEvent(QMouseEvent *);
 	void mousePressEvent(QMouseEvent *ev);
 	void closeEvent(QCloseEvent *event);

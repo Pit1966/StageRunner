@@ -35,6 +35,8 @@ class PsVideoWidget;
 class FxClipItem;
 class VideoControl;
 
+#define PIC_OVERLAY_COUNT 2
+
 class VideoPlayer : protected QMediaPlayer
 {
 	Q_OBJECT
@@ -49,8 +51,9 @@ protected:
 	QMediaPlayer::State currentState;
 	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
 	FxClipItem *m_currentFxClipItem;
+	FxClipItem *m_lastFxClipItem;
 
-	QTimeLine m_overlayFadeTimeLine;		///< used to fade in and out the overlay picture
+	QTimeLine m_overlayFadeTimeLine[PIC_OVERLAY_COUNT];		///< used to fade in and out the overlay picture
 	bool m_overlayFadeOutFirst;
 
 public:
@@ -65,20 +68,24 @@ public:
 	void setVolume(int vol);
 	void setMasterVolume(int vol);
 	void setPicClipOverlayDisabled();
-	bool isPicClipOverlayVisible();
-	bool fadePicClipOverlayOut(int ms);
-	bool fadePicClipOverlayIn(int ms);
+	bool isPicClipOverlaysActive();
+	bool fadePicClipOverlayOut(int ms, int layer);
+	bool fadePicClipOverlayIn(int ms, int layer);
 
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}
+
+private:
+	bool playPicClip(FxClipItem *fxc);
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
 	void on_play_state_changed(QMediaPlayer::State state);
 	void on_playback_position_changed(qint64 pos);
 	void onVideoEnd();
-	void setOverlayFade(qreal val);
-	void setOverlayFadeFinished();
+	void setOverlayFade(qreal val, int layer);
+	void setOverlayFadeFinished(int layer);
+	void stopAllOverlayFades();
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);
