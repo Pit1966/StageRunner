@@ -1,1 +1,5 @@
 build*/
+**/configrev.h
+*.pro.user
+tmp.txt
+

@@ -120,8 +120,10 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 //	}
 
 
+//  Test
 //	QRect r = option->rect;
 //	painter->fillRect(r, Qt::green);
+//	qDebug() << "drawPrimitive element type" << element << widget->objectName();
 
 	switch (element) {
 //	case PE_CustomBase:
@@ -315,6 +317,9 @@ void LightDeskStyle::drawControl(QStyle::ControlElement element, const QStyleOpt
 //		w = w->parentWidget();
 //	}
 
+//	if (element != CE_ShapedFrame)
+//		qDebug() << "drawControl" << element;
+
 	switch (element) {
 	case CE_TabBarTabShape:
 		{
@@ -375,6 +380,14 @@ void LightDeskStyle::drawControl(QStyle::ControlElement element, const QStyleOpt
 			painter->restore();
 		}
 		break;
+
+#if QT_VERSION >= 0x050e00
+	case CE_MenuItem:
+		painter->fillRect(option->rect, QColor(30,30,30));
+		QProxyStyle::drawControl(element, option, painter, widget);
+		break;
+#endif
+
 	default:
 //			QRect r = option->rect;
 //			//r.adjust(0,0,0,-1);

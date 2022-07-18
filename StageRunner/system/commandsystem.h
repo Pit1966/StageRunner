@@ -178,12 +178,13 @@ namespace VIDEO {
  */
 enum VideoViewStatus {
 	VIEW_UNUSED			= 0,
-	VIEW_BLACK			= 1<<0,
-	VIEW_VIDEO_VISIBLE	= 1<<1,
-	VIEW_VIDEO_FADEIN	= 1<<2,
-	VIEW_VIDEO_FADEOUT	= 1<<3,
-	VIEW_PIC_FADEIN		= 1<<4,
-	VIEW_PIC_FADEOUT	= 1<<5,
+	VIEW_BLACK			= 1<<0,			// 1
+	VIEW_VIDEO_VISIBLE	= 1<<1,			// 2
+	VIEW_VIDEO_FADEIN	= 1<<2,			// 4
+	VIEW_VIDEO_FADEOUT	= 1<<3,			// 8
+	VIEW_PIC_VISIBLE	= 1<<4,			// 16
+	VIEW_PIC_FADEIN		= 1<<5,			// 32
+	VIEW_PIC_FADEOUT	= 1<<6,			// 64
 
 };
 }

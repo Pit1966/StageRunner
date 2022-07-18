@@ -23,6 +23,7 @@
 
 #include "setupwidget.h"
 #include "config.h"
+#include "configrev.h"
 #include "log.h"
 #include "appcentral.h"
 #include "ioplugincentral.h"
@@ -36,6 +37,7 @@
 #include "variantmapserializer.h"
 
 #include <QtWidgets>
+#include <QSettings>
 
 SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	: QDialog(parent)
@@ -46,6 +48,8 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	setupUi(this);
 	initGui();
 
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("Plugins");
 
 	myapp->pluginCentral->updatePluginMappingInformation();
 	m_curPluginMap = myapp->pluginCentral->pluginMapping;
@@ -53,7 +57,14 @@ SetupWidget::SetupWidget(AppCentral *app_central, QWidget *parent)
 	QList<QLCIOPlugin*>qlcplugins = myapp->pluginCentral->qlcPlugins();
 	for (int t=0; t<qlcplugins.size(); t++) {
 		QLCIOPlugin *plugin = qlcplugins.at(t);
-		qlcPluginsList->addItem(plugin->name());
+		QListWidgetItem *item = new QListWidgetItem(plugin->name());
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		if (set.value(plugin->name(), true).toBool() == false) {
+			item->setCheckState(Qt::Unchecked);
+		} else {
+			item->setCheckState(Qt::Checked);
+		}
+		qlcPluginsList->addItem(item);
 	}
 
 	configurePluginButton->setDisabled(true);
@@ -478,3 +489,17 @@ void SetupWidget::on_updateLinesButton_clicked()
 {
 	myapp->reOpenPlugins();
 }
+
+void SetupWidget::on_qlcPluginsList_itemChanged(QListWidgetItem *item)
+{
+	// DEBUGTEXT("item changed %s\n", item->text().toLocal8Bit().constData());
+
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("Plugins");
+	if (item->checkState() == Qt::Unchecked) {
+		set.setValue(item->text(), false);
+	} else {
+		set.setValue(item->text(), true);
+	}
+}
+

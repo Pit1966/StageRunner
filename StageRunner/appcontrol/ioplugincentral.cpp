@@ -33,10 +33,11 @@
 #include <QDir>
 #include <QPluginLoader>
 #include <QMetaObject>
+#include <QSettings>
 
 IOPluginCentral::IOPluginCentral(QObject *parent)
-    : QObject(parent)
-    , pluginMapping(new PluginMapping())
+	: QObject(parent)
+	, pluginMapping(new PluginMapping())
 {
 }
 
@@ -61,6 +62,10 @@ QLCIOPlugin *IOPluginCentral::getQLCPluginByName(const QString &name)
 
 int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 {
+	// Read enable / disable status of plugin from Qt config
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("Plugins");
+
 	int loadcnt = 0;
 
 	QString path = dir_str;
@@ -90,11 +95,16 @@ int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 		QObject *obj = load.instance();
 		QLCIOPlugin *plugin = qobject_cast<QLCIOPlugin*> (obj);
 		if (plugin) {
+			// check if plugin is disabled
+			if (set.value(plugin->name(), true).toBool() == false) {
+				LOGTEXT(tr("<font color=info>QLC plugin '%1' is disabled</font>").arg(plugin->name()));
+				qlc_plugins.append(plugin);
+				plugin->setProperty("isDisabled", true);
+				loadcnt++;
+			}
 			// Check if plugin is already loaded
-			if (nullptr == getQLCPluginByName(plugin->name())) {
-				LOGTEXT(tr("QLC plugin '%1' loaded")
-						.arg(plugin->name()));
-
+			else if (nullptr == getQLCPluginByName(plugin->name())) {
+				LOGTEXT(tr("QLC plugin '%1' loaded").arg(plugin->name()));
 				qlc_plugins.append(plugin);
 
 				plugin->init();
@@ -108,35 +118,37 @@ int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 					connect(plugin,SIGNAL(statusMsgEmitted(QString)),this,SLOT(onStatusMessageReceived(QString)));
 				}
 
-			} else {
+			}
+			else {
 				DEBUGERROR("'%s' QLC I/O plugin in %s is already loaded -> unload again"
-						   ,plugin->name().toLocal8Bit().data(), path.toLocal8Bit().data());
+						   , plugin->name().toLocal8Bit().constData(), path.toLocal8Bit().constData());
 				load.unload();
 			}
 
 		} else {
 			DEBUGERROR("%s: %s doesn't contain an QLC I/O plugin:"
-					   ,Q_FUNC_INFO, path.toLocal8Bit().data(), load.errorString().toLocal8Bit().data());
+					   , Q_FUNC_INFO, path.toLocal8Bit().data(), load.errorString().toLocal8Bit().data());
 			load.unload();
 		}
 
 	}
+
 	return loadcnt;
 }
 
 void IOPluginCentral::unloadPlugins()
 {
-//	QObjectList plugins = QPluginLoader::staticInstances();
+	//	QObjectList plugins = QPluginLoader::staticInstances();
 
-//	for (int t=0; t<plugins.size(); t++) {
-//		delete plugins.at(t);
-//	}
-//  qlc_plugins.clear();
+	//	for (int t=0; t<plugins.size(); t++) {
+	//		delete plugins.at(t);
+	//	}
+	//  qlc_plugins.clear();
 
-    if (debug) qDebug() << "unload plugins";
+	if (debug) qDebug() << "unload plugins";
 
-    while (!qlc_plugins.isEmpty())
-        delete qlc_plugins.takeFirst();
+	while (!qlc_plugins.isEmpty())
+		delete qlc_plugins.takeFirst();
 }
 
 bool IOPluginCentral::updatePluginMappingInformation()
@@ -214,7 +226,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			if (fastMapInUniverse[univ].plugin) {
 				POPUPERRORMSG(tr("Plugin Settings")
 							  ,tr("Input universe %1 is assigned to multiple plugin lines -> this is not implemented yet")
-						 .arg(univ+1));
+							  .arg(univ+1));
 			} else {
 				fastMapInUniverse[univ].deviceUniverse = univ;
 				fastMapInUniverse[univ].plugin = lineconf->plugin;
@@ -235,6 +247,10 @@ bool IOPluginCentral::openPlugins()
 
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		if (plugin->property("isDisabled").toBool() == true) {
+			LOGTEXT(tr("Plugin '%1' not opened, since it is disabled").arg(plugin->name()));
+			continue;
+		}
 		int cap = plugin->capabilities();
 		QString capstr;
 		if (cap & QLCIOPlugin::Output)
@@ -262,7 +278,7 @@ bool IOPluginCentral::openPlugins()
 		}
 
 		QStringList inputs = inputsOf(plugin);
-        for (int i=0; i<inputs.size(); i++) {
+		for (int i=0; i<inputs.size(); i++) {
 			int universe;
 			getInputUniverseForPlugin(plugin,i,universe);
 			if (universe < 0) {
@@ -286,13 +302,13 @@ void IOPluginCentral::closePlugins()
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
 		QStringList outputs = outputsOf(plugin);
-        for (int o=0; o<outputs.size(); o++) {
+		for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));
 			plugin->closeOutput(uint(o),0);
 			plugin->disconnect();
 		}
 		QStringList inputs = inputsOf(plugin);
-        for (int i=0; i<inputs.size(); i++) {
+		for (int i=0; i<inputs.size(); i++) {
 			LOGTEXT(tr("Close Plugin: %1, Input: %2").arg(plugin->name(),inputs.at(i)));
 			plugin->closeInput(uint(i),0);
 			plugin->disconnect();
@@ -306,7 +322,7 @@ QStringList IOPluginCentral::getAllAvailableInputNames() const
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
 		input_names += inputsOf(plugin);
-    }
+	}
 	return input_names;
 }
 
@@ -326,8 +342,8 @@ QString IOPluginCentral::sysPluginDir()
 #ifdef WIN32
 	dir = "../plugins";
 #elif __APPLE__
-//	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
-//			.arg("PlugIns/stagerunner");
+	//	dir = QString("%1/../%2").arg(QCoreApplication::applicationDirPath())
+	//			.arg("PlugIns/stagerunner");
 	dir = QString("%1/Contents/%2")
 			.arg("~/StageRunner.app")
 			.arg(PLUGINDIR);
@@ -601,14 +617,14 @@ void IOPluginCentral::onPluginConfigurationChanged()
 
 	if (added_inouts.size()) {
 		openPlugins();
-//		MessageDialog *dialog = new MessageDialog;
-//		QString maintext = tr("One or more Input or Output line(s) has appeared!\n");
-//		QString subtext;
-//		for (int t=0; t<added_inouts.size(); t++) {
-//			subtext += QString("Line: %1\n").arg(added_inouts.at(t));
-//		}
-//		dialog->connectSpecialFunction(this,"reOpenPlugins");
-//		dialog->showMessage(maintext,subtext);
+		//		MessageDialog *dialog = new MessageDialog;
+		//		QString maintext = tr("One or more Input or Output line(s) has appeared!\n");
+		//		QString subtext;
+		//		for (int t=0; t<added_inouts.size(); t++) {
+		//			subtext += QString("Line: %1\n").arg(added_inouts.at(t));
+		//		}
+		//		dialog->connectSpecialFunction(this,"reOpenPlugins");
+		//		dialog->showMessage(maintext,subtext);
 	}
 
 	updatePluginMappingInformation();

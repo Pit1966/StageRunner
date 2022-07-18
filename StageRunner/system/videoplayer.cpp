@@ -91,6 +91,7 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 
 		if (m_videoWid->isPicClipOverlayVisible()) {
 			m_overlayFadeTimeLine.setDirection(QTimeLine::Backward);
+			m_viewState = VIEW_PIC_FADEOUT;
 			m_overlayFadeOutFirst = true;
 		} else {
 			m_videoWid->setPicClipOverlayImage(fxc->filePath());
@@ -98,6 +99,7 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 			m_videoWid->raisePicClipOverlay();
 
 			m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
+			m_viewState = VIEW_PIC_FADEIN;
 			m_videoWid->setPicClipOverlayOpacity(0.0);
 		}
 		m_overlayFadeTimeLine.setDuration(3000);
@@ -108,9 +110,9 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 		m_videoWid->setPicClipOverlayVisible(false);
 		m_videoWid->show();
 		m_videoWid->raise();
+		m_viewState = VIEW_VIDEO_VISIBLE;
 		this->play();
 	}
-
 
 	if (m_videoWid->size().isNull())
 		m_videoWid->resize(700,500);
@@ -202,9 +204,13 @@ bool VideoPlayer::fadePicClipOverlayOut(int ms)
 	if (!m_videoWid->isPicClipOverlayVisible())
 		return false;
 
+	if (m_viewState <= VIEW_BLACK)
+		return false;
+
 	if (ms < 0)
 		ms = 0;
 
+	m_viewState = VIEW_PIC_FADEOUT;
 	m_overlayFadeTimeLine.setDirection(QTimeLine::Backward);
 	m_overlayFadeTimeLine.setDuration(ms);
 	m_overlayFadeTimeLine.start();
@@ -220,6 +226,7 @@ bool VideoPlayer::fadePicClipOverlayIn(int ms)
 	if (ms < 0)
 		ms = 0;
 
+	m_viewState = VIEW_PIC_FADEIN;
 	m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
 	m_overlayFadeTimeLine.setDuration(ms);
 	m_overlayFadeTimeLine.start();
@@ -244,7 +251,11 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 		if (loopCnt < loopTarget) return;
 		break;
 	case QMediaPlayer::InvalidMedia:
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(media().request().url().toString()));
+#else
 		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(media().canonicalUrl().toString()));
+#endif
 		break;
 	}
 
@@ -367,13 +378,24 @@ void VideoPlayer::setOverlayFade(qreal val)
 
 void VideoPlayer::setOverlayFadeFinished()
 {
+	int cur_state = m_viewState;
+
 	if (m_overlayFadeOutFirst) {
 		m_overlayFadeOutFirst = false;
 		m_overlayFadeTimeLine.setDirection(QTimeLine::Forward);
+		m_viewState = VIEW_PIC_FADEIN;
 		if (m_currentFxClipItem)
 			m_videoWid->setPicClipOverlayImage(m_currentFxClipItem->filePath());
 		m_overlayFadeTimeLine.start();
 	} else {
+		if (m_viewState == VIEW_PIC_FADEIN) {
+			m_viewState = VIEW_PIC_VISIBLE;
+		}
+		else if (m_viewState == VIEW_PIC_FADEOUT) {
+			m_viewState = VIEW_BLACK;
+		}
 		// m_videoWid->setOverlayOpacity(1);
+
 	}
+	qDebug() << "set overlay finished" << cur_state << m_viewState;
 }

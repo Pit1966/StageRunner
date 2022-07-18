@@ -69,6 +69,7 @@ private slots:
 	void on_restartAudioVideoSlots_clicked();
 
 	void on_updateLinesButton_clicked();
+	void on_qlcPluginsList_itemChanged(QListWidgetItem *item);
 
 signals:
 	void applicationStyleChanged(QString style);
