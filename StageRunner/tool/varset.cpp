@@ -1023,10 +1023,11 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 {
 	bool ok = true;
 
-	QFlags<QIODevice::OpenModeFlag> append_flag = 0;
+	QFlags<QIODevice::OpenModeFlag> append_flag;
 	if (append) {
 		append_flag = QIODevice::Append;
 	} else {
+		append_flag = QIODevice::NotOpen;
 		QFile::remove(path + "~");
 		QFile::rename(path, path + "~");
 	}

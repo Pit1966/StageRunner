@@ -84,7 +84,7 @@ QSize PsLineEdit::sizeHint() const
 	ensurePolished();
 	QFontMetrics fm(font());
 	int h = qMax(fm.height(), 10);
-	int w = fm.width(text()) + 8;
+	int w = fm.horizontalAdvance(text()) + 8;
 	return QSize(w,h);
 }
 

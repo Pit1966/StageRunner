@@ -28,6 +28,7 @@
 
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QDebug>
 
 #include <cmath>
 
@@ -151,10 +152,15 @@ void qsynthKnob::wheelEvent ( QWheelEvent *pWheelEvent )
 		QDial::wheelEvent(pWheelEvent);
 	} else {
 		int iValue = value();
+#if QT_VERSION >= 0x050e00
+		if (pWheelEvent->angleDelta().y() > 0)
+			iValue -= pageStep() / 2;
+#else
 		if (pWheelEvent->delta() > 0)
-			iValue -= pageStep();
+			iValue -= pageStep() / 2;
+#endif
 		else
-			iValue += pageStep();
+			iValue += pageStep() / 2;
 		if (iValue > maximum())
 			iValue = maximum();
 		else
