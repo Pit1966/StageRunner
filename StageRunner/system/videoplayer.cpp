@@ -45,7 +45,6 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	, currentState(QMediaPlayer::StoppedState)
 	, m_viewState(VIEW_UNUSED)
 	, m_currentFxClipItem(nullptr)
-	, m_lastFxClipItem(nullptr)
 	, m_overlayFadeOutFirst(false)
 	, m_stopVideoAtEventEnd(false)
 {
@@ -87,12 +86,9 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 	m_slotNumber = slotNum;
 	qDebug() << "playFxClip" << fxc->name() << "viewState" << m_viewState;
 
-	m_lastFxClipItem = m_currentFxClipItem;
-	m_currentFxClipItem = fxc;
-
 	bool ok = true;
 	if (fxc->isPicClip) {
-		ok = playPicClip(fxc);
+		ok = playPicClip(fxc, m_currentFxClipItem);
 	}
 	else {
 		this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
@@ -110,6 +106,8 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 		m_viewState = VIEW_VIDEO_VISIBLE;
 		this->play();
 	}
+
+	m_currentFxClipItem = fxc;
 
 	if (m_videoWid->size().isNull())
 		m_videoWid->resize(700,500);
@@ -235,10 +233,17 @@ bool VideoPlayer::fadePicClipOverlayIn(int ms, int layer)
 	if (ms < 0)
 		ms = 0;
 
-	m_viewState = VIEW_PIC_FADEIN;
-	m_overlayFadeTimeLine[layer].setDirection(QTimeLine::Forward);
-	m_overlayFadeTimeLine[layer].setDuration(ms);
-	m_overlayFadeTimeLine[layer].start();
+	if (ms == 0) {
+		m_viewState = VIEW_PIC_VISIBLE;
+		m_overlayFadeTimeLine[layer].stop();
+		m_videoWid->setPicClipOverlayOpacity(1.0, layer);
+	}
+	else {
+		m_viewState = VIEW_PIC_FADEIN;
+		m_overlayFadeTimeLine[layer].setDirection(QTimeLine::Forward);
+		m_overlayFadeTimeLine[layer].setDuration(ms);
+		m_overlayFadeTimeLine[layer].start();
+	}
 
 	return true;
 }
@@ -248,9 +253,10 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	if (!isRunning())
 		return false;
 
-	m_videoWid->setPicClipOverlayOpacity(0, 0);	// set opacity for all overlay layers to 0
-	m_videoWid->setPicClipOverlayOpacity(0, 1);	// set opacity for all overlay layers to 0
 	m_videoWid->clearPicClipOverlayImage();		// remove all overlay PicClips
+	m_videoWid->setPicClipOverlayOpacity(0);	// set opacity for all overlay layers to 0
+	// m_videoWid->setPicClipOverlayImage(":/gfx/pics/stonechip_01.png", 0, 0.0);
+	// m_videoWid->setPicClipOverlayImage(":/gfx/pics/screen_black.png", 0, 0.0);
 	m_videoWid->setPicClipOverlaysActive(true);
 	bool ok = true;
 	ok &= m_videoCtrl->fadeOutFxClipAudio(m_slotNumber, 0, ms);
@@ -262,10 +268,9 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	return ok;
 }
 
-bool VideoPlayer::playPicClip(FxClipItem *fxc)
+bool VideoPlayer::playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
 {
 	// pause playback, if it is a picture in order to get a still image
-
 
 	if (m_viewState & VIEW_FADE_ACTIVE) {
 		stopAllOverlayFades();
@@ -279,42 +284,46 @@ bool VideoPlayer::playPicClip(FxClipItem *fxc)
 		}
 
 		// crossfade
-		int fadetime = 4000;
+		int fadeintime = fxc->fadeInTime();
+		int fadeouttime = fadeintime;
+		if (old_fxc && old_fxc->fadeOutTime() > 0)
+			fadeouttime = old_fxc->fadeOutTime();
+
 		// m_overlayFadeOutFirst = true;
 
 		if (m_videoWid->isPicClipVisible(1)) {
-			fadePicClipOverlayOut(fadetime, 1);
+			fadePicClipOverlayOut(fadeouttime, 1);
 
 			if (!m_overlayFadeOutFirst) {
 				m_videoWid->setPicClipOverlayImage(fxc->filePath(), 0, 0.0);
-				if (!fadePicClipOverlayIn(fadetime, 0))
+				if (!fadePicClipOverlayIn(fadeintime, 0))
 					return false;
 				LOGTEXT(tr("<font color=green>Crossfade Overlay</font> <b>%1</b> <font color=green> to back layer</font>")
 						.arg(fxc->fileName()));
 			}
 			else {
 				QString oldname;
-				if (m_lastFxClipItem)
-					oldname = m_lastFxClipItem->fileName();
+				if (old_fxc)
+					oldname = old_fxc->fileName();
 				LOGTEXT(tr("<font color=green>Fade out back overlay</font> <b>%1</b>").arg(oldname));
 			}
 
 		}
 		else {
-			fadePicClipOverlayOut(fadetime, 0);
+			fadePicClipOverlayOut(fadeouttime, 0);
 
 			if (!m_overlayFadeOutFirst) {
 
 				m_videoWid->setPicClipOverlayImage(fxc->filePath(), 1, 0.0);
-				if (!fadePicClipOverlayIn(fadetime, 1))
+				if (!fadePicClipOverlayIn(fadeintime, 1))
 					return false;
 				LOGTEXT(tr("<font color=green>Crossfade overlay</font> <b>%1</b> <font color=green> to top layer</font>")
 						.arg(fxc->fileName()));
 			}
 			else {
 				QString oldname;
-				if (m_lastFxClipItem)
-					oldname = m_lastFxClipItem->fileName();
+				if (old_fxc)
+					oldname = old_fxc->fileName();
 				LOGTEXT(tr("<font color=green>Fade out top overlay</font> <b>%1</b>").arg(oldname));
 			}
 		}
@@ -323,12 +332,12 @@ bool VideoPlayer::playPicClip(FxClipItem *fxc)
 		// this is first initialisation of a picture as overlay over videoplayer
 		// set picture in overlay number 1 and fade in
 
-		int fadetime = 2000;
+		int fadeintime = fxc->fadeInTime();
 
-		m_videoWid->setPicClipOverlayImage(fxc->filePath(), 1, 0.6);
+		m_videoWid->setPicClipOverlayImage(fxc->filePath(), 1, 0.0);
 		m_videoWid->setPicClipOverlaysActive(true);
 		m_videoWid->raisePicClipOverlay();
-		if (!fadePicClipOverlayIn(fadetime, 1))
+		if (!fadePicClipOverlayIn(fadeintime, 1))
 			return false;
 
 		LOGTEXT(tr("<font color=green>Set Overlay</font> <b>%1</b> <font color=green> to top layer</font>")
@@ -525,7 +534,6 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 			m_viewState = VIEW_BLACK;
 			if (m_currentFxClipItem) {
 				LOGTEXT(tr("<font color=green>VIDEO fade out end</font> <b>%1</b>").arg(m_currentFxClipItem->fileName()));
-				m_lastFxClipItem = m_currentFxClipItem;
 				m_currentFxClipItem = nullptr;
 			}
 		}

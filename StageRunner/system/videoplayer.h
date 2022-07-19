@@ -51,7 +51,6 @@ protected:
 	QMediaPlayer::State currentState;
 	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
 	FxClipItem *m_currentFxClipItem;		///< @todo switch to QPointer ... guarded pointer
-	FxClipItem *m_lastFxClipItem;
 
 	QTimeLine m_overlayFadeTimeLine[PIC_OVERLAY_COUNT];		///< used to fade in and out the overlay picture
 	bool m_overlayFadeOutFirst;				///< Overlay PicClip has to be started after current one was faded out
@@ -79,7 +78,7 @@ public:
 	inline QMediaPlayer * mediaPlayer() {return this;}
 
 private:
-	bool playPicClip(FxClipItem *fxc);
+	bool playPicClip(FxClipItem *fxc, FxClipItem *old_fxc);
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);

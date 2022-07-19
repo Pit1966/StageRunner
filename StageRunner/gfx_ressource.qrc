@@ -67,5 +67,7 @@
         <file>gfx/icons/audio_pause_red.png</file>
         <file>docs/help.txt</file>
         <file>gfx/icons/picclip.png</file>
+        <file>gfx/pics/stonechip_01.png</file>
+        <file>gfx/pics/screen_black.png</file>
     </qresource>
 </RCC>
