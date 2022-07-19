@@ -56,6 +56,7 @@ public:
 	void videoBlack(qint32 time_ms);
 	bool setVideoVolume(int slotnum, int vol);
 	bool setVideoMasterVolume(int vol);
+	bool fadeOutFxClipAudio(int slotnum, int targetVolume, int time_ms);
 
 signals:
 	void videoCtrlMsgEmitted(const AudioCtrlMsg &msg);

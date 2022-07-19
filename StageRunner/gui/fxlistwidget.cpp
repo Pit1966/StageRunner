@@ -800,9 +800,13 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	if (item) {
 		switch (fx->fxType()) {
 		case FX_AUDIO:
-			if (reinterpret_cast<FxAudioItem*>(fx)->isFxClip) {
+			if (reinterpret_cast<FxAudioItem*>(fx)->isPicClip) {
+				item->itemLabel->setPixmap(QPixmap(":/gfx/icons/picclip.png"));
+			}
+			else if (reinterpret_cast<FxAudioItem*>(fx)->isFxClip) {
 				item->itemLabel->setPixmap(QPixmap(":/gfx/icons/video.png"));
-			} else {
+			}
+			else {
 				item->itemLabel->setPixmap(QPixmap(":/gfx/icons/audio_speaker_grey.png"));
 			}
 			break;

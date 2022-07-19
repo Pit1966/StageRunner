@@ -50,14 +50,16 @@ protected:
 	int m_currentMasterVolume;
 	QMediaPlayer::State currentState;
 	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
-	FxClipItem *m_currentFxClipItem;
+	FxClipItem *m_currentFxClipItem;		///< @todo switch to QPointer ... guarded pointer
 	FxClipItem *m_lastFxClipItem;
 
 	QTimeLine m_overlayFadeTimeLine[PIC_OVERLAY_COUNT];		///< used to fade in and out the overlay picture
-	bool m_overlayFadeOutFirst;
+	bool m_overlayFadeOutFirst;				///< Overlay PicClip has to be started after current one was faded out
+	bool m_stopVideoAtEventEnd;				///< video player has to be stopped. Usaly after a fade out
 
 public:
 	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
+	FxClipItem * currentFxClipItem() const {return m_currentFxClipItem;}
 
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
@@ -67,10 +69,11 @@ public:
 	bool stopAndWait();
 	void setVolume(int vol);
 	void setMasterVolume(int vol);
-	void setPicClipOverlayDisabled();
+	void setPicClipOverlaysDisabled();
 	bool isPicClipOverlaysActive();
 	bool fadePicClipOverlayOut(int ms, int layer);
 	bool fadePicClipOverlayIn(int ms, int layer);
+	bool fadeVideoToBlack(int ms);
 
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}

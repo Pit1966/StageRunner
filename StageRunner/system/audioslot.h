@@ -123,6 +123,8 @@ public:
 	bool selectFxClipVideo();
 	void startFxClipVideoControls(FxAudioItem *fx, Executer *exec);
 	void setFxClipVideoCtrlStatus(AudioStatus stat);
+	bool fadeoutFxClip(int targetVolume, int time_ms);
+
 
 private:
 	void emit_audio_play_progress();

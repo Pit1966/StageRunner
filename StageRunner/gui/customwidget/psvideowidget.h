@@ -28,6 +28,7 @@
 
 class VideoPlayer;
 class PsOverlayLabel;
+class QGraphicsOpacityEffect;
 
 #define PIC_OVERLAY_COUNT 2
 
@@ -37,8 +38,11 @@ class PsVideoWidget : public QVideoWidget
 private:
 	VideoPlayer *m_myPlayer;
 	PsOverlayLabel *m_overlay[PIC_OVERLAY_COUNT];
+	QGraphicsOpacityEffect *m_opFx[PIC_OVERLAY_COUNT];
+
 	QString m_currentPicPaths[PIC_OVERLAY_COUNT];
 	bool m_hasOverlays;
+	bool m_hasOpacityFx;
 	bool m_isOverlayVisible;
 
 public:
@@ -51,6 +55,7 @@ public:
 	bool isPicClipOverlaysActive() const {return m_isOverlayVisible;}
 	void setPicClipOverlaysActive(bool state);
 	bool setPicClipOverlayImage(const QString &path, int layer, qreal opacity);
+	void clearPicClipOverlayImage(int layer = -1);
 	const QString &overlayPicPath(int layer);
 	void setPicClipOverlayOpacity(qreal val, int layer = -1);
 	bool isPicClipVisible(int layer);

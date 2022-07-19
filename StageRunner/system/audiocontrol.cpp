@@ -286,32 +286,6 @@ AudioPlayer *AudioControl::audioPlayer(int i) const
 }
 
 /**
- * @brief Start Clip (Video)
- * @param fxc
- * @return
- */
-bool AudioControl::startFxClip(FxClipItem *fxc)
-{
-	if (!m_videoPlayer) return false;
-
-	QMultimedia::AvailabilityStatus astat = m_videoPlayer->availability();
-	Q_UNUSED(astat)
-
-	QMutexLocker lock(slotMutex);
-	int slot = selectFreeAudioSlot();
-	qDebug() << "Start FxClip" << fxc->name() << "slot" << slot;
-	if (slot >= 0) {
-		myApp.unitVideo->setVideoVolume(slot, fxc->initialVolume);
-		audioSlots[slot]->selectFxClipVideo();
-		startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume);
-
-		m_videoPlayer->playFxClip(fxc, slot);
-	}
-
-	return true;
-}
-
-/**
  * @brief Search audio fx in any audio slot and return current play volume if found
  * @param fxa
  * @return current play volume or -1, if audio was not found

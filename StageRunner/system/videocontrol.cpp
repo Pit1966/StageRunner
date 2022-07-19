@@ -27,6 +27,7 @@
 #include "appcentral.h"
 #include "fxclipitem.h"
 #include "audiocontrol.h"
+#include "audioslot.h"
 #include "videoplayer.h"
 #include "customwidget/psvideowidget.h"
 
@@ -94,7 +95,6 @@ bool VideoControl::startFxClipById(qint32 id)
 bool VideoControl::startFxClip(FxClipItem *fxc)
 {
 	qDebug() << "Start FxAudio as FxClip"<< fxc->name();
-	// return myApp.unitAudio->startFxClip(fxc);
 
 	bool videoRunning = false;
 	int slot = myApp.unitAudio->selectFreeVideoSlot(&videoRunning);
@@ -137,8 +137,6 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 
 void VideoControl::videoBlack(qint32 time_ms)
 {
-	Q_UNUSED(time_ms)
-
 	if (!myApp.unitAudio->isValid())
 		return;
 
@@ -146,6 +144,10 @@ void VideoControl::videoBlack(qint32 time_ms)
 	Q_ASSERT(vp);
 
 	qDebug() << "videoBlack PicOverlayActive" << vp->isPicClipOverlaysActive();
+
+	if (vp->currentFxClipItem())
+		LOGTEXT(tr("<font color=green>BLACK video screen</font> <b>%1</b>")
+				.arg(vp->currentFxClipItem()->fileName()));
 
 	if (vp->isPicClipOverlaysActive()) {
 
@@ -170,8 +172,13 @@ void VideoControl::videoBlack(qint32 time_ms)
 		}
 	}
 	else {
-		vp->stop();
-		vp->setPicClipOverlayDisabled();
+		if (time_ms < 1) {
+			vp->stop();
+			vp->setPicClipOverlaysDisabled();		// ??? Should be disabled at this time ???
+		}
+		else {
+			vp->fadeVideoToBlack(time_ms);
+		}
 	}
 
 	myApp.unitAudio->videoWidget()->update();
@@ -208,4 +215,25 @@ bool VideoControl::setVideoMasterVolume(int vol)
 	}
 
 	return false;
+}
+
+/**
+ * @brief Fadeout audio for a video clip
+ * @param slotnum
+ * @param targetVolume
+ * @param time_ms
+ * @return
+ *
+ * @note this function calls fadeout functions from AudioSlot.
+ */
+bool VideoControl::fadeOutFxClipAudio(int slotnum, int targetVolume, int time_ms)
+{
+	Q_UNUSED(slotnum)
+
+	VideoPlayer *vp = videoSlot(slotnum);
+	AudioSlot *as = myApp.unitAudio->audioSlot(slotnum);
+	if (!vp || !as)
+		return false;
+
+	return as->fadeoutFxClip(targetVolume, time_ms);
 }

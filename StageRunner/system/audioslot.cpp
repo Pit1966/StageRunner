@@ -339,14 +339,15 @@ bool AudioSlot::pauseFxAudio(bool state)
 bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 {
 	if (time_ms <= 0) {
-		qDebug("Fade out time = %d",time_ms);
+		qDebug("AudioSlot::fadeoutFxAudio Fade out time = %d",time_ms);
 		return false;
 	}
 
 	if (audio_player->state() != AUDIO_RUNNING)
 		return false;
 
-	if (!FxItem::exists(current_fx)) return false;
+	if (!FxItem::exists(current_fx))
+		return false;
 
 	fade_mode = AUDIO_FADE_OUT;
 
@@ -767,4 +768,31 @@ void AudioSlot::setFxClipVideoCtrlStatus(AudioStatus stat)
 	run_status = stat;
 	if (stat == AUDIO_IDLE)
 		current_fx = nullptr;
+}
+
+bool AudioSlot::fadeoutFxClip(int targetVolume, int time_ms)
+{
+	if (time_ms <= 0) {
+		qDebug("AudioSlot::fadeoutFxClip Fade out time = %d",time_ms);
+		return false;
+	}
+
+	if (run_status != VIDEO_RUNNING)
+		return  false;
+
+	if (!FxItem::exists(current_fx)) return false;
+
+	fade_mode = AUDIO_FADE_OUT;
+
+	// Set Fadeout time
+	fade_initial_vol = current_volume;
+	fade_target_vol = targetVolume;
+	fade_timeline.setDuration(time_ms);
+
+	// and start the time line ticker
+	fade_timeline.start();
+	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
+			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
+
+	return true;
 }

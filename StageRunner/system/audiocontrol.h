@@ -106,7 +106,6 @@ public:
 	inline int masterVolume() const {return m_masterVolume;}
 	inline int maxVolume() const {return MAX_VOLUME;}
 
-	bool startFxClip(FxClipItem *fxc);
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
