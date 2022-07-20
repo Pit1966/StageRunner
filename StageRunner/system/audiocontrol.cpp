@@ -474,6 +474,18 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 	}
 }
 
+
+/**
+ * @brief AudioControl::startFxClipItemInSlot
+ * @param fxc
+ * @param slotnum
+ * @param exec
+ * @param atMs
+ * @param initVol
+ * @return
+ *
+ * This is used for audio control of video media files, which are player in VideoPlayer handled by VideoControl
+ */
 bool AudioControl::startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec, qint64 atMs, int initVol)
 {
 	Q_UNUSED(atMs)

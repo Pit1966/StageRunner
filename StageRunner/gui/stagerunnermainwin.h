@@ -106,6 +106,8 @@ public slots:
 	void addRecentProject(const QString &pathname);
 
 private slots:
+	void setStatusMessage(const QString &msg, int displayTimeMs);
+
 	void on_addAudioFxButton_clicked();
 	void on_actionLoad_Project_triggered();
 	void on_actionNew_Project_triggered();

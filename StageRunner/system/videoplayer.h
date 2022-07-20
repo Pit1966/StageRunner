@@ -34,6 +34,7 @@ using namespace AUDIO;
 class PsVideoWidget;
 class FxClipItem;
 class VideoControl;
+class Executer;
 
 #define PIC_OVERLAY_COUNT 2
 
@@ -63,7 +64,7 @@ public:
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
 	bool isRunning() const;
-	bool isCurrentPicture() const;
+	bool isCurrentFxClipAPicClip() const;
 	void stop();
 	bool stopAndWait();
 	void setVolume(int vol);

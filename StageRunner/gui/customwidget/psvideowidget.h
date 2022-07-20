@@ -62,7 +62,7 @@ public:
 	void clearPicClipOverlayImage(int layer = -1);
 	const QString &overlayPicPath(int layer);
 	void setPicClipOverlayOpacity(qreal val, int layer = -1);
-	bool isPicClipVisible(int layer);
+	bool isPicClipVisible(int layer = -1);
 	bool isPicPathVisible(const QString &path);
 
 protected:

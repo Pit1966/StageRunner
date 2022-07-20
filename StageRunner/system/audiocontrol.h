@@ -109,7 +109,6 @@ public:
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
-	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 
 	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
@@ -134,6 +133,7 @@ public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
 	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	int stopAllFxAudio();
 	bool stopFxAudioWithID(int fxID);

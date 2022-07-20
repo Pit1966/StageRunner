@@ -41,10 +41,11 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QStyle>
+#include <QWindow>
 
 
 /// Statics
-QThread *Log::main_thread = nullptr;
+QThread *Log::m_mainThread = nullptr;
 
 /// Die Ascii Texte als Auflösung der konstanten Fehlernummern @see ErrMsgCode
 const char *error_msg_asc[] = {
@@ -106,13 +107,7 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 Log::Log()
 {
 	this->setObjectName("Thread::Log");
-	loggingEnabled = false;
-	statuswid = nullptr;
-	logfileEnabled = false;
-	log_line_cnt = 0;
-	stopThreadFlag = false;
-	mainThreadLifeCount = 20000;
-	main_thread = currentThread();
+	m_mainThread = currentThread();
 }
 
 
@@ -183,7 +178,7 @@ void Log::run()
 	// static bool ready_fail = false;
 
 	while (!stopThreadFlag) {
-		msleep(10);
+		msleep(50);
 		int cnt = mainThreadLifeCount.fetchAndAddOrdered(-1);
 		if (cnt <= 0 && 0) {
 			if (cnt == 0) {
@@ -191,7 +186,31 @@ void Log::run()
 				// ready_fail = true;
 			}
 		}
+
+		QWindow *w = QGuiApplication::focusWindow();
+
+		if (w != m_currentFocusWindow) {
+			if (w) {
+				if (m_noFocusCount > 0) {
+					m_noFocusCount = 0;
+					emit warnMsgSent(QString(), 10);
+				}
+				// qDebug() << "focus window changed" << w->objectName();
+			} else {
+				// qDebug() << "focus window is null";
+			}
+			m_currentFocusWindow = w;
+		}
+
+		if (w == nullptr) {
+			m_noFocusCount++;
+			if (m_noFocusCount > 100) {
+				emit warnMsgSent(tr("No input focus! Please click on main window in order to keep the key presses working!"), 2000);
+				m_noFocusCount = 80;
+			}
+		}
 	}
+
 	stopThreadFlag = false;
 }
 
@@ -266,29 +285,29 @@ void Log::do_append_log_text (const QString & txt, int level, MsgLogType type, b
 	replaceColorTags(msg);
 
 	if (!remote_only) {
-		if (log_line_cnt++ > MAX_LOG_LINES) {
+		if (m_logLineCount++ > MAX_LOG_LINES) {
 			emit clearlog();
-			log_line_cnt = 0;
+			m_logLineCount = 0;
 			emit newtext(tr("Log display cleared (exceeds max lines limit)\n\n"));
 		}
 		emit newtext(msg);
 
 		msg += "\n";
-		logfile_mutex.lock();
+		m_logfileMutex.lock();
 		if (logfileEnabled) {
-			logfile.write(msg.toUtf8());
+			m_logfile.write(msg.toUtf8());
 		}
-		logfile_mutex.unlock();
+		m_logfileMutex.unlock();
 	}
 }
 
 void Log::flushLogfile()
 {
-	logfile_mutex.lock();
+	m_logfileMutex.lock();
 	if (logfileEnabled) {
-		logfile.flush();
+		m_logfile.flush();
 	}
-	logfile_mutex.unlock();
+	m_logfileMutex.unlock();
 
 }
 
@@ -343,12 +362,12 @@ void Log::do_append_log_error(const QString & txt, int level, MsgLogType type, b
 		emit newtext(msg);
 
 		msg += "\n";
-		logfile_mutex.lock();
+		m_logfileMutex.lock();
 		if (logfileEnabled) {
-			logfile.write("E_");
-			logfile.write(msg.toUtf8());
+			m_logfile.write("E_");
+			m_logfile.write(msg.toUtf8());
 		}
-		logfile_mutex.unlock();
+		m_logfileMutex.unlock();
 	}
 }
 
@@ -527,18 +546,18 @@ void Log::setColor(const QColor &col)
 QWidget * Log::setStatusWidget(QWidget * wid)
 {
 	QWidget * old_widget = nullptr;
-	if (statuswid) {
+	if (m_statusWid) {
 		this->disconnect();
-		old_widget = statuswid;
+		old_widget = m_statusWid;
 	}
-	statuswid = static_cast<QTextEdit*>(wid);
-	if (statuswid != nullptr) {
+	m_statusWid = static_cast<QTextEdit*>(wid);
+	if (m_statusWid != nullptr) {
 
 		loggingEnabled = true;
-		statuswid->setUndoRedoEnabled(false);
-		connect(this,SIGNAL(newtext(const QString &)),statuswid,SLOT(append(const QString &)),Qt::QueuedConnection);
-		connect(this,SIGNAL(newcolor(const QColor &)),statuswid,SLOT(setTextColor(const QColor &)),Qt::QueuedConnection);
-		connect(this,SIGNAL(clearlog()),statuswid,SLOT(clear()),Qt::QueuedConnection);
+		m_statusWid->setUndoRedoEnabled(false);
+		connect(this,SIGNAL(newtext(const QString &)),m_statusWid,SLOT(append(const QString &)),Qt::QueuedConnection);
+		connect(this,SIGNAL(newcolor(const QColor &)),m_statusWid,SLOT(setTextColor(const QColor &)),Qt::QueuedConnection);
+		connect(this,SIGNAL(clearlog()),m_statusWid,SLOT(clear()),Qt::QueuedConnection);
 	}
 	else {
 		loggingEnabled = false;
@@ -557,15 +576,15 @@ bool Log::openLogfileAppend()
 	bool ok = true;
 	if (logfileEnabled) closeLogfile();
 
-	logfile_mutex.lock();
-	logfile.setFileName(LOG_FILE_PATH);
-	if (logfile.open(QIODevice::Append)) {
+	m_logfileMutex.lock();
+	m_logfile.setFileName(LOG_FILE_PATH);
+	if (m_logfile.open(QIODevice::Append)) {
 		logfileEnabled = true;
 		ok = true;
 	} else {
 		ok = false;
 	}
-	logfile_mutex.unlock();
+	m_logfileMutex.unlock();
 	return ok;
 }
 
@@ -575,12 +594,12 @@ bool Log::openLogfileAppend()
  */
 void Log::closeLogfile()
 {
-	logfile_mutex.lock();
+	m_logfileMutex.lock();
 	if (logfileEnabled) {
 		logfileEnabled = false;
-		logfile.close();
+		m_logfile.close();
 	}
-	logfile_mutex.unlock();
+	m_logfileMutex.unlock();
 }
 
 void Log::errorPopupMsg(const QString & where, const QString & text, QWidget *parentWid)
@@ -624,11 +643,11 @@ bool Log::rotateLog()
 
 	QStringList messages;
 
-	logfile_mutex.lock();
+	m_logfileMutex.lock();
 
 	if (logfileEnabled) {
-		if (logfile.size() >= MAX_LOG_SIZE) {
-			logfile.close();
+		if (m_logfile.size() >= MAX_LOG_SIZE) {
+			m_logfile.close();
 			QString old_path = LOG_FILE_PATH;
 			QString log_path = old_path;
 			old_path += ".old";
@@ -650,7 +669,7 @@ bool Log::rotateLog()
 				}
 			}
 
-			if (logfile.open(QIODevice::Append)) {
+			if (m_logfile.open(QIODevice::Append)) {
 				logfileEnabled = true;
 				rotate = true;
 			} else {
@@ -659,7 +678,7 @@ bool Log::rotateLog()
 			}
 		}
 	}
-	logfile_mutex.unlock();
+	m_logfileMutex.unlock();
 
 	for (int t=0;t<messages.size();t++) {
 		LOGTEXT(messages.at(t));
@@ -701,7 +720,7 @@ int Log::readAppendLogFile(const QString & path)
 			if (++update > 50) {
 				update = 0;
 				progress.setValue(count);
-				if (QThread::currentThread() == main_thread) QApplication::processEvents();
+				if (QThread::currentThread() == m_mainThread) QApplication::processEvents();
 			}
 		}
 	} else {

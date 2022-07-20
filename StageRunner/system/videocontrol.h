@@ -57,10 +57,11 @@ public:
 	bool setVideoVolume(int slotnum, int vol);
 	bool setVideoMasterVolume(int vol);
 	bool fadeOutFxClipAudio(int slotnum, int targetVolume, int time_ms);
+	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1);
 
 signals:
 	void videoCtrlMsgEmitted(const AudioCtrlMsg &msg);
-
+	void videoStartedWithAudio(FxClipItem *fxc, int slotNum, Executer *exec, qint64 atMs, int initialVol);
 
 public slots:
 

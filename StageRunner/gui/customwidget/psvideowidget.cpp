@@ -46,7 +46,7 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	setAutoFillBackground(false);
 	setWindowTitle("Video screen");
 
-	setWindowFlag(Qt::FramelessWindowHint);
+	setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	// setWindowFlag(Qt::WindowTransparentForInput);
 
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
@@ -227,10 +227,17 @@ void PsVideoWidget::setPicClipOverlayOpacity(qreal val, int layer)
 
 bool PsVideoWidget::isPicClipVisible(int layer)
 {
-	if (layer >= PIC_OVERLAY_COUNT)
+	if (layer < 0) {
+		for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+			if (m_overlay[i]->windowOpacity() > 0.0)
+				return true;
+		}
 		return false;
+	}
+	else if (layer < PIC_OVERLAY_COUNT)
+		return m_overlay[layer]->windowOpacity() > 0.0;
 
-	return m_overlay[layer]->windowOpacity() > 0.0;
+	return false;
 }
 
 bool PsVideoWidget::isPicPathVisible(const QString &path)

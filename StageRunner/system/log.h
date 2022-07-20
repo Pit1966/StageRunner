@@ -114,21 +114,24 @@ class Log : public QThread
 
 public:
 
-	bool loggingEnabled;				///< zeigt an, das normales Logging in Gui möglich ist
-	bool logfileEnabled;				///< zeigt an, dass Logfile geöffnet ist.
-	volatile bool stopThreadFlag;
-	QAtomicInt mainThreadLifeCount;		///< wird benutzt, um zu erkennen, ob Mainthread hängt
+	bool loggingEnabled				= false;		///< zeigt an, das normales Logging in Gui möglich ist
+	bool logfileEnabled				= false;		///< zeigt an, dass Logfile geöffnet ist.
+	volatile bool stopThreadFlag	= false;
+	QAtomicInt mainThreadLifeCount	= 20000;		///< wird benutzt, um zu erkennen, ob Mainthread hängt
 
 private:
-	static QThread *main_thread;		///< Pointer auf Main Thread
+	static QThread *m_mainThread;					///< Pointer auf Main Thread
 
-	QTextEdit * statuswid;			///< an dieses Widget, wird der Statustext gesendet
-	QColor color;					///< aktuelle Textausgabe Farbe
-	int log_line_cnt;				///< Die Anzahl der Zeilen, die ins Log Fenster ausgegeben werden (Bei Ereichen von MAX_LOG_LINES, wird dieses gelöscht);
-	QList<LogEntry> m_shadowLog;	///< Messages logged in application startup phase, when GUI is not ready
+	QTextEdit * m_statusWid			= nullptr;		///< an dieses Widget, wird der Statustext gesendet
+	QColor color;									///< aktuelle Textausgabe Farbe
+	int m_logLineCount				= 0;			///< Die Anzahl der Zeilen, die ins Log Fenster ausgegeben werden (Bei Ereichen von MAX_LOG_LINES, wird dieses gelöscht);
+	QList<LogEntry> m_shadowLog;					///< Messages logged in application startup phase, when GUI is not ready
 
-	QMutex logfile_mutex;
-	QFile logfile;
+	QMutex m_logfileMutex;
+	QFile m_logfile;
+
+	QWindow *m_currentFocusWindow	= nullptr;
+	int m_noFocusCount				= 0;
 
 public:
 	Log();
@@ -155,7 +158,7 @@ public:
 	static void debugCurrentThread();
 	static QString getCurrentThreadName();
 	inline static QThread * getCurrentThreadPointer() {return currentThread();}
-	inline static bool isMainThread() {return (main_thread == currentThread());}
+	inline static bool isMainThread() {return (m_mainThread == currentThread());}
 
 	inline const QList<LogEntry> & shadowLog() const {return m_shadowLog;}
 	QStringList shadowLogStrings(MsgLogType type) const;
@@ -183,6 +186,8 @@ signals:
 	void msgLogged(const QString, quint32);
 	void infoMsgReceived(const QString & func, const QString & text);
 	void errorMsgReceived(const QString & func, const QString & text);
+
+	void warnMsgSent(const QString &msg, int display_ms);
 };
 
 extern const char *error_msg_asc[];

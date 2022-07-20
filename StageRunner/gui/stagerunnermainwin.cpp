@@ -189,9 +189,11 @@ void StageRunnerMainWin::initConnects()
 	// Global Info & Error Messaging
 	connect(logThread,SIGNAL(infoMsgReceived(QString,QString)),this,SLOT(showInfoMsg(QString,QString)));
 	connect(logThread,SIGNAL(errorMsgReceived(QString,QString)),this,SLOT(showErrorMsg(QString,QString)));
+	connect(logThread,SIGNAL(warnMsgSent(QString,int)),this,SLOT(setStatusMessage(QString,int)));
 
 	// Project <-> Mainwindow
 	connect(appCentral->project, SIGNAL(projectLoadedOrSaved(QString,bool)), this, SLOT(addRecentProject(QString)));
+
 
 	qApp->installEventFilter(this);
 }
@@ -546,6 +548,25 @@ void StageRunnerMainWin::addRecentProject(const QString &pathname)
 	}
 }
 
+void StageRunnerMainWin::setStatusMessage(const QString &msg, int displayTimeMs)
+{
+	if (msg.isEmpty()) {
+		statusBar()->setStyleSheet("");
+		statusBar()->showMessage("", 20);
+	}
+	else {
+		if (msg == statusBar()->currentMessage() || statusBar()->styleSheet().isEmpty()) {
+			if (statusBar()->styleSheet().startsWith("color:red")) {
+				statusBar()->setStyleSheet("color:white; background:red; font-weight:bold;");
+			} else {
+				statusBar()->setStyleSheet("color:red; background:white; font-weight:bold;");
+			}
+		}
+		statusBar()->showMessage(msg, displayTimeMs);
+	}
+
+}
+
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
 {
 	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
@@ -843,6 +864,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		switch (key) {
 		case Qt::Key_Shift:
 			activeKeyModifiers |= Qt::SHIFT;
+			this->statusBar()->setStyleSheet("color: red; font-weight: bold; background: white;");
+			this->statusBar()->showMessage("SHIFT PRESSED", 1000);
 			break;
 		case Qt::Key_Control:
 			activeKeyModifiers |= Qt::CTRL;

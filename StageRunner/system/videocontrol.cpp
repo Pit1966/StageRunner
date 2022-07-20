@@ -94,7 +94,7 @@ bool VideoControl::startFxClipById(qint32 id)
  */
 bool VideoControl::startFxClip(FxClipItem *fxc)
 {
-	qDebug() << "Start FxAudio as FxClip"<< fxc->name();
+	qDebug() << "VideoControl::Start FxClip"<< fxc->name();
 
 	bool videoRunning = false;
 	int slot = myApp.unitAudio->selectFreeVideoSlot(&videoRunning);
@@ -109,8 +109,8 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 
 	// check if there is already a video running in this slot.
 	// If so, we have to stop the video first.
-	if (videoRunning) {
-		if (vp->isCurrentPicture()) {
+	if (videoRunning && !fxc->isPicClip) {
+		if (vp->isCurrentFxClipAPicClip()) {
 			vp->stop();
 		}
 		else if (!vp->stopAndWait())
@@ -118,15 +118,6 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 
 		// select it
 		if (!myApp.unitAudio->selectVideoSlot(slot))
-			return false;
-	}
-
-	if (!fxc->isPicClip) {
-		QMultimedia::AvailabilityStatus astat = vp->availability();
-		Q_UNUSED(astat)
-
-		vp->setVolume(fxc->initialVolume);
-		if (!myApp.unitAudio->startFxClipItemInSlot(fxc, slot, nullptr, -1, fxc->initialVolume))
 			return false;
 	}
 
@@ -236,4 +227,13 @@ bool VideoControl::fadeOutFxClipAudio(int slotnum, int targetVolume, int time_ms
 		return false;
 
 	return as->fadeoutFxClip(targetVolume, time_ms);
+}
+
+bool VideoControl::startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec, qint64 atMs)
+{
+	if (!FxItem::exists(fxc))
+		return false;
+
+	emit videoStartedWithAudio(fxc, slotnum, exec, atMs, fxc->initialVolume);
+	return myApp.unitAudio->startFxClipItemInSlot(fxc, slotnum, exec, atMs, fxc->initialVolume);
 }
