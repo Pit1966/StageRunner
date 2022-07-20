@@ -42,6 +42,11 @@ private:
 	QString m_currentPicPaths[PIC_OVERLAY_COUNT];
 	bool m_hasOverlays;
 	bool m_isOverlayVisible;
+	bool m_mousePressed;
+	bool m_isWindowMoveMode;
+
+	QPoint m_clickStartPos;
+	QPoint m_clickWindowPos;
 
 public:
 	PsVideoWidget(QWidget *parent = nullptr);
@@ -64,15 +69,17 @@ protected:
 	void checkOverlayShow();
 	void hideOverlays();
 	void closeOverlays();
-	void mouseDoubleClickEvent(QMouseEvent *);
-	void mousePressEvent(QMouseEvent *ev);
-	void closeEvent(QCloseEvent *event);
-	void paintEvent(QPaintEvent *event);
-	void moveEvent(QMoveEvent *event);
-	void resizeEvent(QResizeEvent *event);
-	void showEvent(QShowEvent *event);
-	void hideEvent(QHideEvent *event);
-	bool event(QEvent *event);
+	void mouseDoubleClickEvent(QMouseEvent *) override;
+	void mousePressEvent(QMouseEvent *ev) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void closeEvent(QCloseEvent *event) override;
+	void paintEvent(QPaintEvent *event) override;
+	void moveEvent(QMoveEvent *event) override;
+	void resizeEvent(QResizeEvent *event) override;
+	void showEvent(QShowEvent *event) override;
+	void hideEvent(QHideEvent *event) override;
+//	bool event(QEvent *event);
 
 public slots:
 	void toggleFullScreen();

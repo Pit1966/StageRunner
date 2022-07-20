@@ -141,13 +141,9 @@ private slots:
 	void on_loadUniverseButton_clicked();
 	void on_actionVirtualDmxOutput_triggered(bool checked);
 	void onRecentProjectActionSelected();
-
 	void on_actionOpen_universe_layout_editor_triggered();
-
 	void on_actionNotes_triggered();
-
 	void on_actionFullscreen_triggered(bool checked);
-
 	void on_actionDelete_FX_Item_triggered();
 
 private:

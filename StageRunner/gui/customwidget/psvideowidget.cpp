@@ -39,26 +39,32 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	, m_overlay{nullptr,}
 	, m_hasOverlays(false)
 	, m_isOverlayVisible(false)
+	, m_mousePressed(false)
+	, m_isWindowMoveMode(false)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setAutoFillBackground(false);
+	setWindowTitle("Video screen");
 
-
+	setWindowFlag(Qt::FramelessWindowHint);
+	// setWindowFlag(Qt::WindowTransparentForInput);
 
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		m_overlay[i] = new PsOverlayLabel();
 
 		// qDebug("winflags %x", int(m_overlay[i]->windowFlags()));
-		m_overlay[i]->setWindowFlags(Qt::ToolTip);
-		// m_overlay[i]->setWindowFlags(Qt::SubWindow | Qt::FramelessWindowHint | Qt::BypassWindowManagerHint | Qt::WindowTransparentForInput);		// this prevents windows from being listed in task bar
+		// m_overlay[i]->setWindowFlags(Qt::ToolTip);
+		m_overlay[i]->setWindowFlags(Qt::FramelessWindowHint | Qt::BypassWindowManagerHint | Qt::WindowTransparentForInput);		// this prevents windows from being listed in task bar
 
 		m_overlay[i]->move(pos());
 		m_overlay[i]->resize(size());
 		m_overlay[i]->show();
 		m_overlay[i]->raise();
 		m_overlay[i]->setWindowOpacity(0.0);
+		m_overlay[i]->setWindowTitle(QString("Video overlay %1").arg(i+1));
 
-		connect(m_overlay[i], SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
+		// not necessary since Qt::WindowTransparentForInput is set for overlays
+		// connect(m_overlay[i], SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
 	}
 
 	m_hasOverlays = true;
@@ -261,7 +267,7 @@ void PsVideoWidget::hideOverlays()
 {
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		setPicClipOverlayOpacity(0.0, i);
-		// m_overlay[i]->hide();
+		m_overlay[i]->hide();
 		m_currentPicPaths[i].clear();
 	}
 }
@@ -281,7 +287,35 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 {
-	Q_UNUSED(ev)
+	m_mousePressed = true;
+	m_clickStartPos = ev->globalPos();
+	m_clickWindowPos = pos();
+}
+
+void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	Q_UNUSED(event)
+	m_mousePressed = false;
+	m_isWindowMoveMode = false;
+}
+
+void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	QPoint curpos = event->globalPos();
+	QPoint movevec = m_clickStartPos - curpos;
+
+	if (!isFullScreen()) {
+
+		if (m_isWindowMoveMode) {
+			move(m_clickWindowPos - movevec);
+		}
+		else {
+
+			int dist = movevec.manhattanLength();
+			if (dist > 20)
+				m_isWindowMoveMode = true;
+		}
+	}
 }
 
 void PsVideoWidget::closeEvent(QCloseEvent *event)
@@ -358,12 +392,12 @@ void PsVideoWidget::hideEvent(QHideEvent *)
 	checkOverlayShow();
 }
 
-bool PsVideoWidget::event(QEvent *event)
-{
-	qDebug() << "event" << event->type();
+//bool PsVideoWidget::event(QEvent *event)
+//{
+//	qDebug() << "event" << event->type();
 
-	return QVideoWidget::event(event);
-}
+//	return QVideoWidget::event(event);
+//}
 
 void PsVideoWidget::toggleFullScreen()
 {
