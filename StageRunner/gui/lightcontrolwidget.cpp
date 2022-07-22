@@ -23,12 +23,19 @@
 
 #include "lightcontrolwidget.h"
 #include "appcentral.h"
+#include "system/videoplayer.h"
 
 LightControlWidget::LightControlWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
 	init();
 	setupUi(this);
+}
+
+void LightControlWidget::setVideoStatus(int viewState, int oldState)
+{
+	QString txt = VideoPlayer::viewStateToString(VIDEO::VideoViewStatus(viewState));
+	videoViewStateLabel->setText(txt);
 }
 
 void LightControlWidget::init()

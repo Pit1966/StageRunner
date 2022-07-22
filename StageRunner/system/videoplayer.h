@@ -26,8 +26,11 @@
 
 #include <QMediaPlayer>
 #include <QTimeLine>
+#include <QTimer>
+#include <QPointer>
 
 #include "commandsystem.h"
+
 
 using namespace AUDIO;
 
@@ -51,8 +54,10 @@ protected:
 	int m_currentMasterVolume;
 	QMediaPlayer::State currentState;
 	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
-	FxClipItem *m_currentFxClipItem;		///< @todo switch to QPointer ... guarded pointer
+	FxClipItem *m_currentFxClipItem;		///< @todo make guarded
+	FxClipItem *m_ctrlFxItem;				///< Item used for current control command (e.g. PRE_DELAY)
 
+	QTimer m_ctrlTimer;
 	QTimeLine m_overlayFadeTimeLine[PIC_OVERLAY_COUNT];		///< used to fade in and out the overlay picture
 	bool m_overlayFadeOutFirst;				///< Overlay PicClip has to be started after current one was faded out
 	bool m_stopVideoAtEventEnd;				///< video player has to be stopped. Usaly after a fade out
@@ -60,6 +65,9 @@ protected:
 public:
 	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
 	FxClipItem * currentFxClipItem() const {return m_currentFxClipItem;}
+
+	VIDEO::VideoViewStatus viewState() const {return m_viewState;}
+	static QString viewStateToString(VIDEO::VideoViewStatus viewState);
 
 	bool playFxClip(FxClipItem *fxc, int slotNum);
 	inline int slotNumber() const {return m_slotNumber;}
@@ -78,8 +86,14 @@ public:
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}
 
+protected:
+	void setViewState(VIDEO::VideoViewStatus state);
+
 private:
-	bool playPicClip(FxClipItem *fxc, FxClipItem *old_fxc);
+	bool _playPicClip(FxClipItem *fxc, FxClipItem *old_fxc);
+	bool _playVideoClip(FxClipItem *fxc, FxClipItem *old_fxc, int slotNum);
+
+	bool fadeInCurrentFxClipItem(int ms, int layer);
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
@@ -88,6 +102,7 @@ private slots:
 	void onVideoEnd();
 	void setOverlayFade(qreal val, int layer);
 	void setOverlayFadeFinished(int layer);
+	void onCtrlTimerFinished();
 	void stopAllOverlayFades();
 
 signals:
@@ -95,6 +110,7 @@ signals:
 	void clipCtrlMsgEmitted(AudioCtrlMsg msg);
 	void clipProgressChanged(FxClipItem *fxclip, int perMille);
 	void audioCtrlMsgEmitted(const AudioCtrlMsg &msg);
+	void viewStateChanged(int viewState, int oldViewState);
 
 	void endReached(qint64 ms);
 	void seekMe(qint64 ms);

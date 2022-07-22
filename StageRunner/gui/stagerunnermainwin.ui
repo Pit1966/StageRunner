@@ -66,7 +66,7 @@
           </widget>
          </item>
          <item>
-          <widget class="LightControlWidget" name="groupBox">
+          <widget class="LightControlWidget" name="lightCtrlGroup">
            <property name="title">
             <string>Light Control</string>
            </property>

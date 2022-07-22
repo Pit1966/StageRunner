@@ -243,11 +243,30 @@ bool PsVideoWidget::isPicClipVisible(int layer)
 bool PsVideoWidget::isPicPathVisible(const QString &path)
 {
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
-		if (m_currentPicPaths[i] == path && isPicClipVisible(i))
+		if (m_currentPicPaths[i] == path && isPicClipVisible(i) && isPicClipVisible(i))
 			return true;
 	}
 
 	return false;
+}
+
+/**
+ * @brief Returns PicClip layer that should be used for next PicClip display.
+ * @return layer number. -1, if there is no free layer
+ *
+ * If layer one is visible this will return 0, if layer one is  visible it will return 1.
+ * If no layer is used so far it will return layer 1
+ */int PsVideoWidget::firstFreePicClicLayer()
+{
+	bool v1 = isPicClipVisible(1);
+	bool v0 = isPicClipVisible(0);
+	qDebug() << "visible layer" << v0 << v1;
+	if (!v1)
+		return 1;
+	if (!v0)
+		return 0;
+
+	return -1;
 }
 
 void PsVideoWidget::checkOverlayShow()

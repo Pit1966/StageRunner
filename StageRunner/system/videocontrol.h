@@ -62,6 +62,7 @@ public:
 signals:
 	void videoCtrlMsgEmitted(const AudioCtrlMsg &msg);
 	void videoStartedWithAudio(FxClipItem *fxc, int slotNum, Executer *exec, qint64 atMs, int initialVol);
+	void mainVideoViewStateChanged(int viewState, int oldViewState);
 
 public slots:
 

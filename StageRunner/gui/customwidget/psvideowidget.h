@@ -64,6 +64,7 @@ public:
 	void setPicClipOverlayOpacity(qreal val, int layer = -1);
 	bool isPicClipVisible(int layer = -1);
 	bool isPicPathVisible(const QString &path);
+	int firstFreePicClicLayer();
 
 protected:
 	void checkOverlayShow();

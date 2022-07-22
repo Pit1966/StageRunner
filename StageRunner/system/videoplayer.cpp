@@ -45,6 +45,7 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	, currentState(QMediaPlayer::StoppedState)
 	, m_viewState(VIEW_UNUSED)
 	, m_currentFxClipItem(nullptr)
+	, m_ctrlFxItem(nullptr)
 	, m_overlayFadeOutFirst(false)
 	, m_stopVideoAtEventEnd(false)
 {
@@ -58,6 +59,10 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
 	connect(this, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), m_videoCtrl, SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)));
 
+	m_ctrlTimer.setSingleShot(true);
+	connect(&m_ctrlTimer, SIGNAL(timeout()), this, SLOT(onCtrlTimerFinished()));
+	connect(this, SIGNAL(viewStateChanged(int,int)), m_videoCtrl, SIGNAL(mainVideoViewStateChanged(int,int)));
+
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		// m_overlayFadeTimeLine[i].setObjectName(QString("picover%1").arg(i));
 
@@ -66,6 +71,37 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	}
 
 	m_videoWid->setVideoPlayer(this);
+}
+
+QString VideoPlayer::viewStateToString(VideoViewStatus viewState)
+{
+	switch (viewState) {
+	case VIEW_UNUSED:
+		return "unused";
+	case VIEW_BLACK:
+		return "black";
+	case VIEW_VIDEO_VISIBLE:
+		return "video visible";
+	case VIEW_VIDEO_FADEIN:
+		return "video fadein";
+	case VIEW_VIDEO_FADEOUT:
+		return "video fadeout";
+	case VIEW_PIC_VISIBLE:
+		return "pic visible";
+	case VIEW_PIC_FADEIN:
+		return "pic fadein";
+	case VIEW_PIC_FADEOUT:
+		return "pic fadeout";
+	case VIEW_FADE_STOPPED:
+		return "fade stopped";
+	case VIEW_PRE_DELAY:
+		return "pre delay";
+	case VIEW_HOLD:
+		return "hold";
+
+	default:
+		return QString::number(viewState);
+	}
 }
 
 
@@ -84,48 +120,42 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 	loopTarget = fxc->loopTimes;
 	loopCnt = 1;
 	m_slotNumber = slotNum;
-	qDebug() << "playFxClip" << fxc->name() << "viewState" << m_viewState;
+	qDebug() << "playFxClip" << fxc->name() << "viewState" << m_viewState << thread();
+
+	if (m_ctrlFxItem != fxc) {
+		if (m_ctrlFxItem == nullptr) {
+			if (fxc->preDelay() > 0) {
+				setViewState(VIEW_PRE_DELAY);
+				m_ctrlTimer.start(fxc->preDelay());
+				m_ctrlFxItem = fxc;
+
+				LOGTEXT(tr("<font color=green>Start</font> <b>%1</b> with pre delay of %2ms")
+						.arg(fxc->name())
+						.arg(fxc->preDelay()));
+
+				return true;
+			}
+		}
+		else {
+			LOGTEXT(tr("<font color=orange>Start</font> <b>%1</b> canceled, since a ctrl command is running")
+					.arg(fxc->name()));
+			return false;
+		}
+	}
 
 	bool ok = true;
 	if (fxc->isPicClip) {
-		ok = playPicClip(fxc, m_currentFxClipItem);
+		ok = _playPicClip(fxc, m_currentFxClipItem);
 	}
 	else {
-		// handle audio track of video first
-		QMultimedia::AvailabilityStatus astat = availability();
-		Q_UNUSED(astat)
-
-		// set volume here in media player
-		setVolume(fxc->initialVolume);
-		// and propagate audio volume to AudioControl unit and audio level widgets
-		if (!m_videoCtrl->startFxClipItemInSlot(fxc, slotNum))
-			return false;
-
-
-		// now set media file
-		this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
-		if (m_viewState >= VIEW_PIC_VISIBLE) {
-			if (m_videoWid->isPicClipVisible(0))
-				fadePicClipOverlayOut(2000, 0);
-			if (m_videoWid->isPicClipVisible(1))
-				fadePicClipOverlayOut(2000, 1);
-		}
-		else {
-			m_videoWid->setPicClipOverlaysActive(false);
-			m_videoWid->show();
-			m_videoWid->raise();
-		}
-		m_viewState = VIEW_VIDEO_VISIBLE;
-		this->play();
+		ok = _playVideoClip(fxc, m_currentFxClipItem, slotNum);
 	}
 
-	m_currentFxClipItem = fxc;
+	if (ok)
+		m_currentFxClipItem = fxc;
 
 	if (m_videoWid->size().isNull())
 		m_videoWid->resize(700,500);
-
-//	qDebug() << "videowidget geo" << m_videoWid->geometry();
-//	qDebug() << Q_FUNC_INFO << thread();
 
 	return ok;
 }
@@ -200,6 +230,9 @@ void VideoPlayer::setPicClipOverlaysDisabled()
 {
 	if (m_videoWid->isPicClipOverlaysActive())
 		m_videoWid->setPicClipOverlaysActive(false);
+
+	if (!isRunning())
+		setViewState(VIEW_BLACK);
 }
 
 bool VideoPlayer::isPicClipOverlaysActive()
@@ -220,13 +253,13 @@ bool VideoPlayer::fadePicClipOverlayOut(int ms, int layer)
 
 	if (m_videoWid->isPicClipVisible(layer)) {
 		if (ms == 0) {
-			m_viewState = VIEW_PIC_FADEOUT;
+			setViewState(VIEW_PIC_FADEOUT);
 			m_overlayFadeTimeLine[layer].stop();
 			m_videoWid->setPicClipOverlayOpacity(0.0, layer);
 			setOverlayFadeFinished(layer);
 		}
 		else {
-			m_viewState = VIEW_PIC_FADEOUT;
+			setViewState(VIEW_PIC_FADEOUT);
 			m_overlayFadeTimeLine[layer].setDirection(QTimeLine::Backward);
 			m_overlayFadeTimeLine[layer].setDuration(ms);
 			m_overlayFadeTimeLine[layer].start();
@@ -247,13 +280,13 @@ bool VideoPlayer::fadePicClipOverlayIn(int ms, int layer)
 		ms = 0;
 
 	if (ms == 0) {
-		m_viewState = VIEW_PIC_FADEIN;
+		setViewState(VIEW_PIC_FADEIN);
 		m_overlayFadeTimeLine[layer].stop();
 		m_videoWid->setPicClipOverlayOpacity(1.0, layer);
 		setOverlayFadeFinished(layer);
 	}
 	else {
-		m_viewState = VIEW_PIC_FADEIN;
+		setViewState(VIEW_PIC_FADEIN);
 		m_overlayFadeTimeLine[layer].setDirection(QTimeLine::Forward);
 		m_overlayFadeTimeLine[layer].setDuration(ms);
 		m_overlayFadeTimeLine[layer].start();
@@ -277,17 +310,25 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	ok &= fadePicClipOverlayIn(ms, 0);
 
 	m_stopVideoAtEventEnd = true;
-	m_viewState = VIEW_VIDEO_FADEOUT;
+	setViewState(VIEW_VIDEO_FADEOUT);
 
 	return ok;
 }
 
-bool VideoPlayer::playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
+void VideoPlayer::setViewState(VIDEO::VideoViewStatus state)
 {
-	// pause playback, if it is a picture in order to get a still image
+	if (state != m_viewState) {
+		int oldstate = m_viewState;
+		m_viewState = state;
+		emit viewStateChanged(state, oldstate);
+	}
+}
 
+bool VideoPlayer::_playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
+{
 	if (m_viewState & VIEW_FADE_ACTIVE) {
 		stopAllOverlayFades();
+		setViewState(VIEW_FADE_STOPPED);
 	}
 
 	if (m_videoWid->isPicClipOverlaysActive()) {
@@ -350,7 +391,7 @@ bool VideoPlayer::playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
 		int audiofadeouttime = 2000;
 
 		qDebug() << "video is running";
-		if (m_viewState == VIEW_VIDEO_VISIBLE) {
+		if (m_viewState & VIEW_VIDEO_SHOWN_OR_DELAY) {
 			m_videoWid->setPicClipOverlayImage(fxc->filePath(), 1, 0.0);
 			m_videoWid->setPicClipOverlaysActive(true);
 			bool ok = true;
@@ -381,6 +422,59 @@ bool VideoPlayer::playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
 	}
 
 	return true;
+}
+
+bool VideoPlayer::_playVideoClip(FxClipItem *fxc, FxClipItem *old_fxc, int slotNum)
+{
+	Q_UNUSED(old_fxc)
+
+	// handle audio track of video first
+	QMultimedia::AvailabilityStatus astat = availability();
+	Q_UNUSED(astat)
+
+	// set volume here in media player
+	setVolume(fxc->initialVolume);
+	// and propagate audio volume to AudioControl unit and audio level widgets
+	if (!m_videoCtrl->startFxClipItemInSlot(fxc, slotNum))
+		return false;
+
+
+	// now set media file
+	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+	if (m_viewState >= VIEW_PIC_VISIBLE) {
+		if (m_videoWid->isPicClipVisible(0))
+			fadePicClipOverlayOut(2000, 0);
+		if (m_videoWid->isPicClipVisible(1))
+			fadePicClipOverlayOut(2000, 1);
+	}
+	else {
+		m_videoWid->setPicClipOverlaysActive(false);
+		m_videoWid->show();
+		m_videoWid->raise();
+	}
+	setViewState(VIEW_VIDEO_VISIBLE);
+	this->play();
+
+	return true;
+}
+
+bool VideoPlayer::fadeInCurrentFxClipItem(int ms, int layer)
+{
+	if (FxItem::exists(m_currentFxClipItem)) {
+		m_videoWid->setPicClipOverlaysActive(true);
+		m_videoWid->setPicClipOverlayImage(m_currentFxClipItem->filePath(), layer, 0);
+		int fadeintime = 3000;
+		if (ms < 0)
+			fadeintime = m_currentFxClipItem->fadeInTime();
+
+		if (fadePicClipOverlayIn(fadeintime, layer)) {
+			LOGTEXT(tr("<font color=green>Fade in %1 overlay</font> <b>%2</b>")
+					.arg(layer == 1 ? QString("top") : QString("back"), m_currentFxClipItem->fileName()));
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
@@ -429,6 +523,7 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 					if (m_currentFxClipItem && m_currentFxClipItem->blackAtVideoEnd) {
 						QMediaPlayer::stop();
 						m_videoWid->update();
+						setViewState(VIEW_BLACK);
 					}
 					stat = VIDEO_IDLE;
 				}
@@ -527,7 +622,14 @@ void VideoPlayer::onVideoEnd()
  */
 void VideoPlayer::setOverlayFade(qreal val, int layer)
 {
-	m_videoWid->setPicClipOverlayOpacity(val, layer);
+	switch (m_viewState) {
+	case VIEW_PRE_DELAY:
+	case VIEW_HOLD:
+		break;
+	default:
+		m_videoWid->setPicClipOverlayOpacity(val, layer);
+	}
+
 }
 
 /**
@@ -548,25 +650,17 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 
 	if (m_overlayFadeOutFirst) {
 		m_overlayFadeOutFirst = false;
-
-		if (m_currentFxClipItem)
-			m_videoWid->setPicClipOverlayImage(m_currentFxClipItem->filePath(), layer, 0);
-
-		if (fadePicClipOverlayIn(3000, layer)) {
-			LOGTEXT(tr("<font color=green>Fade in %1 overlay</font> <b>%2</b>")
-					.arg(layer == 1 ? QString("top") : QString("back"), m_currentFxClipItem->fileName()));
-		}
-
+		fadeInCurrentFxClipItem(3000, layer);
 	}
 	else {
 		if (m_viewState == VIEW_PIC_FADEIN) {
-			m_viewState = VIEW_PIC_VISIBLE;
+			setViewState(VIEW_PIC_VISIBLE);
 		}
 		else if (m_viewState == VIEW_PIC_FADEOUT) {
-			m_viewState = VIEW_BLACK;
+			setViewState(VIEW_BLACK);
 		}
 		else if (m_viewState == VIEW_VIDEO_FADEOUT) {
-			m_viewState = VIEW_BLACK;
+			setViewState(VIEW_BLACK);
 			if (m_currentFxClipItem) {
 				LOGTEXT(tr("<font color=green>VIDEO fade out end</font> <b>%1</b>").arg(m_currentFxClipItem->fileName()));
 				m_currentFxClipItem = nullptr;
@@ -582,6 +676,17 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 
 	qDebug() << "layer" << layer << "set overlay finished" << cur_state << m_viewState;
 }
+
+void VideoPlayer::onCtrlTimerFinished()
+{
+	if (m_viewState == VIEW_PRE_DELAY) {
+		if (m_ctrlFxItem) {
+			playFxClip(m_ctrlFxItem, m_slotNumber);
+			m_ctrlFxItem = nullptr;
+		}
+	}
+}
+
 
 void VideoPlayer::stopAllOverlayFades()
 {

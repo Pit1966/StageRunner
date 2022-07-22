@@ -286,8 +286,11 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 					setTitle(time);
 				}
 			}
-			else if (msg.fxAudio) {
+			else if (msg.fxAudio && FxItem::exists(msg.fxAudio)) {
 				setTitle(msg.fxAudio->name().left(7) + "...");
+			}
+			else {
+				setTitle(tr("n/a"));
 			}
 			break;
 		default:

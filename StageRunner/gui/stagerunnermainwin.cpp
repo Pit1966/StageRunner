@@ -30,6 +30,7 @@
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "lightcontrol.h"
+#include "videocontrol.h"
 #include "fxcontrol.h"
 #include "execcenter.h"
 #include "fxlist.h"
@@ -194,6 +195,8 @@ void StageRunnerMainWin::initConnects()
 	// Project <-> Mainwindow
 	connect(appCentral->project, SIGNAL(projectLoadedOrSaved(QString,bool)), this, SLOT(addRecentProject(QString)));
 
+	// Video Control
+	connect(appCentral->unitVideo, SIGNAL(mainVideoViewStateChanged(int,int)), lightCtrlGroup, SLOT(setVideoStatus(int,int)));
 
 	qApp->installEventFilter(this);
 }

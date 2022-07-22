@@ -79,6 +79,8 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 
 	if (localMsg.contains("Cannot create"))
 		fprintf(stderr, "Catch: %s\n",localMsg.constData());
+	else if (localMsg.contains("libpng"))
+		fprintf(stderr, "Catch: %s\n",localMsg.constData());
 
 	switch (type) {
 	case QtDebugMsg:

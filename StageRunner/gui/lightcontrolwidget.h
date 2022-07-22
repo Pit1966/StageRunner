@@ -37,6 +37,9 @@ private:
 public:
 	LightControlWidget(QWidget *parent = 0);
 
+public slots:
+	void setVideoStatus(int viewState, int oldState);
+
 private slots:
 	void on_blackButton_clicked();
 
