@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.6.0
-APP_MILESTONE = K4 Loriot
+APPVERSION = V0.9.7.0
+APP_MILESTONE = PICSHOW
 APP_PRODUCER = 2022 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
@@ -82,16 +82,17 @@ unix:!macx:TRANSLATIONDIR = $$DATADIR/translations
 macx:TRANSLATIONDIR       = $$DATADIR/Translations
 
 # Log files
-win32:LOF_FILE_PATH       = c:/StageRunner.log
-unix:!macx:LOG_FILE_PATH  = /tmp/StageRunner.log
-macx:LOG_FILE_PATH  = /tmp/StageRunner.log
+win32:LOF_FILE_PATH			= c:/StageRunner.log
+unix:!macx:LOG_FILE_PATH	= /tmp/StageRunner.log
+macx:LOG_FILE_PATH			= /tmp/StageRunner.log
 
 
 #############################################################################
 # configrev.h generation
 #############################################################################
 
-CONFIGFILE = $$_PRO_FILE_PWD_/configrev.h
+#CONFIGFILE = $$_PRO_FILE_PWD_/configrev.h
+CONFIGFILE = $$OUT_PWD/configrev.h
 conf.target = $$CONFIGFILE
 QMAKE_EXTRA_TARGETS += conf
 PRE_TARGETDEPS += $$CONFIGFILE
@@ -150,7 +151,5 @@ win32 {
 	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 
-HEADERS += \
-	$$PWD/system/qt_versions.h
 
 

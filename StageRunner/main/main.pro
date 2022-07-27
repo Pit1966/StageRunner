@@ -5,6 +5,13 @@ LANGUAGE = C++
 TARGET   = stagerunner
 
 
+exists($$(HOME)/DEVELOPER_NO_PRECOMPILED) {
+	message("Disabled PRECOMPILED_HEADER")
+} else {
+	PRECOMPILED_HEADER = ../precompiled_headers.h
+	CONFIG += precompile_header
+}
+
 # PKG_CONFIG = /usr/local/bin/pkg-config   #mac
 
 # CONFIG += static
@@ -56,6 +63,7 @@ unix:!macx {
 QT += core gui
 QT += sql
 QT += multimedia
+
 # QT		+= network
 
 greaterThan(QT_MAJOR_VERSION, 4) {
@@ -73,104 +81,104 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 
 SOURCES += \
+	../appcontrol/appcentral.cpp \
+	../appcontrol/execloop.cpp \
+	../appcontrol/execloopthreadinterface.cpp \
+	../appcontrol/fxlistvarset.cpp \
+	../appcontrol/ioplugincentral.cpp \
+	../appcontrol/lightloop.cpp \
+	../appcontrol/lightloopthreadinterface.cpp \
+	../appcontrol/pluginmapping.cpp \
+	../appcontrol/project.cpp \
+	../appcontrol/scapplication.cpp \
+	../appcontrol/usersettings.cpp \
+	../fx/execcenter.cpp \
+	../fx/executer.cpp \
+	../fx/fxaudioitem.cpp \
+	../fx/fxcueitem.cpp \
+	../fx/fxitem.cpp \
+	../fx/fxitemobj.cpp \
+	../fx/fxitemtool.cpp \
+	../fx/fxlist.cpp \
+	../fx/fxplaylistitem.cpp \
+	../fx/fxsceneitem.cpp \
+	../fx/fxscriptitem.cpp \
+	../fx/fxscripttools.cpp \
+	../fx/fxseqitem.cpp \
+	../gui/audiocontrolwidget.cpp \
+	../gui/audioslotwidget.cpp \
+	../gui/consolidatedialog.cpp \
+	../gui/customwidget/extmimedata.cpp \
+	../gui/customwidget/mixerchannel.cpp \
+	../gui/customwidget/mixergroup.cpp \
+	../gui/customwidget/psdockwidget.cpp \
+	../gui/customwidget/psinfodialog.cpp \
+	../gui/customwidget/pslabel.cpp \
+	../gui/customwidget/pslineedit.cpp \
+	../gui/customwidget/pslistwidget.cpp \
 	../gui/customwidget/psoverlaylabel.cpp \
 	../gui/customwidget/pspushbutton.cpp \
+	../gui/customwidget/psspectrometer.cpp \
+	../gui/customwidget/psspinbox.cpp \
+	../gui/customwidget/psvideowidget.cpp \
+	../gui/customwidget/psvumeter.cpp \
 	../gui/deviceinfowidget.cpp \
-	../system/dmx/fixture.cpp \
-	../system/netserver.cpp \
-	main.cpp \
-	../fx/fxitem.cpp \
-	../fx/fxlist.cpp \
-	../fx/fxaudioitem.cpp \
+	../gui/fxitempropertywidget.cpp \
+	../gui/fxlistwidget.cpp \
+	../gui/fxlistwidgetitem.cpp \
+	../gui/fxplaylistwidget.cpp \
+	../gui/fxscriptwidget.cpp \
+	../gui/lightcontrolwidget.cpp \
+	../gui/ptablewidget.cpp \
+	../gui/scenedeskwidget.cpp \
+	../gui/scenestatuswidget.cpp \
+	../gui/sequencecontrolwidget.cpp \
+	../gui/sequencestatuswidget.cpp \
+	../gui/setupwidget.cpp \
+	../gui/stagerunnermainwin.cpp \
+	../gui/style/lightdeskstyle.cpp \
+	../gui/universeeditorwidget.cpp \
+	../gui/videostatuswidget.cpp \
+	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
-	../system/log.cpp \
-	../system/audioiodevice.cpp \
 	../system/audioformat.cpp \
-	../appcontrol/appcentral.cpp \
-	../appcontrol/project.cpp \
-	../appcontrol/usersettings.cpp \
-	../tool/toolclasses.cpp \
-	../tool/prefvar.cpp \
-	../tool/dbquery.cpp \
-	../tool/database.cpp \
+	../system/audioiodevice.cpp \
+	../system/audiooutput/iodeviceaudiobackend.cpp \
+	../system/audiooutput/mediaplayeraudiobackend.cpp \
+	../system/audioplayer.cpp \
+	../system/audioslot.cpp \
+	../system/dmx/fixture.cpp \
+	../system/dmxchannel.cpp \
+	../system/dmxchanproperty.cpp \
+	../system/dmxuniverseproperty.cpp \
+	../system/fxclipitem.cpp \
+	../system/fxcontrol.cpp \
+	../system/fxtimer.cpp \
+	../system/lightcontrol.cpp \
+	../system/log.cpp \
+	../system/messagedialog.cpp \
+	../system/messagehub.cpp \
+	../system/netserver.cpp \
+	../system/runguard.cpp \
+	../system/variantmapserializer.cpp \
+	../system/videocontrol.cpp \
+	../system/videoplayer.cpp \
+	../thirdparty/widget/qsynthdialclassicstyle.cpp \
 	../thirdparty/widget/qsynthdialpeppinostyle.cpp \
 	../thirdparty/widget/qsynthknob.cpp \
 	../thirdparty/widget/qsynthmeter.cpp \
-	../thirdparty/widget/qsynthdialclassicstyle.cpp \
-	../gui/fxlistwidget.cpp \
-	../gui/stagerunnermainwin.cpp \
-	../gui/sequencecontrolwidget.cpp \
-	../gui/audioslotwidget.cpp \
-	../gui/audiocontrolwidget.cpp \
-	../gui/ptablewidget.cpp \
-	../appcontrol/ioplugincentral.cpp \
-	../gui/customwidget/mixerchannel.cpp \
-	../gui/setupwidget.cpp \
-	../gui/customwidget/mixergroup.cpp \
-	../gui/fxitempropertywidget.cpp \
-	../system/dmxchannel.cpp \
-	../fx/fxsceneitem.cpp \
-	../tool/varset.cpp \
-	../gui/scenedeskwidget.cpp \
-	../gui/customwidget/pslineedit.cpp \
-	../system/lightcontrol.cpp \
-	../appcontrol/lightloop.cpp \
-	../appcontrol/lightloopthreadinterface.cpp \
-	../gui/scenestatuswidget.cpp \
-	../gui/lightcontrolwidget.cpp \
-	../tool/qtstatictools.cpp \
-	../gui/fxlistwidgetitem.cpp \
-	../appcontrol/pluginmapping.cpp \
-	../gui/customwidget/pslabel.cpp \
-	../gui/customwidget/extmimedata.cpp \
-	../gui/style/lightdeskstyle.cpp \
-	../system/messagehub.cpp \
-	../system/messagedialog.cpp \
-	../fx/fxplaylistitem.cpp \
-	../gui/fxplaylistwidget.cpp \
-	../gui/customwidget/pslistwidget.cpp \
-	../fx/fxitemtool.cpp \
-	../fx/execcenter.cpp \
-	../fx/executer.cpp \
-	../fx/fxitemobj.cpp \
-	../fx/fxseqitem.cpp \
-	../system/fxcontrol.cpp \
-	../appcontrol/execloopthreadinterface.cpp \
-	../appcontrol/execloop.cpp \
-	../gui/sequencestatuswidget.cpp \
-	../system/audioplayer.cpp \
-	../appcontrol/scapplication.cpp \
-	../tool/psmovingaverage.cpp \
-	../tool/frqspectrum.cpp \
-	../gui/customwidget/psspectrometer.cpp \
-	../appcontrol/fxlistvarset.cpp \
+	../tool/database.cpp \
+	../tool/dbquery.cpp \
 	../tool/fftrealfixlenwrapper.cpp \
-	../gui/customwidget/psvumeter.cpp \
-	../system/videocontrol.cpp \
-	../system/fxclipitem.cpp \
-	../gui/customwidget/psvideowidget.cpp \
-	../system/videoplayer.cpp \
-	../system/dmxchanproperty.cpp \
-	../system/dmxuniverseproperty.cpp \
-	../fx/fxscriptitem.cpp \
-    ../gui/fxscriptwidget.cpp \
-	../fx/fxscripttools.cpp \
-	../fx/fxcueitem.cpp \
-    ../plugins/yadi/src/dmxmonitor.cpp \
-	../gui/customwidget/psinfodialog.cpp \
-	../system/variantmapserializer.cpp \
-    ../gui/customwidget/psdockwidget.cpp \
-    ../system/runguard.cpp \
-	../system/audiooutput/mediaplayeraudiobackend.cpp \
+	../tool/frqspectrum.cpp \
+	../tool/prefvar.cpp \
+	../tool/psmovingaverage.cpp \
+	../tool/qtstatictools.cpp \
+	../tool/toolclasses.cpp \
+	../tool/varset.cpp \
+	../widgets/editormarginwidget.cpp \
 	../widgets/scripteditwidget.cpp \
-    ../widgets/editormarginwidget.cpp \
-    ../system/audioslot.cpp \
-	../system/audiooutput/iodeviceaudiobackend.cpp \
-	../gui/consolidatedialog.cpp \
-	../gui/universeeditorwidget.cpp \
-	../gui/customwidget/psspinbox.cpp \
-	../system/fxtimer.cpp
-
+	main.cpp
 
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
@@ -179,82 +187,89 @@ unix {
 HEADERS  += \
 	../config.h \
 #    ../configrev.h \
-	../fx/fxitem.h \
-	../fx/fxlist.h \
-	../fx/fxaudioitem.h \
-	../gui/customwidget/psoverlaylabel.h \
-	../gui/customwidget/pspushbutton.h \
-	../gui/deviceinfowidget.h \
-	../system/audiocontrol.h \
-	../system/dmx/fixture.h \
-	../system/importfxmaster/fxMaster.h \
-	../system/log.h \
-	../system/commandsystem.h \
-	../system/audioiodevice.h \
-	../system/audioformat.h \
 	../appcontrol/appcentral.h \
-	../appcontrol/project.h \
-	../appcontrol/usersettings.h \
-	../system/netserver.h \
-	../tool/toolclasses.h \
-	../tool/prefvar.h \
-	../tool/dbquery.h \
-	../tool/database.h \
-	../thirdparty/widget/qsynthdialpeppinostyle.h \
-	../thirdparty/widget/qsynthknob.h \
-	../thirdparty/widget/qsynthmeter.h \
-	../thirdparty/widget/qsynthdialclassicstyle.h \
-	../gui/fxlistwidget.h \
-	../gui/stagerunnermainwin.h \
-	../gui/sequencecontrolwidget.h \
-	../gui/audioslotwidget.h \
-	../gui/audiocontrolwidget.h \
-	../gui/ptablewidget.h \
+	../appcontrol/execloop.h \
+	../appcontrol/execloopthreadinterface.h \
+	../appcontrol/fxlistvarset.h \
 	../appcontrol/ioplugincentral.h \
-	../gui/customwidget/mixerchannel.h \
-	../gui/setupwidget.h \
-	../gui/customwidget/mixergroup.h \
-	../gui/fxitempropertywidget.h \
-	../system/dmxchannel.h \
-	../fx/fxsceneitem.h \
-	../tool/varset.h \
-	../tool/varsetlist.h \
-	../gui/scenedeskwidget.h \
-	../gui/customwidget/pslineedit.h \
-	../system/lightcontrol.h \
-	../appcontrol/lightloopthreadinterface.h \
 	../appcontrol/lightloop.h \
-	../gui/scenestatuswidget.h \
-	../gui/lightcontrolwidget.h \
-	../tool/qtstatictools.h \
-	../gui/fxlistwidgetitem.h \
+	../appcontrol/lightloopthreadinterface.h \
 	../appcontrol/pluginmapping.h \
-	../gui/customwidget/pslabel.h \
-	../gui/customwidget/extmimedata.h \
-	../gui/style/lightdeskstyle.h \
-	../system/messagehub.h \
-	../system/messagedialog.h \
-	../fx/fxplaylistitem.h \
-	../gui/fxplaylistwidget.h \
-	../gui/customwidget/pslistwidget.h \
-	../fx/fxitemtool.h \
+	../appcontrol/project.h \
+	../appcontrol/scapplication.h \
+	../appcontrol/usersettings.h \
 	../fx/execcenter.h \
 	../fx/executer.h \
+	../fx/fxaudioitem.h \
+	../fx/fxcueitem.h \
+	../fx/fxitem.h \
 	../fx/fxitemobj.h \
+	../fx/fxitemtool.h \
+	../fx/fxlist.h \
+	../fx/fxplaylistitem.h \
+	../fx/fxsceneitem.h \
+	../fx/fxscriptitem.h \
+	../fx/fxscripttools.h \
 	../fx/fxseqitem.h \
-	../system/fxcontrol.h \
-	../appcontrol/execloopthreadinterface.h \
-	../appcontrol/execloop.h \
-	../gui/sequencestatuswidget.h \
-	../system/audioplayer.h \
-	../appcontrol/scapplication.h \
-	../tool/psmovingaverage.h \
-	../tool/frqspectrum.h \
+	../gui/audiocontrolwidget.h \
+	../gui/audioslotwidget.h \
+	../gui/consolidatedialog.h \
+	../gui/customwidget/extmimedata.h \
+	../gui/customwidget/mixerchannel.h \
+	../gui/customwidget/mixergroup.h \
+	../gui/customwidget/psinfodialog.h \
+	../gui/customwidget/pslabel.h \
+	../gui/customwidget/pslineedit.h \
+	../gui/customwidget/pslistwidget.h \
+	../gui/customwidget/psoverlaylabel.h \
+	../gui/customwidget/pspushbutton.h \
 	../gui/customwidget/psspectrometer.h \
-	../appcontrol/fxlistvarset.h \
+	../gui/customwidget/psspinbox.h \
+	../gui/customwidget/psvideowidget.h \
+	../gui/customwidget/psvumeter.h \
+	../gui/deviceinfowidget.h \
+	../gui/fxitempropertywidget.h \
+	../gui/fxlistwidget.h \
+	../gui/fxlistwidgetitem.h \
+	../gui/fxplaylistwidget.h \
+	../gui/lightcontrolwidget.h \
+	../gui/ptablewidget.h \
+	../gui/scenedeskwidget.h \
+	../gui/scenestatuswidget.h \
+	../gui/sequencecontrolwidget.h \
+	../gui/sequencestatuswidget.h \
+	../gui/setupwidget.h \
+	../gui/stagerunnermainwin.h \
+	../gui/style/lightdeskstyle.h \
+	../gui/universeeditorwidget.h \
+	../gui/videostatuswidget.h \
+	../system/audiocontrol.h \
+	../system/audioformat.h \
+	../system/audioiodevice.h \
+	../system/audiooutput/iodeviceaudiobackend.h \
+	../system/audiooutput/mediaplayeraudiobackend.h \
+	../system/audioplayer.h \
+	../system/commandsystem.h \
+	../system/dmx/fixture.h \
+	../system/dmxchannel.h \
+	../system/dmxchanproperty.h \
+	../system/dmxtypes.h \
+	../system/dmxuniverseproperty.h \
+	../system/fxclipitem.h \
+	../system/fxcontrol.h \
+	../system/fxtimer.h \
+	../system/importfxmaster/fxMaster.h \
+	../system/lightcontrol.h \
+	../system/log.h \
+	../system/messagedialog.h \
+	../system/messagehub.h \
+	../system/netserver.h \
+	../system/qt_versions.h \
+	../system/variantmapserializer.h \
+	../system/videocontrol.h \
+	../system/videoplayer.h \
 	../thirdparty/fftreal2/ffft/Array.h \
 	../thirdparty/fftreal2/ffft/Array.hpp \
-	../thirdparty/fftreal2/ffft/def.h \
 	../thirdparty/fftreal2/ffft/DynArray.h \
 	../thirdparty/fftreal2/ffft/DynArray.hpp \
 	../thirdparty/fftreal2/ffft/FFTReal.h \
@@ -272,58 +287,54 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/FFTRealUseTrigo.hpp \
 	../thirdparty/fftreal2/ffft/OscSinCos.h \
 	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
+	../thirdparty/fftreal2/ffft/def.h \
+	../thirdparty/widget/qsynthdialclassicstyle.h \
+	../thirdparty/widget/qsynthdialpeppinostyle.h \
+	../thirdparty/widget/qsynthknob.h \
+	../thirdparty/widget/qsynthmeter.h \
+	../tool/database.h \
+	../tool/dbquery.h \
 	../tool/fftrealfixlenwrapper.h \
-	../gui/customwidget/psvumeter.h \
-	../system/dmxtypes.h \
-	../system/videocontrol.h \
-	../system/fxclipitem.h \
-	../gui/customwidget/psvideowidget.h \
-	../system/videoplayer.h \
-	../system/dmxchanproperty.h \
-	../system/dmxuniverseproperty.h \
-	../fx/fxscriptitem.h \
-    ../gui/fxscriptwidget.h \
-	../fx/fxscripttools.h \
-	../fx/fxcueitem.h \
-    ../plugins/yadi/src/dmxmonitor.h \
-	../gui/customwidget/psinfodialog.h \
-	../system/variantmapserializer.h \
-    ../gui/customwidget/psdockwidget.h \
-    ../system/runguard.h \
-	../system/audiooutput/mediaplayeraudiobackend.h \
+	../tool/frqspectrum.h \
+	../tool/prefvar.h \
+	../tool/psmovingaverage.h \
+	../tool/qtstatictools.h \
+	../tool/toolclasses.h \
+	../tool/varset.h \
+	../tool/varsetlist.h \
 	../widgets/scripteditwidget.h \
-    ../widgets/editormarginwidget.h \
-    ../system/audioslot.h \
-	../system/audiooutput/iodeviceaudiobackend.h \
-	../gui/consolidatedialog.h \
-	../gui/universeeditorwidget.h \
-	../gui/customwidget/psspinbox.h \
-	../system/fxtimer.h
+	../gui/customwidget/psdockwidget.h \
+	../gui/fxscriptwidget.h \
+	../plugins/yadi/src/dmxmonitor.h \
+	../system/audioslot.h \
+	../system/runguard.h \
+	../widgets/editormarginwidget.h
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h
 }
 
 FORMS    += \
-	../gui/deviceinfowidget.ui \
-	../gui/fxlistwidget.ui \
-	../gui/stagerunnermainwin.ui \
-	../gui/sequencecontrolwidget.ui \
-	../gui/audioslotwidget.ui \
 	../gui/audiocontrolwidget.ui \
-	../gui/setupwidget.ui \
+	../gui/audioslotwidget.ui \
+	../gui/consolidatedialog.ui \
+	../gui/customwidget/psinfodialog.ui \
+	../gui/deviceinfowidget.ui \
 	../gui/fxitempropertywidget.ui \
+	../gui/fxlistwidget.ui \
+	../gui/fxlistwidgetitem.ui \
+	../gui/fxplaylistwidget.ui \
+	../gui/fxscriptwidget.ui \
+	../gui/lightcontrolwidget.ui \
 	../gui/scenedeskwidget.ui \
 	../gui/scenestatuswidget.ui \
-	../gui/lightcontrolwidget.ui \
-	../gui/fxlistwidgetitem.ui \
-	../system/messagedialog.ui \
-	../gui/fxplaylistwidget.ui \
+	../gui/sequencecontrolwidget.ui \
 	../gui/sequencestatuswidget.ui \
-	../gui/customwidget/psinfodialog.ui \
-	../gui/fxscriptwidget.ui \
-	../gui/consolidatedialog.ui \
-	../gui/universeeditorwidget.ui
+	../gui/setupwidget.ui \
+	../gui/stagerunnermainwin.ui \
+	../gui/universeeditorwidget.ui \
+	../gui/videostatuswidget.ui \
+	../system/messagedialog.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

@@ -77,21 +77,23 @@ QString VideoPlayer::viewStateToString(VideoViewStatus viewState)
 {
 	switch (viewState) {
 	case VIEW_UNUSED:
-		return "unused";
+		return "UNUSED";
+	case VIEW_ERROR:
+		return "ERROR";
 	case VIEW_BLACK:
-		return "black";
+		return "BLACK";
 	case VIEW_VIDEO_VISIBLE:
-		return "video visible";
+		return "VIDEO visible";
 	case VIEW_VIDEO_FADEIN:
-		return "video fadein";
+		return "VIDEO fadein";
 	case VIEW_VIDEO_FADEOUT:
-		return "video fadeout";
+		return "VIDEO fadeout";
 	case VIEW_PIC_VISIBLE:
-		return "pic visible";
+		return "PIC visible";
 	case VIEW_PIC_FADEIN:
-		return "pic fadein";
+		return "PIC fadein";
 	case VIEW_PIC_FADEOUT:
-		return "pic fadeout";
+		return "PIC fadeout";
 	case VIEW_FADE_STOPPED:
 		return "fade stopped";
 	case VIEW_PRE_DELAY:
@@ -100,7 +102,22 @@ QString VideoPlayer::viewStateToString(VideoViewStatus viewState)
 		return "hold";
 
 	default:
-		return QString::number(viewState);
+		int state = viewState;
+		int bit = 0;
+		QString status;
+		while (state > 0) {
+			int val = 1<<bit;
+			if (state & val) {
+				state -= val;
+				if (!status.isEmpty())
+					status += ";";
+				status += viewStateToString(VideoViewStatus(val));
+			}
+
+			bit++;
+		}
+
+		return status;
 	}
 }
 
@@ -315,12 +332,28 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	return ok;
 }
 
-void VideoPlayer::setViewState(VIDEO::VideoViewStatus state)
+void VideoPlayer::setViewState(VIDEO::VideoViewStatus state, bool addState)
 {
+	if (addState)
+		state = VIDEO::VideoViewStatus( int(m_viewState) | int(state) );
+
 	if (state != m_viewState) {
 		int oldstate = m_viewState;
 		m_viewState = state;
 		emit viewStateChanged(state, oldstate);
+	}
+}
+
+void VideoPlayer::fadeOutCurrent(int ms)
+{
+	if (m_viewState & VIEW_VIDEO_VISIBLE) {
+		fadeVideoToBlack(ms);
+	}
+	else if (m_viewState & VIEW_PIC_VISIBLE) {
+		if (m_videoWid->isPicClipVisible(0))
+			fadePicClipOverlayOut(ms, 0);
+		if (m_videoWid->isPicClipVisible(1))
+			fadePicClipOverlayOut(ms, 1);
 	}
 }
 
@@ -655,13 +688,19 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 	else {
 		if (m_viewState == VIEW_PIC_FADEIN) {
 			setViewState(VIEW_PIC_VISIBLE);
+			if (FxItem::exists(m_currentFxClipItem) && m_currentFxClipItem->holdTime() > 0) {
+				setViewState(VIEW_HOLD, true);
+				m_ctrlTimer.start(m_currentFxClipItem->holdTime());
+				LOGTEXT(tr("<font color=green>HOLD</font> <b>%1</b> for %2ms")
+						.arg(m_currentFxClipItem->name()).arg(m_currentFxClipItem->holdTime()));
+			}
 		}
 		else if (m_viewState == VIEW_PIC_FADEOUT) {
 			setViewState(VIEW_BLACK);
 		}
 		else if (m_viewState == VIEW_VIDEO_FADEOUT) {
 			setViewState(VIEW_BLACK);
-			if (m_currentFxClipItem) {
+			if (FxItem::exists(m_currentFxClipItem) && m_currentFxClipItem) {
 				LOGTEXT(tr("<font color=green>VIDEO fade out end</font> <b>%1</b>").arg(m_currentFxClipItem->fileName()));
 				m_currentFxClipItem = nullptr;
 			}
@@ -679,12 +718,21 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 
 void VideoPlayer::onCtrlTimerFinished()
 {
-	if (m_viewState == VIEW_PRE_DELAY) {
-		if (m_ctrlFxItem) {
+	if (m_viewState & VIEW_PRE_DELAY) {
+		if (FxItem::exists(m_ctrlFxItem)) {
 			playFxClip(m_ctrlFxItem, m_slotNumber);
 			m_ctrlFxItem = nullptr;
+			return;
 		}
 	}
+	else if (m_viewState & VIEW_HOLD) {
+		if (FxItem::exists(m_currentFxClipItem)) {
+			fadeOutCurrent(m_currentFxClipItem->fadeOutTime());
+			return;
+		}
+	}
+
+	setViewState(VIEW_ERROR);
 }
 
 

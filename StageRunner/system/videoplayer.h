@@ -87,7 +87,8 @@ public:
 	inline QMediaPlayer * mediaPlayer() {return this;}
 
 protected:
-	void setViewState(VIDEO::VideoViewStatus state);
+	void setViewState(VIDEO::VideoViewStatus state, bool addState = false);
+	void fadeOutCurrent(int ms);
 
 private:
 	bool _playPicClip(FxClipItem *fxc, FxClipItem *old_fxc);

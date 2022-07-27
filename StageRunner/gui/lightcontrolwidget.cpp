@@ -34,6 +34,7 @@ LightControlWidget::LightControlWidget(QWidget *parent) :
 
 void LightControlWidget::setVideoStatus(int viewState, int oldState)
 {
+	Q_UNUSED(oldState)
 	QString txt = VideoPlayer::viewStateToString(VIDEO::VideoViewStatus(viewState));
 	videoViewStateLabel->setText(txt);
 }
