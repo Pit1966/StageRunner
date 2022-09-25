@@ -193,11 +193,13 @@ void Log::run()
 
 		if (w != m_currentFocusWindow) {
 			if (w) {
-				if (m_noFocusCount > 0) {
+				// qDebug() << "focus window changed" << w->objectName();
+				if (w->objectName() == "StageRunnerMainwinWindow" && m_noFocusCount > 0) {
 					m_noFocusCount = 0;
 					emit warnMsgSent(QString(), 10);
+				} else {
+					w = nullptr;
 				}
-				// qDebug() << "focus window changed" << w->objectName();
 			} else {
 				// qDebug() << "focus window is null";
 			}
