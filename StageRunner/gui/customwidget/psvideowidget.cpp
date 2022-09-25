@@ -429,3 +429,4 @@ void PsVideoWidget::toggleFullScreen()
 {
 	setFullScreen(!isFullScreen());
 }
+

@@ -885,3 +885,4 @@ void AppCentral::init()
 	// TCP server -> Script Executer
 	connect(tcpServer, SIGNAL(remoteCmdReceived(QString)), execCenter, SLOT(executeScriptCmd(QString)));
 }
+

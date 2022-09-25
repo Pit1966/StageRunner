@@ -207,3 +207,4 @@ bool PsLineEdit::event(QEvent *event)
 	}
 	return QLineEdit::event(event);
 }
+

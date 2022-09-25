@@ -57,3 +57,4 @@ void LightControlWidget::on_fadeToBlackButton_clicked()
 	appcentral->lightBlack(fadeSecondsSpin->value() * 1000);
 	appcentral->videoBlack(fadeSecondsSpin->value() * 1000);
 }
+

@@ -5,12 +5,12 @@ LANGUAGE = C++
 TARGET   = stagerunner
 
 
-exists($$(HOME)/DEVELOPER_NO_PRECOMPILED) {
-	message("Disabled PRECOMPILED_HEADER")
-} else {
-	PRECOMPILED_HEADER = ../precompiled_headers.h
-	CONFIG += precompile_header
-}
+#exists($$(HOME)/DEVELOPER_NO_PRECOMPILED) {
+#	message("Disabled PRECOMPILED_HEADER")
+#} else {
+#	PRECOMPILED_HEADER = ../precompiled_headers.h
+#	CONFIG += precompile_header
+#}
 
 # PKG_CONFIG = /usr/local/bin/pkg-config   #mac
 
@@ -35,7 +35,7 @@ macx {
 INCLUDEPATH += ../SDL2/SDL2
 INCLUDEPATH += ../SDL2
 
-INCLUDEPATH += /Library/Frameworks/SDL2.framewor/Headers
+INCLUDEPATH += /Library/Frameworks/SDL2.framework/Headers
 INCLUDEPATH += /Library/Frameworks/SDL2_mixer.framework/Headers
 LIBS += -framework SDL2
 LIBS += -framework SDL2_mixer
