@@ -48,10 +48,10 @@ public:
 
 	void copyFrom(const FxPlayListItem &o);
 
-	void setLoopValue(qint32 val);
-	qint32 loopValue() const;
-	bool isRandomized();
-	void setRandomized(bool state);
+	void setLoopValue(qint32 val) override;
+	qint32 loopValue() const override;
+	bool isRandomized() const override;
+	void setRandomized(bool state) override;
 	FxList *fxList() const override {return fxPlayList;}
 
 
@@ -59,8 +59,8 @@ public:
 	int size();
 	void continuePlay(FxItem *fx, CtrlCmd cmd, Executer *exec);
 	inline FxItemObj * connector() {return itemObj;}
-	QString widgetPosition() {return widgetPos;}
-	void setWidgetPosition(const QString & geometry) {widgetPos = geometry;}
+	QString widgetPosition() const override {return widgetPos;}
+	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 
 private:
 	void init();

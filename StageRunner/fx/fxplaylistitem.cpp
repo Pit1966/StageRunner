@@ -70,7 +70,7 @@ qint32 FxPlayListItem::loopValue() const
 	return loopTimes;
 }
 
-bool FxPlayListItem::isRandomized()
+bool FxPlayListItem::isRandomized() const
 {
 	return fxPlayList->myRandomizedFlag;
 }
