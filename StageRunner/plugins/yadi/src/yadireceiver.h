@@ -95,6 +95,7 @@ public:
 
 private:
 	YadiDevice *device;
+	QString m_deviceProductName;
 	int inputNumber;
 
 	volatile RunCmd cmd;
@@ -105,6 +106,7 @@ public:
 	YadiReceiver(YadiDevice *p_device);
 	~YadiReceiver();
 
+	void setProductName(const QString &productName) {m_deviceProductName = productName;}
 	bool startRxDmx(int input);
 	bool stopRxDmx();
 	bool detectRxDmxPacketSize(int *packet_size);

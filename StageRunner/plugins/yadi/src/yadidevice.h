@@ -31,6 +31,7 @@ class SerialWrapper;
 class DmxMonitor;
 class MvgAvgCollector;
 class QSerialPortThread;
+class YadiDMXUSBOut;
 
 
 /**
@@ -49,6 +50,7 @@ class QSerialPortThread;
 class YadiDevice
 {
 private:
+	YadiDMXUSBOut *m_yadiPlugin;			// the parent plugin
 	QString m_devNodePath;
 	QString m_devNodeName;
 
@@ -103,7 +105,7 @@ private:
 	bool m_isDeviceActivated;
 
 public:
-	YadiDevice(const QString & dev_node);
+	YadiDevice(YadiDMXUSBOut *yadiPlugin, const QString & dev_node);
 	~YadiDevice();
 	YadiDevice(const YadiDevice & other);
 	YadiDevice & operator= (const YadiDevice & other);
@@ -141,13 +143,15 @@ public:
 	void loadConfig();
 	void sendConfigToDevice();
 
+	void sendStatusMsg(const QString &msg);
+	void sendErrorMsg(const QString &msg);
+
 	DmxMonitor *openDmxInMonitorWidget();
 	DmxMonitor *openDmxOutMonitorWidget();
 	void closeDmxInMonitorWidget();
 	void closeDmxOutMonitorWidget();
 
 	static bool deviceNodeExists(const QString &dev_node);
-
 	static QString threadName();
 	static const char *threadNameAsc();
 

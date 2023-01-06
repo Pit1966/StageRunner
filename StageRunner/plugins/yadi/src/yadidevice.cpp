@@ -22,10 +22,12 @@
 ************************************************************************************/
 
 #include "yadidevice.h"
+#include "yadidmxusbout.h"
 #include "yadireceiver.h"
 #include "serialwrapper.h"
 #include "dmxmonitor.h"
 #include "configrev.h"
+
 #ifdef USE_QTSERIAL
 #  include "qserialportthread.h"
 #endif
@@ -35,7 +37,8 @@
 #include <QDebug>
 #include <QObject>
 
-YadiDevice::YadiDevice(const QString &dev_node)
+YadiDevice::YadiDevice(YadiDMXUSBOut *yadiPlugin, const QString &dev_node)
+	: m_yadiPlugin(yadiPlugin)
 {
 	setDevNodePath(dev_node);
 	init();
@@ -44,6 +47,7 @@ YadiDevice::YadiDevice(const QString &dev_node)
 YadiDevice &YadiDevice::operator =(const YadiDevice &other)
 {
 	bool activate_again = false;
+	m_yadiPlugin = other.m_yadiPlugin;
 
 	if (m_devNodePath != other.m_devNodePath) {
 		if (m_isDeviceActivated) {
@@ -148,6 +152,7 @@ bool YadiDevice::activateDevice()
 	if (!file) {
 		if (SerialWrapper::deviceNodeExists(devNode())) {
 			file = new SerialWrapper(this, devNodePath());
+			file->setProductName(deviceProductName);
 			outUniverse.fill(0,512);
 		} else {
 			ok = false;
@@ -156,6 +161,7 @@ bool YadiDevice::activateDevice()
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
 			input_thread = new YadiReceiver(this);
+			input_thread->setProductName(deviceProductName);
 			inUniverse.fill(0,512);
 		}
 		else if (!(capabilities&FL_INPUT_UNIVERSE) && input_thread) {
@@ -213,6 +219,14 @@ bool YadiDevice::openOutput()
 #else
 	if (!file->isOpen()) {
 		m_isOutputOpen = file->openSerial();
+		if (m_isOutputOpen) {
+			QByteArray version;
+			file->writeCommand("v", &version);
+			QByteArray channels;
+			file->writeCommand("c", &channels);
+			currentDetectedDmxInPacketSize = channels.split(' ').at(0).toInt();
+		}
+
 	} else {
 		m_isOutputOpen = true;
 	}
@@ -456,6 +470,18 @@ void YadiDevice::sendConfigToDevice()
 	}
 }
 
+void YadiDevice::sendStatusMsg(const QString &msg)
+{
+	QString txt = QString("%1: %2").arg(m_devNodeName, msg);
+	m_yadiPlugin->sendStatusMsg(txt);
+}
+
+void YadiDevice::sendErrorMsg(const QString &msg)
+{
+	QString txt = QString("%1: %2").arg(m_devNodeName, msg);
+	m_yadiPlugin->sendErrorMsg(txt);
+}
+
 DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 {
 	if (!dmxInMonWidget) {
@@ -562,6 +588,7 @@ void YadiDevice::init()
 	usedDmxInChannels = -1;
 	usedDmxOutChannels = -1;
 	capabilities = FL_CLEAR;
+	currentDetectedDmxInPacketSize = 0;
 #ifdef USE_QTSERIAL
 	m_serialThread = nullptr;
 #else

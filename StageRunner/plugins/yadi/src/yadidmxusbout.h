@@ -67,6 +67,7 @@ public:
 	YadiDMXUSBOut();
 	~YadiDMXUSBOut();
 
+	// reimplemented functions from QLC+
 	void init();						///< @reimp
 	bool findDevices(bool update = false);
 	QString name();						///< @reimp
@@ -95,6 +96,10 @@ public:
 
 	// Special functions only implemented by YADI
 	Q_INVOKABLE bool setInOutMergeMode(quint32 input, quint32 universe, quint32 mode);
+
+	// internal used functions
+	void sendStatusMsg(const QString &msg);
+	void sendErrorMsg(const QString &msg);
 
 private:
 	void handle_output_error(quint32 output);

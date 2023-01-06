@@ -57,6 +57,7 @@ class SerialWrapper : public QObject
 	Q_OBJECT
 private:
 	QString device_node;			// may be port name for QtSerial, or device path for unix
+	QString m_productName;			// product name info from USB enumerator
 	int error_num;
 	YadiDevice *m_yadi;
 	QThread *m_openedFromThread;
@@ -74,11 +75,10 @@ public:
 	SerialWrapper(YadiDevice *dev, const QString & dev_node = "");
 	~SerialWrapper();
 	static bool deviceNodeExists(const QString &dev_node);
-
 #ifdef HAS_QTSERIAL
-	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);
+	static QList<QSerialPortInfo> discoverQtSerialPorts(const QString &nameMatch);		// todo move to Manager
 #endif
-
+	void setProductName(const QString &productName) {m_productName = productName;}
 	bool openSerial();
 	void closeSerial();
 	QByteArray readSerial(qint64 size);

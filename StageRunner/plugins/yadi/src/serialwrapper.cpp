@@ -154,7 +154,7 @@ bool SerialWrapper::openSerial()
 
 
 	m_serialPort->setPortName(device_node);
-	m_serialPort->setBaudRate(115200);
+	m_serialPort->setBaudRate(203400);
 
 	if (m_serialPort->open(QIODevice::ReadWrite) == false) {
 		qWarning("Yadi: %s cannot open serial driver '%s'"
@@ -220,18 +220,22 @@ bool SerialWrapper::openSerial()
 		tio.c_iflag &= ~(ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXANY | IXOFF);
 		tio.c_lflag &= ~(ISIG | ICANON | ECHO | ECHOE | ECHOK | ECHONL);
 		tio.c_cflag |= CLOCAL;					// this is necessary for mac when using tty.usbModem instead of cu.usbModem
-		cfsetispeed(&tio,B115200);
-		cfsetospeed(&tio,B115200);
+		m_yadi->sendStatusMsg(tr("Interface product name: %1").arg(m_productName));
+
+		cfsetispeed(&tio,B230400);
+		cfsetospeed(&tio,B230400);
+//		cfsetispeed(&tio,B115200);
+//		cfsetospeed(&tio,B115200);
 		tcsetattr(serial_fd,TCSANOW,&tio);   // TCSANOW
 
 #ifdef DEBUGME
 		QProcess stty;
-//		QString cmd = QString("stty -F %1 115200 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNodePath);
-#ifdef Q_OS_MAC
+//		QString cmd = QString("stty -F %1 230400 raw -echo -echoe").arg(globYadiDeviceList.at(t)->devNodePath);
+#  ifdef Q_OS_MAC
 		QString cmd = QString("stty -f %1").arg(deviceNode());
-#else
+#  else
 		QString cmd = QString("stty -F %1").arg(deviceNode());
-#endif
+#  endif
 		stty.start(cmd);
 		stty.waitForFinished(2000);
 		// qDebug() <<  "QProcess" << cmd;
@@ -239,9 +243,6 @@ bool SerialWrapper::openSerial()
 		QString err =  QString::fromUtf8(stty.readAllStandardError().data());
 		qDebug("stty:\n%s\nerr:\n%s\n",out.toLocal8Bit().constData(),err.toLocal8Bit().constData());
 #endif
-
-		// Read Version info
-		writeCommand("v");
 
 	} else {
 		ok = false;

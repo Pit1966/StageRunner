@@ -107,10 +107,6 @@ int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 				LOGTEXT(tr("QLC plugin '%1' loaded").arg(plugin->name()));
 				qlc_plugins.append(plugin);
 
-				plugin->init();
-				loadcnt++;
-
-				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 				if (obj->metaObject()->indexOfSignal("errorMsgEmitted(QString)") >= 0) {
 					connect(plugin,SIGNAL(errorMsgEmitted(QString)),this,SLOT(onErrorMessageReceived(QString)));
 				}
@@ -118,6 +114,10 @@ int IOPluginCentral::loadQLCPlugins(const QString &dir_str)
 					connect(plugin,SIGNAL(statusMsgEmitted(QString)),this,SLOT(onStatusMessageReceived(QString)));
 				}
 
+				plugin->init();
+				loadcnt++;
+
+				connect(plugin,SIGNAL(configurationChanged()),this,SLOT(onPluginConfigurationChanged()));
 			}
 			else {
 				DEBUGERROR("'%s' QLC I/O plugin in %s is already loaded -> unload again"
