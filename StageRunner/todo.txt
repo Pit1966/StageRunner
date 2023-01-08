@@ -22,3 +22,6 @@ Features:
 als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewartet und dann ausgefadet
 
 
+- Möglichkeit (Knopf) einbauen, den Videoscreen wieder zu schließen
+- Dokumentation der Script Funktionen
+- Grap DMX in Prüfen

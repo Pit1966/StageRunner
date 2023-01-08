@@ -3,9 +3,9 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.7.0
-APP_MILESTONE = PICSHOW
-APP_PRODUCER = 2022 Stonechip Entertainment
+APPVERSION = V0.9.7.1
+APP_MILESTONE = Mausefalle
+APP_PRODUCER = 2023 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
 

@@ -1112,6 +1112,7 @@ bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
 		FxItemList clonelist;
 		if (fadeout_all) {
 			clonelist = FxItem::getTempCopiesOfFx(scene);
+			clonelist.append(scene);
 		} else {
 			clonelist = getExecuterTempCopiesOfFx(scene);
 		}
