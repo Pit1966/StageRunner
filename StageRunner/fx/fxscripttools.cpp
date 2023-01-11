@@ -38,6 +38,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("grapscene",KW_GRAP_SCENE);
 	m_keywordHash.insert("black",KW_BLACK);
 	m_keywordHash.insert("remote",KW_REMOTE);
+	m_keywordHash.insert("fadevol",KW_FADE_VOL);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)

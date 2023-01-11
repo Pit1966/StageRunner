@@ -387,8 +387,6 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 	LOGTEXT(tr("Fade in for slot %1: '%2' started with duration %3ms")
 			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
 
-
-
 	return true;
 }
 
@@ -629,6 +627,9 @@ void AudioSlot::audioCtrlReceiver(const AudioCtrlMsg &msg)
 		break;
 	case CMD_AUDIO_CHANGE_VOL:
 		setVolume(msg.volume);
+		break;
+	case CMD_AUDIO_FADEIN:
+		fadeinFxAudio(msg.volume,msg.fadetime);
 		break;
 	case CMD_AUDIO_FADEOUT:
 		fadeoutFxAudio(0,msg.fadetime);

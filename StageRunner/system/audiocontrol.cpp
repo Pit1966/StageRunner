@@ -622,6 +622,37 @@ void AudioControl::storeCurrentSeekPos(int slot)
 	audioSlots[slot]->storeCurrentSeekPos();
 }
 
+void AudioControl::fadeVolTo(int slot, int targetVolume, int time_ms)
+{
+	if (slot < 0 || slot >= used_slots)
+		return;
+
+	QMutexLocker lock(slotMutex);
+
+	FxAudioItem *fxaudio = audioSlots[slot]->currentFxAudio();
+	if (fxaudio == nullptr) {
+		LOGTEXT(tr("FADEVOL canceled since there is no audio running in slot #%1").arg(slot+1));
+		return;
+	}
+
+	int currentVol = audioSlots[slot]->volume();
+	if (targetVolume == currentVol) {
+		LOGTEXT(tr("FADEVOL canceled since tareget volume is already reached in slot #%1").arg(slot+1));
+		return;
+	}
+
+	// This is a private message to my audio thread
+	AudioCtrlMsg msg(slot,CMD_AUDIO_FADEIN);
+	if (currentVol > targetVolume)
+		msg.ctrlCmd = CMD_AUDIO_FADEOUT;
+	msg.volume = targetVolume;
+	msg.fadetime = time_ms;
+	msg.executer = audioSlots[slot]->currentExecuter();
+	emit audioThreadCtrlMsgEmitted(msg);
+
+	// audioSlots[slot]->fadeinFxAudio(targetVolume, time_ms);
+}
+
 int AudioControl::fadeoutAllFxAudio(int time_ms)
 {
 	QMutexLocker lock(slotMutex);
@@ -643,13 +674,16 @@ void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 	QMutexLocker lock(slotMutex);
 	dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 
-	// This is a private message to my audio thread
-	//		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
-	//		msg.fadetime = time_ms;
-	//		msg.executer = audioChannels[slot]->currentExecuter();
-	//		emit audioThreadCtrlMsgEmitted(msg);
-
-	audioSlots[slot]->fadeoutFxAudio(0,time_ms);
+	if (Log::isMainThread()) {
+		audioSlots[slot]->fadeoutFxAudio(0,time_ms);
+	}
+	else {
+		// This is a private message to my audio thread
+		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEOUT);
+		msg.fadetime = time_ms;
+		msg.executer = audioSlots[slot]->currentExecuter();
+		emit audioThreadCtrlMsgEmitted(msg);
+	}
 }
 
 void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
@@ -671,6 +705,39 @@ void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
 		if (audioSlots[t]->currentExecuter() == exec) {
 			fadeoutFxAudio(t,time_ms);
 		}
+	}
+}
+
+/**
+ * @brief AudioControl::fadeinFxAudio
+ * @param slot
+ * @param targetVolume
+ * @param time_ms
+ *
+ * @attention this function must be called from main thread!! Otherwise you will get a timer not in thread error
+ */
+void AudioControl::fadeinFxAudio(int slot, int targetVolume, int time_ms)
+{
+	if (slot < 0 || slot >= used_slots)
+		return;
+
+	QMutexLocker lock(slotMutex);
+
+	FxAudioItem *fxaudio = audioSlots[slot]->currentFxAudio();
+	if (fxaudio == nullptr) {
+		LOGERROR(tr("FADEVOL canceled since there is no audio running in slot #%1").arg(slot+1));
+		return;
+	}
+
+	if (Log::isMainThread()) {
+		audioSlots[slot]->fadeinFxAudio(targetVolume, time_ms);
+	}
+	else {
+		// This is a private message to my audio thread
+		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEIN);
+		msg.fadetime = time_ms;
+		msg.executer = audioSlots[slot]->currentExecuter();
+		emit audioThreadCtrlMsgEmitted(msg);
 	}
 }
 
@@ -792,6 +859,10 @@ void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
 	case CMD_AUDIO_START:
 		LOGTEXT(tr("Restart Audio Fx in slot %1").arg(msg.slotNumber+1));
 		restartFxAudioInSlot(msg.slotNumber);
+		break;
+	case CMD_AUDIO_FADEIN:
+		LOGTEXT(tr("Fade in Audio Fx in slot %1").arg(msg.slotNumber+1));
+		fadeinFxAudio(msg.slotNumber,msg.volume,msg.fadetime);
 		break;
 	case CMD_AUDIO_FADEOUT:
 		LOGTEXT(tr("Fade out Audio Fx in slot %1").arg(msg.slotNumber+1));

@@ -143,10 +143,12 @@ public slots:
 	void stopFxAudio(FxAudioItem *fxa);
 	void storeCurrentSeekPositions();
 	void storeCurrentSeekPos(int slot);
+	void fadeVolTo(int slot, int targetVolume, int time_ms);
 	int fadeoutAllFxAudio(int time_ms = 5000);
 	void fadeoutFxAudio(int slot, int time_ms);
 	void fadeoutFxAudio(FxAudioItem *fxa, int time_ms = 5000);
 	void fadeoutFxAudio(Executer *exec, int time_ms = 5000);
+	void fadeinFxAudio(int slot, int targetVolume, int time_ms = 5000);
 	bool seekPosPerMilleFxAudio(int slot, int perMille);
 	bool seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille);
 	bool executeAttachedAudioStartCmd(FxAudioItem *fxa);

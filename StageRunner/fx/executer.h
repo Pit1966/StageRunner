@@ -234,6 +234,7 @@ protected:
 	bool executeGrabScene(FxScriptLine *line);
 	bool executeBlack(FxScriptLine *line);
 	bool executeRemote(FxScriptLine *line);
+	bool executeFadeVolume(FxScriptLine *line);
 
 	static bool executeSingleCmd(const QString &linestr);
 

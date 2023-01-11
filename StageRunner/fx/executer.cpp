@@ -897,6 +897,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		ok = executeRemote(line);
 		break;
 
+	case KW_FADE_VOL:
+		ok = executeFadeVolume(line);
+		break;
+
 	default:
 		ok = false;
 		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
@@ -1101,6 +1105,18 @@ bool ScriptExecuter::executeFadeOut(FxScriptLine *line)
 	bool ok = true;
 	foreach (FxItem *fx, fxlist) {
 
+		if (fx->fxType() == FX_AUDIO) {
+			FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
+			if (fxa) {
+				if (fadeout_ms > 0) {
+					myApp.unitAudio->fadeoutFxAudio(fxa, fadeout_ms);
+				} else {
+					myApp.unitAudio->stopFxAudio(fxa);
+				}
+			}
+			continue;
+		}
+
 		FxSceneItem *scene = dynamic_cast<FxSceneItem*>(fx);
 		if (!scene) {
 			LOGERROR(tr("Script '%1': FADEOUT must be applied on a SCENE! Line #%2")
@@ -1281,6 +1297,54 @@ bool ScriptExecuter::executeRemote(FxScriptLine *line)
 	QString host = getFirstParaOfString(parastr);
 
 	myApp.connectToRemote(host, NET_TCP_PORT, parastr);
+
+	return true;
+}
+
+bool ScriptExecuter::executeFadeVolume(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+
+	int slotno = 0;
+	int targetVol = 0;
+	int fadeTimeMs = 0;
+
+	QString type = getFirstParaOfString(parastr).toLower();
+	if (type == "slot") {
+		slotno = getFirstParaOfString(parastr).toInt();
+	}
+	else {
+		m_lastScriptError = tr("Unknown parameter type '%1' for FADEVOL command: (use [slot])").arg(type);
+		return false;
+	}
+
+	if (!slotno) {
+		m_lastScriptError = tr("Missing slot number in FADEVOL command");
+		return false;
+	}
+	slotno--;
+
+	QString targetVolStr = getFirstParaOfString(parastr);
+	if (targetVolStr.endsWith('%')) {
+		targetVolStr.chop(1);
+		targetVol = targetVolStr.toInt();
+		if ((targetVol < 0) || (targetVol > 100)) {
+			m_lastScriptError = tr("Volume target out of range: %1. Must be [0%:100%]").arg(targetVol);
+			return false;
+		}
+		targetVol = targetVol * MAX_VOLUME / 100;
+	} else {
+		targetVol = targetVolStr.toInt();
+		if ((targetVol < 0) || (targetVol > MAX_VOLUME)) {
+			m_lastScriptError = tr("Volume target out of range: %1. Must be [0:%2]").arg(targetVol).arg(MAX_VOLUME);
+			return false;
+		}
+	}
+
+	if (!parastr.isEmpty())
+		fadeTimeMs = QtStaticTools::timeStringToMS(parastr);
+
+	myApp.unitAudio->fadeVolTo(slotno, targetVol, fadeTimeMs);
 
 	return true;
 }
