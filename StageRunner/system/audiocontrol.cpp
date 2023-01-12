@@ -791,8 +791,9 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 		myApp.stopAllSequencesAndPlaylists();
 		break;
 	case FxAudioItem::ATTACHED_CMD_SET_MASTER_VOL:
-		fxa->tmpMasterVolAtStart = myApp.unitAudio->masterVolume();
-		myApp.unitAudio->setMasterVolume(fxa->attachedStartCmd);
+		if (myApp.unitAudio->masterVolume() != fxa->attachedStartPara1)
+			fxa->tmpMasterVolAtStart = myApp.unitAudio->masterVolume();
+		myApp.unitAudio->setMasterVolume(fxa->attachedStartPara1);
 		break;
 	default:
 		break;
