@@ -75,6 +75,7 @@ protected:
 	pstring pProjectName;
 	pstring pComment;
 	pstring pProjectBaseDir;					///< this is the base directory for relative path names in FXs
+	pint32 pMasterVolume;
 
 private:
 	FxList *fxList;

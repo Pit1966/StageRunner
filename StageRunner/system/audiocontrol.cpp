@@ -789,6 +789,11 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
 		myApp.stopAllSequencesAndPlaylists();
+		break;
+	case FxAudioItem::ATTACHED_CMD_SET_MASTER_VOL:
+		fxa->tmpMasterVolAtStart = myApp.unitAudio->masterVolume();
+		myApp.unitAudio->setMasterVolume(fxa->attachedStartCmd);
+		break;
 	default:
 		break;
 	}
@@ -816,8 +821,18 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
 		myApp.stopAllSequencesAndPlaylists();
+		break;
+	case FxAudioItem::ATTACHED_CMD_SET_MASTER_VOL:
+		fxa->tmpMasterVolAtStart = 0;
+		myApp.unitAudio->setMasterVolume(fxa->attachedStopPara1);
+		break;
 	default:
 		break;
+	}
+
+	if (fxa->tmpMasterVolAtStart > 0) {
+		myApp.unitAudio->setMasterVolume(fxa->tmpMasterVolAtStart);
+		fxa->tmpMasterVolAtStart = 0;
 	}
 	return true;
 }
@@ -892,7 +907,11 @@ void AudioControl::setMasterVolume(int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	m_masterVolume = vol;
+
+	if (m_masterVolume != vol) {
+		m_masterVolume = vol;
+		emit masterVolumeChanged(vol);
+	}
 
 	// Set master volume for video players too
 	myApp.unitVideo->setVideoMasterVolume(vol);

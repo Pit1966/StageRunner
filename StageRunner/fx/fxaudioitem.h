@@ -41,6 +41,7 @@ public:
 		ATTACHED_CMD_STOP_VIDEO,
 		ATTACHED_CMD_START_FX,
 		ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS,
+		ATTACHED_CMD_SET_MASTER_VOL,
 
 		ATTACHED_CMD_CNT
 	};
@@ -65,6 +66,8 @@ public:
 	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)
 	bool isFxClip;							///< True, if Audio is recognized to be a video clip
 	bool isPicClip;							///< True, if Audio is recognized as still picture
+
+	qint32 tmpMasterVolAtStart;				///< Mastervolume, if started with master volume changer
 
 protected:
 	AudioSeqState mySeqStatus;

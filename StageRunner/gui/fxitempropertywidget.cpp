@@ -74,7 +74,6 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	connect(holdTimeEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(audioStartAtEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 	connect(audioStopAtEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
-
 }
 
 FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)

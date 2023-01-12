@@ -176,6 +176,7 @@ signals:
 	void audioThreadCtrlMsgEmitted(AudioCtrlMsg msg);
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void fftSpectrumChanged(int slotnum, FrqSpectrum * spec);
+	void masterVolumeChanged(int vol);
 };
 
 #endif // AUDIOCONTROL_H

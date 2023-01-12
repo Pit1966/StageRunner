@@ -34,6 +34,7 @@ QStringList FxAudioItem::attachedCmdStrings = QStringList()
 		<< QObject::tr("Stop/BLACK video")
 		<< QObject::tr("Start FX")
 		<< QObject::tr("Stop all SEQ & SCRIPTS")
+		<< QObject::tr("Set MASTER VOLUME")
 		<< QString("DEVELOPER ADD TEXT!");
 
 
@@ -130,6 +131,8 @@ void FxAudioItem::init()
 	myFxType = FX_AUDIO;
 	mySeqStatus = AUDIO_OFF;
 	myclass = PrefVarCore::FX_AUDIO_ITEM;
+
+	tmpMasterVolAtStart = 0;
 
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);

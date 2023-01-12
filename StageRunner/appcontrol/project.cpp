@@ -26,6 +26,7 @@
 #include "log.h"
 #include "appcentral.h"
 #include "fxitemtool.h"
+#include "audiocontrol.h"
 
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
@@ -131,9 +132,12 @@ void Project::clear()
 
 bool Project::saveToFile(const QString &path)
 {
+	// get some settings from application
+	pMasterVolume = AppCentral::ref().unitAudio->masterVolume();
+
 	pProjectFormat = PROJECT_FORMAT;
 	QString modpath = path;
-	if (modpath.toLower().endsWith(".fxm")) {
+	if (modpath.endsWith(".fxm", Qt::CaseInsensitive)) {
 		modpath.chop(4);
 		modpath.append(".srp");
 	}
@@ -162,7 +166,7 @@ bool Project::loadFromFile(const QString &path)
 	clearCurrentVars();
 	bool ok = true;
 
-	if (path.toLower().endsWith(".fxm")) {
+	if (path.endsWith(".fxm", Qt::CaseInsensitive)) {
 		LOGTEXT(tr("<font color=orange> -> maybe fxMaster project file"));
 		ok = loadFxMasterProject(path);
 	}
@@ -217,6 +221,9 @@ bool Project::loadFromFile(const QString &path)
 		}
 	}
 
+	if (pMasterVolume > 0)
+		AppCentral::ref().unitAudio->setMasterVolume(pMasterVolume);
+
 	if (ok) {
 		curProjectFilePath = path;
 		generateProjectNameFromPath();
@@ -226,7 +233,7 @@ bool Project::loadFromFile(const QString &path)
 		ok = checkFxItemList(fxList, result);
 		if (!ok) {
 			QString msg = QString("Project load was ok, but <font color=darkOrange>consistance check found some errors</font>:<br>");
-			for (const QString &txt : result.errorMessageList) {
+			for (const QString &txt : qAsConst(result.errorMessageList)) {
 				msg += QString("- %1<br>").arg(txt);
 			}
 			POPUPINFOMSG("Load project",msg);
@@ -234,7 +241,7 @@ bool Project::loadFromFile(const QString &path)
 		}
 		else if (result.resultMessageList.size()) {
 			QString msg = QString("<font color=green>Project loaded successfully!</font><br>");
-			for (const QString &txt : result.resultMessageList) {
+			for (const QString &txt : qAsConst(result.resultMessageList)) {
 				msg += QString("- %1<br>").arg(txt);
 			}
 			POPUPINFOMSG("Load project",msg);
@@ -878,6 +885,7 @@ void Project::init()
 	addExistingVar(pProjectName,"ProjectName");
 	addExistingVar(pComment,"Comment");
 	addExistingVar(pProjectBaseDir,"ProjectBaseDir");
+	addExistingVar(pMasterVolume,"MasterVolume");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
 	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");

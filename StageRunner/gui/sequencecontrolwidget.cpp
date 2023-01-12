@@ -52,6 +52,16 @@ void SequenceControlWidget::setNextFx(FxItem *fx)
 	}
 }
 
+void SequenceControlWidget::setMasterVolume(int val)
+{
+	if (val < 0)
+		val = 0;
+	if (val > MAX_VOLUME)
+		val = MAX_VOLUME;
+
+	masterVolDial->setValue(val);
+}
+
 void SequenceControlWidget::init()
 {
 }

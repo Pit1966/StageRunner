@@ -46,6 +46,7 @@ private:
 
 public slots:
 	void setNextFx(FxItem *fx);
+	void setMasterVolume(int val);
 
 private slots:
 	void on_ctrlPlayButton_clicked();
