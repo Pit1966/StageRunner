@@ -97,7 +97,7 @@ enum AudioErrorType {
 
 enum AudioOutputType {
 	OUT_NONE,
-	OUT_DEVICE,
+	OUT_DEVICE,					// classic audio engine and needed for multiple audio device support
 	OUT_MEDIAPLAYER,
 	OUT_SDL2
 };

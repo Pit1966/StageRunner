@@ -25,6 +25,7 @@
 #include "config.h"
 #include "log.h"
 #include "audioslot.h"
+#include "audioiodevice.h"
 #include "appcentral.h"
 #include "usersettings.h"
 #include "fxaudioitem.h"
@@ -1097,8 +1098,30 @@ void AudioControl::createMediaPlayInstances()
 	AudioOutputType outputType = myApp.usedAudioOutputType();
 
 	// This is for audio use
+	bool errmsg = false;
 	for (int t=0; t<used_slots; t++) {
-		AudioSlot *slot = new AudioSlot(this, t, outputType, set->pSlotAudioDevice[t]);
+		QString audiodev = set->pSlotAudioDevice[t];
+		if (!audiodev.isEmpty() && audiodev != "system default") {
+			if (outputType != OUT_DEVICE) {
+				if (!errmsg)
+					POPUPERRORMSG(Q_FUNC_INFO, tr("There is a dedicated audio device specified for audio slot %1,\n"
+												  "but this is only supported for CLASSIC audio mode.\n"
+												  "Multi device output not possible! Default audio from system will be used.").arg(t+1));
+				errmsg = true;
+			} else {
+				bool ok;
+				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
+				if (!ok) {
+					if (!errmsg)
+						POPUPERRORMSG(Q_FUNC_INFO, tr("Audio device '%1' not found!\n"
+													  "Configuration for audio slot %1 failed.\n"
+													  "Multi device output not possible! Default audio from system will be used.")
+									  .arg(audiodev).arg(t+1));
+					errmsg = true;
+				}
+			}
+		}
+		AudioSlot *slot = new AudioSlot(this, t, outputType, audiodev);
 		audioSlots.append(slot);
 		AudioErrorType aerror = slot->lastAudioError();
 		if (aerror == AUDIO_ERR_DECODER) {

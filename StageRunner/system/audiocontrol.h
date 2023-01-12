@@ -110,7 +110,6 @@ public:
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 
-	inline const QAudioDeviceInfo & extraAudioDevice() const {return m_extraDevice;}
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
 
 private:
