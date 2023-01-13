@@ -117,7 +117,11 @@ void AudioSlotWidget::on_slotStopButton_clicked()
 void AudioSlotWidget::on_slotAbsButton_clicked(bool checked)
 {
 	isAbsoluteTime = checked;
-
+	if (checked) {
+		setTitle(tr("time"));
+	} else {
+		setTitle(tr("percentage"));
+	}
 }
 
 void AudioSlotWidget::on_slotPauseButton_clicked()

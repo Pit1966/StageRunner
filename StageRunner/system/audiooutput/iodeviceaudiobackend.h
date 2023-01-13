@@ -65,6 +65,9 @@ public:
 
 	void delayedStartEvent() override;
 
+	void setFFTEnabled(bool state) override;
+	bool isFFTEnabled() const override;
+
 
 private slots:
 	void onAudioOutputStatusChanged(QAudio::State state);

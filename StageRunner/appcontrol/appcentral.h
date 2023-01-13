@@ -67,8 +67,10 @@ class AppCentral : public QObject
 	Q_OBJECT
 public:
 	enum MODUL_ERROR {
-		E_NO_ERROR				= 0,
-		E_NO_AUDIO_DECODER		= 1<<0			///< Audio decoding service not found
+		E_NO_ERROR					= 0,
+		E_NO_AUDIO_DECODER			= 1<<0,			///< Audio decoding service not found
+		E_AUDIO_DEVICE_NOT_FOUND	= 1<<1,			///< Audio device (non default config not found)
+		E_AUDIO_MULTI_OUT_FAIL		= 1<<2			///< Audio multi output on differnt devices not possible due to wrong audio mode (only possible in classic mode)
 	};
 
 private:

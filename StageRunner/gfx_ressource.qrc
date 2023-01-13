@@ -69,5 +69,6 @@
         <file>gfx/icons/picclip.png</file>
         <file>gfx/pics/stonechip_01.png</file>
         <file>gfx/pics/screen_black.png</file>
+        <file>gfx/icons/config-date_green.png</file>
     </qresource>
 </RCC>

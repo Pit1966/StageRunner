@@ -1104,20 +1104,22 @@ void AudioControl::createMediaPlayInstances()
 		if (!audiodev.isEmpty() && audiodev != "system default") {
 			if (outputType != OUT_DEVICE) {
 				if (!errmsg)
-					POPUPERRORMSG(Q_FUNC_INFO, tr("There is a dedicated audio device specified for audio slot %1,\n"
+					POPUPERRORMSG("Init audio", tr("There is a dedicated audio device specified for audio slot %1,\n"
 												  "but this is only supported for CLASSIC audio mode.\n"
 												  "Multi device output not possible! Default audio from system will be used.").arg(t+1));
 				errmsg = true;
+				myApp.setModuleError(AppCentral::E_AUDIO_MULTI_OUT_FAIL);
 			} else {
 				bool ok;
 				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
 				if (!ok) {
 					if (!errmsg)
-						POPUPERRORMSG(Q_FUNC_INFO, tr("Audio device '%1' not found!\n"
-													  "Configuration for audio slot %1 failed.\n"
+						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
+													  "Configuration for audio slot %2 failed.\n"
 													  "Multi device output not possible! Default audio from system will be used.")
 									  .arg(audiodev).arg(t+1));
 					errmsg = true;
+					myApp.setModuleError(AppCentral::E_AUDIO_DEVICE_NOT_FOUND);
 				}
 			}
 		}

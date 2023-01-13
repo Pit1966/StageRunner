@@ -81,6 +81,7 @@ void AudioControlWidget::init_gui()
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		AudioSlotWidget *slot = new AudioSlotWidget;
 		slot->slotNumber = t;
+		slot->setTitle(tr("Slot %1").arg(t+1));
 
 		connect(slot,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
 

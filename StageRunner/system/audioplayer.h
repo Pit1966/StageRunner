@@ -97,8 +97,8 @@ public:
 
 	virtual void delayedStartEvent() {;}
 
-	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
-	inline bool isFFTEnabled() const {return m_fftEnabled;}
+	virtual void setFFTEnabled(bool state) {m_fftEnabled = state;}
+	virtual bool isFFTEnabled() const {return m_fftEnabled;}
 
 //protected:
 	// some helper fucntions, that can be used by any backend implementation

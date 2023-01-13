@@ -487,6 +487,16 @@ QString AppCentral::moduleErrorText(AppCentral::MODUL_ERROR e)
 				   "Application will not play audio fx items.<br><br>"
 				   "Check if your gstreamer installation is sufficient<br><br>");
 	}
+	if (e & E_AUDIO_DEVICE_NOT_FOUND) {
+		estr += tr("<b>Audio device not available</b><br>"
+				   "One or more configured audio devices could not been found.<br><br>"
+				   "This could mean multi audio output is not possible<br>(See log for details)<br><br>");
+	}
+	if (e & E_AUDIO_MULTI_OUT_FAIL) {
+		estr += tr("<b>Multi audio device output not possible!</b><br>"
+				   "Seems like there are special audio devices configured for some audio slots.<br>"
+				   "This does work only in CLASSIC audio mode, but it seems we are using a different mode.<br><br>");
+	}
 
 	return estr;
 }

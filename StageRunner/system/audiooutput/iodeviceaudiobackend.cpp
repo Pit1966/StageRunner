@@ -187,6 +187,16 @@ void IODeviceAudioBackend::delayedStartEvent()
 	LOGTEXT(tr("<font color=green> Started delayed audio:</font> %1").arg(m_fxName));
 }
 
+void IODeviceAudioBackend::setFFTEnabled(bool state)
+{
+	m_audioIODev->setFFTEnabled(state);
+}
+
+bool IODeviceAudioBackend::isFFTEnabled() const
+{
+	return m_audioIODev->isFFTEnabled();
+}
+
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;

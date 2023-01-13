@@ -101,6 +101,7 @@ public:
 	inline qreal pcm16ToReal(qint16 pcm) { return qreal(pcm * 2) / ((1<<audio_format->sampleSize())-1);}
 	inline qint16 realToPcm16(qreal real) { return real * ((1<<audio_format->sampleSize())-1) / 2;}
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
+	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
 	inline static qreal pcm16ToReal(qint16 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
 	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}

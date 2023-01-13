@@ -32,7 +32,7 @@ PsSpectrometer::PsSpectrometer(QWidget *parent, int specSize)
 	, m_spectrum(specSize)
 	, m_bars(specSize)
 	, m_showLowBand(0)
-	, m_showHiBand(specSize-1)
+	, m_showHiBand(specSize*2/3)
 	, m_idleTimerId(0)
 	, m_idleCount(0)
 	, m_idleBar(0)
@@ -111,7 +111,7 @@ void PsSpectrometer::mousePressEvent(QMouseEvent *)
 	if (!m_isZoomed) {
 		m_showHiBand = m_spectrum.size()/4;
 	} else {
-		m_showHiBand = m_spectrum.size()-1;
+		m_showHiBand = m_spectrum.size()*2/3;
 	}
 	m_isZoomed = !m_isZoomed;
 	update();
