@@ -118,8 +118,10 @@ void AudioSlotWidget::on_slotAbsButton_clicked(bool checked)
 {
 	isAbsoluteTime = checked;
 	if (checked) {
+		slotAbsButton->setIcon(QIcon(":/gfx/icons/config-date_green.png"));
 		setTitle(tr("time"));
 	} else {
+		slotAbsButton->setIcon(QIcon(":/gfx/icons/config-date.png"));
 		setTitle(tr("percentage"));
 	}
 }
