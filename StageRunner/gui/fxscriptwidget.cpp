@@ -103,6 +103,14 @@ bool FxScriptWidget::applyChanges()
 	if (new_script != m_OriginFxScript->m_scriptRaw) {
 		m_OriginFxScript->m_scriptRaw = new_script;
 		m_OriginFxScript->setModified(true);
+
+		// check some possible script issues such as long wait time
+		QString checkResult = FxScriptItem::checkScript(new_script);
+		if (!checkResult.isEmpty()) {
+			checkResult = tr("Possible error sources discovered in script:\n\n%1").arg(checkResult);
+			POPUPINFOMSG("Script check", checkResult, this);
+		}
+
 		emit modified();
 		return true;
 	}

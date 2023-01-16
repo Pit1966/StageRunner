@@ -27,8 +27,12 @@
 #include "fxitem.h"
 #include "fxscripttools.h"
 
+#include <QCoreApplication>
+
 class FxScriptItem : public FxItem
 {
+	Q_DECLARE_TR_FUNCTIONS(FxScriptItem)
+
 private:
 	QString m_scriptRaw;
 	FxScriptList m_script;
@@ -45,6 +49,7 @@ public:
 	bool updateScript();
 
 	static int rawToScript(const QString &rawlines, FxScriptList &scriptlist);
+	static QString checkScript(const QString &rawlines);
 
 private:
 	void init();

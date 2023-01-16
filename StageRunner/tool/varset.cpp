@@ -1683,7 +1683,8 @@ QStringList VarSet::getRegistryInfo()
 			out.append(line);
 		}
 	}
-	qSort(out);
+
+	std::sort(out.begin(), out.end());
 	for (int t=0; t<out.size();t++) {
 		qDebug() << out.at(t);
 	}

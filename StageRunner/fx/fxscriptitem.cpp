@@ -86,6 +86,22 @@ int FxScriptItem::rawToScript(const QString &rawlines, FxScriptList &scriptlist)
 	return linecnt;
 }
 
+QString FxScriptItem::checkScript(const QString &rawlines)
+{
+	QString errortxt;
+	FxScriptList script;
+	rawToScript(rawlines, script);
+	for (int r = 0; r<script.size(); r++) {
+		FxScriptLine *line = script.at(r);
+		if (line->execDuration() > 20000) {
+			errortxt.append(tr("Line %1: Long execution duration of %2 seconds")
+							.arg(r+1).arg(line->execDuration() / 1000));
+		}
+	}
+
+	return errortxt;
+}
+
 void FxScriptItem::init()
 {
 	myFxType = FX_SCRIPT;
