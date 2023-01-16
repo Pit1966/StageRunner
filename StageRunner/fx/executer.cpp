@@ -638,6 +638,14 @@ void ScriptExecuter::processProgress()
 		}
 		emit listProgressStepChanged(perMille, 0);
 	}
+
+	if (state() == EXEC_FINISH) {
+		if (m_currentLineNum < m_script.size()) {
+			LOGTEXT(tr("<font color=darkGreen>Script</font> '%1' <font color=darkOrange>Canceled</font>")
+					.arg(m_fxScriptItem->name()));
+			destroyLater();
+		}
+	}
 }
 
 ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx)
