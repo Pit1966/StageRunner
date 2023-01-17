@@ -102,6 +102,13 @@ enum AudioOutputType {
 	OUT_SDL2
 };
 
+enum DMXLockingMode {
+	DMX_AUDIO_NOT_LOCKED,
+	DMX_AUDIO_INC_SEARCH,
+	DMX_AUDIO_DEC_SEARCH,
+	DMX_AUDIO_LOCKED
+};
+
 class AudioCtrlMsg {
 public:
 	int slotNumber;

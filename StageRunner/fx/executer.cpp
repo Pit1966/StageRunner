@@ -639,8 +639,12 @@ void ScriptExecuter::processProgress()
 		emit listProgressStepChanged(perMille, 0);
 	}
 
-	if (state() == EXEC_FINISH) {
+	if (state() == EXEC_FINISH && m_breakOnCancel) {
 		if (m_currentLineNum < m_script.size()) {
+			// fadeout all scenes that where cloned by this executer
+			for (FxSceneItem *fxs : m_clonedSceneList) {
+				fxs->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, 200);
+			}
 			LOGTEXT(tr("<font color=darkGreen>Script</font> '%1' <font color=darkOrange>Canceled</font>")
 					.arg(m_fxScriptItem->name()));
 			destroyLater();
@@ -652,6 +656,7 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 	: Executer(app_central,script)
 	, m_fxScriptItem(script)
 	, m_currentLineNum(0)
+	, m_breakOnCancel(false)
 {
 	parentFxItem = parentFx;
 	if (script)
@@ -907,6 +912,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 
 	case KW_FADE_VOL:
 		ok = executeFadeVolume(line);
+		break;
+
+	case KW_MODE:
+		ok = executeMode(line);
 		break;
 
 	default:
@@ -1355,6 +1364,27 @@ bool ScriptExecuter::executeFadeVolume(FxScriptLine *line)
 	myApp.unitAudio->fadeVolTo(slotno, targetVol, fadeTimeMs);
 
 	return true;
+}
+
+bool ScriptExecuter::executeMode(FxScriptLine *line)
+{
+	const QStringList paras = line->parameters().split(',');
+	bool ok = true;
+
+	for (const QString &opt : paras) {
+		QString lc = opt.toLower();
+		if (lc == "breakoncancel") {
+			m_breakOnCancel = true;
+		}
+		else {
+			m_lastScriptError += tr("Unknown MODE option: %1\n").arg(lc);
+			ok = false;
+		}
+	}
+
+	if (!ok)
+		m_lastScriptError.chop(1);
+	return ok;
 }
 
 bool ScriptExecuter::executeSingleCmd(const QString &linestr)

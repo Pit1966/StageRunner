@@ -88,8 +88,8 @@ void AudioSlotWidget::init_gui()
 	slotVolumeDial->setNotchesVisible(true);
 	slotVolumeDial->setNotchTarget(18);
 
-	connect(meterWidget,SIGNAL(valueChanged(float)),this,SLOT(if_meter_volume_changed(float)));
-	connect(slotVolumeDial,SIGNAL(valueChanged(int)),this,SLOT(if_volume_knob_changed(int)));
+	connect(meterWidget,SIGNAL(sliderMoved(float)),this,SLOT(onMeterSliderMoved(float)));
+	connect(slotVolumeDial,SIGNAL(sliderMoved(int)),this,SLOT(onVolumeDialMoved(int)));
 	connect(meterWidget,SIGNAL(sliderPressed()),this,SLOT(on_slotVolumeDial_sliderPressed()));
 	connect(meterWidget,SIGNAL(sliderReleased()),this,SLOT(on_slotVolumeDial_sliderReleased()));
 }
@@ -119,10 +119,12 @@ void AudioSlotWidget::on_slotAbsButton_clicked(bool checked)
 	isAbsoluteTime = checked;
 	if (checked) {
 		slotAbsButton->setIcon(QIcon(":/gfx/icons/config-date_green.png"));
-		setTitle(tr("time"));
+		if (!m_currentPlayState)
+			setTitle(tr("time"));
 	} else {
 		slotAbsButton->setIcon(QIcon(":/gfx/icons/config-date.png"));
-		setTitle(tr("percentage"));
+		if (!m_currentPlayState)
+			setTitle(tr("percentage"));
 	}
 }
 
@@ -136,18 +138,19 @@ void AudioSlotWidget::on_slotPauseButton_clicked()
 	emit pauseClicked(slotNumber);
 }
 
-void AudioSlotWidget::if_meter_volume_changed(float valf)
+void AudioSlotWidget::onMeterSliderMoved(float valf)
 {
 	slotVolumeDial->setValue(valf * slotVolumeDial->maximum());
-	on_slotVolumeDial_sliderMoved(slotVolumeDial->sliderPosition());
+	onVolumeChangedInGUI(slotVolumeDial->sliderPosition());
 }
 
-void AudioSlotWidget::if_volume_knob_changed(int val)
+void AudioSlotWidget::onVolumeDialMoved(int val)
 {
 	meterWidget->setVolume(float(val) / float(slotVolumeDial->maximum()));
+	onVolumeChangedInGUI(val);
 }
 
-void AudioSlotWidget::on_slotVolumeDial_sliderMoved(int position)
+void AudioSlotWidget::onVolumeChangedInGUI(int position)
 {
 	AudioCtrlMsg msg;
 	msg.ctrlCmd = CMD_AUDIO_CHANGE_VOL;
@@ -249,8 +252,10 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 			}
 			break;
 		}
-		if (msg.volume >= 0)
+		if (msg.volume >= 0) {
 			slotVolumeDial->setValue(msg.volume);
+			meterWidget->setVolume(float(msg.volume) / float(slotVolumeDial->maximum()));
+		}
 	}
 	else if (msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
@@ -302,9 +307,10 @@ void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
 		default:
 			break;
 		}
-		if (msg.volume >= 0)
+		if (msg.volume >= 0) {
 			slotVolumeDial->setValue(msg.volume);
-
+			meterWidget->setVolume(float(msg.volume) / float(slotVolumeDial->maximum()));
+		}
 	}
 }
 

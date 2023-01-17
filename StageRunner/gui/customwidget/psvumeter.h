@@ -43,6 +43,7 @@ public:
 	void setVolume(float vol);
 
 private:
+	void _setVolume(float vol);
 	void paintEvent(QPaintEvent *);
 	void mousePressEvent(QMouseEvent *ev);
 	void mouseMoveEvent(QMouseEvent *ev);
@@ -51,6 +52,8 @@ private:
 signals:
 	void valueChanged(float level);
 	void valueChanged(int level);
+	void sliderMoved(float level);
+	void sliderMoved(int level);
 	void sliderPressed();
 	void sliderReleased();
 };

@@ -50,6 +50,23 @@ void PsVuMeter::setVolume(float vol)
 	}
 }
 
+void PsVuMeter::_setVolume(float vol)
+{
+	if (vol < 0.0f)
+		vol = 0.0f;
+	if (vol > 1.0f)
+		vol = 1.0f;
+
+	if (vol != m_volume) {
+		m_volume = vol;
+		update();
+		emit valueChanged(m_volume);
+		emit valueChanged(int(m_volume * 1000));
+		emit sliderMoved(m_volume);
+		emit sliderMoved(int(m_volume * 1000));
+	}
+}
+
 void PsVuMeter::paintEvent(QPaintEvent *)
 {
 	QPainter p(this);
@@ -80,7 +97,7 @@ void PsVuMeter::mouseMoveEvent(QMouseEvent *ev)
 	if (m_mouseButton == Qt::LeftButton) {
 		QPoint move_dif = ev->pos() - m_dragBeginMousePos;
 		float moved_norm = float(move_dif.y()) / float(height());
-		setVolume(m_dragBeginVolume - moved_norm);
+		_setVolume(m_dragBeginVolume - moved_norm);
 		update();
 	}
 }

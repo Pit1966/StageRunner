@@ -61,12 +61,12 @@ private:
 private slots:
 	void on_slotPlayButton_clicked();
 	void on_slotStopButton_clicked();
-	void on_slotVolumeDial_sliderMoved(int position);
+	void onVolumeChangedInGUI(int position);
 	void on_slotVolumeDial_doubleClicked();
 	void on_slotAbsButton_clicked(bool checked);
 	void on_slotPauseButton_clicked();
-	void if_meter_volume_changed(float valf);
-	void if_volume_knob_changed(int val);
+	void onMeterSliderMoved(float valf);
+	void onVolumeDialMoved(int val);
 	void on_slotVolumeDial_sliderPressed();
 	void on_slotVolumeDial_sliderReleased();
 

@@ -81,8 +81,9 @@ private:
 	int fade_target_vol;
 	int current_volume;								///< Volume the audio slot is set to
 	int master_volume;								///< This is Master Volume
-
 	bool m_isFFTEnabled;
+
+	DMXLockingMode m_dmxVolLockState;
 
 	QString m_lastErrorText;
 	AudioErrorType m_lastAudioError;
@@ -99,6 +100,7 @@ public:
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
 	void setVolume(int vol);
+	bool setVolumeFromDMX(int dmxvol);
 	inline int volume() {return current_volume;}
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
@@ -127,6 +129,7 @@ public:
 
 
 private:
+	void _setVolume(int vol);
 	void emit_audio_play_progress();
 
 private slots:

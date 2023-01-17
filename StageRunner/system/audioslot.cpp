@@ -64,6 +64,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 	, current_volume(0)
 	, master_volume(MAX_VOLUME)
 	, m_isFFTEnabled(false)
+	, m_dmxVolLockState(DMX_AUDIO_NOT_LOCKED)
 	, m_lastAudioError(AUDIO_ERR_NONE)
 {
 //	qDebug() << "init AudioSlot" << pSlotNumber;
@@ -390,26 +391,61 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 	return true;
 }
 
+/**
+ * @brief AudioSlot::setVolume
+ * @param vol
+ *
+ * @note this is called, when software changes the volume, but not when Volume slider is moved manually
+ */
 void AudioSlot::setVolume(int vol)
 {
-	if (run_status == VIDEO_RUNNING) {
-		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, vol);
-		return;
+	m_dmxVolLockState = DMX_AUDIO_NOT_LOCKED;
+
+	_setVolume(vol);
+}
+
+bool AudioSlot::setVolumeFromDMX(int dmxvol)
+{
+	qDebug() << "set dmx vol state" << m_dmxVolLockState << dmxvol;
+
+	switch (m_dmxVolLockState) {
+	case DMX_AUDIO_LOCKED:
+		_setVolume(dmxvol);
+		break;
+
+	case DMX_AUDIO_INC_SEARCH:
+		if (dmxvol >= current_volume) {
+			m_dmxVolLockState = DMX_AUDIO_LOCKED;
+			_setVolume(dmxvol);
+		}
+		break;
+
+	case DMX_AUDIO_DEC_SEARCH:
+		if (dmxvol <= current_volume) {
+			m_dmxVolLockState = DMX_AUDIO_LOCKED;
+			_setVolume(dmxvol);
+		}
+		break;
+
+	case DMX_AUDIO_NOT_LOCKED:
+		if (dmxvol < current_volume) {
+			m_dmxVolLockState = DMX_AUDIO_INC_SEARCH;
+		}
+		else if (dmxvol > current_volume) {
+			m_dmxVolLockState = DMX_AUDIO_DEC_SEARCH;
+		}
+		else {
+			m_dmxVolLockState = DMX_AUDIO_LOCKED;
+		}
+		break;
+
+	default:
+		break;
 	}
 
-	if (!audio_player) return;
+	qDebug() << "   set dmx vol state" << m_dmxVolLockState << dmxvol;
 
-	int level = vol;
-	if (master_volume >= 0) {
-		level = level * master_volume / MAX_VOLUME;
-	}
-
-	audio_player->setVolume(level,MAX_VOLUME);
-
-	current_volume = vol;
-
-	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
-	volset_timer.start();
+	return m_dmxVolLockState == DMX_AUDIO_LOCKED;
 }
 
 void AudioSlot::setMasterVolume(int vol)
@@ -796,4 +832,26 @@ bool AudioSlot::fadeoutFxClip(int targetVolume, int time_ms)
 			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
 
 	return true;
+}
+
+void AudioSlot::_setVolume(int vol)
+{
+	if (run_status == VIDEO_RUNNING) {
+		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, vol);
+		return;
+	}
+
+	if (!audio_player) return;
+
+	int level = vol;
+	if (master_volume >= 0) {
+		level = level * master_volume / MAX_VOLUME;
+	}
+
+	audio_player->setVolume(level,MAX_VOLUME);
+
+	current_volume = vol;
+
+	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
+	volset_timer.start();
 }

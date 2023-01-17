@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
 	// This also loads the last project
 	mywin->initAppDefaults();
 
+	/// @todo should this be done before the last project is loaded
 	// Load Plugins
 	myapp->loadPlugins();
 	myapp->openPlugins();

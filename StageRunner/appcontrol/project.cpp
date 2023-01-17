@@ -480,6 +480,7 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 				QString fullpath = QString("%1/%2").arg(pbasedir, filepath);
 				foundfile = QFile::exists(fullpath);
 				if (foundfile) {
+					qDebug() << "Changed FX file path from" << fx->filePath() << "to" << fullpath;
 					fx->setFilePath(fullpath);
 					result.setModified = true;
 				}

@@ -1037,16 +1037,19 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
 
 
-	if (debug) qDebug("Set Volume slot %d, %d",slot,vol);
+//	if (debug)
+//		qDebug("Set Volume slot %d, %d",slot,vol);
 
 	vol = MAX_VOLUME * vol / 255;
-	audioSlots[slot]->setVolume(vol);
+	bool locked = audioSlots[slot]->setVolumeFromDMX(vol);
 
-	AudioCtrlMsg msg;
-	msg.ctrlCmd = CMD_STATUS_REPORT;
-	msg.slotNumber = slot;
-	msg.volume = vol;
-	emit audioCtrlMsgEmitted(msg);
+	if (locked) {
+		AudioCtrlMsg msg;
+		msg.ctrlCmd = CMD_STATUS_REPORT;
+		msg.slotNumber = slot;
+		msg.volume = vol;
+		emit audioCtrlMsgEmitted(msg);
+	}
 }
 
 bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
