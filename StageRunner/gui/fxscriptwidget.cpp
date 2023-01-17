@@ -71,7 +71,7 @@ bool FxScriptWidget::setFxScriptContent(FxScriptItem *fxscr)
 	script.replace(';',"\n");
 
 	scriptEdit->setPlainText(script);
-
+	scriptEdit->moveCursor(QTextCursor::End);
 	return true;
 }
 

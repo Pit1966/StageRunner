@@ -50,6 +50,12 @@ void FxScriptItem::resetFx()
 {
 }
 
+void FxScriptItem::setRawScript(const QString &script)
+{
+	m_scriptRaw = script;
+	m_scriptRaw.replace('\n',';');
+}
+
 /**
  * @brief This function generates the internal ScriptList from raw text
  * @return

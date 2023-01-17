@@ -209,6 +209,8 @@ protected:
 	QList<FxSceneItem*> m_clonedSceneList;
 	QString m_lastScriptError;
 
+	bool m_breakOnCancel;					///< should executer immediately break, if canceled
+
 public:
 	inline TYPE type() {return EXEC_SCRIPT;}
 	bool processExecuter();
@@ -235,6 +237,8 @@ protected:
 	bool executeBlack(FxScriptLine *line);
 	bool executeRemote(FxScriptLine *line);
 	bool executeFadeVolume(FxScriptLine *line);
+	bool executeMode(FxScriptLine *line);
+
 
 	static bool executeSingleCmd(const QString &linestr);
 

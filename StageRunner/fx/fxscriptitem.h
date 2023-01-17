@@ -46,6 +46,7 @@ public:
 	void resetFx() override;
 
 	inline const QString & rawScript() const {return m_scriptRaw;}
+	void setRawScript(const QString &script);
 	bool updateScript();
 
 	static int rawToScript(const QString &rawlines, FxScriptList &scriptlist);
