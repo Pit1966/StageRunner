@@ -190,7 +190,8 @@ void PsLineEdit::keyReleaseEvent(QKeyEvent *event)
 	}
 
 	if (single_key_mode_f) {
-		if (doemit) emit textEdited(text());
+		if (doemit)
+			emit textEdited(text());
 	} else {
 		QLineEdit::keyReleaseEvent(event);
 	}

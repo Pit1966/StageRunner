@@ -55,6 +55,7 @@ private:
 	QColor m_barsBorderColor;
 	QColor m_barsColor;
 	QColor m_barsSecColor;
+	QColor m_valueColor;
 
 public:
 	DmxMonitor(QWidget *parent = 0);

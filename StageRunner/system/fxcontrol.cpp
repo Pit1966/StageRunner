@@ -305,10 +305,17 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 //		myApp.lightBlack(200);
 //	}
 
-	LOGTEXT(tr("<font color=green>Start script</font> %1").arg(fxscript->name()));
+	ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);
+	if (fxexec && fxexec->isMultiStartDisabled()) {
+		LOGTEXT(tr("<font color=green>Start script</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
+				.arg(fxscript->name()));
+		return nullptr;
+	} else {
+		LOGTEXT(tr("<font color=green>Start script</font> %1").arg(fxscript->name()));
+	}
 
 	// Create an executor for the script
-	ScriptExecuter *fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
+	fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
 
 	// Determine what the FxListWidget is where the script comes from
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxscript);

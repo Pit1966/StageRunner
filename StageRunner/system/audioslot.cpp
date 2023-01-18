@@ -400,13 +400,12 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 void AudioSlot::setVolume(int vol)
 {
 	m_dmxVolLockState = DMX_AUDIO_NOT_LOCKED;
-
 	_setVolume(vol);
 }
 
 bool AudioSlot::setVolumeFromDMX(int dmxvol)
 {
-	qDebug() << "set dmx vol state" << m_dmxVolLockState << dmxvol;
+//	qDebug() << "set dmx vol state" << m_dmxVolLockState << dmxvol;
 
 	switch (m_dmxVolLockState) {
 	case DMX_AUDIO_LOCKED:
@@ -443,7 +442,7 @@ bool AudioSlot::setVolumeFromDMX(int dmxvol)
 		break;
 	}
 
-	qDebug() << "   set dmx vol state" << m_dmxVolLockState << dmxvol;
+//	qDebug() << "   set dmx vol state" << m_dmxVolLockState << dmxvol;
 
 	return m_dmxVolLockState == DMX_AUDIO_LOCKED;
 }

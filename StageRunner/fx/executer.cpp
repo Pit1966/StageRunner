@@ -657,6 +657,7 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 	, m_fxScriptItem(script)
 	, m_currentLineNum(0)
 	, m_breakOnCancel(false)
+	, m_disableMultiStart(false)
 {
 	parentFxItem = parentFx;
 	if (script)
@@ -1375,6 +1376,12 @@ bool ScriptExecuter::executeMode(FxScriptLine *line)
 		QString lc = opt.toLower();
 		if (lc == "breakoncancel") {
 			m_breakOnCancel = true;
+		}
+		else if (lc == "disablemultistart") {
+			m_disableMultiStart = true;
+		}
+		else if (lc == "enablemultistart") {
+			m_disableMultiStart = false;
 		}
 		else {
 			m_lastScriptError += tr("Unknown MODE option: %1\n").arg(lc);

@@ -290,7 +290,7 @@ void FxItem::setFilePath(const QString &path)
 
 void FxItem::setKeyCode(int code)
 {
-	if (code == Qt::Key_Escape || code == Qt::Key_Backspace)
+	if (code == Qt::Key_Escape || code == Qt::Key_Backspace || code == Qt::Key_Delete)
 		code = 0;
 	if (myKey != code) {
 		myKey = code;

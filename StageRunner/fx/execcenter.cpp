@@ -63,6 +63,11 @@ Executer *ExecCenter::findExecuter(const FxItem *fx)
 	return 0;
 }
 
+ScriptExecuter *ExecCenter::findScriptExecuter(const FxItem *fx)
+{
+	return dynamic_cast<ScriptExecuter*>(findExecuter(fx));
+}
+
 bool ExecCenter::exists(Executer *exec)
 {
 	return executerList.lockContains(exec);

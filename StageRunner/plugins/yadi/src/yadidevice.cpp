@@ -486,6 +486,7 @@ DmxMonitor *YadiDevice::openDmxInMonitorWidget()
 {
 	if (!dmxInMonWidget) {
 		dmxInMonWidget = new DmxMonitor;
+		dmxInMonWidget->resize(1400, 800);
 		dmxInMonWidget->setWindowTitle(QObject::tr("DMX Input Monitor V0.2 - Universe %1").arg(inUniverseNumber+1));
 		dmxInMonWidget->setChannelPeakBars(usedDmxInChannels);
 #ifdef USE_QTSERIAL

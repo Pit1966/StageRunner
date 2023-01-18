@@ -210,11 +210,13 @@ protected:
 	QString m_lastScriptError;
 
 	bool m_breakOnCancel;					///< should executer immediately break, if canceled
+	bool m_disableMultiStart;
 
 public:
 	inline TYPE type() {return EXEC_SCRIPT;}
 	bool processExecuter();
 	void processProgress();
+	bool isMultiStartDisabled() const {return m_disableMultiStart;}
 
 protected:
 	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);

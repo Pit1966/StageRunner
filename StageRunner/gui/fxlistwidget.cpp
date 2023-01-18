@@ -1564,12 +1564,17 @@ void FxListWidget::if_fxitemwidget_edited(FxListWidgetItem *listitem, const QStr
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
 
+	int keycode = 0;
+
 	switch(listitem->columnType) {
 	case FxListWidgetItem::CT_NAME:
 		fx->setName(text);
 		break;
 	case FxListWidgetItem::CT_KEY:
-		fx->setKeyCode(QtStaticTools::stringToKey(text));
+		keycode = QtStaticTools::stringToKey(text);
+		fx->setKeyCode(keycode);
+		if (fx->keyCode() == 0)
+			listitem->setText("");
 		break;
 	case FxListWidgetItem::CT_PRE_DELAY:
 		fx->setPreDelay(QtStaticTools::timeStringToMS(text));

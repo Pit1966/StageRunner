@@ -43,24 +43,25 @@ void DmxMonitor::init()
 	memset(bar_value,0,sizeof(int) * 512);
 	memset(bar_valueSec,0,sizeof(int) * 512);
 	m_frameRateUpdateTimer.start();
-	m_flags = F_ENABLE_BAR_BORDERS | F_ENABLE_BAR_TEXTS;
+	m_flags = /*F_ENABLE_BAR_BORDERS |*/ F_ENABLE_BAR_TEXTS;
 
 	m_barsBorderColor = Qt::blue;
-	m_barsColor = Qt::white;
+	m_barsColor = "#333355";
 	m_barsSecColor = Qt::darkGreen;
+	m_valueColor = Qt::yellow;
 }
 
 void DmxMonitor::paintEvent(QPaintEvent *)
 {
 	int xsize = width();
 	int ysize = height();
-	int legendYSize = ysize < 40 ? 0 : 20;
+	int legendYSize = ysize < 40 ? 0 : 26;
 
 	QPainter paint(this);
 	// Hintergrund löschen
 	paint.eraseRect(0,0,xsize,ysize);
 
-	paint.fillRect(0,legendYSize,xsize,ysize-legendYSize,palette().base().color());
+	paint.fillRect(0,0/*legendYSize-1*/,xsize,ysize/*-legendYSize*/,palette().base().color());
 
 	paint.translate(0,ysize-1);
 	paint.scale(1,-1);
@@ -117,7 +118,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 				if (t >= used_bars) {
 					paint.setPen(Qt::red);
 				} else {
-					paint.setPen(Qt::black);
+					paint.setPen(m_valueColor);
 				}
 				QRect rect = paint.boundingRect(0,18,bar_width,18,Qt::AlignCenter,QString::number(bar_value[t],16));
 				paint.drawText(t * bar_width + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16) );
@@ -144,15 +145,16 @@ void DmxMonitor::mouseDoubleClickEvent(QMouseEvent *)
 
 void DmxMonitor::setChannelPeakBars(int num)
 {
-	if (num < 0 || num > 512) num = 512;
+	if (num < 0 || num > 512)
+		num = 512;
 	bars = num;
 	used_bars = num;
 	memset(bar_value,0,sizeof(int)*512);
 
-	if (bars < 48) {
+	if (bars <= 48) {
 		setMinimumWidth(bars * 20);
 	}
-	setMaximumWidth(bars * 20);
+	setMaximumWidth(bars * 22);
 
 	update();
 }
@@ -180,7 +182,7 @@ void DmxMonitor::setSmallHeightEnabled(bool enable)
 			setMaximumHeight(25);
 		} else {
 			m_flags &= ~F_SMALL_HEIGHT;
-			setMaximumHeight(20000);
+			setMaximumHeight(2000);
 		}
 	}
 }

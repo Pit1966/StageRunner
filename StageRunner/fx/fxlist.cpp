@@ -721,7 +721,7 @@ FxItem *FxList::addFx(int fxtype, int option)
 		{
 			FxScriptItem *fx = new FxScriptItem(this);
 			fx->refCount.ref();
-			fx->setRawScript("mode BreakOnCancel\n");
+			fx->setRawScript("mode BreakOnCancel,DisableMultiStart\n");
 			m_fxList.append(fx);
 			m_isModified = true;
 			retfx = fx;

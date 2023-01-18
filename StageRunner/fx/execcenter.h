@@ -56,6 +56,7 @@ public:
 	~ExecCenter();
 
 	Executer * findExecuter(const FxItem *fx);
+	ScriptExecuter * findScriptExecuter(const FxItem *fx);
 	bool exists(Executer *exec);
 	bool useExecuter(Executer *exec);
 	bool freeExecuter(Executer *exec);
