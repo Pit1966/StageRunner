@@ -10,22 +10,24 @@ QT      += core
 
 HEADERS     += ../../../interfaces/qlcioplugin.h
 HEADERS     += ../../../../engine/src/qlcfile.h
-HEADERS += ../common/mididevice.h \
+HEADERS += \
            ../common/midiinputdevice.h \
            ../common/midioutputdevice.h \
            ../common/midiplugin.h \
            ../common/midiprotocol.h \
            ../common/miditemplate.h \
            ../common/midienumerator.h \
+		   ../common/mididevice.h \
            ../common/configuremidiplugin.h
 
 SOURCES += ../../../interfaces/qlcioplugin.cpp
-SOURCES += ../common/mididevice.cpp \
+SOURCES += \
            ../common/midiinputdevice.cpp \
            ../common/midioutputdevice.cpp \
            ../common/midiplugin.cpp \
            ../common/midiprotocol.cpp \
            ../common/miditemplate.cpp \
+		   ../common/mididevice.cpp \
            ../common/configuremidiplugin.cpp
 
 SOURCES += ../../../../engine/src/qlcfile.cpp

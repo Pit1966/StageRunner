@@ -28,11 +28,11 @@ AudioFormat::AudioFormat() :
 {
 }
 
-AudioFormat::AudioFormat(const AudioFormat &other)
-	: QAudioFormat()
-{
-	*this = other;
-}
+//AudioFormat::AudioFormat(const AudioFormat &other)
+//	: QAudioFormat()
+//{
+//	*this = other;
+//}
 
 AudioFormat::AudioFormat(const QAudioFormat &other)
 	: QAudioFormat(other)

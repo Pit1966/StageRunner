@@ -21,12 +21,12 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************************************/
 
+#include "configrev.h"
 #include "yadidevice.h"
 #include "yadidmxusbout.h"
 #include "yadireceiver.h"
 #include "serialwrapper.h"
 #include "dmxmonitor.h"
-#include "configrev.h"
 
 #ifdef USE_QTSERIAL
 #  include "qserialportthread.h"

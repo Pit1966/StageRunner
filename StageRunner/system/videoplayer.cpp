@@ -431,6 +431,8 @@ bool VideoPlayer::_playPicClip(FxClipItem *fxc, FxClipItem *old_fxc)
 			ok &= m_videoCtrl->fadeOutFxClipAudio(m_slotNumber, 0, audiofadeouttime);
 			m_stopVideoAtEventEnd = true;
 			ok &= fadePicClipOverlayIn(fadeintime, 1);
+			if (!ok)
+				return false;
 		}
 		else {
 			qWarning() << "VideoPlayer::playPicClip: video is running but mode is not VIDEO_VISIBLE";

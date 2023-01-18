@@ -76,11 +76,12 @@ public:
 		, text(text)
 		, dateTime(dateTime)
 	{}
-	LogEntry(const LogEntry &o)
-		: type(o.type)
-		, text(o.text)
-		, dateTime(o.dateTime)
-	{}
+// Not needed, compiler will create automatically
+//	LogEntry(const LogEntry &o)
+//		: type(o.type)
+//		, text(o.text)
+//		, dateTime(o.dateTime)
+//	{}
 };
 
 #define MAX_LOG_LINES 10000

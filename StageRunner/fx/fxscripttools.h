@@ -84,7 +84,8 @@ private:
 public:
 	FxScriptLine(const QString &cmd, const QString &paras);
 	FxScriptLine(const QString &time, const QString &cmd, const QString &paras);
-	FxScriptLine(const FxScriptLine &o);
+	// Not needed, compiler will create automatically
+//	FxScriptLine(const FxScriptLine &o);
 
 	int lineNumber() const {return m_lineNum;}
 	const QString & command() const {return m_cmd;}

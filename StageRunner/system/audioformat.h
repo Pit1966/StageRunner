@@ -30,7 +30,7 @@ class AudioFormat : public QAudioFormat
 {
 public:
 	AudioFormat();
-	AudioFormat(const AudioFormat &other);
+//	AudioFormat(const AudioFormat &other);
 	AudioFormat(const QAudioFormat &other);
 
 	static AudioFormat defaultFormat();

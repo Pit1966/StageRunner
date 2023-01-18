@@ -88,16 +88,16 @@ FxScriptLine::FxScriptLine(const QString &time, const QString &cmd, const QStrin
 	m_execTimeMs = QtStaticTools::timeStringToMS(time);
 }
 
-FxScriptLine::FxScriptLine(const FxScriptLine &o)
-	: m_cmdKey(o.m_cmdKey)
-	, m_lineNum(o.m_lineNum)
-	, m_loopCount(o.m_loopCount)
-	, m_execTimeMs(o.m_execTimeMs)
-	, m_execDurationMs(o.m_execDurationMs)
-	, m_cmd(o.m_cmd)
-	, m_paras(o.m_paras)
-{
-}
+//FxScriptLine::FxScriptLine(const FxScriptLine &o)
+//	: m_cmdKey(o.m_cmdKey)
+//	, m_lineNum(o.m_lineNum)
+//	, m_loopCount(o.m_loopCount)
+//	, m_execTimeMs(o.m_execTimeMs)
+//	, m_execDurationMs(o.m_execDurationMs)
+//	, m_cmd(o.m_cmd)
+//	, m_paras(o.m_paras)
+//{
+//}
 
 int FxScriptLine::execDuration()
 {

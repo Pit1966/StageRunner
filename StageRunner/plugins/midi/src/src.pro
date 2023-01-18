@@ -1,4 +1,4 @@
-unix:!macx:include(../../../configvars.pri)
+#unix:!macx:include(../../../configvars.pri)
 
 TEMPLATE = subdirs
 

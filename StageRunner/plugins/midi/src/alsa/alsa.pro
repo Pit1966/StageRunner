@@ -8,8 +8,6 @@ CONFIG      += plugin
 CONFIG      += link_pkgconfig
 PKGCONFIG   += alsa
 
-include(../common/common.pri)
-
 HEADERS += alsamidiinputthread.h \
            alsamidiinputdevice.h \
            alsamidioutputdevice.h \
@@ -21,3 +19,5 @@ SOURCES += alsamidiinputthread.cpp \
            alsamidioutputdevice.cpp \
            alsamidienumerator.cpp \
            alsamidiutil.cpp
+
+include(../common/common.pri)

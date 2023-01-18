@@ -49,7 +49,7 @@ SOURCES += artnetpacketizer.cpp \
            configureartnet.cpp
 
 unix:!macx {
-    metainfo.path   = $$INSTALLROOT/share/appdata/
-    metainfo.files += qlcplus-artnet.metainfo.xml 
-    INSTALLS       += metainfo
+	metainfo.path	= $$INSTALLROOT/share/appdata/
+	metainfo.files	+= qlcplus-artnet.metainfo.xml
+	INSTALLS		+= metainfo
 }

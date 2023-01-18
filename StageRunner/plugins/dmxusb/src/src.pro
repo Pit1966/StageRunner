@@ -7,6 +7,7 @@ TARGET   = ../../dmxusb
 CONFIG      += plugin
 QT          += gui core
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 INCLUDEPATH += ../../interfaces
 
 # Uncomment the following to use QtSerialPort before
@@ -76,34 +77,45 @@ CONFIG(libftdi) {
     }
 }
 
+#DEPENDPATH += .
+#INCLUDEPATH += .
+#POST_TARGETDEPS += configrev.h
+
 HEADERS += ../../interfaces/qlcioplugin.h
 
-HEADERS += dmxusb.h \
-           dmxusbwidget.h \
-           dmxusbconfig.h \
-           enttecdmxusbpro.h \
-           enttecdmxusbopen.h \
-           stageprofi.h \
-           vinceusbdmx512.h \
-           dmxinterface.h
+HEADERS += \
+	dmxusb.h \
+	dmxusbwidget.h \
+	enttecdmxusbpro.h \
+	stageprofi.h \
+	vinceusbdmx512.h
 
 unix|macx: HEADERS += nanodmx.h euroliteusbdmxpro.h
+unix|macx: SOURCES += nanodmx.cpp euroliteusbdmxpro.cpp
 
 SOURCES += ../../interfaces/qlcioplugin.cpp
-SOURCES += dmxinterface.cpp \
-           dmxusb.cpp \
-           dmxusbwidget.cpp \
-           dmxusbconfig.cpp \
-           enttecdmxusbpro.cpp \
-           enttecdmxusbopen.cpp \
-           stageprofi.cpp \
-           vinceusbdmx512.cpp
+SOURCES +=  \
+	dmxusb.cpp \
+	dmxusbwidget.cpp \
+	enttecdmxusbopen.cpp \
+	stageprofi.cpp \
+	vinceusbdmx512.cpp
 
 INCLUDEPATH += ../../midi/src/common
 HEADERS += ../../midi/src/common/midiprotocol.h
 SOURCES += ../../midi/src/common/midiprotocol.cpp
 
-unix|macx: SOURCES += nanodmx.cpp euroliteusbdmxpro.cpp
+HEADERS += \
+	dmxusbconfig.h \
+	enttecdmxusbopen.h \
+	dmxinterface.h
+
+SOURCES += \
+	dmxusbconfig.cpp \
+	enttecdmxusbpro.cpp \
+	dmxinterface.cpp
+
+
 
 CONFIG(qtserial) {
     SOURCES += qtserial-interface.cpp

@@ -4,27 +4,29 @@ TEMPLATE = lib
 LANGUAGE = C++
 TARGET   = ../../yadidmxusbout
 
-CONFIG      += plugin
-CONFIG		+= debug
-QT          += gui core
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 QT += widgets
-
 DEFINES += IS_QT5
 }
 
+CONFIG      += plugin
+
 INCLUDEPATH += .
 INCLUDEPATH += ../../interfaces
+DEPENDPATH  += ../../interfaces
 
-FORMS += \
-	yadiconfigdialog.ui
+win32:QMAKE_LFLAGS += -shared
+
+target.path = $$INSTALLROOT/$$PLUGINDIR
+
+message(YADI-Plugin: Installroot: $$INSTALLROOT  Plugins: $$INSTALLROOT/$$PLUGINDIR)
+
 
 HEADERS += \
 	../../interfaces/qlcioplugin.h \
 	yadidmxusbout.h \
 	serialwrapper.h \
-	yadidevice.h \
 	yadidevicemanager.h \
 	yadiconfigdialog.h \
 	yadireceiver.h \
@@ -35,14 +37,27 @@ SOURCES += ../../interfaces/qlcioplugin.cpp \
     mvgavgcollector.cpp \
     yadidmxusbout.cpp \
     serialwrapper.cpp \
-    yadidevice.cpp \
     yadidevicemanager.cpp \
     yadiconfigdialog.cpp \
     yadireceiver.cpp \
     dmxmonitor.cpp
 
-OTHER_FILES += yadi.json
 
+HEADERS += \
+	yadidevice.h
+
+SOURCES += \
+	yadidevice.cpp
+
+
+FORMS += \
+	yadiconfigdialog.ui
+
+OTHER_FILES += \
+	yadi.json
+
+DISTFILES += \
+	serial_notes.txt
 
 unix:!macx {
 	QT      += dbus
@@ -82,18 +97,15 @@ CONFIG(qtserialsupport) {
     }
 }
 
-PRO_FILE      = src.pro
+#PRO_FILE = src.pro
 
 # This must be after "TARGET = " and before target installation so that
 # install_name_tool can be run before target installation
 # macx:include(../../../macx/nametool.pri)
 
 # Plugin installation
-target.path = $$INSTALLROOT/$$PLUGINDIR
+
 INSTALLS   += target
 
-OTHER_FILES += \
-	yadi.json
 
-DISTFILES += \
-    serial_notes.txt
+
