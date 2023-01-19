@@ -615,7 +615,7 @@ bool YadiDMXUSBOut::setInOutMergeMode(quint32 input, quint32 universe, quint32 m
 		return false;
 	}
 
-	QString cmd = QString("m %1").arg(mode);
+	QString cmd = QString("m %1\n").arg(mode);
 	qDebug() << "Yadi: set merge mode:" << cmd;
 	yadi->write(cmd.toLocal8Bit().data());
 

@@ -259,7 +259,7 @@ bool YadiReceiver::detectRxDmxPacketSize(int *packet_size)
 	if (!device->serialDev()->isOpen())
 		return false;
 
-	if ( device->serialDev()->writeSerial("c") <= 0 ) {
+	if ( device->serialDev()->writeSerial("c\n") <= 0 ) {
 		qDebug("YadiReceiver: Device 'c' command failed");
 		return false;
 	}
@@ -286,7 +286,7 @@ bool YadiReceiver::detectRxDmxUniverseSize(int *max_universe_size, int *used_uni
 	if (!device->serialDev()->isOpen())
 		return false;
 
-	if ( device->serialDev()->writeSerial("ui") <= 0 ) {
+	if ( device->serialDev()->writeSerial("ui\n") <= 0 ) {
 		qDebug("YadiReceiver: Device 'ui' command failed");
 		return false;
 	}
