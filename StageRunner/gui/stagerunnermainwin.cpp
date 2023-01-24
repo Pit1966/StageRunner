@@ -1087,6 +1087,9 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 		;
 	}
 	qDebug() << "Mainloop is back";
+
+//	int t = 0;
+//	int a = wait.elapsed() / t;
 }
 
 void StageRunnerMainWin::on_actionDMX_Input_triggered()

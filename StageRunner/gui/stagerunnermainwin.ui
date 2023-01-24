@@ -34,7 +34,7 @@
       </widget>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="iconSize">
         <size>
