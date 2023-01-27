@@ -732,6 +732,8 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 		QApplication::setStyle(QStyleFactory::create(style));
 	}
 
+	// set palette also. In some environments this is necessary
+	QApplication::setPalette(QApplication::style()->standardPalette());
 }
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()

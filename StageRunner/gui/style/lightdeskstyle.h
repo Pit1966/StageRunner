@@ -51,22 +51,25 @@ protected:
 	QPixmap pixButtonM;
 	QPixmap pixButtonR;
 
+	mutable QPalette m_standardPalette;
+	mutable bool m_isPaletteInitialized;
+
 public:
 	LightDeskStyle(const QString &basekey = "windows");
 	~LightDeskStyle();
 
-	void polish(QPalette &pal);
-	void polish(QWidget *widget);
+	QPalette standardPalette() const override;
 
-	int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const;
-	int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
-	void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
-	void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
-	void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const;
-	void drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal, bool enabled, const QString &text, QPalette::ColorRole textRole) const;
-	void drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const;
+	void polish(QPalette &pal) override;
+	void polish(QWidget *widget) override;
 
-
+	int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const override;
+	int pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const override;
+	void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const override;
+	void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const override;
+	void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const override;
+	void drawItemText(QPainter *painter, const QRect &rect, int flags, const QPalette &pal, bool enabled, const QString &text, QPalette::ColorRole textRole) const override;
+	void drawItemPixmap(QPainter *painter, const QRect &rect, int alignment, const QPixmap &pixmap) const override;
 
 protected:
 	static void setTexture(QPalette &pal, QPalette::ColorRole role, const QPixmap &pixmap);

@@ -29,8 +29,9 @@ QPen LightDeskStyle::penBevelDarkTrans = QPen(QColor(10,10,10,120),3);
 QPen LightDeskStyle::penBevelLightTrans = QPen(QColor(200,200,200,120),3);
 int LightDeskStyle::roundRadius = 8;
 
-LightDeskStyle::LightDeskStyle(const QString &basekey) :
-	QProxyStyle(QStyleFactory::create(basekey))
+LightDeskStyle::LightDeskStyle(const QString &basekey)
+	: QProxyStyle(QStyleFactory::create(basekey))
+	, m_isPaletteInitialized(false)
 {
 	pixButtonL = QPixmap(":/gfx/customwidget/desk_knob_left.png");
 	pixButtonM = QPixmap(":/gfx/customwidget/desk_knob_mid.png");
@@ -42,6 +43,33 @@ LightDeskStyle::LightDeskStyle(const QString &basekey) :
 LightDeskStyle::~LightDeskStyle()
 {
 	// qDebug("LightDeskStyle destroyed");
+}
+
+QPalette LightDeskStyle::standardPalette() const
+{
+	if (!m_isPaletteInitialized) {
+		QColor darkGrey(30,30,30);
+		QColor grey(180,180,200);
+		QColor orange(220,180,0);
+		QColor greyBlue(60,60,160);
+		// QColor darkRedTrans(160,60,60,80);
+		QColor highGreenTrans(0,250,0,60);
+		QPixmap background_img(":/gfx/customwidget/desk_structure_2.png");
+
+		QPalette pal(darkGrey);
+		pal.setBrush(QPalette::Base, darkGrey);
+		pal.setBrush(QPalette::Highlight, highGreenTrans);
+		pal.setBrush(QPalette::HighlightedText, orange);
+		pal.setBrush(QPalette::Window, darkGrey);
+		pal.setBrush(QPalette::WindowText, grey);
+		pal.setBrush(QPalette::Mid, greyBlue);
+		setTexture(pal, QPalette::Window, background_img);
+
+		m_standardPalette = pal;
+		m_isPaletteInitialized = true;
+	}
+
+	return m_standardPalette;
 }
 
 void LightDeskStyle::polish(QPalette &pal)
@@ -60,9 +88,9 @@ void LightDeskStyle::polish(QPalette &pal)
 	pal.setBrush(QPalette::HighlightedText, orange);
 	pal.setBrush(QPalette::Window, darkGrey);
 	pal.setBrush(QPalette::WindowText, grey);
+	// pal.setBrush(QPalette::Base, QColor("blue"));
 	pal.setBrush(QPalette::Mid, greyBlue);
 	setTexture(pal, QPalette::Window, background_img);
-
 }
 
 int LightDeskStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
@@ -104,6 +132,10 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 //		}
 //		w = w->parentWidget();
 //	}
+
+//	QRect r = option->rect;
+//	painter->fillRect(r, Qt::blue);
+
 
 //	QString name = widget->objectName();
 //	if (!name.contains(QRegExp("(Audio|itemEdit)")))
