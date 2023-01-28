@@ -592,6 +592,11 @@ void StageRunnerMainWin::setStatusMessage(const QString &msg, int displayTimeMs)
 void StageRunnerMainWin::onStatusTimer()
 {
 	if (m_timeLabel) {
+		if (isFullScreen()) {
+			m_timeLabel->show();
+			actionFullscreen->setChecked(true);
+		}
+
 		QDateTime dt = QDateTime::currentDateTimeUtc();
 		QString time = dt.toString("ddd d. MMMM hh:mm:ss");
 		m_timeLabel->setText(time);
@@ -599,7 +604,8 @@ void StageRunnerMainWin::onStatusTimer()
 		// calculate size of text
 		QFontMetrics fm(m_timeLabel->font());
 		int fw = fm.horizontalAdvance(time) + 8;
-		if (fw > m_timeLabel->width()) {
+		qDebug() << "mainwin fw" << fw << m_timeLabel->width();
+		if (fw > m_timeLabel->width() || m_timeLabel->x() > height() - fw) {
 			m_timeLabel->resize(fw, m_timeLabel->height());
 			m_timeLabel->move(width() - fw, m_timeLabel->y());
 		}
@@ -1077,6 +1083,8 @@ void StageRunnerMainWin::resizeEvent(QResizeEvent *event)
 		int x = mainsize.width() - 100;
 		int y = mainsize.height() - 30;
 		m_timeLabel->move(x, y);
+		if (isFullScreen())
+			m_timeLabel->show();
 	}
 }
 
