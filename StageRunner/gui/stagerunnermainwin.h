@@ -29,6 +29,7 @@
 #include <QString>
 #include <QStyle>
 #include <QTextEdit>
+#include <QTimer>
 
 
 class AppCentral;
@@ -57,6 +58,10 @@ private:
 	PsDockWidget *sequence_status_dock;
 	PsDockWidget *template_dock;
 	UniverseEditorWidget *m_universeEditor;
+
+	QLabel *m_timeLabel;
+	QTimer m_statusTimer;							///< feeds time label
+
 
 	QStringList m_recentProjectPaths;				///< This list holds the pathnames of last used projects (max. 10)
 
@@ -93,6 +98,7 @@ public:
 private:
 	bool eventFilter(QObject *obj, QEvent *event);
 	void closeEvent(QCloseEvent *event);
+	void resizeEvent(QResizeEvent *event);
 
 public slots:
 	void showInfoMsg(const QString &where, const QString &text);
@@ -107,6 +113,7 @@ public slots:
 
 private slots:
 	void setStatusMessage(const QString &msg, int displayTimeMs);
+	void onStatusTimer();
 
 	void on_addAudioFxButton_clicked();
 	void on_actionLoad_Project_triggered();

@@ -67,6 +67,7 @@
 #include <QFileDialog>
 #include <QErrorMessage>
 #include <QTextEdit>
+#include <QFont>
 
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
@@ -75,6 +76,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	appCentral = myapp;
 
 	init();
+
 
 	// DocWidgets defauls
 	setTabPosition(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea, QTabWidget::North);
@@ -112,6 +114,19 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	virtDmxWidget->setAutoBarsEnabled(true);
 	virtDmxWidget->setBarsBordersEnabled(false);
 	virtDmxWidget->setSecondBarGroupEnabled(true);
+
+	// Time display and status
+	m_timeLabel = new QLabel("12:00", this);
+	m_timeLabel->move(10,10);
+	m_timeLabel->show();
+	QFont myfont(font());
+	myfont.setPixelSize(16);
+	myfont.setBold(true);
+	m_timeLabel->setFont(myfont);
+
+	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(onStatusTimer()));
+	m_statusTimer.start(1000);
+
 
 	// For external access
 	logWidget = logEdit;
@@ -277,6 +292,10 @@ void StageRunnerMainWin::restore_window()
 	set.endGroup();
 	// update Menu -> Recent Projects
 	addRecentProject("");
+
+	actionFullscreen->setChecked(isFullScreen());
+	if (m_timeLabel)
+		m_timeLabel->setVisible(isFullScreen());
 }
 
 void StageRunnerMainWin::updateButtonStyles(QString style)
@@ -571,6 +590,23 @@ void StageRunnerMainWin::setStatusMessage(const QString &msg, int displayTimeMs)
 
 }
 
+void StageRunnerMainWin::onStatusTimer()
+{
+	if (m_timeLabel) {
+		QDateTime dt = QDateTime::currentDateTimeUtc();
+		QString time = dt.toString("ddd d. MMMM hh:mm:ss");
+		m_timeLabel->setText(time);
+
+		// calculate size of text
+		QFontMetrics fm(m_timeLabel->font());
+		int fw = fm.horizontalAdvance(time) + 8;
+		if (fw > m_timeLabel->width()) {
+			m_timeLabel->resize(fw, m_timeLabel->height());
+			m_timeLabel->move(width() - fw, m_timeLabel->y());
+		}
+	}
+}
+
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)
 {
 	SceneDeskWidget *desk = SceneDeskWidget::openSceneDesk(fx);
@@ -722,8 +758,10 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 {
 	LOGTEXT(tr("Set Application GUI style to '%1'").arg(style));
 
+	bool isLightDesk = false;
 	if (style == "" || style == "LightDesk") {
 		QApplication::setStyle(new LightDeskStyle);
+		isLightDesk = true;
 	}
 	else if (style == "Default") {
 		QApplication::setStyle(nullptr);
@@ -734,6 +772,16 @@ void StageRunnerMainWin::setApplicationGuiStyle(QString style)
 
 	// set palette also. In some environments this is necessary
 	QApplication::setPalette(QApplication::style()->standardPalette());
+
+	if (m_timeLabel) {
+		if (isLightDesk) {
+			QPalette pal = m_timeLabel->palette();
+			pal.setBrush(QPalette::WindowText, QColor(220,180,0));
+			m_timeLabel->setPalette(pal);
+		} else {
+			m_timeLabel->setPalette(QApplication::style()->standardPalette());
+		}
+	}
 }
 
 void StageRunnerMainWin::on_addAudioFxButton_clicked()
@@ -1021,6 +1069,16 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	FxListWidget::destroyAllFxListWidgets();
 	SceneDeskWidget::destroyAllSceneDesks();
 
+}
+
+void StageRunnerMainWin::resizeEvent(QResizeEvent *event)
+{
+	if (m_timeLabel) {
+		QSize mainsize = event->size();
+		int x = mainsize.width() - 100;
+		int y = mainsize.height() - 30;
+		m_timeLabel->move(x, y);
+	}
 }
 
 void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
@@ -1316,6 +1374,10 @@ void StageRunnerMainWin::on_actionFullscreen_triggered(bool checked)
 		this->showFullScreen();
 	} else {
 		this->showNormal();
+	}
+
+	if (m_timeLabel) {
+		m_timeLabel->setVisible(checked);
 	}
 }
 
