@@ -388,7 +388,12 @@ void StageRunnerMainWin::initAppDefaults()
 		actionVirtualDmxOutput->setChecked(true);
 	}
 
+	// restore window layout
 	restore_window();
+
+	// Load Default Template FxList
+	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
+		on_loadTemplatesButton_clicked();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
 		Project *pro = appCentral->project;
@@ -421,9 +426,6 @@ void StageRunnerMainWin::initAppDefaults()
 	// Copy User Settings to GUI
 	applyUserSettingsToGui(appCentral->userSettings);
 
-	// Load Default Template FxList
-	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
-		on_loadTemplatesButton_clicked();
 
 }
 
