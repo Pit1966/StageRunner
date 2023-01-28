@@ -83,7 +83,7 @@ void FxItem::init()
 	addExistingVar(hookedToInputDmxChannel,"HookedToInputDmxChannel",-1,511,-1);
 }
 
-int FxItem::init_generate_id(int from)
+int FxItem::init_generate_id(int from, bool storeInstanceInGlobalList)
 {
     QMutexLocker lock(&global_fx_lock);
 
@@ -93,11 +93,17 @@ int FxItem::init_generate_id(int from)
 		// create that list if not happend before
 		global_fx_list = new QList<FxItem*>;
 	}
-	global_fx_list->append(this);
 
-	QSet<qint32> ids;
+	if (storeInstanceInGlobalList) {
+		if (global_fx_list->contains(this)) {
+			qWarning() << "global fx list already contains" << this << this->name() << this->id();
+		} else {
+			global_fx_list->append(this);
+		}
+	}
 
 	// generate an unique id for the effect
+	QSet<qint32> ids;
 	int new_id = 0;
 	for (int t=0; t<global_fx_list->size(); t++) {
 		int t_id = global_fx_list->at(t)->myId;
@@ -122,7 +128,7 @@ FxItem::~FxItem()
 
     // remove the reference to this effect from global list
 	if (! global_fx_list->removeOne(this)) {
-		// qDebug("%s: FxItem not found in global list",__func__);
+		qDebug("%s: FxItem not found in global list",__func__);
 	}
 
 	// delete list if empty
@@ -268,7 +274,7 @@ int FxItem::generateNewID(int from)
 {
 	if (from == 0)
 		from = myId;
-	myId = init_generate_id(from);
+	myId = init_generate_id(from, false);
 	return myId;
 }
 

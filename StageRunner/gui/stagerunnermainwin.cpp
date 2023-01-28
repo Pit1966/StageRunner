@@ -117,7 +117,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	// Time display and status
 	m_timeLabel = new QLabel("12:00", this);
-	m_timeLabel->move(10,10);
+	m_timeLabel->move(width() - 100, height() - 30);
 	m_timeLabel->show();
 	QFont myfont(font());
 	myfont.setPixelSize(16);
@@ -126,7 +126,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(onStatusTimer()));
 	m_statusTimer.start(1000);
-
 
 	// For external access
 	logWidget = logEdit;

@@ -549,10 +549,12 @@ void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint
 		int i_universe;
 		if (getInputUniverseForPlugin(sendby,int(input),i_universe)) {
 			if (i_universe < 0) {
-				if (debug > 4) DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
+				if (debug > 4)
+					DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
 			} else {
 				emit universeValueChanged(uint(i_universe),channel,value);
-				if (debug > 4) DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",i_universe+1,channel,value);
+				if (debug > 4)
+					DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",i_universe+1,channel,value);
 			}
 		}
 	}

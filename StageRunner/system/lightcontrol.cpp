@@ -446,10 +446,12 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 		dmxInputChanged[universe] = true;
 	}
 
+	// qDebug() << "dmx in changed" << universe << channel << value;
+
 	if (myApp.isInputAssignMode())
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 
-	foreach (FxItem * fx, FxItem::globalFxList()) {
+	for (FxItem * fx : qAsConst(FxItem::globalFxList())) {
 		if (fx->isHookedToInput(universe,channel)) {
 			if (fx->fxType() == FX_SCENE) {
 				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);

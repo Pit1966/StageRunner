@@ -171,7 +171,7 @@ public:
 
 private:
 	void init();
-	int init_generate_id(int from = 0);
+	int init_generate_id(int from = 0, bool storeInstanceInGlobalList = true);
 
 	friend class FxList;
 	friend class FxItemTool;

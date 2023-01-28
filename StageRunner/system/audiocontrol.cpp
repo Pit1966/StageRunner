@@ -1056,10 +1056,12 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 {
 	QMutexLocker lock(slotMutex);
 
+	// qDebug() << "dmx audio" << fxa << value;
+
 	bool ok = true;
 	if (value > 5) {
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
-			ok = startFxAudioAt(fxa, nullptr, -1, 5);
+			ok = startFxAudioAt(fxa);
 			fxa->isDmxStarted = true;
 		}
 		else if (fxa->isDmxStarted) {
@@ -1073,7 +1075,7 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 		fxa->isDmxStarted = false;
 		int slot = findAudioSlot(fxa);
 		if (slot >= 0) {
-			storeCurrentSeekPos(slot);
+			// storeCurrentSeekPos(slot);
 			stopFxAudio(slot);
 		}
 	}
