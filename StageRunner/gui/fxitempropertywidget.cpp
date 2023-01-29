@@ -631,6 +631,7 @@ void FxItemPropertyWidget::on_findAudioFileButton_clicked()
 		cur_fxa->setFilePath(newpath);
 		cur_fxa->setModified(true);
 		audioFilePathEdit->setStyleSheet("");
+		audioFilePathEdit->setText(newpath);
 
 		dir = QFileInfo(newpath).absoluteDir().path();
 	}
