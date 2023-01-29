@@ -259,8 +259,10 @@ QStringList YadiDMXUSBOut::outputs()
 		if (!yadi)
 			continue;
 		QString name = "TX:";
-		name += yadi->devNode();
-		name += ":";
+		if (yadi->deviceSerial.isEmpty()) {
+			name += yadi->devNode();
+			name += ":";
+		}
 		name += yadi->deviceProductName;
 		name += "(" + yadi->deviceSerial + ")";
 		if (!yadi->deviceNodePresent) {
@@ -409,7 +411,7 @@ QString YadiDMXUSBOut::outputInfo(quint32 output)
 		str += QString("<P>");
 		if (yadi) {
 			if (yadi->deviceNodePresent) {
-				str += tr("Device is online.<br>");
+				str += tr("Device (%1) is online.<br>").arg(yadi->devNode());
 			} else {
 				str += tr("<font color=darkred>Device is offline.</font><br>");
 			}
@@ -463,8 +465,10 @@ QStringList YadiDMXUSBOut::inputs()
 		if (!yadi)
 			continue;
 		QString name = "RX:";
-		name += yadi->devNode();
-		name += ":";
+		if (yadi->deviceSerial.isEmpty()) {
+			name += yadi->devNode();
+			name += ":";
+		}
 		name += yadi->deviceProductName;
 		name += "(" + yadi->deviceSerial +")";
 		if (!yadi->deviceNodePresent) {
@@ -508,7 +512,7 @@ QString YadiDMXUSBOut::inputInfo(quint32 input)
 		str += QString("<P>");
 		if (yadi) {
 			if (yadi->deviceNodePresent) {
-				str += tr("Device is online.<br>");
+				str += tr("Device (%1) is online.<br>").arg(yadi->devNode());
 			} else {
 				str += tr("<font color=darkred>Device is offline.</font><br>");
 			}

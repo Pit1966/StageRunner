@@ -192,7 +192,8 @@ bool YadiReceiver::receiver_loop()
 					return false;
 
 				if (device->serialDev()->error()) {
-					qDebug() << "YadiReceiver: serial error:" << device->serialDev()->errorString();
+					QString msg = QString("YADI listener: serial error: %1").arg(device->serialDev()->errorString());
+					emit errorMsgSent(msg);
 					ok = false;
 				} else {
 					int framenanos = m_time.nsecsElapsed();

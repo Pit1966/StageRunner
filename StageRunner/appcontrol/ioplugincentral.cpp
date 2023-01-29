@@ -161,7 +161,7 @@ bool IOPluginCentral::updatePluginMappingInformation()
 	int count = 0;
 
 	// Discover plugin lines (input/outputs) and update configuration for each
-	foreach(QLCIOPlugin *plugin, qlcPlugins()) {
+	for (QLCIOPlugin *plugin : qlcPlugins()) {
 		QString plugin_name = plugin->name();
 		QStringList outputs = IOPluginCentral::outputsOf(plugin);
 		QStringList inputs = IOPluginCentral::inputsOf(plugin);
@@ -175,7 +175,8 @@ bool IOPluginCentral::updatePluginMappingInformation()
 			lineconf->deviceNumber = t;
 			lineconf->deviceIoType = QLCIOPlugin::Output;
 			// lineconf->pIsUsed = true;
-			if (debug > 1) qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
+			if (debug > 1)
+				qDebug() << (++count) << lineconf->pLineName << int(lineconf->pUniverse);
 
 			allOutputNames.append(outputs.at(t));
 
