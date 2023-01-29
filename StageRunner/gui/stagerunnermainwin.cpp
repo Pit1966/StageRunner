@@ -604,7 +604,7 @@ void StageRunnerMainWin::onStatusTimer()
 		// calculate size of text
 		QFontMetrics fm(m_timeLabel->font());
 		int fw = fm.horizontalAdvance(time) + 8;
-		qDebug() << "mainwin fw" << fw << m_timeLabel->width();
+		// qDebug() << "mainwin fw" << fw << m_timeLabel->width();
 		if (fw > m_timeLabel->width() || m_timeLabel->x() > height() - fw) {
 			m_timeLabel->resize(fw, m_timeLabel->height());
 			m_timeLabel->move(width() - fw, m_timeLabel->y());
