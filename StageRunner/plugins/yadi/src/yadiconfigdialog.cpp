@@ -143,7 +143,7 @@ void YadiConfigDialog::on_transMergeModeCombo_activated(int index)
 		c_yadi->settingsChanged = true;
 
 		if (c_yadi->openOutput()) {
-			QString cmd = QString("m %1").arg(index);
+			QString cmd = QString("m %1\n").arg(index);
 			qDebug() << "YadiConfigDialog::on_transMergeModeCombo_activated: send" << cmd;
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}
@@ -159,7 +159,7 @@ void YadiConfigDialog::on_transLimitOutChannelsSpin_valueChanged(int arg1)
 		c_yadi->settingsChanged = true;
 
 		if (c_yadi->openOutput()) {
-			QString cmd = QString("ho %1").arg(arg1);
+			QString cmd = QString("ho %1\n").arg(arg1);
 			qDebug() << "YadiConfigDialog::on_transMaxOutChannelsSpin_valueChanged: send" << cmd;
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}
@@ -175,7 +175,7 @@ void YadiConfigDialog::on_transLimitInChannelsSpin_valueChanged(int arg1)
 		c_yadi->settingsChanged = true;
 
 		if (c_yadi->openOutput()) {
-			QString cmd = QString("hi %1").arg(arg1);
+			QString cmd = QString("hi %1\n").arg(arg1);
 			qDebug() << "YadiConfigDialog::on_transMaxInChannelsSpin_valueChanged: send" << cmd;
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}
@@ -191,7 +191,7 @@ void YadiConfigDialog::on_rxLimitInChannelsSpin_valueChanged(int arg1)
 		c_yadi->settingsChanged = true;
 
 		if (c_yadi->openOutput()) {
-			QString cmd = QString("hi %1").arg(arg1);
+			QString cmd = QString("hi %1\n").arg(arg1);
 			qDebug() << "YadiConfigDialog::on_rxLimitInChannelsSpin_valueChanged: send" << cmd;
 			c_yadi->write(cmd.toLocal8Bit().data());
 		}

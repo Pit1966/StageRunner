@@ -105,6 +105,11 @@ bool YadiReceiver::receiver_loop()
 		int max_channels = -1;
 		int used_channels = -1;
 		ok = detectRxDmxUniverseSize(&max_channels, &used_channels);
+		if (!ok) {
+			QString msg = tr("<font color=green>YADI listener</font>: Could not query universe size from device!");
+			emit errorMsgSent(msg);
+			return false;
+		}
 
 		if (device->debug > 3)
 			printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
@@ -124,11 +129,19 @@ bool YadiReceiver::receiver_loop()
 			printf("[ YadiReceiver ]: Enter inner loop\n");
 
 		if (firstloop) {
-			QString msg = tr("<font color=green>YADI started listener</font>: DMX packet size: %1, channels: used %2 / max %3")
-					.arg(rx_dmx_packet_size - 1)
+			QString msg = tr("<font color=green>YADI listener started</font>: DMX packet size: %1, channels: used %2 / max %3")
+					.arg(rx_dmx_packet_size)
 					.arg(used_channels)
 					.arg(max_channels);
 			emit statusMsgSent(msg);
+		}
+
+		if (rx_dmx_packet_size >=6 && rx_dmx_packet_size < device->usedDmxInChannels) {
+			QString msg = tr("<font color=green>YADI listener </font>: DMX max used universe size adjusted from %1 to %2 due to detected DMX frame size")
+					.arg(used_channels)
+					.arg(rx_dmx_packet_size);
+			emit statusMsgSent(msg);
+			device->usedDmxInChannels = rx_dmx_packet_size;
 		}
 
 		bool dmxSizeReported = false;

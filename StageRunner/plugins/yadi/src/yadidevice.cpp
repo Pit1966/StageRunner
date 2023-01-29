@@ -451,15 +451,15 @@ void YadiDevice::sendConfigToDevice()
 	if (openOutput()) {
 		QString cmd;
 		if ((capabilities & FL_INOUT_UNIVERSE) == FL_INOUT_UNIVERSE) {
-			cmd = QString("m %1").arg(universeMergeMode);
+			cmd = QString("m %1\n").arg(universeMergeMode);
 			write(cmd.toLocal8Bit().data());
 		}
 		if (capabilities & FL_INPUT_UNIVERSE) {
-			cmd = QString("hi %1").arg(usedDmxInChannels);
+			cmd = QString("hi %1\n").arg(usedDmxInChannels);
 			write(cmd.toLocal8Bit().data());
 		}
 		if (capabilities & FL_OUTPUT_UNIVERSE) {
-			cmd = QString("ho %1").arg(usedDmxOutChannels);
+			cmd = QString("ho %1\n").arg(usedDmxOutChannels);
 			write(cmd.toLocal8Bit().data());
 		}
 
