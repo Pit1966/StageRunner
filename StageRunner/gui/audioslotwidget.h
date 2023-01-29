@@ -49,6 +49,10 @@ public:
 	AudioSlotWidget(AudioControlWidget *widget);
 	void setFFTGraphVisible(bool state);
 	void setVolumeDialVisible(bool state);
+	bool setGuiSetting(const QString &key, const QString &val);
+	QString guiSetting(const QString &key);
+	QString allGuiSettings();
+	bool setAllGuiSettings(const QString &settings);
 
 
 protected:

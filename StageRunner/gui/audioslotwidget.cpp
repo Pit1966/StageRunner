@@ -65,6 +65,57 @@ void AudioSlotWidget::setVolumeDialVisible(bool state)
 	slotVolumeDial->setVisible(state);
 }
 
+bool AudioSlotWidget::setGuiSetting(const QString &key, const QString &val)
+{
+	if (key == "timemode") {
+		if (val == "percent") {
+			slotAbsButton->setChecked(false);
+		}
+		else if (val == "time") {
+			slotAbsButton->setChecked(true);
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+QString AudioSlotWidget::guiSetting(const QString &key)
+{
+	if (key == "timemode") {
+		return slotAbsButton->isChecked() ? "time" : "percent";
+	}
+
+	return QString();
+}
+
+/**
+ * @brief return a semicolon separated list of the gui settings of this widget
+ * @return
+ */
+QString AudioSlotWidget::allGuiSettings()
+{
+	QString settings = "timemode=" + guiSetting("timemode");
+
+	return settings;
+}
+
+bool AudioSlotWidget::setAllGuiSettings(const QString &settings)
+{
+	bool ok = true;
+	const QStringList entries = settings.split(';');
+	for (QString entry : entries) {
+		QString key = entry.section('=',0,0);
+		QString val = entry.section('=', 1);
+		if (key.size() && val.size()) {
+			ok &= setGuiSetting(key, val);
+
+		}
+	}
+	return ok;
+}
+
 void AudioSlotWidget::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);

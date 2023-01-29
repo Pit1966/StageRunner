@@ -424,7 +424,7 @@ void YadiDevice::loadConfig()
 
 	set.beginGroup(group);
 	if (set.contains("Capabilities")) {
-		qDebug() << "Load settings for device" << group;
+		// qDebug() << "Load settings for device" << group;
 		capabilities = set.value("Capabilities").toInt();
 		usedDmxInChannels = set.value("UsedDmxInChannels").toInt();
 		usedDmxOutChannels = set.value("UsedDmxOutChannels").toInt();

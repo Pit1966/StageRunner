@@ -468,11 +468,13 @@ void StageRunnerMainWin::showModuleError()
 void StageRunnerMainWin::copyGuiSettingsToProject()
 {
 	appCentral->project->pAutoProceedSequence = fxListWidget->fxList()->autoProceedSequence();
+	appCentral->project->pSlotGuiConfig = audioCtrlGroup->completeGuiSettings();
 }
 
 void StageRunnerMainWin::copyProjectSettingsToGui()
 {
 	fxListWidget->setAutoProceedSequence( appCentral->project->pAutoProceedSequence );
+	audioCtrlGroup->setCompleteGuiSettings(appCentral->project->pSlotGuiConfig);
 }
 
 void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
@@ -803,6 +805,7 @@ void StageRunnerMainWin::on_actionSave_Project_triggered()
 	Project * pro = appCentral->project;
 
 	if (pro->curProjectFilePath.size()) {
+		copyGuiSettingsToProject();
 		if (pro->saveToFile(pro->curProjectFilePath)) {
 			POPUPINFOMSG(Q_FUNC_INFO,tr("Project successfully saved!"));
 		}

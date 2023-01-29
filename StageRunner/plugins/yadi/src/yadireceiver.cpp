@@ -158,6 +158,10 @@ bool YadiReceiver::receiver_loop()
 				// We could not receive rx DMX input data from interface.
 				// This means that cable was disconnected or something similar
 				// Not a fault so far.
+
+				QString msg = tr("<font color=orange>YADI listener </font>: No dmx frame received. Maybe cable disconnected?");
+				emit statusMsgSent(msg);
+
 				dmxStatus &= ~1;
 				ok = true;
 				// So we leave the receiver loop and check if the interface is still present.

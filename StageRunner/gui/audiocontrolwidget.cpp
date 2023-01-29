@@ -63,6 +63,46 @@ void AudioControlWidget::setVolumeDialVisibleFromMask(qint32 mask)
 	}
 }
 
+void AudioControlWidget::setGuiSettingForSlot(int slotNum, const QString &key, const QString &val)
+{
+	if (slotNum < audioSlotWidgets.size() && slotNum >= 0) {
+		audioSlotWidgets.at(slotNum)->setGuiSetting(key, val);
+	}
+}
+
+QString AudioControlWidget::guiSettingForSlot(int slotNum, const QString &key)
+{
+	if (slotNum < audioSlotWidgets.size() && slotNum >= 0) {
+		return audioSlotWidgets.at(slotNum)->guiSetting(key);
+	}
+	return QString();
+}
+
+QString AudioControlWidget::completeGuiSettings()
+{
+	QString set;
+	for (int s=0; s<audioSlotWidgets.size(); s++) {
+		set += "[" + QString::number(s+1) + ":" + audioSlotWidgets.at(s)->allGuiSettings() + "]";
+	}
+	return set;
+}
+
+bool AudioControlWidget::setCompleteGuiSettings(const QString &settings)
+{
+	bool ok = true;
+	const QStringList slotsets = settings.split(']', Qt::SkipEmptyParts);
+	for (QString slotset : slotsets) {
+		slotset.remove('[');
+		int slot = slotset.section(':',0,0).toInt() - 1;
+		QString set = slotset.section(':', 1);
+		if (slot >= 0 && slot < audioSlotWidgets.size()) {
+			ok &= audioSlotWidgets.at(slot)->setAllGuiSettings(set);
+		}
+	}
+
+	return ok;
+}
+
 void AudioControlWidget::resizeEvent(QResizeEvent *event)
 {
 	Q_UNUSED(event);

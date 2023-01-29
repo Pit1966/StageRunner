@@ -62,7 +62,11 @@ public:
 	};
 
 public:
+	// begin: saved config
 	pbool pAutoProceedSequence;
+	pstring pSlotGuiConfig;						///< config settings for Slot widgets
+	// end: saved config
+
 	QString curProjectFilePath;					///< Stores the location of the project file, is previously saved or loaded from disk (used for project-save)
 
 	int loadErrorLineNumber;					///< this holds the line number after load project has failed due to a script error
@@ -77,8 +81,9 @@ protected:
 	pstring pProjectBaseDir;					///< this is the base directory for relative path names in FXs
 	pint32 pMasterVolume;
 
+
 private:
-	FxList *fxList;
+	FxList *fxList;								///< this is the effect list, which actually holds nearly the complete configuration
 	QStringList m_mediaFileSearchDirs;			///< these are temporary entries for directories which will be scanned, if a file is not found on load
 
 public:

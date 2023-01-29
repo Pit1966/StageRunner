@@ -50,6 +50,10 @@ public:
 	AudioControlWidget(QWidget *parent = 0);
 	void setFFTGraphVisibleFromMask(qint32 mask);
 	void setVolumeDialVisibleFromMask(qint32 mask);
+	void setGuiSettingForSlot(int slotNum, const QString &key, const QString &val);
+	QString guiSettingForSlot(int slotNum, const QString &key);
+	QString completeGuiSettings();
+	bool setCompleteGuiSettings(const QString &settings);
 
 protected:
 	void resizeEvent(QResizeEvent *event);

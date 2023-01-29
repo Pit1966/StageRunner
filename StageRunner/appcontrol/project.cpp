@@ -895,6 +895,8 @@ void Project::init()
 	addExistingVar(fxList->showColumnFadeoutFlag,"FxListShowFadeOutTime");
 	addExistingVar(fxList->showColumnPostdelayFlag,"FxListShowPostDelay");
 
+	addExistingVar(pSlotGuiConfig,"SlotGuiConfig");
+
 
 	addExistingVarSetList(fxList->nativeFxList(),"MainFxList",PrefVarCore::FX_ITEM);
 }
