@@ -600,7 +600,7 @@ void StageRunnerMainWin::onStatusTimer()
 		}
 
 		QDateTime dt = QDateTime::currentDateTimeUtc();
-		QString time = dt.toString("ddd d. MMMM hh:mm:ss");
+		QString time = dt.toLocalTime().toString("ddd d. MMMM hh:mm:ss");
 		m_timeLabel->setText(time);
 
 		// calculate size of text

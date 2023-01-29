@@ -338,7 +338,7 @@ void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)
 	emit fftSpectrumChanged(slotnum,spec);
 }
 
-bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec)
+bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
 	QMutexLocker lock(slotMutex);
 
@@ -373,20 +373,23 @@ bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec)
 		audioSlots[slot]->select();
 	}
 
-	return start_fxaudio_in_slot(fxa, slot, exec, 0);
+	if (atMs < 0)
+		atMs = 0;
+
+	return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
 }
 
-bool AudioControl::startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
-{
-	QMutexLocker lock(slotMutex);
+//bool AudioControl::startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
+//{
+//	QMutexLocker lock(slotMutex);
 
-	int slot = selectFreeAudioSlot();
-	if (slot < 0) {
-		return false;
-	} else {
-		return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
-	}
-}
+//	int slot = selectFreeAudioSlot();
+//	if (slot < 0) {
+//		return false;
+//	} else {
+//		return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
+//	}
+//}
 
 void AudioControl::startFxAudioFromTimer(FxItem *fx)
 {
@@ -397,7 +400,7 @@ void AudioControl::startFxAudioFromTimer(FxItem *fx)
 }
 
 
-bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
+bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
 {
 	QMutexLocker lock(slotMutex);
 	executeAttachedAudioStartCmd(fxa);
@@ -409,16 +412,16 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec)
 //		return true;
 //	}
 
-	return startFxAudioStage2(fxa, exec);
+	return startFxAudioStage2(fxa, exec, atMs, initVol);
 }
 
-bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
-{
-	QMutexLocker lock(slotMutex);
-
-	executeAttachedAudioStartCmd(fxa);
-	return startFxAudioAtStage2(fxa, exec, atMs, initVol);
-}
+//bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
+//{
+//	QMutexLocker lock(slotMutex);
+//	executeAttachedAudioStartCmd(fxa);
+////	return startFxAudioAtStage2(fxa, exec, atMs, initVol);
+//	return startFxAudioStage2(fxa, exec, atMs, initVol);
+//}
 
 bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
 {
@@ -1061,7 +1064,7 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 	bool ok = true;
 	if (value > 5) {
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
-			ok = startFxAudioAt(fxa);
+			ok = startFxAudio(fxa, nullptr);
 			fxa->isDmxStarted = true;
 		}
 		else if (fxa->isDmxStarted) {

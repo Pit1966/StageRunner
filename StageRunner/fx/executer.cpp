@@ -482,7 +482,7 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 	case AUDIO_OFF:
 		cue_time = audio->preDelay();
 		if (cue_time == -1) {
-			myApp.unitAudio->startFxAudioAt(audio,this);
+			myApp.unitAudio->startFxAudio(audio,this);
 			audio->setSeqStatus(AUDIO_POST_DELAY);
 			cue_time = audio->postDelay();
 			if (cue_time < 0)
@@ -504,7 +504,7 @@ qint64 FxListExecuter::cue_fx_audio(FxAudioItem *audio)
 		if (originFx()->fxType() == FX_AUDIO_PLAYLIST) {
 			myApp.unitAudio->startFxAudioInSlot(audio,myApp.userSettings->pAudioPlayListChannel,this);
 		} else {
-			myApp.unitAudio->startFxAudioAt(audio,this);
+			myApp.unitAudio->startFxAudio(audio,this);
 		}
 		audio->setSeqStatus(AUDIO_PLAYTIME);
 		break;
@@ -962,7 +962,7 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 				ok &= myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
 			}
 			else if (pos >= -1) {
-				ok &= myApp.unitAudio->startFxAudioAt(fxa, this, pos);
+				ok &= myApp.unitAudio->startFxAudio(fxa, this, pos);
 			}
 			else {
 				ok &= myApp.unitAudio->startFxAudio(fxa, this);

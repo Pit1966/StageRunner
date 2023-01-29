@@ -123,14 +123,14 @@ private:
 private slots:
 	void vu_level_changed_receiver(int slotnum, qreal left, qreal right);
 	void fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec);
-	bool startFxAudioStage2(FxAudioItem *fxa, Executer *exec);
-	bool startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1);
+//	bool startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 
 	void startFxAudioFromTimer(FxItem *fx);
 
 public slots:
-	bool startFxAudio(FxAudioItem *fxa, Executer *exec);
-	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1);
+//	bool startFxAudioAt(FxAudioItem *fxa, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);

@@ -533,19 +533,20 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 			default:
 				unitVideo->startFxClip(fxc);
 			}
-		} else {
+		}
+		else {
 			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
 
 			switch (cmd) {
 			case CMD_AUDIO_START:
 				if (fxa->initialSeekPos) {
-					unitAudio->startFxAudioAt(fxa, exec, fxa->initialSeekPos);
+					unitAudio->startFxAudio(fxa, exec, fxa->initialSeekPos);
 				} else {
 					unitAudio->startFxAudio(fxa, exec);
 				}
 				break;
 			case CMD_AUDIO_START_AT:
-				unitAudio->startFxAudioAt(fxa, exec);
+				unitAudio->startFxAudio(fxa, exec);
 				break;
 			case CMD_AUDIO_STOP:
 				unitAudio->stopFxAudio(fxa);
