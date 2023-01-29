@@ -46,8 +46,8 @@ void DmxMonitor::init()
 	m_flags = /*F_ENABLE_BAR_BORDERS |*/ F_ENABLE_BAR_TEXTS;
 
 	m_barsBorderColor = Qt::blue;
-	m_barsColor = "#333355";
-	m_barsSecColor = Qt::darkGreen;
+	m_barsColor = Qt::darkGreen;
+	m_barsSecColor = "#7070d0";
 	m_valueColor = Qt::yellow;
 }
 
@@ -67,11 +67,17 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 	paint.scale(1,-1);
 
 	if (bars) {
+		float bar_dist = float(xsize) / bars;
 		int bar_width = xsize / bars;
+		if (bar_width < 4)
+			bar_width = 4;
 		int bar_height = ysize - legendYSize;
 
 		// Second bar group
 		if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
+			if (bar_width < 6)
+				bar_width = 6;
+
 			paint.setBrush(m_barsSecColor);
 			paint.setPen(Qt::NoPen);
 
@@ -80,7 +86,7 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 					paint.setPen(Qt::red);
 				}
 				int h = bar_height * bar_valueSec[t] / 255;
-				paint.drawRect(t * bar_width + 1, 0, bar_width/2 - 1, h);
+				paint.drawRect(bar_dist * t, 0, bar_width/2 - 1, h);
 			}
 		}
 
@@ -97,9 +103,9 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 			}
 			int h = bar_height * bar_value[t] / 255;
 			if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
-				paint.drawRect(t * bar_width + bar_width/2, 0, bar_width/2 - 2, h);
+				paint.drawRect(bar_dist * t + bar_width/2, 0, bar_width/2 - 1, h);
 			} else {
-				paint.drawRect(t * bar_width + 1, 0, bar_width - 2, h);
+				paint.drawRect(bar_dist * t, 0, bar_width - 2, h);
 			}
 		}
 
@@ -111,17 +117,19 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 				if (m_flags & F_ENABLE_AUTO_BARS) {
 					paint.setPen(Qt::white);
 					QString val = QString("%1").arg(t+1,3,10);
-					QRect rect = paint.boundingRect(0,18,bar_width,12,Qt::AlignCenter,val);
-					paint.drawText(t * bar_width + rect.x(), rect.y(), val);
+					QRect rect = paint.boundingRect(0,18,bar_dist,12,Qt::AlignCenter,val);
+					paint.drawText(t * bar_dist + rect.x(), rect.y(), val);
 				}
 
-				if (t >= used_bars) {
-					paint.setPen(Qt::red);
-				} else {
-					paint.setPen(m_valueColor);
+				if (bar_width >= 16 || bar_value[t] > 0) {
+					if (t >= used_bars) {
+						paint.setPen(Qt::red);
+					} else {
+						paint.setPen(m_valueColor);
+					}
+					QRect rect = paint.boundingRect(0,18,bar_dist,18,Qt::AlignCenter,QString::number(bar_value[t],16));
+					paint.drawText(bar_dist * t + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16) );
 				}
-				QRect rect = paint.boundingRect(0,18,bar_width,18,Qt::AlignCenter,QString::number(bar_value[t],16));
-				paint.drawText(t * bar_width + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16) );
 			}
 		}
 	}
