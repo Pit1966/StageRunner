@@ -1155,7 +1155,7 @@ void StageRunnerMainWin::on_stopMainLoopButton_clicked()
 	qDebug() << "Mainloop stopped";
 	QElapsedTimer wait;
 	wait.start();
-	while (wait.elapsed() < 3000) {
+	while (wait.elapsed() < 8000) {
 		;
 	}
 	qDebug() << "Mainloop is back";

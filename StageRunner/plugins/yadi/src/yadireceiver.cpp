@@ -111,6 +111,9 @@ bool YadiReceiver::receiver_loop()
 			return false;
 		}
 
+		// give interface a little bit of time in order to detect frame size (if DMX input is connected)
+		msleep(100);
+
 		if (device->debug > 3)
 			printf("max channels: %d, used channels: %d\n",max_channels, used_channels);
 
@@ -137,7 +140,7 @@ bool YadiReceiver::receiver_loop()
 		}
 
 		if (rx_dmx_packet_size >=6 && rx_dmx_packet_size < device->usedDmxInChannels) {
-			QString msg = tr("<font color=green>YADI listener </font>: DMX max used universe size adjusted from %1 to %2 due to detected DMX frame size")
+			QString msg = tr("<font color=green>YADI listener</font>: DMX max used universe size adjusted from %1 to %2 due to detected DMX frame size")
 					.arg(used_channels)
 					.arg(rx_dmx_packet_size);
 			emit statusMsgSent(msg);
@@ -159,7 +162,7 @@ bool YadiReceiver::receiver_loop()
 				// This means that cable was disconnected or something similar
 				// Not a fault so far.
 
-				QString msg = tr("<font color=orange>YADI listener </font>: No dmx frame received. Maybe cable disconnected?");
+				QString msg = tr("<font color=orange>YADI listener</font>: No dmx frame received. Maybe cable disconnected?");
 				emit statusMsgSent(msg);
 
 				dmxStatus &= ~1;

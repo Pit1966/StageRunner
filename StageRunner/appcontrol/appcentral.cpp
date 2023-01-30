@@ -738,7 +738,6 @@ void AppCentral::onInputUniverseChannelChanged(quint32 universe, quint32 channel
 	/// For now we forward the signal to the light unit
 	/// some functions like setAudioVol are already implemented in LightControl::onInputUniverseChanged( ... )
 	unitLight->onInputUniverseChannelChanged(universe,channel,value);
-
 }
 
 void AppCentral::setGlobalSelectedFx(FxItem *item)
@@ -885,7 +884,7 @@ void AppCentral::init()
 	MessageHub::instance();
 
 	// Do some connects
-	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)));
+	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)), Qt::DirectConnection);
 
 	// AppCentral -> AudioControl Thread (unitAudio)
 	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));

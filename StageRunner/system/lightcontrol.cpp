@@ -435,6 +435,8 @@ void LightControl::onSceneCueReady(FxSceneItem *scene)
  * @param value dmx-wert (0-255)
  *
  * Diese Funktion stellt die Verbindung einer Eingangsleitung mit einem FxSceneItem dar
+ *
+ * @todo make thread safe
  */
 void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value)
 {

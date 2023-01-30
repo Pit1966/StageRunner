@@ -291,9 +291,8 @@ bool IOPluginCentral::openPlugins()
 			}
 			// Lets connect to inputChanged Signal
 			connect(plugin,SIGNAL(valueChanged(quint32,quint32,quint32,uchar,QString))
-					,this,SLOT(onInputValueChanged(quint32,quint32,quint32,uchar,QString)),Qt::UniqueConnection);
+					,this,SLOT(onInputValueChanged(quint32,quint32,quint32,uchar,QString)),Qt::ConnectionType(Qt::UniqueConnection|Qt::DirectConnection));
 		}
-
 	}
 	return one_opened;
 }
@@ -541,23 +540,27 @@ bool IOPluginCentral::setPluginParametersFromLineConf(QLCIOPlugin *plugin, Plugi
  * The function determines the plugin that has emitted the signal and maps the input number
  * to the configured universe. Than the univeresChannelChanged Signal will be emitted
  *
+ *
  */
 void IOPluginCentral::onInputValueChanged(quint32 universe, quint32 input, quint32 channel, uchar value, const QString &key)
 {
 	Q_UNUSED(key)
-	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
-	if(sendby) {
-		int i_universe;
-		if (getInputUniverseForPlugin(sendby,int(input),i_universe)) {
-			if (i_universe < 0) {
-				if (debug > 4)
-					DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
-			} else {
-				emit universeValueChanged(uint(i_universe),channel,value);
-				if (debug > 4)
-					DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",i_universe+1,channel,value);
-			}
-		}
+//	QLCIOPlugin *sendby = qobject_cast<QLCIOPlugin*>(sender());
+//	if(sendby) {
+//		int i_universe;
+//		if (getInputUniverseForPlugin(sendby,int(input),i_universe)) {
+//			if (i_universe < 0) {
+//				if (debug > 4)
+//					DEBUGTEXT("Input universe event from plugin ignored: Universe: %d -> ch:%d=%d (Line is not configured)",universe+1,channel,value);
+//			} else {
+//				emit universeValueChanged(uint(i_universe),channel,value);
+//				if (debug > 4)
+//					DEBUGTEXT("Input event in uiverse %d -> ch:%d=%d",i_universe+1,channel,value);
+//			}
+//		}
+//	}
+	if (universe < MAX_DMX_UNIVERSE) {
+		emit universeValueChanged(universe,channel,value);
 	}
 }
 

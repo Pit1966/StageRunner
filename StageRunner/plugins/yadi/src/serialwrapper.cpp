@@ -222,6 +222,8 @@ bool SerialWrapper::openSerial()
 		tio.c_cflag |= CLOCAL;					// this is necessary for mac when using tty.usbModem instead of cu.usbModem
 		m_yadi->sendStatusMsg(tr("Interface product name: %1").arg(m_productName));
 
+//		cfsetispeed(&tio,B500000);
+//		cfsetospeed(&tio,B500000);
 		cfsetispeed(&tio,B230400);
 		cfsetospeed(&tio,B230400);
 //		cfsetispeed(&tio,B115200);

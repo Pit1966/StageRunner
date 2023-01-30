@@ -756,7 +756,7 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 			connect(yadi->serialPortThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
 #else
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
-					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
+					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::ConnectionType(Qt::UniqueConnection | Qt::DirectConnection));
 			connect(yadi->inputThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
