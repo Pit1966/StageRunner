@@ -104,6 +104,7 @@ private slots:
 	void onError(const QSerialPort::SerialPortError error);
 
 signals:
+	void dmxInDeviceChannelChanged(quint32 universe, quint32 input, quint32 channel, uchar value);
 	void dmxInChannelChanged(quint32, uchar);
 	void dmxPacketReceived(YadiDevice* dev, const QString &str);
 };

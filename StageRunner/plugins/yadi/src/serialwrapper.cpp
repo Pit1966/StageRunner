@@ -511,10 +511,9 @@ bool SerialWrapper::writeCommand(const QByteArray cmd, QByteArray *serAnswer)
 
 	qDebug() << "Serialcommand" << cmd << answer;
 
-#endif
-
 	if (serAnswer)
 		*serAnswer = answer;
+#endif
 
 	return true;
 }

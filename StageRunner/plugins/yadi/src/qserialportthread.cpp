@@ -37,7 +37,7 @@ QSerialPortThread::QSerialPortThread(YadiDevice *dev)
 	, m_isInputOpen(false)
 {
 	foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-		if (info.portName() == dev->devNodePath) {
+		if (info.portName() == dev->devNode()) {
 			m_portInfo = info;
 			break;
 		}

@@ -122,7 +122,7 @@ bool YadiDevice::activateDevice()
 	// First let us look if we are already activated. If so and the
 	// device path has changed, we deactivate the device first.
 #ifdef USE_QTSERIAL
-	if (m_serialThread && m_serialThread->deviceNode() != devNodePath)
+	if (m_serialThread && m_serialThread->deviceNode() != devNode())
 		deActivateDevice();
 #else
 	if (file && file->deviceNode() != devNodePath())
@@ -135,7 +135,7 @@ bool YadiDevice::activateDevice()
 	// we create the thread object that should read from the device later
 #ifdef USE_QTSERIAL
 	if (!m_serialThread) {
-		if (deviceNodeExists(devNodePath)) {
+		if (deviceNodeExists(devNode())) {
 			m_serialThread = new QSerialPortThread(this);
 			outUniverse.fill(0,512);
 			inUniverse.fill(0,512);
