@@ -26,6 +26,8 @@
 #include "config.h"
 #include "gui/audioslotwidget.h"
 #include "appcontrol/appcentral.h"
+#include "system/qt_versions.h"
+
 
 #include <QHBoxLayout>
 #include <QDebug>
@@ -90,7 +92,7 @@ QString AudioControlWidget::completeGuiSettings()
 bool AudioControlWidget::setCompleteGuiSettings(const QString &settings)
 {
 	bool ok = true;
-	const QStringList slotsets = settings.split(']', Qt::SkipEmptyParts);
+	const QStringList slotsets = settings.split(']', QT_SKIP_EMPTY_PARTS);
 	for (QString slotset : slotsets) {
 		slotset.remove('[');
 		int slot = slotset.section(':',0,0).toInt() - 1;
