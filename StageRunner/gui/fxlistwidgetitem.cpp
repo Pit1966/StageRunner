@@ -130,7 +130,7 @@ void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
 	if (current_button == Qt::LeftButton) {
 		drag_begin_pos = event->pos();
 	}
-	else if (current_button == Qt::MidButton) {
+	else if (current_button == QT_MIDDLE_BUTTON) {
 		seek_mode_f = true;
 	}
 }

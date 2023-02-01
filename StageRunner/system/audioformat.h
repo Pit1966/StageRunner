@@ -29,12 +29,27 @@
 class AudioFormat : public QAudioFormat
 {
 public:
+#ifdef IS_QT6
+	enum SampleType : quint16 {
+		Unknown,
+		SignedInt,
+		UnSignedInt,
+		Float,
+		NSampleTypes
+	};
+#endif
+
 	AudioFormat();
 //	AudioFormat(const AudioFormat &other);
 	AudioFormat(const QAudioFormat &other);
 
-	static AudioFormat defaultFormat();
+#ifdef IS_QT6
+	int sampleSize() const;
+	SampleType sampleType() const;
 
+#endif
+
+	static AudioFormat defaultFormat();
 };
 
 #endif // AUDIOFORMAT_H

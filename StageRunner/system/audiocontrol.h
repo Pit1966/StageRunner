@@ -31,7 +31,17 @@
 #include <QThread>
 #include <QList>
 #include <QMutex>
-#include <QAudioDeviceInfo>
+#ifdef IS_QT6
+#  include <QMediaDevices>
+#  include <QAudioDevice>
+#else
+#  include <QAudioDeviceInfo>
+#endif
+
+#include <QMediaPlayer>
+#include <QUrl>
+#include <QVideoWidget>
+#include <QThread>
 
 using namespace AUDIO;
 
@@ -61,13 +71,15 @@ protected:
 	int m_masterVolume;
 	bool m_isValid;
 	bool m_initInThread;
-	QAudioDeviceInfo m_extraDevice;
+#if IS_QT6
+	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
+#else
 	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
+#endif
 	QStringList m_audioDeviceNames;						///< A list of audio devices by names
 
 	// Video player stuff (as hyper extension)
 	VideoPlayer *m_videoPlayer;
-	QMediaPlaylist *m_playlist;
 	PsVideoWidget *m_videoWid;
 
 private:

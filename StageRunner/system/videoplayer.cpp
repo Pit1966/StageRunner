@@ -42,19 +42,26 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	, m_slotNumber(-1)
 	, m_currentVolume(-1)
 	, m_currentMasterVolume(-1)
-	, currentState(QMediaPlayer::StoppedState)
+	, m_currentState(VideoPlayer::StoppedState)
 	, m_viewState(VIEW_UNUSED)
 	, m_currentFxClipItem(nullptr)
 	, m_ctrlFxItem(nullptr)
 	, m_overlayFadeOutFirst(false)
 	, m_stopVideoAtEventEnd(false)
 {
+#if QT_VERSION_MAJOR >= 6
+	m_audioOutput = nullptr;
+#endif
 	setVideoOutput(m_videoWid);
 
 	connect(this,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(on_media_status_changed(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
+#if QT_VERSION_MAJOR >= 6
+	connect(this,SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)),this,SLOT(on_play_state_changed(QMediaPlayer::PlaybackState)),Qt::DirectConnection);
+#else
 	connect(this,SIGNAL(stateChanged(QMediaPlayer::State)),this,SLOT(on_play_state_changed(QMediaPlayer::State)),Qt::DirectConnection);
-	connect(this,SIGNAL(positionChanged(qint64)),this,SLOT(on_playback_position_changed(qint64)));
 	setNotifyInterval(20);
+#endif
+	connect(this,SIGNAL(positionChanged(qint64)),this,SLOT(on_playback_position_changed(qint64)));
 
 	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
 	connect(this, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), m_videoCtrl, SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)));
@@ -179,7 +186,7 @@ bool VideoPlayer::playFxClip(FxClipItem *fxc, int slotNum)
 
 bool VideoPlayer::isRunning() const
 {
-	return currentState == QMediaPlayer::PlayingState;
+	return m_currentState == VideoPlayer::PlayingState;
 }
 
 bool VideoPlayer::isCurrentFxClipAPicClip() const
@@ -225,6 +232,7 @@ bool VideoPlayer::stopAndWait()
  */
 void VideoPlayer::setVolume(int vol)
 {
+	// volume range of qt is 0-1.0f
 	float level = float(vol * 100) / m_videoCtrl->maxVolume();
 	if (m_currentMasterVolume >= 0) {
 		level = level * m_currentMasterVolume / m_videoCtrl->maxVolume();
@@ -232,7 +240,12 @@ void VideoPlayer::setVolume(int vol)
 
 	// qDebug() << "set volume" << vol << "master" << m_currentMasterVolume << "final" << level;
 
+#ifdef IS_QT6
+	if (m_audioOutput)
+		m_audioOutput->setVolume(level);
+#else
 	QMediaPlayer::setVolume(level);
+#endif
 	m_currentVolume = vol;
 }
 
@@ -464,8 +477,7 @@ bool VideoPlayer::_playVideoClip(FxClipItem *fxc, FxClipItem *old_fxc, int slotN
 	Q_UNUSED(old_fxc)
 
 	// handle audio track of video first
-	QMultimedia::AvailabilityStatus astat = availability();
-	Q_UNUSED(astat)
+
 
 	// set volume here in media player
 	setVolume(fxc->initialVolume);
@@ -475,7 +487,11 @@ bool VideoPlayer::_playVideoClip(FxClipItem *fxc, FxClipItem *old_fxc, int slotN
 
 
 	// now set media file
+#if QT_VERSION_MAJOR >= 6
+	this->setSource(QUrl::fromLocalFile(fxc->filePath()));
+#else
 	this->setMedia(QUrl::fromLocalFile(fxc->filePath()));
+#endif
 	if (m_viewState >= VIEW_PIC_VISIBLE) {
 		if (m_videoWid->isPicClipVisible(0))
 			fadePicClipOverlayOut(2000, 0);
@@ -515,7 +531,9 @@ bool VideoPlayer::fadeInCurrentFxClipItem(int ms, int layer)
 void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 {
 	switch (status) {
+#if QT_VERSION_MAJOR < 6
 	case QMediaPlayer::UnknownMediaStatus:
+#endif
 	case QMediaPlayer::NoMedia:
 	case QMediaPlayer::LoadingMedia:
 		break;
@@ -529,7 +547,9 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 		if (loopCnt < loopTarget) return;
 		break;
 	case QMediaPlayer::InvalidMedia:
-#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+#if QT_VERSION_MAJOR >= 6
+		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(source().toString()));
+#elif QT_VERSION >= QT_VERSION_CHECK(5,14,0)
 		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(media().request().url().toString()));
 #else
 		POPUPERRORMSG(Q_FUNC_INFO, tr("Invalid Media: %1").arg(media().canonicalUrl().toString()));
@@ -542,21 +562,21 @@ void VideoPlayer::on_media_status_changed(QMediaPlayer::MediaStatus status)
 	// qDebug() << Q_FUNC_INFO << status;
 }
 
-void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
+void VideoPlayer::onVideoPlaybackStateChanged(VideoPlayer::PlayState videoPlayState)
 {
 	bool restart = false;
 	AudioStatus stat = AudioStatus::AUDIO_NO_STATE;
 
-	if (state != currentState) {
-		qDebug() << Q_FUNC_INFO << state << thread();
-		if (state == QMediaPlayer::StoppedState) {
-			if (currentState == QMediaPlayer::PlayingState) {
+	if (videoPlayState != m_currentState) {
+		qDebug() << Q_FUNC_INFO << videoPlayState << thread();
+		if (videoPlayState == VideoPlayer::StoppedState) {
+			if (m_currentState == VideoPlayer::PlayingState) {
 				if (loopCnt < loopTarget) {
 					loopCnt++;
 					restart = true;
 				} else {
 					if (m_currentFxClipItem && m_currentFxClipItem->blackAtVideoEnd) {
-						QMediaPlayer::stop();
+						VideoPlayer::stop();
 						m_videoWid->update();
 						setViewState(VIEW_BLACK);
 					}
@@ -564,15 +584,15 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 				}
 			}
 		}
-		else if (state == QMediaPlayer::PlayingState) {
+		else if (videoPlayState == VideoPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
 			// QMediaPlayer::setVolume(currentVolume);
 			stat = VIDEO_RUNNING;
 		}
-		else if (state == QMediaPlayer::PausedState) {
+		else if (videoPlayState == VideoPlayer::PausedState) {
 			stat = VIDEO_IDLE;
 		}
-		currentState = state;
+		m_currentState = videoPlayState;
 	}
 
 	if (restart)
@@ -590,11 +610,23 @@ void VideoPlayer::on_play_state_changed(QMediaPlayer::State state)
 	}
 }
 
+#ifdef IS_QT6
+void VideoPlayer::on_play_state_changed(PlaybackState playbackState)
+{
+	onVideoPlaybackStateChanged(VideoPlayer::PlayState(playbackState));
+}
+#else
+void VideoPlayer::on_play_state_changed(State state)
+{
+	onVideoPlaybackStateChanged(VideoPlayer::PlayState(state));
+}
+#endif
+
 void VideoPlayer::on_playback_position_changed(qint64 pos)
 {
 	if (!m_currentFxClipItem) return;
 
-	if (currentState != QMediaPlayer::PlayingState)
+	if (m_currentState != VideoPlayer::PlayingState)
 		return;
 
 	qint64 dur = duration();
@@ -612,7 +644,7 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 				loopCnt++;
 				emit seekMe(0);
 			} else {
-				if (currentState != QMediaPlayer::PausedState) {
+				if (m_currentState != VideoPlayer::PausedState) {
 					QMediaPlayer::pause();
 					return;
 				}
@@ -623,7 +655,7 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 	emit clipProgressChanged(m_currentFxClipItem, permille);
 
 	AudioCtrlMsg msg(m_currentFxClipItem, m_slotNumber, CMD_VIDEO_STATUS_CHANGED);
-	msg.currentAudioStatus = currentState == QMediaPlayer::PlayingState ? VIDEO_RUNNING : VIDEO_IDLE;
+	msg.currentAudioStatus = m_currentState == VideoPlayer::PlayingState ? VIDEO_RUNNING : VIDEO_IDLE;
 	msg.progress = permille;
 	msg.progressTime = int(pos);
 	msg.loop = loopCnt;

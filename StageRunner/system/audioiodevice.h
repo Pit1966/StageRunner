@@ -32,15 +32,26 @@
 
 #include <QIODevice>
 #include <QElapsedTimer>
-#include <QAudioDeviceInfo>
 #include <QAudioDecoder>
 #include <QMutex>
 
+#ifdef IS_QT6
+#  include <QMediaDevices>
+#  include <QAudioDevice>
+#else
+#  include <QAudioDeviceInfo>
+#endif
+
 class QAudioFormat;
+class AudioFormat;
 
 class AudioDecoder : public QAudioDecoder
 {
-
+#if QT_VERSION_MAJOR < 6
+	bool isDecoding() const {return state() == QAudioDecoder::DecodingState;}
+	void setSource(const QUrl &filename) {setSourceFilename(filename);}
+	QUrl source() const {return QUrl::fromLocalFile(sourceFilename());}
+#endif
 };
 
 class AudioIODevice : public QIODevice
@@ -103,21 +114,25 @@ public:
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
-	inline static qreal pcm16ToReal(qint16 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
-	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
-	inline static qreal realToRealNorm(qreal real, const QAudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
-	inline static qreal realNormToReal(qreal realnorm, const QAudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
+	inline static qreal pcm16ToReal(qint16 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
+	inline static qint16 realToPcm16(qreal real, const AudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
+	inline static qreal realToRealNorm(qreal real, const AudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
+	inline static qreal realNormToReal(qreal realnorm, const AudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
 
-	inline static qreal pcm32ToReal(qint64 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
+	inline static qreal pcm32ToReal(qint64 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
 
 	void setLoopCount(int loops);
 
+#ifdef IS_QT6
+	static 	QAudioDevice getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
+#else
 	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
+#endif
 
 public slots:
 	void start(int loops = 1);
 	void stop();
-	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 private slots:
 	void process_decoder_buffer();

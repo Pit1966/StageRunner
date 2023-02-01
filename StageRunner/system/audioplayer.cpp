@@ -78,7 +78,7 @@ bool AudioPlayer::setSourceFilename(const QString &path, const QString &fxName)
 	return true;
 }
 
-void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat)
+void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &audioFormat)
 {
 	//	static QTime checktime;
 	//	qDebug("calcLast %dms",checktime.elapsed());
@@ -96,8 +96,8 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &au
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
 
 	switch (audioFormat.sampleType()) {
-	case QAudioFormat::SignedInt:
-	case QAudioFormat::UnSignedInt:
+	case AudioFormat::SignedInt:
+	case AudioFormat::UnSignedInt:
 		switch (audioFormat.sampleSize()) {
 		case 16:
 			{
@@ -165,7 +165,7 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &au
 		right = sqrt(energy[1] / frames);
 		break;
 
-	case QAudioFormat::Float:
+	case AudioFormat::Float:
 		{
 			switch (audioFormat.sampleSize()) {
 			case 32:
@@ -207,7 +207,7 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &au
 			right = sqrt(energy[1] / frames);
 		}
 		break;
-	case QAudioFormat::Unknown:
+	case AudioFormat::Unknown:
 		DEBUGERROR("Sampletype in audiostream unknown");
 		break;
 	}

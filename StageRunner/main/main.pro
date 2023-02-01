@@ -45,20 +45,6 @@ DEFINES += IS_MAC
 DEFINES += USE_SDL
 }
 
-unix:!macx {
-	exists(/usr/include/SDL2/SDL.h) {
-		exists(/usr/include/SDL2/SDL_mixer.h) {
-			message ("Found SDL2 ...")
-			INCLUDEPATH += /usr/include/SDL2
-			DEFINES += USE_SDL
-			LIBS += -lSDL2
-			LIBS += -lSDL2_mixer
-		} else {
-			message("Found SDL2 ... but not SDL_Mixer2")
-		}
-	}
-}
-
 
 QT += core gui
 QT += sql
@@ -71,8 +57,26 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 	QT += multimediawidgets
 
 	DEFINES += IS_QT5
+	greaterThan(QT_MAJOR_VERSION, 5) {
+		DEFINES += IS_QT6
+		message(Build with Qt6!)
+	}
 } else {
 	message(Compiling with Qt4 is not supported!. Please use Qt5)
+}
+
+unix:!macx {
+	exists(/usr/include/SDL2/SDL.h) {
+		exists(/usr/include/SDL2/SDL_mixer.h) {
+			message ("Found SDL2 ...")
+			INCLUDEPATH += /usr/include/SDL2
+			DEFINES += USE_SDL
+			LIBS += -lSDL2
+			LIBS += -lSDL2_mixer
+		} else {
+			message("Found SDL2 ... but not SDL_Mixer2")
+		}
+	}
 }
 
 win32 {

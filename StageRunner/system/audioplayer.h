@@ -32,13 +32,23 @@
 #include "frqspectrum.h"
 
 
+
 class AudioSlot;
+class AudioFormat;
 
 template <class T> class PsMovingAverage;
 
 class AudioPlayer : public QObject
 {
 	Q_OBJECT
+public:
+	enum PlayState
+	{
+		StoppedState,
+		PlayingState,
+		PausedState
+	};
+	Q_ENUM(PlayState)
 
 protected:
 	AudioSlot & m_parentAudioSlot;
@@ -102,7 +112,7 @@ public:
 
 //protected:
 	// some helper fucntions, that can be used by any backend implementation
-	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 protected:
 	void timerEvent(QTimerEvent *event);

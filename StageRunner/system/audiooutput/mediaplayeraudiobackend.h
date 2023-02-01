@@ -40,7 +40,7 @@ class MediaPlayerAudioBackend : public AudioPlayer
 private:
 	QMediaPlayer *m_mediaPlayer;
 	QAudioProbe *m_audioProbe;
-	QMediaPlayer::State m_currentMediaPlayerState;
+	AudioPlayer::PlayState m_currentMediaPlayerState;
 	AUDIO::AudioStatus m_currentAudioStatus;			///< This is QMediaPlayer::State and QMediaPlayer::MediaStatus translated to StageRunner status
 
 public:
@@ -65,7 +65,12 @@ public:
 
 private slots:
 	void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+	void onAudioPlaybackStateChanged(AudioPlayer::PlayState audioPlayState);
+#ifdef IS_QT6
+	void onPlayerStateChanged(QMediaPlayer::PlaybackState playState);
+#else
 	void onPlayerStateChanged(QMediaPlayer::State state);
+#endif
 	void onMediaDurationChanged(qint64 ms);
 	void calculateVuLevel(QAudioBuffer buffer);
 

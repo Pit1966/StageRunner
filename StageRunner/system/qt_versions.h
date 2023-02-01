@@ -5,6 +5,12 @@
 #include <QMutex>
 #include <QString>
 
+#if QT_VERSION_MAJOR >= 6
+#define QT_MIDDLE_BUTTON Qt::MiddleButton
+#else
+#define QT_MIDDLE_BUTTON Qt::MidButton
+#endif
+
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
 

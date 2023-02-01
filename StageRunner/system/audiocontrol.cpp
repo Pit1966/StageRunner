@@ -45,14 +45,6 @@
 #include <QStringList>
 #include <QDebug>
 
-#ifdef IS_QT5
-#include <QAudioDeviceInfo>
-#include <QMediaPlaylist>
-#include <QMediaPlayer>
-#include <QUrl>
-#include <QVideoWidget>
-#include <QThread>
-#endif
 
 #ifdef USE_SDL
 #include "audiooutput/sdl2audiobackend.h"
@@ -128,6 +120,26 @@ void AudioControl::getAudioDevices()
 
 	AudioFormat default_format = AudioFormat::defaultFormat();
 
+#ifdef IS_QT6
+	QList<QAudioDevice> devList = QMediaDevices::audioOutputs();
+	for (int t=0; t<devList.size(); t++) {
+		QAudioDevice &dev = devList[t];
+		bool default_format_supported = dev.isFormatSupported(default_format);
+		QString dev_name = dev.description();
+		if (default_format_supported) {
+			m_audioDeviceNames.append(dev_name);
+			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
+		}
+	}
+
+	QAudioDevice def_dev(QMediaDevices::defaultAudioOutput());
+	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(def_dev.description()));
+	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
+		LOGTEXT(tr("<font color=ok>Default format supported</font>"));
+	} else {
+		LOGTEXT(tr("<font color=error>Default audio format not supported by audio device"));
+	}
+#else
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	for (int t=0; t<devList.size(); t++) {
 		QAudioDeviceInfo &dev = devList[t];
@@ -136,15 +148,9 @@ void AudioControl::getAudioDevices()
 		if (default_format_supported) {
 			m_audioDeviceNames.append(dev_name);
 			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
-			/// @todo this takes a hardcoded device name and should be adjustable
-			if (dev_name.contains("UA-25EX")) {
-				m_extraDevice = dev;
-			}
 		}
 	}
 	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
-	if (!m_extraDevice.isNull())
-		LOGTEXT(tr("<font color=info>Extra Audio: %1</font>").arg(m_extraDevice.deviceName()));
 
 	QAudioDeviceInfo def_dev(QAudioDeviceInfo::defaultOutputDevice());
 	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
@@ -152,6 +158,7 @@ void AudioControl::getAudioDevices()
 	} else {
 		LOGTEXT(tr("<font color=error>Default audio format not supported by audio device"));
 	}
+#endif
 
 	if (audioSlots.size())
 		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
@@ -1088,7 +1095,6 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 
 void AudioControl::init()
 {
-	m_playlist = nullptr;
 	m_videoPlayer = nullptr;
 	m_videoWid = nullptr;
 
@@ -1119,7 +1125,11 @@ void AudioControl::createMediaPlayInstances()
 				myApp.setModuleError(AppCentral::E_AUDIO_MULTI_OUT_FAIL);
 			} else {
 				bool ok;
+#ifdef IS_QT6
+				QAudioDevice dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
+#else
 				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
+#endif
 				if (!ok) {
 					if (!errmsg)
 						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
@@ -1169,6 +1179,4 @@ void AudioControl::destroyMediaPlayInstances()
 	m_videoWid = nullptr;
 	delete m_videoPlayer;
 	m_videoPlayer = nullptr;
-	delete m_playlist;
-	m_playlist = nullptr;
 }

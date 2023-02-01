@@ -29,6 +29,10 @@
 #include <QTimer>
 #include <QPointer>
 
+#if QT_VERSION_MAJOR >= 6
+#  include <QAudioOutput>
+#endif
+
 #include "commandsystem.h"
 
 
@@ -44,6 +48,15 @@ class Executer;
 class VideoPlayer : protected QMediaPlayer
 {
 	Q_OBJECT
+public:
+	enum PlayState
+	{
+		StoppedState,
+		PlayingState,
+		PausedState
+	};
+	Q_ENUM(PlayState)
+
 protected:
 	VideoControl *m_videoCtrl;
 	PsVideoWidget *m_videoWid;
@@ -52,7 +65,10 @@ protected:
 	int m_slotNumber;
 	int m_currentVolume;					///< current volume in StageRunner range (0 - MAX_VOLUME)
 	int m_currentMasterVolume;
-	QMediaPlayer::State currentState;
+	PlayState m_currentState;
+#if QT_VERSION_MAJOR >= 6
+	QAudioOutput *m_audioOutput;			///< new Qt6 QAudioOutput
+#endif
 	VIDEO::VideoViewStatus m_viewState;		///< this is current widget status of videoplayer and still picture video overlays
 	FxClipItem *m_currentFxClipItem;		///< @todo make guarded
 	FxClipItem *m_ctrlFxItem;				///< Item used for current control command (e.g. PRE_DELAY)
@@ -83,7 +99,6 @@ public:
 	bool fadePicClipOverlayIn(int ms, int layer);
 	bool fadeVideoToBlack(int ms);
 
-	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}
 
 protected:
@@ -98,7 +113,12 @@ private:
 
 private slots:
 	void on_media_status_changed(QMediaPlayer::MediaStatus status);
+	void onVideoPlaybackStateChanged(VideoPlayer::PlayState videoPlayState);
+#ifdef IS_QT6
+	void on_play_state_changed(QMediaPlayer::PlaybackState playbackState);
+#else
 	void on_play_state_changed(QMediaPlayer::State state);
+#endif
 	void on_playback_position_changed(qint64 pos);
 	void onVideoEnd();
 	void setOverlayFade(qreal val, int layer);

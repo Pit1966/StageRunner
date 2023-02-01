@@ -74,7 +74,11 @@ float qsynthKnob::mouseAngle ( const QPoint& pos )
 // Alternate mouse behavior event handlers.
 void qsynthKnob::mousePressEvent ( QMouseEvent *pMouseEvent )
 {
+#if QT_VERSION_MAJOR >= 6
+	if (pMouseEvent->button() == Qt::MiddleButton) {
+#else
 	if (pMouseEvent->button() == Qt::MidButton) {
+#endif
 		// Reset to default value...
 		if (m_iDefaultValue < minimum() || m_iDefaultValue > maximum())
 			m_iDefaultValue = (maximum() + minimum()) / 2;
@@ -137,7 +141,11 @@ void qsynthKnob::mouseMoveEvent ( QMouseEvent *pMouseEvent )
 
 void qsynthKnob::mouseReleaseEvent ( QMouseEvent *pMouseEvent )
 {
+#if QT_VERSION_MAJOR >= 6
+	if (m_dialMode == DefaultMode && pMouseEvent->button() != Qt::MiddleButton) {
+#else
 	if (m_dialMode == DefaultMode && pMouseEvent->button() != Qt::MidButton) {
+#endif
 		QDial::mouseReleaseEvent(pMouseEvent);
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;

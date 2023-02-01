@@ -28,6 +28,7 @@
 
 #include <QTime>
 #include <QByteArray>
+#include <QUrl>
 #include <qmath.h>
 
 AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
@@ -56,7 +57,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	m_leftFFT.setOversampling(4);
 
 	audio_decoder = new AudioDecoder;
-	if (audio_decoder->error() == QAudioDecoder::ServiceMissingError) {
+	if (audio_decoder->error() != QAudioDecoder::NoError) {
 		m_lastErrorText = tr("Audio decoder not initialized. No decode/play service available");
 		audio_error = AUDIO::AUDIO_ERR_DECODER;
 		return;
@@ -176,13 +177,13 @@ qint64 AudioIODevice::bytesAvailable() const
 
 bool AudioIODevice::setSourceFilename(const QString &filename)
 {
-	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
+	if (isDecoding()) {
 		qWarning() << "audio decoding while starting" << filename;
 	} else {
 		if (debug > 1)
 			qWarning() << "start audio" << filename;
 	}
-	audio_decoder->setSourceFilename(filename);
+	audio_decoder->setSource(QUrl(filename));
 	audio_decoder->setAudioFormat(*audio_format);
 	current_filename = filename;
 	m_currentPlaybackSamplerate = 0;
@@ -194,7 +195,12 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 	int samplesize = form.sampleSize();
 	int channels = form.channelCount();
 	int samplerate = form.sampleRate();
+
+#ifdef IS_QT6
+	QString codec = QStringLiteral("codec n/a: implement me QT6");
+#else
 	QString codec = form.codec();
+#endif
 
 	if (debug) {
 		qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
@@ -205,9 +211,8 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 
 bool AudioIODevice::isDecoding() const
 {
-	return audio_decoder->state() == QAudioDecoder::DecodingState;
+	return audio_decoder->isDecoding();
 }
-
 
 /**
  * @brief Calculate RMS level of audio signal
@@ -215,7 +220,7 @@ bool AudioIODevice::isDecoding() const
  * @param size
  * @param audioFormat
  */
-void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat & audioFormat)
+void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat &audioFormat)
 {
 //	static QTime checktime;
 //	qDebug("calcLast %dms",checktime.elapsed());
@@ -233,8 +238,8 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
 
 	switch (audioFormat.sampleType()) {
-	case QAudioFormat::SignedInt:
-	case QAudioFormat::UnSignedInt:
+	case AudioFormat::SignedInt:
+	case AudioFormat::UnSignedInt:
 		switch (audioFormat.sampleSize()) {
 		case 16:
 			{
@@ -302,7 +307,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 		right = sqrt(energy[1] / frames);
 		break;
 
-	case QAudioFormat::Float:
+	case AudioFormat::Float:
 		{
 		switch (audioFormat.sampleSize()) {
 		case 32:
@@ -344,7 +349,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 		right = sqrt(energy[1] / frames);
 	}
 		break;
-	case QAudioFormat::Unknown:
+	case AudioFormat::Unknown:
 		DEBUGERROR("Sampletype in audiostream unknown");
 		break;
 	}
@@ -439,6 +444,24 @@ void AudioIODevice::setLoopCount(int loops)
 	loop_count = 1;
 }
 
+#ifdef IS_QT6
+QAudioDevice AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
+{
+	QList<QAudioDevice> devList = QMediaDevices::audioOutputs();
+	for (int t=0; t<devList.size(); t++) {
+		if (devList.at(t).description() == devName) {
+			if (found)
+				*found = true;
+			return devList.at(t);
+		}
+	}
+
+	if (found)
+		*found = false;
+
+	return QAudioDevice();
+}
+#else
 QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
 {
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -455,6 +478,7 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 
 	return QAudioDeviceInfo();
 }
+#endif
 
 void AudioIODevice::start(int loops)
 {
@@ -488,10 +512,13 @@ void AudioIODevice::stop()
 {
 	m_mutex.lock();
 
-	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
+	if (audio_decoder->isDecoding()) {
 		audio_decoder->stop();
-		while (audio_decoder->state() == QAudioDecoder::DecodingState) {
-			fprintf(stderr, "wait for stop");
+		QElapsedTimer wait;
+		wait.start();
+		while (audio_decoder->isDecoding()) {
+			if (wait.elapsed() % 100 == 0)
+				fprintf(stderr, "wait for stop");
 		}
 	}
 	close();
@@ -540,7 +567,7 @@ void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 {
 	DEBUGERROR("An error occurred while decoding audio: %s (error: %d)"
 			  ,audio_decoder->errorString().toLocal8Bit().data(),error);
-	LOGERROR(tr("Failed file was: %1").arg(audio_decoder->sourceFilename()));
+	LOGERROR(tr("Failed file was: %1").arg(audio_decoder->source().toString()));
 	audio_error = AUDIO::AUDIO_ERR_DECODER;
 }
 

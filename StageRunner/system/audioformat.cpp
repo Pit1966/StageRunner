@@ -39,15 +39,51 @@ AudioFormat::AudioFormat(const QAudioFormat &other)
 {
 }
 
+#ifdef IS_QT6
+int AudioFormat::sampleSize() const
+{
+	switch (sampleFormat()) {
+	case QAudioFormat::Int16:
+		return 16;
+	case QAudioFormat::Int32:
+	case QAudioFormat::Float:
+		return 32;
+	case QAudioFormat::UInt8:
+		return 8;
+	default:
+		return 0;
+	}
+}
+
+AudioFormat::SampleType AudioFormat::sampleType() const
+{
+	switch (sampleFormat()) {
+	case QAudioFormat::Int16:
+	case QAudioFormat::Int32:
+		return SignedInt;
+	case QAudioFormat::Float:
+		return Float;
+	case QAudioFormat::UInt8:
+		return UnSignedInt;
+	default:
+		return Unknown;
+	}
+}
+#endif
+
 AudioFormat AudioFormat::defaultFormat()
 {
 	AudioFormat format;
 	format.setSampleRate(48000);
 	format.setChannelCount(2);
+#ifdef IS_QT6
+	format.setSampleFormat(QAudioFormat::Int16);
+#else
 	format.setSampleType(QAudioFormat::SignedInt);
 	format.setSampleSize(16);
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setCodec("audio/pcm");
+#endif
 
 	return format;
 }

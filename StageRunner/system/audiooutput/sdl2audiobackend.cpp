@@ -37,8 +37,12 @@ SDL2AudioBackend::SDL2AudioBackend(AudioSlot &audioSlot)
 	, m_currentStatus(AUDIO_NO_STATE)
 {
 	m_sdlAudioFormat.setChannelCount(2);
+#ifdef IS_QT6
+	m_sdlAudioFormat.setSampleFormat(QAudioFormat::Int16);
+#else
 	m_sdlAudioFormat.setSampleSize(16);
 	m_sdlAudioFormat.setSampleType(QAudioFormat::SignedInt);
+#endif
 	m_sdlAudioFormat.setSampleRate(44100);
 }
 

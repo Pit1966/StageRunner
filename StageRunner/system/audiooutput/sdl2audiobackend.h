@@ -25,6 +25,7 @@
 #define SDL2AUDIOBACKEND_H
 
 #include "audioplayer.h"
+#include "audioformat.h"
 #include "commandsystem.h"
 
 #include <QElapsedTimer>
@@ -39,7 +40,7 @@ class SDL2AudioBackend : public AudioPlayer
 {
 	Q_OBJECT
 private:
-	QAudioFormat m_sdlAudioFormat;
+	AudioFormat m_sdlAudioFormat;
 	Mix_Chunk *m_sdlChunk;
 	Mix_Chunk m_sdlChunkCopy;
 	AUDIO::AudioStatus m_currentStatus;

@@ -6,6 +6,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMetaEnum>
+#include <QString>
+
 
 SR_Channel::SR_Channel(SR_Fixture *parent)
 	: m_parentFixture(parent)
@@ -543,8 +545,12 @@ bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
 	bool subok = true;
 
 	while (xml.readNextStartElement()) {
+#ifdef IS_QT6
+		QStringView name = xml.name();
+#else
 		QStringRef name = xml.name();
-		if (name == "Creator") {
+#endif
+		if (name == QStringLiteral("Creator")) {
 			subok = subLoadCreator(xml);
 		}
 		else if (name == SR_FIXTURE_DEF_MANUFACTURER) {
@@ -586,8 +592,12 @@ bool SR_Fixture::loadQLCFixture(QXmlStreamReader &xml)
 
 bool SR_Fixture::subLoadCreator(QXmlStreamReader &xml)
 {
+#ifdef IS_QT6
+		QStringView name = xml.name();
+#else
 	QStringRef name = xml.name();
-	if (name != "Creator") {
+#endif
+	if (name != QStringLiteral("Creator")) {
 		qWarning() << QT_TR_NOOP("Creator information expected!");
 		return false;
 	}

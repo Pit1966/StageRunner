@@ -24,12 +24,35 @@
 #include "mediaplayeraudiobackend.h"
 #include "log.h"
 #include "audioslot.h"
+#include "config.h"
 
-#include <QAudioProbe>
+#ifdef IS_QT6
+#  include <QAudioOutput>
+#else
+#  include <QAudioProbe>
+#endif
 #include <QApplication>
 
 using namespace AUDIO;
 
+#ifdef IS_QT6
+MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
+	: AudioPlayer(audioChannel)
+	, m_mediaPlayer(new QMediaPlayer())
+	, m_audioProbe(nullptr)
+	, m_currentMediaPlayerState(AudioPlayer::StoppedState)
+	, m_currentAudioStatus(AUDIO_IDLE)
+{
+	connect(m_mediaPlayer,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
+	connect(m_mediaPlayer,SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)),this,SLOT(onPlayerStateChanged(QMediaPlayer::PlaybackState)),Qt::DirectConnection);
+	connect(m_mediaPlayer,SIGNAL(durationChanged(qint64)),this,SLOT(onMediaDurationChanged(qint64)));
+}
+
+MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
+{
+	delete m_mediaPlayer;
+}
+#else
 MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 	: AudioPlayer(audioChannel)
 	, m_mediaPlayer(new QMediaPlayer())
@@ -57,6 +80,7 @@ MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
 	delete m_audioProbe;
 	delete m_mediaPlayer;
 }
+#endif
 
 bool MediaPlayerAudioBackend::setSourceFilename(const QString &path, const QString &fxName)
 {
@@ -66,7 +90,11 @@ bool MediaPlayerAudioBackend::setSourceFilename(const QString &path, const QStri
 		if (!QFile::exists(path))
 			return false;
 
+#ifdef IS_QT6
+		m_mediaPlayer->setSource(QUrl::fromLocalFile(path));
+#else
 		m_mediaPlayer->setMedia(QUrl::fromLocalFile(path));
+#endif
 		m_mediaPath = path;
 	}
 
@@ -104,7 +132,7 @@ void MediaPlayerAudioBackend::start(int loops)
 
 void MediaPlayerAudioBackend::stop()
 {
-	bool waspaused = m_currentMediaPlayerState == QMediaPlayer::PausedState;
+	bool waspaused = m_currentMediaPlayerState == AudioPlayer::PausedState;
 
 	m_loopCnt = m_loopTarget;
 	m_currentCtrlCmd = CMD_AUDIO_STOP;
@@ -161,9 +189,16 @@ bool MediaPlayerAudioBackend::seekPlayPosMs(qint64 posMs)
 
 void MediaPlayerAudioBackend::setVolume(int vol, int maxvol)
 {
+#ifdef IS_QT6
+	float v = vol / maxvol;
+	m_currentVolume = vol;
+	if (m_mediaPlayer->audioOutput())
+		m_mediaPlayer->audioOutput()->setVolume(v);
+#else
 	int v = vol * 100 / maxvol;
 	m_currentVolume = vol;
 	m_mediaPlayer->setVolume(v);
+#endif
 }
 
 int MediaPlayerAudioBackend::volume() const
@@ -214,13 +249,15 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 	AUDIO::AudioStatus audiostatus;
 
 	switch (status) {
+#ifndef IS_QT6
 	case QMediaPlayer::UnknownMediaStatus:
+#endif
 	case QMediaPlayer::NoMedia:
 		audiostatus = AUDIO_ERROR;
 		break;
 	case QMediaPlayer::LoadingMedia:
 		audiostatus = AUDIO_INIT;
-		m_mediaPlayer->setVolume(m_currentVolume-1);		// why this??
+		setVolume(m_currentVolume-1, MAX_VOLUME);		// why this??
 		break;
 	case QMediaPlayer::LoadedMedia:
 		audiostatus = AUDIO_IDLE;
@@ -235,7 +272,7 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		} else {
 			audiostatus = m_currentAudioStatus;
 		}
-		m_mediaPlayer->setVolume(m_currentVolume);
+		setVolume(m_currentVolume, MAX_VOLUME);
 		break;
 	case QMediaPlayer::EndOfMedia:
 		if (m_loopCnt < m_loopTarget)
@@ -257,14 +294,14 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 	}
 }
 
-void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
+void MediaPlayerAudioBackend::onAudioPlaybackStateChanged(PlayState audioPlayState)
 {
 	//qDebug() << "playerStateChanged" << m_currentMediaPlayerState << state;
-	if (state != m_currentMediaPlayerState) {
+	if (audioPlayState != m_currentMediaPlayerState) {
 		AUDIO::AudioStatus audiostatus;
 
-		if (state == QMediaPlayer::StoppedState) {
-			if (m_currentMediaPlayerState == QMediaPlayer::PlayingState) {
+		if (audioPlayState == AudioPlayer::StoppedState) {
+			if (m_currentMediaPlayerState == AudioPlayer::PlayingState) {
 				if (m_loopCnt < m_loopTarget) {
 					m_loopCnt++;
 					m_mediaPlayer->play();
@@ -276,12 +313,12 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 				audiostatus = AUDIO_IDLE;
 			}
 		}
-		else if (state == QMediaPlayer::PlayingState) {
+		else if (audioPlayState == AudioPlayer::PlayingState) {
 			// qDebug("Current volume: %d",volume());
 			// QMediaPlayer::setVolume(currentVolume);
 			audiostatus = AUDIO_RUNNING;
 		}
-		else if (state == QMediaPlayer::PausedState) {
+		else if (audioPlayState == AudioPlayer::PausedState) {
 			if (currentAudioCmd() == CMD_AUDIO_PAUSE) {
 				// this distinction is necessary cause we always pause the audio stream even if stop was selected
 				audiostatus = AUDIO_PAUSED;
@@ -292,7 +329,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 		else {
 			audiostatus = AUDIO_IDLE;
 		}
-		m_currentMediaPlayerState = state;
+		m_currentMediaPlayerState = audioPlayState;
 
 		if (m_currentAudioStatus != audiostatus) {
 			m_currentAudioStatus = audiostatus;
@@ -302,6 +339,18 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 	}
 }
 
+#ifdef IS_QT6
+void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::PlaybackState playState)
+{
+	onAudioPlaybackStateChanged(AudioPlayer::PlayState(playState));
+}
+#else
+void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
+{
+	onAudioPlaybackStateChanged(AudioPlayer::PlayState(playState));
+}
+#endif
+
 void MediaPlayerAudioBackend::onMediaDurationChanged(qint64 ms)
 {
 	emit mediaDurationChanged(ms);
@@ -309,8 +358,8 @@ void MediaPlayerAudioBackend::onMediaDurationChanged(qint64 ms)
 
 void MediaPlayerAudioBackend::calculateVuLevel(QAudioBuffer buffer)
 {
-	calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
-				,buffer.byteCount()
-				,buffer.format());
+//	calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
+//				,buffer.byteCount()
+//				,buffer.format());
 
 }
