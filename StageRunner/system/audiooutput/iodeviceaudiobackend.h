@@ -31,6 +31,10 @@
 #include <QAudio>
 #include <QMutex>
 
+#ifdef IS_QT6
+#  include <QAudioSink>
+#endif
+
 class AudioIODevice;
 class QAudioOutput;
 
@@ -39,7 +43,12 @@ class IODeviceAudioBackend : public AudioPlayer
 	Q_OBJECT
 private:
 	AudioIODevice *m_audioIODev;
+#ifdef IS_QT6
+	QAudioSink *m_audioSink;							///< for Qt6 we need an QAudioSink, QAudioOutput does not handle the start/stop feature anymore
+#else
 	QAudioOutput *m_audioOutput;
+#endif
+
 	QAudio::State m_currentOutputState;
 	AUDIO::AudioStatus m_currentAudioStatus;			///< This is AudioIODevice state and output state translated to StageRunner audio state
 

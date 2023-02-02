@@ -34,6 +34,7 @@
 #include <QElapsedTimer>
 #include <QAudioDecoder>
 #include <QMutex>
+#include <QUrl>
 
 #ifdef IS_QT6
 #  include <QMediaDevices>
@@ -47,10 +48,13 @@ class AudioFormat;
 
 class AudioDecoder : public QAudioDecoder
 {
+public:
 #if QT_VERSION_MAJOR < 6
 	bool isDecoding() const {return state() == QAudioDecoder::DecodingState;}
-	void setSource(const QUrl &filename) {setSourceFilename(filename);}
+	void setSource(const QUrl &filename) {QAudioDecoder::setSourceFilename(filename.toLocalFile());}
 	QUrl source() const {return QUrl::fromLocalFile(sourceFilename());}
+#else
+	void setSourceFilename(const QString &filename) {QAudioDecoder::setSource(QUrl::fromLocalFile(filename));}
 #endif
 };
 
@@ -145,7 +149,7 @@ signals:
 	void vuLevelChanged(qreal left, qreal right);
 	void frqSpectrumChanged(FrqSpectrum *spec);
 	void audioDurationDetected(qint64 ms);
-	void rawDataProcessed(const char *data, int size, const QAudioFormat &audioFormat);
+	void rawDataProcessed(const char *data, int size, const AudioFormat &audioFormat);
 
 };
 

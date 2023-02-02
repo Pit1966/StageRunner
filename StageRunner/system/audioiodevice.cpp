@@ -68,7 +68,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
-	connect(this,SIGNAL(rawDataProcessed(const char*,int,QAudioFormat)),this,SLOT(calcVuLevel(const char*,int,QAudioFormat)),Qt::QueuedConnection);
+	connect(this,SIGNAL(rawDataProcessed(const char*,int,AudioFormat)),this,SLOT(calcVuLevel(const char*,int,AudioFormat)),Qt::QueuedConnection);
 
 }
 
@@ -183,7 +183,7 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 		if (debug > 1)
 			qWarning() << "start audio" << filename;
 	}
-	audio_decoder->setSource(QUrl(filename));
+	audio_decoder->setSourceFilename(filename);
 	audio_decoder->setAudioFormat(*audio_format);
 	current_filename = filename;
 	m_currentPlaybackSamplerate = 0;

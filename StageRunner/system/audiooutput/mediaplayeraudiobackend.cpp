@@ -39,17 +39,25 @@ using namespace AUDIO;
 MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 	: AudioPlayer(audioChannel)
 	, m_mediaPlayer(new QMediaPlayer())
+	, m_audioOut(nullptr)
 	, m_audioProbe(nullptr)
 	, m_currentMediaPlayerState(AudioPlayer::StoppedState)
 	, m_currentAudioStatus(AUDIO_IDLE)
+	, m_lastPlayPos(0)
 {
+	m_audioOut = new QAudioOutput();
+	m_mediaPlayer->setAudioOutput(m_audioOut);
+
 	connect(m_mediaPlayer,SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),this,SLOT(onMediaStatusChanged(QMediaPlayer::MediaStatus)),Qt::DirectConnection);
 	connect(m_mediaPlayer,SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)),this,SLOT(onPlayerStateChanged(QMediaPlayer::PlaybackState)),Qt::DirectConnection);
 	connect(m_mediaPlayer,SIGNAL(durationChanged(qint64)),this,SLOT(onMediaDurationChanged(qint64)));
+	connect(m_mediaPlayer,SIGNAL(positionChanged(qint64)),this,SLOT(onPlayPositionChanged(qint64)));
 }
 
 MediaPlayerAudioBackend::~MediaPlayerAudioBackend()
 {
+	m_mediaPlayer->setAudioOutput(nullptr);
+	delete m_audioOut;
 	delete m_mediaPlayer;
 }
 #else
@@ -57,7 +65,7 @@ MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 	: AudioPlayer(audioChannel)
 	, m_mediaPlayer(new QMediaPlayer())
 	, m_audioProbe(new QAudioProbe())
-	, m_currentMediaPlayerState(QMediaPlayer::StoppedState)
+	, m_currentMediaPlayerState(AudioPlayer::StoppedState)
 	, m_currentAudioStatus(AUDIO_IDLE)
 {
 #ifndef IS_MAC
@@ -190,7 +198,7 @@ bool MediaPlayerAudioBackend::seekPlayPosMs(qint64 posMs)
 void MediaPlayerAudioBackend::setVolume(int vol, int maxvol)
 {
 #ifdef IS_QT6
-	float v = vol / maxvol;
+	qreal v = qreal(vol) / maxvol;
 	m_currentVolume = vol;
 	if (m_mediaPlayer->audioOutput())
 		m_mediaPlayer->audioOutput()->setVolume(v);
@@ -209,11 +217,11 @@ int MediaPlayerAudioBackend::volume() const
 AudioStatus MediaPlayerAudioBackend::state() const
 {
 	switch (m_currentMediaPlayerState/*m_mediaPlayer->state()*/) {
-	case QMediaPlayer::StoppedState:
+	case AudioPlayer::StoppedState:
 		return AUDIO_STOPPED;
-	case QMediaPlayer::PlayingState:
+	case AudioPlayer::PlayingState:
 		return AUDIO_RUNNING;
-	case QMediaPlayer::PausedState:
+	case AudioPlayer::PausedState:
 		return AUDIO_PAUSED;
 	}
 
@@ -286,7 +294,7 @@ void MediaPlayerAudioBackend::onMediaStatusChanged(QMediaPlayer::MediaStatus sta
 		audiostatus = m_currentAudioStatus;
 	}
 
-	// qDebug() << "mediaStatusChanged" << status << "audiostat old" << m_currentAudioStatus << "new" << audiostatus;;
+	qDebug() << "mediaStatusChanged" << status << "audiostat old" << m_currentAudioStatus << "new" << audiostatus;;
 	if (m_currentAudioStatus != audiostatus) {
 		m_currentAudioStatus = audiostatus;
 		emit statusChanged(audiostatus);
@@ -347,7 +355,7 @@ void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::PlaybackState p
 #else
 void MediaPlayerAudioBackend::onPlayerStateChanged(QMediaPlayer::State state)
 {
-	onAudioPlaybackStateChanged(AudioPlayer::PlayState(playState));
+	onAudioPlaybackStateChanged(AudioPlayer::PlayState(state));
 }
 #endif
 
@@ -356,10 +364,22 @@ void MediaPlayerAudioBackend::onMediaDurationChanged(qint64 ms)
 	emit mediaDurationChanged(ms);
 }
 
+void MediaPlayerAudioBackend::onPlayPositionChanged(qint64 ms)
+{
+	if (qAbs(ms - m_lastPlayPos) > 50) {
+		m_lastPlayPos = ms;
+		emit vuLevelChanged(0,0);		///< todo dummy
+	}
+}
+
 void MediaPlayerAudioBackend::calculateVuLevel(QAudioBuffer buffer)
 {
-//	calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
-//				,buffer.byteCount()
-//				,buffer.format());
-
+#ifdef IS_QT6
+	const char *data = buffer.constData<char>();
+	calcVuLevel(data, buffer.byteCount(), AudioFormat(buffer.format()));
+#else
+	calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
+				,buffer.byteCount()
+				,AudioFormat(buffer.format()));
+#endif
 }

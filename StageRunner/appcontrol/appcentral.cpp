@@ -47,6 +47,7 @@
 #include "dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "netserver.h"
+#include "system/audioformat.h"
 
 #include <QFileDialog>
 
@@ -847,6 +848,11 @@ void AppCentral::init()
 	m_isSDLAvailable = false;
 #endif // ifdef USE_SDL
 
+	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+	qRegisterMetaType<CtrlCmd>("CtrlCmd");
+	qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
+	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
+	qRegisterMetaType<AudioFormat>("AudioFormat");
 
 	mainwinWidget = nullptr;
 	mainWinObj = nullptr;
@@ -873,12 +879,6 @@ void AppCentral::init()
 	m_remoteSocket = new QTcpSocket(this);
 	connect(m_remoteSocket, SIGNAL(connected()), this, SLOT(onRemoteConnected()));
 	connect(m_remoteSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onRemoteStateChanged(QAbstractSocket::SocketState)));
-
-	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
-	qRegisterMetaType<CtrlCmd>("CtrlCmd");
-	qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
-	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
-	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules
 	MessageHub::instance();

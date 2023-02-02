@@ -26,9 +26,11 @@
 
 #include "audioplayer.h"
 #include "commandsystem.h"
+#include "audioformat.h"
 
 #include <QMediaPlayer>
 #include <QAudioBuffer>
+#include <QAudioOutput>
 #include <QObject>
 
 
@@ -39,9 +41,11 @@ class MediaPlayerAudioBackend : public AudioPlayer
 	Q_OBJECT
 private:
 	QMediaPlayer *m_mediaPlayer;
-	QAudioProbe *m_audioProbe;
+	QAudioOutput *m_audioOut;							///< Qt6 audio output, cause  things has changed in QMediaPlayer
+	QAudioProbe *m_audioProbe;							///< not implemented in Qt6
 	AudioPlayer::PlayState m_currentMediaPlayerState;
 	AUDIO::AudioStatus m_currentAudioStatus;			///< This is QMediaPlayer::State and QMediaPlayer::MediaStatus translated to StageRunner status
+	qint64 m_lastPlayPos;
 
 public:
 	MediaPlayerAudioBackend(AudioSlot &audioChannel);
@@ -72,6 +76,7 @@ private slots:
 	void onPlayerStateChanged(QMediaPlayer::State state);
 #endif
 	void onMediaDurationChanged(qint64 ms);
+	void onPlayPositionChanged(qint64 ms);
 	void calculateVuLevel(QAudioBuffer buffer);
 
 };
