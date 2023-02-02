@@ -51,7 +51,8 @@ private:
 
 	QAudio::State m_currentOutputState;
 	AUDIO::AudioStatus m_currentAudioStatus;			///< This is AudioIODevice state and output state translated to StageRunner audio state
-
+	int m_requestedBufferSize;
+	int m_gotBufferSize;
 
 public:
 	IODeviceAudioBackend(AudioSlot &audioChannel, const QString &devName);

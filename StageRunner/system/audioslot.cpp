@@ -106,6 +106,8 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 
 	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
 		audio_player->setAudioBufferSize(parent->myApp.userSettings->pAudioBufferSize);
+	} else {
+		audio_ctrl->myApp.userSettings->pAudioBufferSize  = 16384;
 	}
 
 	//Fadeout Timeline
@@ -511,7 +513,7 @@ void AudioSlot::emit_audio_play_progress()
 	if (current_fx->loopTimes > 1) {
 		msg.maxloop = current_fx->loopTimes;
 	}
-	emit audioCtrlMsgEmitted(msg);
+	// emit audioCtrlMsgEmitted(msg);
 }
 
 
@@ -581,7 +583,6 @@ void AudioSlot::on_vulevel_changed(qreal left, qreal right)
 
 void AudioSlot::on_frqSpectrum_changed(FrqSpectrum *spec)
 {
-	qDebug() << "on spectrum changed";
 	emit frqSpectrumChanged(slotNumber,spec);
 }
 

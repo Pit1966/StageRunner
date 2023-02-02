@@ -256,7 +256,7 @@ void MixerGroup::dragEnterEvent(QDragEnterEvent *event)
 		if (temp_drag_move_idx < 0) {
 			// Find layout item under mouse cursor
 			for (int i=0; i<mixerlayout->count(); i++) {
-				if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->pos())) {
+				if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->position().toPoint())) {
 					temp_drag_move_idx = i;
 					break;
 				}
@@ -296,7 +296,7 @@ void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
 		// MixerChannel *movwid = extmime->mixerChannel;
 		// search Widget (hopefully a MixerChannel) under mouse cursor
 		for (int i=0; i<mixerlayout->count(); i++) {
-			if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->pos())) {
+			if (mixerlayout->itemAt(i)->widget()->geometry().contains(event->position().toPoint())) {
 				if (temp_drag_move_idx != i) {
 					if (temp_drag_move_idx >= 0) {
 						QLayoutItem *fillitem;

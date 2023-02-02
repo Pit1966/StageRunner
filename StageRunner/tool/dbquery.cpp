@@ -256,7 +256,7 @@ bool DBquery::prepareValue(const QString & field, QVariant value)
 		return false;
 	}
 	// Keine leeren Strings vorbereiten
-	if (value.type() == QVariant::String && value.isNull() && (mode == INSERT)) {
+	if (value.typeId() == QMetaType::QString && value.isNull() && (mode == INSERT)) {
 		return true;
 	}
 

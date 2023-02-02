@@ -40,6 +40,8 @@ IODeviceAudioBackend::IODeviceAudioBackend(AudioSlot &audioChannel, const QStrin
 #endif
 	, m_currentOutputState(QAudio::StoppedState)
 	, m_currentAudioStatus(AUDIO_NO_STATE)
+	, m_requestedBufferSize(0)
+	, m_gotBufferSize(0)
 {
 	// No AudioIODevice SoundOutputSupport for MAC OS X
 	m_audioIODev = new AudioIODevice(AudioFormat::defaultFormat());
@@ -137,6 +139,11 @@ void IODeviceAudioBackend::start(int loops)
 	if (m_audioSink->error() != QAudio::NoError)
 		qWarning() << "start audio" << m_audioSink->error();
 
+	if (m_gotBufferSize != m_audioSink->bufferSize()) {
+		m_gotBufferSize = m_audioSink->bufferSize();
+		LOGTEXT(tr("Audio requested buffer size: %1 -> got %2 bytes").arg(m_requestedBufferSize).arg(m_gotBufferSize));
+	}
+
 #else
 	if (m_startDelayedTimerId == 0) {
 		m_audioOutput->start(m_audioIODev);
@@ -154,7 +161,6 @@ void IODeviceAudioBackend::start(int loops)
 
 void IODeviceAudioBackend::stop()
 {
-
 	m_audioIODev->stop();
 #ifdef IS_QT6
 	m_audioSink->stop();
@@ -231,11 +237,16 @@ AudioStatus IODeviceAudioBackend::state() const
 
 void IODeviceAudioBackend::setAudioBufferSize(int bytes)
 {
+	qDebug() << "set audio buffer size" << bytes;
 #ifdef IS_QT6
-	m_audioSink->setBufferSize(bytes);
+	// m_audioSink->setBufferSize(bytes);
 #else
 	m_audioOutput->setBufferSize(bytes);
 #endif
+	if (m_requestedBufferSize != bytes) {
+		m_requestedBufferSize = bytes;
+		m_gotBufferSize = 0;
+	}
 }
 
 int IODeviceAudioBackend::audioBufferSize() const
@@ -266,7 +277,8 @@ bool IODeviceAudioBackend::isFFTEnabled() const
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
-	// qDebug() << "QAudioDevice state changed" << state;
+	qDebug() << "QAudioDevice state changed" << state << m_audioSink->state();
+
 
 	AudioStatus audiostatus;
 
@@ -276,6 +288,10 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 		break;
 	case QAudio::IdleState:
 		audiostatus = AUDIO_IDLE;
+#ifdef IS_QT6
+        m_audioSink->stop();
+        m_audioSink->reset();
+#endif
 		break;
 	case QAudio::SuspendedState:
 		audiostatus = AUDIO_PAUSED;
@@ -287,6 +303,13 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 		} else {
 			audiostatus = AUDIO_STOPPED;
 		}
+#ifdef IS_QT6
+        if (m_audioSink->error() != QAudio::NoError) {
+            qWarning() << "Audio error" << m_audioSink->error();
+        }
+        m_audioSink->stop();
+        m_audioSink->reset();
+#endif
 		break;
 
 #if QT_VERSION >= 0x050b00 && QT_VERSION_MAJOR < 6
@@ -305,6 +328,7 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 	}
 
 	if (m_currentAudioStatus != audiostatus) {
+		// qDebug() << "audio player status changed" << m_currentAudioStatus << audiostatus;
 		m_currentAudioStatus = audiostatus;
 		emit statusChanged(audiostatus);
 	}

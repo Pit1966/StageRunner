@@ -349,9 +349,8 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat &a
 		right = sqrt(energy[1] / frames);
 	}
 		break;
-	case AudioFormat::Unknown:
+	default:
 		DEBUGERROR("Sampletype in audiostream unknown");
-		break;
 	}
 
 	// qDebug("left:%f right:%f",left,right);
@@ -398,7 +397,9 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat &a
 
 qint64 AudioIODevice::currentPlayPosMs() const
 {
-	return audio_format->durationForBytes(qint32(bytes_read) / 1000);
+	qint64 sec = audio_format->durationForBytes(qint32(bytes_read) / 1000);
+//	qDebug() << "play pos s" << sec;
+	return sec;
 
 //	if (bytes_read >= bytes_avail && bytes_avail != 0) {
 //		return 0;

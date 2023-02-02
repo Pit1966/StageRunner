@@ -115,7 +115,7 @@ bool VariantMapSerializer::parseString(int &pos, const QString &str, QVariantMap
 				else if ( (c >= '0' and c <= '9') || c == '-' || c == '+' || c == '.' ) { // a number
 					// rollback position, cause we have already consumed the first number character
 					pos--;
-					double number;
+					double number = 0;
 					getNumber(pos,str,number);
 					// add key / number pair to map, where number maybe double or long long
 					if (number - int(number) == 0) {

@@ -187,7 +187,7 @@ bool YadiReceiver::receiver_loop()
 				// qDebug() << in.toHex();
 
 				if (device->debug > 1 || in.size() != dmx.dmxDataSize)
-					qDebug("YadiReceiver::run: read dmx data size: %d",in.size());
+					qDebug("YadiReceiver::run: read dmx data size: %d",int(in.size()));
 				if (!dmxSizeReported) {
 					dmxSizeReported = true;
 					QString msg = tr("<font color=green>YADI listener</font>: Detected DMX Frame size: %1")
