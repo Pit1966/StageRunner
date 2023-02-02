@@ -581,6 +581,7 @@ void AudioSlot::on_vulevel_changed(qreal left, qreal right)
 
 void AudioSlot::on_frqSpectrum_changed(FrqSpectrum *spec)
 {
+	qDebug() << "on spectrum changed";
 	emit frqSpectrumChanged(slotNumber,spec);
 }
 
