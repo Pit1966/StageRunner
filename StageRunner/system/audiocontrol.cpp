@@ -1104,6 +1104,7 @@ void AudioControl::createMediaPlayInstances()
 {
 	UserSettings *set = myApp.userSettings;
 	AudioOutputType outputType = myApp.usedAudioOutputType();
+	LOGTEXT(tr("Create media player instances %1").arg(m_initInThread?"in thread":"from main"));
 
 	// This is for audio use
 	bool errmsg = false;
@@ -1143,6 +1144,9 @@ void AudioControl::createMediaPlayInstances()
 		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(fft_spectrum_changed_receiver(int,FrqSpectrum*)));
 		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
 	}
+	// Enable FFT
+	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
+
 
 	// This is for video playback
 	m_videoWid = new PsVideoWidget;
