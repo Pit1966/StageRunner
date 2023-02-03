@@ -164,8 +164,8 @@ bool YadiDevice::activateDevice()
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
 			input_thread = new YadiReceiver(this);
-            connect(input_thread,SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
-            connect(input_thread,SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
+			m_yadiPlugin->connect(input_thread,SIGNAL(statusMsgSent(QString)),m_yadiPlugin,SIGNAL(statusMsgEmitted(QString)));
+			m_yadiPlugin->connect(input_thread,SIGNAL(errorMsgSent(QString)),m_yadiPlugin,SIGNAL(errorMsgEmitted(QString)));
             input_thread->setProductName(deviceProductName);
 			inUniverse.fill(0,512);
 		}
