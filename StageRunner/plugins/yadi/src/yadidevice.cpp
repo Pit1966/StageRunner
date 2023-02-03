@@ -137,6 +137,9 @@ bool YadiDevice::activateDevice()
 	if (!m_serialThread) {
 		if (deviceNodeExists(devNode())) {
 			m_serialThread = new QSerialPortThread(this);
+            m_yadiPlugin->connect(m_serialThread,SIGNAL(statusMsgSent(QString)),m_yadiPlugin,SIGNAL(statusMsgEmitted(QString)));
+            m_yadiPlugin->connect(m_serialThread,SIGNAL(errorMsgSent(QString)),m_yadiPlugin,SIGNAL(errorMsgEmitted(QString)));
+
 			outUniverse.fill(0,512);
 			inUniverse.fill(0,512);
 		} else {
@@ -161,7 +164,9 @@ bool YadiDevice::activateDevice()
 	if (file) {
 		if ( (capabilities&FL_INPUT_UNIVERSE) && !input_thread ) {
 			input_thread = new YadiReceiver(this);
-			input_thread->setProductName(deviceProductName);
+            connect(input_thread,SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
+            connect(input_thread,SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
+            input_thread->setProductName(deviceProductName);
 			inUniverse.fill(0,512);
 		}
 		else if (!(capabilities&FL_INPUT_UNIVERSE) && input_thread) {

@@ -65,7 +65,7 @@ unix:!macx {
 	LIBS	+= -ludev
 
 	CONFIG += qtserialsupport			# compile QtSerialPort funtions
-#	CONFIG += qtserial					# use QtSerial for interface
+	#CONFIG += qtserial					# use QtSerial for interface
 
 # Rules to make yadi devices readable & writable by normal users
 #    udev.path  = /etc/udev/rules.d

@@ -60,19 +60,19 @@ YadiDMXUSBOut::YadiDMXUSBOut()
 
 	connect (this,SIGNAL(communicationErrorDetected()),this,SLOT(handleCommunicationError()),Qt::QueuedConnection);
 
-	QByteArray dat;
-	QFile file("/tmp/dmxfull.bin");
-	file.open(QIODevice::WriteOnly);
-	dat.append('O');
-	int cnt = 500;
-	dat.append(cnt & 0xff);
-	dat.append(cnt >> 8);
+//	QByteArray dat;
+//	QFile file("/tmp/dmxfull.bin");
+//	file.open(QIODevice::WriteOnly);
+//	dat.append('O');
+//	int cnt = 500;
+//	dat.append(cnt & 0xff);
+//	dat.append(cnt >> 8);
 
-	uint8_t val = 0;
-	for (int t=0; t<cnt; t++)
-		dat.append(val++);
+//	uint8_t val = 0;
+//	for (int t=0; t<cnt; t++)
+//		dat.append(val++);
 
-	file.write(dat);
+//	file.write(dat);
 }
 
 
@@ -752,8 +752,6 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
 			connect(yadi->serialPortThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->serialPortThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
-			connect(yadi->serialPortThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
-			connect(yadi->serialPortThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
 #else
 			connect(yadi->inputThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::ConnectionType(Qt::UniqueConnection | Qt::DirectConnection));

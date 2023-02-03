@@ -200,7 +200,7 @@ bool IODeviceAudioBackend::isFFTEnabled() const
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
-	// qDebug() << "QAudioDevice state changed" << state;
+    // qDebug() << "QAudioDevice state changed" << state;
 
 	AudioStatus audiostatus;
 
@@ -226,6 +226,7 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 #if QT_VERSION >= 0x050b00
 	case QAudio::InterruptedState:
 		DEBUGERROR("%s: QAudio::Interrupted",Q_FUNC_INFO);
+        audiostatus = AUDIO_IDLE;
 		break;
 #endif
 	default:

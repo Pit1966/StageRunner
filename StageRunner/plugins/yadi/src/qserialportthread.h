@@ -29,8 +29,10 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QMutex>
+#include <QElapsedTimer>
 
 class YadiDevice;
+class MvgAvgCollector;
 
 static const char * _asc_cmds[] = {
 	"NONE",
@@ -70,12 +72,25 @@ private:
 	QList<QByteArray> m_sendDataList;			///< this is a queue of strings to be send via serial device
 
 	// status
-	volatile bool m_sendDataListHasData;					///< is true, when sendDataList has at least one entry
+	volatile bool m_sendDataListHasData;		///< is true, when sendDataList has at least one entry
 	bool m_isOutputOpen;
 	bool m_isInputOpen;
+	bool m_emitAllInputData;                    ///< if set, the complete input universe will be send, than the flag is resetted
+	volatile bool m_isInThreadLoop;
+
+	bool m_waitForAtChar;
+	int m_inputDmxFrameCnt;
+	int m_inputDmxFrameSize;
+	QByteArray m_dmxInLine;
+
+	// Framerate
+	QElapsedTimer m_time;
+	MvgAvgCollector *m_frameRateAvg;
+
 
 public:
 	QSerialPortThread(YadiDevice *dev);
+	~QSerialPortThread();
 	QString deviceNode() const;
 	bool sendCommand(CMD cmd);
 
@@ -100,13 +115,21 @@ private:
 
 	static const char * ascCmd(int cmdno);
 
+	void processDmxDataLine();
+
 private slots:
 	void onError(const QSerialPort::SerialPortError error);
+    void onDataReceived();
+	void onCompleteFrameReceived(int rxDataSize);
 
 signals:
 	void dmxInDeviceChannelChanged(quint32 universe, quint32 input, quint32 channel, uchar value);
 	void dmxInChannelChanged(quint32, uchar);
 	void dmxPacketReceived(YadiDevice* dev, const QString &str);
+    void exitReceiverWithFailure(int input);
+    void statusMsgSent(const QString &msg);
+    void errorMsgSent(const QString &msg);
+
 };
 
 #endif // QSERIALPORTTHREAD_H
