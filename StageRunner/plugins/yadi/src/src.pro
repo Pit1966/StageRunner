@@ -62,16 +62,17 @@ DISTFILES += \
 unix:!macx {
 	QT      += dbus
 	DEFINES += DBUS_ENABLED
-	LIBS	+= -ludev
 
 	CONFIG += qtserialsupport			# compile QtSerialPort funtions
 	#CONFIG += qtserial					# use QtSerial for interface
 
-# Rules to make yadi devices readable & writable by normal users
-#    udev.path  = /etc/udev/rules.d
-#    udev.files = z65-enttec-dmxusb.rules
-#    INSTALLS  += udev
+	# the next is not needed with qtserialsupport
+	# CONFIG += link_pkgconfig DEFINES += LINK_LIBUDEV PKGCONFIG += libudev
 
+	# Rules to make yadi devices readable & writable by normal users
+	#    udev.path  = /etc/udev/rules.d
+	#    udev.files = z65-enttec-dmxusb.rules
+	#    INSTALLS  += udev
 }
 
 macx: {

@@ -25,8 +25,8 @@
 #include "yadidevice.h"
 #include "serialwrapper.h"
 
-#ifdef Q_OS_LINUX
-#include <libudev.h>
+#if defined(Q_OS_LINUX) && !defined(HAS_QTSERIAL)
+#  include <libudev.h>
 #endif
 
 #include <QMessageBox>
