@@ -64,7 +64,7 @@ unix:!macx {
 	DEFINES += DBUS_ENABLED
 
 	CONFIG += qtserialsupport			# compile QtSerialPort funtions
-	#CONFIG += qtserial					# use QtSerial for interface
+	CONFIG += qtserial					# use QtSerial for interface
 
 	# the next is not needed with qtserialsupport
 	# CONFIG += link_pkgconfig DEFINES += LINK_LIBUDEV PKGCONFIG += libudev

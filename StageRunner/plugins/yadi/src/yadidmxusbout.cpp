@@ -749,7 +749,7 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 			inDevNameTable[input] = input_devices.at(input);
 #ifdef USE_QTSERIAL
 			connect(yadi->serialPortThread(),SIGNAL(dmxInDeviceChannelChanged(quint32,quint32,quint32,uchar))
-					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::UniqueConnection);
+					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::ConnectionType(Qt::UniqueConnection | Qt::DirectConnection));
 			connect(yadi->serialPortThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->serialPortThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
 #else
@@ -757,8 +757,8 @@ bool YadiDMXUSBOut::internOpenInput(quint32 input, int universe)
 					,this,SLOT(propagateChangedInput(quint32,quint32,quint32,uchar)),Qt::ConnectionType(Qt::UniqueConnection | Qt::DirectConnection));
 			connect(yadi->inputThread(),SIGNAL(dmxPacketReceived(YadiDevice*,QString)),this,SLOT(propagateReceiverFrameRate(YadiDevice*,QString)),Qt::UniqueConnection);
 			connect(yadi->inputThread(),SIGNAL(exitReceiverWithFailure(int)),this,SLOT(inputDeviceFailed(int)),Qt::UniqueConnection);
-			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
-			connect(yadi->inputThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
+//			connect(yadi->inputThread(),SIGNAL(statusMsgSent(QString)),this,SIGNAL(statusMsgEmitted(QString)));
+//			connect(yadi->inputThread(),SIGNAL(errorMsgSent(QString)),this,SIGNAL(errorMsgEmitted(QString)));
 #endif
 		} else {
 			qDebug("Yadi: %s: openInput(%d) failed!",YadiDevice::threadNameAsc(),input+1);

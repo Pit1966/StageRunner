@@ -31,6 +31,8 @@
 #include <QMutex>
 #include <QElapsedTimer>
 
+
+
 class YadiDevice;
 class MvgAvgCollector;
 
@@ -58,15 +60,20 @@ public:
 		CMD_START_OUTPUT,
 		CMD_START_INPUT,
 		CMD_STOP_OUTPUT,
-		CMD_STOP_INPUT
+		CMD_STOP_INPUT,
+		CMD_REQ_CHANNELS,			///< Request detected DMX Framesize:  Yadi "c" command
+		CMD_REQ_UNIVERSE_SIZE,		///< get max and configured universe size: Yadi "ui" command
+		CMD_REQ_VERSION				///< get Firmware version string: Yadi "v" command
 	};
 
 private:
 	YadiDevice *m_yadiDev;
 	QSerialPortInfo m_portInfo;
 	QSerialPort *m_serialPort;
-	QMutex m_accessMutex;
+	QMutex m_accessMutex;						///< this is for data list
+	QRecursiveMutex m_serialMutex;				///< Access protection to serial device
 	volatile CMD m_threadCmd;
+	volatile CMD m_internalCmd;					///< this is internal command store. You should not set a new command if there ist already one
 
 	// inter thread access
 	QList<QByteArray> m_sendDataList;			///< this is a queue of strings to be send via serial device
@@ -83,7 +90,7 @@ private:
 	int m_inputDmxFrameSize;
 	QByteArray m_dmxInLine;
 
-	// Framerate
+	// Framerate and DMX frame detection
 	QElapsedTimer m_time;
 	MvgAvgCollector *m_frameRateAvg;
 
