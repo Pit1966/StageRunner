@@ -191,8 +191,13 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Audio Buffer Size
-	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 16384) {
+	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 2048) {
+		int usedBufSize = audio_player->audioBufferSize();
 		audio_player->setAudioBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
+		if (usedBufSize != audio_ctrl->myApp.userSettings->pAudioBufferSize) {
+			LOGTEXT(tr("Set audio buffer size to: %1 -> used size: %2")
+					.arg(audio_ctrl->myApp.userSettings->pAudioBufferSize).arg(usedBufSize));
+		}
 	}
 
 	if (startPosMs < 0) {

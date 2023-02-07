@@ -33,6 +33,7 @@
 #include <QWidget>
 #include <QPointer>
 #include <QTcpSocket>
+#include <QElapsedTimer>
 
 #ifdef USE_SDL
 #include <SDL2/SDL.h>
@@ -94,6 +95,9 @@ private:
 	QString m_lastRemote;
 	QStringList m_pendingRemoteCmdList;
 	bool m_remoteOk			= false;
+
+	// system
+	QElapsedTimer m_uptime;
 
 public:
 	QWidget *mainwinWidget;
@@ -166,6 +170,11 @@ public:
 	AUDIO::AudioOutputType usedAudioOutputType() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 
+	// Sytem
+	qint64 uptimeMs() const {return m_uptime.elapsed();}
+	void closeVideoWidget();
+	bool isVideoWidgetVisible() const;
+
 private:
 	AppCentral();
 	~AppCentral();
@@ -188,7 +197,6 @@ public slots:
 	void setGlobalSelectedFx(FxItem *item);
 
 	void deleteFxSceneItem(FxSceneItem *scene);
-
 	void connectToRemote(const QString &host, quint16 port, const QString &cmd);
 
 private slots:

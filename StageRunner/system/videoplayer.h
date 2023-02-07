@@ -85,6 +85,7 @@ public:
 
 	inline QMultimedia::AvailabilityStatus availability() const {return QMediaPlayer::availability();}
 	inline QMediaPlayer * mediaPlayer() {return this;}
+	void clearViewState();
 
 protected:
 	void setViewState(VIDEO::VideoViewStatus state, bool addState = false);

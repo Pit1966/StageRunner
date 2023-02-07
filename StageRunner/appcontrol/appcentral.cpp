@@ -514,6 +514,16 @@ AudioOutputType AppCentral::usedAudioOutputType() const
 	}
 }
 
+void AppCentral::closeVideoWidget()
+{
+	unitAudio->closeVideoWidget();
+}
+
+bool AppCentral::isVideoWidgetVisible() const
+{
+	return unitAudio->isVideoWidgetVisible();
+}
+
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 {
@@ -894,5 +904,7 @@ void AppCentral::init()
 
 	// TCP server -> Script Executer
 	connect(tcpServer, SIGNAL(remoteCmdReceived(QString)), execCenter, SLOT(executeScriptCmd(QString)));
+
+	m_uptime.start();
 }
 

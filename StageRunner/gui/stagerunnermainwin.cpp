@@ -1401,3 +1401,9 @@ void StageRunnerMainWin::on_actionDelete_FX_Item_triggered()
 	}
 }
 
+
+void StageRunnerMainWin::on_actionClose_video_window_triggered()
+{
+	appCentral->closeVideoWidget();
+}
+

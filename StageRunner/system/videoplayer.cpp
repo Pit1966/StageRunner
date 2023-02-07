@@ -332,6 +332,11 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	return ok;
 }
 
+void VideoPlayer::clearViewState()
+{
+	setViewState(VIDEO::VIEW_UNUSED);
+}
+
 void VideoPlayer::setViewState(VIDEO::VideoViewStatus state, bool addState)
 {
 	if (addState)

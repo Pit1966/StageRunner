@@ -305,6 +305,22 @@ int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
 	return curvol;
 }
 
+void AudioControl::closeVideoWidget()
+{
+	if (m_videoWid) {
+		m_videoWid->setPicClipOverlaysActive(false);
+		m_videoWid->close();
+	}
+}
+
+bool AudioControl::isVideoWidgetVisible() const
+{
+	if (m_videoWid)
+		return m_videoWid->isVisible();
+
+	return false;
+}
+
 void AudioControl::run()
 {
 	if (m_initInThread)
