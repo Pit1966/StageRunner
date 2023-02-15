@@ -54,6 +54,7 @@ public:
 	pstring pFxTemplatePath;						///< This is the default Template File
 	pbool pIsDarkGuiTheme;							///< Should be set to true, if GUI Style is dark
 	pbool pShowVirtualDMXMonitor;
+	pint32 pStartCount;								///< counter incremented every start
 
 public:
 	UserSettings();

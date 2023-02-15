@@ -863,6 +863,12 @@ void AppCentral::init()
 	m_remoteSocket = nullptr;
 
 	userSettings = new UserSettings;
+#ifdef IS_MAC
+	if (userSettings->pStartCount <= 1 && m_isSDLAvailable) {
+		userSettings->pUseSDLAudio = true;
+		userSettings->pAltAudioEngine = true;
+	}
+#endif
 	project = new Project;
 	universeLayout = new DmxUniverseProperty;
 	pluginCentral = new IOPluginCentral;

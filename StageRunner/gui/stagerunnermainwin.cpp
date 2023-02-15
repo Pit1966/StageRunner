@@ -102,8 +102,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 #ifdef IS_MAC
 //	delete actionExperimental_audio_mode;
 //	actionExperimental_audio_mode = nullptr;
-	myapp->userSettings->pUseSDLAudio = true;
-	myapp->userSettings->pAltAudioEngine = true;
 #endif
 	guiSetAudioOutput(myapp->usedAudioOutputType());
 
