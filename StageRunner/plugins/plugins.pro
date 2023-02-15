@@ -4,9 +4,9 @@ TEMPLATE = subdirs
 
 SUBDIRS += midi
 SUBDIRS += artnet
-SUBDIRS += dmxusb
 SUBDIRS += yadi
 SUBDIRS += hid
+#SUBDIRS += dmxusb
 
 unix:!macx {
 # old - substituted by dmxusb

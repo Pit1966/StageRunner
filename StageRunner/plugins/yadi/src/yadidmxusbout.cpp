@@ -37,6 +37,7 @@
 #include <QMutexLocker>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QFile>
 
 
 #ifdef __unix__
