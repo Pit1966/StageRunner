@@ -872,7 +872,11 @@ void AppCentral::init()
 #ifdef IS_MAC
 	if (userSettings->pStartCount <= 1 && m_isSDLAvailable) {
 		userSettings->pUseSDLAudio = true;
+#		ifdef IS_QT6
+		userSettings->pAltAudioEngine = false;
+#		else
 		userSettings->pAltAudioEngine = true;
+#		endif
 	}
 #endif
 	project = new Project;

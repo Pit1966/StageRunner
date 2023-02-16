@@ -37,9 +37,8 @@ UserSettings::UserSettings()
 
 	pStartCount = pStartCount + 1;
 
-
 #ifdef __APPLE__
-	pAltAudioEngine = true;
+//	pAltAudioEngine = true;
 #endif
 }
 
