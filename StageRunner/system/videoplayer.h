@@ -64,7 +64,7 @@ protected:
 
 public:
 	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
-	FxClipItem * currentFxClipItem() const {return m_currentFxClipItem;}
+	FxClipItem *currentFxClipItem();
 
 	VIDEO::VideoViewStatus viewState() const {return m_viewState;}
 	static QString viewStateToString(VIDEO::VideoViewStatus viewState);

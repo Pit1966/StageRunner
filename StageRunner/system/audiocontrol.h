@@ -164,6 +164,7 @@ public slots:
 	int getVolume(int slot) const;
 	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);
+	void setDmxVolumeToLocked(int slot);
 
 	bool handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value);
 

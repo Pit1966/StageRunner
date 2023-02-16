@@ -191,13 +191,9 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Audio Buffer Size
-	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 2048) {
-		int usedBufSize = audio_player->audioBufferSize();
+	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 16384) {
 		audio_player->setAudioBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
-		if (usedBufSize != audio_ctrl->myApp.userSettings->pAudioBufferSize) {
-			LOGTEXT(tr("Set audio buffer size to: %1 -> used size: %2")
-					.arg(audio_ctrl->myApp.userSettings->pAudioBufferSize).arg(usedBufSize));
-		}
+		LOGTEXT(tr("Set audio buffer size to: %1").arg(audio_ctrl->myApp.userSettings->pAudioBufferSize));
 	}
 
 	if (startPosMs < 0) {
@@ -264,6 +260,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		QApplication::processEvents();
 		if (run_status == AUDIO_RUNNING) {
 			current_fx->startInProgress = false;
+			current_fx->startSlot = -1;
 			qreal vol = audio_player->volume();
 			/*if (debug > 1) */DEBUGTEXT("FxAudio started: '%s'' (%dms delayed, vol: %f)"
 									 ,fxa->name().toLocal8Bit().data(),run_time.elapsed(),vol);
@@ -432,14 +429,14 @@ bool AudioSlot::setVolumeFromDMX(int dmxvol)
 		break;
 
 	case DMX_AUDIO_NOT_LOCKED:
-		if (dmxvol < current_volume) {
+		if (qAbs(dmxvol - current_volume) < 2) {
+			m_dmxVolLockState = DMX_AUDIO_LOCKED;
+		}
+		else if (dmxvol < current_volume) {
 			m_dmxVolLockState = DMX_AUDIO_INC_SEARCH;
 		}
 		else if (dmxvol > current_volume) {
 			m_dmxVolLockState = DMX_AUDIO_DEC_SEARCH;
-		}
-		else {
-			m_dmxVolLockState = DMX_AUDIO_LOCKED;
 		}
 		break;
 
@@ -532,14 +529,16 @@ void AudioSlot::onPlayerStatusChanged(AudioStatus status)
 			run_status = AUDIO_ERROR;
 			break;
 		case AUDIO_RUNNING:
-			if (current_fx)
+			if (current_fx) {
 				current_fx->startInProgress = false;
+				current_fx->startSlot = -1;
+			}
+			LOGTEXT(tr("Slot %1: Audio buffer size used: %2").arg(slotNumber+1).arg(audio_player->audioBufferSize()));
 			//fall through
 		default:
 			run_status = status;
 		}
 	}
-
 
 	if (cur_status != run_status) {
 		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);

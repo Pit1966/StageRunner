@@ -62,6 +62,7 @@ public:
 	qint32 attachedStopPara2;
 	pbool blackAtVideoEnd;
 
+	int startSlot;							///< this is set immediately after startFxAudio() before the start command is emitted.
 	bool startInProgress;					///< set this Flag to give a hint, that this effect will start in a short time
 	bool isDmxStarted;						///< Flag shows that start through DMX has occured (must be resseted before new DMX driven start is allowed)
 	bool isFxClip;							///< True, if Audio is recognized to be a video clip

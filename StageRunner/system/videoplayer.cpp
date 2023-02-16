@@ -73,6 +73,14 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	m_videoWid->setVideoPlayer(this);
 }
 
+FxClipItem *VideoPlayer::currentFxClipItem()
+{
+	if (!FxItem::exists(m_currentFxClipItem))
+		m_currentFxClipItem = nullptr;
+
+	return m_currentFxClipItem;
+}
+
 QString VideoPlayer::viewStateToString(VideoViewStatus viewState)
 {
 	switch (viewState) {
