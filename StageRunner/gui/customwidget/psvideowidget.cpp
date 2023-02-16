@@ -41,6 +41,7 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	, m_isOverlayVisible(false)
 	, m_mousePressed(false)
 	, m_isWindowMoveMode(false)
+	, m_doubleClicked(false)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setAutoFillBackground(false);
@@ -311,6 +312,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 	setFullScreen(!isFullScreen());
 	m_mousePressed = false;
 	m_isWindowMoveMode = false;
+	m_doubleClicked = true;
 }
 
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
@@ -318,6 +320,7 @@ void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 	m_mousePressed = true;
 	m_clickStartPos = ev->globalPos();
 	m_clickWindowPos = pos();
+	m_doubleClicked = false;
 }
 
 void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -332,13 +335,12 @@ void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
 	QPoint curpos = event->globalPos();
 	QPoint movevec = m_clickStartPos - curpos;
 
-	if (!isFullScreen()) {
+	if (!isFullScreen() && !m_doubleClicked) {
 
 		if (m_isWindowMoveMode) {
 			move(m_clickWindowPos - movevec);
 		}
 		else {
-
 			int dist = movevec.manhattanLength();
 			if (dist > 20)
 				m_isWindowMoveMode = true;

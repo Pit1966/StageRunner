@@ -44,6 +44,7 @@ private:
 	bool m_isOverlayVisible;
 	bool m_mousePressed;
 	bool m_isWindowMoveMode;
+	bool m_doubleClicked;
 
 	QPoint m_clickStartPos;
 	QPoint m_clickWindowPos;
