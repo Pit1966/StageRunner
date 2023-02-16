@@ -65,7 +65,7 @@ void UserSettings::init()
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
 	addExistingVar(pLastCondolidatePath,"LastConsolidatePath");
-	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,5000);
+	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,18000);
 //				   ,QObject::tr("Audio buffer size for audio playback in the audio slots"));
 	addExistingVar(pDefaultAudioFadeoutTimeMs,"DefaultAudioFadeoutTimeMs",0,10000,5001);
 	addExistingVar(pProhibitAudioDoubleStart,"ProhibitAudioDoubleStart",true);
