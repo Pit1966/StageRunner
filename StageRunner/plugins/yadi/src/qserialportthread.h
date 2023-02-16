@@ -31,6 +31,7 @@
 #include <QMutex>
 #include <QElapsedTimer>
 
+#include "../interfaces/qt_versions.h"
 
 
 class YadiDevice;
