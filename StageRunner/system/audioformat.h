@@ -34,8 +34,7 @@ public:
 		Unknown,
 		SignedInt,
 		UnSignedInt,
-		Float,
-		NSampleTypes
+		Float
 	};
 #endif
 

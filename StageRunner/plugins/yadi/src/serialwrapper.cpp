@@ -459,11 +459,11 @@ bool SerialWrapper::isOpen()
 	return open;
 }
 
+#ifndef USE_QTSERIAL
 bool SerialWrapper::writeCommand(const QByteArray cmd, QByteArray *serAnswer)
 {
-#if defined(USE_QTSERIAL)
 
-#elif defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN32)
 
 #elif defined(Q_OS_UNIX)
 	if (serial_fd == 0)
@@ -517,3 +517,4 @@ bool SerialWrapper::writeCommand(const QByteArray cmd, QByteArray *serAnswer)
 
 	return true;
 }
+#endif // ifndef USE_QT_SERIAL

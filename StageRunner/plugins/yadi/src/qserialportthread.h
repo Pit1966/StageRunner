@@ -47,6 +47,7 @@ static const char * _asc_cmds[] = {
 	"DEVELOPER ENTER CMD DESPRICTION HERE"
 };
 
+
 class QSerialPortThread : public QThread
 {
 	Q_OBJECT

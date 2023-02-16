@@ -53,7 +53,7 @@ IODeviceAudioBackend::IODeviceAudioBackend(AudioSlot &audioChannel, const QStrin
 #ifdef IS_QT6
 	QAudioFormat format = AudioFormat::defaultFormat();
 	if (devName.isEmpty() || devName == "system default") {
-		m_audioSink = new QAudioSink(format, this);
+		m_audioSink = new QAudioSink(QMediaDevices::defaultAudioOutput(), format, this);
 	}
 	else {
 		bool ok;
@@ -61,7 +61,7 @@ IODeviceAudioBackend::IODeviceAudioBackend(AudioSlot &audioChannel, const QStrin
 		if (ok) {
 			m_audioSink = new QAudioSink(dev, format, this);
 		} else {
-			m_audioSink = new QAudioSink(format, this);
+			m_audioSink = new QAudioSink(QMediaDevices::defaultAudioOutput(), format, this);
 		}
 	}
 	connect(m_audioSink, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onAudioOutputStatusChanged(QAudio::State)));

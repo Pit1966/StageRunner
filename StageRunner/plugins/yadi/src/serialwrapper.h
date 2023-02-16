@@ -90,7 +90,9 @@ public:
 	bool isOpen();
 	const QString & deviceNode() {return device_node;}
 
+#ifndef USE_QTSERIAL
 	bool writeCommand(const QByteArray cmd, QByteArray *serAnswer = nullptr);
+#endif
 
 signals:
 

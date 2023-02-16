@@ -316,7 +316,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 {
 	m_mousePressed = true;
-	m_clickStartPos = ev->globalPos();
+	m_clickStartPos = ev->globalPosition().toPoint();
 	m_clickWindowPos = pos();
 }
 
@@ -329,7 +329,7 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
 {
-	QPoint curpos = event->globalPos();
+	QPoint curpos = event->globalPosition().toPoint();
 	QPoint movevec = m_clickStartPos - curpos;
 
 	if (!isFullScreen()) {
