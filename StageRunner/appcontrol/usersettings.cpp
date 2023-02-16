@@ -35,6 +35,9 @@ UserSettings::UserSettings()
 
 	readFromPref();
 
+	pStartCount = pStartCount + 1;
+
+
 #ifdef __APPLE__
 	pAltAudioEngine = true;
 #endif
@@ -83,4 +86,5 @@ void UserSettings::init()
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,8);
 	addExistingVar(pIsDarkGuiTheme,"IsDarkGuiTheme",true);
 	addExistingVar(pShowVirtualDMXMonitor,"ShowVirtualDMXMonitor",false);
+	addExistingVar(pStartCount,"AppStartCount");
 }

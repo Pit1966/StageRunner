@@ -309,6 +309,8 @@ void PsVideoWidget::closeOverlays()
 void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
 	setFullScreen(!isFullScreen());
+	m_mousePressed = false;
+	m_isWindowMoveMode = false;
 }
 
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
@@ -348,8 +350,11 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 {
 	saveCurrentStateToPrefs();
 
-	if (m_myPlayer && m_myPlayer->isRunning())
-		m_myPlayer->stop();
+	if (m_myPlayer) {
+		if (m_myPlayer->isRunning())
+			m_myPlayer->stop();
+		m_myPlayer->clearViewState();
+	}
 
 #if QT_VERSION >= 0x050600
 	if (m_hasOverlays)
@@ -362,6 +367,7 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 	if (m_hasOverlays)
 		closeOverlays();
 #endif
+
 }
 
 void PsVideoWidget::paintEvent(QPaintEvent */*event*/)

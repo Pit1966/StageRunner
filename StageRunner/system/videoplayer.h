@@ -80,7 +80,7 @@ protected:
 
 public:
 	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
-	FxClipItem * currentFxClipItem() const {return m_currentFxClipItem;}
+	FxClipItem *currentFxClipItem();
 
 	VIDEO::VideoViewStatus viewState() const {return m_viewState;}
 	static QString viewStateToString(VIDEO::VideoViewStatus viewState);
@@ -100,6 +100,7 @@ public:
 	bool fadeVideoToBlack(int ms);
 
 	inline QMediaPlayer * mediaPlayer() {return this;}
+	void clearViewState();
 
 protected:
 	void setViewState(VIDEO::VideoViewStatus state, bool addState = false);

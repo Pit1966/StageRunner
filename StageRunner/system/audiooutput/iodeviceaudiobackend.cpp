@@ -277,8 +277,7 @@ bool IODeviceAudioBackend::isFFTEnabled() const
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
-	qDebug() << "QAudioDevice state changed" << state << m_audioSink->state();
-
+	// qDebug() << "QAudioDevice state changed" << state << m_audioSink->state();
 
 	AudioStatus audiostatus;
 

@@ -36,7 +36,6 @@
 #ifdef __unix__
 #include <signal.h>
 #include <execinfo.h>
-#endif
 
 typedef void (*sighandler_t) (int);
 
@@ -351,6 +350,8 @@ bool register_sys_signal_handler()
 	}
 
 }
+#endif // ifdef __unix__
+
 
 int main(int argc, char *argv[])
 {
@@ -370,7 +371,9 @@ int main(int argc, char *argv[])
 
 	logThread = new Log;
 	logThread->initLog(nullptr);
+#ifdef __unix__
 	register_sys_signal_handler();
+#endif
 
 	AppCentral *myapp = AppCentral::instance();
 	StageRunnerMainWin *mywin = new StageRunnerMainWin(myapp);

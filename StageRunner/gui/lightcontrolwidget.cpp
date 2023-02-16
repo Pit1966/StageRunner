@@ -25,6 +25,8 @@
 #include "appcentral.h"
 #include "system/videoplayer.h"
 
+#include <QMessageBox>
+
 LightControlWidget::LightControlWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
@@ -49,6 +51,24 @@ void LightControlWidget::on_blackButton_clicked()
 	appcentral->sequenceStop();
 	appcentral->lightBlack(0);
 	appcentral->videoBlack(0);
+
+	int clickcnt = blackButton->property("clickcnt").toInt();
+	qint64 ms = appcentral->uptimeMs();
+	qint64 lastMs = blackButton->property("lastclicked").toLongLong();
+	if (ms - lastMs > 300)
+		clickcnt = 0;
+
+	// qDebug() << "dif ms" << ms-lastMs << "clickcnt" << clickcnt;
+	if (++clickcnt == 2 && appcentral->isVideoWidgetVisible()) {
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("Do you want to close the video output?")
+										,QMessageBox::Yes | QMessageBox::No);
+		if (ret == QMessageBox::Yes)
+			appcentral->closeVideoWidget();
+	}
+
+	blackButton->setProperty("lastclicked", ms);
+	blackButton->setProperty("clickcnt",clickcnt);
 }
 
 void LightControlWidget::on_fadeToBlackButton_clicked()

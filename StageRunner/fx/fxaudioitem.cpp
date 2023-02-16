@@ -122,6 +122,7 @@ bool FxAudioItem::checkForVideoClip()
 
 void FxAudioItem::init()
 {
+	startSlot = -1;
 	startInProgress = false;
 	isDmxStarted = false;
 	isFxClip = false;

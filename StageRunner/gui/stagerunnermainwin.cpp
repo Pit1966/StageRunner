@@ -102,8 +102,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 #ifdef IS_MAC
 //	delete actionExperimental_audio_mode;
 //	actionExperimental_audio_mode = nullptr;
-	myapp->userSettings->pUseSDLAudio = true;
-	myapp->userSettings->pAltAudioEngine = true;
 #endif
 	guiSetAudioOutput(myapp->usedAudioOutputType());
 
@@ -1399,5 +1397,11 @@ void StageRunnerMainWin::on_actionDelete_FX_Item_triggered()
 			== QMessageBox::Yes) {
 		appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());
 	}
+}
+
+
+void StageRunnerMainWin::on_actionClose_video_window_triggered()
+{
+	appCentral->closeVideoWidget();
 }
 

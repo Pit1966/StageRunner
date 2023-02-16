@@ -154,6 +154,7 @@ private slots:
 	void on_actionNotes_triggered();
 	void on_actionFullscreen_triggered(bool checked);
 	void on_actionDelete_FX_Item_triggered();
+	void on_actionClose_video_window_triggered();
 
 private:
 	void init();

@@ -121,6 +121,9 @@ public:
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
+	void closeVideoWidget();
+	bool isVideoWidgetVisible() const;
+
 
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
 
@@ -165,7 +168,6 @@ public slots:
 	bool executeAttachedAudioStartCmd(FxAudioItem *fxa);
 	bool executeAttachedAudioStopCmd(FxAudioItem *fxa);
 
-
 	void audioCtrlRepeater(AudioCtrlMsg msg);
 	void audioCtrlReceiver(AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
@@ -174,6 +176,7 @@ public slots:
 	int getVolume(int slot) const;
 	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);
+	void setDmxVolumeToLocked(int slot);
 
 	bool handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value);
 

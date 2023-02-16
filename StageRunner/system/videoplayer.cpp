@@ -80,6 +80,14 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	m_videoWid->setVideoPlayer(this);
 }
 
+FxClipItem *VideoPlayer::currentFxClipItem()
+{
+	if (!FxItem::exists(m_currentFxClipItem))
+		m_currentFxClipItem = nullptr;
+
+	return m_currentFxClipItem;
+}
+
 QString VideoPlayer::viewStateToString(VideoViewStatus viewState)
 {
 	switch (viewState) {
@@ -343,6 +351,11 @@ bool VideoPlayer::fadeVideoToBlack(int ms)
 	setViewState(VIEW_VIDEO_FADEOUT);
 
 	return ok;
+}
+
+void VideoPlayer::clearViewState()
+{
+	setViewState(VIDEO::VIEW_UNUSED);
 }
 
 void VideoPlayer::setViewState(VIDEO::VideoViewStatus state, bool addState)

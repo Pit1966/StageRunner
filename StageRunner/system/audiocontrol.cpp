@@ -312,6 +312,22 @@ int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
 	return curvol;
 }
 
+void AudioControl::closeVideoWidget()
+{
+	if (m_videoWid) {
+		m_videoWid->setPicClipOverlaysActive(false);
+		m_videoWid->close();
+	}
+}
+
+bool AudioControl::isVideoWidgetVisible() const
+{
+	if (m_videoWid)
+		return m_videoWid->isVisible();
+
+	return false;
+}
+
 void AudioControl::run()
 {
 	if (m_initInThread)
@@ -379,6 +395,7 @@ bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 a
 
 		audioSlots[slot]->select();
 	}
+	fxa->startSlot = slot;
 
 	if (atMs < 0)
 		atMs = 0;
@@ -1045,8 +1062,6 @@ void AudioControl::setVolumeByDmxInput(int slot, int vol)
 void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 {
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
-
-
 //	if (debug)
 //		qDebug("Set Volume slot %d, %d",slot,vol);
 
@@ -1062,6 +1077,12 @@ void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 	}
 }
 
+void AudioControl::setDmxVolumeToLocked(int slot)
+{
+	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
+	audioSlots[slot]->setDmxVolLockState(DMX_AUDIO_LOCKED);
+}
+
 bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 {
 	QMutexLocker lock(slotMutex);
@@ -1073,19 +1094,22 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
 			ok = startFxAudio(fxa, nullptr);
 			fxa->isDmxStarted = true;
+			if (fxa->initialVolume == 0 && fxa->startSlot >= 0)
+				setDmxVolumeToLocked(fxa->startSlot);
+
 		}
 		else if (fxa->isDmxStarted) {
 			int slot = findAudioSlot(fxa);
-			if (slot >= 0) {
+			if (slot >= 0)
 				setVolumeFromDmxLevel(slot,value);
-			}
 		}
 	}
 	else {
 		fxa->isDmxStarted = false;
 		int slot = findAudioSlot(fxa);
 		if (slot >= 0) {
-			// storeCurrentSeekPos(slot);
+			if (fxa->initialVolume == 0)
+				storeCurrentSeekPos(slot);
 			stopFxAudio(slot);
 		}
 	}

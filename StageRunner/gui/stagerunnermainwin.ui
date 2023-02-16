@@ -286,7 +286,7 @@
      <x>0</x>
      <y>0</y>
      <width>1449</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -339,6 +339,8 @@
     <addaction name="actionDMX_Input"/>
     <addaction name="actionDMX_Output"/>
     <addaction name="actionVirtualDmxOutput"/>
+    <addaction name="actionClose_video_window"/>
+    <addaction name="actionTest"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -545,6 +547,16 @@
   <action name="actionDelete_FX_Item">
    <property name="text">
     <string>Delete FX Item</string>
+   </property>
+  </action>
+  <action name="actionClose_video_window">
+   <property name="text">
+    <string>Close video window</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="text">
+    <string>Test</string>
    </property>
   </action>
  </widget>
