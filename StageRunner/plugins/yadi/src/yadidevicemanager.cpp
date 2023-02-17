@@ -60,11 +60,11 @@ int YadiDeviceManager::enumerateYadiDevices(YadiDMXUSBOut *yadiPlugin, bool upda
 #if defined(HAS_QTSERIAL)
 	QList<QSerialPortInfo>yadidevs = SerialWrapper::discoverQtSerialPorts("YADI DMX");
 
-	for (const QSerialPortInfo &port : yadidevs) {
+	for (const QSerialPortInfo &port : qAsConst(yadidevs)) {
 		// Check if new or already in known list
 		YadiDevice *yadi = nullptr;
 		bool found = false;
-		for (YadiDevice *t : globYadiDeviceList) {
+		for (YadiDevice *t : qAsConst(globYadiDeviceList)) {
 			if (port.portName() == t->devNodeName()) {
 				yadi = t;
 				found = true;
