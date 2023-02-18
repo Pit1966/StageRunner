@@ -125,6 +125,10 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(onStatusTimer()));
 	m_statusTimer.start(1000);
 
+	// Font in log view
+	QFont font("Monospace",9);
+	logEdit->setFont(font);
+
 	// For external access
 	logWidget = logEdit;
 	if (myapp->mainWinObj) {
