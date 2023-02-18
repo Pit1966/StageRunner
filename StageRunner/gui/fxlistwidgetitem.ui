@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>182</width>
-    <height>25</height>
+    <height>28</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>ListWidgetItem</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">

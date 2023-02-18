@@ -80,6 +80,8 @@ public:
 	QPoint dragBeginPos() const {return drag_begin_pos;}
 	QSize sizeHint() const;
 	QSize minimumSizeHint() const;
+	void setTextColor(const QString &col);
+	void setTextCentered(bool state);
 
 
 private:

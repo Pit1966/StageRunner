@@ -24,8 +24,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// #include "configrev.h"
-
 /**
   * For basic defines, settings, application name and so far
   * look in configvars.pri

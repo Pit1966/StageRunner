@@ -53,6 +53,7 @@
 #include "messagedialog.h"
 #include "lightcontrol.h"
 #include "videocontrol.h"
+#include "appcontrol/colorsettings.h"
 
 
 MutexQList<FxListWidget*>FxListWidget::globalFxListWidgetList;
@@ -73,6 +74,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	fxTable->setSelectionMode(QAbstractItemView::NoSelection);
 
 
+	fxTable->verticalHeader()->setVisible(false);
 	// fxTable->setContextMenuPolicy(Qt::NoContextMenu);
 
 	QPalette pal = fxTable->palette();
@@ -647,6 +649,8 @@ void FxListWidget::create_fxlist_row(FxItem *fx, FxList *fxlist, int row)
 	key_font.setPointSize(14);
 	key_font.setBold(true);
 
+	ColorSettings *color = AppCentral::ref().colorSettings;
+
 	int col = 0;
 
 	if (fxlist->showColumnKeyFlag) {
@@ -656,11 +660,13 @@ void FxListWidget::create_fxlist_row(FxItem *fx, FxList *fxlist, int row)
 		}
 
 		item = new_fxlistwidgetitem(fx,key,FxListWidgetItem::CT_KEY);
+		item->itemLabel->hide();
+		item->setTextColor(color->pKeyColumn);
+		item->setTextCentered(true);
 		item->itemEdit->setMinimized(true);
 		item->itemEdit->setSingleKeyEditEnabled(true);
 		item->itemEdit->setFont(key_font);
 		item->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
-		item->itemLabel->hide();
 		item->myRow = row;
 		item->myColumn = col;
 		fxTable->setCellWidget(row,col++,item);
@@ -1010,7 +1016,7 @@ void FxListWidget::propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA,
 	}
 }
 
-void FxListWidget::propagateAudioStatus(const AudioCtrlMsg &msg)
+void FxListWidget::propagateAudioStatus(const AUDIO::AudioCtrlMsg &msg)
 {
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED || msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
 		int row = getRowThatContainsFxItem(msg.fxAudio);
@@ -1660,5 +1666,11 @@ void FxListWidget::on_closeButton_clicked()
 void FxListWidget::on_editButton_clicked(bool checked)
 {
 	setEditable(checked);
+}
+
+
+void FxListWidget::on_showRowNumCheck_clicked(bool checked)
+{
+	fxTable->verticalHeader()->setVisible(checked);
 }
 
