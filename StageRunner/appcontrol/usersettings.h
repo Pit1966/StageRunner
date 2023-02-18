@@ -25,7 +25,7 @@
 #define USERSETTINGS_H
 
 #include "../tool/varset.h"
-#include "config.h"
+#include "../config.h"
 
 class UserSettings : public VarSet
 {

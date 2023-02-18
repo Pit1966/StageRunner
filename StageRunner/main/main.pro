@@ -82,6 +82,7 @@ QMAKE_LFLAGS += /INCREMENTAL:NO
 
 SOURCES += \
 	../appcontrol/appcentral.cpp \
+	../appcontrol/colorsettings.cpp \
 	../appcontrol/execloop.cpp \
 	../appcontrol/execloopthreadinterface.cpp \
 	../appcontrol/fxlistvarset.cpp \
@@ -185,6 +186,7 @@ unix {
 }
 
 HEADERS  += \
+	../appcontrol/colorsettings.h \
 	../config.h \
 #    ../configrev.h \
 	../appcontrol/appcentral.h \

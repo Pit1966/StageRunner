@@ -45,6 +45,7 @@ class AudioControl;
 class LightControl;
 class Project;
 class UserSettings;
+class ColorSettings;
 class FxItem;
 class FxList;
 class IOPluginCentral;
@@ -110,6 +111,7 @@ public:
 	Project *project;
 	DmxUniverseProperty *universeLayout;
 	UserSettings *userSettings;
+	ColorSettings *colorSettings;
 	IOPluginCentral *pluginCentral;
 	ExecCenter *execCenter;
 	FxListVarSet *templateFxList;

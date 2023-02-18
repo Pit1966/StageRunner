@@ -115,7 +115,7 @@ public slots:
 	void unselectRows();
 	void propagateSceneStatus(FxSceneItem *scene);
 	void propagateSceneFadeProgress(FxSceneItem *scene, int perMilleA, int perMilleB);
-	void propagateAudioStatus(const AudioCtrlMsg &msg);
+	void propagateAudioStatus(const AUDIO::AudioCtrlMsg &msg);
 	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc);
 	void onFxItemSelectedInChildWidget(FxItem *fx);
 
@@ -138,6 +138,8 @@ private slots:
 	void on_randomCheckBox_clicked(bool checked);
 	void on_closeButton_clicked();
 	void on_editButton_clicked(bool checked);
+
+	void on_showRowNumCheck_clicked(bool checked);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);

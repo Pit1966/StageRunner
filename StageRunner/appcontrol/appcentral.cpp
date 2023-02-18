@@ -32,7 +32,8 @@
 #include "fxclipitem.h"
 #include "fxscriptitem.h"
 #include "project.h"
-#include "usersettings.h"
+#include "appcontrol/usersettings.h"
+#include "appcontrol/colorsettings.h"
 #include "fxlist.h"
 #include "ioplugincentral.h"
 #include "qlcioplugin.h"
@@ -828,6 +829,7 @@ AppCentral::~AppCentral()
 	delete pluginCentral;
 	delete universeLayout;
 	delete project;
+	delete colorSettings;
 	delete userSettings;
 
 	MessageHub::destroy();
@@ -863,6 +865,8 @@ void AppCentral::init()
 	m_remoteSocket = nullptr;
 
 	userSettings = new UserSettings;
+	colorSettings = new ColorSettings;
+
 #ifdef IS_MAC
 	if (userSettings->pStartCount <= 1 && m_isSDLAvailable) {
 		userSettings->pUseSDLAudio = true;

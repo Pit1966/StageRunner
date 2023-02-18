@@ -51,7 +51,7 @@ UserSettings::~UserSettings()
 void UserSettings::init()
 {
 	QString templatePath = QString("%1/.config/%2/%3.templates")
-			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+			.arg(QDir::homePath(), QStringLiteral(APP_CONFIG_PATH), QStringLiteral(APPNAME));
 
 
 	setClass(PrefVarCore::USER_CONFIG,"UserSettings");

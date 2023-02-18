@@ -83,6 +83,23 @@ QSize FxListWidgetItem::minimumSizeHint() const
 	return QSize();
 }
 
+void FxListWidgetItem::setTextColor(const QString &col)
+{
+	QPalette pal = palette();
+	pal.setColor(QPalette::Text, QColor(col));
+	setPalette(pal);
+}
+
+void FxListWidgetItem::setTextCentered(bool state)
+{
+	if (state) {
+		itemLabel->show();
+		// itemExtra->show();
+	} else {
+		itemLabel->hide();
+	}
+}
+
 void FxListWidgetItem::init()
 {
 	current_button = 0;
