@@ -2,7 +2,7 @@ include(../../../../configvars.pri)
 
 TEMPLATE = lib
 LANGUAGE = C++
-TARGET   = midiplugin
+TARGET   = ../../../midiplugin
 
 CONFIG      += plugin
 INCLUDEPATH += ../common
