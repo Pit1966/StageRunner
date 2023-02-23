@@ -125,7 +125,7 @@ void AudioControlWidget::init_gui()
 		slot->slotNumber = t;
 		slot->setTitle(tr("Slot %1").arg(t+1));
 
-		connect(slot,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+		connect(slot,SIGNAL(audioCtrlCmdEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AUDIO::AudioCtrlMsg)));
 
 		audioSlotWidgets.append(slot);
 		layout->addWidget(slot);
@@ -134,7 +134,7 @@ void AudioControlWidget::init_gui()
 	mainLayout->insertLayout(0,layout);
 }
 
-void AudioControlWidget::audioCtrlReceiver(AudioCtrlMsg msg)
+void AudioControlWidget::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 {
 	if (debug > 5) DEBUGTEXT("%s: Cmd:%d, AudioStatus:%d, Volume:%d, Progress:%d ProgressTime: %d"
 							 ,Q_FUNC_INFO,msg.ctrlCmd,msg.currentAudioStatus,msg.volume,msg.progress,msg.progressTime);
@@ -155,7 +155,7 @@ void AudioControlWidget::audioCtrlReceiver(AudioCtrlMsg msg)
 	}
 }
 
-void AudioControlWidget::audioCtrlRepeater(AudioCtrlMsg msg)
+void AudioControlWidget::audioCtrlRepeater(AUDIO::AudioCtrlMsg msg)
 {
 	emit audioCtrlCmdEmitted(msg);
 }

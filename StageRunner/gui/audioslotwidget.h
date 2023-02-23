@@ -77,7 +77,7 @@ private slots:
 public slots:
 	void setPlayState(bool state);
 	void setPauseState(bool state);
-	void updateGuiStatus(AudioCtrlMsg msg);
+	void updateGuiStatus(AUDIO::AudioCtrlMsg msg);
 	void setVuLevel(qreal left, qreal right);
 	void setFFTSpectrum(FrqSpectrum *spectrum);
 
@@ -86,7 +86,7 @@ signals:
 	void stopClicked(int slotNum);
 	void pauseClicked(int slotNum);
 	void volumeChanged(int slotNum, int vol);
-	void audioCtrlCmdEmitted(AudioCtrlMsg msg);
+	void audioCtrlCmdEmitted(AUDIO::AudioCtrlMsg msg);
 };
 
 #endif // AUDIOSLOTWIDGET_H

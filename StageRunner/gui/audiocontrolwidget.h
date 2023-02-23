@@ -63,8 +63,8 @@ private:
 	void init_gui();
 
 public slots:
-	void audioCtrlReceiver(AudioCtrlMsg msg);
-	void audioCtrlRepeater(AudioCtrlMsg msg);
+	void audioCtrlReceiver(AUDIO::AudioCtrlMsg msg);
+	void audioCtrlRepeater(AUDIO::AudioCtrlMsg msg);
 	void setVuMeterLevel(int channel, qreal left, qreal right);
 	void setFFTSpectrum(int channel, FrqSpectrum *spectrum);
 
@@ -72,7 +72,7 @@ signals:
 	void playClicked(int slotNum);
 	void stopClicked(int slotNum);
 	void volumeChanged(int slotNum, int volume);
-	void audioCtrlCmdEmitted(AudioCtrlMsg msg);
+	void audioCtrlCmdEmitted(AUDIO::AudioCtrlMsg msg);
 
 };
 

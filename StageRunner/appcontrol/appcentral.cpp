@@ -83,6 +83,12 @@ bool AppCentral::destroyInstance()
 	}
 }
 
+void AppCentral::startupReady()
+{
+	// m_isApplicationStart = false;
+	QTimer::singleShot(1000, [this]() { m_isApplicationStart = false; } );
+}
+
 void AppCentral::clearProject()
 {
 	project->clear();
@@ -839,11 +845,7 @@ void AppCentral::init()
 {
 	m_mainThread = QThread::currentThread();
 	m_mainThread->setObjectName("MainThread");
-	edit_mode_f = false;
-	input_assign_mode_f = false;
-	input_assign_target_fxitem = nullptr;
-	m_moduleErrorMask = E_NO_ERROR;
-	last_global_selected_fxitem = nullptr;
+
 #ifdef USE_SDL
 	if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) >= 0) {
 		/* initialize sdl mixer, open up the audio device */
@@ -858,11 +860,6 @@ void AppCentral::init()
 #else
 	m_isSDLAvailable = false;
 #endif // ifdef USE_SDL
-
-
-	mainwinWidget = nullptr;
-	mainWinObj = nullptr;
-	m_remoteSocket = nullptr;
 
 	userSettings = new UserSettings;
 	colorSettings = new ColorSettings;
@@ -887,7 +884,8 @@ void AppCentral::init()
 	templateFxList->fxList()->setProtected(true);
 
 	int id = registerFxList(project->mainFxList());
-	if (debug > 1) DEBUGTEXT("Registered Project FX list with Id:%d",id);
+	if (debug > 1)
+		DEBUGTEXT("Registered Project FX list with Id:%d",id);
 	unitLight->addFxListToControlLoop(project->mainFxList());
 
 	m_remoteSocket = new QTcpSocket(this);
@@ -895,8 +893,11 @@ void AppCentral::init()
 	connect(m_remoteSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onRemoteStateChanged(QAbstractSocket::SocketState)));
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
+	qRegisterMetaType<AUDIO::AudioCtrlMsg>("AUDIO::AudioCtrlMsg");
 	qRegisterMetaType<CtrlCmd>("CtrlCmd");
-	qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
+	qRegisterMetaType<AudioStatus>("AudioStatus");
+	qRegisterMetaType<AUDIO::AudioStatus>("AUDIO::AudioStatus");
+	// qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
 	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
 	QThread::currentThread()->setObjectName("MainThread");
 
@@ -907,10 +908,10 @@ void AppCentral::init()
 	connect(pluginCentral,SIGNAL(universeValueChanged(quint32,quint32,uchar)),this,SLOT(onInputUniverseChannelChanged(quint32,quint32,uchar)), Qt::DirectConnection);
 
 	// AppCentral -> AudioControl Thread (unitAudio)
-	connect(this,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(this,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),unitAudio,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 
 	///todo video	move signal/slots to videoctrl
-	connect(unitVideo,SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)),unitAudio,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+	connect(unitVideo,SIGNAL(videoCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),unitAudio,SLOT(audioCtrlRepeater(AUDIO::AudioCtrlMsg)));
 
 	// TCP server -> Script Executer
 	connect(tcpServer, SIGNAL(remoteCmdReceived(QString)), execCenter, SLOT(executeScriptCmd(QString)));

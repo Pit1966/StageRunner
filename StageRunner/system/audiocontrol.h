@@ -103,6 +103,7 @@ public:
 	int usedSlots() const {return audioSlots.size();}
 	AudioSlot* audioSlot(int i) const {return audioSlots.at(i);}
 	AudioPlayer* audioPlayer(int i) const;
+	int getVolume(int slot) const;
 	inline int masterVolume() const {return m_masterVolume;}
 	inline int maxVolume() const {return MAX_VOLUME;}
 
@@ -111,7 +112,6 @@ public:
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 	void closeVideoWidget();
 	bool isVideoWidgetVisible() const;
-
 
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
 
@@ -156,12 +156,11 @@ public slots:
 	bool executeAttachedAudioStartCmd(FxAudioItem *fxa);
 	bool executeAttachedAudioStopCmd(FxAudioItem *fxa);
 
-	void audioCtrlRepeater(AudioCtrlMsg msg);
-	void audioCtrlReceiver(AudioCtrlMsg msg);
+	void audioCtrlRepeater(AUDIO::AudioCtrlMsg msg);
+	void audioCtrlReceiver(AUDIO::AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
 	void setVolumeInFx(int slot, int vol, bool setAsInitVolume);
-	int getVolume(int slot) const;
 	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);
 	void setDmxVolumeToLocked(int slot);
@@ -174,8 +173,8 @@ private:
 	void destroyMediaPlayInstances();
 
 signals:
-	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
-	void audioThreadCtrlMsgEmitted(AudioCtrlMsg msg);
+	void audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
+	void audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void fftSpectrumChanged(int slotnum, FrqSpectrum * spec);
 	void masterVolumeChanged(int vol);

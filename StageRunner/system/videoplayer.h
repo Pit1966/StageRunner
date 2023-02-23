@@ -109,9 +109,9 @@ private slots:
 
 signals:
 	void statusChanged(QMediaPlayer::MediaStatus status);
-	void clipCtrlMsgEmitted(AudioCtrlMsg msg);
+	void clipCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
 	void clipProgressChanged(FxClipItem *fxclip, int perMille);
-	void audioCtrlMsgEmitted(const AudioCtrlMsg &msg);
+	void audioCtrlMsgEmitted(const AUDIO::AudioCtrlMsg &msg);
 	void viewStateChanged(int viewState, int oldViewState);
 
 	void endReached(qint64 ms);

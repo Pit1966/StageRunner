@@ -170,8 +170,8 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(editableChanged(bool)),appCentral,SLOT(setEditMode(bool)));
 
 	// Audio Control Panel <-> Audio Control
-	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AudioCtrlMsg)),appCentral->unitAudio,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
+	connect(audioCtrlGroup,SIGNAL(audioCtrlCmdEmitted(AUDIO::AudioCtrlMsg)),appCentral->unitAudio,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 	connect(appCentral->unitAudio,SIGNAL(vuLevelChanged(int,qreal,qreal)),audioCtrlGroup,SLOT(setVuMeterLevel(int,qreal,qreal)));
 	connect(appCentral->unitAudio,SIGNAL(fftSpectrumChanged(int,FrqSpectrum*)),audioCtrlGroup,SLOT(setFFTSpectrum(int,FrqSpectrum*)));
 	connect(appCentral->unitAudio,SIGNAL(masterVolumeChanged(int)),seqCtrlGroup,SLOT(setMasterVolume(int)));
@@ -194,7 +194,7 @@ void StageRunnerMainWin::initConnects()
 	connect(appCentral->unitLight,SIGNAL(inputUniverseChanged(int,QByteArray)),virtDmxWidget,SLOT(setDmxValuesSec(int,QByteArray)));
 
 	// Audio Control -> Project FxListWidget
-	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AudioCtrlMsg)));
+	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),fxListWidget,SLOT(propagateAudioStatus(AUDIO::AudioCtrlMsg)));
 
 	// Fx Control -> SequenceStatusWidget
 	connect(appCentral->unitFx,SIGNAL(executerChanged(Executer*)),seqStatusDisplay,SLOT(propagateExecuter(Executer*)));
@@ -646,7 +646,7 @@ void StageRunnerMainWin::openFxPlayListItemPanel(FxPlayListItem *fx)
 			playlistwid->selectFx(exe->nextFx());
 			connect(exe,SIGNAL(currentFxChanged(FxItem*)),playlistwid,SLOT(markFx(FxItem*)));
 			connect(exe,SIGNAL(nextFxChanged(FxItem*)),playlistwid,SLOT(selectFx(FxItem*)));
-			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AudioCtrlMsg)));
+			connect(AppCentral::instance()->unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),playlistwid,SLOT(propagateAudioStatus(AUDIO::AudioCtrlMsg)));
 			connect(playlistwid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)));
 			connect(playlistwid,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 

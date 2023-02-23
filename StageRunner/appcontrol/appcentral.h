@@ -78,46 +78,47 @@ public:
 private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
-	bool edit_mode_f;
-	bool input_assign_mode_f;
-	FxItem * input_assign_target_fxitem;
-	FxItem * last_global_selected_fxitem;
+	bool edit_mode_f						= false;
+	bool input_assign_mode_f				= false;
+	FxItem * input_assign_target_fxitem		= nullptr;
+	FxItem * last_global_selected_fxitem	= nullptr;
 
 	QPointer<DmxMonitor> m_openedInputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
 	QPointer<DmxMonitor> m_openedOutputDmxMonitorWidgets[MAX_DMX_UNIVERSE];
 
-	int m_moduleErrorMask;
-	bool m_isSDLAvailable;
+	int m_moduleErrorMask		= E_NO_ERROR;
+	bool m_isSDLAvailable		= false;
+	bool m_isApplicationStart	= true;			///< this is true in init phase after program start until Qt enters exec loop
 
-	QThread *m_mainThread;
+	QThread *m_mainThread		= nullptr;
 
 	// network
-	QTcpSocket *m_remoteSocket;
+	QTcpSocket *m_remoteSocket	= nullptr;
 	QString m_lastRemote;
 	QStringList m_pendingRemoteCmdList;
-	bool m_remoteOk			= false;
+	bool m_remoteOk				= false;
 
 	// system
 	QElapsedTimer m_uptime;
 
 public:
-	QWidget *mainwinWidget;
-	QObject *mainWinObj;
-	AudioControl *unitAudio;
-	LightControl *unitLight;
-	FxControl *unitFx;
-	VideoControl *unitVideo;
-	NetServer *tcpServer;
-	Project *project;
-	DmxUniverseProperty *universeLayout;
-	UserSettings *userSettings;
-	ColorSettings *colorSettings;
-	IOPluginCentral *pluginCentral;
-	ExecCenter *execCenter;
-	FxListVarSet *templateFxList;
+	QWidget *mainwinWidget				= nullptr;
+	QObject *mainWinObj					= nullptr;
+	AudioControl *unitAudio				= nullptr;
+	LightControl *unitLight				= nullptr;
+	FxControl *unitFx					= nullptr;
+	VideoControl *unitVideo				= nullptr;
+	NetServer *tcpServer				= nullptr;
+	Project *project					= nullptr;
+	DmxUniverseProperty *universeLayout = nullptr;
+	UserSettings *userSettings			= nullptr;
+	ColorSettings *colorSettings		= nullptr;
+	IOPluginCentral *pluginCentral		= nullptr;
+	ExecCenter *execCenter				= nullptr;
+	FxListVarSet *templateFxList		= nullptr;
 
 #ifdef USE_SDL
-	Mix_Music *testsdl;
+	Mix_Music *testsdl					= nullptr;
 #endif
 
 
@@ -127,6 +128,8 @@ public:
 	static bool isReady() {return myinstance != nullptr;}
 	static bool destroyInstance();
 
+	bool isApplicationStart() const {return m_isApplicationStart;}
+	void startupReady();
 	void clearProject();
 	bool setLightLoopEnabled(bool state);
 	bool setFxExecLoopEnabled(bool state);
@@ -206,7 +209,7 @@ private slots:
 	void onRemoteStateChanged(QAbstractSocket::SocketState state);
 
 signals:
-	void audioCtrlMsgEmitted(AudioCtrlMsg msg);
+	void audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
 	void editModeChanged(bool state);
 	void inputAssignModeChanged(bool state);
 	void inputAssigned(FxItem *);

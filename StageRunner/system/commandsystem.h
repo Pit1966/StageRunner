@@ -111,32 +111,25 @@ enum DMXLockingMode {
 
 class AudioCtrlMsg {
 public:
-	int slotNumber;
-	CtrlCmd ctrlCmd;
-	AudioStatus currentAudioStatus;
-	int volume;
-	int fadetime;
-	int progress;
-	int progressTime;
-	int loop;
-	int maxloop;
-	bool isActive;
-	FxAudioItem *fxAudio;			// maybe FxClipItem in some cases too
-	Executer *executer;
+	int slotNumber			= -1;
+	CtrlCmd ctrlCmd			= CMD_STATUS_REPORT;
+	AudioStatus currentAudioStatus = AUDIO_NO_STATE;
+	int volume				= -1;
+	int fadetime			= -1;
+	int progress			= -1;
+	int progressTime		= 0;
+	int loop				= 0;
+	int maxloop				= 0;
+	bool isActive			= false;
+	bool isDmxVolumeLocked	= false;
+	FxAudioItem *fxAudio	= nullptr;			// maybe FxClipItem in some cases too
+	Executer *executer		= nullptr;
 
 public:
 	AudioCtrlMsg(int slotnum = -1, CtrlCmd cmd = CMD_STATUS_REPORT, AudioStatus status = AUDIO_NO_STATE, Executer *exec = nullptr)
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(status)
-		, volume(-1)
-		, fadetime(-1)
-		, progress(-1)
-		, progressTime(0)
-		, loop(0)
-		, maxloop(0)
-		, isActive(false)
-		, fxAudio(nullptr)
 		, executer(exec)
 	{}
 
@@ -144,12 +137,6 @@ public:
 		: slotNumber(slotnum)
 		, ctrlCmd(cmd)
 		, currentAudioStatus(AUDIO_NO_STATE)
-		, volume(-1)
-		, fadetime(-1)
-		, progress(-1)
-		, loop(0)
-		, maxloop(0)
-		, isActive(false)
 		, fxAudio(fxaudio)
 		, executer(exec)
 	{}

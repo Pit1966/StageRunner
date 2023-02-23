@@ -419,7 +419,7 @@ FxListExecuter *FxControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAud
 	if (wid) {
 		connect(exe,SIGNAL(currentFxChanged(FxItem*)),wid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
 		connect(exe,SIGNAL(nextFxChanged(FxItem*)),wid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
-		connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),wid,SLOT(propagateAudioStatus(AudioCtrlMsg)),Qt::UniqueConnection);
+		connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),wid,SLOT(propagateAudioStatus(AUDIO::AudioCtrlMsg)),Qt::UniqueConnection);
 		connect(wid,SIGNAL(fxItemSelected(FxItem*)),exe,SLOT(selectNextFx(FxItem*)),Qt::UniqueConnection);
 	}
 

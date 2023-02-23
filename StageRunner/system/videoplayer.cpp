@@ -57,7 +57,7 @@ VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
 	setNotifyInterval(20);
 
 	connect(this,SIGNAL(seekMe(qint64)),this,SLOT(setPosition(qint64)),Qt::QueuedConnection);
-	connect(this, SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)), m_videoCtrl, SIGNAL(videoCtrlMsgEmitted(AudioCtrlMsg)));
+	connect(this, SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)), m_videoCtrl, SIGNAL(videoCtrlMsgEmitted(AUDIO::AudioCtrlMsg)));
 
 	m_ctrlTimer.setSingleShot(true);
 	connect(&m_ctrlTimer, SIGNAL(timeout()), this, SLOT(onCtrlTimerFinished()));

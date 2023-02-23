@@ -151,7 +151,7 @@ protected:
 	~FxListExecuter();
 
 protected slots:
-	void audioCtrlReceiver(AudioCtrlMsg msg);
+	void audioCtrlReceiver(AUDIO::AudioCtrlMsg msg);
 	void lightCtrlReceiver(FxSceneItem *fxs);
 	void sceneCueReceiver(FxSceneItem *fxs);
 

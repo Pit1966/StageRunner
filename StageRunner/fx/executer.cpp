@@ -265,7 +265,7 @@ void FxListExecuter::setFxList(FxList *fx_list)
 	fxList = fx_list;
 }
 
-void FxListExecuter::audioCtrlReceiver(AudioCtrlMsg msg)
+void FxListExecuter::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 {
 	if (msg.executer != this)
 		return;		// Not for me
@@ -327,8 +327,8 @@ void FxListExecuter::sceneCueReceiver(FxSceneItem *fxs)
 
 void FxListExecuter::init()
 {
-	connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
-	// connect(myApp.unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+	connect(myApp.unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
+	// connect(myApp.unitAudio,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 	connect(myApp.unitLight,SIGNAL(sceneChanged(FxSceneItem*)),this,SLOT(lightCtrlReceiver(FxSceneItem*)),Qt::DirectConnection);
 	connect(myApp.unitLight,SIGNAL(sceneCueReady(FxSceneItem*)),this,SLOT(sceneCueReceiver(FxSceneItem*)),Qt::DirectConnection);
 }

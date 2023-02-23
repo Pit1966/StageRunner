@@ -413,6 +413,7 @@ int main(int argc, char *argv[])
 		mywin->showShadowLog();
 
 	// and run
+	myapp->startupReady();
 	int ret =  app.exec();
 
 	// Stop the world

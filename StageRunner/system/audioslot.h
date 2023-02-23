@@ -83,7 +83,7 @@ private:
 	int master_volume;								///< This is Master Volume
 	bool m_isFFTEnabled;
 
-	DMXLockingMode m_dmxVolLockState;
+	DMXLockingMode m_dmxVolLockState;		///< this is a helper for audio fx started by dmx signal. It tracks if dmx input is synchronized with audio volume
 
 	QString m_lastErrorText;
 	AudioErrorType m_lastAudioError;
@@ -94,6 +94,7 @@ public:
 
 	bool select();
 	void unselect();
+	bool startFxAudio(const AUDIO::AudioCtrlMsg &msg);
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
 	bool stopFxAudio();
 	bool pauseFxAudio(bool state);
@@ -144,11 +145,11 @@ private slots:
 	void on_volset_timer_finished();
 
 public slots:
-	void audioCtrlReceiver(const AudioCtrlMsg &msg);
+	void audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg);
 	void setAudioDurationMs(qint64 ms);
 
 signals:
-	void audioCtrlMsgEmitted(const AudioCtrlMsg &msg);
+	void audioCtrlMsgEmitted(const AUDIO::AudioCtrlMsg &msg);
 	void audioProgressChanged(int slotnum, FxAudioItem *fxaudio, int perMille);			///< this is not used for now!!
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void frqSpectrumChanged(int slotnum, FrqSpectrum *spec);

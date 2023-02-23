@@ -450,6 +450,9 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 
 	// qDebug() << "dmx in changed" << universe << channel << value;
 
+	if (myApp.isApplicationStart())
+		return;
+
 	if (myApp.isInputAssignMode())
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 

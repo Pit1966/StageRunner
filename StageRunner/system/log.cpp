@@ -82,6 +82,9 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 	else if (localMsg.contains("libpng"))
 		fprintf(stderr, "Catch: %s\n",localMsg.constData());
 
+	if (msg.contains("Timers"))
+		fprintf(stderr, "invalid timers");
+
 	switch (type) {
 	case QtDebugMsg:
 		fprintf(stderr, "Debug: %s\n", localMsg.constData());

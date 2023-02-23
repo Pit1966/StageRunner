@@ -388,6 +388,8 @@ bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 a
 
 		audioSlots[slot]->select();
 	}
+
+	// attention if audio fx is started more than once. This is the last instance.
 	fxa->startSlot = slot;
 
 	if (atMs < 0)
@@ -473,14 +475,17 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 
 	if (audioSlots[slotnum]->status() == AUDIO_INIT) {
 
-		if (atMs >= 0) {
+		if (atMs >= 0)
 			fxa->setSeekPosition(atMs);
-		}
+
 		fxa->startInProgress = true;
 
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
-		AudioCtrlMsg msg(fxa,slotnum, CMD_AUDIO_START_AT,exec);
+		AudioCtrlMsg msg(fxa, slotnum, CMD_AUDIO_START_AT, exec);
 		msg.volume = initVol;
+		if (fxa->isDmxStarted && initVol < 0 && fxa->initialVolume == 0) {
+			msg.isDmxVolumeLocked = true;
+		}
 		emit audioThreadCtrlMsgEmitted(msg);
 
 		return true;
@@ -866,7 +871,7 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
  * This slot is used to repeat the audio control messages from all existing audio slots (channels)
  * So you do not have to connect on each audio channel
  */
-void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
+void AudioControl::audioCtrlRepeater(AUDIO::AudioCtrlMsg msg)
 {
 //	qDebug() << "AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded"
 //			 << msg.ctrlCmd
@@ -885,7 +890,7 @@ void AudioControl::audioCtrlRepeater(AudioCtrlMsg msg)
 	emit audioCtrlMsgEmitted(msg);
 }
 
-void AudioControl::audioCtrlReceiver(AudioCtrlMsg msg)
+void AudioControl::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 {
 	// qDebug("AudioControl::audioCtrlReceiver Ctrl Msg received: %d",msg.ctrlCmd);
 
@@ -1078,23 +1083,29 @@ void AudioControl::setDmxVolumeToLocked(int slot)
 
 bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 {
+	if (myApp.isApplicationStart())
+		return false;
+
 	QMutexLocker lock(slotMutex);
 
 	// qDebug() << "dmx audio" << fxa << value;
 
 	bool ok = true;
-	if (value > 5) {
+	if (value > 3) {
 		if (!fxa->isDmxStarted && !isFxAudioActive(fxa)) {
-			ok = startFxAudio(fxa, nullptr);
 			fxa->isDmxStarted = true;
-			if (fxa->initialVolume == 0 && fxa->startSlot >= 0)
-				setDmxVolumeToLocked(fxa->startSlot);
-
+			if (fxa->initialVolume == 0) {
+				ok = startFxAudio(fxa, nullptr, fxa->seekPosition());
+			} else {
+				ok = startFxAudio(fxa, nullptr);
+			}
+			if (!ok)
+				fxa->isDmxStarted = false;
 		}
 		else if (fxa->isDmxStarted) {
 			int slot = findAudioSlot(fxa);
 			if (slot >= 0)
-				setVolumeFromDmxLevel(slot,value);
+				setVolumeFromDmxLevel(slot,(value-3) * 255 / 252);
 		}
 	}
 	else {
@@ -1163,10 +1174,10 @@ void AudioControl::createMediaPlayInstances()
 			myApp.setModuleError(AppCentral::E_NO_AUDIO_DECODER);
 		}
 		slot->slotNumber = t;
-		connect(slot,SIGNAL(audioCtrlMsgEmitted(AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AudioCtrlMsg)));
+		connect(slot,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AUDIO::AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(vu_level_changed_receiver(int,qreal,qreal)));
 		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(fft_spectrum_changed_receiver(int,FrqSpectrum*)));
-		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AudioCtrlMsg)));
+		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 	}
 	// Enable FFT
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);

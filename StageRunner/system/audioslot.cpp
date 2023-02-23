@@ -152,6 +152,20 @@ void AudioSlot::unselect()
 	run_status = AUDIO_IDLE;
 }
 
+bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
+{
+	int startPosMs = 0;
+	if (msg.ctrlCmd == CMD_AUDIO_START_AT)
+		startPosMs = -1;
+
+	bool ok = startFxAudio(msg.fxAudio, msg.executer, startPosMs, msg.volume);
+
+	if (msg.isDmxVolumeLocked)
+		setDmxVolLockState(DMX_AUDIO_LOCKED);
+
+	return ok;
+}
+
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
 {
 	if (!audio_player) {
@@ -184,8 +198,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	// Set Filename of audio file
 	if (!audio_player->setSourceFilename(fxa->filePath(), fxa->name())) {
 		QString msg = tr("FX '%1': Could not start FX audio with file '%2'")
-				.arg(fxa->fxNamePath())
-				.arg(fxa->filePath());
+				.arg(fxa->fxNamePath(), fxa->filePath());
 		POPUPERRORMSG(__func__, msg);
 		return false;
 	}
@@ -241,8 +254,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 		LOGTEXT(tr("<font color=green>Start</font> <b>%1</b> <font color=green>in audio slot %2</font> with Executer: %3 at %4 with volume %5%6")
 				.arg(fxa->name())
 				.arg(slotNumber+1)
-				.arg(exec->getIdString())
-				.arg(QtStaticTools::msToTimeString(target_pos_ms))
+				.arg(exec->getIdString(), QtStaticTools::msToTimeString(target_pos_ms))
 				.arg(targetVolume)
 				.arg(delayMsg));
 	} else {
@@ -637,7 +649,7 @@ void AudioSlot::on_volset_timer_finished()
 	LOGTEXT(volset_text);
 }
 
-void AudioSlot::audioCtrlReceiver(const AudioCtrlMsg &msg)
+void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
 {
 	// Test if Message is for me
 	if (msg.slotNumber != slotNumber) return;
@@ -650,7 +662,8 @@ void AudioSlot::audioCtrlReceiver(const AudioCtrlMsg &msg)
 		if (FxItem::exists(msg.fxAudio)) {
 			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel :%d"
 									 ,Q_FUNC_INFO,msg.slotNumber+1);
-			startFxAudio(msg.fxAudio,msg.executer,0,msg.volume);
+			//startFxAudio(msg.fxAudio,msg.executer,0,msg.volume);
+			startFxAudio(msg);
 		} else {
 			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
 		}
@@ -659,7 +672,8 @@ void AudioSlot::audioCtrlReceiver(const AudioCtrlMsg &msg)
 		if (FxItem::exists(msg.fxAudio)) {
 			if (debug > 2) DEBUGTEXT("%s: received: startAudio on channel %d AT LAST POSITION"
 									 ,Q_FUNC_INFO,msg.slotNumber+1);
-			startFxAudio(msg.fxAudio,msg.executer,-1,msg.volume);
+			//startFxAudio(msg.fxAudio,msg.executer,-1,msg.volume);
+			startFxAudio(msg);
 		} else {
 			DEBUGERROR("%s: Audio Fx Start: FxAudioItem is not in global FX list",Q_FUNC_INFO);
 		}
@@ -856,5 +870,10 @@ void AudioSlot::_setVolume(int vol)
 	current_volume = vol;
 
 	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
-	volset_timer.start();
+
+	// it is not allowed to start timers from different thread
+//	if (QThread::currentThread() == this->thread())
+//		volset_timer.start();
+	// this works from every thread
+	QMetaObject::invokeMethod(&volset_timer, "start");
 }

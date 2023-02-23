@@ -60,7 +60,7 @@ public:
 	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1);
 
 signals:
-	void videoCtrlMsgEmitted(const AudioCtrlMsg &msg);
+	void videoCtrlMsgEmitted(const AUDIO::AudioCtrlMsg &msg);
 	void videoStartedWithAudio(FxClipItem *fxc, int slotNum, Executer *exec, qint64 atMs, int initialVol);
 	void mainVideoViewStateChanged(int viewState, int oldViewState);
 

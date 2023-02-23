@@ -250,7 +250,7 @@ void AudioSlotWidget::setPauseState(bool state)
 	m_currentPauseState = state;
 }
 
-void AudioSlotWidget::updateGuiStatus(AudioCtrlMsg msg)
+void AudioSlotWidget::updateGuiStatus(AUDIO::AudioCtrlMsg msg)
 {
 	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
