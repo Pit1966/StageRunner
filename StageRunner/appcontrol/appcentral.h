@@ -178,7 +178,7 @@ public:
 	// Sytem
 	qint64 uptimeMs() const {return m_uptime.elapsed();}
 	void closeVideoWidget();
-	bool isVideoWidgetVisible() const;
+	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
 
 private:
 	AppCentral();
@@ -207,6 +207,7 @@ public slots:
 private slots:
 	void onRemoteConnected();
 	void onRemoteStateChanged(QAbstractSocket::SocketState state);
+	void onRemoteSocketDataReceived();
 
 signals:
 	void audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
@@ -216,5 +217,6 @@ signals:
 
 	void fxSceneDeleted(FxSceneItem *scene);
 };
+
 
 #endif // APPCENTRAL_H

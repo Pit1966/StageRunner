@@ -526,9 +526,9 @@ void AppCentral::closeVideoWidget()
 	unitAudio->closeVideoWidget();
 }
 
-bool AppCentral::isVideoWidgetVisible() const
+bool AppCentral::isVideoWidgetVisible(QWidget **videoWid) const
 {
-	return unitAudio->isVideoWidgetVisible();
+	return unitAudio->isVideoWidgetVisible(videoWid);
 }
 
 
@@ -782,7 +782,7 @@ void AppCentral::connectToRemote(const QString &host, quint16 port, const QStrin
 	}
 
 	if (m_remoteSocket->state() == QAbstractSocket::ConnectedState && host == m_lastRemote) {
-		m_remoteSocket->write(cmd.toLocal8Bit());
+		m_remoteSocket->write(cmd.toUtf8());
 		return;
 	}
 
@@ -790,6 +790,14 @@ void AppCentral::connectToRemote(const QString &host, quint16 port, const QStrin
 		m_pendingRemoteCmdList.append(cmd);
 
 	m_lastRemote = host;
+
+	if (m_remoteSocket->state() != QAbstractSocket::UnconnectedState) {
+		QElapsedTimer checktime;
+		checktime.start();
+		m_remoteSocket->disconnectFromHost();
+		LOGTEXT(tr("Current remote connection disconnected (after %1 µs)").arg(checktime.nsecsElapsed()/1000));
+	}
+
 	m_remoteSocket->connectToHost(host, port);
 }
 
@@ -799,17 +807,38 @@ void AppCentral::onRemoteConnected()
 
 void AppCentral::onRemoteStateChanged(QAbstractSocket::SocketState state)
 {
-	LOGTEXT(tr("Remote socket state: %1").arg(state));
+	QTcpSocket * socket = qobject_cast<QTcpSocket*>(sender());
+	LOGTEXT(tr("Remote socket state: %1 (socket: 0x%2)")
+			.arg(state)
+			.arg(reinterpret_cast<quintptr>(socket), 0, 16, QChar('0')));
 
 	if (state == QAbstractSocket::ConnectedState) {
 		m_remoteOk = true;
 		while (!m_pendingRemoteCmdList.isEmpty()) {
 			QString cmd = m_pendingRemoteCmdList.takeFirst();
 			m_remoteSocket->write(cmd.toLocal8Bit());
+			LOGTEXT(tr("Remote device connected -> Finaly send: '%1'").arg(cmd));
 		}
 	}
 	else {
 		m_remoteOk = false;
+	}
+}
+
+void AppCentral::onRemoteSocketDataReceived()
+{
+	if (!m_remoteSocket)
+		return;
+
+	while (m_remoteSocket->bytesAvailable()) {
+		QByteArray dat = m_remoteSocket->readAll();
+		QTcpSocket *sock = qobject_cast<QTcpSocket*>(sender());
+		QString ip = "unknown";
+		if (sock)
+			ip = sock->peerAddress().toString();
+
+		LOGTEXT(tr("Remote answer from IP %1 : %2")
+				.arg(ip, QString::fromUtf8(dat)));
 	}
 }
 
@@ -891,6 +920,7 @@ void AppCentral::init()
 	m_remoteSocket = new QTcpSocket(this);
 	connect(m_remoteSocket, SIGNAL(connected()), this, SLOT(onRemoteConnected()));
 	connect(m_remoteSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onRemoteStateChanged(QAbstractSocket::SocketState)));
+	connect(m_remoteSocket, SIGNAL(readyRead()), this, SLOT(onRemoteSocketDataReceived()));
 
 	qRegisterMetaType<AudioCtrlMsg>("AudioCtrlMsg");
 	qRegisterMetaType<AUDIO::AudioCtrlMsg>("AUDIO::AudioCtrlMsg");

@@ -1289,14 +1289,14 @@ bool ScriptExecuter::executeBlack(FxScriptLine *line)
 
 	QString type = getFirstParaOfString(parastr).toLower();
 
-	if (type == "video") {
+	if (type == "video" || type == "all") {
 		if (myApp.unitVideo) {
 			myApp.unitVideo->videoBlack(0);
 		}
 
 		return true;
 	}
-	else if (type == "scene" || type == "light") {
+	else if (type == "scene" || type == "light" || type == "all") {
 		int timems = 0;
 		if (parastr.size())
 			timems = QtStaticTools::timeStringToMS(parastr);
@@ -1305,7 +1305,7 @@ bool ScriptExecuter::executeBlack(FxScriptLine *line)
 		return true;
 	}
 
-	m_lastScriptError = tr("Unknown parameter type '%1' for BLACK command").arg(type);
+	m_lastScriptError = tr("Unknown parameter type '%1' for BLACK command. (use 'scene','light', 'video' or 'all'").arg(type);
 	return false;
 }
 
@@ -1403,6 +1403,10 @@ bool ScriptExecuter::executeSingleCmd(const QString &linestr)
 
 	bool reexecdelayed = false;
 	bool ok = exe.executeLine(&line, reexecdelayed);
+	if (!ok) {
+		LOGERROR(tr("Execute script command failed: <font color=darkOrange>Target parameter missing!</font>")
+				 .arg(exe.lastScriptError()));
+	}
 
 	return ok;
 }

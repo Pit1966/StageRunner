@@ -340,7 +340,12 @@ void StageRunnerMainWin::openFxPropertyEditor(FxItem *item)
 void StageRunnerMainWin::clearProject()
 {
 	if (appCentral->project->isModified()) {
-		int ret = QMessageBox::question(this,tr("Attention")
+		QWidget *parentWid = this;
+		QWidget *videoWid = nullptr;
+		if (appCentral->isVideoWidgetVisible(&videoWid))
+			parentWid = videoWid;
+
+		int ret = QMessageBox::question(parentWid,tr("Attention")
 										,tr("The current project is modified!\n\nDo you want to save it now?")
 										,QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 		if (ret == QMessageBox::Yes) {
@@ -1030,8 +1035,13 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	appCentral->closeAllDmxMonitors();
 
 	if (appCentral->project->isModified()) {
-		int ret = QMessageBox::question(this,tr("Attention")
-										,tr("Project is modified!\n\nDo you want to save it now?"));
+		QWidget *parentWid = this;
+		QWidget *videoWid = nullptr;
+		if (appCentral->isVideoWidgetVisible(&videoWid))
+			parentWid = videoWid;
+		int ret = QMessageBox::question(parentWid,
+										tr("Attention"),
+										tr("Project is modified!\n\nDo you want to save it now?"));
 		if (ret == QMessageBox::Yes) {
 			on_actionSave_Project_triggered();
 		}

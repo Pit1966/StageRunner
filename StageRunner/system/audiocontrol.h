@@ -111,7 +111,7 @@ public:
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
 	void closeVideoWidget();
-	bool isVideoWidgetVisible() const;
+	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
 
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
 

@@ -313,10 +313,15 @@ void AudioControl::closeVideoWidget()
 	}
 }
 
-bool AudioControl::isVideoWidgetVisible() const
+bool AudioControl::isVideoWidgetVisible(QWidget ** videoWid) const
 {
-	if (m_videoWid)
+	if (m_videoWid) {
+		if (videoWid)
+			*videoWid = m_videoWid;
 		return m_videoWid->isVisible();
+	}
+	if (videoWid)
+		*videoWid = nullptr;
 
 	return false;
 }

@@ -59,8 +59,9 @@ void LightControlWidget::on_blackButton_clicked()
 		clickcnt = 0;
 
 	// qDebug() << "dif ms" << ms-lastMs << "clickcnt" << clickcnt;
-	if (++clickcnt == 2 && appcentral->isVideoWidgetVisible()) {
-		int ret = QMessageBox::question(this,tr("Attention")
+	QWidget *parentWid = this;
+	if (++clickcnt == 2 && appcentral->isVideoWidgetVisible(&parentWid)) {
+		int ret = QMessageBox::question(parentWid,tr("Attention")
 										,tr("Do you want to close the video output?")
 										,QMessageBox::Yes | QMessageBox::No);
 		if (ret == QMessageBox::Yes)

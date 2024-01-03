@@ -271,7 +271,7 @@ void NetServer::onTcpDataReceived()
 
 	QByteArray dat = client->readAll();
 	QString cmd = QString::fromLocal8Bit(dat);
-	LOGTEXT(tr("Execute TCP command: %1").arg(QString::fromLocal8Bit(dat)));
+	LOGTEXT(tr("Execute received remote command: %1").arg(QString::fromUtf8(dat)));
 	emit remoteCmdReceived(cmd);
 }
 

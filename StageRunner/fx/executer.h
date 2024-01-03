@@ -217,6 +217,7 @@ public:
 	bool processExecuter();
 	void processProgress();
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
+	const QString & lastScriptError() const {return m_lastScriptError;}
 
 protected:
 	ScriptExecuter(AppCentral &app_central, FxScriptItem *script, FxItem *parentFx);
