@@ -162,6 +162,10 @@ bool IOPluginCentral::updatePluginMappingInformation()
 
 	// Discover plugin lines (input/outputs) and update configuration for each
 	for (QLCIOPlugin *plugin : qlcPlugins()) {
+		// skip, if plugin is disabled and skip
+		if (plugin->property("isDisabled").toBool())
+			continue;
+
 		QString plugin_name = plugin->name();
 		QStringList outputs = IOPluginCentral::outputsOf(plugin);
 		QStringList inputs = IOPluginCentral::inputsOf(plugin);
