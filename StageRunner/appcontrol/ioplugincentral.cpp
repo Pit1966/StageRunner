@@ -305,6 +305,9 @@ void IOPluginCentral::closePlugins()
 {
 	for (int t=0; t<qlc_plugins.size(); t++) {
 		QLCIOPlugin *plugin = qlc_plugins.at(t);
+		if (plugin->property("isDisabled").toBool())
+			continue;
+
 		QStringList outputs = outputsOf(plugin);
 		for (int o=0; o<outputs.size(); o++) {
 			LOGTEXT(tr("Close Plugin: %1, Output: %2").arg(plugin->name(),outputs.at(o)));

@@ -159,6 +159,11 @@ void SetupWidget::copy_settings_to_gui()
 				combo->setCurrentIndex(combo->count()-1);
 		}
 	}
+
+	// Video Tab
+	videoXSizeEdit->setText(QString::number(set->pVideoOutXSize));
+	videoYSizeEdit->setText(QString::number(set->pVideoOutYSize));
+	videoForceSecondCheck->setChecked(set->pVideoForceSecondDesktop);
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -218,6 +223,10 @@ void SetupWidget::copy_gui_to_settings()
 
 	}
 
+	// Video Tab
+	set->pVideoOutXSize = videoXSizeEdit->text().toInt();
+	set->pVideoOutYSize = videoYSizeEdit->text().toInt();
+	set->pVideoForceSecondDesktop = videoForceSecondCheck->isChecked();
 }
 
 void SetupWidget::on_okButton_clicked()

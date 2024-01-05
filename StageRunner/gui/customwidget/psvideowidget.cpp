@@ -166,6 +166,10 @@ void PsVideoWidget::setPicClipOverlaysActive(bool state)
 
 		checkOverlayShow();
 	}
+
+	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+		qDebug() << "video overlay" << i << "size" << m_overlay[i]->width() << m_overlay[i]->height();
+	}
 }
 
 bool PsVideoWidget::setPicClipOverlayImage(const QString &path, int layer, qreal opacity)
@@ -292,6 +296,7 @@ void PsVideoWidget::checkOverlayShow()
 
 void PsVideoWidget::hideOverlays()
 {
+	// qDebug() << "hide overlays";
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		setPicClipOverlayOpacity(0.0, i);
 		m_overlay[i]->hide();
@@ -301,6 +306,7 @@ void PsVideoWidget::hideOverlays()
 
 void PsVideoWidget::closeOverlays()
 {
+	// qDebug() << "close overlays";
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		m_overlay[i]->close();
 		m_currentPicPaths[i].clear();
@@ -339,6 +345,7 @@ void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
 
 		if (m_isWindowMoveMode) {
 			move(m_clickWindowPos - movevec);
+			qDebug() << "video wid pos" << this->pos();
 		}
 		else {
 			int dist = movevec.manhattanLength();

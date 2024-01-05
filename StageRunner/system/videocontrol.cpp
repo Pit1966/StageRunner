@@ -88,7 +88,7 @@ bool VideoControl::startFxClipById(qint32 id)
  * @param fxc
  * @return
  *
- * There are two types of video clips now. A normal video, played by QVideoPlayer, on one hand and and still pictures, which are
+ * There are two types of video clips now. A normal video, played by QVideoPlayer, on one hand and still pictures, which are
  * overlayed in an extra widget on the other hand.
  * Both are based on functions and the FxItem of an FxAudio item.
  */

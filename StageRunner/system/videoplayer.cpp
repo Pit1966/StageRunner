@@ -26,6 +26,8 @@
 #include "customwidget/psvideowidget.h"
 #include "log.h"
 #include "fxclipitem.h"
+#include "appcontrol/usersettings.h"
+#include "appcontrol/appcentral.h"
 
 #include <QMediaPlayer>
 #include <QElapsedTimer>
@@ -499,6 +501,18 @@ bool VideoPlayer::_playVideoClip(FxClipItem *fxc, FxClipItem *old_fxc, int slotN
 		m_videoWid->setPicClipOverlaysActive(false);
 		m_videoWid->show();
 		m_videoWid->raise();
+
+		UserSettings *set = AppCentral::ref().userSettings;
+		if (set->pVideoOutXSize > 0 && set->pVideoOutYSize > 0) {
+			m_videoWid->resize(set->pVideoOutXSize, set->pVideoOutYSize);
+		}
+
+		if (set->pVideoForceSecondDesktop && AppCentral::ref().hasSecondScreen()) {
+			QPoint secCenterPos = AppCentral::ref().secondScreenCenterPoint();
+			secCenterPos -= QPoint(m_videoWid->width() / 2, m_videoWid->height() / 2);
+			m_videoWid->move(secCenterPos);
+			// qDebug() << "final video win pos" << m_videoWid->pos();
+		}
 	}
 	setViewState(VIEW_VIDEO_VISIBLE);
 	this->play();

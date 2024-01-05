@@ -86,5 +86,9 @@ void UserSettings::init()
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,8);
 	addExistingVar(pIsDarkGuiTheme,"IsDarkGuiTheme",true);
 	addExistingVar(pShowVirtualDMXMonitor,"ShowVirtualDMXMonitor",false);
+	addExistingVar(pVideoForceSecondDesktop,"ForceVideoSecondDesktop",false);
 	addExistingVar(pStartCount,"AppStartCount");
+	addExistingVar(pVideoOutXSize,"VideoOutXSize", 0, 5000, 0);
+	addExistingVar(pVideoOutYSize,"VideoOutYSize", 0, 2500, 0);
+
 }

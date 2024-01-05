@@ -98,6 +98,11 @@ private:
 	QStringList m_pendingRemoteCmdList;
 	bool m_remoteOk				= false;
 
+	// gui
+	bool m_hasSecondScreen		= false;
+	QPoint m_secondScreenPos;
+	QSize m_secondScreenSize;
+
 	// system
 	QElapsedTimer m_uptime;
 
@@ -179,6 +184,11 @@ public:
 	qint64 uptimeMs() const {return m_uptime.elapsed();}
 	void closeVideoWidget();
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
+
+	// Gui
+	bool hasSecondScreen() const {return m_hasSecondScreen;}
+	QSize secondScreenSize() const;
+	QPoint secondScreenCenterPoint() const;
 
 private:
 	AppCentral();

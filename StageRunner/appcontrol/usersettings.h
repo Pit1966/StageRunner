@@ -54,7 +54,10 @@ public:
 	pstring pFxTemplatePath;						///< This is the default Template File
 	pbool pIsDarkGuiTheme;							///< Should be set to true, if GUI Style is dark
 	pbool pShowVirtualDMXMonitor;
+	pbool pVideoForceSecondDesktop;					///< open video output on second desktop/monitor if there is one
 	pint32 pStartCount;								///< counter incremented every start
+	pint32 pVideoOutXSize;
+	pint32 pVideoOutYSize;
 
 public:
 	UserSettings();

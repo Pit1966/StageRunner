@@ -40,7 +40,7 @@
 
 void MidiPlugin::init()
 {
-    qDebug() << Q_FUNC_INFO;
+	// qDebug() << Q_FUNC_INFO;
 
     m_enumerator = new MidiEnumerator(this);
     connect(m_enumerator, SIGNAL(configurationChanged()),
@@ -53,7 +53,9 @@ void MidiPlugin::init()
 
 MidiPlugin::~MidiPlugin()
 {
-    qDebug() << Q_FUNC_INFO;
+	// qDebug() << Q_FUNC_INFO;
+	if (property("isDisabled").toBool())
+		return;
 
     Q_ASSERT(m_enumerator != NULL);
     delete m_enumerator;

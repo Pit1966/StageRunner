@@ -70,7 +70,7 @@ public:
     QString pluginInfo();
 
 private:
-    MidiEnumerator* m_enumerator;
+	MidiEnumerator* m_enumerator = nullptr;
 
     /*************************************************************************
      * Outputs

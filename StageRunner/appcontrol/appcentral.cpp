@@ -531,6 +531,23 @@ bool AppCentral::isVideoWidgetVisible(QWidget **videoWid) const
 	return unitAudio->isVideoWidgetVisible(videoWid);
 }
 
+QSize AppCentral::secondScreenSize() const
+{
+	if (m_hasSecondScreen)
+		return m_secondScreenSize;
+	return QSize();
+}
+
+QPoint AppCentral::secondScreenCenterPoint() const
+{
+	if (!m_hasSecondScreen)
+		return QPoint();
+
+	QSize halfsize = m_secondScreenSize / 2;
+
+	return m_secondScreenPos + QPoint(halfsize.width(), halfsize.height());
+}
+
 
 void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 {
@@ -945,6 +962,20 @@ void AppCentral::init()
 
 	// TCP server -> Script Executer
 	connect(tcpServer, SIGNAL(remoteCmdReceived(QString)), execCenter, SLOT(executeScriptCmd(QString)));
+
+	// check screens
+	if (QGuiApplication::screens().size() > 1) {
+		m_hasSecondScreen = true;
+		// QScreen *priScreen = QGuiApplication::screens().at(0);
+		QScreen *secScreen = QGuiApplication::screens().at(1);
+		// QRect geopri = priScreen->geometry();
+		QRect geo = secScreen->geometry();
+		// qDebug() << "pri screen" << geopri;
+		// qDebug() << "sec screen" << geo;
+
+		m_secondScreenPos = geo.topLeft();
+		m_secondScreenSize = geo.size();
+	}
 
 	m_uptime.start();
 }
