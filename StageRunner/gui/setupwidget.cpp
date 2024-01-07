@@ -258,6 +258,11 @@ void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 void SetupWidget::update_gui_plugin_info()
 {
 	if (m_selectedPlugin) {
+		if (m_selectedPlugin->property("isDisabled").toBool()) {
+			qlcPluginEdit->setHtml("Plugin is disabled");
+			return;
+		}
+
 		QString info;
 		QStringList outputs = m_selectedPlugin->outputs();
         if (outputs.size())

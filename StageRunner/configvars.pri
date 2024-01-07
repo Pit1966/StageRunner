@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.8.1
+APPVERSION = V0.9.8.2
 APP_MILESTONE = 37 Ansichtskarten
 APP_PRODUCER = 2024 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
@@ -107,14 +107,14 @@ macx {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_CONFIG_PATH \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
+    conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 unix:!macx {
     conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
@@ -124,14 +124,14 @@ unix:!macx {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_CONFIG_PATH \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define DOCSDIR \\\"$$INSTALLROOT/$$DOCSDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define PLUGINDIR \\\"$$INSTALLROOT/$$PLUGINDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define TRANSLATIONDIR \\\"$$INSTALLROOT/$$TRANSLATIONDIR\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::NativeFormat,QSettings::UserScope,APP_ORG_STRING\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
+    conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::NativeFormat,QSettings::UserScope,APP_ORG_STRING\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 win32 {
     conf.commands += echo \"$$LITERAL_HASH ifndef CONFIGREV_H\" > $$CONFIGFILE &&
@@ -141,14 +141,14 @@ win32 {
     conf.commands += echo \"$$LITERAL_HASH define APP_MILESTONE \\\"$$APP_MILESTONE\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_PRODUCER \\\"$$APP_PRODUCER\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_ORG_STRING \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH define APP_ORG_DOMAIN \\\"$$APP_ORG_DOMAIN\\\"\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define APP_CONFIG_PATH \\\"$$APP_ORG_STRING\\\"\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define DOCSDIR \"$$DOCSDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define PLUGINDIR \"$$PLUGINDIR\" >> $$CONFIGFILE &&
     conf.commands += @echo $$LITERAL_HASH define TRANSLATIONDIR \"$$TRANSLATIONDIR\" >> $$CONFIGFILE &&
     conf.commands += echo \"$$LITERAL_HASH define LOG_FILE_PATH \\\"$$LOG_FILE_PATH\\\"\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
-	conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
+    conf.commands += echo \"$$LITERAL_HASH define QSETFORMAT QSettings::IniFormat,QSettings::UserScope,APP_ORG_DOMAIN\" >> $$CONFIGFILE &&
+    conf.commands += echo \"$$LITERAL_HASH endif\" >> $$CONFIGFILE
 }
 
 
