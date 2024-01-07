@@ -633,7 +633,12 @@ void FxList::cloneSelectedSceneItem()
 		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(m_fxNext);
 		FxSceneItem *new_scene = new FxSceneItem(*scene);
 		new_scene->refCount.ref();
-		m_fxList.append(new_scene);
+		int idx = m_fxList.indexOf(scene);
+		if (idx >= 0) {
+			m_fxList.insert(idx + 1, new_scene);
+		} else {
+			m_fxList.append(new_scene);
+		}
 		m_isModified = true;
 		FxItemTool::setClonedFxName(scene,new_scene,this);
 	}
@@ -645,9 +650,32 @@ void FxList::cloneSelectedSeqItem()
 		FxSeqItem *seq = reinterpret_cast<FxSeqItem*>(m_fxNext);
 		FxSeqItem *new_seq = new FxSeqItem(*seq);
 		new_seq->refCount.ref();
-		m_fxList.append(new_seq);
+		int idx = m_fxList.indexOf(seq);
+		if (idx >= 0) {
+			m_fxList.insert(idx + 1, new_seq);
+		} else {
+			m_fxList.append(new_seq);
+		}
 		m_isModified = true;
 		FxItemTool::setClonedFxName(seq,new_seq,this);
+	}
+}
+
+void FxList::cloneSelectedScriptItem()
+{
+	if (m_fxNext && m_fxNext->fxType() == FX_SCRIPT) {
+		FxScriptItem *script = reinterpret_cast<FxScriptItem*>(m_fxNext);
+		FxScriptItem *new_script = new FxScriptItem(*script);
+		new_script->refCount.ref();
+		new_script->setKeyCode(0);
+		int idx = m_fxList.indexOf(script);
+		if (idx >= 0) {
+			m_fxList.insert(idx + 1, new_script);
+		} else {
+			m_fxList.append(new_script);
+		}
+		m_isModified = true;
+		FxItemTool::setClonedFxName(script,new_script,this);
 	}
 }
 

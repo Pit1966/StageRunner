@@ -70,9 +70,11 @@ bool AudioSlotWidget::setGuiSetting(const QString &key, const QString &val)
 	if (key == "timemode") {
 		if (val == "percent") {
 			slotAbsButton->setChecked(false);
+			isAbsoluteTime = false;
 		}
 		else if (val == "time") {
 			slotAbsButton->setChecked(true);
+			isAbsoluteTime = true;
 		}
 		return true;
 	}

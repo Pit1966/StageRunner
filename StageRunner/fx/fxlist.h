@@ -130,6 +130,7 @@ public:
 	void setModified(bool state);
 	void cloneSelectedSceneItem();
 	void cloneSelectedSeqItem();
+	void cloneSelectedScriptItem();
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
 

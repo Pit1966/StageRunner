@@ -107,7 +107,7 @@ public slots:
 	void markFx(FxItem *fx);
 	void setCurrentFx(FxItem *newfx, FxItem *oldfx);
 	void initRowDrag(FxListWidgetItem *item);
-	void refreshList();
+	void refreshList(int sliderpos = -1);
 	void refreshFxItem(FxItem *fx);
 	void setEditable(bool state);
 	void setRowSelected(int row, bool state);

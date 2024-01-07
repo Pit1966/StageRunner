@@ -890,11 +890,13 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	}
 }
 
-void FxListWidget::refreshList()
+void FxListWidget::refreshList(int sliderpos)
 {
 	// qDebug("FxListWidget refresh");
 	if (myfxlist) {
 		setFxList(myfxlist);
+		if (sliderpos >= 0)
+			fxTable->verticalScrollBar()->setSliderPosition(sliderpos);
 	}
 }
 
@@ -1427,6 +1429,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Clone Fx Sequence"));
 			act->setObjectName("10");
 		}
+		if (fxtype == FX_SCRIPT) {
+			act = menu.addAction(tr("Clone Fx script"));
+			act->setObjectName("12");
+		}
 
 		if (fxtype == FX_AUDIO) {
 			act = menu.addAction(tr("Start in external video player"));
@@ -1445,9 +1451,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		}
 
 
-
 		act = menu.exec(event->globalPos());
 		if (!act) return;
+
+		int curScrollPos = fxTable->verticalScrollBar()->sliderPosition();
 
 		switch (act->objectName().toInt()) {
 		case 1:
@@ -1472,7 +1479,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 6:
 			fxList()->cloneSelectedSceneItem();
-			refreshList();
+			refreshList(curScrollPos);
 			break;
 		case 7:
 			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
@@ -1489,16 +1496,21 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 														,fx->name());
 				if (newname.size()) {
 					fx->setName(newname);
-					refreshList();
+					refreshList(curScrollPos);
 				}
 			}
 			break;
 		case 10:
 			fxList()->cloneSelectedSeqItem();
-			refreshList();
+			refreshList(curScrollPos);
 			break;
 		case 11:
 			AppCentral::instance()->unitVideo->startFxClip(reinterpret_cast<FxClipItem*>(fx));
+			break;
+		case 12:
+			fxList()->cloneSelectedScriptItem();
+			refreshList(curScrollPos);
+
 			break;
 		default:
 			break;

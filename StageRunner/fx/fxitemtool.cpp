@@ -102,7 +102,6 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone
 		else if (exactClone > 1)
 			newFx->myId = srcItem->myId;
 
-
 		if (oldNewMap) {
 			if (!oldNewMap->contains(srcItem->id())) {
 				oldNewMap->insert(srcItem->id(), newFx->id());
