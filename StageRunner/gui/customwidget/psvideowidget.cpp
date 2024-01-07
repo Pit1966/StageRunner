@@ -27,6 +27,7 @@
 #include <QPainter>
 #include <QPicture>
 #include <QGraphicsOpacityEffect>
+#include <QMenu>
 
 #include "psvideowidget.h"
 #include "videoplayer.h"
@@ -334,6 +335,55 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 	Q_UNUSED(event)
 	m_mousePressed = false;
 	m_isWindowMoveMode = false;
+
+	if (event->button() == Qt::RightButton) {
+		QMenu menu(this);
+		QAction *act;
+		act = menu.addAction(tr("Resolution 640x480 (4:3)"));
+		act->setProperty("cmd", "resolution");
+		act->setProperty("x", 640);
+		act->setProperty("y", 480);
+
+		act = menu.addAction(tr("Resolution 720x405 (16:9)"));
+		act->setProperty("cmd", "resolution");
+		act->setProperty("x", 720);
+		act->setProperty("y", 405);
+
+		act = menu.addAction(tr("Resolution 1920x1080 (16:9 HD)"));
+		act->setProperty("cmd", "resolution");
+		act->setProperty("x", 1920);
+		act->setProperty("y", 1080);
+
+		if (isFullScreen()) {
+			act = menu.addAction(tr("Fullscreen off"));
+			act->setProperty("cmd","fullscreen");
+			act->setProperty("opt1", false);
+		} else {
+			act = menu.addAction(tr("Fullscreen on"));
+			act->setProperty("cmd","fullscreen");
+			act->setProperty("opt1", true);
+		}
+
+		menu.addSeparator();
+
+		act = menu.addAction(tr("Close video window"));
+		act->setProperty("cmd","close");
+
+		act = menu.exec(event->globalPos());
+		if (!act)
+			return;
+
+		QString cmd = act->property("cmd").toString();
+		if (cmd == "resolution") {
+			resize(act->property("x").toInt(), act->property("y").toInt());
+		}
+		else if (cmd == "fullscreen") {
+			setFullScreen(act->property("opt1").toBool());
+		}
+		else if (cmd == "close") {
+			close();
+		}
+	}
 }
 
 void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
