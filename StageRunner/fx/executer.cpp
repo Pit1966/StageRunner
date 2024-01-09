@@ -244,14 +244,16 @@ bool FxListExecuter::processExecuter()
 			fx = move_to_next_fx();
 			if (fx) {
 				cue_time = 0;
-			} else {
-				if (originFxItem) {
-					if (originFxItem->loopValue() > 0) {
-						fx = move_to_next_fx();
-						cue_time = 0;
-					}
-				}
 			}
+			// we don't need this. It is done in move_to_next_fx()
+			// else {
+			// 	if (originFxItem) {
+			// 		if (originFxItem->loopValue() > m_loopCount) {
+			// 			fx = move_to_next_fx();
+			// 			cue_time = 0;
+			// 		}
+			// 	}
+			// }
 		}
 	}
 
@@ -340,22 +342,24 @@ void FxListExecuter::init()
 FxItem *FxListExecuter::move_to_next_fx()
 {
 	// Find the following FX in fxList of the current active or set the first FX in fxList as current
-	FxItem * next = 0;
+	FxItem * next = nullptr;
 	if (nxtFx && FxItem::exists(nxtFx)) {
 		next = nxtFx;
 		fxList->resetFxItems(nxtFx);
-		setNextFx(0);
+		setNextFx(nullptr);
 	}
 	else if (fxList->isRandomized()) {
 		next = fxList->findSequenceRandomFxItem();
 	}
 	else if (!curFx) {
 		next = fxList->getFirstFx();
-		if (next) next->resetFx();
+		if (next)
+			next->resetFx();
 	}
 	else {
-		next = fxList->findSequenceFollower(curFx);
-		if (next) next->resetFx();
+		next = fxList->findSequenceFollower(curFx, false);
+		if (next)
+			next->resetFx();
 	}
 
 	if (originFxItem && fxList->size()) {
@@ -368,6 +372,9 @@ FxItem *FxListExecuter::move_to_next_fx()
 			emit listProgressStepChanged(m_playbackProgress,0);
 		}
 	}
+
+	// QString name = next ? next->name() : "n/a";
+	// qDebug() << "fxListExecutor: move to next fx:" << name;
 
 	// Check for fxList end
 	if (!next) {

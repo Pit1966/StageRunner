@@ -389,7 +389,7 @@ FxItem *FxList::findSequenceFollower(FxItem *curfx, bool turnover)
 	if (!curfx)
 		curfx = m_fxNext;
 
-	FxItem *followfx = 0;
+	FxItem *followfx = nullptr;
 	int idx_cur = m_fxList.indexOf(curfx);
 	if (idx_cur >= 0) {
 		if (idx_cur+1 < m_fxList.size()) {

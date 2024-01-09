@@ -272,6 +272,10 @@ FxListWidgetItem *FxListWidget::getFxListItemAtPos(QPoint pos)
 	if (fxTable->horizontalHeader()) {
 		pos.setY(pos.y()-fxTable->horizontalHeader()->height());
 	}
+
+	if (pos.y() < 0)	// out of visible scope. Is above
+		return nullptr;
+
 	if (fxTable->verticalHeader()) {
 		pos.setX(pos.x()-fxTable->verticalHeader()->width());
 	}
