@@ -285,6 +285,9 @@ void FxListWidgetItem::setActivationProgress(int perMilleA, int perMilleB)
 
 void FxListWidgetItem::setActivationProgressB(int perMilleB)
 {
+	if (perMilleB < 0)
+		return;
+
 	if (perMilleB != activation_indicator_b) {
 		activation_indicator_b = perMilleB;
 		update();
@@ -293,6 +296,9 @@ void FxListWidgetItem::setActivationProgressB(int perMilleB)
 
 void FxListWidgetItem::setActivationProgressA(int perMilleA)
 {
+	if (perMilleA < 0)
+		return;
+
 	if (perMilleA != activation_indicator_a) {
 		activation_indicator_a = perMilleA;
 		update();

@@ -149,7 +149,6 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(true);
 
-
 		// Is not audio but Video in Audio slot
 		if (cur_fxa->isFxClip) {
 			cur_fxa = 0;
@@ -174,6 +173,11 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 
 		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(false);
+		videoGroup->setVisible(false);
+	}
+	else if (fx->fxType() == FX_SCRIPT) {
+		audioGroup->setVisible(false);
+		hookedToGroup->setVisible(true);
 		videoGroup->setVisible(false);
 	}
 	else {

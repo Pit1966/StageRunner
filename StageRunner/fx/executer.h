@@ -70,6 +70,7 @@ protected:
 	FxItem *parentFxItem;						///< This is the parent FxItem, that contains the originFxItem or NULL
 	QString idString;
 	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
+	QElapsedTimer runTimeOne;					///< Timer holds runtime for current loop
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
 	qint64 lastProgressTimeMs;					///< May get used by derived classes
 	bool isWaitingForAudio;
@@ -133,10 +134,12 @@ private:
 	int m_playbackProgress;
 	int m_currentInitialVolume;
 	int m_loopCount;
+	mutable int m_calculatedExecutionTime;				// this is calculated execution time as a sum of all FxItems in the sequence (-1: is uncalculated)
 
 public:
 	inline TYPE type() {return EXEC_FXLIST;}
 	bool processExecuter();
+	void processProgress();
 
 	void setFxList(FxList *fx_list);
 	void setNextFx(FxItem *fx);
@@ -145,6 +148,8 @@ public:
 	inline FxItem * currentFx() const {return curFx;}
 	FxAudioItem * currentFxAudio();
 	inline void setCurrentInitialVol(int vol) {m_currentInitialVolume = vol;}
+	qint64 calculateSeqExecutionTime() const;
+
 
 protected:
 	FxListExecuter(AppCentral & app_central, FxList *fx_list);

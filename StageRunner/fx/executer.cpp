@@ -55,6 +55,7 @@ Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	, use_cnt(0)
 {
 	runTime.start();
+	runTimeOne.start();
 }
 
 Executer::~Executer()
@@ -178,6 +179,7 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 	, m_playbackProgress(0)
 	, m_currentInitialVolume(-1)
 	, m_loopCount(0)
+	, m_calculatedExecutionTime(-1)
 {
 	init();
 }
@@ -216,20 +218,49 @@ FxAudioItem * FxListExecuter::currentFxAudio()
 	}
 }
 
+qint64 FxListExecuter::calculateSeqExecutionTime() const
+{
+	if (m_calculatedExecutionTime >= 0)
+		return m_calculatedExecutionTime;
+
+
+	if (fxList == nullptr)
+		return 0;
+
+	int timeMs = 0;
+
+	for (int i=0; i<fxList->size(); i++) {
+		FxItem *fx = fxList->at(i);
+		timeMs += fx->calcExecutionTime();
+	}
+
+	m_calculatedExecutionTime = timeMs;
+	return timeMs;
+}
+
 /**
  * @brief process next event in the FxList
  * @return true, if something was processed
  */
 bool FxListExecuter::processExecuter()
 {
-	if (myState == EXEC_IDLE) return false;
-	if (eventTargetTimeMs > runTime.elapsed()) return false;
+	if (myState == EXEC_IDLE)
+		return false;
 
-	FxItem *fx = 0;
+	if (eventTargetTimeMs > runTime.elapsed())
+		return false;
+
+	FxItem *fx = nullptr;
 	qint64 cue_time = 0;
 
 	// First we have to check if there is already an active FX
 	if (!curFx) {
+		lastProgressTimeMs = 0;
+		calculateSeqExecutionTime();
+		QString parent = parentFxItem ? parentFxItem->name() : "no parent";
+		QString origin = originFxItem ? originFxItem->name() : "no origin";
+		// qDebug()  << "Duration of parent" << parent << "origin" << origin << float(m_calculatedExecutionTime) / 1000 << "seconds";
+
 		fx = move_to_next_fx();
 	} else {
 		fx = curFx;
@@ -259,7 +290,21 @@ bool FxListExecuter::processExecuter()
 
 	eventTargetTimeMs += cue_time;
 
-	return (fx != 0);
+	return (fx != nullptr);
+}
+
+void FxListExecuter::processProgress()
+{
+	qint64 runtime = runTime.elapsed();
+	if (runtime > lastProgressTimeMs) {
+		lastProgressTimeMs += 50;
+		// update progress
+		if (m_calculatedExecutionTime > 0) {
+			int progress = runTimeOne.elapsed() * 1000 / m_calculatedExecutionTime;
+			// qDebug() << "progress" << progress;
+			emit listProgressStepChanged(progress, -1);
+		}
+	}
 }
 
 void FxListExecuter::setFxList(FxList *fx_list)
@@ -308,7 +353,7 @@ void FxListExecuter::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 	}
 	else if (msg.ctrlCmd == CMD_STATUS_REPORT) {
 		if (originFxItem && originFxItem->fxType() == FX_AUDIO_PLAYLIST && fxList->size()) {
-			emit listProgressStepChanged(m_playbackProgress, msg.progress);
+			emit listProgressStepChanged(msg.progress, m_playbackProgress);
 		}
 	}
 }
@@ -368,8 +413,8 @@ FxItem *FxListExecuter::move_to_next_fx()
 			while (pos < fxList->size() && fxList->at(pos) != next) {
 				pos++;
 			}
-			m_playbackProgress = pos * 1000 / fxList->size();
-			emit listProgressStepChanged(m_playbackProgress,0);
+			m_playbackProgress = (pos + 1) * 1000 / fxList->size();
+			emit listProgressStepChanged(-1, m_playbackProgress);
 		}
 	}
 
@@ -381,6 +426,7 @@ FxItem *FxListExecuter::move_to_next_fx()
 		// Check if playback of list is looped
 		m_loopCount++;
 		if (m_loopCount < fxList->loopTimes()) {
+			runTimeOne.start();
 			fxList->resetFxItemsForNewExecuter();
 			fxList->resetFxItems();
 			if (fxList->isRandomized()) {
@@ -388,6 +434,8 @@ FxItem *FxListExecuter::move_to_next_fx()
 			} else {
 				next = fxList->findSequenceFirstItem();
 			}
+			if (fxList->size())
+				emit listProgressStepChanged(-1, 1000 / fxList->size());
 		}
 	}
 

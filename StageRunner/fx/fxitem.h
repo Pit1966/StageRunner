@@ -168,6 +168,7 @@ public:
 	 * @return
 	 */
 	virtual FxList * fxList() const {return nullptr;}
+	virtual qint32 calcExecutionTime() const;
 
 private:
 	void init();

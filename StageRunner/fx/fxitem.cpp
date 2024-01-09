@@ -363,4 +363,21 @@ void FxItem::setHoldTime(qint32 val)
 	}
 }
 
+qint32 FxItem::calcExecutionTime() const
+{
+	qint32 timeMs = 0;
+
+	if (preDelay() < 0) {
+		return timeMs;
+	}
+
+	timeMs = preDelay();
+	timeMs += fadeInTime();
+	timeMs += holdTime();
+	timeMs += fadeOutTime();
+	timeMs += postDelay();
+
+	return timeMs;
+}
+
 
