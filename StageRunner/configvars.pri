@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.8.2
+APPVERSION = V0.9.8.3
 APP_MILESTONE = 37 Ansichtskarten
 APP_PRODUCER = 2024 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
