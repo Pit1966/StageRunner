@@ -16,7 +16,7 @@ TARGET   = stagerunner
 
 # CONFIG += static
 
-#CONFIG += c++11
+CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH  += .
@@ -140,6 +140,8 @@ SOURCES += \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
+	../mods/timeline/timelineitem.cpp \
+	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
 	../system/audioformat.cpp \
@@ -181,15 +183,14 @@ SOURCES += \
 	../widgets/scripteditwidget.cpp \
 	main.cpp
 
+
 unix {
 	SOURCES += 	../system/unixsignalcatcher.cpp
 }
 
 HEADERS  += \
-	../appcontrol/colorsettings.h \
-	../config.h \
-#    ../configrev.h \
 	../appcontrol/appcentral.h \
+	../appcontrol/colorsettings.h \
 	../appcontrol/execloop.h \
 	../appcontrol/execloopthreadinterface.h \
 	../appcontrol/fxlistvarset.h \
@@ -200,6 +201,7 @@ HEADERS  += \
 	../appcontrol/project.h \
 	../appcontrol/scapplication.h \
 	../appcontrol/usersettings.h \
+	../config.h \
 	../fx/execcenter.h \
 	../fx/executer.h \
 	../fx/fxaudioitem.h \
@@ -219,6 +221,7 @@ HEADERS  += \
 	../gui/customwidget/extmimedata.h \
 	../gui/customwidget/mixerchannel.h \
 	../gui/customwidget/mixergroup.h \
+	../gui/customwidget/psdockwidget.h \
 	../gui/customwidget/psinfodialog.h \
 	../gui/customwidget/pslabel.h \
 	../gui/customwidget/pslineedit.h \
@@ -234,6 +237,7 @@ HEADERS  += \
 	../gui/fxlistwidget.h \
 	../gui/fxlistwidgetitem.h \
 	../gui/fxplaylistwidget.h \
+	../gui/fxscriptwidget.h \
 	../gui/lightcontrolwidget.h \
 	../gui/ptablewidget.h \
 	../gui/scenedeskwidget.h \
@@ -245,12 +249,16 @@ HEADERS  += \
 	../gui/style/lightdeskstyle.h \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
+	../mods/timeline/timelineitem.h \
+	../mods/timeline/timelinewidget.h \
+	../plugins/yadi/src/dmxmonitor.h \
 	../system/audiocontrol.h \
 	../system/audioformat.h \
 	../system/audioiodevice.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
 	../system/audiooutput/mediaplayeraudiobackend.h \
 	../system/audioplayer.h \
+	../system/audioslot.h \
 	../system/commandsystem.h \
 	../system/dmx/fixture.h \
 	../system/dmxchannel.h \
@@ -267,6 +275,7 @@ HEADERS  += \
 	../system/messagehub.h \
 	../system/netserver.h \
 	../system/qt_versions.h \
+	../system/runguard.h \
 	../system/variantmapserializer.h \
 	../system/videocontrol.h \
 	../system/videoplayer.h \
@@ -304,13 +313,9 @@ HEADERS  += \
 	../tool/toolclasses.h \
 	../tool/varset.h \
 	../tool/varsetlist.h \
-	../widgets/scripteditwidget.h \
-	../gui/customwidget/psdockwidget.h \
-	../gui/fxscriptwidget.h \
-	../plugins/yadi/src/dmxmonitor.h \
-	../system/audioslot.h \
-	../system/runguard.h \
-	../widgets/editormarginwidget.h
+	../widgets/editormarginwidget.h \
+	../widgets/scripteditwidget.h
+#    ../configrev.h \
 
 unix {
 	HEADERS +=	../system/unixsignalcatcher.h

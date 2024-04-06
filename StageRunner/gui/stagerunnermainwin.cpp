@@ -61,6 +61,8 @@
 #include "gui/customwidget/psdockwidget.h"
 #include "gui/consolidatedialog.h"
 #include "gui/universeeditorwidget.h"
+#include "mods/timeline/timelinewidget.h"
+#include "mods/timeline/timelineitem.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -69,6 +71,7 @@
 #include <QTextEdit>
 #include <QFont>
 
+using namespace PS_TL;
 
 StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	QMainWindow(nullptr)
@@ -144,6 +147,18 @@ StageRunnerMainWin::~ StageRunnerMainWin()
 	delete dialWidgetStyle;
 	delete msg_dialog;
 	delete fxitem_editor_dock;
+}
+
+void StageRunnerMainWin::initModules()
+{
+	TimeLineWidget *timeLineWid = new TimeLineWidget();
+	timelineLayout->addWidget(timeLineWid);
+
+	// populize with some timeline items
+	TimeLineItem *item = timeLineWid->addTimeLineItem(0, 10000, "item 1", 1);
+
+	item = timeLineWid->addTimeLineItem(10000, 10000, "item 2", 2);
+	item->setBackgroundColor(0x552222);
 }
 
 void StageRunnerMainWin::initConnects()

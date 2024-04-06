@@ -79,6 +79,7 @@ public:
 	StageRunnerMainWin(AppCentral * myapp);
 	~StageRunnerMainWin();
 
+	void initModules();
 	void initConnects();
 
 	void clearProject();
