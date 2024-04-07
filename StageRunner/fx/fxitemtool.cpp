@@ -28,6 +28,8 @@
 #include "fxseqitem.h"
 #include "fxplaylistitem.h"
 #include "fxscriptitem.h"
+#include "fxtimelineitem.h"
+
 
 FxItemTool::FxItemTool()
 {
@@ -88,6 +90,14 @@ FxItem *FxItemTool::cloneFxItem(FxItem *srcItem, bool renameItem, int exactClone
 			newFx = new_scriptitem;
 		}
 		break;
+
+	case FX_TIMELINE:
+		{
+			FxTimeLineItem *timelineitem = static_cast<FxTimeLineItem*>(srcItem);
+			FxTimeLineItem *new_timelineitem = new FxTimeLineItem(*timelineitem);
+			new_timelineitem->refCount.ref();
+			newFx = new_timelineitem;
+		}
 
 	default:
 		break;

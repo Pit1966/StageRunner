@@ -45,6 +45,7 @@ class FxScriptItem;
 class PsDockWidget;
 class UniverseEditorWidget;
 class FxPlayListItem;
+class FxTimeLineItem;
 class FxSeqItem;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
@@ -93,6 +94,7 @@ public:
 	void openFxPlayListItemPanel(FxPlayListItem *fx);
 	void openFxSeqItemPanel(FxSeqItem *fx);
 	void openFxScriptPanel(FxScriptItem *fx);
+	void openFxTimeLinePanel(FxTimeLineItem *fx);
 	void setProjectName(const QString &path);
 	void loadProject(const QString &path);
 

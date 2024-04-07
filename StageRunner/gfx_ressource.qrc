@@ -70,5 +70,7 @@
         <file>gfx/pics/stonechip_01.png</file>
         <file>gfx/pics/screen_black.png</file>
         <file>gfx/icons/config-date_green.png</file>
+        <file>gfx/icons/timeline_item.svg</file>
+        <file>gfx/icons/timeline_item.png</file>
     </qresource>
 </RCC>

@@ -47,6 +47,7 @@ enum FxType {
 	FX_CLIP,				// is a video clip (or audio)
 	FX_SCRIPT,				// is a script file
 	Fx_CUE,					// is a cue list for existing other fx types
+	FX_TIMELINE,			// is a time line (editable like in video editors)
 
 	FX_SIZE
 };

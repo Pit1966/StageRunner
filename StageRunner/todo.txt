@@ -18,10 +18,11 @@ In der GUI (AudioControl) wird die Ablaufzeit der Sounddatei nicht zurückgesetz
 
 Features:
 
+- pComment in project wird nicht angezeigt und kann nicht editiert werden.
+
 (ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten
 als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewartet und dann ausgefadet
 
 
-- Möglichkeit (Knopf) einbauen, den Videoscreen wieder zu schließen
 - Dokumentation der Script Funktionen
 - Grap DMX in Prüfen

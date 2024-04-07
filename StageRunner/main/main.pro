@@ -106,6 +106,7 @@ SOURCES += \
 	../fx/fxscriptitem.cpp \
 	../fx/fxscripttools.cpp \
 	../fx/fxseqitem.cpp \
+	../fx/fxtimelineitem.cpp \
 	../gui/audiocontrolwidget.cpp \
 	../gui/audioslotwidget.cpp \
 	../gui/consolidatedialog.cpp \
@@ -205,6 +206,7 @@ HEADERS  += \
 	../fx/execcenter.h \
 	../fx/executer.h \
 	../fx/fxaudioitem.h \
+	../fx/fxclipitem.h \
 	../fx/fxcueitem.h \
 	../fx/fxitem.h \
 	../fx/fxitemobj.h \
@@ -215,6 +217,7 @@ HEADERS  += \
 	../fx/fxscriptitem.h \
 	../fx/fxscripttools.h \
 	../fx/fxseqitem.h \
+	../fx/fxtimelineitem.h \
 	../gui/audiocontrolwidget.h \
 	../gui/audioslotwidget.h \
 	../gui/consolidatedialog.h \
@@ -265,7 +268,6 @@ HEADERS  += \
 	../system/dmxchanproperty.h \
 	../system/dmxtypes.h \
 	../system/dmxuniverseproperty.h \
-	../system/fxclipitem.h \
 	../system/fxcontrol.h \
 	../system/fxtimer.h \
 	../system/importfxmaster/fxMaster.h \

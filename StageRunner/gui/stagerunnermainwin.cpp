@@ -31,7 +31,7 @@
 #include "audiocontrol.h"
 #include "lightcontrol.h"
 #include "videocontrol.h"
-#include "fxcontrol.h"
+#include "system/fxcontrol.h"
 #include "execcenter.h"
 #include "fxlist.h"
 #include "project.h"
@@ -44,18 +44,19 @@
 #include "sequencestatuswidget.h"
 #include "qtstatictools.h"
 #include "style/lightdeskstyle.h"
-#include "fxitem.h"
-#include "fxsceneitem.h"
-#include "fxseqitem.h"
-#include "fxscriptitem.h"
+#include "fx/fxitem.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxseqitem.h"
+#include "fx/fxscriptitem.h"
+#include "fx/fxtimelineitem.h"
 #include "fxplaylistitem.h"
 #include "executer.h"
 #include "fxlistwidget.h"
 #include "scenedeskwidget.h"
-#include "fxitemobj.h"
-#include "fxlistvarset.h"
-#include "customwidget/psvideowidget.h"
-#include "dmxuniverseproperty.h"
+#include "fx/fxitemobj.h"
+#include "appcontrol/fxlistvarset.h"
+#include "gui/customwidget/psvideowidget.h"
+#include "system/dmxuniverseproperty.h"
 #include "fxscriptwidget.h"
 #include "gui/customwidget/psinfodialog.h"
 #include "gui/customwidget/psdockwidget.h"
@@ -516,6 +517,9 @@ void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
 	case FX_SCRIPT:
 		openFxScriptPanel(static_cast<FxScriptItem*>(fx));
 		break;
+	case FX_TIMELINE:
+		openFxTimeLinePanel(static_cast<FxTimeLineItem*>(fx));
+		break;
 	}
 }
 
@@ -740,6 +744,15 @@ void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
 			connect(editor,SIGNAL(modified()),parentWid,SLOT(refreshList()));
 		}
 		editor->show();
+	}
+}
+
+void StageRunnerMainWin::openFxTimeLinePanel(FxTimeLineItem *fx)
+{
+	TimeLineWidget *timelineWid = new TimeLineWidget();
+	if (timelineWid) {
+		timelineWid->resize(800, 170);
+		timelineWid->show();
 	}
 }
 

@@ -831,6 +831,10 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 			break;
 		case FX_SCRIPT:
 			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/script.png"));
+			break;
+		case FX_TIMELINE:
+			item->itemLabel->setPixmap(QPixmap(":/gfx/icons/timeline_item.png"));
+			break;
 		default:
 			break;
 		}
@@ -1282,6 +1286,9 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 //			act = menu.addAction(tr("New Cue List"));
 //			act->setObjectName("25");
 
+			act = menu.addAction(tr("New Timeline"));
+			act->setObjectName("26");
+
 
 			act = menu.addAction("--------------------");
 			if (isEditable()) {
@@ -1364,6 +1371,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 25:
 			fxList()->addFxCue();
+			refreshList();
+			break;
+		case 26:
+			fxList()->addFxTimeLine();
 			refreshList();
 			break;
 		case 2:

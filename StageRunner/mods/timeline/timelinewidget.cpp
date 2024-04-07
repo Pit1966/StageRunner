@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QAction>
+#include <QMenu>
 
 namespace PS_TL {
 
@@ -75,6 +77,23 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	setLayout(vLay);
 }
 
+TimeLineWidget::~TimeLineWidget()
+{
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		while (!m_itemLists[t].isEmpty())
+			delete m_itemLists[t].takeFirst();
+	}
+}
+
+void TimeLineWidget::clear()
+{
+	m_rightMostItem = nullptr;
+	for (int t=1; t<TIMELINE_MAX_TRACKS; t++) {
+		while (!m_itemLists[t].isEmpty())
+			delete m_itemLists[t].takeFirst();
+	}
+}
+
 /**
  * @brief Returns the vertical space needed in order to display all tracks in full height
  *
@@ -104,6 +123,8 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	item->setDuration(durationMs);
 	item->setPosition(posMs);
 	item->setYPos(m_trackYOffsets.at(trackID));
+
+	m_itemLists[trackID].append(item);
 
 	// item->setCursor(Qt::SizeHorCursor);
 	// QGraphicsRectItem *leftHandle = new QGraphicsRectItem(0,0, 10, item->ho, item);
@@ -230,8 +251,6 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	qDebug() << "  -> resize widget" << event->size() << "view size" << m_view->size() << "stored size" << m_view->currentSize();
 
 	// get size of child TimeLineGfxView
-	// qreal xsize = m_view->currentSize().width();
-	// qreal ysize = m_view->currentSize().height();
 
 	qreal xsize = m_view->width() - 4;
 	qreal xvsize = m_view->viewport()->geometry().width();
@@ -258,6 +277,7 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
 	// setTimeLineViewRangeMs(30000);
+	// clear();
 	currentVisibleRect();
 }
 
@@ -289,6 +309,33 @@ void TimeLineWidget::recalcPixelPosInAllItems()
 		}
 	}
 	m_scene->update();
+}
+
+void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+	QMenu menu(this);
+	QAction *act;
+	act = menu.addAction(tr("Add Item in track 1"));
+	act->setObjectName("newIn1");
+	act = menu.addAction(tr("Add Item in track 2"));
+	act->setObjectName("newIn2");
+
+	act = menu.exec(event->globalPos());
+	if (!act) return;
+
+	QString cmd = act->objectName();
+	if (cmd == "newIn1") {
+		int ms = 0;
+		if (!m_itemLists[1].isEmpty())
+			ms = m_itemLists[1].last()->endPosition();
+		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, "item t1", 1);
+	}
+	else if (cmd == "newIn2") {
+		int ms = 50000;
+		if (!m_itemLists[2].isEmpty())
+			ms = m_itemLists[2].last()->endPosition();
+		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, "item t2", 2);
+	}
 }
 
 } // namespace PS_TL

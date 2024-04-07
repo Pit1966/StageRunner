@@ -121,6 +121,8 @@ void Project::clear()
 	pProjectName = "Default Project";
 	pProjectId = QDateTime::currentDateTime().toTime_t();
 	pProjectFormat = 0;
+	pProjectBaseDir = QString();
+	pComment = QString();
 
 	if (fxList->size()) {
 		fxList->clear();
@@ -202,7 +204,8 @@ bool Project::loadFromFile(const QString &path)
 					// Wait for ClassName matching FxItem Type
 					if (curClassname == "FxItem" && !curChildActive) {
 						// An opening bracket could mean a new instance will come
-						if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") ) fx = 0;
+						if (curKey.startsWith('[') && !curKey.startsWith("[CHILDLIST]") )
+							fx = nullptr;
 						// We have to wait for FxType to determine what kind of Fx we
 						// have to initialize
 						if (curKey == "FxType") {
@@ -309,8 +312,8 @@ bool Project::consolidateToDir(const QString &exportProName, const QString &dirn
 	proname.remove(".SRP");
 
 	tpro.pComment = QString("Consolidated from: %1, at: %2")
-			.arg(curProjectFilePath).arg(QDateTime::currentDateTime().toString());
-	tpro.pProjectId = QDateTime::currentDateTime().toTime_t();
+			.arg(curProjectFilePath, QDateTime::currentDateTime().toString());
+	tpro.pProjectId = QDateTime::currentDateTimeUtc().toLocalTime().toTime_t();
 	tpro.pProjectName = proname;
 
 

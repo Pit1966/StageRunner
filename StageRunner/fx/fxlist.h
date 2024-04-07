@@ -123,6 +123,7 @@ public:
 	bool addFxSequence();
 	bool addFxScript();
 	bool addFxCue();
+	bool addFxTimeLine();
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);

@@ -32,14 +32,16 @@
 #include "dmxchannel.h"
 #include "pluginmapping.h"
 #include "messagehub.h"
-#include "fxaudioitem.h"
-#include "fxsceneitem.h"
-#include "fxplaylistitem.h"
-#include "fxseqitem.h"
-#include "fxclipitem.h"
-#include "fxscriptitem.h"
+#include "fx/fxaudioitem.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxplaylistitem.h"
+#include "fx/fxseqitem.h"
+#include "fx/fxclipitem.h"
+#include "fx/fxscriptitem.h"
+#include "fx/fxcueitem.h"
+#include "fx/fxtimelineitem.h"
 #include "dmxchanproperty.h"
-#include "fxlist.h"
+#include "fx/fxlist.h"
 
 #include "qt_versions.h"
 
@@ -306,6 +308,12 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 									break;
 								case PrefVarCore::FX_SCRIPT_ITEM:
 									item = new FxScriptItem(fxlist);
+									break;
+								case PrefVarCore::FX_CUE_ITEM:
+									item = new FxCueItem(fxlist);
+									break;
+								case PrefVarCore::FX_TIMELINE_ITEM:
+									item = new FxTimeLineItem(fxlist);
 									break;
 								default:
 									break;

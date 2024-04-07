@@ -35,7 +35,7 @@ FxScriptWidget *FxScriptWidget::openFxScriptPanel(FxScriptItem *fx, QWidget *par
 			scrwid->setWindowState(scrwid->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
 			scrwid->raise();
 			scrwid->show();
-			return 0;
+			return nullptr;
 		}
 	}
 

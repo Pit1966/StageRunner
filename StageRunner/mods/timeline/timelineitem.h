@@ -22,6 +22,9 @@ enum GRAB {
 	GRAB_RIGHT
 };
 
+public:
+	QVariant userData;
+
 private:
 	TimeLineWidget *m_timeline;
 	int m_id					= 0;

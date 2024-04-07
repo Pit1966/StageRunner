@@ -28,6 +28,7 @@
 #include "fxseqitem.h"
 #include "fxscriptitem.h"
 #include "fxcueitem.h"
+#include "fxtimelineitem.h"
 #include "log.h"
 #include "fxitemtool.h"
 
@@ -555,6 +556,18 @@ bool FxList::addFxCue()
 	return false;
 }
 
+bool FxList::addFxTimeLine()
+{
+	FxItem *fx = addFx(FX_TIMELINE);
+	if (fx) {
+		fx->refCount.ref();
+		fx->setName("FX TimeLine");
+		m_isModified = true;
+		return true;
+	}
+	return false;
+}
+
 void FxList::moveFromTo(int srcidx, int destidx)
 {
 	FxItem *xitem = 0;
@@ -764,6 +777,15 @@ FxItem *FxList::addFx(int fxtype, int option)
 			retfx = fx;
 		}
 		break;
+	case FX_TIMELINE:
+		{
+			FxTimeLineItem *fx = new FxTimeLineItem(this);
+			fx->refCount.ref();
+			// init FxTimeLine here
+			m_fxList.append(fx);
+			m_isModified = true;
+			retfx = fx;
+		}
 	default:
 		break;
 	}

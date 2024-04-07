@@ -7,6 +7,9 @@
 #include <QGraphicsItem>
 #include <QLabel>
 #include <QSlider>
+#include <QPointer>
+
+#define TIMELINE_MAX_TRACKS 9
 
 namespace PS_TL {
 
@@ -33,6 +36,8 @@ protected:
 
 // -------------------------------------------------------------------------------------------------
 
+
+
 class TimeLineWidget : public QWidget
 {
 	Q_OBJECT
@@ -49,7 +54,11 @@ private:
 	int m_defaultTrackHeight	= 34;
 	QList<int> m_trackYOffsets;			///< list of y-sizes of the tracks
 
-	TimeLineItem *m_rightMostItem	= nullptr;	///< this is the rightmost item in the timeline
+	QPointer<TimeLineItem> m_rightMostItem;	///< this is the furthest right item in the timeline
+
+	// lists with timeline items. Each track has its own list
+	// List index 0 is the ruler track. The editable tracks start with index 1
+	QList<TimeLineItem*> m_itemLists[TIMELINE_MAX_TRACKS];
 
 	// helper for transformation of time to pixel pos and vice versa
 	qreal m_msPerPixel			= 0.0;		///< how many milliseconds is a pixel
@@ -57,6 +66,9 @@ private:
 
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);
+	virtual ~TimeLineWidget();
+	void clear();
+
 	int timeLineHeight() const;
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 
@@ -77,6 +89,8 @@ protected:
 
 	void adjustSceneRectToTimelineLength();
 	void recalcPixelPosInAllItems();
+
+	void contextMenuEvent(QContextMenuEvent *event);
 
 signals:
 	void furthestRightItemChanged(TimeLineItem *item);
