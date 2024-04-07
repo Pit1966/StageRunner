@@ -157,7 +157,7 @@ void StageRunnerMainWin::initModules()
 	// populize with some timeline items
 	TimeLineItem *item = timeLineWid->addTimeLineItem(0, 10000, "item 1", 1);
 
-	item = timeLineWid->addTimeLineItem(10000, 10000, "item 2", 2);
+	item = timeLineWid->addTimeLineItem(50000, 10000, "item 2", 2);
 	item->setBackgroundColor(0x552222);
 }
 

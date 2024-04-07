@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QResizeEvent>
 #include <QScrollBar>
-#include <QSlider>
 
 namespace PS_TL {
 
@@ -59,10 +58,12 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	// tlItem2->setBackgroundColor(0x552222);
 	// m_scene->addItem(tlItem2);
 
-	QSlider *slider = new QSlider(Qt::Horizontal);
-	slider->setMaximum(120000);		// 2minutes
-	slider->setValue(60000);
-	connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(setTimeLineViewRangeMs(int)));
+	m_view->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+	m_viewRangeSlider = new QSlider(Qt::Horizontal);
+	m_viewRangeSlider->setMaximum(120000);		// 2minutes
+	m_viewRangeSlider->setValue(m_viewRangeMs);
+	connect(m_viewRangeSlider, SIGNAL(sliderMoved(int)), this, SLOT(setTimeLineViewRangeMs(int)));
 
 	// widget layout
 	QBoxLayout *vLay = new QVBoxLayout;
@@ -70,8 +71,18 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	vLay->setContentsMargins(0,0,0,0);
 	vLay->addWidget(m_navLabel);
 	vLay->addWidget(m_view);
-	vLay->addWidget(slider);
+	vLay->addWidget(m_viewRangeSlider);
 	setLayout(vLay);
+}
+
+/**
+ * @brief Returns the vertical space needed in order to display all tracks in full height
+ *
+ * The functions returns at least the height of 2 tracks
+ */
+int TimeLineWidget::timeLineHeight() const
+{
+	return qMax(m_trackYOffsets.last(), m_defaultTrackHeight * 2 + 10);
 }
 
 /**
@@ -94,6 +105,9 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	item->setPosition(posMs);
 	item->setYPos(m_trackYOffsets.at(trackID));
 
+	// item->setCursor(Qt::SizeHorCursor);
+	// QGraphicsRectItem *leftHandle = new QGraphicsRectItem(0,0, 10, item->ho, item);
+
 	m_scene->addItem(item);
 	return item;
 }
@@ -101,6 +115,30 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 qreal TimeLineWidget::msPerPixel() const
 {
 	return m_msPerPixel;
+}
+
+qreal TimeLineWidget::pixelToMs(qreal x) const
+{
+	return m_msPerPixel * x;
+}
+
+qreal TimeLineWidget::msToPixel(qreal ms) const
+{
+	return ms / m_msPerPixel;
+}
+
+QRectF TimeLineWidget::currentVisibleRect() const
+{
+	// QRectF rect = m_view->mapToScene(m_view->viewport()->geometry()).boundingRect();
+
+	QPointF tl(m_view->horizontalScrollBar()->value(), m_view->verticalScrollBar()->value());
+	QPointF br = tl + m_view->viewport()->rect().bottomRight();
+	QRectF rect = QRectF(tl,br);
+
+	// qDebug() << "begin [x]" << rect.x() << "end [x]" << rect.right();
+	qDebug() << "begin [ms]" << pixelToMs(rect.x()) << "end [ms]" << pixelToMs(rect.right() + 1);
+
+	return rect;
 }
 
 /**
@@ -171,11 +209,14 @@ void TimeLineWidget::setTimeLineViewRangeMs(int ms)
 
 	// adjust view range and transformation factor
 	m_viewRangeMs = ms;
-	m_msPerPixel = qreal(m_viewRangeMs) / xsize;
+	m_msPerPixel = qreal(m_viewRangeMs) / (xsize - m_rightMargin);
 
+	// readjust sceneRect since pixel transformation has changed
+	adjustSceneRectToTimelineLength();
 	// update pixel positions in all items
 	recalcPixelPosInAllItems();
 
+	m_navLabel->setText(QString("view range: %1s").arg(float(ms)/1000));
 }
 
 /**
@@ -193,46 +234,48 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	// qreal ysize = m_view->currentSize().height();
 
 	qreal xsize = m_view->width() - 4;
+	qreal xvsize = m_view->viewport()->geometry().width();
 	// qreal ysize = m_view->height() - 4;
-
-	qDebug() << "  -> vert scroll" << m_view->verticalScrollBar()->size() << "hori scroll" << m_view->horizontalScrollBar()->size();
 
 	// calculate pixel/time convertion factors
 	// if this is the first call, the scale is set. Otherwise the viewRange is adopted.
 	if (m_msPerPixel == 0) {
-		m_msPerPixel = qreal(m_viewRangeMs) / xsize;
+		m_msPerPixel = qreal(m_viewRangeMs) / (xsize - m_rightMargin);
 	} else {
 		m_viewRangeMs = m_msPerPixel * xsize;
+		m_viewRangeSlider->setValue(m_viewRangeMs);
 	}
 
 	// setViewRect of screen to the x-size of the complete timeline
 	// if timeline is smaller than visible view, the view rect is extended to the view size
 	adjustSceneRectToTimelineLength();
 
+	m_navLabel->setText(QString("view range: %1s").arg(float(m_viewRangeMs)/1000));
+
 	// qDebug() << "ms per pixel" << m_msPerPixel << m_scene->sceneRect();
 }
 
 void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
-	qDebug() << "double click";
-	setTimeLineViewRangeMs(30000);
+	// setTimeLineViewRangeMs(30000);
+	currentVisibleRect();
 }
 
 /**
  * @brief TimeLineWidget::adjustSceneRectToTimelineLength
  *
- * setViewRect of screen to the x-size of the complete timeline
- * if timeline is smaller than visible view, the view rect is extended to the view size
+ * setViewRect of scene to the x-size of the complete timeline
  */
 void TimeLineWidget::adjustSceneRectToTimelineLength()
 {
-	qreal xsize = m_view->width() - 4;
-	qreal ysize = m_view->height() - 4;
+	// qreal xsize = m_view->viewport()->geometry().width();
+	// qreal xsize = m_view->width() - 4;
+	// qreal ysize = m_view->height() - 4;
+
+	qreal yMax = timeLineHeight();
 
 	qreal timelineXSize = qreal(m_timeLineLenMs) / m_msPerPixel;
-	if (timelineXSize < xsize)
-		timelineXSize = xsize;
-	m_view->setSceneRect(0, 0, timelineXSize, ysize);
+	m_view->setSceneRect(0, 0, timelineXSize, yMax);
 }
 
 void TimeLineWidget::recalcPixelPosInAllItems()

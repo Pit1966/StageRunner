@@ -16,6 +16,11 @@ public:
 enum {
 	TL_ITEM = UserType + 1
 };
+enum GRAB {
+	GRAB_NONE,
+	GRAB_LEFT,
+	GRAB_RIGHT
+};
 
 private:
 	TimeLineWidget *m_timeline;
@@ -40,7 +45,10 @@ private:
 	// temp
 	QPointF m_clickPos;						///< coordinates when item was clicked
 	QPointF m_itemPos;						///< position for item when clicked
+	qreal m_clickXSize			= 0;		///< x size on item grab event begin
 	bool m_isClicked			= false;
+	bool m_isHover				= false;
+	GRAB m_grabMode				= GRAB_NONE;
 
 
 public:
@@ -55,6 +63,7 @@ public:
 	qreal yPos() const;
 	void setYPos(qreal yPixelPos);
 	int endPosition() const {return m_positionMs + m_durationMs;}
+	void setEndPosition(int ms);
 	void setLabel(const QString &label);
 	const QString & label() const {return m_label;}
 	void setBackgroundColor(const QColor &col);
@@ -69,6 +78,10 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+	void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+	void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
 
 };
 

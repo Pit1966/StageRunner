@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneMoveEvent>
 #include <QDebug>
 
 namespace PS_TL {
@@ -11,20 +12,27 @@ TimeLineItem::TimeLineItem(TimeLineWidget *timeline, int trackId)
 	: m_timeline(timeline)
 	, m_trackId(trackId)
 {
+	setAcceptHoverEvents(true);
 }
 
 void TimeLineItem::setPosition(int ms)
 {
-	m_positionMs = ms;
-	m_isTimePosValid = true;
-	m_isPixelPosValid = false;
+	if (ms != m_positionMs) {
+		m_positionMs = ms;
+		m_isTimePosValid = true;
+		m_isPixelPosValid = false;
+		update();
+	}
 }
 
 void TimeLineItem::setDuration(int ms)
 {
-	m_isTimePosValid = true;
-	m_isPixelPosValid = false;
-	m_durationMs = ms;
+	if (m_durationMs != ms) {
+		m_isTimePosValid = true;
+		m_isPixelPosValid = false;
+		m_durationMs = ms;
+		update();
+	}
 }
 
 qreal TimeLineItem::yPos() const
@@ -35,6 +43,15 @@ qreal TimeLineItem::yPos() const
 void TimeLineItem::setYPos(qreal yPixelPos)
 {
 	setY(yPixelPos);
+}
+
+void TimeLineItem::setEndPosition(int ms)
+{
+	if (ms != endPosition()) {
+		m_isPixelPosValid = false;
+		m_isTimePosValid = true;
+		m_positionMs = ms - m_durationMs;
+	}
 }
 
 void TimeLineItem::setLabel(const QString &label)
@@ -95,7 +112,8 @@ void TimeLineItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_clickPos = event->scenePos();
 		m_itemPos = scenePos();				// store current position for move
 		m_isClicked = true;
-		// qDebug() << "clicked item" << m_label << "at pos" << m_itemPos;
+		m_clickXSize = m_xSize;
+		qDebug() << "clicked item" << m_label << "at pos" << m_itemPos << "duration [ms]" << duration();
 	} else {
 		m_isClicked = false;
 	}
@@ -108,26 +126,82 @@ void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		qreal xdif = curPos.x() - m_clickPos.x();
 		// qreal ydif = curPos.y() - m_clickPos.y();
 
-		qreal newX = m_itemPos.x() + xdif;
-		qreal newY = m_itemPos.y() /*+ ydif*/;
-		if (newX < 0)
-			newX = 0;
-		if (newY < 0)
-			newY = 0;
+		if (m_grabMode == GRAB_RIGHT) {
+			m_xSize = m_clickXSize + xdif;
+			m_durationMs = m_xSize * m_timeline->msPerPixel();
 
-		// set new item pos
-		setPos(newX, newY);
+			// this schedules an graphics update
+			setPos(pos() + QPointF(1,0));
+			setPos(pos() - QPointF(1,0));
+		}
+		else if (m_grabMode == GRAB_LEFT) {
+			qreal newX = m_itemPos.x() + xdif;
+			qreal newY = m_itemPos.y();
+			qreal newXSize = m_clickXSize - xdif;
+			// calc new time position and new duration
+			m_positionMs = m_timeline->msPerPixel() * newX;
+			m_durationMs = m_timeline->msPerPixel() * newXSize;
 
-		// calc new time position
-		m_positionMs = m_timeline->msPerPixel() * newX;
-		qDebug() << m_label << "current timepos" << m_positionMs << "size" << m_durationMs;
+			// set new item pos
+			setPos(newX, newY);		}
+		else {
+			qreal newX = m_itemPos.x() + xdif;
+			qreal newY = m_itemPos.y() /*+ ydif*/;
+			if (newX < 0)
+				newX = 0;
+			if (newY < 0)
+				newY = 0;
+
+			// calc new time position
+			m_positionMs = m_timeline->msPerPixel() * newX;
+			// set new item pos
+			setPos(newX, newY);
+
+			qDebug() << m_label << "current timepos" << m_positionMs << "size" << m_durationMs;
+		}
 	}
 }
 
 void TimeLineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 {
 	m_isClicked = false;
+	m_grabMode = GRAB_NONE;
 	m_timeline->checkForRightMostItem(this);
+}
+
+void TimeLineItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+	// qDebug() << "hover enter" << m_label;
+	m_isHover = true;
+}
+
+void TimeLineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+	// qDebug() << "hover leave" << m_label;
+	m_isHover = true;
+}
+
+void TimeLineItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+	if (m_isClicked)
+		return;
+
+	// qDebug() << "hover move" << m_label << event->pos();
+	qreal x = event->pos().x();
+
+	if (x < 5) {
+		setCursor(Qt::SizeHorCursor);
+		m_grabMode = GRAB_LEFT;
+	}
+	else if (x > m_xSize - 5) {
+		setCursor(Qt::SizeHorCursor);
+		m_grabMode = GRAB_RIGHT;
+	}
+	else {
+		setCursor(m_timeline->cursor());
+		m_grabMode = GRAB_NONE;
+	}
+
 }
 
 } // namespace PS_TL

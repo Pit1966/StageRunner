@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QLabel>
+#include <QSlider>
 
 namespace PS_TL {
 
@@ -39,6 +40,7 @@ private:
 	QGraphicsScene *m_scene;
 	TimeLineGfxView *m_view;
 	QLabel *m_navLabel;
+	QSlider *m_viewRangeSlider;
 
 	int m_viewPosMs				= 0;		///< current timeline view position (left border of view)
 	int m_viewRangeMs			= 60000;	///< length of visible timeline portion (view area length)
@@ -51,13 +53,18 @@ private:
 
 	// helper for transformation of time to pixel pos and vice versa
 	qreal m_msPerPixel			= 0.0;		///< how many milliseconds is a pixel
+	qreal m_rightMargin			= 1.0;
 
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);
+	int timeLineHeight() const;
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 
-
 	qreal msPerPixel() const;
+	qreal pixelToMs(qreal x) const;
+	qreal msToPixel(qreal ms) const;
+	QRectF currentVisibleRect() const;
+
 	bool checkForRightMostItem(TimeLineItem *item);
 	TimeLineItem * findRightMostItem() const;
 
