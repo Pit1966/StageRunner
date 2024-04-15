@@ -31,7 +31,7 @@ DmxChanProperty::DmxChanProperty()
 
 void DmxChanProperty::init()
 {
-	setClass(PrefVarCore::DMX_CHANNEL,"DmxChanProperty");
+	setClass(PrefVarCore::DMX_CHANNEL_PROPERTY,"DmxChanProperty");
 	setDescription("DMX channel configuration");
 
 	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);

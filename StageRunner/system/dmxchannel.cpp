@@ -78,7 +78,6 @@ void DmxChannel::init()
 	addExistingVar(labelText,"LabelText");
 }
 
-
 DmxChannel::~DmxChannel()
 {
 }

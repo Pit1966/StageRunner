@@ -78,7 +78,8 @@ public:
 		FX_CLIP_ITEM,
 		FX_SCRIPT_ITEM,
 		FX_CUE_ITEM,
-		FX_TIMELINE_ITEM
+		FX_TIMELINE_ITEM,
+		TIMELINE_OBJ			///< object in a FxTimeline
 	};
 
 	/**

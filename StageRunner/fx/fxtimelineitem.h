@@ -2,19 +2,27 @@
 #define FXTIMELINEITEM_H
 
 #include "fxitem.h"
+#include "tool/varset.h"
+#include "tool/varsetlist.h"
+#include "mods/timeline/timeline_defines.h"
 
 #include <QCoreApplication>
 
-class FxTimeLineItem : public FxItem
+class FxTimeLineObj;
+
+class FxTimeLineItem : public QObject, public FxItem
 {
-	Q_DECLARE_TR_FUNCTIONS(FxTimeLineItem)
+	Q_OBJECT			// Q_DECLARE_TR_FUNCTIONS(FxTimeLineItem)
 
 private:
-
+	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];
 
 public:
 	FxTimeLineItem(FxList *fxList);
 	FxTimeLineItem(const FxTimeLineItem &o);
+	virtual ~FxTimeLineItem();
+
+	void clear();
 
 	qint32 loopValue() const override;
 	void setLoopValue(qint32 val) override;
@@ -22,6 +30,8 @@ public:
 
 private:
 	void init();
+
+friend class FxTimeLineEditWidget;
 
 };
 

@@ -62,8 +62,8 @@
 #include "gui/customwidget/psdockwidget.h"
 #include "gui/consolidatedialog.h"
 #include "gui/universeeditorwidget.h"
-#include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelineitem.h"
+#include "widgets/fxtimelineeditwidget.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -152,7 +152,7 @@ StageRunnerMainWin::~ StageRunnerMainWin()
 
 void StageRunnerMainWin::initModules()
 {
-	TimeLineWidget *timeLineWid = new TimeLineWidget();
+	TimeLineWidget *timeLineWid = new FxTimeLineEditWidget();
 	timelineLayout->addWidget(timeLineWid);
 
 	// populize with some timeline items
@@ -749,8 +749,9 @@ void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
 
 void StageRunnerMainWin::openFxTimeLinePanel(FxTimeLineItem *fx)
 {
-	TimeLineWidget *timelineWid = new TimeLineWidget();
+	FxTimeLineEditWidget *timelineWid = new FxTimeLineEditWidget();
 	if (timelineWid) {
+		timelineWid->setFxTimeLineItem(fx);
 		timelineWid->resize(800, 170);
 		timelineWid->show();
 	}

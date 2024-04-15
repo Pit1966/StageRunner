@@ -1,0 +1,77 @@
+#include "fxtimelineeditwidget.h"
+#include "fx/fxtimelineitem.h"
+#include "fx/fxtimelineobj.h"
+#include "mods/timeline/timelineitem.h"
+
+FxTimeLineEditWidget::FxTimeLineEditWidget()
+{
+
+}
+
+bool FxTimeLineEditWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
+{
+	m_curFxItem = fxt;
+
+	// clear all tracks (and items) in the widget
+	clear();
+
+	// Each track has a its own list with item/objs
+	// t is also the trackID !!
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		int trackID = t;
+		// get references to the source and destination list for this track
+		const VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
+		// QList<TimeLineItem*> &timelinelist = m_itemLists[t];
+
+		// now copy the elements of the track
+		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
+		// is used in the TimeLineWidget
+
+		for (int i=0; i<varset.size(); i++) {
+			FxTimeLineObj *obj = varset.at(i);
+			/*TimeLineItem *tli = */addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
+		}
+	}
+
+	return true;
+}
+
+bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
+{
+	if (!fxt)
+		return false;
+
+	// clear all tracks (and FxTimeLineObjs) in the FxTimeLineItem
+	fxt->clear();
+
+	// Each track has a its own list with item/objs
+	// t is also the trackID !!
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		int trackID = t;
+		// get references to the source and destination list for this track
+		// const QList<TimeLineItem*> &timelinelist = m_itemLists[t];
+		VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
+
+		// now copy the elements of the track
+		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
+		// is used in the TimeLineWidget
+
+		for (int i=0; i<m_itemLists[trackID].size(); i++) {
+			TimeLineItem *tli = at(trackID, i);
+			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
+			varset.append(obj);
+		}
+	}
+
+	fxt->setModified(true);
+	return true;
+}
+
+void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
+{
+	qDebug() << "close event" << m_curFxItem;
+	if (m_curFxItem)
+		copyToFxTimeLineItem(m_curFxItem);
+
+	deleteLater();
+}

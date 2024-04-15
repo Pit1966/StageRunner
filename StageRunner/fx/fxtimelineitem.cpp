@@ -1,16 +1,42 @@
 #include "fxtimelineitem.h"
 
+#include "fxtimelineobj.h"
+
+
 FxTimeLineItem::FxTimeLineItem(FxList *fxList)
-	: FxItem(fxList)
+	: QObject()
+	, FxItem(fxList)
+	, m_timelines{}
 {
 	init();
 }
 
 FxTimeLineItem::FxTimeLineItem(const FxTimeLineItem &o)
-	: FxItem(o.myParentFxList)
+	: QObject()
+	, FxItem(o.myParentFxList)
+	, m_timelines{}
 {
 	init();
 	cloneFrom(o);
+
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		for (int i=0; i<o.m_timelines[t].size(); i++) {
+			FxTimeLineObj *obj = new FxTimeLineObj(*o.m_timelines[t].at(i));
+			m_timelines[t].append(obj);
+		}
+	}
+}
+
+FxTimeLineItem::~FxTimeLineItem()
+{
+
+}
+
+void FxTimeLineItem::clear()
+{
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		m_timelines[t].clear();
+	}
 }
 
 qint32 FxTimeLineItem::loopValue() const
@@ -25,11 +51,15 @@ void FxTimeLineItem::setLoopValue(qint32 val)
 
 void FxTimeLineItem::resetFx()
 {
-
 }
 
 void FxTimeLineItem::init()
 {
 	myFxType = FX_TIMELINE;
 	myclass = PrefVarCore::FX_TIMELINE_ITEM;
+
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		m_timelines[t].parentVoid = this;
+		addExistingVarSetList(m_timelines[t], QString("Timeline%1").arg(t), PrefVarCore::TIMELINE_OBJ);
+	}
 }

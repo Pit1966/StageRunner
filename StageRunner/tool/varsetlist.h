@@ -37,7 +37,7 @@ public:
 	void *parentVoid;
 
 public:
-	VarSetList(void *parent)
+	VarSetList(void *parent = nullptr)
 		: parentVoid(parent)
 	{
 		// Lets test if the template class is derived from VarSet and is a Pointer
@@ -45,11 +45,17 @@ public:
 		VarSet *test = (T)0;
 		(void)test;
 	}
+
 	~VarSetList() {
 		while (!list.isEmpty()) {
 			delete list.takeFirst();
 		}
+	}
 
+	void clear() {
+		while (!list.isEmpty()) {
+			delete list.takeFirst();
+		}
 	}
 
 	inline const QList<T> & nativeList() const {

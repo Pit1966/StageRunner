@@ -25,8 +25,8 @@
 #define FXSCENEITEM_H
 
 #include "fxitem.h"
-#include "varsetlist.h"
-#include "commandsystem.h"
+#include "tool/varsetlist.h"
+#include "system/commandsystem.h"
 
 #ifndef MIX_LINES
 #define MIX_INTERN 0

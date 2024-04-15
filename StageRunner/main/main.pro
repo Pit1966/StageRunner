@@ -142,6 +142,7 @@ SOURCES += \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
 	../mods/timeline/timelineitem.cpp \
+	../mods/timeline/timelineobj.cpp \
 	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
@@ -181,6 +182,7 @@ SOURCES += \
 	../tool/toolclasses.cpp \
 	../tool/varset.cpp \
 	../widgets/editormarginwidget.cpp \
+	../widgets/fxtimelineeditwidget.cpp \
 	../widgets/scripteditwidget.cpp \
 	main.cpp
 
@@ -218,6 +220,7 @@ HEADERS  += \
 	../fx/fxscripttools.h \
 	../fx/fxseqitem.h \
 	../fx/fxtimelineitem.h \
+	../fx/fxtimelineobj.h \
 	../gui/audiocontrolwidget.h \
 	../gui/audioslotwidget.h \
 	../gui/consolidatedialog.h \
@@ -252,6 +255,7 @@ HEADERS  += \
 	../gui/style/lightdeskstyle.h \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
+	../mods/timeline/timeline_defines.h \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \
@@ -316,6 +320,7 @@ HEADERS  += \
 	../tool/varset.h \
 	../tool/varsetlist.h \
 	../widgets/editormarginwidget.h \
+	../widgets/fxtimelineeditwidget.h \
 	../widgets/scripteditwidget.h
 #    ../configrev.h \
 

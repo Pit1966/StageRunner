@@ -40,6 +40,7 @@
 #include "fx/fxscriptitem.h"
 #include "fx/fxcueitem.h"
 #include "fx/fxtimelineitem.h"
+#include "fx/fxtimelineobj.h"
 #include "dmxchanproperty.h"
 #include "fx/fxlist.h"
 
@@ -247,6 +248,16 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							if (var->contextClass == PrefVarCore::DMX_CHANNEL) {
 								VarSetList<DmxChannel*> *varsetlist = reinterpret_cast<VarSetList<DmxChannel*>*>(var->p_refvar);
 								DmxChannel *item = new DmxChannel;
+								varsetlist->append(item);
+								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
+									return -1;
+								} else {
+									return 0;
+								}
+							}
+							else if (var->contextClass == PrefVarCore::TIMELINE_OBJ) {
+								VarSetList<FxTimeLineObj*> *varsetlist = reinterpret_cast<VarSetList<FxTimeLineObj*>*>(var->p_refvar);
+								FxTimeLineObj* item = new FxTimeLineObj;
 								varsetlist->append(item);
 								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;

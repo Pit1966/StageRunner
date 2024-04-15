@@ -9,7 +9,7 @@
 #include <QSlider>
 #include <QPointer>
 
-#define TIMELINE_MAX_TRACKS 9
+#include "timeline_defines.h"
 
 namespace PS_TL {
 
@@ -44,6 +44,8 @@ class TimeLineWidget : public QWidget
 private:
 	QGraphicsScene *m_scene;
 	TimeLineGfxView *m_view;
+
+protected:
 	QLabel *m_navLabel;
 	QSlider *m_viewRangeSlider;
 
@@ -71,6 +73,8 @@ public:
 
 	int timeLineHeight() const;
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
+	TimeLineItem * at(int trackID, int idx);
+	int timeLineSize(int trackID = 1) const;
 
 	qreal msPerPixel() const;
 	qreal pixelToMs(qreal x) const;

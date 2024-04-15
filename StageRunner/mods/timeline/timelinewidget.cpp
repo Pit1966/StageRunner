@@ -133,6 +133,30 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	return item;
 }
 
+TimeLineItem *TimeLineWidget::at(int trackID, int idx)
+{
+	if (trackID < 0 || trackID >= TIMELINE_MAX_TRACKS)
+		return nullptr;
+
+	if (m_itemLists[trackID].size() <= idx)
+		return nullptr;
+
+	return m_itemLists[trackID].at(idx);
+}
+
+/**
+ * @brief Return the amount of elements in the timeline for the requested track id
+ * @param trackID
+ * @return
+ */
+int TimeLineWidget::timeLineSize(int trackID) const
+{
+	if (trackID < 0 || trackID >= TIMELINE_MAX_TRACKS)
+		return 0;
+
+	return m_itemLists[trackID].size();
+}
+
 qreal TimeLineWidget::msPerPixel() const
 {
 	return m_msPerPixel;
