@@ -9,30 +9,10 @@
 namespace PS_TL {
 
 TimeLineItem::TimeLineItem(TimeLineWidget *timeline, int trackId)
-	: m_timeline(timeline)
+	: TimeLineBase(timeline)
 	, m_trackId(trackId)
 {
 	setAcceptHoverEvents(true);
-}
-
-void TimeLineItem::setPosition(int ms)
-{
-	if (ms != m_positionMs) {
-		m_positionMs = ms;
-		m_isTimePosValid = true;
-		m_isPixelPosValid = false;
-		update();
-	}
-}
-
-void TimeLineItem::setDuration(int ms)
-{
-	if (m_durationMs != ms) {
-		m_isTimePosValid = true;
-		m_isPixelPosValid = false;
-		m_durationMs = ms;
-		update();
-	}
 }
 
 qreal TimeLineItem::yPos() const
@@ -92,9 +72,7 @@ void TimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 		m_isTimePosValid = true;
 		m_positionMs = m_timeline->msPerPixel() * x();
 		m_durationMs = m_timeline->msPerPixel() * m_xSize;
-
 	}
-
 
 	QPen pen;
 	pen.setColor(m_colorBorder);

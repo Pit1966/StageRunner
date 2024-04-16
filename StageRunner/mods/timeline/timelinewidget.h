@@ -15,6 +15,7 @@ namespace PS_TL {
 
 class TimeLineItem;
 class TimeLineWidget;
+class TimeLineCursor;
 
 class TimeLineGfxView : public QGraphicsView
 {
@@ -44,6 +45,8 @@ class TimeLineWidget : public QWidget
 private:
 	QGraphicsScene *m_scene;
 	TimeLineGfxView *m_view;
+
+	TimeLineCursor *m_cursor;
 
 protected:
 	QLabel *m_navLabel;

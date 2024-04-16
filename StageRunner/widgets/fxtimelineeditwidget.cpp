@@ -42,7 +42,7 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		return false;
 
 	// clear all tracks (and FxTimeLineObjs) in the FxTimeLineItem
-	fxt->clear();
+	// fxt->clear();
 
 	// Each track has a its own list with item/objs
 	// t is also the trackID !!
@@ -52,18 +52,33 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		// const QList<TimeLineItem*> &timelinelist = m_itemLists[t];
 		VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 
+
+		int i = -1;
 		// now copy the elements of the track
 		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
 		// is used in the TimeLineWidget
-
-		for (int i=0; i<m_itemLists[trackID].size(); i++) {
+		while (++i < m_itemLists[trackID].size()) {
 			TimeLineItem *tli = at(trackID, i);
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
-			varset.append(obj);
+			if (i < varset.size()) {
+				if (varset.at(i)->isEqual(obj)) {
+					// item not modified
+					delete obj;
+				} else {
+					// delete old item in timeline
+					delete varset.at(i);
+					// and set new one at the same position
+					varset[i] = obj;
+					fxt->setModified(true);
+				}
+			}
+			else {
+				varset.append(obj);
+				fxt->setModified(true);
+			}
 		}
 	}
 
-	fxt->setModified(true);
 	return true;
 }
 

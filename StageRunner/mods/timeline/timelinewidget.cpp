@@ -1,6 +1,7 @@
 #include "timelinewidget.h"
 
 #include "timelineitem.h"
+#include "timelinecursor.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -47,6 +48,11 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 
 	m_trackYOffsets.append(1);
 
+	// add cursor to scene
+	m_cursor = new TimeLineCursor(this);
+	m_scene->addItem(m_cursor);
+	m_cursor->setPos(30, 0);
+
 	// QGraphicsRectItem *gitem = new QGraphicsRectItem(50,50, 50, 10);
 	// m_scene->addItem(gitem);
 
@@ -59,6 +65,7 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	// tlItem2->setPos(40,40);
 	// tlItem2->setBackgroundColor(0x552222);
 	// m_scene->addItem(tlItem2);
+
 
 	m_view->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -218,7 +225,8 @@ bool TimeLineWidget::checkForRightMostItem(TimeLineItem *item)
 	if (m_rightMostItem != newRightItem) {
 		m_rightMostItem = newRightItem;
 		emit furthestRightItemChanged(m_rightMostItem);
-		qDebug() << "furthest right item changed" << m_rightMostItem->label() << "endPos" << m_rightMostItem->endPosition() << "timeline len [ms]" << m_timeLineLenMs;
+		qDebug() << "furthest right item changed" << m_rightMostItem->label();
+		qDebug() << "endPos" << m_rightMostItem->endPosition() << "timeline len [ms]" << m_timeLineLenMs;
 		return true;
 	}
 
@@ -230,7 +238,7 @@ TimeLineItem *TimeLineWidget::findRightMostItem() const
 	TimeLineItem *rItem = nullptr;
 	const QList<QGraphicsItem*> items = m_scene->items();
 	for (auto *it : items) {
-		TimeLineItem *tlItem = qgraphicsitem_cast<TimeLineItem *>(it);
+		TimeLineItem *tlItem = dynamic_cast<TimeLineItem *>(it);
 		if (tlItem) {
 			if (rItem) {
 				if (tlItem->endPosition() > rItem->endPosition())
@@ -296,9 +304,11 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	m_navLabel->setText(QString("view range: %1s").arg(float(m_viewRangeMs)/1000));
 
 	// qDebug() << "ms per pixel" << m_msPerPixel << m_scene->sceneRect();
+
+	m_cursor->setHeight(m_view->height());
 }
 
-void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent *event)
+void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent */*event*/)
 {
 	// setTimeLineViewRangeMs(30000);
 	// clear();
@@ -326,8 +336,9 @@ void TimeLineWidget::recalcPixelPosInAllItems()
 {
 	const QList<QGraphicsItem*> items = m_scene->items();
 	for (auto *it : items) {
-		TimeLineItem *tlItem = qgraphicsitem_cast<TimeLineItem *>(it);
+		TimeLineBase *tlItem = dynamic_cast<TimeLineBase*>(it);
 		if (tlItem) {
+			qDebug() << "type" << tlItem->type();
 			tlItem->recalcPixelPos();
 			// tlItem->update();
 		}

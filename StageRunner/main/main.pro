@@ -107,6 +107,7 @@ SOURCES += \
 	../fx/fxscripttools.cpp \
 	../fx/fxseqitem.cpp \
 	../fx/fxtimelineitem.cpp \
+	../fx/fxtimelineobj.cpp \
 	../gui/audiocontrolwidget.cpp \
 	../gui/audioslotwidget.cpp \
 	../gui/consolidatedialog.cpp \
@@ -141,8 +142,9 @@ SOURCES += \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
+	../mods/timeline/timelinebase.cpp \
+	../mods/timeline/timelinecursor.cpp \
 	../mods/timeline/timelineitem.cpp \
-	../mods/timeline/timelineobj.cpp \
 	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
@@ -256,6 +258,8 @@ HEADERS  += \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
 	../mods/timeline/timeline_defines.h \
+	../mods/timeline/timelinebase.h \
+	../mods/timeline/timelinecursor.h \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \

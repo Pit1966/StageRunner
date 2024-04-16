@@ -26,6 +26,19 @@ void FxTimeLineObj::clear()
 
 }
 
+bool FxTimeLineObj::operator ==(const FxTimeLineObj &o)
+{
+	return this->isEqual(&o);
+}
+
+bool FxTimeLineObj::isEqual(const FxTimeLineObj *o)
+{
+	return trackId == o->trackId
+			&& posMs == o->posMs
+			&& lenMs == o->lenMs
+			&& label == o->label;
+}
+
 void FxTimeLineObj::init()
 {
 	setClass(PrefVarCore::TIMELINE_OBJ,"TLObj");
