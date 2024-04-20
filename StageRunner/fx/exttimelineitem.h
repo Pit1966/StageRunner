@@ -28,6 +28,7 @@ private:
 	void contextLinkToFx();
 
 	friend class FxTimeLineEditWidget;
+	friend class ExtTimeLineWidget;
 };
 
 #endif // EXTTIMELINEITEM_H

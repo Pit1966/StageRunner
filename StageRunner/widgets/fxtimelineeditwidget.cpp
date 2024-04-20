@@ -2,17 +2,15 @@
 #include "fx/fxtimelineitem.h"
 #include "fx/fxtimelineobj.h"
 #include "fx/exttimelineitem.h"
+#include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelineitem.h"
 
-FxTimeLineEditWidget::FxTimeLineEditWidget()
+// ------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------------------
+
+bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 {
-
-}
-
-bool FxTimeLineEditWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
-{
-	m_curFxItem = fxt;
-
 	// clear all tracks (and items) in the widget
 	clear();
 
@@ -40,7 +38,7 @@ bool FxTimeLineEditWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 	return true;
 }
 
-bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
+bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 {
 	if (!fxt)
 		return false;
@@ -92,6 +90,48 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	return true;
 }
 
+TimeLineItem *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+{
+	ExtTimeLineItem * tlItem = new ExtTimeLineItem(timeline, trackId);
+	qDebug() << "new item";
+	return tlItem;
+}
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------------------
+
+FxTimeLineEditWidget::FxTimeLineEditWidget()
+	: m_timeline(new ExtTimeLineWidget())
+{
+	setupUi(this);
+
+	mainLayout->addWidget(m_timeline);
+}
+
+FxTimeLineEditWidget::~FxTimeLineEditWidget()
+{
+	delete m_timeline;
+}
+
+FxTimeLineItem *FxTimeLineEditWidget::currentFxItem() const
+{
+	return m_curFxItem.data();
+}
+
+bool FxTimeLineEditWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
+{
+	m_curFxItem = fxt;
+
+	return m_timeline->setFxTimeLineItem(fxt);
+}
+
+bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
+{
+
+	return m_timeline->copyToFxTimeLineItem(fxt);
+}
+
 void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
 {
 	qDebug() << "close event" << m_curFxItem;
@@ -101,9 +141,3 @@ void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
 	deleteLater();
 }
 
-TimeLineItem *FxTimeLineEditWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
-{
-	ExtTimeLineItem * tlItem = new ExtTimeLineItem(timeline, trackId);
-	qDebug() << "new item";
-	return tlItem;
-}

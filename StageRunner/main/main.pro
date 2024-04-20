@@ -357,7 +357,8 @@ FORMS    += \
 	../gui/stagerunnermainwin.ui \
 	../gui/universeeditorwidget.ui \
 	../gui/videostatuswidget.ui \
-	../system/messagedialog.ui
+	../system/messagedialog.ui \
+	../widgets/fxtimelineeditwidget.ui
 
 RESOURCES += \
 	../gfx_ressource.qrc

@@ -32,6 +32,7 @@ private:
 	void init();
 
 	friend class FxTimeLineEditWidget;
+	friend class ExtTimeLineWidget;
 };
 
 #endif // FXTIMELINEOBJ_H

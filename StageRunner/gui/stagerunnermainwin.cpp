@@ -152,14 +152,23 @@ StageRunnerMainWin::~ StageRunnerMainWin()
 
 void StageRunnerMainWin::initModules()
 {
-	TimeLineWidget *timeLineWid = new FxTimeLineEditWidget();
-	timelineLayout->addWidget(timeLineWid);
+	TimeLineWidget *tlwid = new TimeLineWidget();
+	timelineLayout->addWidget(tlwid);
 
 	// populize with some timeline items
-	TimeLineItem *item = timeLineWid->addTimeLineItem(0, 10000, "item 1", 1);
+	tlwid->addTimeLineItem(0, 10000, "item 1", 1);
 
-	item = timeLineWid->addTimeLineItem(50000, 10000, "item 2", 2);
+	TimeLineItem *item = tlwid->addTimeLineItem(50000, 10000, "item 2", 2);
 	item->setBackgroundColor(0x552222);
+
+	// FxTimeLineEditWidget *fxTimeLineWid = new FxTimeLineEditWidget();
+	// timelineLayout->addWidget(fxTimeLineWid);
+
+	// // populize with some timeline items
+	// fxTimeLineWid->timeLineWidget()->addTimeLineItem(0, 10000, "item 1", 1);
+
+	// TimeLineItem *item = fxTimeLineWid->timeLineWidget()->addTimeLineItem(50000, 10000, "item 2", 2);
+	// item->setBackgroundColor(0x552222);
 }
 
 void StageRunnerMainWin::initConnects()
