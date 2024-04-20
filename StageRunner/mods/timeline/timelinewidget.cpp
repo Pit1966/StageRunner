@@ -52,6 +52,7 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	m_cursor = new TimeLineCursor(this);
 	m_scene->addItem(m_cursor);
 	m_cursor->setPos(30, 0);
+	m_cursor->setZValue(100);
 
 	// QGraphicsRectItem *gitem = new QGraphicsRectItem(50,50, 50, 10);
 	// m_scene->addItem(gitem);
@@ -125,10 +126,12 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 		m_trackYOffsets.append(m_trackYOffsets.last() + m_defaultTrackHeight);
 	}
 
-	TimeLineItem *item = new TimeLineItem(this, trackID);
-	item->setLabel(label);
-	item->setDuration(durationMs);
-	item->setPosition(posMs);
+	TimeLineItem *item = createNewTimeLineItem(this, trackID);		//new TimeLineItem(this, trackID);
+	if (!item->isFirstInitReady()) {
+		item->setLabel(label);
+		item->setDuration(durationMs);
+		item->setPosition(posMs);
+	}
 	item->setYPos(m_trackYOffsets.at(trackID));
 
 	m_itemLists[trackID].append(item);
@@ -149,6 +152,23 @@ TimeLineItem *TimeLineWidget::at(int trackID, int idx)
 		return nullptr;
 
 	return m_itemLists[trackID].at(idx);
+}
+
+bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
+{
+	for (int t=0; t<TIMELINE_MAX_TRACKS;t++) {
+		if (m_itemLists[t].contains(item)) {
+			// remove item from scene
+			m_scene->removeItem(item);
+			// remove item from internal list
+			m_itemLists[t].removeOne(item);
+			// delete instance later, if requested
+			if (deleteLater)
+				item->deleteLater();
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -285,7 +305,7 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	// get size of child TimeLineGfxView
 
 	qreal xsize = m_view->width() - 4;
-	qreal xvsize = m_view->viewport()->geometry().width();
+	// qreal xvsize = m_view->viewport()->geometry().width();
 	// qreal ysize = m_view->height() - 4;
 
 	// calculate pixel/time convertion factors
@@ -313,6 +333,20 @@ void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent */*event*/)
 	// setTimeLineViewRangeMs(30000);
 	// clear();
 	currentVisibleRect();
+}
+
+/**
+ * @brief Create a standard TimeLineItem and return address.
+ * @param timeline
+ * @param trackId
+ * @return Address of newly created item.
+ *
+ * Reimplement this function in your derived class in order to automatically generate
+ * more complex TimeLineItems.
+ */
+TimeLineItem *TimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+{
+	return new TimeLineItem(timeline, trackId);
 }
 
 /**

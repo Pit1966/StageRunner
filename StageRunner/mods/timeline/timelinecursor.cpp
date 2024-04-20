@@ -108,7 +108,15 @@ void TimeLineCursor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		// calc new time position
 		m_positionMs = m_timeline->msPerPixel() * pos.x();
 
-		setPos(pos.x(),	y());
+		if (pos.x() < 0) {
+			setPos(0, y());
+		}
+		else if (pos.x() > m_timeline->width()) {
+			setPos(m_timeline->width(), y());
+		}
+		else {
+			setPos(pos.x(), y());
+		}
 		// QGraphicsItem::mouseMoveEvent(event);
 		// update();
 	}

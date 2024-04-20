@@ -18,6 +18,7 @@ In der GUI (AudioControl) wird die Ablaufzeit der Sounddatei nicht zurückgesetz
 
 Features:
 
+- loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
 
 (ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten

@@ -989,6 +989,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			if (!isAutoRepeat) {
 				appCentral->unitFx->stopAllFxSequences();
 				appCentral->unitFx->stopAllFxScripts();
+				appCentral->unitFx->stopAllTimeLines();
 				appCentral->lightBlack(0);
 				appCentral->videoBlack(0);
 				appCentral->unitLight->setYadiInOutMergeMode(0);			// Set Yadi devices to HTP mode
@@ -1088,7 +1089,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 //		appCentral->userSettings->pLastProjectLoadPath = "";
 	}
 
-	// This stops and removes all running sequences
+	// This stops and removes all running sequences, timelines and scripts
 	appCentral->stopAllSequencesAndPlaylists();
 
 	if (appCentral->unitAudio->isValid()) {

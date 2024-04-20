@@ -36,11 +36,13 @@ class FxSceneItem;
 class FxAudioItem;
 class FxPlayListItem;
 class FxScriptItem;
+class FxTimeLineItem;
 class FxExecLoop;
 class ExecLoopThreadInterface;
 class Executer;
 class FxListExecuter;
 class ScriptExecuter;
+class TimeLineExecuter;
 class ExecCenter;
 
 class FxControl : public QObject
@@ -59,7 +61,6 @@ public:
 	FxListExecuter * startFxSequence(FxSeqItem *fxseq);
 	bool stopFxSequence(FxSeqItem *fxseq);
 	int stopAllFxSequences();
-	int stopAllFxScripts();
 	bool pauseFxPlaylist(FxPlayListItem *fxplay);
 	bool stopFxPlayList(FxPlayListItem *fxplay);
 	int pauseAllFxPlaylist();
@@ -67,7 +68,11 @@ public:
 
 	ScriptExecuter *startFxScript(FxScriptItem *fxscript);
 	bool stopFxScript(FxScriptItem *fxscript);
+	int stopAllFxScripts();
 
+	TimeLineExecuter *startFxTimeLine(FxTimeLineItem *fxtimeline);
+	bool stopFxTimeLine(FxTimeLineItem *fxtimeline);
+	int stopAllTimeLines();
 
 
 public slots:

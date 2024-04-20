@@ -330,11 +330,13 @@ void pint32::initPara(const QString & name, qint32 p_min, qint32 p_max, qint32 p
 
 void pint32::cloneFrom(const PrefVarCore &other)
 {
-	PrefVarCore::cloneFrom(other);
-	pmin = static_cast<const pint32 &>(other).pmin;
-	pmax = static_cast<const pint32 &>(other).pmax;
-	pvalue = static_cast<const pint32 &>(other).pvalue;
-	pdefault = static_cast<const pint32 &>(other).pdefault;
+	if (other.pType() == pType()) {
+		PrefVarCore::cloneFrom(other);
+		pmin = static_cast<const pint32 &>(other).pmin;
+		pmax = static_cast<const pint32 &>(other).pmax;
+		pvalue = static_cast<const pint32 &>(other).pvalue;
+		pdefault = static_cast<const pint32 &>(other).pdefault;
+	}
 }
 
 void pint32::set_value(QVariant val)

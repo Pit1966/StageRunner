@@ -24,6 +24,8 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event) override;
 
+	TimeLineItem * createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1) override;
+
 };
 
 #endif // FXTIMELINEEDITWIDGET_H

@@ -42,6 +42,7 @@ class FxItem;
 class FxSceneItem;
 class FxScriptItem;
 class FxScriptList;
+class FxTimeLineItem;
 
 typedef QList<FxItem*> FxItemList;
 
@@ -53,7 +54,8 @@ public:
 		EXEC_BASE,
 		EXEC_FXLIST,
 		EXEC_SCENE,
-		EXEC_SCRIPT
+		EXEC_SCRIPT,
+		EXEC_TIMELINE
 	};
 	enum STATE {
 		EXEC_IDLE,
@@ -86,7 +88,7 @@ protected:
 public:
 	inline int useCount() const {return use_cnt;}
 	void setIdString(const QString & str);
-	inline virtual TYPE type() {return EXEC_BASE;}
+	inline virtual TYPE type() const {return EXEC_BASE;}
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
 	virtual void processProgress();
@@ -137,7 +139,7 @@ private:
 	mutable int m_calculatedExecutionTime;				// this is calculated execution time as a sum of all FxItems in the sequence (-1: is uncalculated)
 
 public:
-	inline TYPE type() {return EXEC_FXLIST;}
+	inline TYPE type() const override {return EXEC_FXLIST;}
 	bool processExecuter();
 	void processProgress();
 
@@ -190,7 +192,7 @@ protected:
 	LIGHT::SceneSeqState sceneState;
 
 public:
-	inline TYPE type() {return EXEC_SCENE;}
+	inline TYPE type() const override {return EXEC_SCENE;}
 	bool processExecuter();
 
 protected:
@@ -218,7 +220,7 @@ protected:
 	bool m_disableMultiStart;
 
 public:
-	inline TYPE type() {return EXEC_SCRIPT;}
+	inline TYPE type() const override {return EXEC_SCRIPT;}
 	bool processExecuter();
 	void processProgress();
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
@@ -255,5 +257,9 @@ signals:
 
 	friend class ExecCenter;
 };
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
 
 #endif // FXLISTEXECUTER_H

@@ -5,6 +5,7 @@
 #include "tool/varset.h"
 #include "tool/varsetlist.h"
 #include "mods/timeline/timeline_defines.h"
+#include "fx/fx_defines.h"
 
 #include <QCoreApplication>
 
@@ -23,6 +24,8 @@ public:
 	virtual ~FxTimeLineItem();
 
 	void clear();
+	int timeLineObjCount(uint trackID) const;
+	FxTimeLineObj *timeLineObjAt(uint trackID, int idx) const;
 
 	qint32 loopValue() const override;
 	void setLoopValue(qint32 val) override;

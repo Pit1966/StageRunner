@@ -39,6 +39,22 @@ void FxTimeLineItem::clear()
 	}
 }
 
+int FxTimeLineItem::timeLineObjCount(uint trackID) const
+{
+	if (trackID < TIMELINE_MAX_TRACKS)
+		return m_timelines[trackID].size();
+
+	return 0;
+}
+
+FxTimeLineObj *FxTimeLineItem::timeLineObjAt(uint trackID, int idx) const
+{
+	if (trackID < TIMELINE_MAX_TRACKS)
+		return m_timelines[trackID].at(idx);
+
+	return nullptr;
+}
+
 qint32 FxTimeLineItem::loopValue() const
 {
 	return 0;

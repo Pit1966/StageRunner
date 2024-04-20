@@ -23,12 +23,13 @@ enum GRAB {
 };
 
 public:
-	QVariant userData;
+	QVariant userData;			// payload data for arbitrary usage
 
-private:
+protected:
 	int m_id					= 0;
-	int m_type					= TL_ITEM;
+	int m_itemType				= TL_ITEM;
 	int m_trackId				= 0;
+	bool m_isFirstInit			= false;
 
 	// user data
 	qreal m_penWidthBorder		= 1;
@@ -48,8 +49,9 @@ private:
 
 public:
 	TimeLineItem(TimeLineWidget *timeline, int trackId = 1);
-	int type() const override {return m_type;}
+	int type() const override {return m_itemType;}
 	int trackID() const {return m_trackId;}
+	bool isFirstInitReady() const {return m_isFirstInit;}
 
 	qreal yPos() const;
 	void setYPos(qreal yPixelPos);
@@ -75,6 +77,13 @@ protected:
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 	void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+
+	// propagade some mouse events to derived classes
+	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
+	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
+
+signals:
+	void labelChanged(const QString &txt);
 
 };
 

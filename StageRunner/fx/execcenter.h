@@ -38,8 +38,10 @@ class FxListExecuter;
 class FxList;
 class FxSceneItem;
 class FxScriptItem;
+class FxTimeLineItem;
 class SceneExecuter;
 class ScriptExecuter;
+class TimeLineExecuter;
 
 class ExecCenter : public QObject
 {
@@ -56,7 +58,6 @@ public:
 	~ExecCenter();
 
 	Executer * findExecuter(const FxItem *fx);
-	ScriptExecuter * findScriptExecuter(const FxItem *fx);
 	bool exists(Executer *exec);
 	bool useExecuter(Executer *exec);
 	bool freeExecuter(Executer *exec);
@@ -71,6 +72,9 @@ public:
 	FxListExecuter * findFxListExecuter(const FxItem *fx);
 	SceneExecuter * newSceneExecuter(FxSceneItem *scene, FxItem *parentFx);
 	ScriptExecuter * newScriptExecuter(FxScriptItem *script, FxItem *parentFx);
+	ScriptExecuter * findScriptExecuter(const FxItem *fx);
+	TimeLineExecuter * newTimeLineExecuter(FxTimeLineItem *timeline, FxItem *parentFx);
+	TimeLineExecuter * findTimeLineExecuter(const FxItem *fx);
 
 	void queueRemove(Executer *exec);
 

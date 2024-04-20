@@ -22,7 +22,7 @@ private:
 	QLineF m_line;
 	QColor m_lineCol			= 0xaaaaaa;
 	QColor m_handleBorderCol	= 0xaaaaaa;
-	QColor m_handleCol			= 0xaa5555;
+	QColor m_handleCol			= 0x228080;
 	qreal m_height	= 40;
 
 	// temporary

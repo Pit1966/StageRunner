@@ -36,7 +36,11 @@ void TimeLineItem::setEndPosition(int ms)
 
 void TimeLineItem::setLabel(const QString &label)
 {
-	m_label = label;
+	if (m_label != label) {
+		m_label = label;
+		update();
+		emit labelChanged(label);
+	}
 }
 
 void TimeLineItem::setBackgroundColor(const QColor &col)
@@ -92,7 +96,12 @@ void TimeLineItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_isClicked = true;
 		m_clickXSize = m_xSize;
 		qDebug() << "clicked item" << m_label << "at pos" << m_itemPos << "duration [ms]" << duration();
-	} else {
+		leftClicked(event);
+	}
+	else if (event->button() == Qt::RightButton) {
+		rightClicked(event);
+	}
+	else {
 		m_isClicked = false;
 	}
 }

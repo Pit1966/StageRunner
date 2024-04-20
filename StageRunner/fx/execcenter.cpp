@@ -24,6 +24,7 @@
 #include "execcenter.h"
 #include "log.h"
 #include "executer.h"
+#include "timelineexecuter.h"
 #include "appcentral.h"
 #include "lightcontrol.h"
 #include "fxcontrol.h"
@@ -60,12 +61,7 @@ Executer *ExecCenter::findExecuter(const FxItem *fx)
 		}
 	}
 	executerList.unlock();
-	return 0;
-}
-
-ScriptExecuter *ExecCenter::findScriptExecuter(const FxItem *fx)
-{
-	return dynamic_cast<ScriptExecuter*>(findExecuter(fx));
+	return nullptr;
 }
 
 bool ExecCenter::exists(Executer *exec)
@@ -186,6 +182,29 @@ ScriptExecuter *ExecCenter::newScriptExecuter(FxScriptItem *script, FxItem *pare
 
 	emit executerCreated(exec);
 	return exec;
+}
+
+ScriptExecuter *ExecCenter::findScriptExecuter(const FxItem *fx)
+{
+	return dynamic_cast<ScriptExecuter*>(findExecuter(fx));
+}
+
+TimeLineExecuter *ExecCenter::newTimeLineExecuter(FxTimeLineItem *timeline, FxItem *parentFx)
+{
+	TimeLineExecuter *exec = new TimeLineExecuter(myApp, timeline, parentFx);
+
+	executerList.lockAppend(exec);
+
+	connect(exec, SIGNAL(deleteMe(Executer*)), this, SLOT(deleteExecuter(Executer*)), Qt::QueuedConnection);
+	connect(exec, SIGNAL(changed(Executer*)), this, SLOT(on_executer_changed(Executer*)), Qt::DirectConnection);
+
+	emit executerCreated(exec);
+	return exec;
+}
+
+TimeLineExecuter *ExecCenter::findTimeLineExecuter(const FxItem *fx)
+{
+	return dynamic_cast<TimeLineExecuter*>(findExecuter(fx));
 }
 
 void ExecCenter::queueRemove(Executer *exec)

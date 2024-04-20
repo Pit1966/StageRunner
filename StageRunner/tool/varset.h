@@ -157,6 +157,7 @@ public:
 	pbool * addDynamicPbool(const QString & name, bool p_default = false, const QString & descrip = "");
 	pstring * addDynamicFunction(const QString & func_name, const QString & func_para);
 
+
 	inline bool contains(PrefVarCore * varcore) {return varList.lockContains(varcore);}
 	bool removeOne(PrefVarCore * varcore);
 

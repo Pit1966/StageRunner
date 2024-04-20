@@ -1,6 +1,7 @@
 #include "fxtimelineeditwidget.h"
 #include "fx/fxtimelineitem.h"
 #include "fx/fxtimelineobj.h"
+#include "fx/exttimelineitem.h"
 #include "mods/timeline/timelineitem.h"
 
 FxTimeLineEditWidget::FxTimeLineEditWidget()
@@ -29,7 +30,10 @@ bool FxTimeLineEditWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 
 		for (int i=0; i<varset.size(); i++) {
 			FxTimeLineObj *obj = varset.at(i);
-			/*TimeLineItem *tli = */addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
+			TimeLineItem *tli = addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
+			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
+			extTLI->m_fxID = obj->m_fxID;
+			extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
 		}
 	}
 
@@ -52,14 +56,20 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		// const QList<TimeLineItem*> &timelinelist = m_itemLists[t];
 		VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 
-
 		int i = -1;
 		// now copy the elements of the track
 		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
 		// is used in the TimeLineWidget
 		while (++i < m_itemLists[trackID].size()) {
 			TimeLineItem *tli = at(trackID, i);
+			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
+
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
+			if (extTLI) {
+				obj->m_fxID = extTLI->m_fxID;
+				obj->m_linkedObjType = extTLI->m_linkedObjType;
+			}
+
 			if (i < varset.size()) {
 				if (varset.at(i)->isEqual(obj)) {
 					// item not modified
@@ -89,4 +99,11 @@ void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
 		copyToFxTimeLineItem(m_curFxItem);
 
 	deleteLater();
+}
+
+TimeLineItem *FxTimeLineEditWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+{
+	ExtTimeLineItem * tlItem = new ExtTimeLineItem(timeline, trackId);
+	qDebug() << "new item";
+	return tlItem;
 }

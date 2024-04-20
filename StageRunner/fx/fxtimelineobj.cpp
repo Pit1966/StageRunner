@@ -14,10 +14,13 @@ FxTimeLineObj::FxTimeLineObj(const FxTimeLineObj &o)
 	: VarSet()
 {
 	init();
+	// cloneFrom(o);
 	trackId = o.trackId;
 	posMs = o.posMs;
 	lenMs = o.lenMs;
 	label = o.label;
+	m_linkedObjType = o.m_linkedObjType;
+	m_fxID = o.m_fxID;
 }
 
 void FxTimeLineObj::clear()
@@ -33,10 +36,12 @@ bool FxTimeLineObj::operator ==(const FxTimeLineObj &o)
 
 bool FxTimeLineObj::isEqual(const FxTimeLineObj *o)
 {
-	return trackId == o->trackId
+	return m_linkedObjType == o->m_linkedObjType
+			&& trackId == o->trackId
 			&& posMs == o->posMs
 			&& lenMs == o->lenMs
-			&& label == o->label;
+			&& label == o->label
+			&& m_fxID == o->m_fxID;
 }
 
 void FxTimeLineObj::init()
@@ -47,4 +52,6 @@ void FxTimeLineObj::init()
 	addExistingVar(posMs,"PosMs");
 	addExistingVar(lenMs,"LenMs");
 	addExistingVar(label, "Label");
+	addExistingVar(m_linkedObjType, "Type");
+	addExistingVar(m_fxID, "FxId");
 }

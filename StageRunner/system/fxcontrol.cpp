@@ -24,21 +24,25 @@
 #include "fxcontrol.h"
 #include "config.h"
 #include "log.h"
-#include "appcentral.h"
-#include "execcenter.h"
-#include "executer.h"
-#include "fxseqitem.h"
-#include "fxsceneitem.h"
-#include "fxplaylistitem.h"
-#include "execloop.h"
-#include "execloopthreadinterface.h"
-#include "toolclasses.h"
-#include "fxlistwidget.h"
-#include "audiocontrol.h"
-#include "fxlistwidgetitem.h"
-#include "fxlist.h"
-#include "fxscriptitem.h"
-#include "fxscriptwidget.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "appcontrol/execloop.h"
+#include "appcontrol/execloopthreadinterface.h"
+#include "fx/execcenter.h"
+#include "fx/executer.h"
+#include "fx/fxlist.h"
+#include "fx/fxplaylistitem.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxscriptitem.h"
+#include "fx/fxseqitem.h"
+#include "fx/fxtimelineitem.h"
+#include "fx/timelineexecuter.h"
+#include "gui/fxlistwidget.h"
+#include "gui/fxlistwidgetitem.h"
+#include "gui/fxscriptwidget.h"
+#include "tool/toolclasses.h"
+#include "widgets/fxtimelineeditwidget.h"
+
 
 FxControl::FxControl(AppCentral &appCentral, ExecCenter &exec_center) :
 	QObject()
@@ -155,29 +159,6 @@ int FxControl::stopAllFxSequences()
 				count++;
 				exec->setPaused(true);
 				exec->destroyLater();
-			}
-		}
-	}
-
-	// Don't forget to unlock the executer list
-	execCenter.unlockExecuterList();
-	return count;
-}
-
-int FxControl::stopAllFxScripts()
-{
-	int count = 0;
-	// This fetches a reference to the executer list and locks it!!
-	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
-
-	QMutableListIterator<Executer*>it(execlist);
-	while (it.hasNext()) {
-		Executer *exec = it.next();
-		if (exec->type() == Executer::EXEC_SCRIPT) {
-			if (exec->state() != Executer::EXEC_DELETED) {
-				count++;
-				exec->setFinish();
-				// exec->destroyLater();
 			}
 		}
 	}
@@ -363,6 +344,120 @@ bool FxControl::stopFxScript(FxScriptItem *fxscript)
 	// Don't forget to unlock the executer list
 	execCenter.unlockExecuterList();
 	return found;
+}
+
+
+int FxControl::stopAllFxScripts()
+{
+	int count = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->type() == Executer::EXEC_SCRIPT) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				count++;
+				exec->setFinish();
+				// exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return count;
+}
+
+TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline)
+{
+	if (!FxItem::exists(fxtimeline)) {
+		qWarning("FxTimeLineItem not found in pool");
+		return nullptr;
+	}
+
+	TimeLineExecuter *exec = myApp.execCenter->findTimeLineExecuter(fxtimeline);
+	if (exec && exec->isMultiStartDisabled()) {
+		LOGTEXT(tr("<font color=green>Start timeline</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
+				.arg(fxtimeline->name()));
+		return nullptr;
+	} else {
+		LOGTEXT(tr("<font color=green>Start timeline</font> %1").arg(fxtimeline->name()));
+	}
+
+	// Create an executor for the script
+	exec = myApp.execCenter->newTimeLineExecuter(fxtimeline, fxtimeline->parentFxItem());
+
+	// Determine what the FxListWidget is where the FxTimeLineItem comes from
+	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxtimeline);
+	if (parentwid) {
+		/// @todo timeline
+		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxtimeline);
+		connect(exec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+	}
+
+	// Determine the FxTimeLineEditWidget that is the editing widget of the timeline
+// 	FxTimeLineEditWidget *editwid = FxTimeLineEditWidget::findParentFxTimeLineEditWidget(fxtimeline);
+// 	if (editwid) {
+// 		/// @todo timeline
+// //		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
+// //		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
+// 	}
+
+
+	// Give control for executer to FxControl loop
+	exec->activateProcessing();
+
+	return exec;
+}
+
+bool FxControl::stopFxTimeLine(FxTimeLineItem *fxtimeline)
+{
+	bool found = false;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->originFx() == fxtimeline && exec->type() == Executer::EXEC_TIMELINE) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				found = true;
+				/// @todo: Search for child executers. Both. SceneExecuter and FxListExecuter
+				// Stop TimeLine Executer
+				exec->setPaused(true);
+				exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return found;
+}
+
+int FxControl::stopAllTimeLines()
+{
+	int count = 0;
+	// This fetches a reference to the executer list and locks it!!
+	MutexQList<Executer*> &execlist = execCenter.lockAndGetExecuterList();
+
+	QMutableListIterator<Executer*>it(execlist);
+	while (it.hasNext()) {
+		Executer *exec = it.next();
+		if (exec->type() == Executer::EXEC_TIMELINE) {
+			if (exec->state() != Executer::EXEC_DELETED) {
+				count++;
+				exec->setFinish();
+				// exec->destroyLater();
+			}
+		}
+	}
+
+	// Don't forget to unlock the executer list
+	execCenter.unlockExecuterList();
+	return count;
 }
 
 FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)

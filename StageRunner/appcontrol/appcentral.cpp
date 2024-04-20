@@ -25,29 +25,29 @@
 #include "appcentral.h"
 #include "audiocontrol.h"
 #include "fxcontrol.h"
-#include "fxlist.h"
-#include "fxitem.h"
-#include "fxaudioitem.h"
-#include "fxsceneitem.h"
-#include "fxclipitem.h"
-#include "fxscriptitem.h"
+#include "fx/fxlist.h"
+#include "fx/fxitem.h"
+#include "fx/fxaudioitem.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxclipitem.h"
+#include "fx/fxscriptitem.h"
+#include "fx/fxtimelineitem.h"
 #include "project.h"
 #include "appcontrol/usersettings.h"
 #include "appcontrol/colorsettings.h"
-#include "fxlist.h"
 #include "ioplugincentral.h"
 #include "qlcioplugin.h"
-#include "lightcontrol.h"
-#include "pluginmapping.h"
+#include "system/lightcontrol.h"
+#include "appcontrol/pluginmapping.h"
 #include "messagehub.h"
-#include "execcenter.h"
-#include "executer.h"
+#include "fx/execcenter.h"
+#include "fx/executer.h"
 #include "fxlistvarset.h"
-#include "fxlistwidget.h"
-#include "videocontrol.h"
-#include "dmxuniverseproperty.h"
+#include "gui/fxlistwidget.h"
+#include "system/videocontrol.h"
+#include "system/dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
-#include "netserver.h"
+#include "system/netserver.h"
 
 #include <QFileDialog>
 
@@ -132,6 +132,7 @@ void AppCentral::stopAllSequencesAndPlaylists()
 	unitFx->stopAllFxPlaylists();
 	unitFx->stopAllFxSequences();
 	unitFx->stopAllFxScripts();
+	unitFx->stopAllTimeLines();
 }
 
 
@@ -649,6 +650,19 @@ void AppCentral::executeFxCmd(FxItem *fx, CtrlCmd cmd, Executer * exec)
 		}
 
 		break;
+
+	case FX_TIMELINE:
+		switch (cmd) {
+		case CMD_FX_START:
+			unitFx->startFxTimeLine(static_cast<FxTimeLineItem*>(fx));
+			break;
+		case CMD_FX_STOP:
+			unitFx->stopFxTimeLine(static_cast<FxTimeLineItem*>(fx));
+			break;
+		default:
+			break;
+
+		}
 
 	default:
 		break;

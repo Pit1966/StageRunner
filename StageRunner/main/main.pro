@@ -95,6 +95,7 @@ SOURCES += \
 	../appcontrol/usersettings.cpp \
 	../fx/execcenter.cpp \
 	../fx/executer.cpp \
+	../fx/exttimelineitem.cpp \
 	../fx/fxaudioitem.cpp \
 	../fx/fxcueitem.cpp \
 	../fx/fxitem.cpp \
@@ -108,6 +109,7 @@ SOURCES += \
 	../fx/fxseqitem.cpp \
 	../fx/fxtimelineitem.cpp \
 	../fx/fxtimelineobj.cpp \
+	../fx/timelineexecuter.cpp \
 	../gui/audiocontrolwidget.cpp \
 	../gui/audioslotwidget.cpp \
 	../gui/consolidatedialog.cpp \
@@ -195,6 +197,7 @@ unix {
 
 HEADERS  += \
 	../appcontrol/appcentral.h \
+	../appcontrol/audiocontrol.h \
 	../appcontrol/colorsettings.h \
 	../appcontrol/execloop.h \
 	../appcontrol/execloopthreadinterface.h \
@@ -209,6 +212,8 @@ HEADERS  += \
 	../config.h \
 	../fx/execcenter.h \
 	../fx/executer.h \
+	../fx/exttimelineitem.h \
+	../fx/fx_defines.h \
 	../fx/fxaudioitem.h \
 	../fx/fxclipitem.h \
 	../fx/fxcueitem.h \
@@ -223,6 +228,7 @@ HEADERS  += \
 	../fx/fxseqitem.h \
 	../fx/fxtimelineitem.h \
 	../fx/fxtimelineobj.h \
+	../fx/timelineexecuter.h \
 	../gui/audiocontrolwidget.h \
 	../gui/audioslotwidget.h \
 	../gui/consolidatedialog.h \
@@ -263,7 +269,6 @@ HEADERS  += \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \
-	../system/audiocontrol.h \
 	../system/audioformat.h \
 	../system/audioiodevice.h \
 	../system/audiooutput/iodeviceaudiobackend.h \

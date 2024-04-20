@@ -34,6 +34,7 @@
 #include "fxsceneitem.h"
 #include "fxscriptitem.h"
 #include "fxclipitem.h"
+#include "fxtimelineitem.h"
 #include "usersettings.h"
 #include "qtstatictools.h"
 #include "dmxchannel.h"
@@ -47,7 +48,7 @@ using namespace SCRIPT;
 Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	: myApp(app_central)
 	, originFxItem(originFx)
-	, parentFxItem(0)
+	, parentFxItem(nullptr)
 	, eventTargetTimeMs(0)
 	, lastProgressTimeMs(0)
 	, isWaitingForAudio(false)
@@ -697,7 +698,7 @@ void ScriptExecuter::processProgress()
 	if (state() == EXEC_FINISH && m_breakOnCancel) {
 		if (m_currentLineNum < m_script.size()) {
 			// fadeout all scenes that where cloned by this executer
-			for (FxSceneItem *fxs : m_clonedSceneList) {
+			for (FxSceneItem *fxs : qAsConst(m_clonedSceneList)) {
 				fxs->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, 200);
 			}
 			LOGTEXT(tr("<font color=darkGreen>Script</font> '%1' <font color=darkOrange>Canceled</font>")
@@ -1058,7 +1059,7 @@ bool ScriptExecuter::executeCmdStop(FxScriptLine *line)
 							.arg(originFxItem->name())
 							.arg(scene->name())
 							.arg(line->lineNumber()));
-					QList<FxItem*>fxlist = getExecuterTempCopiesOfFx(fx);
+					FxItemList fxlist = getExecuterTempCopiesOfFx(fx);
 					foreach (FxItem *fx_cp, fxlist) {
 						FxSceneItem *fxsc_cp = dynamic_cast<FxSceneItem*>(fx_cp);
 						if (fxsc_cp) {
@@ -1465,3 +1466,7 @@ bool ScriptExecuter::executeSingleCmd(const QString &linestr)
 
 	return ok;
 }
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------

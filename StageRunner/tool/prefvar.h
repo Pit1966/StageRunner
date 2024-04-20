@@ -125,14 +125,14 @@ public:
 
 	inline void setDoNotCopy(bool state) {doNotCopy = state;}
 
-	inline bool isModified() {return modified_f;}
+	inline bool isModified() const {return modified_f;}
 	inline void setModified(bool state) {modified_f = state;}
 	bool writeToPrefGroup(QSettings * setting, const QString & group = "");
 	bool readFromPrefGroupSystem(QSettings * setting, const QString & group = "");
-	inline QString & pVarName() {return myname;}
-	inline QString & pDisplayName() {return dispname;}
-	inline QString & pDescription() {return description;}
-	inline PrefVarType pType() {return mytype;}
+	inline const QString & pVarName() const {return myname;}
+	inline const QString & pDisplayName() const {return dispname;}
+	inline const QString & pDescription() const {return description;}
+	inline PrefVarType pType() const {return mytype;}
 	/**
 	 * @brief Variable auslesen [virtual]
 	 * @return QVariant mit Wert der Variable
@@ -149,10 +149,10 @@ public:
 	 * @brief Prüfen, ob Variable beim Laden aus File vorhanden war
 	 * @return true, falls Variablenname im File steht
 	 */
-	inline bool existsInFile() {return exists_in_file_f;}
-	inline bool isInitialized() {return initialized_f;}
-	inline Function getFunction() {return function;}
-	inline bool isFunction() {return function != FUNC_NORMAL;}
+	inline bool existsInFile() const {return exists_in_file_f;}
+	inline bool isInitialized() const {return initialized_f;}
+	inline Function getFunction() const {return function;}
+	inline bool isFunction() const {return function != FUNC_NORMAL;}
 
 	static void debugDumpAllVars();
 	static bool writeAllToPref();
@@ -188,7 +188,7 @@ public:
 	~pbool();
 	void initPara(const QString & name, bool p_default, const QString & descrip = "");
 	inline operator bool () const { return pvalue; }								///< Zuweisung (Type conversion):  qint64 val = pint64
-	inline bool value() {return pvalue;}
+	inline bool value() const {return pvalue;}
 	/// Zuweisung: pbool val = pbool
 	inline pbool & operator = (const pbool &o) {
 		if (pvalue != o.pvalue) {
@@ -238,7 +238,7 @@ public:
 	~pint64();
 	void initPara(const QString & name, qint64 p_min, qint64 p_max, qint64 p_default, const QString & descrip = "");
 	inline operator qint64 () const { return pvalue; }			///< Zuweisung (Type conversion):  qint64 val = pint64
-	inline qint64 value() {return pvalue;}
+	inline qint64 value() const {return pvalue;}
 	inline pint64 & operator = (const pint64 &o) {
 		pmin = o.pmin;
 		pmax = o.pmax;
@@ -254,8 +254,8 @@ public:
 		if (pvalue!=val) {pvalue=val;modified_f=true;}
 		return *this;
 	}
-	inline qint64 minimum() {return pmin;}
-	inline qint64 maximum() {return pmax;}
+	inline qint64 minimum() const {return pmin;}
+	inline qint64 maximum() const {return pmax;}
 	void cloneFrom(const PrefVarCore &other);
 
 private:
@@ -288,7 +288,7 @@ public:
 	~pint32();
 	void initPara(const QString & name, qint32 p_min, qint32 p_max, qint32 p_default, const QString & descrip = "");
 	inline operator qint32 () const { return pvalue; }				///< Zuweisung (Type conversion):  qint32 val = pint32
-	inline qint32 value() {return pvalue;}
+	inline qint32 value() const {return pvalue;}
 	inline pint32 & operator = (const pint32 &o) {
 		pmin = o.pmin;
 		pmax = o.pmax;
@@ -299,13 +299,13 @@ public:
 		}
 		return *this;
 	}
-	/// Zuweisung: pint64 val = qint32
+	/// Zuweisung: pint32 val = qint32
 	inline pint32 & operator = (qint32 val) {
 		if (pvalue != val) {pvalue=val;modified_f=true;}
 		return *this;
 	}
-	inline qint32 minimum() {return pmin;}
-	inline qint32 maximum() {return pmax;}
+	inline qint32 minimum() const {return pmin;}
+	inline qint32 maximum() const {return pmax;}
 	void cloneFrom(const PrefVarCore &other);
 
 private:
@@ -334,8 +334,8 @@ public:
 	pstring();
 	~pstring();
 	void initPara(const QString & name, const QString & p_default, const QString & descrip = "");
-	inline QString value() {return pvalue;}
-	inline int size() {return pvalue.size();}
+	inline const QString & value()const {return pvalue;}
+	inline int size() const {return pvalue.size();}
 	inline operator QString () const {return pvalue;}
 	inline pstring & operator = (const pstring &o) {
 		pdefault = o.pdefault;

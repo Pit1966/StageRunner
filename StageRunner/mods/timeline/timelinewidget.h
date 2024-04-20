@@ -77,7 +77,10 @@ public:
 	int timeLineHeight() const;
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);
+	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);
 	int timeLineSize(int trackID = 1) const;
+	QGraphicsView *gfxView() const {return m_view;}
+	TimeLineGfxView *timeLineGfxView() const {return m_view;}
 
 	qreal msPerPixel() const;
 	qreal pixelToMs(qreal x) const;
@@ -93,6 +96,8 @@ public slots:
 protected:
 	void resizeEvent(QResizeEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
+
+	virtual TimeLineItem *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
 
 	void adjustSceneRectToTimelineLength();
 	void recalcPixelPosInAllItems();
