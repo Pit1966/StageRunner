@@ -10,11 +10,12 @@ TimeLineBase::TimeLineBase(TimeLineWidget *timeline)
 
 void TimeLineBase::setPosition(int ms)
 {
-	if (ms != m_positionMs) {
+	if (ms != m_positionMs || !m_wasPainted) {
 		m_positionMs = ms;
 		m_isTimePosValid = true;
 		m_isPixelPosValid = false;
 		update();
+		emit timePositionChanged(ms);
 	}
 }
 
@@ -25,6 +26,7 @@ void TimeLineBase::setDuration(int ms)
 		m_isPixelPosValid = false;
 		m_durationMs = ms;
 		update();
+		emit durationChanged(ms);
 	}
 }
 

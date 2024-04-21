@@ -70,7 +70,7 @@ public:
 	bool stopFxScript(FxScriptItem *fxscript);
 	int stopAllFxScripts();
 
-	TimeLineExecuter *startFxTimeLine(FxTimeLineItem *fxtimeline);
+	TimeLineExecuter *startFxTimeLine(FxTimeLineItem *fxtimeline, int atMs = 0);
 	bool stopFxTimeLine(FxTimeLineItem *fxtimeline);
 	int stopAllTimeLines();
 

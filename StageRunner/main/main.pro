@@ -160,6 +160,7 @@ SOURCES += \
 	../system/dmxchannel.cpp \
 	../system/dmxchanproperty.cpp \
 	../system/dmxuniverseproperty.cpp \
+	../system/extelapsedtimer.cpp \
 	../system/fxclipitem.cpp \
 	../system/fxcontrol.cpp \
 	../system/fxtimer.cpp \
@@ -281,6 +282,7 @@ HEADERS  += \
 	../system/dmxchanproperty.h \
 	../system/dmxtypes.h \
 	../system/dmxuniverseproperty.h \
+	../system/extelapsedtimer.h \
 	../system/fxcontrol.h \
 	../system/fxtimer.h \
 	../system/importfxmaster/fxMaster.h \

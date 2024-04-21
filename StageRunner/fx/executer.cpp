@@ -107,10 +107,17 @@ void Executer::destroyLater()
 	}
 }
 
-bool Executer::activateProcessing()
+bool Executer::activateProcessing(bool continueProcessing)
 {
 	if (myState == EXEC_IDLE) {
 		myState = EXEC_RUNNING;
+		if (continueProcessing) {
+			runTime.cont();
+			runTimeOne.cont();
+		} else {
+			runTime.start();
+			runTimeOne.start();
+		}
 		return true;
 	}
 	else if (myState == EXEC_RUNNING || myState == EXEC_PAUSED) {
@@ -127,6 +134,8 @@ bool Executer::deactivateProcessing()
 	case EXEC_PAUSED:
 	case EXEC_FINISH:
 		myState = EXEC_IDLE;
+		runTime.stop();
+		runTimeOne.stop();
 		return true;
 	case EXEC_DELETED:
 		return false;
@@ -258,8 +267,8 @@ bool FxListExecuter::processExecuter()
 	if (!curFx) {
 		lastProgressTimeMs = 0;
 		calculateSeqExecutionTime();
-		QString parent = parentFxItem ? parentFxItem->name() : "no parent";
-		QString origin = originFxItem ? originFxItem->name() : "no origin";
+		// QString parent = parentFxItem ? parentFxItem->name() : "no parent";
+		// QString origin = originFxItem ? originFxItem->name() : "no origin";
 		// qDebug()  << "Duration of parent" << parent << "origin" << origin << float(m_calculatedExecutionTime) / 1000 << "seconds";
 
 		fx = move_to_next_fx();
@@ -1009,21 +1018,21 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 	foreach (FxItem *fx, fxlist) {
 		switch (fx->fxType()) {
 		case FX_AUDIO:
-		{
-			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
-			int pos = getPos(restparas);
-			// qDebug() << "pos" << pos << "restparas" << restparas;
+			{
+				FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+				int pos = getPos(restparas);
+				// qDebug() << "pos" << pos << "restparas" << restparas;
 
-			if (fxa->isFxClip) {
-				ok &= myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
+				if (fxa->isFxClip) {
+					ok &= myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
+				}
+				else if (pos >= -1) {
+					ok &= myApp.unitAudio->startFxAudio(fxa, this, pos);
+				}
+				else {
+					ok &= myApp.unitAudio->startFxAudio(fxa, this);
+				}
 			}
-			else if (pos >= -1) {
-				ok &= myApp.unitAudio->startFxAudio(fxa, this, pos);
-			}
-			else {
-				ok &= myApp.unitAudio->startFxAudio(fxa, this);
-			}
-		}
 			break;
 		case FX_SCENE:
 			/// @todo it would be better to copy the scene and actually fade in the new instance here

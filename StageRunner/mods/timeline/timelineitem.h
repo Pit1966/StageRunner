@@ -55,8 +55,8 @@ public:
 
 	qreal yPos() const;
 	void setYPos(qreal yPixelPos);
-	int endPosition() const {return m_positionMs + m_durationMs;}
-	void setEndPosition(int ms);
+	int endPosition() const {return position() + duration();}
+	void moveToEndPosition(int ms);
 	const QString & label() const {return m_label;}
 	void setLabel(const QString &label);
 	void setBackgroundColor(const QColor &col);

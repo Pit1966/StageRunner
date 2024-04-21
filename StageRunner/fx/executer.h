@@ -26,6 +26,7 @@
 
 #include "commandsystem.h"
 #include "fx/fxscripttools.h"
+#include "system/extelapsedtimer.h"
 
 #include <QObject>
 #include <QString>
@@ -71,8 +72,8 @@ protected:
 	FxItem *originFxItem;						///< This should be the FxItem that has initiated the executer or NULL
 	FxItem *parentFxItem;						///< This is the parent FxItem, that contains the originFxItem or NULL
 	QString idString;
-	QElapsedTimer runTime;						///< This timer holds the overall running time of the executer
-	QElapsedTimer runTimeOne;					///< Timer holds runtime for current loop
+	ExtElapsedTimer runTime;					///< This timer holds the overall running time of the executer
+	ExtElapsedTimer runTimeOne;					///< Timer holds runtime for current loop (only used for progress!!)
 	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
 	qint64 lastProgressTimeMs;					///< May get used by derived classes
 	bool isWaitingForAudio;
@@ -94,7 +95,7 @@ public:
 	virtual void processProgress();
 
 	void destroyLater();
-	bool activateProcessing();
+	bool activateProcessing(bool continueProcessing = false);
 	bool deactivateProcessing();
 	bool setPaused(bool state);
 	bool setFinish();

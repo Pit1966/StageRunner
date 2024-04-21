@@ -29,7 +29,7 @@ void TimeLineCursor::setHeight(qreal height)
 void TimeLineCursor::recalcPixelPos()
 {
 	if (m_isTimePosValid) {
-		setX(qreal(m_positionMs) / m_timeline->msPerPixel());
+		setX(qreal(position()) / m_timeline->msPerPixel());
 		m_xSize = 1;
 	}
 }
@@ -71,16 +71,15 @@ void TimeLineCursor::paint(QPainter *painter, const QStyleOptionGraphicsItem */*
 
 	if (m_isTimePosValid) {
 		if (!m_isPixelPosValid) {
-			setX(qreal(m_positionMs) / m_timeline->msPerPixel());
+			setX(qreal(position()) / m_timeline->msPerPixel());
 			m_xSize = 1;
 		}
 	}
 	else {
 		m_isTimePosValid = true;
-		m_positionMs = m_timeline->msPerPixel() * x();
-		m_durationMs = 0;
+		setPosition(m_timeline->msPerPixel() * x());
+		setDuration(0);
 	}
-
 
 	QPen pen;
 	pen.setColor(m_lineCol);
@@ -91,6 +90,8 @@ void TimeLineCursor::paint(QPainter *painter, const QStyleOptionGraphicsItem */*
 	painter->setPen(pen);
 	painter->setBrush(m_handleCol);
 	painter->drawPolygon(m_handle);
+
+	m_wasPainted = true;
 }
 
 void TimeLineCursor::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -103,22 +104,33 @@ void TimeLineCursor::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void TimeLineCursor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	if (m_clicked) {
-		QPointF pos = event->scenePos();
+		QPointF evPos = event->scenePos();
+		// calc new time position 1
+		// int new_ms = m_timeline->msPerPixel() * evPos.x();
+		// if (new_ms < 0) {
+		// 	new_ms = 0;
+		// }
+		// else if (new_ms > m_timeline->timeLineDuration()) {
+		// 	new_ms = m_timeline->timeLineDuration();
+		// }
 
-		// calc new time position
-		m_positionMs = m_timeline->msPerPixel() * pos.x();
-
-		if (pos.x() < 0) {
-			setPos(0, y());
+		if (evPos.x() < m_timeline->leftViewPixel()) {
+			setPos(m_timeline->leftViewPixel(), y());
 		}
-		else if (pos.x() > m_timeline->width()) {
-			setPos(m_timeline->width(), y());
+		else if (evPos.x() > m_timeline->rightViewPixel()) {
+			setPos(m_timeline->rightViewPixel(), y());
 		}
 		else {
-			setPos(pos.x(), y());
+			setPos(evPos.x(), y());
 		}
 		// QGraphicsItem::mouseMoveEvent(event);
 		// update();
+
+		int new_ms = m_timeline->msPerPixel() * x();
+		if (new_ms != position()) {
+			setPosition(new_ms);
+			emit cursorMoved(new_ms);
+		}
 	}
 }
 

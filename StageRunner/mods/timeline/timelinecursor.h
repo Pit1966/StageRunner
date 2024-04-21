@@ -33,6 +33,7 @@ public:
 	int type() const override {return m_type;}
 	void setHeight(qreal height);
 	// QSizeF size() const;
+	bool isClicked() const {return m_clicked;}
 
 	void recalcPixelPos() override;
 
@@ -43,6 +44,9 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+signals:
+	void cursorMoved(int ms);
 };
 
 } // namespace PS_TL

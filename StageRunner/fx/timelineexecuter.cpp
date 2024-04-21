@@ -1,9 +1,16 @@
 #include "timelineexecuter.h"
 
+#include "log.h"
 #include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "system/lightcontrol.h"
+#include "system/videocontrol.h"
 #include "fx/fxitem.h"
 #include "fx/fxtimelineitem.h"
 #include "fx/fxtimelineobj.h"
+#include "fx/fxaudioitem.h"
+#include "fx/fxclipitem.h"
+#include "fx/fxsceneitem.h"
 #include "mods/timeline/timelineitem.h"
 
 bool TimeLineExecuter::processExecuter()
@@ -12,13 +19,31 @@ bool TimeLineExecuter::processExecuter()
 		return false;
 	}
 
-	qDebug() << "time" << runTime.elapsed() << "ms. execute obj no" << m_curObjPos + 1;
+	Event &ev = m_sortedObjEventList[m_curEventPos];
+	FxTimeLineObj *obj = ev.obj;
+	if (ev.evType == EV_BEGIN) {
+		qDebug() << "EV" << ev.evNum +1 << "begin time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
 
-	FxTimeLineObj *next = findNextObj();
-	if (!next)
+		if (obj->type() == LINKED_FXITEM) {
+			FxItem *fx = FxItem::findFxById(obj->fxID());
+			execObjBeginPosForFx(fx, ev);
+		}
+	}
+	else if (ev.evType == EV_END) {
+		qDebug() << "EV" << ev.evNum +1 << "end time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
+
+		if (obj->type() == LINKED_FXITEM) {
+			FxItem *fx = FxItem::findFxById(obj->fxID());
+			execObjEndPosForFx(fx, ev);
+		}
+
+	}
+
+	Event nextEv = findNextObj();
+	if (nextEv.evType == EV_UNKNOWN)
 		return false;			// no more active. We are ready
 
-	setEventTargetTimeAbsolute(next->posMs);
+	setEventTargetTimeAbsolute(nextEv.timeMs);
 	return true;
 }
 
@@ -28,6 +53,32 @@ void TimeLineExecuter::processProgress()
 		qDebug() << "finish timeline" << m_fxTimeLine->name();
 		destroyLater();
 	}
+	else if (myState == EXEC_RUNNING) {
+		emit playPosChanged(runTimeOne.elapsed());		///< todo timeline
+	}
+}
+
+bool TimeLineExecuter::setReplayPosition(int ms)
+{
+	if (m_sortedObjEventList.isEmpty())
+		return false;
+
+	int n = 0;
+
+	while (n < m_sortedObjEventList.size() && m_sortedObjEventList.at(n).timeMs < ms)
+		n++;
+
+	if (n >= m_sortedObjEventList.size()) {
+		LOGERROR(tr("Start position %1ms not valid for timeline: %2").arg(ms).arg(m_fxTimeLine->name()));
+		return false;
+	}
+
+	m_curEventPos = n;
+	setEventTargetTimeAbsolute(m_sortedObjEventList.at(n).timeMs);
+
+	runTime.setMs(ms);			/// @todo not correct for loop
+	runTimeOne.setMs(ms);
+	return true;
 }
 
 TimeLineExecuter::TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timeline, FxItem *parentFx)
@@ -40,7 +91,7 @@ TimeLineExecuter::TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timel
 		destroyLater();
 	}
 	else {
-		setEventTargetTimeAbsolute(m_sortedTimeLineObjList.at(m_curObjPos)->posMs);
+		setEventTargetTimeAbsolute(m_sortedObjEventList.at(m_curEventPos).timeMs);
 	}
 }
 
@@ -49,13 +100,13 @@ TimeLineExecuter::~TimeLineExecuter()
 	qDebug() << "destroyed timeline executer";
 }
 
-FxTimeLineObj *TimeLineExecuter::findNextObj()
+TimeLineExecuter::Event TimeLineExecuter::findNextObj()
 {
-	m_curObjPos++;
-	if (m_curObjPos < m_sortedTimeLineObjList.size())
-		return m_sortedTimeLineObjList.at(m_curObjPos);
+	m_curEventPos++;
+	if (m_curEventPos < m_sortedObjEventList.size())
+		return m_sortedObjEventList.at(m_curEventPos);
 
-	return nullptr;
+	return {};
 }
 
 /**
@@ -70,18 +121,104 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
 		for (int i=0; i<fx->timeLineObjCount(t); i++) {
 			FxTimeLineObj *o = fx->timeLineObjAt(t, i);
-			if (!o) break;
+			if (!o) break;			// should never happen
 
-			// insert object in list searching the correct time position
+			// insert BEGIN event of object in list searching the correct time position
 			int n = 0;
-			while (n < m_sortedTimeLineObjList.size() && o->posMs > m_sortedTimeLineObjList.at(n)->posMs)
+			while (n < m_sortedObjEventList.size() && o->beginMs() > m_sortedObjEventList.at(n).timeMs)
 				n++;
-			m_sortedTimeLineObjList.insert(n, o);
+			Event ev(EV_BEGIN);
+			ev.evNum = n;
+			ev.timeMs = o->beginMs();
+			ev.trackID = t;
+			ev.obj = o;
+			m_sortedObjEventList.insert(n, ev);
+
+			// insert END event of object in list searching the correct time position
+			n = 0;
+			while (n < m_sortedObjEventList.size() && o->endMs() > m_sortedObjEventList.at(n).timeMs)
+				n++;
+			ev.evType = EV_END;
+			ev.evNum = n;
+			ev.timeMs = o->endMs();
+			m_sortedObjEventList.insert(n, ev);
 		}
 	}
 
-	if (m_sortedTimeLineObjList.isEmpty())
+	if (m_sortedObjEventList.isEmpty())
 		return false; // nothing to execute
 
 	return true;	// at least one timeline obj in list
+}
+
+bool TimeLineExecuter::execObjBeginPosForFx(FxItem *fx, Event &ev)
+{
+	if (!fx) return false;
+
+	bool ok = false;
+
+	switch (fx->fxType()) {
+	case FX_AUDIO:
+		{
+			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+			int pos = -1;
+
+			if (fxa->isFxClip) {
+				ok = myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
+			}
+			else if (pos >= -1) {
+				ok = myApp.unitAudio->startFxAudio(fxa, this, pos);
+			}
+			else {
+				ok = myApp.unitAudio->startFxAudio(fxa, this);
+			}
+		}
+		break;
+	case FX_SCENE:
+		/// @todo it would be better to copy the scene and actually fade in the new instance here
+		/// Further the executer is not handed over to scene
+		ok = myApp.unitLight->startFxScene(static_cast<FxSceneItem*>(fx));
+		break;
+	default:
+		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
+				 .arg(m_fxTimeLine->name()));
+	}
+
+	return ok;
+}
+
+bool TimeLineExecuter::execObjEndPosForFx(FxItem *fx, Event &ev)
+{
+	if (!fx) return false;
+
+	bool ok = false;
+
+	switch (fx->fxType()) {
+	case FX_AUDIO:
+		{
+			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+			int fade_time = 3000;
+
+			if (fxa->isFxClip) {
+				myApp.unitVideo->videoBlack(fade_time);
+			}
+			else if (fade_time > 0) {
+				myApp.unitAudio->fadeoutFxAudio(fxa, fade_time);
+			}
+			else {
+				myApp.unitAudio->stopFxAudio(fxa);
+			}
+
+			ok = true;
+		}
+		break;
+	case FX_SCENE:
+		ok = myApp.unitLight->stopFxScene(static_cast<FxSceneItem*>(fx));
+		break;
+	default:
+		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
+				 .arg(m_fxTimeLine->name()));
+	}
+
+	return ok;
 }

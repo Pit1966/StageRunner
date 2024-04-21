@@ -2,8 +2,11 @@
 #include "fx/fxtimelineitem.h"
 #include "fx/fxtimelineobj.h"
 #include "fx/exttimelineitem.h"
+#include "fx/timelineexecuter.h"
 #include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelineitem.h"
+#include "system/fxcontrol.h"
+#include "appcontrol/appcentral.h"
 
 // ------------------------------------------------------------------------------------------------------------
 
@@ -101,12 +104,15 @@ TimeLineItem *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline,
 
 // ------------------------------------------------------------------------------------------------------------
 
-FxTimeLineEditWidget::FxTimeLineEditWidget()
-	: m_timeline(new ExtTimeLineWidget())
+FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central)
+	: m_aC(app_central)
+	, m_fxCtrl(app_central->unitFx)
+	, m_timeline(new ExtTimeLineWidget())
 {
 	setupUi(this);
 
 	mainLayout->addWidget(m_timeline);
+	m_timeline->setCursorPos(0);
 }
 
 FxTimeLineEditWidget::~FxTimeLineEditWidget()
@@ -139,5 +145,25 @@ void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
 		copyToFxTimeLineItem(m_curFxItem);
 
 	deleteLater();
+}
+
+
+void FxTimeLineEditWidget::on_runButton_clicked()
+{
+	if (!m_curFxItem)
+		return;
+
+	if (!m_timelineExecuter) {
+		m_timelineExecuter = m_fxCtrl->startFxTimeLine(m_curFxItem, m_timeline->cursorPos());
+		connect (m_timelineExecuter.data(), SIGNAL(playPosChanged(int)), m_timeline, SLOT(setCursorPos(int)));
+
+		if (m_timelineExecuter->isRunning()) {
+			runButton->setText("Stop");
+		}
+	}
+	else {
+		m_timelineExecuter->setFinish();
+		runButton->setText("Run");
+	}
 }
 

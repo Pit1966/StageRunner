@@ -75,6 +75,7 @@ public:
 	void clear();
 
 	int timeLineHeight() const;
+	int timeLineDuration() const {return m_timeLineLenMs;}
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);
 	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);
@@ -85,13 +86,18 @@ public:
 	qreal msPerPixel() const;
 	qreal pixelToMs(qreal x) const;
 	qreal msToPixel(qreal ms) const;
+	int leftViewPixel() const;
+	int rightViewPixel() const;
 	QRectF currentVisibleRect() const;
 
 	bool checkForRightMostItem(TimeLineItem *item);
 	TimeLineItem * findRightMostItem() const;
 
+	int cursorPos() const;
+
 public slots:
 	void setTimeLineViewRangeMs(int ms);
+	void setCursorPos(int ms);
 
 protected:
 	void resizeEvent(QResizeEvent *event);
@@ -103,6 +109,10 @@ protected:
 	void recalcPixelPosInAllItems();
 
 	void contextMenuEvent(QContextMenuEvent *event);
+
+
+private slots:
+	void onCursorMoved(int ms);
 
 signals:
 	void furthestRightItemChanged(TimeLineItem *item);

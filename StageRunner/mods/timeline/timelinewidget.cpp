@@ -53,6 +53,7 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	m_scene->addItem(m_cursor);
 	m_cursor->setPos(30, 0);
 	m_cursor->setZValue(100);
+	connect(m_cursor, SIGNAL(cursorMoved(int)), this, SLOT(onCursorMoved(int)));
 
 	// QGraphicsRectItem *gitem = new QGraphicsRectItem(50,50, 50, 10);
 	// m_scene->addItem(gitem);
@@ -199,6 +200,16 @@ qreal TimeLineWidget::msToPixel(qreal ms) const
 	return ms / m_msPerPixel;
 }
 
+int TimeLineWidget::leftViewPixel() const
+{
+	return gfxView()->horizontalScrollBar()->value();
+}
+
+int TimeLineWidget::rightViewPixel() const
+{
+	return this->width() + gfxView()->horizontalScrollBar()->value();
+}
+
 QRectF TimeLineWidget::currentVisibleRect() const
 {
 	// QRectF rect = m_view->mapToScene(m_view->viewport()->geometry()).boundingRect();
@@ -273,6 +284,15 @@ TimeLineItem *TimeLineWidget::findRightMostItem() const
 	return rItem;
 }
 
+/**
+ * @brief Return current position of time line cursor (indicator)
+ * @return int position [ms]
+ */
+int TimeLineWidget::cursorPos() const
+{
+	return m_cursor->position();
+}
+
 void TimeLineWidget::setTimeLineViewRangeMs(int ms)
 {
 	if (m_viewRangeMs == ms)
@@ -290,6 +310,16 @@ void TimeLineWidget::setTimeLineViewRangeMs(int ms)
 	recalcPixelPosInAllItems();
 
 	m_navLabel->setText(QString("view range: %1s").arg(float(ms)/1000));
+}
+
+void TimeLineWidget::setCursorPos(int ms)
+{
+	// qDebug() << "set cursor pos" << ms;
+	if (m_cursor->isClicked())
+		return;
+
+	m_cursor->setPosition(ms);
+	// m_cursor->setPos(QPointF(ms / m_msPerPixel, m_cursor->y()));
 }
 
 /**
@@ -405,6 +435,11 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 			ms = m_itemLists[2].last()->endPosition();
 		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, "item t2", 2);
 	}
+}
+
+void TimeLineWidget::onCursorMoved(int ms)
+{
+	qDebug() << "Cursor moved to" << ms;
 }
 
 } // namespace PS_TL

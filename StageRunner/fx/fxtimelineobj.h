@@ -25,6 +25,10 @@ public:
 	bool operator ==(const FxTimeLineObj &o);
 	bool isEqual(const FxTimeLineObj *o);
 
+	int beginMs() const {return posMs;}
+	int endMs() const {return posMs + lenMs;}
+	int durationMs() const {return lenMs;}
+
 	int fxID() const {return m_fxID;}
 	LINKED_OBJ_TYPE type() const {return LINKED_OBJ_TYPE(m_linkedObjType);}
 

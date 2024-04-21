@@ -25,12 +25,12 @@ void TimeLineItem::setYPos(qreal yPixelPos)
 	setY(yPixelPos);
 }
 
-void TimeLineItem::setEndPosition(int ms)
+void TimeLineItem::moveToEndPosition(int ms)
 {
 	if (ms != endPosition()) {
 		m_isPixelPosValid = false;
 		m_isTimePosValid = true;
-		m_positionMs = ms - m_durationMs;
+		setPosition(ms - duration());
 	}
 }
 
@@ -51,8 +51,8 @@ void TimeLineItem::setBackgroundColor(const QColor &col)
 void TimeLineItem::recalcPixelPos()
 {
 	if (m_isTimePosValid) {
-		setX(qreal(m_positionMs) / m_timeline->msPerPixel());
-		m_xSize = qreal(m_durationMs) / m_timeline->msPerPixel();
+		setX(qreal(position()) / m_timeline->msPerPixel());
+		m_xSize = qreal(duration()) / m_timeline->msPerPixel();
 	}
 }
 
@@ -68,14 +68,14 @@ void TimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
 	if (m_isTimePosValid) {
 		if (!m_isPixelPosValid) {
-			setX(qreal(m_positionMs) / m_timeline->msPerPixel());
-			m_xSize = qreal(m_durationMs) / m_timeline->msPerPixel();
+			setX(qreal(position()) / m_timeline->msPerPixel());
+			m_xSize = qreal(duration()) / m_timeline->msPerPixel();
 		}
 	}
 	else {
 		m_isTimePosValid = true;
-		m_positionMs = m_timeline->msPerPixel() * x();
-		m_durationMs = m_timeline->msPerPixel() * m_xSize;
+		setPosition(m_timeline->msPerPixel() * x());
+		setDuration(m_timeline->msPerPixel() * m_xSize);
 	}
 
 	QPen pen;
@@ -86,6 +86,8 @@ void TimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	painter->drawRect(m_penWidthBorder/2, m_penWidthBorder/2, m_xSize, m_ySize);
 
 	painter->drawText(5, m_ySize / 2, m_label);
+
+	m_wasPainted = true;
 }
 
 void TimeLineItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -115,7 +117,7 @@ void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 		if (m_grabMode == GRAB_RIGHT) {
 			m_xSize = m_clickXSize + xdif;
-			m_durationMs = m_xSize * m_timeline->msPerPixel();
+			setDuration(m_xSize * m_timeline->msPerPixel());
 
 			// this schedules an graphics update
 			setPos(pos() + QPointF(1,0));
@@ -126,8 +128,8 @@ void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			qreal newY = m_itemPos.y();
 			qreal newXSize = m_clickXSize - xdif;
 			// calc new time position and new duration
-			m_positionMs = m_timeline->msPerPixel() * newX;
-			m_durationMs = m_timeline->msPerPixel() * newXSize;
+			setPosition(m_timeline->msPerPixel() * newX);
+			setDuration(m_timeline->msPerPixel() * newXSize);
 
 			// set new item pos
 			setPos(newX, newY);		}
@@ -140,11 +142,11 @@ void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 				newY = 0;
 
 			// calc new time position
-			m_positionMs = m_timeline->msPerPixel() * newX;
+			setPosition(m_timeline->msPerPixel() * newX);
 			// set new item pos
 			setPos(newX, newY);
 
-			qDebug() << m_label << "current timepos" << m_positionMs << "size" << m_durationMs;
+			qDebug() << m_label << "current timepos" << position() << "size" << duration();
 		}
 	}
 }
@@ -156,13 +158,13 @@ void TimeLineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 	m_timeline->checkForRightMostItem(this);
 }
 
-void TimeLineItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void TimeLineItem::hoverEnterEvent(QGraphicsSceneHoverEvent */*event*/)
 {
 	// qDebug() << "hover enter" << m_label;
 	m_isHover = true;
 }
 
-void TimeLineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void TimeLineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
 {
 	// qDebug() << "hover leave" << m_label;
 	m_isHover = true;

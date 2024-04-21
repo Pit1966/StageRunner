@@ -370,7 +370,7 @@ int FxControl::stopAllFxScripts()
 	return count;
 }
 
-TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline)
+TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atMs)
 {
 	if (!FxItem::exists(fxtimeline)) {
 		qWarning("FxTimeLineItem not found in pool");
@@ -388,6 +388,11 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline)
 
 	// Create an executor for the script
 	exec = myApp.execCenter->newTimeLineExecuter(fxtimeline, fxtimeline->parentFxItem());
+	bool isContinue = false;
+	if (atMs > 0) {
+		exec->setReplayPosition(atMs);
+		isContinue = true;
+	}
 
 	// Determine what the FxListWidget is where the FxTimeLineItem comes from
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxtimeline);
@@ -407,7 +412,8 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline)
 
 
 	// Give control for executer to FxControl loop
-	exec->activateProcessing();
+	if (!exec->activateProcessing(isContinue))
+		LOGERROR(tr("Could not activate timeline: %1").arg(fxtimeline->name()));
 
 	return exec;
 }

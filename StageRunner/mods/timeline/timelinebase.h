@@ -14,17 +14,19 @@ class TimeLineBase : public QGraphicsObject
 {
 	Q_OBJECT
 
-protected:
-	TimeLineWidget *m_timeline;
-
+private:
 	int m_positionMs			= 0;		///< position of item in milliseconds
 	int m_durationMs			= 0;		///< length of item in milliseconds
+
+protected:
+	TimeLineWidget *m_timeline;
 
 	// current item dimensions in pixels. Depends on the timeline scaling
 	qreal m_xSize				= 200.0;
 	qreal m_ySize				= 30.0;
 	bool m_isTimePosValid		= false;	///< this is true, if m_timePosMs and m_timeLenMs are valid.
 	bool m_isPixelPosValid		= true;		///< this is true, if pixel position information is correct
+	bool m_wasPainted			= false;	///< becomes true, after first paint event
 
 public:
 	TimeLineBase(TimeLineWidget *timeline);
@@ -35,6 +37,10 @@ public:
 	void setDuration(int ms);
 
 	virtual void recalcPixelPos()	= 0;
+
+signals:
+	void timePositionChanged(int ms);
+	void durationChanged(int ms);
 
 };
 

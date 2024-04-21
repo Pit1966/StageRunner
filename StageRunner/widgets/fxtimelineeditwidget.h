@@ -11,6 +11,9 @@ using namespace PS_TL;
 
 class FxTimeLineItem;
 class FxTimeLineItem;
+class TimeLineExecuter;
+class AppCentral;
+class FxControl;
 
 class ExtTimeLineWidget : public TimeLineWidget
 {
@@ -31,11 +34,14 @@ class FxTimeLineEditWidget : public QWidget, public Ui::FxTimeLineEditWidget
 {
 	Q_OBJECT
 private:
+	AppCentral *m_aC;
+	FxControl *m_fxCtrl;
 	ExtTimeLineWidget *m_timeline;
 	QPointer<FxTimeLineItem> m_curFxItem;
+	QPointer<TimeLineExecuter> m_timelineExecuter;
 
 public:
-	FxTimeLineEditWidget();
+	FxTimeLineEditWidget(AppCentral *app_central);
 	~FxTimeLineEditWidget();
 	ExtTimeLineWidget * timeLineWidget() const {return m_timeline;}
 	FxTimeLineItem * currentFxItem() const;
@@ -46,6 +52,8 @@ public:
 protected:
 	void closeEvent(QCloseEvent *event) override;
 
+private slots:
+	void on_runButton_clicked();
 };
 
 #endif // FXTIMELINEEDITWIDGET_H
