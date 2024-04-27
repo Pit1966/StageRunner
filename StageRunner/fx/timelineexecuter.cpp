@@ -40,8 +40,10 @@ bool TimeLineExecuter::processExecuter()
 	}
 
 	Event nextEv = findNextObj();
-	if (nextEv.evType == EV_UNKNOWN)
+	if (nextEv.evType == EV_UNKNOWN) {
+		emit timeLineStatusChanged(EXEC_FINISH);
 		return false;			// no more active. We are ready
+	}
 
 	setEventTargetTimeAbsolute(nextEv.timeMs);
 	return true;
@@ -51,11 +53,16 @@ void TimeLineExecuter::processProgress()
 {
 	if (myState == EXEC_FINISH) {
 		qDebug() << "finish timeline" << m_fxTimeLine->name();
+		emit timeLineStatusChanged(EXEC_FINISH);
 		destroyLater();
 	}
 	else if (myState == EXEC_RUNNING) {
+		if (m_lastState != EXEC_RUNNING)
+			emit timeLineStatusChanged(EXEC_RUNNING);
 		emit playPosChanged(runTimeOne.elapsed());		///< todo timeline
 	}
+
+	m_lastState = myState;
 }
 
 bool TimeLineExecuter::setReplayPosition(int ms)

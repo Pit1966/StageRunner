@@ -2,6 +2,8 @@
 
 #include "timelineitem.h"
 #include "timelinecursor.h"
+#include "timelineruler.h"
+
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -9,8 +11,39 @@
 #include <QScrollBar>
 #include <QAction>
 #include <QMenu>
+#include <QGraphicsSceneMouseEvent>
 
 namespace PS_TL {
+
+
+TimeLineGfxScene::TimeLineGfxScene(TimeLineWidget *timeLineWidget, QWidget *parent)
+	: QGraphicsScene(parent)
+	, m_timeLine(timeLineWidget)
+{
+}
+
+void TimeLineGfxScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+	emit mouseHoverPosChanged(event->scenePos());
+	QGraphicsScene::mouseMoveEvent(event);
+}
+
+void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &rect)
+{
+	QList<TimeLineTrack> &tracks = m_timeLine->m_tracks;
+	for (int t=1; t<tracks.size(); t++) {
+		if (t & 1) {
+			painter->fillRect(0, tracks.at(t).yPos()-1, width(), tracks.at(t).ySize()-1, m_bg1);
+		} else {
+			painter->fillRect(0, tracks.at(t).yPos()-1, width(), tracks.at(t).ySize()-1, m_bg2);
+		}
+	}
+}
+
+
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
 
 TimeLineGfxView::TimeLineGfxView(TimeLineWidget *timeLineWidget, QGraphicsScene *scene, QWidget *parent)
 	: QGraphicsView(scene, parent)
@@ -42,11 +75,14 @@ void TimeLineGfxView::resizeEvent(QResizeEvent *event)
 TimeLineWidget::TimeLineWidget(QWidget *parent)
 	: QWidget{parent}
 {
-	m_scene = new QGraphicsScene(this);
+	m_scene = new TimeLineGfxScene(this);
 	m_view = new TimeLineGfxView(this, m_scene);
 	m_navLabel = new QLabel("navigation ...");
 
-	m_trackYOffsets.append(1);
+	connect(m_scene, SIGNAL(mouseHoverPosChanged(QPointF)), this, SLOT(onMouseHovered(QPointF)));
+
+	TimeLineTrack rulerTrack(0, 0, 34);
+	m_tracks.append(rulerTrack);
 
 	// add cursor to scene
 	m_cursor = new TimeLineCursor(this);
@@ -54,6 +90,15 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	m_cursor->setPos(30, 0);
 	m_cursor->setZValue(100);
 	connect(m_cursor, SIGNAL(cursorMoved(int)), this, SLOT(onCursorMoved(int)));
+
+
+	// add ruler to scene
+	m_ruler = new TimeLineRuler(this);
+	m_scene->addItem(m_ruler);
+	m_ruler->setPos(0, 0);
+	m_ruler->setZValue(99);
+	m_ruler->setDuration(m_timeLineLenMs);
+
 
 	// QGraphicsRectItem *gitem = new QGraphicsRectItem(50,50, 50, 10);
 	// m_scene->addItem(gitem);
@@ -110,7 +155,7 @@ void TimeLineWidget::clear()
  */
 int TimeLineWidget::timeLineHeight() const
 {
-	return qMax(m_trackYOffsets.last(), m_defaultTrackHeight * 2 + 10);
+	return qMax(m_tracks.last().yEndPos(), m_defaultTrackHeight * 2 + 10);
 }
 
 /**
@@ -123,8 +168,9 @@ int TimeLineWidget::timeLineHeight() const
  */
 TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID)
 {
-	while (m_trackYOffsets.size() <= trackID) {
-		m_trackYOffsets.append(m_trackYOffsets.last() + m_defaultTrackHeight);
+	while (m_tracks.size() <= trackID) {
+		TimeLineTrack track(trackID, m_tracks.last().yEndPos(), m_defaultTrackHeight);
+		m_tracks.append(track);
 	}
 
 	TimeLineItem *item = createNewTimeLineItem(this, trackID);		//new TimeLineItem(this, trackID);
@@ -133,7 +179,7 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 		item->setDuration(durationMs);
 		item->setPosition(posMs);
 	}
-	item->setYPos(m_trackYOffsets.at(trackID));
+	item->setYPos(m_tracks.at(trackID).yPos());
 
 	m_itemLists[trackID].append(item);
 
@@ -249,8 +295,7 @@ bool TimeLineWidget::checkForRightMostItem(TimeLineItem *item)
 	// check if item is beyond the time line lenght
 	if (newRightItem->endPosition() > m_timeLineLenMs) {
 		// extend timeline
-		m_timeLineLenMs = newRightItem->endPosition();
-		adjustSceneRectToTimelineLength();
+		setTimeLineDuration(newRightItem->endPosition());
 	}
 
 	if (m_rightMostItem != newRightItem) {
@@ -293,6 +338,36 @@ int TimeLineWidget::cursorPos() const
 	return m_cursor->position();
 }
 
+
+/**
+ * @brief Returns trackID for given y position
+ * @param y
+ * @return trackID or -1, if no track
+ *
+ * @note the first track has trackID 1 (trackID 0 is the timeline ruler)
+ */
+int TimeLineWidget::yPosToTrackId(int y)
+{
+	for (int t=0; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t).isInYRange(y))
+			return m_tracks.at(t).trackId();
+	}
+
+	return -1;
+}
+
+void TimeLineWidget::setTimeLineDuration(int ms)
+{
+	if (m_timeLineLenMs != ms) {
+		m_timeLineLenMs = ms;
+
+		m_ruler->setTimeLineDuration(ms);
+		adjustSceneRectToTimelineLength();
+
+		emit timeLineDurationChanged(ms);
+	}
+}
+
 void TimeLineWidget::setTimeLineViewRangeMs(int ms)
 {
 	if (m_viewRangeMs == ms)
@@ -318,6 +393,9 @@ void TimeLineWidget::setCursorPos(int ms)
 	if (m_cursor->isClicked())
 		return;
 
+	if (m_cursor->position() != ms) {
+		emit cursorPosChanged(ms);
+	}
 	m_cursor->setPosition(ms);
 	// m_cursor->setPos(QPointF(ms / m_msPerPixel, m_cursor->y()));
 }
@@ -363,7 +441,9 @@ void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent */*event*/)
 	// setTimeLineViewRangeMs(30000);
 	// clear();
 	currentVisibleRect();
+	setTimeLineDuration(100000);
 }
+
 
 /**
  * @brief Create a standard TimeLineItem and return address.
@@ -412,34 +492,49 @@ void TimeLineWidget::recalcPixelPosInAllItems()
 
 void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 {
+	QPointF pos1 = m_view->mapFromGlobal(event->globalPos());
+	int clickedTrackID = yPosToTrackId(pos1.y());
+	int ms = pixelToMs(pos1.x());
+	qDebug() << "ms" << ms << "pixel" << pos1.x();
+
 	QMenu menu(this);
 	QAction *act;
-	act = menu.addAction(tr("Add Item in track 1"));
-	act->setObjectName("newIn1");
-	act = menu.addAction(tr("Add Item in track 2"));
-	act->setObjectName("newIn2");
+	if (clickedTrackID > 0) {
+		act = menu.addAction(tr("Add new Item"));
+		act->setObjectName("newItem");
+	}
+	else if (clickedTrackID < 0) {
+		act = menu.addAction(tr("Add new timeline track"));
+		act->setObjectName("newTrack");
+	}
 
 	act = menu.exec(event->globalPos());
 	if (!act) return;
 
 	QString cmd = act->objectName();
-	if (cmd == "newIn1") {
-		int ms = 0;
-		if (!m_itemLists[1].isEmpty())
-			ms = m_itemLists[1].last()->endPosition();
-		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, "item t1", 1);
+	if (cmd == "newItem") {
+		// if (!m_itemLists[1].isEmpty())
+		// 	ms = m_itemLists[1].last()->endPosition();
+		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, QString("item t%1").arg(clickedTrackID), clickedTrackID);
 	}
-	else if (cmd == "newIn2") {
-		int ms = 50000;
-		if (!m_itemLists[2].isEmpty())
-			ms = m_itemLists[2].last()->endPosition();
-		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, "item t2", 2);
+	else if (cmd == "newTrack") {
+		int newTrackId = m_tracks.size();
+		TimeLineTrack track(newTrackId, m_tracks.last().yEndPos(), m_defaultTrackHeight);
+		m_tracks.append(track);
 	}
 }
 
 void TimeLineWidget::onCursorMoved(int ms)
 {
-	qDebug() << "Cursor moved to" << ms;
+	emit cursorPosChanged(ms);
+	emit cursorActivated(ms);
+}
+
+void TimeLineWidget::onMouseHovered(const QPointF &pos)
+{
+	int xMs = pixelToMs(pos.x());
+	if (xMs > 0)
+		emit mousePosMsChanged(xMs);
 }
 
 } // namespace PS_TL

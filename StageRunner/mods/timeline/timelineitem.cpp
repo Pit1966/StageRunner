@@ -85,7 +85,10 @@ void TimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	painter->setBrush(m_colorBG);
 	painter->drawRect(m_penWidthBorder/2, m_penWidthBorder/2, m_xSize, m_ySize);
 
-	painter->drawText(5, m_ySize / 2, m_label);
+	// painter->drawText(5, m_ySize / 2, m_label);
+	QRectF textRect = boundingRect();
+	textRect.adjust(5,4,-5,0);
+	painter->drawText(textRect, m_label);
 
 	m_wasPainted = true;
 }

@@ -100,11 +100,11 @@ QString UniverseEditorWidget::defaultFilepath()
 
 FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fixList)
 {
-	FxSceneItem *sc = new FxSceneItem();
 	int tubes = fixList->lastUsedDmxAddr();
 	if (tubes == 0)
 		return nullptr;
 
+	FxSceneItem *sc = new FxSceneItem();
 	sc->createDefaultTubes(tubes);
 
 	// Loop over fixtures and add them to scene
@@ -113,14 +113,14 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 		SR_Fixture *fix = fixList->at(t);
 		SR_Mode *mode = fix->mode(fix->currentMode());
 		int c = 0;
-		for (SR_Channel *chan : mode->channels()) {
+		for (SR_Channel *chan : qAsConst(mode->channels())) {
 			if (c++ == 0) {
 				if (fix->dmxAdr()-1 > dmx)
 					dmx = fix->dmxAdr()-1;
 			}
 			DmxChannel *tube = sc->tube(dmx);
 			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
-			qDebug() << "type" << chan->preset() << type;
+			// qDebug() << "type" << chan->preset() << type;
 			if (type >= SR_Channel::Custom /*DMX_GENERIC*/)
 				tube->dmxType = int(type);
 

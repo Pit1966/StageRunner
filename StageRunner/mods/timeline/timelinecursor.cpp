@@ -9,11 +9,15 @@ namespace PS_TL {
 TimeLineCursor::TimeLineCursor(TimeLineWidget *timeline)
 	: TimeLineBase(timeline)
 {
-	m_handle << QPointF(-10,0)
-			 << QPointF(-10,10)
-			 << QPointF(0, 20)
-			 << QPointF(10,10)
-			 << QPointF(10,0);
+	int yo = m_gripOffset;
+	int s = m_gripSize;
+
+
+	m_handle << QPointF(-s, yo)
+			 << QPointF(-s, s + yo)
+			 << QPointF(0, 2*s + yo)
+			 << QPointF(s, s + yo)
+			 << QPointF(s, yo);
 
 	setHeight(m_height);
 	setFlag(QGraphicsItem::ItemIsMovable);
@@ -59,8 +63,11 @@ void TimeLineCursor::recalcPixelPos()
 
 QRectF TimeLineCursor::boundingRect() const
 {
-	QRectF rf = m_handle.boundingRect();
-	rf.setHeight(m_height);
+	//QRectF rf = m_handle.boundingRect();
+	// rf.setHeight(m_height);
+
+	QRectF rf(-m_gripSize, 0, 2 * m_gripSize + 1, m_height);
+
 	return rf;
 }
 
@@ -134,7 +141,7 @@ void TimeLineCursor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	}
 }
 
-void TimeLineCursor::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void TimeLineCursor::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 {
 	m_clicked = false;
 }

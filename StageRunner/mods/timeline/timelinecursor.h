@@ -17,6 +17,8 @@ class TimeLineCursor : public TimeLineBase
 	Q_OBJECT
 private:
 	int m_type					= TL_CURSOR;
+	int m_gripSize				= 7;
+	int m_gripOffset			= 14;
 
 	QPolygonF m_handle;
 	QLineF m_line;
@@ -24,6 +26,7 @@ private:
 	QColor m_handleBorderCol	= 0xaaaaaa;
 	QColor m_handleCol			= 0x228080;
 	qreal m_height	= 40;
+
 
 	// temporary
 	bool m_clicked	= false;

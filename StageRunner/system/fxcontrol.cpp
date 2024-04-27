@@ -397,19 +397,16 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atM
 	// Determine what the FxListWidget is where the FxTimeLineItem comes from
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxtimeline);
 	if (parentwid) {
-		/// @todo timeline
+		/// @todo timeline. Do we need this?
 		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxtimeline);
-		connect(exec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
 	}
 
-	// Determine the FxTimeLineEditWidget that is the editing widget of the timeline
-// 	FxTimeLineEditWidget *editwid = FxTimeLineEditWidget::findParentFxTimeLineEditWidget(fxtimeline);
-// 	if (editwid) {
-// 		/// @todo timeline
-// //		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
-// //		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
-// 	}
-
+	// Determine wheter there is a FxTimeLineEditWidget that is currently the editor for this timeline
+	FxTimeLineEditWidget *editwid = FxTimeLineEditWidget::findParentFxTimeLinePanel(fxtimeline);
+	if (editwid) {
+		connect(exec, SIGNAL(timeLineStatusChanged(int)), editwid, SLOT(onChildRunStatusChanged(int)));
+		connect (exec, SIGNAL(playPosChanged(int)), editwid->timeLineWidget(), SLOT(setCursorPos(int)));
+	}
 
 	// Give control for executer to FxControl loop
 	if (!exec->activateProcessing(isContinue))

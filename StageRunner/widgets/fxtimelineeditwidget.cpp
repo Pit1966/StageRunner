@@ -3,10 +3,14 @@
 #include "fx/fxtimelineobj.h"
 #include "fx/exttimelineitem.h"
 #include "fx/timelineexecuter.h"
+#include "fx/execcenter.h"
 #include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelineitem.h"
+#include "mods/timeline/timelineruler.h"
 #include "system/fxcontrol.h"
 #include "appcontrol/appcentral.h"
+
+
 
 // ------------------------------------------------------------------------------------------------------------
 
@@ -104,8 +108,12 @@ TimeLineItem *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline,
 
 // ------------------------------------------------------------------------------------------------------------
 
-FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central)
-	: m_aC(app_central)
+QList<FxTimeLineEditWidget*>FxTimeLineEditWidget::m_timelineEditWidgetList;
+
+
+FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *parent)
+	: QWidget(parent)
+	, m_aC(app_central)
 	, m_fxCtrl(app_central->unitFx)
 	, m_timeline(new ExtTimeLineWidget())
 {
@@ -113,12 +121,62 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central)
 
 	mainLayout->addWidget(m_timeline);
 	m_timeline->setCursorPos(0);
+	onMousePositionChanged(0);
+	onCursorPositionChanged(0);
+
+	connect(m_timeline, SIGNAL(cursorPosChanged(int)), this, SLOT(onCursorPositionChanged(int)));
+	connect(m_timeline, SIGNAL(mousePosMsChanged(int)), this, SLOT(onMousePositionChanged(int)));
 }
 
 FxTimeLineEditWidget::~FxTimeLineEditWidget()
 {
 	delete m_timeline;
 }
+
+FxTimeLineEditWidget *FxTimeLineEditWidget::openTimeLinePanel(FxTimeLineItem *fx, QWidget *parent)
+{
+	for (FxTimeLineEditWidget *tlwid : qAsConst(m_timelineEditWidgetList)) {
+		if (tlwid->currentFxItem() == fx) {
+			tlwid->setWindowState(tlwid->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
+			tlwid->raise();
+			tlwid->show();
+			return nullptr;
+		}
+	}
+
+	FxTimeLineEditWidget *editwid = new FxTimeLineEditWidget(AppCentral::instance(), parent);
+	editwid->setFxTimeLineItem(fx);
+	m_timelineEditWidgetList.append(editwid);
+
+	// is there already an executor running for this timeline?
+	TimeLineExecuter *exec = AppCentral::ref().execCenter->findTimeLineExecuter(fx);
+	if (exec) {
+		connect(exec, SIGNAL(timeLineStatusChanged(int)), editwid, SLOT(onChildRunStatusChanged(int)));
+		connect (exec, SIGNAL(playPosChanged(int)), editwid->timeLineWidget(), SLOT(setCursorPos(int)));
+
+		if (exec->isRunning())
+			editwid->onChildRunStatusChanged(Executer::EXEC_RUNNING);
+	}
+
+
+	return editwid;
+}
+
+void FxTimeLineEditWidget::destroyAllTimelinePanels()
+{
+	while (!m_timelineEditWidgetList.isEmpty())
+		delete m_timelineEditWidgetList.takeFirst();
+}
+
+FxTimeLineEditWidget *FxTimeLineEditWidget::findParentFxTimeLinePanel(FxItem *fx)
+{
+	for (FxTimeLineEditWidget *tlwid : m_timelineEditWidgetList) {
+		if (tlwid->currentFxItem() == fx)
+			return tlwid;
+	}
+	return nullptr;
+}
+
 
 FxTimeLineItem *FxTimeLineEditWidget::currentFxItem() const
 {
@@ -138,12 +196,25 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	return m_timeline->copyToFxTimeLineItem(fxt);
 }
 
+void FxTimeLineEditWidget::onChildRunStatusChanged(int runStatus)
+{
+	if (runStatus == Executer::EXEC_RUNNING) {
+		runButton->setText("Stop");
+	}
+	else {
+		runButton->setText("Run");
+	}
+}
+
+
 void FxTimeLineEditWidget::closeEvent(QCloseEvent */*event*/)
 {
 	qDebug() << "close event" << m_curFxItem;
 	if (m_curFxItem)
 		copyToFxTimeLineItem(m_curFxItem);
 
+
+	m_timelineEditWidgetList.removeOne(this);
 	deleteLater();
 }
 
@@ -155,7 +226,6 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 
 	if (!m_timelineExecuter) {
 		m_timelineExecuter = m_fxCtrl->startFxTimeLine(m_curFxItem, m_timeline->cursorPos());
-		connect (m_timelineExecuter.data(), SIGNAL(playPosChanged(int)), m_timeline, SLOT(setCursorPos(int)));
 
 		if (m_timelineExecuter->isRunning()) {
 			runButton->setText("Stop");
@@ -163,7 +233,28 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 	}
 	else {
 		m_timelineExecuter->setFinish();
-		runButton->setText("Run");
+		// runButton->setText("Run");
 	}
+}
+
+void FxTimeLineEditWidget::onCursorPositionChanged(int ms)
+{
+	QString tcStr = TimeLineRuler::msToTimeLineString(ms, 3);
+	while (tcStr.size() < 10)
+		tcStr.prepend(' ');
+
+	QString str = QString("Pos ") + tcStr;
+
+	timeCodeCursorLabel->setText(str);
+}
+
+void FxTimeLineEditWidget::onMousePositionChanged(int ms)
+{
+	QString tcStr = TimeLineRuler::msToTimeLineString(ms, 3);
+	while (tcStr.size() < 10)
+		tcStr.prepend(' ');
+
+	QString str = QString("    ") + tcStr;
+	timeCodeMouseLabel->setText(str);
 }
 

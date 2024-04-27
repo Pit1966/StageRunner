@@ -14,6 +14,7 @@ class FxTimeLineItem;
 class TimeLineExecuter;
 class AppCentral;
 class FxControl;
+class FxItem;
 
 class ExtTimeLineWidget : public TimeLineWidget
 {
@@ -40,20 +41,32 @@ private:
 	QPointer<FxTimeLineItem> m_curFxItem;
 	QPointer<TimeLineExecuter> m_timelineExecuter;
 
+	static QList<FxTimeLineEditWidget*>m_timelineEditWidgetList;
+
 public:
-	FxTimeLineEditWidget(AppCentral *app_central);
+	FxTimeLineEditWidget(AppCentral *app_central, QWidget *parent = nullptr);
 	~FxTimeLineEditWidget();
+
+	static FxTimeLineEditWidget * openTimeLinePanel(FxTimeLineItem *fx, QWidget *parent = nullptr);
+	static void destroyAllTimelinePanels();
+	static FxTimeLineEditWidget * findParentFxTimeLinePanel(FxItem *fx);
+
 	ExtTimeLineWidget * timeLineWidget() const {return m_timeline;}
 	FxTimeLineItem * currentFxItem() const;
 
 	bool setFxTimeLineItem(FxTimeLineItem *fxt);
 	bool copyToFxTimeLineItem(FxTimeLineItem *fxt);
 
+public slots:
+	void onChildRunStatusChanged(int runStatus);
+
 protected:
 	void closeEvent(QCloseEvent *event) override;
 
 private slots:
 	void on_runButton_clicked();
+	void onCursorPositionChanged(int ms);
+	void onMousePositionChanged(int ms);
 };
 
 #endif // FXTIMELINEEDITWIDGET_H

@@ -147,6 +147,7 @@ SOURCES += \
 	../mods/timeline/timelinebase.cpp \
 	../mods/timeline/timelinecursor.cpp \
 	../mods/timeline/timelineitem.cpp \
+	../mods/timeline/timelineruler.cpp \
 	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
@@ -156,6 +157,7 @@ SOURCES += \
 	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../system/audioplayer.cpp \
 	../system/audioslot.cpp \
+	../system/convtools.cpp \
 	../system/dmx/fixture.cpp \
 	../system/dmxchannel.cpp \
 	../system/dmxchanproperty.cpp \
@@ -268,6 +270,7 @@ HEADERS  += \
 	../mods/timeline/timelinebase.h \
 	../mods/timeline/timelinecursor.h \
 	../mods/timeline/timelineitem.h \
+	../mods/timeline/timelineruler.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \
 	../system/audioformat.h \
@@ -277,6 +280,7 @@ HEADERS  += \
 	../system/audioplayer.h \
 	../system/audioslot.h \
 	../system/commandsystem.h \
+	../system/convtools.h \
 	../system/dmx/fixture.h \
 	../system/dmxchannel.h \
 	../system/dmxchanproperty.h \

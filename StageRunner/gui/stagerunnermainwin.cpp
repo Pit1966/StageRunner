@@ -758,9 +758,8 @@ void StageRunnerMainWin::openFxScriptPanel(FxScriptItem *fx)
 
 void StageRunnerMainWin::openFxTimeLinePanel(FxTimeLineItem *fx)
 {
-	FxTimeLineEditWidget *timelineWid = new FxTimeLineEditWidget(appCentral);
+	FxTimeLineEditWidget *timelineWid = FxTimeLineEditWidget::openTimeLinePanel(fx);
 	if (timelineWid) {
-		timelineWid->setFxTimeLineItem(fx);
 		timelineWid->resize(800, 170);
 		timelineWid->show();
 	}
