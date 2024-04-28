@@ -19,6 +19,11 @@ bool TimeLineExecuter::processExecuter()
 		return false;
 	}
 
+	if (m_sortedObjEventList.isEmpty() || m_curEventPos >= m_sortedObjEventList.size()) {
+		LOGERROR(tr("Event list not valid in %1").arg(m_fxTimeLine->name()));
+		return false;
+	}
+
 	Event &ev = m_sortedObjEventList[m_curEventPos];
 	FxTimeLineObj *obj = ev.obj;
 	if (ev.evType == EV_BEGIN) {

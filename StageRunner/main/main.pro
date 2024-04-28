@@ -153,6 +153,7 @@ SOURCES += \
 	../system/audiocontrol.cpp \
 	../system/audioformat.cpp \
 	../system/audioiodevice.cpp \
+	../system/audiooutput/audiofileinfo.cpp \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
 	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../system/audioplayer.cpp \
@@ -221,6 +222,7 @@ HEADERS  += \
 	../fx/fxclipitem.h \
 	../fx/fxcueitem.h \
 	../fx/fxitem.h \
+	../fx/fxitem_includes.h \
 	../fx/fxitemobj.h \
 	../fx/fxitemtool.h \
 	../fx/fxlist.h \
@@ -275,6 +277,7 @@ HEADERS  += \
 	../plugins/yadi/src/dmxmonitor.h \
 	../system/audioformat.h \
 	../system/audioiodevice.h \
+	../system/audiooutput/audiofileinfo.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
 	../system/audiooutput/mediaplayeraudiobackend.h \
 	../system/audioplayer.h \

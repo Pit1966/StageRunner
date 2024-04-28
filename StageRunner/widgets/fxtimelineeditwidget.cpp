@@ -224,6 +224,10 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 	if (!m_curFxItem)
 		return;
 
+	// we have to update the FxItem with timeline changes
+	/// @todo modify flag would be nice here.
+	copyToFxTimeLineItem(m_curFxItem);
+
 	if (!m_timelineExecuter) {
 		m_timelineExecuter = m_fxCtrl->startFxTimeLine(m_curFxItem, m_timeline->cursorPos());
 

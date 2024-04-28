@@ -85,6 +85,7 @@ public:
 	void setLoopValue(qint32 val) override {loopTimes = val;}
 	void initForSequence() override;
 	void resetFx() override;
+	qint32 durationHint() const override;
 	inline qint64 seekPosition() const {return mySeekPosition;}
 	inline int seekPosPerMille() const {return mySeekPosPerMille;}
 	void setSeekPosition(qint64 posMs);

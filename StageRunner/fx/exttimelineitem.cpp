@@ -1,6 +1,7 @@
 #include "exttimelineitem.h"
 #include "widgets/fxtimelineeditwidget.h"
 #include "fx/fxtimelineitem.h"
+#include "fx/fxitem_includes.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneContextMenuEvent>
@@ -71,5 +72,30 @@ void ExtTimeLineItem::contextLinkToFx()
 		m_fxID = fxId;
 		m_linkedObjType = LINKED_FXITEM;
 		setLabel(fx->name());
+
+		int minLenMs = -1;
+		// preset of base time values, such as minimal execution duration of item
+		switch (fx->fxType()) {
+		case FX_SCENE:
+			minLenMs = fx->durationHint();
+			if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
+				minLenMs = 2000;
+			break;
+		case FX_AUDIO:
+			minLenMs = fx->durationHint();
+			qDebug() << "item duration" << minLenMs;
+			if (minLenMs <= 0)
+				minLenMs = 30000;
+		}
+
+		if (minLenMs > 0)
+			setDuration(minLenMs);
+
+		recalcPixelPos();
+		scene()->update();
+
+		// expand timeline if item lies beyond the timeline end
+		if (endPosition() > m_timeline->timeLineDuration())
+			m_timeline->setTimeLineDuration(endPosition());
 	}
 }

@@ -170,6 +170,11 @@ public:
 	 */
 	virtual FxList * fxList() const {return nullptr;}
 	virtual qint32 calcExecutionTime() const;
+	/**
+	 * @brief Implement this to give a run time duration hint for the fx (like audio play time)
+	 * @return
+	 */
+	virtual qint32 durationHint() const {return 0;}
 
 private:
 	void init();

@@ -100,6 +100,11 @@ void FxSceneItem::resetFx()
 	mySeqStatus = SCENE_OFF;
 }
 
+qint32 FxSceneItem::durationHint() const
+{
+	return fadeInTime() + holdTime() + fadeOutTime();
+}
+
 void FxSceneItem::createDefaultTubes(int tubecount)
 {
 	for (int t=0; t<tubecount; t++) {

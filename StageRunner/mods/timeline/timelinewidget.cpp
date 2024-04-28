@@ -30,12 +30,15 @@ void TimeLineGfxScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &rect)
 {
+	int timeLineWidthMs = m_timeLine->timeLineDuration();
+	int width = m_timeLine->msToPixel(timeLineWidthMs);
+
 	QList<TimeLineTrack> &tracks = m_timeLine->m_tracks;
 	for (int t=1; t<tracks.size(); t++) {
 		if (t & 1) {
-			painter->fillRect(0, tracks.at(t).yPos()-1, width(), tracks.at(t).ySize()-1, m_bg1);
+			painter->fillRect(0, tracks.at(t).yPos()-1, width, tracks.at(t).ySize()-1, m_bg1);
 		} else {
-			painter->fillRect(0, tracks.at(t).yPos()-1, width(), tracks.at(t).ySize()-1, m_bg2);
+			painter->fillRect(0, tracks.at(t).yPos()-1, width, tracks.at(t).ySize()-1, m_bg2);
 		}
 	}
 }
@@ -521,6 +524,8 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 		int newTrackId = m_tracks.size();
 		TimeLineTrack track(newTrackId, m_tracks.last().yEndPos(), m_defaultTrackHeight);
 		m_tracks.append(track);
+		// update scene in order to draw the background
+		m_scene->update();
 	}
 }
 

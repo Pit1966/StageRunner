@@ -23,6 +23,7 @@
 
 #include "fxaudioitem.h"
 #include "../config.h"
+#include "system/audiooutput/audiofileinfo.h"
 
 #include <QFileInfo>
 #include <QMediaPlayer>
@@ -80,6 +81,17 @@ void FxAudioItem::resetFx()
 		mySeekPosPerMille = -1;
 	}
 	mySeqStatus = AUDIO_OFF;
+}
+
+qint32 FxAudioItem::durationHint() const
+{
+	AudioFileInfo ai(filePath());
+	bool ok = ai.inspectFile();
+
+	if (ok)
+		return ai.getDurationMs();
+
+	return 25000;
 }
 
 void FxAudioItem::setSeekPosition(qint64 posMs)

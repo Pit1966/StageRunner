@@ -68,6 +68,7 @@ public:
 	void resetFx() override;
 	QString widgetPosition() const override {return widgetPos;}
 	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
+	qint32 durationHint() const override;
 
 	void createDefaultTubes(int tubecount);
 	void setTubeCount(int tubecount);
