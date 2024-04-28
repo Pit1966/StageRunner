@@ -43,7 +43,6 @@ void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &rect)
 	}
 }
 
-
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
@@ -78,7 +77,19 @@ void TimeLineGfxView::resizeEvent(QResizeEvent *event)
 TimeLineWidget::TimeLineWidget(QWidget *parent)
 	: QWidget{parent}
 {
-	m_scene = new TimeLineGfxScene(this);
+}
+
+TimeLineWidget::~TimeLineWidget()
+{
+	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+		while (!m_itemLists[t].isEmpty())
+			delete m_itemLists[t].takeFirst();
+	}
+}
+
+void TimeLineWidget::init()
+{
+	m_scene = createTimeLineScene(this);
 	m_view = new TimeLineGfxView(this, m_scene);
 	m_navLabel = new QLabel("navigation ...");
 
@@ -132,14 +143,6 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 	vLay->addWidget(m_view);
 	vLay->addWidget(m_viewRangeSlider);
 	setLayout(vLay);
-}
-
-TimeLineWidget::~TimeLineWidget()
-{
-	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
-		while (!m_itemLists[t].isEmpty())
-			delete m_itemLists[t].takeFirst();
-	}
 }
 
 void TimeLineWidget::clear()
@@ -460,6 +463,18 @@ void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent */*event*/)
 TimeLineItem *TimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
 {
 	return new TimeLineItem(timeline, trackId);
+}
+
+/**
+ * @brief Create a standard TimeLineGfxScene and return address.
+ * @param timeline
+ * @return
+ *
+ * Reimplement this function for customized derived Scene classes
+ */
+TimeLineGfxScene *TimeLineWidget::createTimeLineScene(TimeLineWidget *timeline)
+{
+	return new TimeLineGfxScene(timeline);
 }
 
 /**

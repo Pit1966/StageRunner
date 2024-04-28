@@ -135,7 +135,6 @@ void AppCentral::stopAllSequencesAndPlaylists()
 	unitFx->stopAllTimeLines();
 }
 
-
 void AppCentral::lightBlack(qint32 time_ms)
 {
 	int num = unitLight->black(time_ms);

@@ -9,7 +9,54 @@
 #include "mods/timeline/timelineruler.h"
 #include "system/fxcontrol.h"
 #include "appcontrol/appcentral.h"
+#include "gui/customwidget/extmimedata.h"
+#include "gui/fxlistwidgetitem.h"
 
+#include <QMimeData>
+#include <QDragEnterEvent>
+
+
+FxTimeLineScene::FxTimeLineScene(TimeLineWidget *timeLineWidget)
+	: TimeLineGfxScene(timeLineWidget)
+{
+}
+
+void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
+{
+	qDebug() << Q_FUNC_INFO;
+	qDebug() << "FxTimeLineScene drop:" << event->dropAction();
+	const QMimeData * mime = event->mimeData();
+	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
+	if (extmime) {
+		qDebug() << "  dropped:" << extmime->fxListWidgetItem->linkedFxItem->name();
+		event->ignore();
+	} else {
+		event->accept();
+	}
+}
+
+void FxTimeLineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
+{
+	qDebug() << Q_FUNC_INFO;
+	const QMimeData * mime = event->mimeData();
+	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
+
+	if (extmime) {
+		event->accept();
+	} else {
+		event->ignore();
+	}
+}
+
+void FxTimeLineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
+{
+	qDebug() << Q_FUNC_INFO;
+}
+
+void FxTimeLineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
+{
+
+}
 
 
 // ------------------------------------------------------------------------------------------------------------
@@ -99,9 +146,21 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 
 TimeLineItem *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
 {
-	ExtTimeLineItem * tlItem = new ExtTimeLineItem(timeline, trackId);
-	qDebug() << "new item";
+	ExtTimeLineItem *tlItem = new ExtTimeLineItem(timeline, trackId);
 	return tlItem;
+}
+
+TimeLineGfxScene *ExtTimeLineWidget::createTimeLineScene(TimeLineWidget *timeline)
+{
+	qDebug() << "create new timeline scene";
+
+	if (m_fxTimeLineScene == nullptr) {
+		m_fxTimeLineScene = new FxTimeLineScene(timeline);
+	} else {
+		qWarning() << Q_FUNC_INFO << "Timeline scene already created!";
+	}
+
+	return m_fxTimeLineScene;
 }
 
 // ------------------------------------------------------------------------------------------------------------
@@ -117,7 +176,10 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 	, m_fxCtrl(app_central->unitFx)
 	, m_timeline(new ExtTimeLineWidget())
 {
+	if (!m_timeline->isInitialized())
+		m_timeline->init();
 	setupUi(this);
+	m_timeline->setAcceptDrops(true);
 
 	mainLayout->addWidget(m_timeline);
 	m_timeline->setCursorPos(0);
@@ -261,4 +323,5 @@ void FxTimeLineEditWidget::onMousePositionChanged(int ms)
 	QString str = QString("    ") + tcStr;
 	timeCodeMouseLabel->setText(str);
 }
+
 

@@ -74,7 +74,6 @@ public:
 	bool stopFxTimeLine(FxTimeLineItem *fxtimeline);
 	int stopAllTimeLines();
 
-
 public slots:
 	FxListExecuter * startFxAudioPlayList(FxPlayListItem *fxplay);
 	FxListExecuter * continueFxAudioPlayList(FxPlayListItem *fxplay, FxAudioItem *fxaudio);

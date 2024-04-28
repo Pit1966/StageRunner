@@ -595,7 +595,7 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	fxTable->setOldScrollPos();
 
 	Qt::DropAction dropaction = drag->exec();
-	qDebug() << "Dropaction:" << dropaction;
+	qDebug() << "InitRowDrag result: Dropaction:" << dropaction;
 	if (dropaction != Qt::MoveAction) {
 		refreshList();
 	}

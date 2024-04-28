@@ -153,6 +153,8 @@ StageRunnerMainWin::~ StageRunnerMainWin()
 void StageRunnerMainWin::initModules()
 {
 	TimeLineWidget *tlwid = new TimeLineWidget();
+	if (!tlwid->isInitialized())
+		tlwid->init();
 	timelineLayout->addWidget(tlwid);
 
 	// populize with some timeline items
@@ -1072,6 +1074,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 {
 	appCentral->closeAllDmxMonitors();
 
+
 	if (appCentral->project->isModified()) {
 		QWidget *parentWid = this;
 		QWidget *videoWid = nullptr;
@@ -1128,7 +1131,7 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 
 	FxListWidget::destroyAllFxListWidgets();
 	SceneDeskWidget::destroyAllSceneDesks();
-
+	FxTimeLineEditWidget::destroyAllTimelinePanels();
 }
 
 void StageRunnerMainWin::resizeEvent(QResizeEvent *event)

@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QPointer>
+#include <QGraphicsSceneDragDropEvent>
 
 using namespace PS_TL;
 
@@ -15,9 +16,31 @@ class TimeLineExecuter;
 class AppCentral;
 class FxControl;
 class FxItem;
+class FxTimeLineScene;
+
+class FxTimeLineScene : public TimeLineGfxScene
+{
+	Q_OBJECT
+
+public:
+	FxTimeLineScene(TimeLineWidget *timeLineWidget);
+
+protected:
+	void dropEvent(QGraphicsSceneDragDropEvent *event) override;
+	void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
+	void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
+	void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
+};
+
+
+// ------------------------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------------------------
 
 class ExtTimeLineWidget : public TimeLineWidget
 {
+protected:
+	FxTimeLineScene *m_fxTimeLineScene	= nullptr;
 
 public:
 	bool setFxTimeLineItem(FxTimeLineItem *fxt);
@@ -25,6 +48,7 @@ public:
 
 protected:
 	TimeLineItem * createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1) override;
+	TimeLineGfxScene * createTimeLineScene(TimeLineWidget *timeline) override;
 };
 
 // ------------------------------------------------------------------------------------------------------------

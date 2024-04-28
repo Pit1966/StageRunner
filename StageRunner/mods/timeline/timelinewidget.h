@@ -31,12 +31,11 @@ public:
 	TimeLineGfxScene(TimeLineWidget *timeLineWidget, QWidget *parent = nullptr);
 
 protected:
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-	void drawBackground(QPainter *painter, const QRectF &rect);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+	void drawBackground(QPainter *painter, const QRectF &rect) override;
 
 signals:
 	void mouseHoverPosChanged(const QPointF &pos);
-
 
 };
 
@@ -57,7 +56,7 @@ public:
 	const QSize & currentSize() const;
 
 protected:
-	void resizeEvent(QResizeEvent *event);
+	void resizeEvent(QResizeEvent *event) override;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -94,16 +93,16 @@ class TimeLineWidget : public QWidget
 	Q_OBJECT
 
 private:
-	TimeLineGfxScene *m_scene;
-	TimeLineGfxView *m_view;
+	TimeLineGfxScene *m_scene	= nullptr;
+	TimeLineGfxView *m_view		= nullptr;
 
-	TimeLineCursor *m_cursor;
-	TimeLineRuler *m_ruler;
+	TimeLineCursor *m_cursor	= nullptr;
+	TimeLineRuler *m_ruler		= nullptr;
 
 
 protected:
-	QLabel *m_navLabel;
-	QSlider *m_viewRangeSlider;
+	QLabel *m_navLabel			= nullptr;
+	QSlider *m_viewRangeSlider	= nullptr;
 
 	int m_viewPosMs				= 0;		///< current timeline view position (left border of view)
 	int m_viewRangeMs			= 60000;	///< length of visible timeline portion (view area length)
@@ -129,6 +128,8 @@ protected:
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);
 	virtual ~TimeLineWidget();
+	void init();
+	bool isInitialized() const {return m_scene != nullptr;}
 	void clear();
 
 	int timeLineHeight() const;
@@ -163,12 +164,12 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
 
 	virtual TimeLineItem *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
+	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);
 
 	void adjustSceneRectToTimelineLength();
 	void recalcPixelPosInAllItems();
 
 	void contextMenuEvent(QContextMenuEvent *event);
-
 
 private slots:
 	void onCursorMoved(int ms);
