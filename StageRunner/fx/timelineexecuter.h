@@ -33,6 +33,7 @@ protected:
 	bool m_disableMultiStart	= true;
 	bool m_timelineValid		= false;
 	int m_curEventPos			= 0;		///< this is current pending obj number. Next to be executed
+	int m_finalEventAtMs		= 0;		///< time position of last cue executed in this timeline (run duration)
 	volatile STATE m_lastState	= EXEC_IDLE;
 
 	QList<Event> m_sortedObjEventList;
@@ -58,6 +59,7 @@ protected:
 signals:
 	void playPosChanged(int ms);
 	void timeLineStatusChanged(int executerStatus);
+	void listProgressChanged(int step1, int step2);
 
 	friend class ExecCenter;
 };

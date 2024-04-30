@@ -397,15 +397,15 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atM
 	// Determine what the FxListWidget is where the FxTimeLineItem comes from
 	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxtimeline);
 	if (parentwid) {
-		/// @todo timeline. Do we need this?
 		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxtimeline);
+		connect(exec, SIGNAL(listProgressChanged(int,int)), listitem, SLOT(setActivationProgress(int,int)));
 	}
 
 	// Determine wheter there is a FxTimeLineEditWidget that is currently the editor for this timeline
 	FxTimeLineEditWidget *editwid = FxTimeLineEditWidget::findParentFxTimeLinePanel(fxtimeline);
 	if (editwid) {
 		connect(exec, SIGNAL(timeLineStatusChanged(int)), editwid, SLOT(onChildRunStatusChanged(int)));
-		connect (exec, SIGNAL(playPosChanged(int)), editwid->timeLineWidget(), SLOT(setCursorPos(int)));
+		connect(exec, SIGNAL(playPosChanged(int)), editwid->timeLineWidget(), SLOT(setCursorPos(int)));
 	}
 
 	// Give control for executer to FxControl loop

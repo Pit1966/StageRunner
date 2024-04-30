@@ -28,9 +28,25 @@ void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 	if (extmime) {
-		qDebug() << "  dropped:" << extmime->fxListWidgetItem->linkedFxItem->name();
+		QPointF dropPos = event->scenePos();
+		int trackID = m_timeLine->yPosToTrackId(dropPos.y());
+
+		FxItem *fx = extmime->fxListWidgetItem->linkedFxItem;
+		if (!FxItem::exists(fx))
+			return;
+		qDebug() << "  dropped:" << fx->name() << "on track" << trackID;
+		if (trackID < 1)
+			return;
+
+		// create a timeline object at drop position
+		int xMs = m_timeLine->pixelToMs(dropPos.x());
+		TimeLineItem *tli = m_timeLine->addTimeLineItem(xMs, 5000, "drop item", trackID);
+		ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
+		extTLI->linkToFxItem(fx);
+
 		event->ignore();
 	} else {
+		qDebug() << Q_FUNC_INFO << "something dropped";
 		event->accept();
 	}
 }
@@ -68,6 +84,8 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 	// clear all tracks (and items) in the widget
 	clear();
 
+	bool hasItems = false;
+
 	// Each track has a its own list with item/objs
 	// t is also the trackID !!
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
@@ -86,8 +104,13 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 			extTLI->m_fxID = obj->m_fxID;
 			extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
+			hasItems = true;
 		}
 	}
+
+	// Add a track, if there are no items and therefor no tracks so far
+	if (!hasItems)
+		addTimeLineTrack();
 
 	return true;
 }
@@ -232,7 +255,7 @@ void FxTimeLineEditWidget::destroyAllTimelinePanels()
 
 FxTimeLineEditWidget *FxTimeLineEditWidget::findParentFxTimeLinePanel(FxItem *fx)
 {
-	for (FxTimeLineEditWidget *tlwid : m_timelineEditWidgetList) {
+	for (FxTimeLineEditWidget *tlwid : qAsConst(m_timelineEditWidgetList)) {
 		if (tlwid->currentFxItem() == fx)
 			return tlwid;
 	}

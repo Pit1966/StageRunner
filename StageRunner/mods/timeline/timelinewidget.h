@@ -22,7 +22,7 @@ class TimeLineRuler;
 class TimeLineGfxScene : public QGraphicsScene
 {
 	Q_OBJECT
-private:
+protected:
 	TimeLineWidget * m_timeLine;
 	QColor m_bg1	= QColor(0x2a2a2a);
 	QColor m_bg2	= QColor(0x232424);
@@ -134,6 +134,7 @@ public:
 
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
+	bool addTimeLineTrack();
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);
 	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);

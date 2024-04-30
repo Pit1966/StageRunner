@@ -4,6 +4,8 @@
 #include "mods/timeline/timelineitem.h"
 #include "fx/fx_defines.h"
 
+class FxItem;
+
 class ExtTimeLineItem : public PS_TL::TimeLineItem
 {
 	Q_OBJECT
@@ -13,6 +15,9 @@ private:
 
 public:
 	ExtTimeLineItem(PS_TL::TimeLineWidget *timeline, int trackId = 1);
+
+	FxItem * linkToFxWithId(int fxId);
+	bool linkToFxItem(FxItem *fx);
 
 protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;

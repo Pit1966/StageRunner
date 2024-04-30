@@ -164,6 +164,20 @@ int TimeLineWidget::timeLineHeight() const
 	return qMax(m_tracks.last().yEndPos(), m_defaultTrackHeight * 2 + 10);
 }
 
+bool TimeLineWidget::addTimeLineTrack()
+{
+	int newTrackId = m_tracks.size();
+	if (newTrackId >= TIMELINE_MAX_TRACKS)
+		return false;
+
+	TimeLineTrack track(newTrackId, m_tracks.last().yEndPos(), m_defaultTrackHeight);
+	m_tracks.append(track);
+	// update scene in order to draw the background
+	m_scene->update();
+
+	return true;
+}
+
 /**
  * @brief TimeLineWidget::addTimeLineItem
  * @param trackID
@@ -536,11 +550,7 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, QString("item t%1").arg(clickedTrackID), clickedTrackID);
 	}
 	else if (cmd == "newTrack") {
-		int newTrackId = m_tracks.size();
-		TimeLineTrack track(newTrackId, m_tracks.last().yEndPos(), m_defaultTrackHeight);
-		m_tracks.append(track);
-		// update scene in order to draw the background
-		m_scene->update();
+		/*bool ok = */addTimeLineTrack();
 	}
 }
 

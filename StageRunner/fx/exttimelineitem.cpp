@@ -16,6 +16,52 @@ ExtTimeLineItem::ExtTimeLineItem(TimeLineWidget *timeline, int trackId)
 
 }
 
+FxItem *ExtTimeLineItem::linkToFxWithId(int fxId)
+{
+	FxItem *fx = FxItem::findFxById(fxId);
+	if (!fx)
+		return nullptr;
+
+	if (!linkToFxItem(fx))
+		return nullptr;
+
+	return fx;
+}
+
+bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
+{
+	if (fx) {
+		m_fxID = fx->id();
+		m_linkedObjType = LINKED_FXITEM;
+		setLabel(fx->name());
+
+		int minLenMs = -1;
+		// preset of base time values, such as minimal execution duration of item
+		switch (fx->fxType()) {
+		case FX_SCENE:
+			minLenMs = fx->durationHint();
+			if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
+				minLenMs = 2000;
+			break;
+		case FX_AUDIO:
+			minLenMs = fx->durationHint();
+			qDebug() << "item duration" << minLenMs;
+			if (minLenMs <= 0)
+				minLenMs = 30000;
+		}
+
+		if (minLenMs > 0)
+			setDuration(minLenMs);
+
+		recalcPixelPos();
+		scene()->update();
+
+		// expand timeline if item lies beyond the timeline end
+		if (endPosition() > m_timeline->timeLineDuration())
+			m_timeline->setTimeLineDuration(endPosition());
+	}
+}
+
 void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
 }
@@ -67,35 +113,5 @@ void ExtTimeLineItem::contextLinkToFx()
 	int fxId = QInputDialog::getInt(m_timeline, tr("Item config"),
 									tr("Enter ID of Fx"));
 
-	FxItem *fx = FxItem::findFxById(fxId);
-	if (fx) {
-		m_fxID = fxId;
-		m_linkedObjType = LINKED_FXITEM;
-		setLabel(fx->name());
-
-		int minLenMs = -1;
-		// preset of base time values, such as minimal execution duration of item
-		switch (fx->fxType()) {
-		case FX_SCENE:
-			minLenMs = fx->durationHint();
-			if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
-				minLenMs = 2000;
-			break;
-		case FX_AUDIO:
-			minLenMs = fx->durationHint();
-			qDebug() << "item duration" << minLenMs;
-			if (minLenMs <= 0)
-				minLenMs = 30000;
-		}
-
-		if (minLenMs > 0)
-			setDuration(minLenMs);
-
-		recalcPixelPos();
-		scene()->update();
-
-		// expand timeline if item lies beyond the timeline end
-		if (endPosition() > m_timeline->timeLineDuration())
-			m_timeline->setTimeLineDuration(endPosition());
-	}
+	linkToFxWithId(fxId);
 }

@@ -47,6 +47,7 @@ bool TimeLineExecuter::processExecuter()
 	Event nextEv = findNextObj();
 	if (nextEv.evType == EV_UNKNOWN) {
 		emit timeLineStatusChanged(EXEC_FINISH);
+		emit listProgressChanged(0, 0);
 		return false;			// no more active. We are ready
 	}
 
@@ -59,12 +60,16 @@ void TimeLineExecuter::processProgress()
 	if (myState == EXEC_FINISH) {
 		qDebug() << "finish timeline" << m_fxTimeLine->name();
 		emit timeLineStatusChanged(EXEC_FINISH);
+		emit listProgressChanged(0,0);
 		destroyLater();
 	}
 	else if (myState == EXEC_RUNNING) {
 		if (m_lastState != EXEC_RUNNING)
 			emit timeLineStatusChanged(EXEC_RUNNING);
-		emit playPosChanged(runTimeOne.elapsed());		///< todo timeline
+		int ranMs = runTimeOne.elapsed();
+		emit playPosChanged(ranMs);
+		int perMille = ranMs * 1000 / m_finalEventAtMs;
+		emit listProgressChanged(perMille, 0);
 	}
 
 	m_lastState = myState;
@@ -157,8 +162,12 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 		}
 	}
 
-	if (m_sortedObjEventList.isEmpty())
+	if (m_sortedObjEventList.isEmpty()) {
+		m_finalEventAtMs = 0;
 		return false; // nothing to execute
+	}
+
+	m_finalEventAtMs = m_sortedObjEventList.last().timeMs;
 
 	return true;	// at least one timeline obj in list
 }
