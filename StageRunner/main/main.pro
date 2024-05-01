@@ -145,6 +145,7 @@ SOURCES += \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
 	../mods/timeline/timelinebase.cpp \
+	../mods/timeline/timelineclasses.cpp \
 	../mods/timeline/timelinecursor.cpp \
 	../mods/timeline/timelineitem.cpp \
 	../mods/timeline/timelineruler.cpp \
@@ -270,6 +271,7 @@ HEADERS  += \
 	../gui/videostatuswidget.h \
 	../mods/timeline/timeline_defines.h \
 	../mods/timeline/timelinebase.h \
+	../mods/timeline/timelineclasses.h \
 	../mods/timeline/timelinecursor.h \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelineruler.h \
