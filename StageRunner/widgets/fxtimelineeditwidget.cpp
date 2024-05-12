@@ -18,7 +18,7 @@
 
 FxTimeLineScene::FxTimeLineScene(TimeLineWidget *timeLineWidget)
 	: TimeLineGfxScene(timeLineWidget)
-{
+{	
 }
 
 void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
@@ -212,6 +212,12 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 	if (!m_timeline->isInitialized())
 		m_timeline->init();
 	setupUi(this);
+//	QFont font("DejaVu Sans Mono", 13);
+//	timeCodeCursorLabel->setFont(font);
+//	timeCodeMouseLabel->setFont(font);
+
+
+
 	m_timeline->setAcceptDrops(true);
 
 	mainLayout->addWidget(m_timeline);

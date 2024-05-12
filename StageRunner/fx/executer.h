@@ -141,8 +141,8 @@ private:
 
 public:
 	inline TYPE type() const override {return EXEC_FXLIST;}
-	bool processExecuter();
-	void processProgress();
+	bool processExecuter() override;
+	void processProgress() override;
 
 	void setFxList(FxList *fx_list);
 	void setNextFx(FxItem *fx);
@@ -194,7 +194,7 @@ protected:
 
 public:
 	inline TYPE type() const override {return EXEC_SCENE;}
-	bool processExecuter();
+	bool processExecuter() override;
 
 protected:
 	SceneExecuter(AppCentral &app_central, FxSceneItem *scene, FxItem *parentFx);
@@ -223,8 +223,8 @@ protected:
 
 public:
 	inline TYPE type() const override {return EXEC_SCRIPT;}
-	bool processExecuter();
-	void processProgress();
+	bool processExecuter() override;
+	void processProgress() override;
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
 	void setDmxStarted(bool state) {m_startedByDMX = state;}
 	bool isStartedByDmx() const {return m_startedByDMX;}

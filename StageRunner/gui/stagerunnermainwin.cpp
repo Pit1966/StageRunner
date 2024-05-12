@@ -130,7 +130,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	m_statusTimer.start(1000);
 
 	// Font in log view
-	QFont font("DejaVuSansMono",9);
+	QFont font("DejaVu Sans Mono",9);
 	font.setStyleHint(QFont::Monospace);
 	logEdit->setFont(font);
 

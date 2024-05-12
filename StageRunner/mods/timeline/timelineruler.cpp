@@ -13,7 +13,7 @@ TimeLineRuler::TimeLineRuler(TimeLineWidget *timeline)
 	m_xSize = 500;
 	m_ySize = 30;
 
-	m_scaleFont = QFont("DejaVuSansMono", 8);
+	m_scaleFont = QFont("DejaVu Sans Mono", 9);
 	m_scaleFont.setStyleHint(QFont::Monospace);
 }
 

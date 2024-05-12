@@ -43,10 +43,10 @@ ScApplication::ScApplication(int &argc, char **argv)
 
 	QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
 	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Regular.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Bold.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Semibold.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-ExtraLight.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Regular.otf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Bold.otf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Semibold.otf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-ExtraLight.otf");
 }
 
 ScApplication::~ScApplication()

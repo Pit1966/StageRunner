@@ -43,8 +43,6 @@
         <property name="font">
          <font>
           <family>Source Code Pro</family>
-          <italic>false</italic>
-          <bold>true</bold>
          </font>
         </property>
         <property name="frameShape">
@@ -76,7 +74,6 @@
          <font>
           <family>Source Code Pro</family>
           <italic>false</italic>
-          <bold>true</bold>
          </font>
         </property>
         <property name="frameShape">
