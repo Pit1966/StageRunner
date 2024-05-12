@@ -7,6 +7,7 @@ FxTimeLineItem::FxTimeLineItem(FxList *fxList)
 	: QObject()
 	, FxItem(fxList)
 	, m_timelines{}
+	, m_timeLineDurationMs(0)
 {
 	init();
 }
@@ -15,6 +16,7 @@ FxTimeLineItem::FxTimeLineItem(const FxTimeLineItem &o)
 	: QObject()
 	, FxItem(o.myParentFxList)
 	, m_timelines{}
+	, m_timeLineDurationMs(0)
 {
 	init();
 	cloneFrom(o);
@@ -74,6 +76,7 @@ void FxTimeLineItem::init()
 	myFxType = FX_TIMELINE;
 	myclass = PrefVarCore::FX_TIMELINE_ITEM;
 
+	addExistingVar(m_timeLineDurationMs, "DurationMs");
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
 		m_timelines[t].parentVoid = this;
 		addExistingVarSetList(m_timelines[t], QString("Timeline%1").arg(t), PrefVarCore::TIMELINE_OBJ);

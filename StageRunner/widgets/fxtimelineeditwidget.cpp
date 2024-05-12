@@ -84,6 +84,12 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 	// clear all tracks (and items) in the widget
 	clear();
 
+	if (fxt->m_timeLineDurationMs > 1000) {
+		qDebug() << "setInitialTimeLineDuration" << fxt->m_timeLineDurationMs;
+		setTimeLineDuration(fxt->m_timeLineDurationMs);
+	}
+
+
 	bool hasItems = false;
 
 	// Each track has a its own list with item/objs
@@ -102,8 +108,9 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 			FxTimeLineObj *obj = varset.at(i);
 			TimeLineItem *tli = addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
-			extTLI->m_fxID = obj->m_fxID;
-			extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
+			extTLI->cloneItemDataFrom(obj);
+			// extTLI->m_fxID = obj->m_fxID;
+			// extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
 			hasItems = true;
 		}
 	}
@@ -141,8 +148,9 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
 			if (extTLI) {
-				obj->m_fxID = extTLI->m_fxID;
-				obj->m_linkedObjType = extTLI->m_linkedObjType;
+				obj->cloneItemDataFrom(extTLI);
+				// obj->m_fxID = extTLI->m_fxID;
+				// obj->m_linkedObjType = extTLI->m_linkedObjType;
 			}
 
 			if (i < varset.size()) {
@@ -163,6 +171,8 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 			}
 		}
 	}
+
+	fxt->m_timeLineDurationMs = timeLineDuration();
 
 	return true;
 }

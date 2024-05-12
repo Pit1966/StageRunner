@@ -67,12 +67,19 @@ public:
 	int stopAllFxPlaylists();
 
 	ScriptExecuter *startFxScript(FxScriptItem *fxscript);
+
+	void handleDmxInputScriptEvent(FxScriptItem *fxscript, uchar dmxVal);
 	bool stopFxScript(FxScriptItem *fxscript);
 	int stopAllFxScripts();
 
 	TimeLineExecuter *startFxTimeLine(FxTimeLineItem *fxtimeline, int atMs = 0);
 	bool stopFxTimeLine(FxTimeLineItem *fxtimeline);
 	int stopAllTimeLines();
+
+
+private:
+	ScriptExecuter * _startFxScript(FxScriptItem *fxscript);
+
 
 public slots:
 	FxListExecuter * startFxAudioPlayList(FxPlayListItem *fxplay);

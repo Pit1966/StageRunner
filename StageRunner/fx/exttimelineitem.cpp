@@ -12,6 +12,7 @@ using namespace PS_TL;
 
 ExtTimeLineItem::ExtTimeLineItem(TimeLineWidget *timeline, int trackId)
 	: TimeLineItem(timeline, trackId)
+	, TimeLineItemData()
 {
 
 }
@@ -40,14 +41,21 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 		switch (fx->fxType()) {
 		case FX_SCENE:
 			minLenMs = fx->durationHint();
+			m_maxDurationMs = 0;
 			if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
 				minLenMs = 2000;
 			break;
 		case FX_AUDIO:
 			minLenMs = fx->durationHint();
+			m_maxDurationMs = minLenMs;
 			qDebug() << "item duration" << minLenMs;
 			if (minLenMs <= 0)
 				minLenMs = 30000;
+			break;
+		case FX_SCRIPT:
+			minLenMs = fx->durationHint();
+			m_maxDurationMs = 0;
+			break;
 		}
 
 		if (minLenMs > 0)
@@ -59,10 +67,14 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 		// expand timeline if item lies beyond the timeline end
 		if (endPosition() > m_timeline->timeLineDuration())
 			m_timeline->setTimeLineDuration(endPosition());
+
+		return true;
 	}
+
+	return false;
 }
 
-void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent */*event*/)
 {
 }
 
@@ -80,6 +92,11 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 void ExtTimeLineItem::rightClicked(QGraphicsSceneMouseEvent */*event*/)
 {
 	qDebug() << "ExtTimeLineItem right clicked";
+}
+
+qreal ExtTimeLineItem::maxDuration() const
+{
+	return m_maxDurationMs;
 }
 
 void ExtTimeLineItem::contextDeleteMe()

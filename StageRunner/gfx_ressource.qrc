@@ -72,5 +72,9 @@
         <file>gfx/icons/config-date_green.png</file>
         <file>gfx/icons/timeline_item.svg</file>
         <file>gfx/icons/timeline_item.png</file>
+        <file>fonts/DejaVuSans-Bold.ttf</file>
+        <file>fonts/DejaVuSans.ttf</file>
+        <file>fonts/DejaVuSansMono.ttf</file>
+        <file>fonts/LiberationSans-Regular.ttf</file>
     </qresource>
 </RCC>

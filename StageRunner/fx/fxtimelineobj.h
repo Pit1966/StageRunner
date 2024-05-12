@@ -3,10 +3,11 @@
 
 #include "tool/varset.h"
 #include "fx/fx_defines.h"
+#include "fx/timelineitemdata.h"
 
 #include <varset.h>
 
-class FxTimeLineObj : public VarSet
+class FxTimeLineObj : public VarSet, public TimeLineItemData
 {
 public:
 	int trackId;				///< trackID for object
@@ -15,12 +16,13 @@ public:
 	QString label;
 
 protected:
-	int m_linkedObjType	= LINKED_UNDEF;
-	int m_fxID			= 0;
+	// next member vars moved to class TimeLineItemData
+	// int m_linkedObjType	= LINKED_UNDEF;
+	// int m_fxID			= 0;
+	// int m_maxDurationMs	= 0;
 
 public:
 	FxTimeLineObj(int posMs = 0, int durationMs = 0, const QString &label = {}, int trackID = 1);
-	FxTimeLineObj(const FxTimeLineObj &o);
 	void clear();
 	bool operator ==(const FxTimeLineObj &o);
 	bool isEqual(const FxTimeLineObj *o);

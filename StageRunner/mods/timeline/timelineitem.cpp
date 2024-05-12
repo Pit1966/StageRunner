@@ -51,8 +51,9 @@ void TimeLineItem::setBackgroundColor(const QColor &col)
 void TimeLineItem::recalcPixelPos()
 {
 	if (m_isTimePosValid) {
-		setX(qreal(position()) / m_timeline->msPerPixel());
 		m_xSize = qreal(duration()) / m_timeline->msPerPixel();
+		qDebug() << label() << "recalc m_xSize" << m_xSize;
+		setX(qreal(position()) / m_timeline->msPerPixel());
 	}
 }
 
@@ -120,7 +121,13 @@ void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 		if (m_grabMode == GRAB_RIGHT) {
 			m_xSize = m_clickXSize + xdif;
-			setDuration(m_xSize * m_timeline->msPerPixel());
+			qreal xSizeMs = m_xSize * m_timeline->msPerPixel();
+			qreal maxDurMs = maxDuration();
+			if (maxDurMs > 0 && xSizeMs > maxDurMs) {
+				xSizeMs = maxDurMs;
+				m_xSize = m_timeline->msToPixel(maxDurMs);
+			}
+			setDuration(xSizeMs);
 
 			// this schedules an graphics update
 			setPos(pos() + QPointF(1,0));

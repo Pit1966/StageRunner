@@ -17,6 +17,7 @@ class FxTimeLineItem : public QObject, public FxItem
 
 private:
 	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];
+	qint32 m_timeLineDurationMs;
 
 public:
 	FxTimeLineItem(FxList *fxList);

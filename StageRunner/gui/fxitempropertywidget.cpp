@@ -176,6 +176,9 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 		videoGroup->setVisible(false);
 	}
 	else if (fx->fxType() == FX_SCRIPT) {
+		hookedToChannelSpin->setValue(fx->hookedChannel()+1);
+		hookedToUniverseSpin->setValue(fx->hookedUniverse()+1);
+
 		audioGroup->setVisible(false);
 		hookedToGroup->setVisible(true);
 		videoGroup->setVisible(false);
@@ -541,7 +544,7 @@ void FxItemPropertyWidget::on_hookedToChannelSpin_valueChanged(int arg1)
 
 	if (cur_fx->hookedChannel() != arg1) {
 		cur_fx->hookToChannel(arg1);
-		cur_fxa->setModified(true);
+		cur_fx->setModified(true);
 		emit modified(cur_fx);
 	}
 }

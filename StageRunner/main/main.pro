@@ -110,6 +110,7 @@ SOURCES += \
 	../fx/fxtimelineitem.cpp \
 	../fx/fxtimelineobj.cpp \
 	../fx/timelineexecuter.cpp \
+	../fx/timelineitemdata.cpp \
 	../gui/audiocontrolwidget.cpp \
 	../gui/audioslotwidget.cpp \
 	../gui/consolidatedialog.cpp \
@@ -235,6 +236,7 @@ HEADERS  += \
 	../fx/fxtimelineitem.h \
 	../fx/fxtimelineobj.h \
 	../fx/timelineexecuter.h \
+	../fx/timelineitemdata.h \
 	../gui/audiocontrolwidget.h \
 	../gui/audioslotwidget.h \
 	../gui/consolidatedialog.h \

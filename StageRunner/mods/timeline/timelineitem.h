@@ -82,6 +82,9 @@ protected:
 	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 
+	// functions maybe implemented in derived classes in order to tweak controls
+	virtual qreal maxDuration() const {return 0.0;}
+
 signals:
 	void labelChanged(const QString &txt);
 

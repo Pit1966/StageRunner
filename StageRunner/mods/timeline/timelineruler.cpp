@@ -13,26 +13,33 @@ TimeLineRuler::TimeLineRuler(TimeLineWidget *timeline)
 	m_xSize = 500;
 	m_ySize = 30;
 
-	m_scaleFont = QFont("Monospace", 8);
+	m_scaleFont = QFont("DejaVuSansMono", 8);
+	m_scaleFont.setStyleHint(QFont::Monospace);
 }
 
 void TimeLineRuler::setTimeLineDuration(int ms)
 {
 	setDuration(ms);
 	recalcPixelPos();
+	// m_timeline->updateScene();
 }
 
 void TimeLineRuler::recalcPixelPos()
 {
 	setX(0);
-	m_xSize = m_timeline->msToPixel(duration());
-	m_isPixelPosValid = true;
+	if (m_timeline->msPerPixel() > 0) {
+		m_xSize = m_timeline->msToPixel(duration());
+		m_isPixelPosValid = true;
+	} else {
+		m_isPixelPosValid = false;
+	}
 	findTicDistance();
 }
 
 QRectF TimeLineRuler::boundingRect() const
 {
-	return QRectF(0, 0, m_xSize, m_ySize);
+	 QRectF br(0, 0, m_xSize, m_ySize);
+	 return br;
 }
 
 void TimeLineRuler::paint(QPainter *painter, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/)

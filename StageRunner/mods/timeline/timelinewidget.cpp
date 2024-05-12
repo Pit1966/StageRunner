@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
+#include <QTimer>
 
 namespace PS_TL {
 
@@ -61,12 +62,7 @@ const QSize &TimeLineGfxView::currentSize() const
 void TimeLineGfxView::resizeEvent(QResizeEvent *event)
 {
 	m_currentSize = event->size();
-	qDebug() << "resize view: event size" << event->size() << "widget size" << this->size();
-
-	// qreal xsize = event->size().width();
-	// qreal ysize = event->size().height();
-
-	// setSceneRect(0, 0, xsize, ysize);
+	// qDebug() << "resize view: event size" << event->size() << "widget size" << this->size();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -383,6 +379,7 @@ void TimeLineWidget::setTimeLineDuration(int ms)
 
 		m_ruler->setTimeLineDuration(ms);
 		adjustSceneRectToTimelineLength();
+		updateScene();
 
 		emit timeLineDurationChanged(ms);
 	}
@@ -398,6 +395,7 @@ void TimeLineWidget::setTimeLineViewRangeMs(int ms)
 	// adjust view range and transformation factor
 	m_viewRangeMs = ms;
 	m_msPerPixel = qreal(m_viewRangeMs) / (xsize - m_rightMargin);
+	qDebug() << "set timelineviewrange msPerPixel" << m_msPerPixel;
 
 	// readjust sceneRect since pixel transformation has changed
 	adjustSceneRectToTimelineLength();
@@ -420,6 +418,13 @@ void TimeLineWidget::setCursorPos(int ms)
 	// m_cursor->setPos(QPointF(ms / m_msPerPixel, m_cursor->y()));
 }
 
+void TimeLineWidget::updateScene()
+{
+	// qDebug() << "updateScene called";
+	if (m_scene)
+		m_scene->update();
+}
+
 /**
  * @brief TimeLineWidget::resizeEvent
  * @param event
@@ -440,6 +445,7 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	// if this is the first call, the scale is set. Otherwise the viewRange is adopted.
 	if (m_msPerPixel == 0) {
 		m_msPerPixel = qreal(m_viewRangeMs) / (xsize - m_rightMargin);
+		qDebug() << "  -> resize set msPerPixel" << m_msPerPixel << "";
 	} else {
 		m_viewRangeMs = m_msPerPixel * xsize;
 		m_viewRangeSlider->setValue(m_viewRangeMs);
@@ -460,8 +466,16 @@ void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent */*event*/)
 {
 	// setTimeLineViewRangeMs(30000);
 	// clear();
-	currentVisibleRect();
-	setTimeLineDuration(100000);
+	// currentVisibleRect();
+	// setTimeLineDuration(100000);
+	updateScene();
+}
+
+void TimeLineWidget::showEvent(QShowEvent */*event*/)
+{
+	/// @todo blöder Workaround, um eine Update der Timeline herbeizuführen, nachdem
+	/// das Widget sichtbar wird
+	QTimer::singleShot(10, this, SLOT(updateScene()));
 }
 
 

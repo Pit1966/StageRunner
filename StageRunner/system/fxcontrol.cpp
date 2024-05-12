@@ -278,47 +278,49 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 		return 0;
 	}
 
-	// See what has to be done before starting the sequence
-//	if (fxseq->stopOtherSeqOnStart) {
-//		myApp.sequenceStop();
-//	}
-//	if (fxseq->blackOtherSeqOnStart) {
-//		myApp.lightBlack(200);
-//	}
-
 	ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);
 	if (fxexec && fxexec->isMultiStartDisabled()) {
 		LOGTEXT(tr("<font color=green>Start script</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
 				.arg(fxscript->name()));
 		return nullptr;
-	} else {
-		LOGTEXT(tr("<font color=green>Start script</font> %1").arg(fxscript->name()));
 	}
 
-	// Create an executor for the script
-	fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
+	return _startFxScript(fxscript);
+}
 
-	// Determine what the FxListWidget is where the script comes from
-	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxscript);
-	if (parentwid) {
-		/// @todo script
-		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
-		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+void FxControl::handleDmxInputScriptEvent(FxScriptItem *fxscript, uchar dmxVal)
+{
+	if (dmxVal > 30) {
+		ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);
+		if (fxexec) {
+			// no multistart when started via DMX
+			if (fxexec->isStartedByDmx())
+				return;
+
+			if (fxexec->isMultiStartDisabled()) {
+				LOGTEXT(tr("<font color=green>Hooked DMX: Start script</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
+						.arg(fxscript->name()));
+				return;
+			}
+
+			// ok we start another script
+		}
+
+		fxexec = _startFxScript(fxscript);
+		if (fxexec) {
+			fxexec->setDmxStarted(true);
+		}
 	}
+	else if (dmxVal < 20) {
+		ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);
+		if (fxexec) {
+			// no multistart when started via DMX
+			if (fxexec->isStartedByDmx()) {
+				stopFxScript(fxscript);
+			}
+		}
 
-	// Determine the FxScriptWidget that is the editing widget of the current script
-	FxScriptWidget *scrwid = FxScriptWidget::findParentFxScriptWidget(fxscript);
-	if (scrwid) {
-		/// @todo script
-//		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
-//		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
 	}
-
-
-	// Give control for executer to FxControl loop
-	fxexec->activateProcessing();
-
-	return fxexec;
 }
 
 bool FxControl::stopFxScript(FxScriptItem *fxscript)
@@ -462,6 +464,37 @@ int FxControl::stopAllTimeLines()
 	execCenter.unlockExecuterList();
 	return count;
 }
+
+ScriptExecuter *FxControl::_startFxScript(FxScriptItem *fxscript)
+{
+	LOGTEXT(tr("<font color=green>Start script</font> %1").arg(fxscript->name()));
+
+	// Create an executor for the script
+	ScriptExecuter *fxexec = myApp.execCenter->newScriptExecuter(fxscript, fxscript->parentFxItem());
+
+	// Determine what the FxListWidget is where the script comes from
+	FxListWidget *parentwid = FxListWidget::findParentFxListWidget(fxscript);
+	if (parentwid) {
+		/// @todo script
+		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
+		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+	}
+
+	// Determine the FxScriptWidget that is the editing widget of the current script
+	FxScriptWidget *scrwid = FxScriptWidget::findParentFxScriptWidget(fxscript);
+	if (scrwid) {
+		/// @todo script
+//		connect(fxexec,SIGNAL(currentFxChanged(FxItem*)),seqwid,SLOT(markFx(FxItem*)),Qt::UniqueConnection);
+//		connect(fxexec,SIGNAL(nextFxChanged(FxItem*)),seqwid,SLOT(selectFx(FxItem*)),Qt::UniqueConnection);
+	}
+
+
+	// Give control for executer to FxControl loop
+	fxexec->activateProcessing();
+
+	return fxexec;
+}
+
 
 FxListExecuter *FxControl::startFxAudioPlayList(FxPlayListItem *fxplay)
 {

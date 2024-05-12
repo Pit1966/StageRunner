@@ -456,12 +456,13 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 	if (myApp.isInputAssignMode())
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 
+	/// @todo faster lookup of fxitems that are hooked to an dmx channel
 	for (FxItem * fx : qAsConst(FxItem::globalFxList())) {
 		if (fx->isHookedToInput(universe,channel)) {
 			if (fx->fxType() == FX_SCENE) {
 				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);
 				int response_time = myApp.pluginCentral->fastMapInUniverse[universe].responseTime;
-				qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
+				// qDebug("Direct Fade Scene: %s to %d (time:%d)",scene->name().toLocal8Bit().data(),value,response_time);
 
 				// This is to force the operator to draw the input slider to Null-Level, when a BLACK command was emitted
 				if (scene->isBlacked(MIX_EXTERN)) {
@@ -477,9 +478,14 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 				FxAudioItem *audio = static_cast<FxAudioItem*>(fx);
 				myApp.unitAudio->handleDmxInputAudioEvent(audio, value);
 			}
+			else if (fx->fxType() == FX_SCRIPT) {
+				// todo start fxscript
+
+			}
 		}
 	}
 
+	// change volume of audio slot, if DMX input is mapped to an audio channel
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		if (myApp.userSettings->mapAudioToDmxUniv[t] == qint32(universe + 1)
 				&& myApp.userSettings->mapAudioToDmxChan[t] == qint32(channel + 1) ) {

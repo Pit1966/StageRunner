@@ -89,7 +89,7 @@ protected:
 	qint32 defaultPostDelay;
 	qint32 defaultMoveTime;
 	qint32 hookedToInputUniverse;
-	qint32 hookedToInputDmxChannel;
+	qint32 hookedToInputDmxChannel;				// default -1 (not hooked to any channel)
 
 	FxList *myParentFxList;
 	bool playedInRandomList;

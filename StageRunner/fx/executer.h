@@ -219,12 +219,15 @@ protected:
 
 	bool m_breakOnCancel;					///< should executer immediately break, if canceled
 	bool m_disableMultiStart;
+	bool m_startedByDMX;
 
 public:
 	inline TYPE type() const override {return EXEC_SCRIPT;}
 	bool processExecuter();
 	void processProgress();
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
+	void setDmxStarted(bool state) {m_startedByDMX = state;}
+	bool isStartedByDmx() const {return m_startedByDMX;}
 	const QString & lastScriptError() const {return m_lastScriptError;}
 
 protected:

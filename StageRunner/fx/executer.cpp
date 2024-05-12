@@ -723,6 +723,7 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 	, m_currentLineNum(0)
 	, m_breakOnCancel(false)
 	, m_disableMultiStart(false)
+	, m_startedByDMX(false)
 {
 	parentFxItem = parentFx;
 	if (script)

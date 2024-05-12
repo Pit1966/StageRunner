@@ -135,10 +135,12 @@ public slots:
 	void setTimeLineDuration(int ms);
 	void setTimeLineViewRangeMs(int ms);
 	void setCursorPos(int ms);
+	void updateScene();
 
 protected:
 	void resizeEvent(QResizeEvent *event);
 	void mouseDoubleClickEvent(QMouseEvent *event);
+	void showEvent(QShowEvent *event);
 
 	virtual TimeLineItem *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
 	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);

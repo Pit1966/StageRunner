@@ -3,15 +3,14 @@
 
 #include "mods/timeline/timelineitem.h"
 #include "fx/fx_defines.h"
+#include "fx/timelineitemdata.h"
 
 class FxItem;
 
-class ExtTimeLineItem : public PS_TL::TimeLineItem
+
+class ExtTimeLineItem : public PS_TL::TimeLineItem, public TimeLineItemData
 {
 	Q_OBJECT
-private:
-	LINKED_OBJ_TYPE m_linkedObjType	= LINKED_UNDEF;
-	int m_fxID						= 0;
 
 public:
 	ExtTimeLineItem(PS_TL::TimeLineWidget *timeline, int trackId = 1);
@@ -25,6 +24,7 @@ protected:
 
 	// reimplementations from base class
 	void rightClicked(QGraphicsSceneMouseEvent *event) override;
+	qreal maxDuration() const override;
 
 
 private:
