@@ -33,19 +33,20 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 {
 	if (fx) {
 		m_fxID = fx->id();
-		m_linkedObjType = LINKED_FXITEM;
 		setLabel(fx->name());
 
 		int minLenMs = -1;
 		// preset of base time values, such as minimal execution duration of item
 		switch (fx->fxType()) {
 		case FX_SCENE:
+			m_linkedObjType = LINKED_FX_SCENE;
 			minLenMs = fx->durationHint();
 			m_maxDurationMs = 0;
 			if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
 				minLenMs = 2000;
 			break;
 		case FX_AUDIO:
+			m_linkedObjType = LINKED_FX_AUDIO;
 			minLenMs = fx->durationHint();
 			m_maxDurationMs = minLenMs;
 			qDebug() << "item duration" << minLenMs;
@@ -53,6 +54,7 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 				minLenMs = 30000;
 			break;
 		case FX_SCRIPT:
+			m_linkedObjType = LINKED_FX_SCRIPT;
 			minLenMs = fx->durationHint();
 			m_maxDurationMs = 0;
 			break;
@@ -114,7 +116,7 @@ void ExtTimeLineItem::contextEditLabel()
 
 	if (newlabel != m_label) {
 		if (newlabel.isEmpty()) {
-			if (m_linkedObjType == LINKED_FXITEM) {
+			if (m_linkedObjType >= LINKED_FX_SCENE && m_linkedObjType <= LINKED_FX_LAST) {
 				FxItem *fx = FxItem::findFxById(m_fxID);
 				if (fx) {
 					newlabel = fx->name();

@@ -12,7 +12,7 @@ public:
 	enum EV_TYPE {
 		EV_UNKNOWN,
 		EV_BEGIN,
-		EV_END
+		EV_STOP
 	};
 
 	class Event {

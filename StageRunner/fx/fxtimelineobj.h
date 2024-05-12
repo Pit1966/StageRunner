@@ -4,11 +4,14 @@
 #include "tool/varset.h"
 #include "fx/fx_defines.h"
 #include "fx/timelineitemdata.h"
+#include "varset.h"
 
-#include <varset.h>
+#include <QtCore>
 
 class FxTimeLineObj : public VarSet, public TimeLineItemData
 {
+	Q_DECLARE_TR_FUNCTIONS(FxTimeLineObj)
+
 public:
 	int trackId;				///< trackID for object
 	int posMs;					///< position on timeline in milliseconds
@@ -30,6 +33,8 @@ public:
 	int beginMs() const {return posMs;}
 	int endMs() const {return posMs + lenMs;}
 	int durationMs() const {return lenMs;}
+	int startAtMs() const;
+	int stopAtMs() const;
 
 	int fxID() const {return m_fxID;}
 	LINKED_OBJ_TYPE type() const {return LINKED_OBJ_TYPE(m_linkedObjType);}

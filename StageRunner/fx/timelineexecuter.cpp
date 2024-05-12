@@ -29,15 +29,15 @@ bool TimeLineExecuter::processExecuter()
 	if (ev.evType == EV_BEGIN) {
 		qDebug() << "EV" << ev.evNum +1 << "begin time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
 
-		if (obj->type() == LINKED_FXITEM) {
+		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			FxItem *fx = FxItem::findFxById(obj->fxID());
 			execObjBeginPosForFx(fx, ev);
 		}
 	}
-	else if (ev.evType == EV_END) {
+	else if (ev.evType == EV_STOP) {
 		qDebug() << "EV" << ev.evNum +1 << "end time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
 
-		if (obj->type() == LINKED_FXITEM) {
+		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			FxItem *fx = FxItem::findFxById(obj->fxID());
 			execObjEndPosForFx(fx, ev);
 		}
@@ -151,14 +151,16 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 			ev.obj = o;
 			m_sortedObjEventList.insert(n, ev);
 
-			// insert END event of object in list searching the correct time position
-			n = 0;
-			while (n < m_sortedObjEventList.size() && o->endMs() > m_sortedObjEventList.at(n).timeMs)
-				n++;
-			ev.evType = EV_END;
-			ev.evNum = n;
-			ev.timeMs = o->endMs();
-			m_sortedObjEventList.insert(n, ev);
+			if (o->stopAtMs() > 0) {
+				// insert END event of object in list searching the correct time position
+				n = 0;
+				while (n < m_sortedObjEventList.size() && o->stopAtMs() > m_sortedObjEventList.at(n).timeMs)
+					n++;
+				ev.evType = EV_STOP;
+				ev.evNum = n;
+				ev.timeMs = o->stopAtMs();
+				m_sortedObjEventList.insert(n, ev);
+			}
 		}
 	}
 
