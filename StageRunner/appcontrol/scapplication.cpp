@@ -28,6 +28,7 @@
 #endif
 
 #include <QApplication>
+#include <QFontDatabase>
 // #include <typeinfo>
 
 ScApplication::ScApplication(int &argc, char **argv)
@@ -40,6 +41,12 @@ ScApplication::ScApplication(int &argc, char **argv)
 	mySignalCatcher = new UnixSignalCatcher;
 #endif
 
+	QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Regular.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Bold.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-Semibold.ttf");
+	QFontDatabase::addApplicationFont(":/fonts/SourceCodePro-ExtraLight.ttf");
 }
 
 ScApplication::~ScApplication()

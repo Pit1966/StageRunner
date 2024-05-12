@@ -159,6 +159,8 @@ private slots:
 	void on_actionDelete_FX_Item_triggered();
 	void on_actionClose_video_window_triggered();
 
+	void on_showFontsButton_clicked();
+
 private:
 	void init();
 	void setup_gui_docks();

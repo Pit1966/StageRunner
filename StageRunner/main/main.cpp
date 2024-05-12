@@ -23,7 +23,7 @@
 
 
 #include <QApplication>
-#include <QFontDatabase>
+
 #include "configrev.h"
 #include "config.h"
 #include "appcentral.h"
@@ -365,9 +365,7 @@ int main(int argc, char *argv[])
 	PrefVarCore::registerVarClasses();
 
 	ScApplication app(argc, argv);
-	QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");
-	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans-Bold.ttf");
+
 
 	app.setApplicationName(APPNAME);
 	app.setOrganizationName(APP_ORG_STRING);

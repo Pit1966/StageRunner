@@ -76,5 +76,9 @@
         <file>fonts/DejaVuSans.ttf</file>
         <file>fonts/DejaVuSansMono.ttf</file>
         <file>fonts/LiberationSans-Regular.ttf</file>
+        <file>fonts/SourceCodePro-Bold.otf</file>
+        <file>fonts/SourceCodePro-Regular.otf</file>
+        <file>fonts/SourceCodePro-Semibold.otf</file>
+        <file>fonts/SourceSansPro-ExtraLight.otf</file>
     </qresource>
 </RCC>

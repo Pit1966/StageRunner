@@ -1461,3 +1461,34 @@ void StageRunnerMainWin::on_actionClose_video_window_triggered()
 	appCentral->closeVideoWidget();
 }
 
+
+void StageRunnerMainWin::on_showFontsButton_clicked()
+{
+	QFontDatabase database;
+	QTreeWidget *fontTree = new QTreeWidget;
+	fontTree->setAttribute(Qt::WA_DeleteOnClose);
+	fontTree->setColumnCount(2);
+	fontTree->setHeaderLabels(QStringList() << "Font" << "Smooth Sizes");
+
+	const QStringList fontFamilies = database.families();
+	for (const QString &family : fontFamilies) {
+		QTreeWidgetItem *familyItem = new QTreeWidgetItem(fontTree);
+		familyItem->setText(0, family);
+
+		const QStringList fontStyles = database.styles(family);
+		for (const QString &style : fontStyles) {
+			QTreeWidgetItem *styleItem = new QTreeWidgetItem(familyItem);
+			styleItem->setText(0, style);
+
+			QString sizes;
+			const QList<int> smoothSizes = database.smoothSizes(family, style);
+			for (int points : smoothSizes)
+				sizes += QString::number(points) + ' ';
+
+			styleItem->setText(1, sizes.trimmed());
+		}
+	}
+
+	fontTree->show();
+}
+

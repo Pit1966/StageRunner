@@ -34,7 +34,7 @@
       </widget>
       <widget class="QTabWidget" name="dmxMixerTab">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="iconSize">
         <size>
@@ -168,6 +168,13 @@
               </item>
               <item>
                <widget class="QSpinBox" name="debugLevelSpin"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="showFontsButton">
+                <property name="text">
+                 <string>Show Fonts</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
