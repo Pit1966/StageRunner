@@ -175,15 +175,15 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 		if (active) {
 			setSceneActive(scene);
 			LOGTEXT(tr("<font color=green>Start FADE IN scene %1</font> Duration: %2")
-					.arg(scene->name())
-					.arg(QtStaticTools::msToTimeString(scene->fadeInTime())));
+					.arg(scene->name(),
+						 QtStaticTools::msToTimeString(scene->fadeInTime())));
 
 		}
 	} else {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
 		LOGTEXT(tr("<font color=green>Start FADE OUT scene %1</font> Duration: %2")
-				.arg(scene->name())
-				.arg(QtStaticTools::msToTimeString(scene->fadeOutTime())));
+				.arg(scene->name(),
+					 QtStaticTools::msToTimeString(scene->fadeOutTime())));
 	}
 
 	return active;

@@ -37,6 +37,7 @@ protected:
 	volatile STATE m_lastState	= EXEC_IDLE;
 
 	QList<Event> m_sortedObjEventList;
+	QHash<int,FxSceneItem*> m_idToClonedSceneHash;	///< this is a hash Original fxID -> cloned FxItem of FxSceneItems that were started in the timeline as copy from main list
 
 public:
 	inline TYPE type() const override {return EXEC_TIMELINE;}
@@ -49,12 +50,14 @@ protected:
 	TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timeline, FxItem *parentFx);
 	virtual ~TimeLineExecuter();
 
+	FxSceneItem *getScene(int fxID);
+
 	Event findNextObj();
 	bool getTimeLineObjs(FxTimeLineItem *fx);
 
 
-	bool execObjBeginPosForFx(FxItem *fx, Event &ev);
-	bool execObjEndPosForFx(FxItem *fx, Event &ev);
+	bool execObjBeginPosForFx(int fxID, Event &ev);
+	bool execObjEndPosForFx(int fxID, Event &ev);
 
 signals:
 	void playPosChanged(int ms);

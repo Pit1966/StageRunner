@@ -433,7 +433,7 @@ void TimeLineWidget::updateScene()
  */
 void TimeLineWidget::resizeEvent(QResizeEvent *event)
 {
-	qDebug() << "  -> resize widget" << event->size() << "view size" << m_view->size() << "stored size" << m_view->currentSize();
+	// qDebug() << "  -> resize widget" << event->size() << "view size" << m_view->size() << "stored size" << m_view->currentSize();
 
 	// get size of child TimeLineGfxView
 
@@ -445,7 +445,7 @@ void TimeLineWidget::resizeEvent(QResizeEvent *event)
 	// if this is the first call, the scale is set. Otherwise the viewRange is adopted.
 	if (m_msPerPixel == 0) {
 		m_msPerPixel = qreal(m_viewRangeMs) / (xsize - m_rightMargin);
-		qDebug() << "  -> resize set msPerPixel" << m_msPerPixel << "";
+		// qDebug() << "  -> resize set msPerPixel" << m_msPerPixel << "";
 	} else {
 		m_viewRangeMs = m_msPerPixel * xsize;
 		m_viewRangeSlider->setValue(m_viewRangeMs);

@@ -197,6 +197,7 @@ TimeLineExecuter *ExecCenter::newTimeLineExecuter(FxTimeLineItem *timeline, FxIt
 
 	connect(exec, SIGNAL(deleteMe(Executer*)), this, SLOT(deleteExecuter(Executer*)), Qt::QueuedConnection);
 	connect(exec, SIGNAL(changed(Executer*)), this, SLOT(on_executer_changed(Executer*)), Qt::DirectConnection);
+	connect(exec, SIGNAL(wantedDeleteFxScene(FxSceneItem*)), &myApp, SLOT(deleteFxSceneItem(FxSceneItem*)));
 
 	emit executerCreated(exec);
 	return exec;
@@ -232,8 +233,8 @@ void ExecCenter::deleteExecuter(Executer *exec)
 	}
 
 	if (executerList.removeOne(exec)) {
-		delete exec;
 		emit executerDeleted(exec);
+		delete exec;
 	}
 }
 

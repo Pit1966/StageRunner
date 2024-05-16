@@ -25,12 +25,15 @@ protected:
 	// reimplementations from base class
 	void rightClicked(QGraphicsSceneMouseEvent *event) override;
 	qreal maxDuration() const override;
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 
 private:
 	void contextDeleteMe();
 	void contextEditLabel();
 	void contextLinkToFx();
+	void contextFadeInTime();
+	void contextFadeOutTime();
 
 	friend class FxTimeLineEditWidget;
 	friend class ExtTimeLineWidget;

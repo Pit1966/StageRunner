@@ -88,6 +88,10 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	menu.addAction(tr("Link to Fx"), this, &ExtTimeLineItem::contextLinkToFx);
 	menu.addAction(tr("Edit label"), this, &ExtTimeLineItem::contextEditLabel);
 
+	menu.addAction(tr("Edit fadeIN time"), this, &ExtTimeLineItem::contextFadeInTime);
+	menu.addAction(tr("Edit fadeOut time"), this, &ExtTimeLineItem::contextFadeOutTime);
+
+
 	menu.exec(m_timeline->gfxView()->mapToGlobal(event->scenePos().toPoint()));
 }
 
@@ -99,6 +103,47 @@ void ExtTimeLineItem::rightClicked(QGraphicsSceneMouseEvent */*event*/)
 qreal ExtTimeLineItem::maxDuration() const
 {
 	return m_maxDurationMs;
+}
+
+void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+	TimeLineItem::paint(painter, option, widget);
+
+	// If there is a linked FX item, there could additional things to render
+	FxItem * fx = linkedFxItem();
+	if (!fx) return;
+
+	if (m_linkedObjType == LINKED_FX_SCENE || m_linkedObjType == LINKED_FX_AUDIO) {
+		int fadeInMs = m_fadeInDurationMs > 0 ? m_fadeInDurationMs : fx->fadeInTime();
+		if (fadeInMs > 0) {
+			// draw a ramp
+			qreal baselen = m_timeline->msToPixel(fadeInMs);
+			painter->setBrush(QColor(180,255,180,80));
+			painter->setPen(Qt::NoPen);
+
+			qreal b = m_penWidthBorder / 2;
+
+			QVector<QPointF> triangle;
+			triangle << QPointF(-b, m_ySize + b)
+					 << QPointF(baselen, m_ySize + b)
+					 << QPointF(baselen, 0/*m_ySize * 2/4*/);
+			painter->drawPolygon(triangle);
+		}
+		if (fx->fadeOutTime() > 0) {
+			// draw a ramp
+			qreal baselen = m_timeline->msToPixel(fx->fadeOutTime());
+			painter->setBrush(QColor(255,180,180,80));
+			painter->setPen(Qt::NoPen);
+
+			qreal b = m_penWidthBorder / 2;
+
+			QVector<QPointF> triangle;
+			triangle << QPointF(m_xSize + b, m_ySize + b)
+					 << QPointF(m_xSize - baselen, m_ySize + b)
+					 << QPointF(m_xSize - baselen, 0/*m_ySize * 2/4*/);
+			painter->drawPolygon(triangle);
+		}
+	}
 }
 
 void ExtTimeLineItem::contextDeleteMe()
@@ -133,4 +178,50 @@ void ExtTimeLineItem::contextLinkToFx()
 									tr("Enter ID of Fx"));
 
 	linkToFxWithId(fxId);
+}
+
+void ExtTimeLineItem::contextFadeInTime()
+{
+	int ms = 0;
+	if (m_fadeInDurationMs > 0) {
+		ms = m_fadeInDurationMs;
+	}
+	else {
+		FxItem * fx = linkedFxItem();
+		if (fx)
+			ms = fx->fadeInTime();
+	}
+
+	int valms = QInputDialog::getInt(m_timeline,
+									 tr("Item config"),
+									 tr("Edit fadeIN time"),
+									 ms);
+	if (valms == ms)
+		return;
+
+	m_fadeInDurationMs = valms;
+	update();
+}
+
+void ExtTimeLineItem::contextFadeOutTime()
+{
+	int ms = 0;
+	if (m_fadeOutDurationMs > 0) {
+		ms = m_fadeOutDurationMs;
+	}
+	else {
+		FxItem * fx = linkedFxItem();
+		if (fx)
+			ms = fx->fadeOutTime();
+	}
+
+	int valms = QInputDialog::getInt(m_timeline,
+									 tr("Item config"),
+									 tr("Edit fadeOut time"),
+									 ms);
+	if (valms == ms)
+		return;
+
+	m_fadeOutDurationMs = valms;
+	update();
 }

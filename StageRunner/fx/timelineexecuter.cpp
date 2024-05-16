@@ -30,16 +30,14 @@ bool TimeLineExecuter::processExecuter()
 		qDebug() << "EV" << ev.evNum +1 << "begin time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
 
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
-			FxItem *fx = FxItem::findFxById(obj->fxID());
-			execObjBeginPosForFx(fx, ev);
+			execObjBeginPosForFx(obj->fxID(), ev);
 		}
 	}
 	else if (ev.evType == EV_STOP) {
 		qDebug() << "EV" << ev.evNum +1 << "end time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
 
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
-			FxItem *fx = FxItem::findFxById(obj->fxID());
-			execObjEndPosForFx(fx, ev);
+			execObjEndPosForFx(obj->fxID(), ev);
 		}
 
 	}
@@ -114,7 +112,39 @@ TimeLineExecuter::TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timel
 
 TimeLineExecuter::~TimeLineExecuter()
 {
+	for (FxSceneItem *fx : qAsConst(m_idToClonedSceneHash)) {
+		if (!fx->isOnStageIntern() && !fx->isActive()) {
+			emit wantedDeleteFxScene(fx);
+		} else {
+			fx->setDeleteOnFinished();
+		}
+	}
 	qDebug() << "destroyed timeline executer";
+}
+
+/**
+ * @brief Get cloned temporary copy of scene with original fxID
+ * @param fxID fx id of FxItem original used in play
+ * @return Address of cloned scene
+ *
+ * if the fxID is not in the internal hash. The scene will be searched in FxItem pool and a
+ * copy will be made first
+ */
+FxSceneItem *TimeLineExecuter::getScene(int fxID)
+{
+	if (m_idToClonedSceneHash.contains(fxID))
+		return m_idToClonedSceneHash[fxID];
+
+	FxSceneItem *orgfx = dynamic_cast<FxSceneItem*>(FxItem::findFxById(fxID));
+	if (!orgfx) {
+		LOGERROR(tr("Could not find FX scene with ID %1, or it is no scene!").arg(fxID));
+		return nullptr;
+	}
+	FxSceneItem *cfx = new FxSceneItem(*orgfx);
+	cfx->setName(tr("%1:%2_tmp").arg(originFxItem->name(), orgfx->name()));
+	cfx->setIsTempCopyOf(orgfx);
+	m_idToClonedSceneHash.insert(fxID, cfx);
+	return cfx;
 }
 
 TimeLineExecuter::Event TimeLineExecuter::findNextObj()
@@ -174,35 +204,45 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 	return true;	// at least one timeline obj in list
 }
 
-bool TimeLineExecuter::execObjBeginPosForFx(FxItem *fx, Event &ev)
+bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 {
-	if (!fx) return false;
+	FxItem *fx = FxItem::findFxById(fxID);
+	if (!fx) {
+		LOGERROR(tr("FX with id #%1 not found in timeline executer").arg(fxID));
+		return false;
+	}
 
 	bool ok = false;
 
-	switch (fx->fxType()) {
-	case FX_AUDIO:
-		{
-			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
-			int pos = -1;
+	int fxtype = fx->fxType();
+	if (fxtype == FX_AUDIO)	{
+		FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+		int pos = -1;
 
-			if (fxa->isFxClip) {
-				ok = myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
-			}
-			else if (pos >= -1) {
-				ok = myApp.unitAudio->startFxAudio(fxa, this, pos);
-			}
-			else {
-				ok = myApp.unitAudio->startFxAudio(fxa, this);
-			}
+		if (fxa->isFxClip) {
+			ok = myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
 		}
-		break;
-	case FX_SCENE:
-		/// @todo it would be better to copy the scene and actually fade in the new instance here
+		else if (pos >= -1) {
+			ok = myApp.unitAudio->startFxAudio(fxa, this, pos);
+		}
+		else {
+			int fadeinms = ev.obj->fadeInDurationMs();
+			// if (fadeinms > 0) {
+			// 	ok = myApp.unitAudio->fadeinFxAudio();
+			// }
+			ok = myApp.unitAudio->startFxAudio(fxa, this);
+		}
+	}
+	else if (fxtype == FX_SCENE) {
 		/// Further the executer is not handed over to scene
-		ok = myApp.unitLight->startFxScene(static_cast<FxSceneItem*>(fx));
-		break;
-	default:
+		FxSceneItem *fxs = getScene(fxID);
+		if (fxs) {
+			fxs->setFadeInTime(ev.obj->fadeInDurationMs());
+			fxs->setFadeOutTime(ev.obj->fadeOutDurationMs());
+			ok = myApp.unitLight->startFxScene(fxs);
+		}
+	}
+	else {
 		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
 				 .arg(m_fxTimeLine->name()));
 	}
@@ -210,35 +250,41 @@ bool TimeLineExecuter::execObjBeginPosForFx(FxItem *fx, Event &ev)
 	return ok;
 }
 
-bool TimeLineExecuter::execObjEndPosForFx(FxItem *fx, Event &ev)
+bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 {
-	if (!fx) return false;
+	FxItem *fx = FxItem::findFxById(fxID);
+	if (!fx) {
+		LOGERROR(tr("FX with id #%1 not found in timeline executer").arg(fxID));
+		return false;
+	}
 
 	bool ok = false;
 
-	switch (fx->fxType()) {
-	case FX_AUDIO:
-		{
-			FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
-			int fade_time = 3000;
+	int fxtype = fx->fxType();
+	if (fxtype == FX_AUDIO)	{
+		FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
+		int fade_time = 3000;
 
-			if (fxa->isFxClip) {
-				myApp.unitVideo->videoBlack(fade_time);
-			}
-			else if (fade_time > 0) {
-				myApp.unitAudio->fadeoutFxAudio(fxa, fade_time);
-			}
-			else {
-				myApp.unitAudio->stopFxAudio(fxa);
-			}
-
-			ok = true;
+		if (fxa->isFxClip) {
+			myApp.unitVideo->videoBlack(fade_time);
 		}
-		break;
-	case FX_SCENE:
-		ok = myApp.unitLight->stopFxScene(static_cast<FxSceneItem*>(fx));
-		break;
-	default:
+		else if (fade_time > 0) {
+			myApp.unitAudio->fadeoutFxAudio(fxa, fade_time);
+		}
+		else {
+			myApp.unitAudio->stopFxAudio(fxa);
+		}
+
+		ok = true;
+	}
+	else if (fxtype == FX_SCENE) {
+		FxSceneItem *fxs = getScene(fxID);
+		if (fxs) {
+			fxs->setFadeOutTime(ev.obj->fadeOutDurationMs());
+			ok = myApp.unitLight->stopFxScene(fxs);
+		}
+	}
+	else {
 		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
 				 .arg(m_fxTimeLine->name()));
 	}

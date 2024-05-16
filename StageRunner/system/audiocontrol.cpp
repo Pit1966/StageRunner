@@ -403,18 +403,6 @@ bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 a
 	return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
 }
 
-//bool AudioControl::startFxAudioAtStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
-//{
-//	QMutexLocker lock(slotMutex);
-
-//	int slot = selectFreeAudioSlot();
-//	if (slot < 0) {
-//		return false;
-//	} else {
-//		return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
-//	}
-//}
-
 void AudioControl::startFxAudioFromTimer(FxItem *fx)
 {
 	FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
@@ -438,14 +426,6 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, i
 
 	return startFxAudioStage2(fxa, exec, atMs, initVol);
 }
-
-//bool AudioControl::startFxAudioAt(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
-//{
-//	QMutexLocker lock(slotMutex);
-//	executeAttachedAudioStartCmd(fxa);
-////	return startFxAudioAtStage2(fxa, exec, atMs, initVol);
-//	return startFxAudioStage2(fxa, exec, atMs, initVol);
-//}
 
 bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
 {

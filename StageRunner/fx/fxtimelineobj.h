@@ -34,6 +34,8 @@ public:
 	int endMs() const {return posMs + lenMs;}
 	int durationMs() const {return lenMs;}
 	int startAtMs() const;
+	int fadeInDurationMs() const;
+	int fadeOutDurationMs() const;
 	int stopAtMs() const;
 
 	int fxID() const {return m_fxID;}
