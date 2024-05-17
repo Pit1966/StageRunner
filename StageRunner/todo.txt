@@ -1,4 +1,6 @@
 /// @todo faster lookup of fxitems that are hooked to an dmx channel
+- timeline executer: fade in audio fx. Do this with a ctrl command.
+
 - findScriptExecuter müsste eine Liste von Executern zurückgeben, wenn der Effekt mehrfach gestartet wurde
 
 - static global_fx_list sollte auch ein Hash sein für schnelle Suche ID->Fx

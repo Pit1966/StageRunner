@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <math.h>
+#include <QGraphicsSceneMouseEvent>
 
 namespace PS_TL {
 
@@ -22,6 +23,12 @@ void TimeLineRuler::setTimeLineDuration(int ms)
 	setDuration(ms);
 	recalcPixelPos();
 	// m_timeline->updateScene();
+}
+
+void TimeLineRuler::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+	int x = event->pos().x();
+	emit timePositionClicked(m_timeline->pixelToMs(x));
 }
 
 void TimeLineRuler::recalcPixelPos()

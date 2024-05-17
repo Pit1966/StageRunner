@@ -11,7 +11,7 @@ private:
 	qint64 m_addNs;
 
 public:
-	ExtElapsedTimer();
+	ExtElapsedTimer(bool startTimer = false);
 	void start();
 	void stop();
 	void cont();

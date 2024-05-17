@@ -110,6 +110,7 @@ public:
 	inline PsVideoWidget * videoWidget() const {return m_videoWid;}
 	inline VideoPlayer * videoPlayer() const {return m_videoPlayer;}
 	int evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa);
+	int getSlotForFxAudio(FxAudioItem *fxa);
 	void closeVideoWidget();
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
 

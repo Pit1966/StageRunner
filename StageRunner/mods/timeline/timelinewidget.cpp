@@ -108,7 +108,7 @@ void TimeLineWidget::init()
 	m_ruler->setPos(0, 0);
 	m_ruler->setZValue(99);
 	m_ruler->setDuration(m_timeLineLenMs);
-
+	connect(m_ruler, SIGNAL(timePositionClicked(int)), this, SLOT(setCursorPos(int)));
 
 	// QGraphicsRectItem *gitem = new QGraphicsRectItem(50,50, 50, 10);
 	// m_scene->addItem(gitem);

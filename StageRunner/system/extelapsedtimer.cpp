@@ -1,10 +1,12 @@
 #include "extelapsedtimer.h"
 #include <QDebug>
 
-ExtElapsedTimer::ExtElapsedTimer()
+ExtElapsedTimer::ExtElapsedTimer(bool startTimer)
 	: m_isRunning(false)
 	, m_addNs(0)
 {
+	if (startTimer)
+		start();
 }
 
 /**

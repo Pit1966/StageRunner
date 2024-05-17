@@ -287,7 +287,7 @@ AudioPlayer *AudioControl::audioPlayer(int i) const
 }
 
 /**
- * @brief Search audio fx in any audio slot and return current play volume if found
+ * @brief Search audio fx in any audio slots and return current play volume if found
  * @param fxa
  * @return current play volume or -1, if audio was not found
  */
@@ -303,6 +303,21 @@ int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
 	}
 
 	return curvol;
+}
+
+/**
+ * @brief Search audio fx in audio slots and return the slot number if found
+ * @param fxa
+ * @return current slot number the audio fx is playing in or -1, if not found
+ */
+int AudioControl::getSlotForFxAudio(FxAudioItem *fxa)
+{
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->currentFxAudio() == fxa)
+			return t;
+	}
+
+	return -1;
 }
 
 void AudioControl::closeVideoWidget()
@@ -747,6 +762,7 @@ void AudioControl::fadeinFxAudio(int slot, int targetVolume, int time_ms)
 		// This is a private message to my audio thread
 		AudioCtrlMsg msg(slot,CMD_AUDIO_FADEIN);
 		msg.fadetime = time_ms;
+		msg.volume = targetVolume;
 		msg.executer = audioSlots[slot]->currentExecuter();
 		emit audioThreadCtrlMsgEmitted(msg);
 	}

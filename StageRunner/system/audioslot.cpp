@@ -267,6 +267,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 				.arg(delayMsg));
 	}
 
+	/// @todo remove this wait loop. Do it with timer or callback ...
 	bool ok = false;
 	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
@@ -379,6 +380,14 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 	return true;
 }
 
+/**
+ * @brief AudioSlot::fadeinFxAudio
+ * @param targetVolume
+ * @param time_ms
+ * @return
+ *
+ * @note must be called from main thread !! ??
+ */
 bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 {
 	if (time_ms <= 0) {

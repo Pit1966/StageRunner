@@ -222,15 +222,26 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		if (fxa->isFxClip) {
 			ok = myApp.unitVideo->startFxClip(static_cast<FxClipItem*>(fx));
 		}
-		else if (pos >= -1) {
+		else if (pos > -1) {
 			ok = myApp.unitAudio->startFxAudio(fxa, this, pos);
 		}
 		else {
+			/// @todo do this fade in with a CtrlMsg
 			int fadeinms = ev.obj->fadeInDurationMs();
-			// if (fadeinms > 0) {
-			// 	ok = myApp.unitAudio->fadeinFxAudio();
-			// }
-			ok = myApp.unitAudio->startFxAudio(fxa, this);
+			if (fadeinms > 0) {
+				ok = myApp.unitAudio->startFxAudio(fxa, this, 0, 0);
+				ExtElapsedTimer wait(true);
+				int slot = -1;
+				while (ok && slot < 0 && wait.elapsed() < FX_AUDIO_START_WAIT_DELAY) {
+					slot = myApp.unitAudio->getSlotForFxAudio(fxa);
+				}
+				// qDebug() << "fadein timeline audio in slot" << slot;
+				if (ok && slot >= 0) {
+					myApp.unitAudio->fadeinFxAudio(0, fxa->initialVolume, fadeinms);
+				}
+			} else {
+				ok = myApp.unitAudio->startFxAudio(fxa, this);
+			}
 		}
 	}
 	else if (fxtype == FX_SCENE) {

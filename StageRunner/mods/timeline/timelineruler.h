@@ -27,6 +27,7 @@ public:
 	void setTimeLineDuration(int ms);
 
 	// reimplemented from base
+	void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	void recalcPixelPos() override;
 
 	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
@@ -37,6 +38,9 @@ public:
 	static QString msToTimeLineString(int ms, int msPrec = 2);
 protected:
 	bool findTicDistance();
+
+signals:
+	void timePositionClicked(int ms);
 
 };
 
