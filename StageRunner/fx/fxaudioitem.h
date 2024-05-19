@@ -53,7 +53,7 @@ public:
 	qint64 initialSeekPos;					///< This is the time in ms the audio file should start on play
 	qint64 stopAtSeekPos;					///< Playing of audio will be stopped at this time (ms) (if not NULL)
 	qint32 loopTimes;
-	qint32 playBackSlot;					///< The default playback slot (channel). 0 means auto select
+	qint32 playBackSlot;					///< The default playback slot (channel). 0 means auto select, < 0 causes a fail start
 	qint32 attachedStartCmd;				///< This is a command that is executed at the same time this Fx is started
 	qint32 attachedStopCmd;
 	qint32 attachedStartPara1;

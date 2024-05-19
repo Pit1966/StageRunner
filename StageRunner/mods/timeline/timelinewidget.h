@@ -84,7 +84,7 @@ protected:
 	int m_viewRangeMs			= 60000;	///< length of visible timeline portion (view area length)
 	int m_timeLineLenMs			= 60000;	///< virtual length of timeline. This is timeline duration
 
-	int m_defaultTrackHeight	= 34;
+	int m_defaultTrackHeight	= 40;
 	QList<TimeLineTrack> m_tracks;			///< list of y-sizes of the tracks
 
 

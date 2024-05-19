@@ -118,21 +118,20 @@ public:
 
 private:
 	void run();
-	bool start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool _startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
+	bool _startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 #ifdef USE_SDL
 	static void sdlChannelDone(int chan);
 	static void sdlPostMix(void *udata, quint8 *stream, int len);
 #endif
 
 private slots:
-	void vu_level_changed_receiver(int slotnum, qreal left, qreal right);
-	void fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec);
-	bool startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1);
-	void startFxAudioFromTimer(FxItem *fx);
+	void _vuLevelChangedReceiver(int slotnum, qreal left, qreal right);
+	void _fftSpectrumChangedReceiver(int slotnum, FrqSpectrum *spec);
 
 public slots:
-	bool startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1);
-	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
+	bool startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
+	bool startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 	bool startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1);
 	bool restartFxAudioInSlot(int slotnum);
 	int stopAllFxAudio();

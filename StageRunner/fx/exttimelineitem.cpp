@@ -76,9 +76,9 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 	return false;
 }
 
-void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent */*event*/)
-{
-}
+// void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent */*event*/)
+// {
+// }
 
 void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
@@ -95,16 +95,6 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	menu.exec(m_timeline->gfxView()->mapToGlobal(event->scenePos().toPoint()));
 }
 
-void ExtTimeLineItem::rightClicked(QGraphicsSceneMouseEvent */*event*/)
-{
-	qDebug() << "ExtTimeLineItem right clicked";
-}
-
-qreal ExtTimeLineItem::maxDuration() const
-{
-	return m_maxDurationMs;
-}
-
 void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	TimeLineItem::paint(painter, option, widget);
@@ -114,7 +104,7 @@ void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 	if (!fx) return;
 
 	if (m_linkedObjType == LINKED_FX_SCENE || m_linkedObjType == LINKED_FX_AUDIO) {
-		int fadeInMs = m_fadeInDurationMs > 0 ? m_fadeInDurationMs : fx->fadeInTime();
+		int fadeInMs = fadeInTime();
 		if (fadeInMs > 0) {
 			// draw a ramp
 			qreal baselen = m_timeline->msToPixel(fadeInMs);
@@ -129,9 +119,10 @@ void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 					 << QPointF(baselen, 0/*m_ySize * 2/4*/);
 			painter->drawPolygon(triangle);
 		}
-		if (fx->fadeOutTime() > 0) {
+		int fadeOutMs = fadeOutTime();
+		if (fadeOutMs > 0) {
 			// draw a ramp
-			qreal baselen = m_timeline->msToPixel(fx->fadeOutTime());
+			qreal baselen = m_timeline->msToPixel(fadeOutMs);
 			painter->setBrush(QColor(255,180,180,80));
 			painter->setPen(Qt::NoPen);
 
@@ -145,6 +136,71 @@ void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 		}
 	}
 }
+
+void ExtTimeLineItem::rightClicked(QGraphicsSceneMouseEvent */*event*/)
+{
+	qDebug() << "ExtTimeLineItem right clicked";
+}
+
+int ExtTimeLineItem::maxDuration() const
+{
+	return m_maxDurationMs;
+}
+
+/**
+ * @brief Get fadein time.
+ * @return fadein time [ms] or 0, if not set
+ *
+ * use fadein time stored in this object, if it is > 0
+ * otherwise use fadeInTime from FxItem, but only if there is a linked FxItem
+ */
+int ExtTimeLineItem::fadeInTime() const
+{
+	int ms = 0;
+	if (m_fadeInDurationMs > 0) {
+		ms = m_fadeInDurationMs;
+	}
+	else {
+		FxItem * fx = linkedFxItem();
+		if (fx)
+			ms = fx->fadeInTime();
+	}
+
+	return ms;
+}
+
+void ExtTimeLineItem::setFadeInTime(int ms)
+{
+	m_fadeInDurationMs = ms;
+}
+
+/**
+ * @brief Get fadeout time.
+ * @return fadeout time [ms] or 0, if not set
+ *
+ * use fadeout time stored in this object, if it is > 0
+ * otherwise use fadeOutTime from FxItem, but only if there is a linked FxItem
+ */
+int ExtTimeLineItem::fadeOutTime() const
+{
+	int ms = 0;
+	if (m_fadeOutDurationMs > 0) {
+		ms = m_fadeOutDurationMs;
+	}
+	else {
+		FxItem * fx = linkedFxItem();
+		if (fx)
+			ms = fx->fadeOutTime();
+	}
+
+	return ms;
+}
+
+void ExtTimeLineItem::setFadeOutTime(int ms)
+{
+	m_fadeOutDurationMs = ms;
+}
+
 
 void ExtTimeLineItem::contextDeleteMe()
 {
@@ -182,16 +238,7 @@ void ExtTimeLineItem::contextLinkToFx()
 
 void ExtTimeLineItem::contextFadeInTime()
 {
-	int ms = 0;
-	if (m_fadeInDurationMs > 0) {
-		ms = m_fadeInDurationMs;
-	}
-	else {
-		FxItem * fx = linkedFxItem();
-		if (fx)
-			ms = fx->fadeInTime();
-	}
-
+	int ms = fadeInTime();
 	int valms = QInputDialog::getInt(m_timeline,
 									 tr("Item config"),
 									 tr("Edit fadeIN time"),
@@ -205,16 +252,7 @@ void ExtTimeLineItem::contextFadeInTime()
 
 void ExtTimeLineItem::contextFadeOutTime()
 {
-	int ms = 0;
-	if (m_fadeOutDurationMs > 0) {
-		ms = m_fadeOutDurationMs;
-	}
-	else {
-		FxItem * fx = linkedFxItem();
-		if (fx)
-			ms = fx->fadeOutTime();
-	}
-
+	int ms = fadeOutTime();
 	int valms = QInputDialog::getInt(m_timeline,
 									 tr("Item config"),
 									 tr("Edit fadeOut time"),

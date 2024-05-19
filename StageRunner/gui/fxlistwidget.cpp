@@ -548,7 +548,7 @@ void FxListWidget::setCurrentFx(FxItem *newfx, FxItem *oldfx)
 void FxListWidget::initRowDrag(FxListWidgetItem *item)
 {
 	QDrag *drag = new QDrag(this);
-	// Now we create a spechial MimeData Object with Information for the origin of the fxListWidgetItem
+	// Now we create a special MimeData Object with Information for the origin of the fxListWidgetItem
 	ExtMimeData *mdata = new ExtMimeData();
 	mdata->fxListWidgetItem = item;
 	mdata->originFxListWidget = this;
@@ -595,7 +595,7 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	fxTable->setOldScrollPos();
 
 	Qt::DropAction dropaction = drag->exec();
-	qDebug() << "InitRowDrag result: Dropaction:" << dropaction;
+	// qDebug() << "InitRowDrag result: Dropaction:" << dropaction;
 	if (dropaction != Qt::MoveAction) {
 		refreshList();
 	}

@@ -356,7 +356,7 @@ void AudioControl::run()
 	LOGTEXT(tr("Audio control finished"));
 }
 
-void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal right)
+void AudioControl::_vuLevelChangedReceiver(int slotnum, qreal left, qreal right)
 {
 	if (slotnum < 0 || slotnum >= audioSlots.size())
 		return;
@@ -368,13 +368,36 @@ void AudioControl::vu_level_changed_receiver(int slotnum, qreal left, qreal righ
 	emit vuLevelChanged(slotnum, left * (pow(10,volf)-1) * 10 / 90, right * (pow(10,volf)-1) * 10 / 90);
 }
 
-void AudioControl::fft_spectrum_changed_receiver(int slotnum, FrqSpectrum *spec)
+void AudioControl::_fftSpectrumChangedReceiver(int slotnum, FrqSpectrum *spec)
 {
 	if (slotnum < 0 || slotnum >= used_slots) return;
 	emit fftSpectrumChanged(slotnum,spec);
 }
 
-bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
+bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
+{
+	QMutexLocker lock(slotMutex);
+	// Execute other configured commands, before audio is started
+	executeAttachedAudioStartCmd(fxa);
+
+	return _startFxAudioStage2(fxa, exec, atMs, initVol, fadeInMs);
+}
+
+bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
+{
+	if (slotnum < 0 || slotnum >= used_slots)
+		return false;
+
+	if (audioSlots[slotnum]->select()) {
+		if (_startFxAudioInSlot(fxa, slotnum, exec, atMs, initVol, fadeInMs))
+			return true;
+
+		audioSlots[slotnum]->unselect();
+	}
+	return false;
+}
+
+bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
 {
 	QMutexLocker lock(slotMutex);
 
@@ -410,50 +433,13 @@ bool AudioControl::startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 a
 	}
 
 	// attention if audio fx is started more than once. This is the last instance.
+	/// @todo
 	fxa->startSlot = slot;
 
 	if (atMs < 0)
 		atMs = 0;
 
-	return start_fxaudio_in_slot(fxa, slot, exec, atMs, initVol);
-}
-
-void AudioControl::startFxAudioFromTimer(FxItem *fx)
-{
-	FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(fx);
-	if (!fxa) return;
-
-	startFxAudioStage2(fxa, nullptr);
-}
-
-
-bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol)
-{
-	QMutexLocker lock(slotMutex);
-	executeAttachedAudioStartCmd(fxa);
-
-//	if (fxa->preDelay() > 0) {
-//		FxTimer *fxt = new FxTimer(fxa);
-//		connect(fxt, SIGNAL(fxTimeout(FxItem*)),this,SLOT(startFxAudioFromTimer(FxItem*)));
-//		fxt->start(fxa->preDelay());
-//		return true;
-//	}
-
-	return startFxAudioStage2(fxa, exec, atMs, initVol);
-}
-
-bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
-{
-	if (slotnum < 0 || slotnum >= used_slots)
-		return false;
-
-	if (audioSlots[slotnum]->select()) {
-		if (start_fxaudio_in_slot(fxa,slotnum,exec,atMs,initVol))
-			return true;
-
-		audioSlots[slotnum]->unselect();
-	}
-	return false;
+	return _startFxAudioInSlot(fxa, slot, exec, atMs, initVol, fadeInMs);
 }
 
 /**
@@ -469,7 +455,7 @@ bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *e
  *
  * @return true means ok
  */
-bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol)
+bool AudioControl::_startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
 {
 	QMutexLocker lock(slotMutex);
 
@@ -483,6 +469,7 @@ bool AudioControl::start_fxaudio_in_slot(FxAudioItem *fxa, int slotnum, Executer
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		AudioCtrlMsg msg(fxa, slotnum, CMD_AUDIO_START_AT, exec);
 		msg.volume = initVol;
+		msg.fadetime = fadeInMs;
 		if (fxa->isDmxStarted && initVol < 0 && fxa->initialVolume == 0) {
 			msg.isDmxVolumeLocked = true;
 		}
@@ -1176,8 +1163,8 @@ void AudioControl::createMediaPlayInstances()
 		}
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AUDIO::AudioCtrlMsg)));
-		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(vu_level_changed_receiver(int,qreal,qreal)));
-		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(fft_spectrum_changed_receiver(int,FrqSpectrum*)));
+		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(_vuLevelChangedReceiver(int,qreal,qreal)));
+		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(_fftSpectrumChangedReceiver(int,FrqSpectrum*)));
 		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 	}
 	// Enable FFT

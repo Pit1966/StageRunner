@@ -158,7 +158,7 @@ bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
 	if (msg.ctrlCmd == CMD_AUDIO_START_AT)
 		startPosMs = -1;
 
-	bool ok = startFxAudio(msg.fxAudio, msg.executer, startPosMs, msg.volume);
+	bool ok = startFxAudio(msg.fxAudio, msg.executer, startPosMs, msg.volume, msg.fadetime);
 
 	if (msg.isDmxVolumeLocked)
 		setDmxVolLockState(DMX_AUDIO_LOCKED);
@@ -166,7 +166,7 @@ bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
 	return ok;
 }
 
-bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol)
+bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol, int fadeInMs)
 {
 	if (!audio_player) {
 		run_status = AUDIO_ERROR;
@@ -226,9 +226,11 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// set initial Volume
-	if (fxa->fadeInTime() > 0) {
+	if (fadeInMs < 0)
+		fadeInMs = fxa->fadeInTime();
+	if (fadeInMs > 0) {
 		setVolume(0);
-		fadeinFxAudio(targetVolume,fxa->fadeInTime());
+		fadeinFxAudio(targetVolume, fadeInMs);
 	}
 	else if (startPosMs > 0 && initVol == -1) {
 		setVolume(0);
@@ -386,7 +388,7 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
  * @param time_ms
  * @return
  *
- * @note must be called from main thread !! ??
+ * @note must be called from main thread !!
  */
 bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 {

@@ -23,23 +23,28 @@ FxTimeLineScene::FxTimeLineScene(TimeLineWidget *timeLineWidget)
 
 void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 {
-	qDebug() << Q_FUNC_INFO;
-	qDebug() << "FxTimeLineScene drop:" << event->dropAction();
+	// qDebug() << Q_FUNC_INFO;
+	// qDebug() << "FxTimeLineScene drop:" << event->dropAction();
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 	if (extmime) {
 		QPointF dropPos = event->scenePos();
 		int trackID = m_timeLine->yPosToTrackId(dropPos.y());
+		QDrag *drag = extmime->dragObject;
+		// qDebug() << "drag pixmap size" << drag->pixmap().size();
+		// qDebug() << "drag hot spot" << drag->hotSpot();
 
 		FxItem *fx = extmime->fxListWidgetItem->linkedFxItem;
 		if (!FxItem::exists(fx))
 			return;
-		qDebug() << "  dropped:" << fx->name() << "on track" << trackID;
+		// qDebug() << "  dropped:" << fx->name() << "on track" << trackID;
 		if (trackID < 1)
 			return;
 
 		// create a timeline object at drop position
-		int xMs = m_timeLine->pixelToMs(dropPos.x());
+		int xMs = m_timeLine->pixelToMs(dropPos.x() - drag->hotSpot().x());
+		if (xMs < 0)
+			xMs = 0;
 		TimeLineItem *tli = m_timeLine->addTimeLineItem(xMs, 5000, "drop item", trackID);
 		ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 		extTLI->linkToFxItem(fx);
@@ -217,7 +222,6 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 //	timeCodeMouseLabel->setFont(font);
 
 
-
 	m_timeline->setAcceptDrops(true);
 
 	mainLayout->addWidget(m_timeline);
@@ -227,6 +231,8 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 
 	connect(m_timeline, SIGNAL(cursorPosChanged(int)), this, SLOT(onCursorPositionChanged(int)));
 	connect(m_timeline, SIGNAL(mousePosMsChanged(int)), this, SLOT(onMousePositionChanged(int)));
+
+	setWindowFlag(Qt::WindowStaysOnTopHint);
 }
 
 FxTimeLineEditWidget::~FxTimeLineEditWidget()

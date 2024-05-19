@@ -19,7 +19,9 @@ public:
 enum GRAB {
 	GRAB_NONE,
 	GRAB_LEFT,
-	GRAB_RIGHT
+	GRAB_RIGHT,
+	GRAB_FADEIN,
+	GRAB_FADEOUT
 };
 
 public:
@@ -45,6 +47,8 @@ protected:
 	bool m_isClicked			= false;
 	bool m_isHover				= false;
 	GRAB m_grabMode				= GRAB_NONE;
+	int m_clickFadeInMs			= 0;		///< fadein time when item is clicked
+	int m_clickFadeOutMs		= 0;		///< fadeout time when item is clicked
 
 
 public:
@@ -66,10 +70,10 @@ public:
 
 	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
 	QRectF boundingRect() const override;
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 
 protected:
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
@@ -83,7 +87,11 @@ protected:
 	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 
 	// functions maybe implemented in derived classes in order to tweak controls
-	virtual qreal maxDuration() const {return 0.0;}
+	virtual int maxDuration() const {return 0;}
+	virtual int fadeInTime() const {return 0;}
+	virtual void setFadeInTime(int ms) {Q_UNUSED(ms);}
+	virtual void setFadeOutTime(int ms) {Q_UNUSED(ms);}
+	virtual int fadeOutTime() const {return 0;}
 
 signals:
 	void labelChanged(const QString &txt);

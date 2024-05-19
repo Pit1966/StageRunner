@@ -39,11 +39,16 @@ bool TimeLineExecuter::processExecuter()
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			execObjEndPosForFx(obj->fxID(), ev);
 		}
-
+	}
+	else if (ev.evType == EV_TIMELINE_END) {
+		emit timeLineStatusChanged(EXEC_FINISH);
+		emit listProgressChanged(0, 0);
+		return false;			// no more active. We are ready
 	}
 
 	Event nextEv = findNextObj();
 	if (nextEv.evType == EV_UNKNOWN) {
+		LOGERROR(tr("Found unknown timeline item -> timeline finished"));
 		emit timeLineStatusChanged(EXEC_FINISH);
 		emit listProgressChanged(0, 0);
 		return false;			// no more active. We are ready
@@ -165,6 +170,9 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 	if (!FxItem::exists(fx))
 		return false;
 
+	// helper for timeline end
+	int lastEventMs = 0;
+
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
 		for (int i=0; i<fx->timeLineObjCount(t); i++) {
 			FxTimeLineObj *o = fx->timeLineObjAt(t, i);
@@ -191,12 +199,22 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 				ev.timeMs = o->stopAtMs();
 				m_sortedObjEventList.insert(n, ev);
 			}
+
+			if (o->endMs() > lastEventMs)
+				lastEventMs = o->endMs();
 		}
 	}
 
 	if (m_sortedObjEventList.isEmpty()) {
 		m_finalEventAtMs = 0;
 		return false; // nothing to execute
+	}
+
+	// add timeline end event
+	if (lastEventMs > 0) {
+		Event ev(EV_TIMELINE_END);
+		ev.timeMs = lastEventMs;
+		m_sortedObjEventList.append(ev);
 	}
 
 	m_finalEventAtMs = m_sortedObjEventList.last().timeMs;
@@ -226,22 +244,24 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 			ok = myApp.unitAudio->startFxAudio(fxa, this, pos);
 		}
 		else {
-			/// @todo do this fade in with a CtrlMsg
-			int fadeinms = ev.obj->fadeInDurationMs();
-			if (fadeinms > 0) {
-				ok = myApp.unitAudio->startFxAudio(fxa, this, 0, 0);
-				ExtElapsedTimer wait(true);
-				int slot = -1;
-				while (ok && slot < 0 && wait.elapsed() < FX_AUDIO_START_WAIT_DELAY) {
-					slot = myApp.unitAudio->getSlotForFxAudio(fxa);
-				}
-				// qDebug() << "fadein timeline audio in slot" << slot;
-				if (ok && slot >= 0) {
-					myApp.unitAudio->fadeinFxAudio(0, fxa->initialVolume, fadeinms);
-				}
-			} else {
-				ok = myApp.unitAudio->startFxAudio(fxa, this);
-			}
+			int startAtMs = -1;
+			int initVol = -1;
+			int fadeinms = -1;
+			if (ev.obj->fadeInDurationMs())
+				fadeinms = ev.obj->fadeInDurationMs();
+
+				// ok = myApp.unitAudio->startFxAudio(fxa, this, 0, 0);
+				// ExtElapsedTimer wait(true);
+				// int slot = -1;
+				// while (ok && slot < 0 && wait.elapsed() < FX_AUDIO_START_WAIT_DELAY) {
+				// 	slot = myApp.unitAudio->getSlotForFxAudio(fxa);
+				// }
+				// // qDebug() << "fadein timeline audio in slot" << slot;
+				// if (ok && slot >= 0) {
+				// 	myApp.unitAudio->fadeinFxAudio(0, fxa->initialVolume, fadeinms);
+				// }
+
+			ok = myApp.unitAudio->startFxAudio(fxa, this, startAtMs, initVol, fadeinms);
 		}
 	}
 	else if (fxtype == FX_SCENE) {
@@ -274,13 +294,12 @@ bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 	int fxtype = fx->fxType();
 	if (fxtype == FX_AUDIO)	{
 		FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
-		int fade_time = 3000;
-
+		int fade_ms = ev.obj->fadeOutDurationMs();
 		if (fxa->isFxClip) {
-			myApp.unitVideo->videoBlack(fade_time);
+			myApp.unitVideo->videoBlack(fade_ms);
 		}
-		else if (fade_time > 0) {
-			myApp.unitAudio->fadeoutFxAudio(fxa, fade_time);
+		else if (fade_ms > 0) {
+			myApp.unitAudio->fadeoutFxAudio(fxa, fade_ms);
 		}
 		else {
 			myApp.unitAudio->stopFxAudio(fxa);

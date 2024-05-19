@@ -117,10 +117,15 @@ int FxTimeLineObj::stopAtMs() const
 		// get linked FxItem
 		FxItem *fx = linkedFxItem();
 		if (!fx) {
-			LOGERROR(tr("Audi FX for timeline object '%1' not found!").arg(label));
+			LOGERROR(tr("Audio FX for timeline object '%1' not found!").arg(label));
 			return 0;
 		}
-		return endMs();
+		int fadeout_ms = fadeOutDurationMs();
+		if (fadeout_ms > 0) {
+			return endMs() - fadeout_ms;
+		} else {
+			return endMs();
+		}
 	}
 	else if (m_linkedObjType == LINKED_FX_SCRIPT) {
 		// get linked FxItem

@@ -19,13 +19,17 @@ public:
 	bool linkToFxItem(FxItem *fx);
 
 protected:
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+	// reimplementations from base class
+	// void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
-	// reimplementations from base class
-	void rightClicked(QGraphicsSceneMouseEvent *event) override;
-	qreal maxDuration() const override;
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+	void rightClicked(QGraphicsSceneMouseEvent *event) override;
+	int maxDuration() const override;
+	int fadeInTime() const override;
+	void setFadeInTime(int ms) override;
+	int fadeOutTime() const override;
+	void setFadeOutTime(int ms) override;
 
 
 private:

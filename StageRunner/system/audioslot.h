@@ -72,7 +72,7 @@ private:
 	FxAudioItem *current_fx;				///< The current/last Fx loaded into this audio slot
 	Executer *current_executer;				///< A Pointer to an Executor if the sound was started by one
 
-	QTimer volset_timer;
+	QTimer volset_timer;					///< help timer. Used to define an interval for the log output, when volume is changed manualy
 	QString volset_text;
 	QElapsedTimer run_time;
 	QTimeLine fade_timeline;
@@ -95,7 +95,7 @@ public:
 	bool select();
 	void unselect();
 	bool startFxAudio(const AUDIO::AudioCtrlMsg &msg);
-	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1);
+	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1, int fadeInMs = -1);
 	bool stopFxAudio();
 	bool pauseFxAudio(bool state);
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
