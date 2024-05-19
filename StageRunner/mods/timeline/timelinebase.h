@@ -21,6 +21,8 @@ private:
 protected:
 	TimeLineWidget *m_timeline;
 
+	QColor m_colorBG			= QColor(0x333333);
+
 	// current item dimensions in pixels. Depends on the timeline scaling
 	qreal m_xSize				= 200.0;
 	qreal m_ySize				= 30.0;

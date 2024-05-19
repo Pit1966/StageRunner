@@ -85,14 +85,12 @@ protected:
 	int m_timeLineLenMs			= 60000;	///< virtual length of timeline. This is timeline duration
 
 	int m_defaultTrackHeight	= 40;
-	QList<TimeLineTrack> m_tracks;			///< list of y-sizes of the tracks
-
 
 	QPointer<TimeLineItem> m_rightMostItem;	///< this is the furthest right item in the timeline
 
 	// lists with timeline items. Each track has its own list
-	// List index 0 is the ruler track. The editable tracks start with index 1
-	QList<TimeLineItem*> m_itemLists[TIMELINE_MAX_TRACKS];
+	// TimeLineTrack with index 0 is the ruler track. The editable tracks start with index 1
+	QList<TimeLineTrack*> m_tracks;			///< list of the tracks, containing ySizes of the tracks and item lists
 
 	// helper for transformation of time to pixel pos and vice versa
 	qreal m_msPerPixel			= 0.0;		///< how many milliseconds is a pixel
@@ -111,6 +109,7 @@ public:
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
 	bool addTimeLineTrack();
+	bool addAudioEnvelopeTrack();
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);
 	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);

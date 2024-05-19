@@ -148,6 +148,7 @@ SOURCES += \
 	../mods/timeline/timelinebase.cpp \
 	../mods/timeline/timelineclasses.cpp \
 	../mods/timeline/timelinecursor.cpp \
+	../mods/timeline/timelinecurve.cpp \
 	../mods/timeline/timelineitem.cpp \
 	../mods/timeline/timelineruler.cpp \
 	../mods/timeline/timelinewidget.cpp \
@@ -275,6 +276,7 @@ HEADERS  += \
 	../mods/timeline/timelinebase.h \
 	../mods/timeline/timelineclasses.h \
 	../mods/timeline/timelinecursor.h \
+	../mods/timeline/timelinecurve.h \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelineruler.h \
 	../mods/timeline/timelinewidget.h \

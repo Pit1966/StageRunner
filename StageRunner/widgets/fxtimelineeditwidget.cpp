@@ -137,8 +137,9 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 
 	// Each track has a its own list with item/objs
 	// t is also the trackID !!
-	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
+	for (int t=0; t<m_tracks.size(); t++) {
 		int trackID = t;
+		TimeLineTrack *track = m_tracks.at(trackID);
 		// get references to the source and destination list for this track
 		// const QList<TimeLineItem*> &timelinelist = m_itemLists[t];
 		VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
@@ -147,8 +148,8 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		// now copy the elements of the track
 		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
 		// is used in the TimeLineWidget
-		while (++i < m_itemLists[trackID].size()) {
-			TimeLineItem *tli = at(trackID, i);
+		while (++i < track->itemCount()) {
+			TimeLineItem *tli = track->itemAt(i);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());

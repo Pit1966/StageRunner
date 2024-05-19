@@ -273,6 +273,9 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 			ok = myApp.unitLight->startFxScene(fxs);
 		}
 	}
+	else if (fxtype == FX_SCRIPT) {
+
+	}
 	else {
 		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
 				 .arg(m_fxTimeLine->name()));

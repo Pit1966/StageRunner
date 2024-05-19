@@ -3,6 +3,7 @@
 #include "timelineitem.h"
 #include "timelinecursor.h"
 #include "timelineruler.h"
+#include "timelinecurve.h"
 
 
 #include <QBoxLayout>
@@ -29,17 +30,23 @@ void TimeLineGfxScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	QGraphicsScene::mouseMoveEvent(event);
 }
 
-void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &rect)
+void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &/*rect*/)
 {
 	int timeLineWidthMs = m_timeLine->timeLineDuration();
 	int width = m_timeLine->msToPixel(timeLineWidthMs);
 
-	QList<TimeLineTrack> &tracks = m_timeLine->m_tracks;
+	QList<TimeLineTrack*> &tracks = m_timeLine->m_tracks;
 	for (int t=1; t<tracks.size(); t++) {
-		if (t & 1) {
-			painter->fillRect(0, tracks.at(t).yPos()-1, width, tracks.at(t).ySize()-1, m_bg1);
-		} else {
-			painter->fillRect(0, tracks.at(t).yPos()-1, width, tracks.at(t).ySize()-1, m_bg2);
+		TimeLineTrack *track = tracks.at(t);
+		QColor bgcol = track->trackBgColor;
+		if (bgcol.isValid()) {
+			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, bgcol);
+		}
+		else if (t & 1) {
+			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, m_bg1);
+		}
+		else {
+			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, m_bg2);
 		}
 	}
 }
@@ -77,10 +84,8 @@ TimeLineWidget::TimeLineWidget(QWidget *parent)
 
 TimeLineWidget::~TimeLineWidget()
 {
-	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
-		while (!m_itemLists[t].isEmpty())
-			delete m_itemLists[t].takeFirst();
-	}
+	while (!m_tracks.isEmpty())
+		delete m_tracks.takeFirst();
 }
 
 void TimeLineWidget::init()
@@ -91,8 +96,8 @@ void TimeLineWidget::init()
 
 	connect(m_scene, SIGNAL(mouseHoverPosChanged(QPointF)), this, SLOT(onMouseHovered(QPointF)));
 
-	TimeLineTrack rulerTrack(0, 0, 34);
-	m_tracks.append(rulerTrack);
+	// create ruler track. This is always track with ID 0
+	m_tracks.append(new TimeLineTrack(TRACK_RULER, 0, 0, 34));
 
 	// add cursor to scene
 	m_cursor = new TimeLineCursor(this);
@@ -144,10 +149,9 @@ void TimeLineWidget::init()
 void TimeLineWidget::clear()
 {
 	m_rightMostItem = nullptr;
-	for (int t=1; t<TIMELINE_MAX_TRACKS; t++) {
-		while (!m_itemLists[t].isEmpty())
-			delete m_itemLists[t].takeFirst();
-	}
+	// delete all tracks except the ruler track
+	while (m_tracks.size() > 1)
+		delete m_tracks.takeLast();
 }
 
 /**
@@ -157,7 +161,7 @@ void TimeLineWidget::clear()
  */
 int TimeLineWidget::timeLineHeight() const
 {
-	return qMax(m_tracks.last().yEndPos(), m_defaultTrackHeight * 2 + 10);
+	return qMax(m_tracks.last()->yEndPos(), m_defaultTrackHeight * 2 + 10);
 }
 
 bool TimeLineWidget::addTimeLineTrack()
@@ -166,8 +170,27 @@ bool TimeLineWidget::addTimeLineTrack()
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack track(newTrackId, m_tracks.last().yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	m_tracks.append(track);
+	// update scene in order to draw the background
+	m_scene->update();
+
+	return true;
+}
+
+bool TimeLineWidget::addAudioEnvelopeTrack()
+{
+	int newTrackId = m_tracks.size();
+	if (newTrackId >= TIMELINE_MAX_TRACKS)
+		return false;
+
+	TimeLineTrack *track = new TimeLineTrack(TRACK_AUDIO_ENV, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	track->trackBgColor = 0x3333555;
+	m_tracks.append(track);
+
+	// add TimeLineCurve to scene on timeline
+	// TimeLineCurve *curve = new TimeLineCurve(this);
+
 	// update scene in order to draw the background
 	m_scene->update();
 
@@ -185,46 +208,51 @@ bool TimeLineWidget::addTimeLineTrack()
 TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID)
 {
 	while (m_tracks.size() <= trackID) {
-		TimeLineTrack track(trackID, m_tracks.last().yEndPos(), m_defaultTrackHeight);
+		TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 		m_tracks.append(track);
 	}
 
+	// this is the track instance
+	TimeLineTrack *track = m_tracks.at(trackID);
+
+	// Now create an item an add it to the track
 	TimeLineItem *item = createNewTimeLineItem(this, trackID);		//new TimeLineItem(this, trackID);
 	if (!item->isFirstInitReady()) {
 		item->setLabel(label);
 		item->setDuration(durationMs);
 		item->setPosition(posMs);
 	}
-	item->setYPos(m_tracks.at(trackID).yPos());
-
-	m_itemLists[trackID].append(item);
+	item->setYPos(m_tracks.at(trackID)->yPos());
+	track->appendTimeLineItem(item);
 
 	// item->setCursor(Qt::SizeHorCursor);
 	// QGraphicsRectItem *leftHandle = new QGraphicsRectItem(0,0, 10, item->ho, item);
 
+	// finaly add the item to the scene
 	m_scene->addItem(item);
 	return item;
 }
 
 TimeLineItem *TimeLineWidget::at(int trackID, int idx)
 {
-	if (trackID < 0 || trackID >= TIMELINE_MAX_TRACKS)
+	if (trackID < 0 || trackID >= m_tracks.size())
 		return nullptr;
 
-	if (m_itemLists[trackID].size() <= idx)
-		return nullptr;
+	// this is the track instance
+	TimeLineTrack *track = m_tracks.at(trackID);
 
-	return m_itemLists[trackID].at(idx);
+	return track->itemAt(idx);
 }
 
 bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
 {
-	for (int t=0; t<TIMELINE_MAX_TRACKS;t++) {
-		if (m_itemLists[t].contains(item)) {
+	for (int t=0; t<m_tracks.size();t++) {
+		TimeLineTrack *track = m_tracks.at(t);
+		if (track->itemList().contains(item)) {
 			// remove item from scene
 			m_scene->removeItem(item);
 			// remove item from internal list
-			m_itemLists[t].removeOne(item);
+			track->itemList().removeOne(item);
 			// delete instance later, if requested
 			if (deleteLater)
 				item->deleteLater();
@@ -241,10 +269,10 @@ bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
  */
 int TimeLineWidget::timeLineSize(int trackID) const
 {
-	if (trackID < 0 || trackID >= TIMELINE_MAX_TRACKS)
+	if (trackID < 0 || trackID >= m_tracks.size())
 		return 0;
 
-	return m_itemLists[trackID].size();
+	return m_tracks.at(trackID)->itemCount();
 }
 
 qreal TimeLineWidget::msPerPixel() const
@@ -365,8 +393,8 @@ int TimeLineWidget::cursorPos() const
 int TimeLineWidget::yPosToTrackId(int y)
 {
 	for (int t=0; t<m_tracks.size(); t++) {
-		if (m_tracks.at(t).isInYRange(y))
-			return m_tracks.at(t).trackId();
+		if (m_tracks.at(t)->isInYRange(y))
+			return m_tracks.at(t)->trackId();
 	}
 
 	return -1;
@@ -431,7 +459,7 @@ void TimeLineWidget::updateScene()
  *
  * @note TimeLineWidget::resizeEvent(...) is called after TimeLineGfxView::resizeEvent(...), which is part of this class !!
  */
-void TimeLineWidget::resizeEvent(QResizeEvent *event)
+void TimeLineWidget::resizeEvent(QResizeEvent */*event*/)
 {
 	// qDebug() << "  -> resize widget" << event->size() << "view size" << m_view->size() << "stored size" << m_view->currentSize();
 
@@ -552,6 +580,9 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	else if (clickedTrackID < 0) {
 		act = menu.addAction(tr("Add new timeline track"));
 		act->setObjectName("newTrack");
+
+		act = menu.addAction(tr("Add audio envelope track"));
+		act->setObjectName("newAudioEnvelope");
 	}
 
 	act = menu.exec(event->globalPos());
@@ -566,6 +597,10 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	else if (cmd == "newTrack") {
 		/*bool ok = */addTimeLineTrack();
 	}
+	else if (cmd == "newAudioEnvelope") {
+		addAudioEnvelopeTrack();
+	}
+
 }
 
 void TimeLineWidget::onCursorMoved(int ms)

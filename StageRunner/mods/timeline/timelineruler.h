@@ -12,7 +12,6 @@ class TimeLineRuler : public TimeLineBase
 {
 	Q_OBJECT
 protected:
-	QColor m_colorBG			= QColor(0x333333);
 	QColor m_colorRulerGrid		= QColor(0x999999);
 	QFont m_scaleFont;
 
@@ -25,17 +24,17 @@ public:
 	TimeLineRuler(TimeLineWidget *timeline);
 
 	void setTimeLineDuration(int ms);
+	static QString msToTimeLineString(int ms, int msPrec = 2);
 
+protected:
 	// reimplemented from base
 	void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	void recalcPixelPos() override;
-
 	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
 	QRectF boundingRect() const override;
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 
-	static QString msToTimeLineString(int ms, int msPrec = 2);
 protected:
 	bool findTicDistance();
 

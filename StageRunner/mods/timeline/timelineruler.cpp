@@ -25,6 +25,19 @@ void TimeLineRuler::setTimeLineDuration(int ms)
 	// m_timeline->updateScene();
 }
 
+QString TimeLineRuler::msToTimeLineString(int ms, int msPrec)
+{
+	int min = ms / 60000;
+	ms = ms % 60000;
+	int sec = ms / 1000;
+	ms = ms % 1000;
+
+	return QString("%1m%2.%3s")
+			.arg(min)
+			.arg(sec, 2, 10, QLatin1Char('0'))
+			.arg(ms, msPrec, 10, QLatin1Char('0'));
+}
+
 void TimeLineRuler::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 	int x = event->pos().x();
@@ -85,19 +98,6 @@ void TimeLineRuler::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 			ms += m_gridDistMajor;
 		}
 	}
-}
-
-QString TimeLineRuler::msToTimeLineString(int ms, int msPrec)
-{
-	int min = ms / 60000;
-	ms = ms % 60000;
-	int sec = ms / 1000;
-	ms = ms % 1000;
-
-	return QString("%1m%2.%3s")
-			.arg(min)
-			.arg(sec, 2, 10, QLatin1Char('0'))
-			.arg(ms, msPrec, 10, QLatin1Char('0'));
 }
 
 bool TimeLineRuler::findTicDistance()
