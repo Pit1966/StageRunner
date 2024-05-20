@@ -21,9 +21,9 @@ class TimeLineItem;
 class TimeLineTrack
 {
 public:
-	qint64 trackBgColor;
+	qint64 trackBgColor	= -1;				///< invalid color
 
-private:
+protected:
 	TRACK_TYPE m_type;
 	int m_trackID;
 	int m_yPos;
@@ -34,10 +34,14 @@ public:
 	TimeLineTrack(TRACK_TYPE type, int id, int y = 0, int ySize = 24);
 	~TimeLineTrack();
 	inline TRACK_TYPE trackType() const {return m_type;}
+	inline void setTrackType(TRACK_TYPE type) {m_type = type;}
 	inline int trackId() const {return m_trackID;}
+	inline void setTrackId(int id) {m_trackID = id;}
 	inline int yPos() const {return m_yPos;}
+	inline void setYPos(int y) {m_yPos = y;}
 	inline int yEndPos() const {return m_yPos + m_ySize;}
 	inline int ySize() const {return m_ySize;}
+	inline void setYSize(int ySize) {m_ySize = ySize;}
 	bool isInYRange(int y) const {return y >= m_yPos && y < yEndPos();}
 
 	inline const QList<TimeLineItem*> & itemList() const {return m_itemList;}
@@ -46,6 +50,7 @@ public:
 	int itemCount() const {return m_itemList.size();}
 	TimeLineItem * itemAt(int idx) const;
 
+	friend class TimeLineWidget;
 };
 
 

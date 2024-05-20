@@ -129,6 +129,7 @@ void PrefVarCore::registerVarClasses()
 	classMapping->insert("VC_FX_CUE",FX_CUE_ITEM);
 	classMapping->insert("VC_FX_TIMELINE",FX_TIMELINE_ITEM);
 	classMapping->insert("VC_TIMELINE_OBJ",TIMELINE_OBJ);
+	classMapping->insert("VC_TIMELINE_TRACK",FX_TIMELINE_TRACK);
 }
 
 PrefVarCore::VarClass PrefVarCore::getVarClass(const QString &className)

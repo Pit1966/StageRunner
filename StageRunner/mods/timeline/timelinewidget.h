@@ -109,6 +109,7 @@ public:
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
 	bool addTimeLineTrack();
+	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);

@@ -4,6 +4,7 @@
 #include "fx/exttimelineitem.h"
 #include "fx/timelineexecuter.h"
 #include "fx/execcenter.h"
+#include "fx/fxtimelinetrack.h"
 #include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelineitem.h"
 #include "mods/timeline/timelineruler.h"
@@ -11,6 +12,7 @@
 #include "appcontrol/appcentral.h"
 #include "gui/customwidget/extmimedata.h"
 #include "gui/fxlistwidgetitem.h"
+#include "log.h"
 
 #include <QMimeData>
 #include <QDragEnterEvent>
@@ -94,13 +96,27 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 		setTimeLineDuration(fxt->m_timeLineDurationMs);
 	}
 
-
 	bool hasItems = false;
 
-	// Each track has a its own list with item/objs
+	// Each track has its own list with item/objs
 	// t is also the trackID !!
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
 		int trackID = t;
+		// add timeline track
+		if (fxt->m_tracks.size() > t) {
+			// copy track data to TimeLineTrack
+			FxTimeLineTrack *fxtrack = fxt->m_tracks.at(t);
+			TimeLineTrack *track = new TimeLineTrack(fxtrack->trackType(), fxtrack->trackId());
+			fxtrack->copyDataTo(track);
+
+			if (fxtrack->trackType() == TRACK_RULER && m_tracks.size() == 1 && m_tracks.at(0)->trackType() == TRACK_RULER)
+				continue;
+
+			if (!addTimeLineTrack(track))
+				LOGERROR(tr("Could not add timeline track with ID #%1 from FX in timeline editor")
+						 .arg(fxtrack->trackId()));
+		}
+
 		// get references to the source and destination list for this track
 		const VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 		// QList<TimeLineItem*> &timelinelist = m_itemLists[t];
@@ -140,9 +156,29 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	for (int t=0; t<m_tracks.size(); t++) {
 		int trackID = t;
 		TimeLineTrack *track = m_tracks.at(trackID);
+		// copy track definition data first
+		if (fxt->m_tracks.size() <= t) {	// track does not exist in FxTimeLineItem
+			FxTimeLineTrack *fxtrack = new FxTimeLineTrack();
+			fxtrack->copyDataFrom(track);
+			fxt->m_tracks.append(fxtrack);
+			fxt->setModified(true);
+		}
+		else if (fxt->m_tracks.at(t) == nullptr) {	// empty track in list
+			FxTimeLineTrack *fxtrack = new FxTimeLineTrack();
+			fxtrack->copyDataFrom(track);
+			fxt->m_tracks[t] = fxtrack;
+			fxt->setModified(true);
+		}
+		else {
+			// copy data in existing track, but only if not modified
+			if (!fxt->m_tracks.at(t)->isEqual(track)) {
+				fxt->m_tracks.at(t)->copyDataFrom(track);
+				fxt->setModified(true);
+			}
+		}
+
 		// Check kind of track first
 		if (track->trackType() == TRACK_AUDIO_ENV) {
-
 
 		}
 

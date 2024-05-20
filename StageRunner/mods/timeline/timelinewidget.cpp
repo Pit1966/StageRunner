@@ -39,7 +39,7 @@ void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &/*rect*/)
 	for (int t=1; t<tracks.size(); t++) {
 		TimeLineTrack *track = tracks.at(t);
 		QColor bgcol = track->trackBgColor;
-		if (bgcol.isValid()) {
+		if (track->trackBgColor >= 0) {
 			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, bgcol);
 		}
 		else if (t & 1) {
@@ -176,6 +176,35 @@ bool TimeLineWidget::addTimeLineTrack()
 	m_scene->update();
 
 	return true;
+}
+
+
+/**
+ * @brief Add given track to timeline
+ * @param track TimeLineTrack object to be added
+ * @return true on added. false, if track was not added
+ */
+bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
+{
+	bool ok = true;
+	if (!m_tracks.isEmpty()) {
+		for (int t=0; t<m_tracks.size(); t++) {
+			if (track->trackId() == m_tracks.at(t)->trackId()) {
+				qWarning() << "track with ID" << track->trackId() << "already in timeline";
+				track->m_trackID = m_tracks.size();
+			}
+		}
+		track->setYPos(m_tracks.last()->yEndPos());
+	}
+	else {
+		track->setYPos(0);
+	}
+	m_tracks.append(track);
+
+	// update scene in order to draw the background
+	m_scene->update();
+	return ok;
+
 }
 
 bool TimeLineWidget::addAudioEnvelopeTrack()

@@ -182,7 +182,7 @@ public:
 	int elements() {return varList.size();}
 
 	/**
-	 * @brief setName Den Klassentyp und -namen des VarSets festlegen
+	 * @brief Den Klassentyp und -namen des VarSets festlegen
 	 * @param classtype Type @see PrefVarCore::VarClass
 	 * @param classname Klassenname als String
 	 *

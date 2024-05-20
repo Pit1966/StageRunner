@@ -80,7 +80,7 @@ public:
 		FX_CUE_ITEM,
 		FX_TIMELINE_ITEM,
 		TIMELINE_OBJ,			///< object in a FxTimeline
-		FX_TIMELINE_TRACK
+		FX_TIMELINE_TRACK		///< track object in FxTimeLine
 	};
 
 	/**
