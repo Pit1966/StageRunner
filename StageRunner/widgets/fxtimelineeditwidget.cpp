@@ -140,14 +140,19 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	for (int t=0; t<m_tracks.size(); t++) {
 		int trackID = t;
 		TimeLineTrack *track = m_tracks.at(trackID);
+		// Check kind of track first
+		if (track->trackType() == TRACK_AUDIO_ENV) {
+
+
+		}
+
 		// get references to the source and destination list for this track
 		// const QList<TimeLineItem*> &timelinelist = m_itemLists[t];
 		VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 
 		int i = -1;
 		// now copy the elements of the track
-		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
-		// is used in the TimeLineWidget
+		// we have to convert the TimeLineItem back to a FxTimeLineObj
 		while (++i < track->itemCount()) {
 			TimeLineItem *tli = track->itemAt(i);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
@@ -164,6 +169,9 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 					// item not modified
 					delete obj;
 				} else {
+					if (varset.at(i)->isEqual(obj)) {
+						qDebug() << "varset modified" << varset.at(i)->className();
+					}
 					// delete old item in timeline
 					delete varset.at(i);
 					// and set new one at the same position
@@ -221,7 +229,6 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 //	QFont font("DejaVu Sans Mono", 13);
 //	timeCodeCursorLabel->setFont(font);
 //	timeCodeMouseLabel->setFont(font);
-
 
 	m_timeline->setAcceptDrops(true);
 

@@ -109,6 +109,7 @@ SOURCES += \
 	../fx/fxseqitem.cpp \
 	../fx/fxtimelineitem.cpp \
 	../fx/fxtimelineobj.cpp \
+	../fx/fxtimelinetrack.cpp \
 	../fx/timelineexecuter.cpp \
 	../fx/timelineitemdata.cpp \
 	../gui/audiocontrolwidget.cpp \
@@ -236,6 +237,7 @@ HEADERS  += \
 	../fx/fxseqitem.h \
 	../fx/fxtimelineitem.h \
 	../fx/fxtimelineobj.h \
+	../fx/fxtimelinetrack.h \
 	../fx/timelineexecuter.h \
 	../fx/timelineitemdata.h \
 	../gui/audiocontrolwidget.h \

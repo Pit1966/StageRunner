@@ -4,7 +4,6 @@
 #include "tool/varset.h"
 #include "fx/fx_defines.h"
 #include "fx/timelineitemdata.h"
-#include "varset.h"
 
 #include <QtCore>
 

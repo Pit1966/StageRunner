@@ -4,11 +4,11 @@
 
 namespace PS_TL {
 
-TimeLineTrack::TimeLineTrack(TRACK_TYPE type, int id, int y, int size)
+TimeLineTrack::TimeLineTrack(TRACK_TYPE type, int id, int y, int ySize)
 	: m_type(type)
 	, m_trackID(id)
 	, m_yPos(y)
-	, m_ySize(size)
+	, m_ySize(ySize)
 {
 }
 

@@ -624,6 +624,7 @@ bool FxList::isModified() const
 	while (it.hasNext()) {
 		FxItem *fx = it.next();
 		if (fx->isModified()) {
+			qDebug() << fx->name() << "is modified";
 			modified = true;
 		}
 	}

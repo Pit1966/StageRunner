@@ -763,7 +763,7 @@ void StageRunnerMainWin::openFxTimeLinePanel(FxTimeLineItem *fx)
 {
 	FxTimeLineEditWidget *timelineWid = FxTimeLineEditWidget::openTimeLinePanel(fx);
 	if (timelineWid) {
-		timelineWid->resize(800, 170);
+		timelineWid->resize(1000, 270);
 		timelineWid->show();
 	}
 }

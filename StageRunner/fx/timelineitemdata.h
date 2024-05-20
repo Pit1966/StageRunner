@@ -28,7 +28,7 @@ public:
 				&& m_fxID == o->m_fxID
 				&& m_maxDurationMs == o->m_maxDurationMs
 				&& m_fadeInDurationMs == o->m_fadeInDurationMs
-				&& m_fadeOutDurationMs == o->m_fadeInDurationMs;
+				&& m_fadeOutDurationMs == o->m_fadeOutDurationMs;
 	}
 	void cloneItemDataFrom(const TimeLineItemData *o) {
 		m_linkedObjType = o->m_linkedObjType;

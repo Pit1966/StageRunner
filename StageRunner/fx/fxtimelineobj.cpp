@@ -26,7 +26,8 @@ bool FxTimeLineObj::operator ==(const FxTimeLineObj &o)
 
 bool FxTimeLineObj::isEqual(const FxTimeLineObj *o)
 {
-	return TimeLineItemData::isEqual(o)
+	bool iseq = TimeLineItemData::isEqual(o);
+	return iseq
 			&& trackId == o->trackId
 			&& posMs == o->posMs
 			&& lenMs == o->lenMs

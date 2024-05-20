@@ -10,12 +10,14 @@
 #include <QCoreApplication>
 
 class FxTimeLineObj;
+class FxTimeLineTrack;
 
 class FxTimeLineItem : public QObject, public FxItem
 {
 	Q_OBJECT			// Q_DECLARE_TR_FUNCTIONS(FxTimeLineItem)
 
 private:
+	// VarSetList<FxTimeLineTrack*>m_tracks[TIMELINE_MAX_TRACKS];
 	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];
 	qint32 m_timeLineDurationMs;
 

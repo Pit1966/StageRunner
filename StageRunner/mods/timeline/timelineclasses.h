@@ -21,7 +21,7 @@ class TimeLineItem;
 class TimeLineTrack
 {
 public:
-	QColor trackBgColor;
+	qint64 trackBgColor;
 
 private:
 	TRACK_TYPE m_type;
@@ -31,7 +31,7 @@ private:
 	QList<TimeLineItem*> m_itemList;		///< this list contains the timeline items in this timeline
 
 public:
-	TimeLineTrack(TRACK_TYPE type, int id, int y = 0, int size = 24);
+	TimeLineTrack(TRACK_TYPE type, int id, int y = 0, int ySize = 24);
 	~TimeLineTrack();
 	inline TRACK_TYPE trackType() const {return m_type;}
 	inline int trackId() const {return m_trackID;}
