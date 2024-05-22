@@ -1,14 +1,14 @@
 #ifndef TIMELINERULER_H
 #define TIMELINERULER_H
 
-#include "timelinebase.h"
+#include "timelineitem.h"
 
 #include <QFont>
 
 
 namespace PS_TL {
 
-class TimeLineRuler : public TimeLineBase
+class TimeLineRuler : public TimeLineItem
 {
 	Q_OBJECT
 protected:

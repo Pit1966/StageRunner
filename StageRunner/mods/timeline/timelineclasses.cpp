@@ -1,6 +1,6 @@
 #include "timelineclasses.h"
 
-#include "timelineitem.h"
+#include "timelinebox.h"
 
 namespace PS_TL {
 
@@ -18,12 +18,12 @@ TimeLineTrack::~TimeLineTrack()
 		delete m_itemList.takeFirst();
 }
 
-void TimeLineTrack::appendTimeLineItem(TimeLineBase *item)
+void TimeLineTrack::appendTimeLineItem(TimeLineItem *item)
 {
 	m_itemList.append(item);
 }
 
-TimeLineBase *TimeLineTrack::itemAt(int idx) const
+TimeLineItem *TimeLineTrack::itemAt(int idx) const
 {
 	if (idx >= 0 && idx < m_itemList.size())
 		return m_itemList.at(idx);

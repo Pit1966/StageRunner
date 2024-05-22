@@ -6,7 +6,7 @@
 #include "fx/execcenter.h"
 #include "fx/fxtimelinetrack.h"
 #include "mods/timeline/timelinewidget.h"
-#include "mods/timeline/timelineitem.h"
+#include "mods/timeline/timelinebox.h"
 #include "mods/timeline/timelineruler.h"
 #include "system/fxcontrol.h"
 #include "appcontrol/appcentral.h"
@@ -47,7 +47,7 @@ void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 		int xMs = m_timeLine->pixelToMs(dropPos.x() - drag->hotSpot().x());
 		if (xMs < 0)
 			xMs = 0;
-		TimeLineItem *tli = m_timeLine->addTimeLineItem(xMs, 5000, "drop item", trackID);
+		TimeLineBox *tli = m_timeLine->addTimeLineItem(xMs, 5000, "drop item", trackID);
 		ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 		extTLI->linkToFxItem(fx);
 
@@ -129,7 +129,7 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 
 		for (int i=0; i<varset.size(); i++) {
 			FxTimeLineObj *obj = varset.at(i);
-			TimeLineItem *tli = addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
+			TimeLineBox *tli = addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 			extTLI->cloneItemDataFrom(obj);
 			// extTLI->m_fxID = obj->m_fxID;
@@ -192,7 +192,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		// now copy the elements of the track
 		// we have to convert the TimeLineItem back to a FxTimeLineObj
 		while (++i < track->itemCount()) {
-			TimeLineBase *tli = track->itemAt(i);
+			TimeLineItem *tli = track->itemAt(i);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
@@ -229,7 +229,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	return true;
 }
 
-TimeLineItem *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+TimeLineBox *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
 {
 	ExtTimeLineItem *tlItem = new ExtTimeLineItem(timeline, trackId);
 	return tlItem;

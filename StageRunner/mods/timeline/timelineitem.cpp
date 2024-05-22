@@ -1,222 +1,59 @@
 #include "timelineitem.h"
-#include "timelinewidget.h"
-
-#include <QPainter>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneMoveEvent>
-#include <QDebug>
 
 namespace PS_TL {
 
 TimeLineItem::TimeLineItem(TimeLineWidget *timeline, int trackId)
-	: TimeLineBase(timeline, trackId)
+	: QGraphicsObject()
+	, m_timeline(timeline)
+	, m_trackId(trackId)
 {
-	setAcceptHoverEvents(true);
-
-	m_colorBG		= QColor(0x225522);
-	m_colorBorder   = QColor(0xeeeeee);
-
 }
 
-void TimeLineItem::moveToEndPosition(int ms)
+void TimeLineItem::setLabel(const QString &label)
 {
-	if (ms != endPosition()) {
+	if (m_label != label) {
+		m_label = label;
+		update();
+		emit labelChanged(label);
+	}
+}
+
+void TimeLineItem::setBackgroundColor(const QColor &col)
+{
+	m_colorBG = col;
+}
+
+void TimeLineItem::setPosition(int ms)
+{
+	if (ms != m_positionMs || !m_wasPainted) {
+		m_positionMs = ms;
+		m_isTimePosValid = true;
 		m_isPixelPosValid = false;
+		update();
+		emit timePositionChanged(ms);
+	}
+}
+
+void TimeLineItem::setDuration(int ms)
+{
+	if (m_durationMs != ms) {
 		m_isTimePosValid = true;
-		setPosition(ms - duration());
+		m_isPixelPosValid = false;
+		m_durationMs = ms;
+		update();
+		emit durationChanged(ms);
 	}
 }
 
-
-void TimeLineItem::recalcPixelPos()
+qreal TimeLineItem::yPos() const
 {
-	if (m_isTimePosValid) {
-		m_xSize = qreal(duration()) / m_timeline->msPerPixel();
-		qDebug() << label() << "recalc m_xSize" << m_xSize;
-		setX(qreal(position()) / m_timeline->msPerPixel());
-	}
+	return y();
 }
 
-QRectF TimeLineItem::boundingRect() const
+void TimeLineItem::setYPos(qreal yPixelPos)
 {
-	return QRectF(0, 0, m_xSize + m_penWidthBorder, m_ySize + m_penWidthBorder);
+	setY(yPixelPos);
 }
 
-void TimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-	if (m_timeline->msPerPixel() <= 0)
-		return;
-
-	if (m_isTimePosValid) {
-		if (!m_isPixelPosValid) {
-			setX(qreal(position()) / m_timeline->msPerPixel());
-			m_xSize = qreal(duration()) / m_timeline->msPerPixel();
-		}
-	}
-	else {
-		m_isTimePosValid = true;
-		setPosition(m_timeline->msPerPixel() * x());
-		setDuration(m_timeline->msPerPixel() * m_xSize);
-	}
-
-	QPen pen;
-	pen.setColor(m_colorBorder);
-	pen.setWidthF(m_penWidthBorder);
-	painter->setPen(pen);
-	painter->setBrush(m_colorBG);
-	painter->drawRect(m_penWidthBorder/2, m_penWidthBorder/2, m_xSize, m_ySize);
-
-	// painter->drawText(5, m_ySize / 2, m_label);
-	QRectF textRect = boundingRect();
-	textRect.adjust(5,-2,-5,-10);
-	painter->drawText(textRect, m_label);
-
-	m_wasPainted = true;
-}
-
-void TimeLineItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-	if (event->button() == Qt::LeftButton) {
-		m_clickPos = event->scenePos();
-		// store current position for move
-		m_itemPos = scenePos();
-		m_isClicked = true;
-		// store some of the current members for calculation of new values by mouse moving
-		m_clickXSize = m_xSize;
-		m_clickFadeInMs = fadeInTime();
-		m_clickFadeOutMs = fadeOutTime();
-		qDebug() << "clicked item" << m_label << "at pos" << m_itemPos << "duration [ms]" << duration();
-		leftClicked(event);
-	}
-	else if (event->button() == Qt::RightButton) {
-		rightClicked(event);
-	}
-	else {
-		m_isClicked = false;
-	}
-}
-
-void TimeLineItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-	if (m_isClicked) {
-		QPointF curPos = event->scenePos();
-		qreal xdif = curPos.x() - m_clickPos.x();
-		// qreal ydif = curPos.y() - m_clickPos.y();
-
-		if (m_grabMode == GRAB_RIGHT) {
-			m_xSize = m_clickXSize + xdif;
-			qreal xSizeMs = m_xSize * m_timeline->msPerPixel();
-			qreal maxDurMs = maxDuration();
-			if (maxDurMs > 0 && xSizeMs > maxDurMs) {
-				xSizeMs = maxDurMs;
-				m_xSize = m_timeline->msToPixel(maxDurMs);
-			}
-			setDuration(xSizeMs);
-
-			// this schedules an graphics update
-			setPos(pos() + QPointF(1,0));
-			setPos(pos() - QPointF(1,0));
-		}
-		else if (m_grabMode == GRAB_LEFT) {
-			qreal newX = m_itemPos.x() + xdif;
-			qreal newY = m_itemPos.y();
-			qreal newXSize = m_clickXSize - xdif;
-			// calc new time position and new duration
-			setPosition(m_timeline->msPerPixel() * newX);
-			setDuration(m_timeline->msPerPixel() * newXSize);
-
-			// set new item pos
-			setPos(newX, newY);
-		}
-		else if (m_grabMode == GRAB_FADEIN) {
-			int fadein_ms = m_timeline->pixelToMs(xdif) + m_clickFadeInMs;
-			if (fadein_ms < 0)
-				fadein_ms = 0;
-			if (fadein_ms > duration() - fadeOutTime())
-				fadein_ms = duration() - fadeOutTime();
-			setFadeInTime(fadein_ms);
-			update();
-		}
-		else if (m_grabMode == GRAB_FADEOUT) {
-			int fadeout_ms = m_clickFadeOutMs - m_timeline->pixelToMs(xdif);
-			if (fadeout_ms < 0)
-				fadeout_ms = 0;
-			if (duration() - fadeout_ms < fadeInTime())
-				fadeout_ms = duration() - fadeInTime();
-			setFadeOutTime(fadeout_ms);
-			update();
-		}
-		else {
-			qreal newX = m_itemPos.x() + xdif;
-			qreal newY = m_itemPos.y() /*+ ydif*/;
-			if (newX < 0)
-				newX = 0;
-			if (newY < 0)
-				newY = 0;
-
-			// calc new time position
-			setPosition(m_timeline->msPerPixel() * newX);
-			// set new item pos
-			setPos(newX, newY);
-
-			qDebug() << m_label << "current timepos" << position() << "size" << duration();
-		}
-	}
-}
-
-void TimeLineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
-{
-	m_isClicked = false;
-	m_grabMode = GRAB_NONE;
-	m_timeline->checkForRightMostItem(this);
-}
-
-void TimeLineItem::hoverEnterEvent(QGraphicsSceneHoverEvent */*event*/)
-{
-	// qDebug() << "hover enter" << m_label;
-	m_isHover = true;
-}
-
-void TimeLineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
-{
-	// qDebug() << "hover leave" << m_label;
-	m_isHover = true;
-}
-
-void TimeLineItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-	if (m_isClicked)
-		return;
-
-	//qDebug() << "hover move" << m_label << event->pos() << "fadeout ms" << fadeOutTime();
-	qreal x = event->pos().x();
-
-	int fadein_x = m_timeline->msToPixel(fadeInTime());
-	int fadeout_x = 0;
-	if (fadeOutTime() > 0)
-		fadeout_x = m_timeline->msToPixel(duration() - fadeOutTime());
-
-	if (fadein_x > 0 && qAbs(fadein_x - x) < 4) {
-		setCursor(Qt::SplitHCursor);
-		m_grabMode = GRAB_FADEIN;
-	}
-	else if (fadeout_x > 0 && qAbs(fadeout_x - x) < 4) {
-		setCursor(Qt::SplitHCursor);
-		m_grabMode = GRAB_FADEOUT;
-	}
-	else if (x < 5) {
-		setCursor(Qt::SizeHorCursor);
-		m_grabMode = GRAB_LEFT;
-	}
-	else if (x > m_xSize - 5) {
-		setCursor(Qt::SizeHorCursor);
-		m_grabMode = GRAB_RIGHT;
-	}
-	else {
-		setCursor(m_timeline->cursor());
-		m_grabMode = GRAB_NONE;
-	}
-
-}
 
 } // namespace PS_TL

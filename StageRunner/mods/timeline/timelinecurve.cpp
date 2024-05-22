@@ -6,7 +6,7 @@
 namespace PS_TL {
 
 TimeLineCurve::TimeLineCurve(TimeLineWidget *timeline, int trackId)
-	: TimeLineBase(timeline, trackId)
+	: TimeLineItem(timeline, trackId)
 {
 	m_xSize = 500;
 	m_xSize = 30;

@@ -1,7 +1,7 @@
 #ifndef TIMELINECURSOR_H
 #define TIMELINECURSOR_H
 
-#include "timelinebase.h"
+#include "timelineitem.h"
 
 #include <QPolygonF>
 #include <QPen>
@@ -12,7 +12,7 @@ namespace PS_TL {
 
 class TimeLineWidget;
 
-class TimeLineCursor : public TimeLineBase
+class TimeLineCursor : public TimeLineItem
 {
 	Q_OBJECT
 private:

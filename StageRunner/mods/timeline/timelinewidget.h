@@ -14,7 +14,7 @@
 
 namespace PS_TL {
 
-class TimeLineItem;
+class TimeLineBox;
 class TimeLineWidget;
 class TimeLineCursor;
 class TimeLineRuler;
@@ -86,7 +86,7 @@ protected:
 
 	int m_defaultTrackHeight	= 40;
 
-	QPointer<TimeLineItem> m_rightMostItem;	///< this is the furthest right item in the timeline
+	QPointer<TimeLineBox> m_rightMostItem;	///< this is the furthest right item in the timeline
 
 	// lists with timeline items. Each track has its own list
 	// TimeLineTrack with index 0 is the ruler track. The editable tracks start with index 1
@@ -111,9 +111,9 @@ public:
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
-	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
-	TimeLineBase * at(int trackID, int idx);
-	bool removeTimeLineItem(TimeLineBase *item, bool deleteLater = false);
+	TimeLineBox * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
+	TimeLineItem * at(int trackID, int idx);
+	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);
 	int timeLineSize(int trackID = 1) const;
 	QGraphicsView *gfxView() const {return m_view;}
 	TimeLineGfxView *timeLineGfxView() const {return m_view;}
@@ -125,8 +125,8 @@ public:
 	int rightViewPixel() const;
 	QRectF currentVisibleRect() const;
 
-	bool checkForRightMostItem(TimeLineItem *item);
-	TimeLineItem * findRightMostItem() const;
+	bool checkForRightMostItem(TimeLineBox *item);
+	TimeLineBox * findRightMostItem() const;
 
 	int cursorPos() const;
 	int yPosToTrackId(int y);
@@ -142,7 +142,7 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
 	void showEvent(QShowEvent *event);
 
-	virtual TimeLineItem *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
+	virtual TimeLineBox *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
 	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);
 
 	void adjustSceneRectToTimelineLength();
@@ -155,7 +155,7 @@ private slots:
 	void onMouseHovered(const QPointF &pos);
 
 signals:
-	void furthestRightItemChanged(TimeLineItem *item);
+	void furthestRightItemChanged(TimeLineBox *item);
 	void cursorPosChanged(int ms);
 	void cursorActivated(int ms);
 	void mousePosMsChanged(int ms);

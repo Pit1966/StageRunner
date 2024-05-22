@@ -1,11 +1,11 @@
 #ifndef TIMELINECURVE_H
 #define TIMELINECURVE_H
 
-#include "timelinebase.h"
+#include "timelineitem.h"
 
 namespace PS_TL {
 
-class TimeLineCurve : public TimeLineBase
+class TimeLineCurve : public TimeLineItem
 {
 	Q_OBJECT
 public:

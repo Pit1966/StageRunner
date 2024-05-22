@@ -1,82 +1,68 @@
 #ifndef TIMELINEITEM_H
 #define TIMELINEITEM_H
 
-#include "timelinebase.h"
+#include "timeline_defines.h"
 
+#include <QGraphicsObject>
 #include <QObject>
-#include <QColor>
-
 
 namespace PS_TL {
 
 class TimeLineWidget;
 
-class TimeLineItem : public TimeLineBase
+class TimeLineItem : public QGraphicsObject
 {
 	Q_OBJECT
-public:
 
-enum GRAB {
-	GRAB_NONE,
-	GRAB_LEFT,
-	GRAB_RIGHT,
-	GRAB_FADEIN,
-	GRAB_FADEOUT
-};
-
-public:
-	QVariant userData;			// payload data for arbitrary usage
+private:
+	int m_positionMs			= 0;		///< position of item in milliseconds
+	int m_durationMs			= 0;		///< length of item in milliseconds
 
 protected:
+	// parent timeline
+	TimeLineWidget *m_timeline;
+	// base information
+	int m_id					= 0;		///< not used yet
+	int m_itemType				= TL_ITEM;
+	int m_trackId				= 0;
 
-	// user data
-	qreal m_penWidthBorder		= 1;
+	// user editable data
+	QString m_label;
+	QColor m_colorBG			= QColor(0x333333);
+	QColor m_colorBorder		= QColor(0xeeeeee);
 
-	// temp
-	QPointF m_clickPos;						///< coordinates when item was clicked
-	QPointF m_itemPos;						///< position for item when clicked
-	qreal m_clickXSize			= 0;		///< x size on item grab event begin
-	bool m_isClicked			= false;
-	bool m_isHover				= false;
-	GRAB m_grabMode				= GRAB_NONE;
-	int m_clickFadeInMs			= 0;		///< fadein time when item is clicked
-	int m_clickFadeOutMs		= 0;		///< fadeout time when item is clicked
-
+	// current item dimensions in pixels. Depends on the timeline scaling
+	qreal m_xSize				= 200.0;
+	qreal m_ySize				= 30.0;
+	bool m_isTimePosValid		= false;	///< this is true, if m_timePosMs and m_timeLenMs are valid.
+	bool m_isPixelPosValid		= true;		///< this is true, if pixel position information is correct
+	bool m_wasPainted			= false;	///< becomes true, after first paint event
+	bool m_isFirstInit			= false;
 
 public:
-	TimeLineItem(TimeLineWidget *timeline, int trackId = 1);
+	TimeLineItem(TimeLineWidget *timeline, int trackId);
+	int type() const override {return m_itemType;}
+	int trackID() const {return m_trackId;}
+	const QString & label() const {return m_label;}
+	void setLabel(const QString &label);
+	void setBackgroundColor(const QColor &col);
 
-	int endPosition() const {return position() + duration();}
-	void moveToEndPosition(int ms);
+	bool isFirstInitReady() const {return m_isFirstInit;}
 
-	// reimplemented functions from TimeLineBase
-	void recalcPixelPos() override;
+	int position() const {return m_positionMs;}
+	void setPosition(int ms);
+	int duration() const {return m_durationMs;}
+	void setDuration(int ms);
 
-	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
-	QRectF boundingRect() const override;
+	qreal yPos() const;
+	void setYPos(qreal yPixelPos);
 
-protected:
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+	virtual void recalcPixelPos()	= 0;
 
-	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-	void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
-
-	// propagade some mouse events to derived classes
-	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
-	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
-
-	// functions maybe implemented in derived classes in order to tweak controls
-	virtual int maxDuration() const {return 0;}
-	virtual int fadeInTime() const {return 0;}
-	virtual void setFadeInTime(int ms) {Q_UNUSED(ms);}
-	virtual void setFadeOutTime(int ms) {Q_UNUSED(ms);}
-	virtual int fadeOutTime() const {return 0;}
-
+signals:
+	void timePositionChanged(int ms);
+	void durationChanged(int ms);
+	void labelChanged(const QString &txt);
 };
 
 } // namespace PS_TL

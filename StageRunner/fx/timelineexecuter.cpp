@@ -11,7 +11,7 @@
 #include "fx/fxaudioitem.h"
 #include "fx/fxclipitem.h"
 #include "fx/fxsceneitem.h"
-#include "mods/timeline/timelineitem.h"
+#include "mods/timeline/timelinebox.h"
 
 bool TimeLineExecuter::processExecuter()
 {

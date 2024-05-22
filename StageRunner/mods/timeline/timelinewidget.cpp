@@ -1,6 +1,6 @@
 #include "timelinewidget.h"
 
-#include "timelineitem.h"
+#include "timelinebox.h"
 #include "timelinecursor.h"
 #include "timelineruler.h"
 #include "timelinecurve.h"
@@ -238,7 +238,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
  * @param label
  * @return
  */
-TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID)
+TimeLineBox *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID)
 {
 	while (m_tracks.size() <= trackID) {
 		TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
@@ -249,7 +249,7 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	TimeLineTrack *track = m_tracks.at(trackID);
 
 	// Now create an item and add it to the track
-	TimeLineItem *item = createNewTimeLineItem(this, trackID);
+	TimeLineBox *item = createNewTimeLineItem(this, trackID);
 	if (!item->isFirstInitReady()) {
 		item->setLabel(label);
 		item->setDuration(durationMs);
@@ -263,7 +263,7 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	return item;
 }
 
-TimeLineBase *TimeLineWidget::at(int trackID, int idx)
+TimeLineItem *TimeLineWidget::at(int trackID, int idx)
 {
 	if (trackID < 0 || trackID >= m_tracks.size())
 		return nullptr;
@@ -274,7 +274,7 @@ TimeLineBase *TimeLineWidget::at(int trackID, int idx)
 	return track->itemAt(idx);
 }
 
-bool TimeLineWidget::removeTimeLineItem(TimeLineBase *item, bool deleteLater)
+bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
 {
 	for (int t=0; t<m_tracks.size();t++) {
 		TimeLineTrack *track = m_tracks.at(t);
@@ -352,9 +352,9 @@ QRectF TimeLineWidget::currentVisibleRect() const
  * This function further checks wether the last item position is beyond the current time line length.
  * The time line will be extended if so.
  */
-bool TimeLineWidget::checkForRightMostItem(TimeLineItem *item)
+bool TimeLineWidget::checkForRightMostItem(TimeLineBox *item)
 {
-	TimeLineItem *newRightItem = m_rightMostItem;
+	TimeLineBox *newRightItem = m_rightMostItem;
 
 	if (!newRightItem) {	// no item existed before
 		newRightItem = item;
@@ -383,12 +383,12 @@ bool TimeLineWidget::checkForRightMostItem(TimeLineItem *item)
 	return false;
 }
 
-TimeLineItem *TimeLineWidget::findRightMostItem() const
+TimeLineBox *TimeLineWidget::findRightMostItem() const
 {
-	TimeLineItem *rItem = nullptr;
+	TimeLineBox *rItem = nullptr;
 	const QList<QGraphicsItem*> items = m_scene->items();
 	for (auto *it : items) {
-		TimeLineItem *tlItem = dynamic_cast<TimeLineItem *>(it);
+		TimeLineBox *tlItem = dynamic_cast<TimeLineBox *>(it);
 		if (tlItem) {
 			if (rItem) {
 				if (tlItem->endPosition() > rItem->endPosition())
@@ -551,9 +551,9 @@ void TimeLineWidget::showEvent(QShowEvent */*event*/)
  * Reimplement this function in your derived class in order to automatically generate
  * more complex TimeLineItems.
  */
-TimeLineItem *TimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+TimeLineBox *TimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
 {
-	return new TimeLineItem(timeline, trackId);
+	return new TimeLineBox(timeline, trackId);
 }
 
 /**
@@ -589,7 +589,7 @@ void TimeLineWidget::recalcPixelPosInAllItems()
 {
 	const QList<QGraphicsItem*> items = m_scene->items();
 	for (auto *it : items) {
-		TimeLineBase *tlItem = dynamic_cast<TimeLineBase*>(it);
+		TimeLineItem *tlItem = dynamic_cast<TimeLineItem*>(it);
 		if (tlItem) {
 			qDebug() << "type" << tlItem->type();
 			tlItem->recalcPixelPos();

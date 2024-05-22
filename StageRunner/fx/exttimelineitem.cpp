@@ -11,7 +11,7 @@
 using namespace PS_TL;
 
 ExtTimeLineItem::ExtTimeLineItem(TimeLineWidget *timeline, int trackId)
-	: TimeLineItem(timeline, trackId)
+	: TimeLineBox(timeline, trackId)
 	, TimeLineItemData()
 {
 
@@ -97,7 +97,7 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 void ExtTimeLineItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	TimeLineItem::paint(painter, option, widget);
+	TimeLineBox::paint(painter, option, widget);
 
 	// If there is a linked FX item, there could additional things to render
 	FxItem * fx = linkedFxItem();

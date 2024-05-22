@@ -1,14 +1,14 @@
 #ifndef EXTTIMELINEITEM_H
 #define EXTTIMELINEITEM_H
 
-#include "mods/timeline/timelineitem.h"
+#include "mods/timeline/timelinebox.h"
 #include "fx/fx_defines.h"
 #include "fx/timelineitemdata.h"
 
 class FxItem;
 
 
-class ExtTimeLineItem : public PS_TL::TimeLineItem, public TimeLineItemData
+class ExtTimeLineItem : public PS_TL::TimeLineBox, public TimeLineItemData
 {
 	Q_OBJECT
 

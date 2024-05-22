@@ -62,7 +62,7 @@
 #include "gui/customwidget/psdockwidget.h"
 #include "gui/consolidatedialog.h"
 #include "gui/universeeditorwidget.h"
-#include "mods/timeline/timelineitem.h"
+#include "mods/timeline/timelinebox.h"
 #include "widgets/fxtimelineeditwidget.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
@@ -161,7 +161,7 @@ void StageRunnerMainWin::initModules()
 	// populize with some timeline items
 	tlwid->addTimeLineItem(0, 10000, "item 1", 1);
 
-	TimeLineItem *item = tlwid->addTimeLineItem(50000, 10000, "item 2", 2);
+	TimeLineBox *item = tlwid->addTimeLineItem(50000, 10000, "item 2", 2);
 	item->setBackgroundColor(0x552222);
 
 	// FxTimeLineEditWidget *fxTimeLineWid = new FxTimeLineEditWidget();

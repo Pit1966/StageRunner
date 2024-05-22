@@ -146,7 +146,7 @@ SOURCES += \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
-	../mods/timeline/timelinebase.cpp \
+	../mods/timeline/timelinebox.cpp \
 	../mods/timeline/timelineclasses.cpp \
 	../mods/timeline/timelinecursor.cpp \
 	../mods/timeline/timelinecurve.cpp \
@@ -275,7 +275,7 @@ HEADERS  += \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
 	../mods/timeline/timeline_defines.h \
-	../mods/timeline/timelinebase.h \
+	../mods/timeline/timelinebox.h \
 	../mods/timeline/timelineclasses.h \
 	../mods/timeline/timelinecursor.h \
 	../mods/timeline/timelinecurve.h \

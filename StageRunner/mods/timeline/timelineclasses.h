@@ -16,8 +16,8 @@ enum TRACK_TYPE {
 
 // -------------------------------------------------------------------------------------------------
 
+class TimeLineBox;
 class TimeLineItem;
-class TimeLineBase;
 
 class TimeLineTrack
 {
@@ -29,7 +29,7 @@ protected:
 	int m_trackID;
 	int m_yPos;
 	int m_ySize;
-	QList<TimeLineBase*> m_itemList;		///< this list contains the timeline items in this timeline
+	QList<TimeLineItem*> m_itemList;		///< this list contains the timeline items in this timeline
 
 public:
 	TimeLineTrack(TRACK_TYPE type, int id, int y = 0, int ySize = 24);
@@ -45,11 +45,11 @@ public:
 	inline void setYSize(int ySize) {m_ySize = ySize;}
 	bool isInYRange(int y) const {return y >= m_yPos && y < yEndPos();}
 
-	inline const QList<TimeLineBase*> & itemList() const {return m_itemList;}
-	inline QList<TimeLineBase*> & itemList() {return m_itemList;}
-	void appendTimeLineItem(TimeLineBase *item);
+	inline const QList<TimeLineItem*> & itemList() const {return m_itemList;}
+	inline QList<TimeLineItem*> & itemList() {return m_itemList;}
+	void appendTimeLineItem(TimeLineItem *item);
 	int itemCount() const {return m_itemList.size();}
-	TimeLineBase * itemAt(int idx) const;
+	TimeLineItem * itemAt(int idx) const;
 
 	friend class TimeLineWidget;
 };
