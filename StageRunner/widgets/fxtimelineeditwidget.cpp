@@ -112,9 +112,11 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 			if (fxtrack->trackType() == TRACK_RULER && m_tracks.size() == 1 && m_tracks.at(0)->trackType() == TRACK_RULER)
 				continue;
 
+
 			if (!addTimeLineTrack(track))
 				LOGERROR(tr("Could not add timeline track with ID #%1 from FX in timeline editor")
 						 .arg(fxtrack->trackId()));
+
 		}
 
 		// get references to the source and destination list for this track
@@ -190,7 +192,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		// now copy the elements of the track
 		// we have to convert the TimeLineItem back to a FxTimeLineObj
 		while (++i < track->itemCount()) {
-			TimeLineItem *tli = track->itemAt(i);
+			TimeLineBase *tli = track->itemAt(i);
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());

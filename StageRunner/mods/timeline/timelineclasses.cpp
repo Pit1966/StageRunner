@@ -18,12 +18,12 @@ TimeLineTrack::~TimeLineTrack()
 		delete m_itemList.takeFirst();
 }
 
-void TimeLineTrack::appendTimeLineItem(TimeLineItem *item)
+void TimeLineTrack::appendTimeLineItem(TimeLineBase *item)
 {
 	m_itemList.append(item);
 }
 
-TimeLineItem * TimeLineTrack::itemAt(int idx) const
+TimeLineBase *TimeLineTrack::itemAt(int idx) const
 {
 	if (idx >= 0 && idx < m_itemList.size())
 		return m_itemList.at(idx);

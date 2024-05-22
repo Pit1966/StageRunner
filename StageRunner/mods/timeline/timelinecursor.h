@@ -32,7 +32,7 @@ private:
 	bool m_clicked	= false;
 
 public:
-	TimeLineCursor(TimeLineWidget *timeline);
+	TimeLineCursor(TimeLineWidget *timeline, int trackId = 0);
 	int type() const override {return m_type;}
 	void setHeight(qreal height);
 	// QSizeF size() const;

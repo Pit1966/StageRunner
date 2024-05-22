@@ -8,8 +8,8 @@
 
 namespace PS_TL {
 
-TimeLineRuler::TimeLineRuler(TimeLineWidget *timeline)
-	: TimeLineBase(timeline)
+TimeLineRuler::TimeLineRuler(TimeLineWidget *timeline, int trackId)
+	: TimeLineBase(timeline, trackId)
 {
 	m_xSize = 500;
 	m_ySize = 30;

@@ -2,10 +2,25 @@
 
 namespace PS_TL {
 
-TimeLineBase::TimeLineBase(TimeLineWidget *timeline)
+TimeLineBase::TimeLineBase(TimeLineWidget *timeline, int trackId)
 	: QGraphicsObject()
 	, m_timeline(timeline)
+	, m_trackId(trackId)
 {
+}
+
+void TimeLineBase::setLabel(const QString &label)
+{
+	if (m_label != label) {
+		m_label = label;
+		update();
+		emit labelChanged(label);
+	}
+}
+
+void TimeLineBase::setBackgroundColor(const QColor &col)
+{
+	m_colorBG = col;
 }
 
 void TimeLineBase::setPosition(int ms)
@@ -29,5 +44,16 @@ void TimeLineBase::setDuration(int ms)
 		emit durationChanged(ms);
 	}
 }
+
+qreal TimeLineBase::yPos() const
+{
+	return y();
+}
+
+void TimeLineBase::setYPos(qreal yPixelPos)
+{
+	setY(yPixelPos);
+}
+
 
 } // namespace PS_TL

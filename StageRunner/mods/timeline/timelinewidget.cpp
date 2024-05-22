@@ -218,7 +218,11 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	m_tracks.append(track);
 
 	// add TimeLineCurve to scene on timeline
-	// TimeLineCurve *curve = new TimeLineCurve(this);
+	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
+	curve->setYPos(track->yPos());
+	curve->setLabel("Audio Curve");
+
+	track->appendTimeLineItem(curve);
 
 	// update scene in order to draw the background
 	m_scene->update();
@@ -244,25 +248,22 @@ TimeLineItem *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const Q
 	// this is the track instance
 	TimeLineTrack *track = m_tracks.at(trackID);
 
-	// Now create an item an add it to the track
-	TimeLineItem *item = createNewTimeLineItem(this, trackID);		//new TimeLineItem(this, trackID);
+	// Now create an item and add it to the track
+	TimeLineItem *item = createNewTimeLineItem(this, trackID);
 	if (!item->isFirstInitReady()) {
 		item->setLabel(label);
 		item->setDuration(durationMs);
 		item->setPosition(posMs);
 	}
-	item->setYPos(m_tracks.at(trackID)->yPos());
+	item->setYPos(track->yPos());
 	track->appendTimeLineItem(item);
-
-	// item->setCursor(Qt::SizeHorCursor);
-	// QGraphicsRectItem *leftHandle = new QGraphicsRectItem(0,0, 10, item->ho, item);
 
 	// finaly add the item to the scene
 	m_scene->addItem(item);
 	return item;
 }
 
-TimeLineItem *TimeLineWidget::at(int trackID, int idx)
+TimeLineBase *TimeLineWidget::at(int trackID, int idx)
 {
 	if (trackID < 0 || trackID >= m_tracks.size())
 		return nullptr;
@@ -273,7 +274,7 @@ TimeLineItem *TimeLineWidget::at(int trackID, int idx)
 	return track->itemAt(idx);
 }
 
-bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
+bool TimeLineWidget::removeTimeLineItem(TimeLineBase *item, bool deleteLater)
 {
 	for (int t=0; t<m_tracks.size();t++) {
 		TimeLineTrack *track = m_tracks.at(t);
@@ -436,8 +437,13 @@ void TimeLineWidget::setTimeLineDuration(int ms)
 
 		m_ruler->setTimeLineDuration(ms);
 		adjustSceneRectToTimelineLength();
-		updateScene();
 
+		for (int t=1; t<m_tracks.size(); t++) {
+			// if (m_tracks.at(t)->trackType() == TRACK_AUDIO_ENV)
+
+		}
+
+		updateScene();
 		emit timeLineDurationChanged(ms);
 	}
 }

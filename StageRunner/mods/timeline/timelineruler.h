@@ -21,7 +21,7 @@ protected:
 	bool m_isGridDistValid		= false;
 
 public:
-	TimeLineRuler(TimeLineWidget *timeline);
+	TimeLineRuler(TimeLineWidget *timeline, int trackId = 0);
 
 	void setTimeLineDuration(int ms);
 	static QString msToTimeLineString(int ms, int msPrec = 2);

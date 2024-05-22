@@ -9,20 +9,13 @@
 namespace PS_TL {
 
 TimeLineItem::TimeLineItem(TimeLineWidget *timeline, int trackId)
-	: TimeLineBase(timeline)
-	, m_trackId(trackId)
+	: TimeLineBase(timeline, trackId)
 {
 	setAcceptHoverEvents(true);
-}
 
-qreal TimeLineItem::yPos() const
-{
-	return y();
-}
+	m_colorBG		= QColor(0x225522);
+	m_colorBorder   = QColor(0xeeeeee);
 
-void TimeLineItem::setYPos(qreal yPixelPos)
-{
-	setY(yPixelPos);
 }
 
 void TimeLineItem::moveToEndPosition(int ms)
@@ -34,19 +27,6 @@ void TimeLineItem::moveToEndPosition(int ms)
 	}
 }
 
-void TimeLineItem::setLabel(const QString &label)
-{
-	if (m_label != label) {
-		m_label = label;
-		update();
-		emit labelChanged(label);
-	}
-}
-
-void TimeLineItem::setBackgroundColor(const QColor &col)
-{
-	m_colorBG = col;
-}
 
 void TimeLineItem::recalcPixelPos()
 {

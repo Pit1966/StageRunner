@@ -5,17 +5,31 @@
 
 namespace PS_TL {
 
-TimeLineCurve::TimeLineCurve(TimeLineWidget *timeline)
-	: TimeLineBase(timeline)
+TimeLineCurve::TimeLineCurve(TimeLineWidget *timeline, int trackId)
+	: TimeLineBase(timeline, trackId)
 {
 	m_xSize = 500;
 	m_xSize = 30;
 	m_colorBG = 0x333355;
+
+	m_nodes.append(Node(0, 1000));
+	m_nodes.append(Node(60000, 1000));
 }
 
 void TimeLineCurve::setTimeLineDuration(int ms)
 {
 	setDuration(ms);
+
+	// delete all nodes that lies beyond the duration
+	Node last = m_nodes.takeLast();
+	last.xMs = ms;
+
+	while (m_nodes.size() > 1 && m_nodes.last().xMs >= ms)
+		m_nodes.removeLast();
+
+	// append last node again
+	m_nodes.append(last);
+
 	recalcPixelPos();
 }
 

@@ -112,8 +112,8 @@ public:
 	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
 	TimeLineItem * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
-	TimeLineItem * at(int trackID, int idx);
-	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);
+	TimeLineBase * at(int trackID, int idx);
+	bool removeTimeLineItem(TimeLineBase *item, bool deleteLater = false);
 	int timeLineSize(int trackID = 1) const;
 	QGraphicsView *gfxView() const {return m_view;}
 	TimeLineGfxView *timeLineGfxView() const {return m_view;}

@@ -6,8 +6,8 @@
 
 namespace PS_TL {
 
-TimeLineCursor::TimeLineCursor(TimeLineWidget *timeline)
-	: TimeLineBase(timeline)
+TimeLineCursor::TimeLineCursor(TimeLineWidget *timeline, int trackId)
+	: TimeLineBase(timeline, trackId)
 {
 	int yo = m_gripOffset;
 	int s = m_gripSize;
