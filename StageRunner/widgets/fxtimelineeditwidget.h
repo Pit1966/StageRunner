@@ -47,7 +47,7 @@ public:
 	bool copyToFxTimeLineItem(FxTimeLineItem *fxt);
 
 protected:
-	TimeLineBox * createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1) override;
+	TimeLineBox * createNewTimeLineBox(TimeLineWidget *timeline, int trackId = 1) override;
 	TimeLineGfxScene * createTimeLineScene(TimeLineWidget *timeline) override;
 };
 

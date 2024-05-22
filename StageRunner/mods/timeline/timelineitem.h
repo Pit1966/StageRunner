@@ -43,6 +43,7 @@ public:
 	TimeLineItem(TimeLineWidget *timeline, int trackId);
 	int type() const override {return m_itemType;}
 	int trackID() const {return m_trackId;}
+	void setTrackID(int id) {m_trackId = id;}
 	const QString & label() const {return m_label;}
 	void setLabel(const QString &label);
 	void setBackgroundColor(const QColor &col);

@@ -159,9 +159,9 @@ void StageRunnerMainWin::initModules()
 	timelineLayout->addWidget(tlwid);
 
 	// populize with some timeline items
-	tlwid->addTimeLineItem(0, 10000, "item 1", 1);
+	tlwid->addTimeLineBox(0, 10000, "item 1", 1);
 
-	TimeLineBox *item = tlwid->addTimeLineItem(50000, 10000, "item 2", 2);
+	TimeLineBox *item = tlwid->addTimeLineBox(50000, 10000, "item 2", 2);
 	item->setBackgroundColor(0x552222);
 
 	// FxTimeLineEditWidget *fxTimeLineWid = new FxTimeLineEditWidget();

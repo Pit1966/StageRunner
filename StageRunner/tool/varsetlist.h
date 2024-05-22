@@ -102,6 +102,10 @@ public:
 		return list.takeFirst();
 	}
 
+	inline T takeLast() {
+		return list.takeLast();
+	}
+
 	inline bool isEmpty() const {
 		return list.isEmpty();
 	}

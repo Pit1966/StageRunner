@@ -50,11 +50,23 @@ QRectF TimeLineCurve::boundingRect() const
 	return br;
 }
 
-void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/)
 {
+	if (m_isTimePosValid) {
+		m_xSize = m_timeline->msToPixel(duration());
+	}
+
 	painter->setBrush(m_colorBG);
+	painter->setPen(Qt::NoPen);
 	painter->drawRect(0, 0, m_xSize, m_ySize);
 
+	QPen pen;
+	pen.setColor(m_colorBorder);
+	painter->setPen(pen);
+
+	QRectF textRect = boundingRect();
+	textRect.adjust(5,-2,-5,-10);
+	painter->drawText(textRect, m_label);
 }
 
 } // namespace PS_TL

@@ -68,15 +68,13 @@ class TimeLineWidget : public QWidget
 {
 	Q_OBJECT
 
-private:
+protected:
 	TimeLineGfxScene *m_scene	= nullptr;
 	TimeLineGfxView *m_view		= nullptr;
 
 	TimeLineCursor *m_cursor	= nullptr;
 	TimeLineRuler *m_ruler		= nullptr;
 
-
-protected:
 	QLabel *m_navLabel			= nullptr;
 	QSlider *m_viewRangeSlider	= nullptr;
 
@@ -108,10 +106,12 @@ public:
 
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
+	TimeLineTrack *findTrackWithId(int trackId);
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
-	TimeLineBox * addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID = 1);
+	bool deleteTimeLineTrack(int trackID);
+	TimeLineBox * addTimeLineBox(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);
 	bool removeTimeLineItem(TimeLineItem *item, bool deleteLater = false);
 	int timeLineSize(int trackID = 1) const;
@@ -142,7 +142,7 @@ protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
 	void showEvent(QShowEvent *event);
 
-	virtual TimeLineBox *createNewTimeLineItem(TimeLineWidget *timeline, int trackId = 1);
+	virtual TimeLineBox *createNewTimeLineBox(TimeLineWidget *timeline, int trackId = 1);
 	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);
 
 	void adjustSceneRectToTimelineLength();

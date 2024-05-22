@@ -30,4 +30,20 @@ TimeLineItem *TimeLineTrack::itemAt(int idx) const
 	return nullptr;
 }
 
+void TimeLineTrack::deleteAllItems()
+{
+	while (!m_itemList.isEmpty())
+		delete m_itemList.takeFirst();
+}
+
+void TimeLineTrack::setTrackIdOfEachItem(int trackId, bool adjustYPosAlso)
+{
+	int id = trackId < 0 ? m_trackID : trackId;
+	for (TimeLineItem *it : qAsConst(m_itemList)) {
+		it->setTrackID(id);
+		if (adjustYPosAlso)
+			it->setYPos(m_yPos);
+	}
+}
+
 }

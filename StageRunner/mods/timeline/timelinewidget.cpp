@@ -164,6 +164,20 @@ int TimeLineWidget::timeLineHeight() const
 	return qMax(m_tracks.last()->yEndPos(), m_defaultTrackHeight * 2 + 10);
 }
 
+/**
+ * @brief Return track with given track ID
+ * @param trackId
+ * @return address of TimeLineTrack instance or nullptr, if not found
+ */
+TimeLineTrack *TimeLineWidget::findTrackWithId(int trackId)
+{
+	for (int t=0; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t)->trackId() == trackId)
+			return m_tracks.at(t);
+	}
+	return nullptr;
+}
+
 bool TimeLineWidget::addTimeLineTrack()
 {
 	int newTrackId = m_tracks.size();
@@ -221,12 +235,42 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
 	curve->setYPos(track->yPos());
 	curve->setLabel("Audio Curve");
+	curve->setTimeLineDuration(m_timeLineLenMs);
 
 	track->appendTimeLineItem(curve);
+
+	// add curve item to scene
+	m_scene->addItem(curve);
 
 	// update scene in order to draw the background
 	m_scene->update();
 
+	return true;
+}
+
+bool TimeLineWidget::deleteTimeLineTrack(int trackID)
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track) return false;
+
+	// delete all items in the track
+	track->deleteAllItems();
+
+	// remove track from list and delete track itself
+	m_tracks.removeOne(track);
+	delete track;
+
+	// renumber all trackIDs both in track and in all track items.
+	// For now the trackID is the index in the track list
+	// This will change later
+	// also recalculate the y position in the time line
+	for (int t = 1; t<m_tracks.size(); t++) {
+		m_tracks.at(t)->setTrackId(t);
+		m_tracks.at(t)->setYPos(m_tracks.at(t-1)->yEndPos());
+		m_tracks.at(t)->setTrackIdOfEachItem(t, true);
+	}
+
+	updateScene();
 	return true;
 }
 
@@ -238,7 +282,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
  * @param label
  * @return
  */
-TimeLineBox *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QString &label, int trackID)
+TimeLineBox *TimeLineWidget::addTimeLineBox(int posMs, int durationMs, const QString &label, int trackID)
 {
 	while (m_tracks.size() <= trackID) {
 		TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
@@ -249,7 +293,7 @@ TimeLineBox *TimeLineWidget::addTimeLineItem(int posMs, int durationMs, const QS
 	TimeLineTrack *track = m_tracks.at(trackID);
 
 	// Now create an item and add it to the track
-	TimeLineBox *item = createNewTimeLineItem(this, trackID);
+	TimeLineBox *item = createNewTimeLineBox(this, trackID);
 	if (!item->isFirstInitReady()) {
 		item->setLabel(label);
 		item->setDuration(durationMs);
@@ -551,7 +595,7 @@ void TimeLineWidget::showEvent(QShowEvent */*event*/)
  * Reimplement this function in your derived class in order to automatically generate
  * more complex TimeLineItems.
  */
-TimeLineBox *TimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+TimeLineBox *TimeLineWidget::createNewTimeLineBox(TimeLineWidget *timeline, int trackId)
 {
 	return new TimeLineBox(timeline, trackId);
 }
@@ -604,13 +648,16 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	QPointF pos1 = m_view->mapFromGlobal(event->globalPos());
 	int clickedTrackID = yPosToTrackId(pos1.y());
 	int ms = pixelToMs(pos1.x());
-	qDebug() << "ms" << ms << "pixel" << pos1.x();
+	// qDebug() << "ms" << ms << "pixel" << pos1.x();
 
 	QMenu menu(this);
 	QAction *act;
 	if (clickedTrackID > 0) {
 		act = menu.addAction(tr("Add new Item"));
 		act->setObjectName("newItem");
+
+		act = menu.addAction(tr("Delete track"));
+		act->setObjectName("delTrack");
 	}
 	else if (clickedTrackID < 0) {
 		act = menu.addAction(tr("Add new timeline track"));
@@ -627,7 +674,10 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	if (cmd == "newItem") {
 		// if (!m_itemLists[1].isEmpty())
 		// 	ms = m_itemLists[1].last()->endPosition();
-		/*TimeLineItem *item = */addTimeLineItem(ms, 10000, QString("item t%1").arg(clickedTrackID), clickedTrackID);
+		/*TimeLineItem *item = */addTimeLineBox(ms, 10000, QString("item t%1").arg(clickedTrackID), clickedTrackID);
+	}
+	else if (cmd == "delTrack") {
+		deleteTimeLineTrack(clickedTrackID);
 	}
 	else if (cmd == "newTrack") {
 		/*bool ok = */addTimeLineTrack();

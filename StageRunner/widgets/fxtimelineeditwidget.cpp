@@ -8,6 +8,7 @@
 #include "mods/timeline/timelinewidget.h"
 #include "mods/timeline/timelinebox.h"
 #include "mods/timeline/timelineruler.h"
+#include "mods/timeline/timelinecurve.h"
 #include "system/fxcontrol.h"
 #include "appcontrol/appcentral.h"
 #include "gui/customwidget/extmimedata.h"
@@ -47,7 +48,7 @@ void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 		int xMs = m_timeLine->pixelToMs(dropPos.x() - drag->hotSpot().x());
 		if (xMs < 0)
 			xMs = 0;
-		TimeLineBox *tli = m_timeLine->addTimeLineItem(xMs, 5000, "drop item", trackID);
+		TimeLineBox *tli = m_timeLine->addTimeLineBox(xMs, 5000, "drop item", trackID);
 		ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 		extTLI->linkToFxItem(fx);
 
@@ -102,16 +103,17 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 	// t is also the trackID !!
 	for (int t=0; t<TIMELINE_MAX_TRACKS; t++) {
 		int trackID = t;
+		FxTimeLineTrack *fxtrack = nullptr;
+		TimeLineTrack *track = nullptr;
 		// add timeline track
-		if (fxt->m_tracks.size() > t) {
+		if (t < fxt->m_tracks.size()) {
 			// copy track data to TimeLineTrack
-			FxTimeLineTrack *fxtrack = fxt->m_tracks.at(t);
-			TimeLineTrack *track = new TimeLineTrack(fxtrack->trackType(), fxtrack->trackId());
+			fxtrack = fxt->m_tracks.at(t);
+			track = new TimeLineTrack(fxtrack->trackType(), fxtrack->trackId());
 			fxtrack->copyDataTo(track);
 
 			if (fxtrack->trackType() == TRACK_RULER && m_tracks.size() == 1 && m_tracks.at(0)->trackType() == TRACK_RULER)
 				continue;
-
 
 			if (!addTimeLineTrack(track))
 				LOGERROR(tr("Could not add timeline track with ID #%1 from FX in timeline editor")
@@ -119,22 +121,46 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 
 		}
 
-		// get references to the source and destination list for this track
+		// get references to the source list in the FxItem for this track
 		const VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
-		// QList<TimeLineItem*> &timelinelist = m_itemLists[t];
 
-		// now copy the elements of the track
-		// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
-		// is used in the TimeLineWidget
+		if (fxtrack && fxtrack->trackType() == TRACK_AUDIO_ENV) {
+			if (!track) {
+				qWarning() << Q_FUNC_INFO << "missing track_audio_env";
+				continue;
+			}
 
-		for (int i=0; i<varset.size(); i++) {
-			FxTimeLineObj *obj = varset.at(i);
-			TimeLineBox *tli = addTimeLineItem(obj->posMs, obj->lenMs, obj->label, trackID);
-			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
-			extTLI->cloneItemDataFrom(obj);
-			// extTLI->m_fxID = obj->m_fxID;
-			// extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
-			hasItems = true;
+			// an audio envelope (TinmeLimeCurve) Track should have only one item, but who knows ....
+			for (int i=0; i<varset.size(); i++) {
+				FxTimeLineObj *obj = varset.at(i);
+
+				// Now create an item and add it to the track
+				TimeLineCurve *item = new TimeLineCurve(this, track->trackId());
+				item->setLabel(obj->label);
+				item->setDuration(m_timeLineLenMs);
+				item->setPosition(obj->posMs);
+				item->setYPos(track->yPos());
+				track->appendTimeLineItem(item);
+
+				// finaly add the item to the scene
+				m_scene->addItem(item);
+			}
+		}
+		else {
+			// This should be a TimeLine Track with editable items of type TRACK_ITEMS
+			// now copy the elements of the track
+			// we have to convert a FxTimeLineObj which is used by the fx control unit to an TimeLineItem, which
+			// is used in the TimeLineWidget
+
+			for (int i=0; i<varset.size(); i++) {
+				FxTimeLineObj *obj = varset.at(i);
+				TimeLineBox *tli = addTimeLineBox(obj->posMs, obj->lenMs, obj->label, trackID);
+				ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
+				extTLI->cloneItemDataFrom(obj);
+				// extTLI->m_fxID = obj->m_fxID;
+				// extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
+				hasItems = true;
+			}
 		}
 	}
 
@@ -222,6 +248,25 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 				fxt->setModified(true);
 			}
 		}
+		// delete superflues elements in fxitem timeline data
+		while (varset.size() > track->itemCount()) {
+			delete varset.takeLast();
+			fxt->setModified(true);
+		}
+	}
+
+	// if tracks were deleted in the time line, the track count in the FxItem is higher than the count in the editor
+	// so we have to delete the superflues
+	int trackCnt = m_tracks.size();
+	if (fxt->m_tracks.size() != trackCnt) {
+		fxt->setModified(true);
+		while (fxt->m_tracks.size() > trackCnt) {
+			delete fxt->m_tracks.takeLast();
+		}
+
+		for (int i=trackCnt; i<TIMELINE_MAX_TRACKS; i++) {
+			fxt->m_timelines[i].clear();
+		}
 	}
 
 	fxt->m_timeLineDurationMs = timeLineDuration();
@@ -229,7 +274,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	return true;
 }
 
-TimeLineBox *ExtTimeLineWidget::createNewTimeLineItem(TimeLineWidget *timeline, int trackId)
+TimeLineBox *ExtTimeLineWidget::createNewTimeLineBox(TimeLineWidget *timeline, int trackId)
 {
 	ExtTimeLineItem *tlItem = new ExtTimeLineItem(timeline, trackId);
 	return tlItem;
@@ -264,9 +309,9 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 	if (!m_timeline->isInitialized())
 		m_timeline->init();
 	setupUi(this);
-//	QFont font("DejaVu Sans Mono", 13);
-//	timeCodeCursorLabel->setFont(font);
-//	timeCodeMouseLabel->setFont(font);
+	//	QFont font("DejaVu Sans Mono", 13);
+	//	timeCodeCursorLabel->setFont(font);
+	//	timeCodeMouseLabel->setFont(font);
 
 	m_timeline->setAcceptDrops(true);
 

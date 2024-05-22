@@ -50,6 +50,8 @@ public:
 	void appendTimeLineItem(TimeLineItem *item);
 	int itemCount() const {return m_itemList.size();}
 	TimeLineItem * itemAt(int idx) const;
+	void deleteAllItems();
+	void setTrackIdOfEachItem(int trackId, bool adjustYPosAlso = false);
 
 	friend class TimeLineWidget;
 };
