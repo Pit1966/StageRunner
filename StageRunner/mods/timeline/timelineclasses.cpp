@@ -1,11 +1,13 @@
 #include "timelineclasses.h"
 
 #include "timelinebox.h"
+#include "timelinewidget.h"
 
 namespace PS_TL {
 
-TimeLineTrack::TimeLineTrack(TRACK_TYPE type, int id, int y, int ySize)
-	: m_type(type)
+TimeLineTrack::TimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, int y, int ySize)
+	: m_timeline(timeline)
+	, m_type(type)
 	, m_trackID(id)
 	, m_yPos(y)
 	, m_ySize(ySize)
@@ -43,6 +45,13 @@ void TimeLineTrack::setTrackIdOfEachItem(int trackId, bool adjustYPosAlso)
 		it->setTrackID(id);
 		if (adjustYPosAlso)
 			it->setYPos(m_yPos);
+	}
+}
+
+void TimeLineTrack::setTrackDuration(int ms)
+{
+	for (int t=0; t<m_itemList.size(); t++) {
+		itemAt(t)->setTrackDuration(ms);
 	}
 }
 

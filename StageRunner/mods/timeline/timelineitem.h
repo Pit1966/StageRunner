@@ -9,6 +9,7 @@
 namespace PS_TL {
 
 class TimeLineWidget;
+class TimeLineTrack;
 
 class TimeLineItem : public QGraphicsObject
 {
@@ -25,6 +26,8 @@ protected:
 	int m_id					= 0;		///< not used yet
 	int m_itemType				= TL_ITEM;
 	int m_trackId				= 0;
+	// temp track, found by trackID
+	TimeLineTrack *m_myTrack	= nullptr;
 
 	// user editable data
 	QString m_label;
@@ -59,6 +62,7 @@ public:
 	void setYPos(qreal yPixelPos);
 
 	virtual void recalcPixelPos()	= 0;
+	virtual void setTrackDuration(int ms) {Q_UNUSED(ms);}
 
 signals:
 	void timePositionChanged(int ms);

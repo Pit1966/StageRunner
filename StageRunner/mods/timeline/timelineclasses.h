@@ -18,6 +18,7 @@ enum TRACK_TYPE {
 
 class TimeLineBox;
 class TimeLineItem;
+class TimeLineWidget;
 
 class TimeLineTrack
 {
@@ -25,6 +26,7 @@ public:
 	qint64 trackBgColor	= -1;				///< invalid color
 
 protected:
+	TimeLineWidget *m_timeline;
 	TRACK_TYPE m_type;
 	int m_trackID;
 	int m_yPos;
@@ -32,7 +34,7 @@ protected:
 	QList<TimeLineItem*> m_itemList;		///< this list contains the timeline items in this timeline
 
 public:
-	TimeLineTrack(TRACK_TYPE type, int id, int y = 0, int ySize = 24);
+	TimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, int y = 0, int ySize = 24);
 	~TimeLineTrack();
 	inline TRACK_TYPE trackType() const {return m_type;}
 	inline void setTrackType(TRACK_TYPE type) {m_type = type;}
@@ -52,6 +54,7 @@ public:
 	TimeLineItem * itemAt(int idx) const;
 	void deleteAllItems();
 	void setTrackIdOfEachItem(int trackId, bool adjustYPosAlso = false);
+	void setTrackDuration(int ms);
 
 	friend class TimeLineWidget;
 };

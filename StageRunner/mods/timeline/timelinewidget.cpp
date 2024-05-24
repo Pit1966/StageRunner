@@ -40,13 +40,13 @@ void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &/*rect*/)
 		TimeLineTrack *track = tracks.at(t);
 		QColor bgcol = track->trackBgColor;
 		if (track->trackBgColor >= 0) {
-			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, bgcol);
+			painter->fillRect(0, track->yPos(), width, track->ySize(), bgcol);
 		}
 		else if (t & 1) {
-			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, m_bg1);
+			painter->fillRect(0, track->yPos(), width, track->ySize(), m_bg1);
 		}
 		else {
-			painter->fillRect(0, track->yPos()-1, width, track->ySize()-1, m_bg2);
+			painter->fillRect(0, track->yPos(), width, track->ySize(), m_bg2);
 		}
 	}
 }
@@ -97,7 +97,7 @@ void TimeLineWidget::init()
 	connect(m_scene, SIGNAL(mouseHoverPosChanged(QPointF)), this, SLOT(onMouseHovered(QPointF)));
 
 	// create ruler track. This is always track with ID 0
-	m_tracks.append(new TimeLineTrack(TRACK_RULER, 0, 0, 34));
+	m_tracks.append(new TimeLineTrack(this, TRACK_RULER, 0, 0, 34));
 
 	// add cursor to scene
 	m_cursor = new TimeLineCursor(this);
@@ -184,7 +184,7 @@ bool TimeLineWidget::addTimeLineTrack()
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(this, TRACK_ITEMS, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	m_tracks.append(track);
 	// update scene in order to draw the background
 	m_scene->update();
@@ -227,7 +227,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack *track = new TimeLineTrack(TRACK_AUDIO_ENV, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_ENV, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	track->trackBgColor = 0x3333555;
 	m_tracks.append(track);
 
@@ -285,7 +285,7 @@ bool TimeLineWidget::deleteTimeLineTrack(int trackID)
 TimeLineBox *TimeLineWidget::addTimeLineBox(int posMs, int durationMs, const QString &label, int trackID)
 {
 	while (m_tracks.size() <= trackID) {
-		TimeLineTrack *track = new TimeLineTrack(TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+		TimeLineTrack *track = new TimeLineTrack(this, TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 		m_tracks.append(track);
 	}
 
@@ -483,8 +483,8 @@ void TimeLineWidget::setTimeLineDuration(int ms)
 		adjustSceneRectToTimelineLength();
 
 		for (int t=1; t<m_tracks.size(); t++) {
-			// if (m_tracks.at(t)->trackType() == TRACK_AUDIO_ENV)
-
+			TimeLineTrack *track = m_tracks.at(t);
+			track->setTrackDuration(ms);
 		}
 
 		updateScene();

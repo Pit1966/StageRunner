@@ -268,7 +268,7 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 							}
 							else if (var->contextClass == PrefVarCore::FX_TIMELINE_TRACK) {
 								VarSetList<FxTimeLineTrack*> *varsetlist = reinterpret_cast<VarSetList<FxTimeLineTrack*>*>(var->p_refvar);
-								FxTimeLineTrack* item = new FxTimeLineTrack;
+								FxTimeLineTrack* item = new FxTimeLineTrack(nullptr);
 								varsetlist->append(item);
 								if (-1 == item->analyzeLoop(read,item,child_level+1,p_line_number,lineCopy)) {
 									return -1;

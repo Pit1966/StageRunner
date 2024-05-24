@@ -2,8 +2,8 @@
 
 using namespace PS_TL;
 
-FxTimeLineTrack::FxTimeLineTrack(TRACK_TYPE type, int id, int y, int size)
-	: TimeLineTrack(type, id)
+FxTimeLineTrack::FxTimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, int y, int size)
+	: TimeLineTrack(timeline, type, id)
 {
 	init();
 

@@ -109,7 +109,7 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 		if (t < fxt->m_tracks.size()) {
 			// copy track data to TimeLineTrack
 			fxtrack = fxt->m_tracks.at(t);
-			track = new TimeLineTrack(fxtrack->trackType(), fxtrack->trackId());
+			track = new TimeLineTrack(this, fxtrack->trackType(), fxtrack->trackId());
 			fxtrack->copyDataTo(track);
 
 			if (fxtrack->trackType() == TRACK_RULER && m_tracks.size() == 1 && m_tracks.at(0)->trackType() == TRACK_RULER)
@@ -137,7 +137,8 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 				// Now create an item and add it to the track
 				TimeLineCurve *item = new TimeLineCurve(this, track->trackId());
 				item->setLabel(obj->label);
-				item->setDuration(m_timeLineLenMs);
+				item->setTimeLineDuration(m_timeLineLenMs);
+				// item->setTrackDuration(m_timeLineLenMs);
 				item->setPosition(obj->posMs);
 				item->setYPos(track->yPos());
 				track->appendTimeLineItem(item);
@@ -186,13 +187,13 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		TimeLineTrack *track = m_tracks.at(trackID);
 		// copy track definition data first
 		if (fxt->m_tracks.size() <= t) {	// track does not exist in FxTimeLineItem
-			FxTimeLineTrack *fxtrack = new FxTimeLineTrack();
+			FxTimeLineTrack *fxtrack = new FxTimeLineTrack(this);
 			fxtrack->copyDataFrom(track);
 			fxt->m_tracks.append(fxtrack);
 			fxt->setModified(true);
 		}
 		else if (fxt->m_tracks.at(t) == nullptr) {	// empty track in list
-			FxTimeLineTrack *fxtrack = new FxTimeLineTrack();
+			FxTimeLineTrack *fxtrack = new FxTimeLineTrack(this);
 			fxtrack->copyDataFrom(track);
 			fxt->m_tracks[t] = fxtrack;
 			fxt->setModified(true);
