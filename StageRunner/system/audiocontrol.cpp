@@ -182,6 +182,19 @@ bool AudioControl::isFxAudioActive(int slotnum)
 	return audioSlots[slotnum]->isActive();
 }
 
+/**
+ * @brief Check if any audio slot is used for playback (also paused)
+ * @return true, if there is at least one audio slot used
+ */
+bool AudioControl::isAnyFxAudioActive() const
+{
+	for (int t=0; t<used_slots; t++) {
+		if (audioSlots[t]->isActive())
+			return true;
+	}
+	return false;
+}
+
 int AudioControl::findAudioSlot(FxAudioItem *fxa)
 {
 	if (!fxa) return false;
@@ -937,6 +950,15 @@ void AudioControl::setMasterVolume(int vol)
 	}
 }
 
+
+/**
+ * @brief Set Volume in slot
+ * @param slot
+ * @param vol
+ *
+ * This function is called by audioCtrlReceiver slot.
+ * Usualy when the software calls it internaly not directly by a slider move
+ */
 void AudioControl::setVolume(int slot, int vol)
 {
 	QMutexLocker lock(slotMutex);
@@ -951,6 +973,29 @@ void AudioControl::setVolume(int slot, int vol)
 		audioSlots[slot]->setVolume(vol);
 		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 		dmx_audio_ctrl_last_vol[slot] = vol;
+	}
+}
+
+
+/**
+ * @brief Set Volume in slot. Only call this from TimeLine Executers
+ * @param slot
+ * @param vol
+ */
+void AudioControl::setVolumeFromTimeLine(int slot, int vol)
+{
+	QMutexLocker lock(slotMutex);
+
+	if (vol < 0) {
+		vol = 0;
+	}
+	else if (vol > MAX_VOLUME) {
+		vol = MAX_VOLUME;
+	}
+	if (slot >= 0 && slot < used_slots) {
+		audioSlots[slot]->setVolumeFromTimeLine(vol);
+		// dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
+		// dmx_audio_ctrl_last_vol[slot] = vol;
 	}
 }
 

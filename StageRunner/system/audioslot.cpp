@@ -428,6 +428,24 @@ void AudioSlot::setVolume(int vol)
 	_setVolume(vol);
 }
 
+/**
+ * @brief This is the volume function that is only used by the timeline (envelopes)
+ * @param vol
+ */
+void AudioSlot::setVolumeFromTimeLine(int vol)
+{
+	qreal linearVolume = QAudio::convertVolume(vol / qreal(MAX_VOLUME),
+											   QAudio::LogarithmicVolumeScale,
+											   QAudio::LinearVolumeScale);
+
+	m_dmxVolLockState = DMX_AUDIO_NOT_LOCKED;
+	_setVolume(qRound(linearVolume * MAX_VOLUME));
+
+	AudioCtrlMsg msg(slotNumber, CMD_STATUS_REPORT, run_status, current_executer);
+	msg.volume = int(vol);
+	emit audioCtrlMsgEmitted(msg);
+}
+
 bool AudioSlot::setVolumeFromDMX(int dmxvol)
 {
 //	qDebug() << "set dmx vol state" << m_dmxVolLockState << dmxvol;

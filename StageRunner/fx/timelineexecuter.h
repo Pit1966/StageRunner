@@ -4,6 +4,10 @@
 #include "executer.h"
 
 class FxTimeLineObj;
+namespace PS_TL {
+	class TimeLineCurve;
+	class TimeLineCurveData;
+}
 
 class TimeLineExecuter : public Executer
 {
@@ -13,13 +17,14 @@ public:
 		EV_UNKNOWN,
 		EV_BEGIN,
 		EV_STOP,
-		EV_TIMELINE_END
+		EV_TIMELINE_END,
+		EV_ENVELOPE_START
 	};
 
 	class Event {
 	public:
 		EV_TYPE evType		= EV_UNKNOWN;
-		int evNum			= 0;
+		int evNum			= 0;			///< not used ... only for debugging
 		int timeMs			= 0;
 		int trackID			= 0;
 		FxTimeLineObj * obj	= nullptr;
@@ -27,6 +32,18 @@ public:
 		Event(EV_TYPE type = EV_UNKNOWN)
 			: evType(type)
 		{}
+	};
+
+	class Envelope {
+	public:
+		int trackID			= 0;
+		int curveTrack		= 0;
+		int targetTrack		= 0;
+		QList<int> usedAudioSlots;	// a list of audioslots with aktiv FxAudioItems or FxClipItems running
+
+		/// Attention! this is only a temporary storage for the pointer.
+		/// the TimeLineCurveData object will not be deleted
+		PS_TL::TimeLineCurveData *curveDat = nullptr;
 	};
 
 protected:
@@ -39,6 +56,13 @@ protected:
 
 	QList<Event> m_sortedObjEventList;
 	QHash<int,FxSceneItem*> m_idToClonedSceneHash;	///< this is a hash Original fxID -> cloned FxItem of FxSceneItems that were started in the timeline as copy from main list
+	QList<Envelope*> m_curveTracks;					///< this is a list of running envelopes aka curves
+
+	int m_curveIntervalMs		= 40;
+
+	// temp
+	int m_nextCurveTrackEventAtMs	= -1;
+	bool m_triggerCurveEvent		= false;		///< override next timeline ITEMS event with a regulary called envelope/curve event
 
 public:
 	inline TYPE type() const override {return EXEC_TIMELINE;}
@@ -52,10 +76,12 @@ protected:
 	virtual ~TimeLineExecuter();
 
 	FxSceneItem *getScene(int fxID);
+	Envelope *getEnvelopeForTrackId(int trackID);
 
 	Event findNextObj();
 	bool getTimeLineObjs(FxTimeLineItem *fx);
 
+	bool processEnvelopes(int estTimeMs);
 
 	bool execObjBeginPosForFx(int fxID, Event &ev);
 	bool execObjEndPosForFx(int fxID, Event &ev);

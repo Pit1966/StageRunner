@@ -18,7 +18,7 @@ class FxTimeLineItem : public QObject, public FxItem
 
 private:
 	VarSetList<FxTimeLineTrack*>m_tracks;
-	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];
+	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];		// m_timelines indes must be trackID
 	qint32 m_timeLineDurationMs;
 
 public:
@@ -27,6 +27,9 @@ public:
 	virtual ~FxTimeLineItem();
 
 	void clear();
+	inline int trackCount() const {return m_tracks.size();}
+	FxTimeLineTrack *trackAt(int t) const {return m_tracks.at(t);}
+
 	int timeLineObjCount(uint trackID) const;
 	FxTimeLineObj *timeLineObjAt(uint trackID, int idx) const;
 

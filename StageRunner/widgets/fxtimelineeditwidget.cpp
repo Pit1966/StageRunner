@@ -141,6 +141,10 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 				// item->setTrackDuration(m_timeLineLenMs);
 				item->setPosition(obj->posMs);
 				item->setYPos(track->yPos());
+
+				// copy config data (nodes, ...) to the item
+				item->setConfigDat(obj->configDat);
+
 				track->appendTimeLineItem(item);
 
 				// finaly add the item to the scene
@@ -223,6 +227,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 			ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 
 			FxTimeLineObj *obj = new FxTimeLineObj(tli->position(), tli->duration(), tli->label(), tli->trackID());
+			obj->configDat = tli->getConfigDat();
 			if (extTLI) {
 				obj->cloneItemDataFrom(extTLI);
 				// obj->m_fxID = extTLI->m_fxID;

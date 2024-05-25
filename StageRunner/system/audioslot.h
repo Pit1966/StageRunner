@@ -101,6 +101,7 @@ public:
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
 	bool fadeinFxAudio(int targetVolume, int time_ms);
 	void setVolume(int vol);
+	void setVolumeFromTimeLine(int vol);
 	bool setVolumeFromDMX(int dmxvol);
 	void setDmxVolLockState(DMXLockingMode state) {m_dmxVolLockState = state;}
 	inline int volume() {return current_volume;}

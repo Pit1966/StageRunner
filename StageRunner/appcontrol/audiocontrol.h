@@ -94,6 +94,7 @@ public:
 	void getAudioDevices();
 	bool isFxAudioActive(FxAudioItem *fxa);
 	bool isFxAudioActive(int slotnum);
+	bool isAnyFxAudioActive() const;
 	int findAudioSlot(FxAudioItem *fxa);
 	int selectFreeAudioSlot(int slotnum = -1);
 	int selectFreeVideoSlot(bool *isVideoRunning);
@@ -157,6 +158,7 @@ public slots:
 	void audioCtrlReceiver(AUDIO::AudioCtrlMsg msg);
 	void setMasterVolume(int vol);
 	void setVolume(int slot, int vol);
+	void setVolumeFromTimeLine(int slot, int vol);
 	void setVolumeInFx(int slot, int vol, bool setAsInitVolume);
 	void setVolumeByDmxInput(int slot, int vol);
 	void setVolumeFromDmxLevel(int slot, int vol);

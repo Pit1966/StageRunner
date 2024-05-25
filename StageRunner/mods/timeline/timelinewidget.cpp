@@ -234,14 +234,13 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	// add TimeLineCurve to scene on timeline
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
 	curve->setYPos(track->yPos());
-	curve->setLabel("Audio Curve");
+	curve->setLabel("Audio Envelope");
 	curve->setTimeLineDuration(m_timeLineLenMs);
 
 	track->appendTimeLineItem(curve);
 
 	// add curve item to scene
 	m_scene->addItem(curve);
-
 	// update scene in order to draw the background
 	m_scene->update();
 

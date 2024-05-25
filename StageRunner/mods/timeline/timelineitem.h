@@ -63,6 +63,8 @@ public:
 
 	virtual void recalcPixelPos()	= 0;
 	virtual void setTrackDuration(int ms) {Q_UNUSED(ms);}
+	virtual QString getConfigDat() const {return QString();}
+	virtual bool setConfigDat(const QString &dat) {Q_UNUSED(dat); return true;}
 
 signals:
 	void timePositionChanged(int ms);

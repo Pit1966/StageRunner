@@ -31,7 +31,8 @@ bool FxTimeLineObj::isEqual(const FxTimeLineObj *o)
 			&& trackId == o->trackId
 			&& posMs == o->posMs
 			&& lenMs == o->lenMs
-			&& label == o->label;
+			&& label == o->label
+			&& configDat == o->configDat;
 }
 
 /**
@@ -149,9 +150,12 @@ void FxTimeLineObj::init()
 	addExistingVar(posMs,"PosMs");
 	addExistingVar(lenMs,"LenMs");
 	addExistingVar(label, "Label");
+	addExistingVar(configDat, "configDat");
+	// in TimeLineData
 	addExistingVar(reinterpret_cast<int&>(m_linkedObjType), "Type");
 	addExistingVar(m_fxID, "FxId");
 	addExistingVar(m_maxDurationMs, "MaxDurMs");
 	addExistingVar(m_fadeInDurationMs, "FadeInMs");
 	addExistingVar(m_fadeOutDurationMs, "FadeOutMs");
+
 }

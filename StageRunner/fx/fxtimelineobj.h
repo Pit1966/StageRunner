@@ -16,6 +16,7 @@ public:
 	int posMs;					///< position on timeline in milliseconds
 	int lenMs;					///< length in milliseconds
 	QString label;
+	QString configDat;			///< this is copied to TimeLineItem::setConfigDat()
 
 protected:
 	// next member vars moved to class TimeLineItemData
