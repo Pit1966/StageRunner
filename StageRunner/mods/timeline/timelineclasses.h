@@ -24,6 +24,8 @@ class TimeLineTrack
 {
 public:
 	qint64 trackBgColor	= -1;				///< invalid color
+	int yAlignOffset	= 1;				///< means, a new track item is located at track y pos + this offset value (here 1)
+	int yAlignSize		= 3;				///< this is the size alignment for a track item. Item height is yAlignSize smaller than track height
 
 protected:
 	TimeLineWidget *m_timeline;
@@ -55,6 +57,8 @@ public:
 	void deleteAllItems();
 	void setTrackIdOfEachItem(int trackId, bool adjustYPosAlso = false);
 	void setTrackDuration(int ms);
+
+	void alignItemPositionsToTrack();
 
 	friend class TimeLineWidget;
 };

@@ -13,8 +13,8 @@ TimeLineBox::TimeLineBox(TimeLineWidget *timeline, int trackId)
 {
 	setAcceptHoverEvents(true);
 
-	m_colorBG		= QColor(0x225522);
-	m_colorBorder   = QColor(0xeeeeee);
+	m_colorBG		= 0x225522;
+	m_colorBorder   = 0x225522;		// 0xeeeeee;
 
 }
 
@@ -63,12 +63,12 @@ void TimeLineBox::paint(QPainter *painter, const QStyleOptionGraphicsItem */*opt
 	pen.setColor(m_colorBorder);
 	pen.setWidthF(m_penWidthBorder);
 	painter->setPen(pen);
-	painter->setBrush(m_colorBG);
+	painter->setBrush(QColor(m_colorBG));
 	painter->drawRect(m_penWidthBorder/2, m_penWidthBorder/2, m_xSize, m_ySize);
 
-	// painter->drawText(5, m_ySize / 2, m_label);
+	painter->setPen(QColor(m_colorText));
 	QRectF textRect = boundingRect();
-	textRect.adjust(5,-2,-5,-10);
+	textRect.adjust(5,-2,-5,-3);
 	painter->drawText(textRect, m_label);
 
 	m_wasPainted = true;
@@ -107,7 +107,10 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			m_xSize = m_clickXSize + xdif;
 			qreal xSizeMs = m_xSize * m_timeline->msPerPixel();
 			qreal maxDurMs = maxDuration();
-			if (maxDurMs > 0 && xSizeMs > maxDurMs) {
+			if (xSizeMs < fadeOutTime() + fadeInTime()) {
+				xSizeMs = fadeOutTime() + fadeInTime();
+			}
+			else if (maxDurMs > 0 && xSizeMs > maxDurMs) {
 				xSizeMs = maxDurMs;
 				m_xSize = m_timeline->msToPixel(maxDurMs);
 			}
@@ -121,6 +124,18 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 			qreal newX = m_itemPos.x() + xdif;
 			qreal newY = m_itemPos.y();
 			qreal newXSize = m_clickXSize - xdif;
+
+			qreal maxXSize = m_timeline->msToPixel(maxDuration());
+			qreal minXSize = m_timeline->msToPixel(fadeInTime() + fadeOutTime());
+			if (newXSize < minXSize) {
+				newX -=  minXSize - newXSize;
+				newXSize = minXSize;
+			}
+			else if (maxXSize > 0 && newXSize > maxXSize) {
+				newX += newXSize - maxXSize;
+				newXSize = maxXSize;
+			}
+
 			// calc new time position and new duration
 			setPosition(m_timeline->msPerPixel() * newX);
 			setDuration(m_timeline->msPerPixel() * newXSize);

@@ -69,7 +69,7 @@ void TimeLineRuler::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 	}
 
 	painter->setPen(QPen());
-	painter->setBrush(m_colorBG);
+	painter->setBrush(QColor(m_colorBG));
 	painter->drawRect(0, 0, m_xSize, m_ySize);
 
 

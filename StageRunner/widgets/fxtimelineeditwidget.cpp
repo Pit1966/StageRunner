@@ -162,8 +162,16 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 				TimeLineBox *tli = addTimeLineBox(obj->posMs, obj->lenMs, obj->label, trackID);
 				ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 				extTLI->cloneItemDataFrom(obj);
-				// extTLI->m_fxID = obj->m_fxID;
-				// extTLI->m_linkedObjType = LINKED_OBJ_TYPE(obj->m_linkedObjType);
+				// auto correct color setting
+				if (extTLI->linkedObjType() == LINKED_FX_SCENE) {
+					extTLI->setBackgroundColor(QColor(0x923d0c));
+					extTLI->setBorderColor(QColor(0x923d0c));
+				}
+				else if (extTLI->linkedObjType() == LINKED_FX_SCRIPT) {
+					extTLI->setBackgroundColor(QColor(0x413f32));
+					extTLI->setBorderColor(QColor(0x413f32));
+				}
+
 				hasItems = true;
 			}
 		}
@@ -435,7 +443,7 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 	if (!m_timelineExecuter) {
 		m_timelineExecuter = m_fxCtrl->startFxTimeLine(m_curFxItem, m_timeline->cursorPos());
 
-		if (m_timelineExecuter->isRunning()) {
+		if (m_timelineExecuter && m_timelineExecuter->isRunning()) {
 			runButton->setText("Stop");
 		}
 	}

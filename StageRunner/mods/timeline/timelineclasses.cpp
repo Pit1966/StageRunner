@@ -55,4 +55,12 @@ void TimeLineTrack::setTrackDuration(int ms)
 	}
 }
 
+void TimeLineTrack::alignItemPositionsToTrack()
+{
+	for (TimeLineItem* item : qAsConst(m_itemList)) {
+		item->setYSize(m_ySize - yAlignSize);
+		item->setYPos(m_yPos + yAlignOffset);
+	}
+}
+
 }

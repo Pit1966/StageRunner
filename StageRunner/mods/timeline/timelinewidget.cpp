@@ -298,7 +298,8 @@ TimeLineBox *TimeLineWidget::addTimeLineBox(int posMs, int durationMs, const QSt
 		item->setDuration(durationMs);
 		item->setPosition(posMs);
 	}
-	item->setYPos(track->yPos());
+	item->setYSize(track->ySize() - track->yAlignSize);
+	item->setYPos(track->yPos() + track->yAlignOffset);
 	track->appendTimeLineItem(item);
 
 	// finaly add the item to the scene
@@ -346,6 +347,28 @@ int TimeLineWidget::timeLineSize(int trackID) const
 		return 0;
 
 	return m_tracks.at(trackID)->itemCount();
+}
+
+bool TimeLineWidget::setTrackHeight(int trackID, int h)
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track)
+		return false;
+
+	track->setYSize(h);
+	recalcTrackSizes();
+	updateScene();
+
+	return true;
+}
+
+int TimeLineWidget::trackHeight(int trackID)
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track)
+		return 0;
+
+	return track->ySize();
 }
 
 qreal TimeLineWidget::msPerPixel() const
@@ -611,6 +634,26 @@ TimeLineGfxScene *TimeLineWidget::createTimeLineScene(TimeLineWidget *timeline)
 	return new TimeLineGfxScene(timeline);
 }
 
+void TimeLineWidget::recalcTrackSizes(int from)
+{
+	int firstChangedTrack = 0;
+	for (int t = 1; t<m_tracks.size(); t++) {
+		int newy = m_tracks.at(t-1)->yEndPos();
+		if (m_tracks.at(t)->yPos() != newy) {
+			m_tracks.at(t)->setYPos(newy);
+			if (firstChangedTrack == 0)
+				firstChangedTrack = t-1;
+		}
+	}
+
+	if (from > 0)
+		firstChangedTrack = from;
+
+	for (int t=firstChangedTrack; t<m_tracks.size(); t++) {
+		m_tracks.at(t)->alignItemPositionsToTrack();
+	}
+}
+
 /**
  * @brief TimeLineWidget::adjustSceneRectToTimelineLength
  *
@@ -657,6 +700,14 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 
 		act = menu.addAction(tr("Delete track"));
 		act->setObjectName("delTrack");
+
+		if (trackHeight(clickedTrackID) < 70) {
+			act = menu.addAction(tr("Expand track height"));
+			act->setObjectName("expandTrack");
+		} else {
+			act = menu.addAction(tr("Shrink track height"));
+			act->setObjectName("shrinkTrack");
+		}
 	}
 	else if (clickedTrackID < 0) {
 		act = menu.addAction(tr("Add new timeline track"));
@@ -684,7 +735,12 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	else if (cmd == "newAudioEnvelope") {
 		addAudioEnvelopeTrack();
 	}
-
+	else if (cmd == "expandTrack") {
+		setTrackHeight(clickedTrackID, 80);
+	}
+	else if (cmd == "shrinkTrack") {
+		setTrackHeight(clickedTrackID, m_defaultTrackHeight);
+	}
 }
 
 void TimeLineWidget::onCursorMoved(int ms)

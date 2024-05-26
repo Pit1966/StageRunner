@@ -31,8 +31,9 @@ protected:
 
 	// user editable data
 	QString m_label;
-	QColor m_colorBG			= QColor(0x333333);
-	QColor m_colorBorder		= QColor(0xeeeeee);
+	uint m_colorBG				= 0x333333;
+	uint m_colorBorder			= 0x3333ff;
+	uint m_colorText			= 0xeeeeee;
 
 	// current item dimensions in pixels. Depends on the timeline scaling
 	qreal m_xSize				= 200.0;
@@ -40,7 +41,7 @@ protected:
 	bool m_isTimePosValid		= false;	///< this is true, if m_timePosMs and m_timeLenMs are valid.
 	bool m_isPixelPosValid		= true;		///< this is true, if pixel position information is correct
 	bool m_wasPainted			= false;	///< becomes true, after first paint event
-	bool m_isFirstInit			= false;
+	bool m_isFirstInitReady		= false;
 
 public:
 	TimeLineItem(TimeLineWidget *timeline, int trackId);
@@ -50,8 +51,9 @@ public:
 	const QString & label() const {return m_label;}
 	void setLabel(const QString &label);
 	void setBackgroundColor(const QColor &col);
+	void setBorderColor(const QColor &col);
 
-	bool isFirstInitReady() const {return m_isFirstInit;}
+	bool isFirstInitReady() const {return m_isFirstInitReady;}
 
 	int position() const {return m_positionMs;}
 	void setPosition(int ms);
@@ -60,6 +62,7 @@ public:
 
 	qreal yPos() const;
 	void setYPos(qreal yPixelPos);
+	void setYSize(qreal ySize);
 
 	virtual void recalcPixelPos()	= 0;
 	virtual void setTrackDuration(int ms) {Q_UNUSED(ms);}

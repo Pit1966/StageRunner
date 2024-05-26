@@ -38,6 +38,7 @@ public:
 		m_fadeOutDurationMs = o->m_fadeOutDurationMs;
 	}
 	FxItem * linkedFxItem() const;
+	LINKED_OBJ_TYPE linkedObjType() const {return m_linkedObjType;}
 };
 
 #endif // TIMELINEITEMDATA_H

@@ -335,6 +335,14 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		act = menu.addAction(tr("Add node"));
 		act->setObjectName("addNode");
 
+		if (m_myTrack->ySize() < 70) {
+			act = menu.addAction(tr("Expand track height"));
+			act->setObjectName("expandTrack");
+		} else {
+			act = menu.addAction(tr("Shrink track height"));
+			act->setObjectName("shrinkTrack");
+		}
+
 		menu.addAction(tr("------------"));
 
 		act = menu.addAction(tr("Delete track"));
@@ -364,6 +372,12 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 			update();
 		}
 	}
+	else if (cmd == "expandTrack") {
+		m_timeline->setTrackHeight(m_trackId, 80);
+	}
+	else if (cmd == "shrinkTrack") {
+		m_timeline->setTrackHeight(m_trackId, m_timeline->defaultTrackHeight());
+	}
 
 	m_nodeClicked = false;
 	m_curHoveredNode = -1;
@@ -388,7 +402,7 @@ void TimeLineCurve::setTrackDuration(int ms)
 
 QRectF TimeLineCurve::boundingRect() const
 {
-	QRectF br(0, 0, m_xSize, m_ySize);
+	QRectF br(0, 0, m_xSize, m_ySize + 2);
 	return br;
 }
 

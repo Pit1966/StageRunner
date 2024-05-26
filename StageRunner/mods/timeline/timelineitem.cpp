@@ -20,7 +20,12 @@ void TimeLineItem::setLabel(const QString &label)
 
 void TimeLineItem::setBackgroundColor(const QColor &col)
 {
-	m_colorBG = col;
+	m_colorBG = col.rgba();
+}
+
+void TimeLineItem::setBorderColor(const QColor &col)
+{
+	m_colorBorder = col.rgba();
 }
 
 void TimeLineItem::setPosition(int ms)
@@ -53,6 +58,14 @@ qreal TimeLineItem::yPos() const
 void TimeLineItem::setYPos(qreal yPixelPos)
 {
 	setY(yPixelPos);
+}
+
+void TimeLineItem::setYSize(qreal ySize)
+{
+	if (m_ySize != ySize) {
+		m_ySize = ySize;
+		update();
+	}
 }
 
 

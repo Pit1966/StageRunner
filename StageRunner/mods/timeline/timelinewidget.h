@@ -104,6 +104,7 @@ public:
 	bool isInitialized() const {return m_scene != nullptr;}
 	void clear();
 
+	int defaultTrackHeight() const {return m_defaultTrackHeight;}
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
 	TimeLineTrack *findTrackWithId(int trackId);
@@ -117,6 +118,9 @@ public:
 	int timeLineSize(int trackID = 1) const;
 	QGraphicsView *gfxView() const {return m_view;}
 	TimeLineGfxView *timeLineGfxView() const {return m_view;}
+
+	bool setTrackHeight(int trackID, int h);
+	int trackHeight(int trackID);
 
 	qreal msPerPixel() const;
 	qreal pixelToMs(qreal x) const;
@@ -145,6 +149,7 @@ protected:
 	virtual TimeLineBox *createNewTimeLineBox(TimeLineWidget *timeline, int trackId = 1);
 	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);
 
+	void recalcTrackSizes(int from = 0);
 	void adjustSceneRectToTimelineLength();
 	void recalcPixelPosInAllItems();
 

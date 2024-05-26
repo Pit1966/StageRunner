@@ -177,6 +177,7 @@ TimeLineExecuter::~TimeLineExecuter()
 			emit wantedDeleteFxScene(fx);
 		} else {
 			fx->setDeleteOnFinished();
+			fx->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, 500);
 		}
 	}
 	qDebug() << "destroyed timeline executer";
