@@ -61,26 +61,22 @@ public:
 	int slotNumber;
 
 private:
-	AudioControl *audio_ctrl;
+	AudioControl *m_audioCtrlUnit;
+	AudioPlayer *m_audioPlayer;				///< base class interface for audio implementation
 
-//	AudioIODevice *audio_io;
-//	QAudioOutput *audio_output;
+	AudioStatus m_runStatus;
+	FxAudioItem *m_currentFx;				///< The current/last Fx loaded into this audio slot
+	Executer *m_currentExecuter;			///< A Pointer to an Executor if the sound was started by one
 
-	AudioPlayer *audio_player;				///< base class interface for audio implementation
-
-	AudioStatus run_status;
-	FxAudioItem *current_fx;				///< The current/last Fx loaded into this audio slot
-	Executer *current_executer;				///< A Pointer to an Executor if the sound was started by one
-
-	QTimer volset_timer;					///< help timer. Used to define an interval for the log output, when volume is changed manualy
-	QString volset_text;
-	QElapsedTimer run_time;
-	QTimeLine fade_timeline;
-	AudioFadeMode fade_mode;
-	int fade_initial_vol;							///< The Volume the fadeout/in starts with
-	int fade_target_vol;
-	int current_volume;								///< Volume the audio slot is set to
-	int master_volume;								///< This is Master Volume
+	QTimer m_volumeSetHelpTimer;			///< help timer. Used to define an interval for the log output, when volume is changed manualy
+	QString m_volumeSetMsg;
+	QElapsedTimer m_audioRunTime;
+	QTimeLine m_fadeHelpTimeLine;
+	AudioFadeMode m_fadeModeAudio;
+	int m_fadeVolumeInitial;				///< The Volume the fadeout/in starts with
+	int m_fadeVolumeTarget;
+	int m_currentVolume;					///< Volume the audio slot is set to
+	int m_masterVolume;						///< This is Master Volume
 	bool m_isFFTEnabled;
 
 	DMXLockingMode m_dmxVolLockState;		///< this is a helper for audio fx started by dmx signal. It tracks if dmx input is synchronized with audio volume
@@ -104,7 +100,7 @@ public:
 	void setVolumeFromTimeLine(int vol);
 	bool setVolumeFromDMX(int dmxvol);
 	void setDmxVolLockState(DMXLockingMode state) {m_dmxVolLockState = state;}
-	inline int volume() {return current_volume;}
+	inline int volume() {return m_currentVolume;}
 	void setMasterVolume(int vol);
 	FxAudioItem *currentFxAudio();
 	Executer * currentExecuter();
@@ -113,16 +109,16 @@ public:
 	bool seekPosPerMille(int perMille);
 	qint64 currentPlayPosMs() const;
 	void storeCurrentSeekPos();
-	inline bool isActive() const {return run_status == AUDIO_RUNNING || run_status == AUDIO_PAUSED;}
-	inline bool isPaused() const {return run_status == AUDIO_PAUSED;}
-	inline AudioStatus status() {return run_status;}
+	inline bool isActive() const {return m_runStatus == AUDIO_RUNNING || m_runStatus == AUDIO_PAUSED;}
+	inline bool isPaused() const {return m_runStatus == AUDIO_PAUSED;}
+	inline AudioStatus status() {return m_runStatus;}
 	int audioOutputBufferSize() const;
 	void setFFTEnabled(bool state);
 	inline bool isFFTEnabled() const {return m_isFFTEnabled;}
 	QString currentFxName() const;
 
 	inline AudioErrorType lastAudioError() const {return m_lastAudioError;}
-	AudioPlayer * audioPlayer() const {return audio_player;}
+	AudioPlayer * audioPlayer() const {return m_audioPlayer;}
 
 	void sdlEmitProgress();
 	bool selectFxClipVideo();

@@ -69,6 +69,7 @@ void UserSettings::init()
 //				   ,QObject::tr("Audio buffer size for audio playback in the audio slots"));
 	addExistingVar(pDefaultAudioFadeoutTimeMs,"DefaultAudioFadeoutTimeMs",0,10000,5001);
 	addExistingVar(pProhibitAudioDoubleStart,"ProhibitAudioDoubleStart",true);
+	addExistingVar(pLogarithmicVolDials,"LogarithmicVolDials",true);
 	addExistingVar(pAudioAllowReactivateTime,"AudioAllowReactivationTime",0,10000,800);
 	addExistingVar(debug,"DebugLevel");
 	addExistingVar(pNoInterfaceDmxFeedback,"EnableNoInterfaceDmxFeedback");

@@ -27,6 +27,7 @@
 #include "system/log.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/ioplugincentral.h"
+#include "appcontrol/project.h"
 #include "plugins/interfaces/qlcioplugin.h"
 #include "appcontrol/usersettings.h"
 #include "appcontrol/pluginmapping.h"
@@ -123,6 +124,8 @@ void SetupWidget::copy_settings_to_gui()
 
 	noInterfaceFeedbackCheck->setChecked(set->pNoInterfaceDmxFeedback);
 	prohibitAudioDoubleStartCheck->setChecked(set->pProhibitAudioDoubleStart);
+	useLogVolumeDefaultCheck->setChecked(set->pLogarithmicVolDials);
+	useLogVolumeProjectCheck->setChecked(myapp->project->pLogarithmicVol);
 	reactivateAudioTimeSpin->setValue(set->pAudioAllowReactivateTime);
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
@@ -178,6 +181,8 @@ void SetupWidget::copy_gui_to_settings()
 
 	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
 	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();
+	set->pLogarithmicVolDials = useLogVolumeDefaultCheck->isChecked();
+	myapp->project->pLogarithmicVol = useLogVolumeProjectCheck->isChecked();
 	set->pAudioAllowReactivateTime = reactivateAudioTimeSpin->value();
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {

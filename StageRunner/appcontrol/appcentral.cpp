@@ -521,6 +521,21 @@ AudioOutputType AppCentral::usedAudioOutputType() const
 	}
 }
 
+/**
+ * @brief Check wether logarithmic volume scale is actived for all sound devices
+ * @return true, if logarithmic conversion is performed
+ *
+ * If a project is loaded, the information is take from the project audio settings.
+ * If there is no project, it will be taken from general audio settings
+ */
+bool AppCentral::isLogarithmicVolume() const
+{
+	if (project->isValid())
+		return project->pLogarithmicVol;
+
+	return userSettings->pLogarithmicVolDials;
+}
+
 void AppCentral::closeVideoWidget()
 {
 	unitAudio->closeVideoWidget();

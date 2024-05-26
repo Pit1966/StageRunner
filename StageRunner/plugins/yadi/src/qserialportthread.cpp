@@ -111,7 +111,7 @@ bool QSerialPortThread::sendCommand(QSerialPortThread::CMD cmd)
 	return true;
 }
 
-QByteArray QSerialPortThread::read(qint64 size)
+QByteArray QSerialPortThread::read(qint64 /*size*/)
 {
 	return QByteArray();
 }

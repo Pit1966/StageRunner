@@ -41,6 +41,7 @@ public:
 	pint32 pAudioBufferSize;
 	pint32 pDefaultAudioFadeoutTimeMs;
 	pbool pProhibitAudioDoubleStart;
+	pbool pLogarithmicVolDials;
 	pint32 pAudioAllowReactivateTime;
 	pbool pNoInterfaceDmxFeedback;
 	qint32 mapAudioToDmxUniv[MAX_AUDIO_SLOTS];

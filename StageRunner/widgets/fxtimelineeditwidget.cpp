@@ -61,7 +61,7 @@ void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 
 void FxTimeLineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 {
-	qDebug() << Q_FUNC_INFO;
+	// qDebug() << Q_FUNC_INFO;
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 
@@ -72,12 +72,12 @@ void FxTimeLineScene::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 	}
 }
 
-void FxTimeLineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
+void FxTimeLineScene::dragLeaveEvent(QGraphicsSceneDragDropEvent */*event*/)
 {
-	qDebug() << Q_FUNC_INFO;
+	// qDebug() << Q_FUNC_INFO;
 }
 
-void FxTimeLineScene::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
+void FxTimeLineScene::dragMoveEvent(QGraphicsSceneDragDropEvent */*event*/)
 {
 
 }

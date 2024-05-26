@@ -462,6 +462,8 @@ bool SerialWrapper::isOpen()
 bool SerialWrapper::writeCommand(const QByteArray cmd, QByteArray *serAnswer)
 {
 #if defined(USE_QTSERIAL)
+	Q_UNUSED(cmd)
+	Q_UNUSED(serAnswer)
 
 #elif defined(Q_OS_WIN32)
 

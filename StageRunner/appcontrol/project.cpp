@@ -22,12 +22,13 @@
 //=======================================================================
 
 #include "project.h"
-#include "config.h"
-#include "log.h"
 #include "appcentral.h"
-#include "fxitemtool.h"
 #include "audiocontrol.h"
+#include "usersettings.h"
+#include "config.h"
+#include "../system/log.h"
 
+#include "../fx/fxitemtool.h"
 #include "../fx/fxlist.h"
 #include "../fx/fxitem.h"
 #include "../fx/fxsceneitem.h"
@@ -112,17 +113,24 @@ bool Project::cloneProjectFrom(const Project &o, bool keepAllFxIitemIDs)
 	return ok;
 }
 
+/**
+ * @brief Project::clear
+ *
+ * @attention It is not allowed to call AppCentral::ref() from clear() !!
+ */
 void Project::clear()
 {
 	loadErrorFileNotExisting = false;
 	loadErrorLineNumber = 0;
 	loadErrorLineString.clear();
+	m_isValid = false;
 
 	pProjectName = "Default Project";
-	pProjectId = QDateTime::currentDateTime().toTime_t();
+	pProjectId = QDateTime::currentDateTimeUtc().toLocalTime().toTime_t();
 	pProjectFormat = 0;
 	pProjectBaseDir = QString();
 	pComment = QString();
+	pLogarithmicVol = true;
 
 	if (fxList->size()) {
 		fxList->clear();
@@ -152,6 +160,7 @@ bool Project::saveToFile(const QString &path)
 		setModified(false);
 		generateProjectNameFromPath();
 		emit projectLoadedOrSaved(modpath, ok);
+		m_isValid = true;
 	}
 
 	return ok;
@@ -160,6 +169,9 @@ bool Project::saveToFile(const QString &path)
 bool Project::loadFromFile(const QString &path)
 {
 	LOGTEXT(tr("<font color=green>Load project</font> '%1'").arg(path));
+
+	// not used in old project versions. So set it to false manually at default.
+	pLogarithmicVol = false;
 
 	int line_number = 0;
 	QString line_copy;
@@ -252,6 +264,7 @@ bool Project::loadFromFile(const QString &path)
 
 		setModified(result.setModified);
 		emit projectLoadedOrSaved(path, ok);
+		m_isValid = true;
 	}
 
 	return ok;
@@ -890,6 +903,7 @@ void Project::init()
 	addExistingVar(pComment,"Comment");
 	addExistingVar(pProjectBaseDir,"ProjectBaseDir");
 	addExistingVar(pMasterVolume,"MasterVolume");
+	addExistingVar(pLogarithmicVol,"LogarithmicVolScale");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
 	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
 	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");

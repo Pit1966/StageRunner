@@ -1275,7 +1275,7 @@ void VarSet::add_to_registry(VarSet::RegVarItem* reg)
 {
 	var_registry->lockAppend(reg);
 	is_registered_f = true;
-	qDebug() << "register" << "type:" << reg->type << myclassname << reg->coderComment << this  << var_registry->size();
+	qDebug() << "register type:" << reg->type << myclassname << reg->coderComment << this  << var_registry->size();
 }
 
 /**

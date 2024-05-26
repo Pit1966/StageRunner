@@ -42,7 +42,7 @@ QRectF TimeLineBox::boundingRect() const
 	return QRectF(0, 0, m_xSize + m_penWidthBorder, m_ySize + m_penWidthBorder);
 }
 
-void TimeLineBox::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void TimeLineBox::paint(QPainter *painter, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/)
 {
 	if (m_timeline->msPerPixel() <= 0)
 		return;

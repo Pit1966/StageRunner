@@ -53,16 +53,16 @@
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audioEngineType, const QString &devName)
 	: QObject()
 	, slotNumber(pSlotNumber)
-	, audio_ctrl(parent)
-	, audio_player(nullptr)
-	, run_status(AUDIO_IDLE)
-	, current_fx(nullptr)
-	, current_executer(nullptr)
-	, fade_mode(AUDIO_FADE_IDLE)
-	, fade_initial_vol(0)
-	, fade_target_vol(0)
-	, current_volume(0)
-	, master_volume(MAX_VOLUME)
+	, m_audioCtrlUnit(parent)
+	, m_audioPlayer(nullptr)
+	, m_runStatus(AUDIO_IDLE)
+	, m_currentFx(nullptr)
+	, m_currentExecuter(nullptr)
+	, m_fadeModeAudio(AUDIO_FADE_IDLE)
+	, m_fadeVolumeInitial(0)
+	, m_fadeVolumeTarget(0)
+	, m_currentVolume(0)
+	, m_masterVolume(MAX_VOLUME)
 	, m_isFFTEnabled(false)
 	, m_dmxVolLockState(DMX_AUDIO_NOT_LOCKED)
 	, m_lastAudioError(AUDIO_ERR_NONE)
@@ -70,9 +70,9 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 //	qDebug() << "init AudioSlot" << pSlotNumber;
 
 	// Vol Set Logging
-	volset_timer.setSingleShot(true);
-	volset_timer.setInterval(500);
-	connect(&volset_timer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
+	m_volumeSetHelpTimer.setSingleShot(true);
+	m_volumeSetHelpTimer.setInterval(500);
+	connect(&m_volumeSetHelpTimer,SIGNAL(timeout()),this,SLOT(on_volset_timer_finished()));
 
 
 	if (audioEngineType == OUT_SDL2) {
@@ -83,21 +83,21 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 #endif
 	}
 	else if (audioEngineType == OUT_DEVICE) {
-		audio_player = new IODeviceAudioBackend(*this, devName);
+		m_audioPlayer = new IODeviceAudioBackend(*this, devName);
 	}
 	else if (audioEngineType == OUT_MEDIAPLAYER) {
-		audio_player = new MediaPlayerAudioBackend(*this);
-		audio_player->setVolume(MAX_VOLUME,MAX_VOLUME);
+		m_audioPlayer = new MediaPlayerAudioBackend(*this);
+		m_audioPlayer->setVolume(MAX_VOLUME,MAX_VOLUME);
 	}
 	else {
 		// no audio -> create a mediaplayer object
-		audio_player = new MediaPlayerAudioBackend(*this);
-		audio_player->setVolume(MAX_VOLUME,MAX_VOLUME);
+		m_audioPlayer = new MediaPlayerAudioBackend(*this);
+		m_audioPlayer->setVolume(MAX_VOLUME,MAX_VOLUME);
 	}
 
-	if (audio_player->audioError()) {
-		m_lastAudioError = audio_player->audioError();
-		m_lastErrorText = audio_player->audioErrorString();
+	if (m_audioPlayer->audioError()) {
+		m_lastAudioError = m_audioPlayer->audioError();
+		m_lastErrorText = m_audioPlayer->audioErrorString();
 	}
 
 
@@ -105,30 +105,30 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 	}
 
 	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
-		audio_player->setAudioBufferSize(parent->myApp.userSettings->pAudioBufferSize);
+		m_audioPlayer->setAudioBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
 
 	//Fadeout Timeline
-	connect(&fade_timeline,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_frame_changed(qreal)));
-	connect(&fade_timeline,SIGNAL(finished()),this,SLOT(on_fade_finished()));
+	connect(&m_fadeHelpTimeLine,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_frame_changed(qreal)));
+	connect(&m_fadeHelpTimeLine,SIGNAL(finished()),this,SLOT(on_fade_finished()));
 
 	// General audio interface connects
-	if (audio_player) {
-		connect(audio_player,SIGNAL(statusChanged(AUDIO::AudioStatus)),this,SLOT(onPlayerStatusChanged(AUDIO::AudioStatus)));
-		connect(audio_player,SIGNAL(mediaDurationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
-		connect(audio_player,SIGNAL(vuLevelChanged(qreal,qreal)),this,SLOT(on_vulevel_changed(qreal,qreal)),Qt::QueuedConnection);
-		connect(audio_player,SIGNAL(frqSpectrumChanged(FrqSpectrum*)),this,SLOT(on_frqSpectrum_changed(FrqSpectrum*)));
+	if (m_audioPlayer) {
+		connect(m_audioPlayer,SIGNAL(statusChanged(AUDIO::AudioStatus)),this,SLOT(onPlayerStatusChanged(AUDIO::AudioStatus)));
+		connect(m_audioPlayer,SIGNAL(mediaDurationChanged(qint64)),this,SLOT(setAudioDurationMs(qint64)));
+		connect(m_audioPlayer,SIGNAL(vuLevelChanged(qreal,qreal)),this,SLOT(on_vulevel_changed(qreal,qreal)),Qt::QueuedConnection);
+		connect(m_audioPlayer,SIGNAL(frqSpectrumChanged(FrqSpectrum*)),this,SLOT(on_frqSpectrum_changed(FrqSpectrum*)));
 	}
 }
 
 AudioSlot::~AudioSlot()
 {
-	if (run_status != AUDIO_IDLE) {
-		if (run_status < VIDEO_INIT)
+	if (m_runStatus != AUDIO_IDLE) {
+		if (m_runStatus < VIDEO_INIT)
 			stopFxAudio();
 	}
 
-	delete audio_player;
+	delete m_audioPlayer;
 }
 
 /**
@@ -140,8 +140,8 @@ AudioSlot::~AudioSlot()
  */
 bool AudioSlot::select()
 {
-	if (run_status <= AUDIO_IDLE) {
-		run_status = AUDIO_INIT;
+	if (m_runStatus <= AUDIO_IDLE) {
+		m_runStatus = AUDIO_INIT;
 		return true;
 	}
 	return false;
@@ -149,7 +149,7 @@ bool AudioSlot::select()
 
 void AudioSlot::unselect()
 {
-	run_status = AUDIO_IDLE;
+	m_runStatus = AUDIO_IDLE;
 }
 
 bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
@@ -168,15 +168,15 @@ bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
 
 bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol, int fadeInMs)
 {
-	if (!audio_player) {
-		run_status = AUDIO_ERROR;
+	if (!m_audioPlayer) {
+		m_runStatus = AUDIO_ERROR;
 		return -1;
 	}
 
-	current_fx = fxa;
-	current_executer = exec;
-	run_status = AUDIO_BUFFERING;
-	run_time.start();
+	m_currentFx = fxa;
+	m_currentExecuter = exec;
+	m_runStatus = AUDIO_BUFFERING;
+	m_audioRunTime.start();
 
 	//
 	qint64 target_pos_ms = startPosMs;
@@ -196,7 +196,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Filename of audio file
-	if (!audio_player->setSourceFilename(fxa->filePath(), fxa->name())) {
+	if (!m_audioPlayer->setSourceFilename(fxa->filePath(), fxa->name())) {
 		QString msg = tr("FX '%1': Could not start FX audio with file '%2'")
 				.arg(fxa->fxNamePath(), fxa->filePath());
 		POPUPERRORMSG(__func__, msg);
@@ -204,25 +204,25 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Audio Buffer Size
-	if (audio_ctrl->myApp.userSettings->pAudioBufferSize  >= 16384) {
-		audio_player->setAudioBufferSize(audio_ctrl->myApp.userSettings->pAudioBufferSize);
-		LOGTEXT(tr("Set audio buffer size to: %1").arg(audio_ctrl->myApp.userSettings->pAudioBufferSize));
+	if (m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize  >= 16384) {
+		m_audioPlayer->setAudioBufferSize(m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize);
+		LOGTEXT(tr("Set audio buffer size to: %1").arg(m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize));
 	}
 
 	if (startPosMs < 0) {
 		// We get the start play position in ms from the last played seek position in the FxAudio instance
 		if (fxa->seekPosition() == 0) {
 			target_pos_ms = 0;
-			audio_player->seekPlayPosMs(0);
+			m_audioPlayer->seekPlayPosMs(0);
 		}
 		else if (fxa->seekPosition() > 0) {
 			target_pos_ms = fxa->seekPosition();
-			audio_player->seekPlayPosMs(fxa->seekPosition());
+			m_audioPlayer->seekPlayPosMs(fxa->seekPosition());
 		}
 		// Reset the seek position to zero
 		fxa->setSeekPosition(0);
 	} else {
-		audio_player->seekPlayPosMs(startPosMs);
+		m_audioPlayer->seekPlayPosMs(startPosMs);
 	}
 
 	// set initial Volume
@@ -241,12 +241,12 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Start playing
-	audio_player->setStartDelay(fxa->preDelay());
-	audio_player->start(fxa->loopTimes);
+	m_audioPlayer->setStartDelay(fxa->preDelay());
+	m_audioPlayer->start(fxa->loopTimes);
 
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fxa,slotNumber);
-	msg.volume = current_volume;
+	msg.volume = m_currentVolume;
 	msg.executer = exec;
 	emit audioCtrlMsgEmitted(msg);
 
@@ -271,26 +271,26 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	/// @todo remove this wait loop. Do it with timer or callback ...
 	bool ok = false;
-	while (run_time.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
+	while (m_audioRunTime.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
-		if (run_status == AUDIO_RUNNING) {
-			current_fx->startInProgress = false;
-			current_fx->startSlot = -1;
-			qreal vol = audio_player->volume();
+		if (m_runStatus == AUDIO_RUNNING) {
+			m_currentFx->startInProgress = false;
+			m_currentFx->startSlot = -1;
+			qreal vol = m_audioPlayer->volume();
 			/*if (debug > 1) */DEBUGTEXT("FxAudio started: '%s'' (%dms delayed, vol: %f)"
-									 ,fxa->name().toLocal8Bit().data(),run_time.elapsed(),vol);
+									 ,fxa->name().toLocal8Bit().data(),m_audioRunTime.elapsed(),vol);
 			ok = true;
-			run_time.start();
-			current_fx = fxa;
+			m_audioRunTime.start();
+			m_currentFx = fxa;
 		}
-		else if (run_status == AUDIO_ERROR) {
+		else if (m_runStatus == AUDIO_ERROR) {
 			DEBUGERROR("FxAudio Error while starting: '%s'",fxa->name().toLocal8Bit().data());
-			current_fx = nullptr;
+			m_currentFx = nullptr;
 			break;
 		}
-		else if (run_status == AUDIO_PAUSED) {
+		else if (m_runStatus == AUDIO_PAUSED) {
 			ok = true;
-			current_fx = fxa;
+			m_currentFx = fxa;
 			qDebug() << Q_FUNC_INFO << "Audio paused on start";
 		}
 	}
@@ -303,34 +303,34 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 bool AudioSlot::stopFxAudio()
 {
-	if (fade_timeline.state() == QTimeLine::Running) {
-		fade_timeline.stop();
+	if (m_fadeHelpTimeLine.state() == QTimeLine::Running) {
+		m_fadeHelpTimeLine.stop();
 	}
 
-	if (current_fx)
-		current_fx->startInProgress = false;
+	if (m_currentFx)
+		m_currentFx->startInProgress = false;
 
 	emit vuLevelChanged(slotNumber,0.0,0.0);
 
-	if (run_status >= VIDEO_RUNNING) {
+	if (m_runStatus >= VIDEO_RUNNING) {
 		// do not stop video here. Uncomment next 2 lines, if you want to stop video too
 		// AudioCtrlMsg msg(slotNumber, CMD_AUDIO_STATUS_CHANGED, AUDIO_IDLE);
 		// emit audioCtrlMsgEmitted(msg);
 		return true;
 	}
-	else if (run_status > AUDIO_IDLE) {
+	else if (m_runStatus > AUDIO_IDLE) {
 		LOGTEXT(tr("Stop Audio playing in slot %1").arg(slotNumber+1));
-		audio_player->stop();
+		m_audioPlayer->stop();
 		return true;
 	}
 	else {
-		AudioStatus s = audio_player->state();
+		AudioStatus s = m_audioPlayer->state();
 		if (s == AUDIO_PAUSED || s == AUDIO_NO_STATE) {
 			return true;
 		}
 		else if (s != AUDIO_IDLE) {
 			LOGERROR(tr("Stop Audio playing in slot %1: But audio channel is idle").arg(slotNumber+1));
-			audio_player->stop();
+			m_audioPlayer->stop();
 		}
 		return false;
 	}
@@ -339,16 +339,16 @@ bool AudioSlot::stopFxAudio()
 bool AudioSlot::pauseFxAudio(bool state)
 {
 	if (state) {
-		if (run_status != AUDIO_RUNNING)
+		if (m_runStatus != AUDIO_RUNNING)
 			return false;
 
-		audio_player->pause(true);
-		run_status = AUDIO_PAUSED;
+		m_audioPlayer->pause(true);
+		m_runStatus = AUDIO_PAUSED;
 	} else {
-		if (run_status != AUDIO_PAUSED)
+		if (m_runStatus != AUDIO_PAUSED)
 			return false;
 
-		audio_player->pause(false);
+		m_audioPlayer->pause(false);
 	}
 
 	return true;
@@ -361,23 +361,23 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 		return false;
 	}
 
-	if (audio_player->state() != AUDIO_RUNNING)
+	if (m_audioPlayer->state() != AUDIO_RUNNING)
 		return false;
 
-	if (!FxItem::exists(current_fx))
+	if (!FxItem::exists(m_currentFx))
 		return false;
 
-	fade_mode = AUDIO_FADE_OUT;
+	m_fadeModeAudio = AUDIO_FADE_OUT;
 
 	// Set Fadeout time
-	fade_initial_vol = current_volume;
-	fade_target_vol = targetVolume;
-	fade_timeline.setDuration(time_ms);
+	m_fadeVolumeInitial = m_currentVolume;
+	m_fadeVolumeTarget = targetVolume;
+	m_fadeHelpTimeLine.setDuration(time_ms);
 
 	// and start the time line ticker
-	fade_timeline.start();
+	m_fadeHelpTimeLine.start();
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
-			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
+			.arg(slotNumber+1).arg(m_currentFx->name()).arg(time_ms));
 
 	return true;
 }
@@ -399,19 +399,19 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 	// Fadeout only possible if audio is running
 	// if (audio_output->state() != QAudio::ActiveState) return false;
 
-	if (!FxItem::exists(current_fx)) return false;
+	if (!FxItem::exists(m_currentFx)) return false;
 
-	fade_mode = AUDIO_FADE_IN;
+	m_fadeModeAudio = AUDIO_FADE_IN;
 
 	// Set Fadein time
-	fade_initial_vol = current_volume;
-	fade_target_vol = targetVolume;
-	fade_timeline.setDuration(time_ms);
+	m_fadeVolumeInitial = m_currentVolume;
+	m_fadeVolumeTarget = targetVolume;
+	m_fadeHelpTimeLine.setDuration(time_ms);
 
 	// and start the time line ticker
-	fade_timeline.start();
+	m_fadeHelpTimeLine.start();
 	LOGTEXT(tr("Fade in for slot %1: '%2' started with duration %3ms")
-			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
+			.arg(slotNumber+1).arg(m_currentFx->name()).arg(time_ms));
 
 	return true;
 }
@@ -434,14 +434,18 @@ void AudioSlot::setVolume(int vol)
  */
 void AudioSlot::setVolumeFromTimeLine(int vol)
 {
-	qreal linearVolume = QAudio::convertVolume(vol / qreal(MAX_VOLUME),
-											   QAudio::LogarithmicVolumeScale,
-											   QAudio::LinearVolumeScale);
-
 	m_dmxVolLockState = DMX_AUDIO_NOT_LOCKED;
-	_setVolume(qRound(linearVolume * MAX_VOLUME));
+	if (AppCentral::ref().isLogarithmicVolume()) {
+		_setVolume(vol);
+	} else {
+		qreal linearVolume = QAudio::convertVolume(vol / qreal(MAX_VOLUME),
+												   QAudio::LogarithmicVolumeScale,
+												   QAudio::LinearVolumeScale);
+		_setVolume(qRound(linearVolume * MAX_VOLUME));
+	}
 
-	AudioCtrlMsg msg(slotNumber, CMD_STATUS_REPORT, run_status, current_executer);
+
+	AudioCtrlMsg msg(slotNumber, CMD_STATUS_REPORT, m_runStatus, m_currentExecuter);
 	msg.volume = int(vol);
 	emit audioCtrlMsgEmitted(msg);
 }
@@ -456,27 +460,27 @@ bool AudioSlot::setVolumeFromDMX(int dmxvol)
 		break;
 
 	case DMX_AUDIO_INC_SEARCH:
-		if (dmxvol >= current_volume) {
+		if (dmxvol >= m_currentVolume) {
 			m_dmxVolLockState = DMX_AUDIO_LOCKED;
 			_setVolume(dmxvol);
 		}
 		break;
 
 	case DMX_AUDIO_DEC_SEARCH:
-		if (dmxvol <= current_volume) {
+		if (dmxvol <= m_currentVolume) {
 			m_dmxVolLockState = DMX_AUDIO_LOCKED;
 			_setVolume(dmxvol);
 		}
 		break;
 
 	case DMX_AUDIO_NOT_LOCKED:
-		if (qAbs(dmxvol - current_volume) < 2) {
+		if (qAbs(dmxvol - m_currentVolume) < 2) {
 			m_dmxVolLockState = DMX_AUDIO_LOCKED;
 		}
-		else if (dmxvol < current_volume) {
+		else if (dmxvol < m_currentVolume) {
 			m_dmxVolLockState = DMX_AUDIO_INC_SEARCH;
 		}
-		else if (dmxvol > current_volume) {
+		else if (dmxvol > m_currentVolume) {
 			m_dmxVolLockState = DMX_AUDIO_DEC_SEARCH;
 		}
 		break;
@@ -492,24 +496,24 @@ bool AudioSlot::setVolumeFromDMX(int dmxvol)
 
 void AudioSlot::setMasterVolume(int vol)
 {
-	master_volume = vol;
-	if (run_status > AUDIO_IDLE && run_status < VIDEO_INIT) {
-		setVolume(current_volume);
+	m_masterVolume = vol;
+	if (m_runStatus > AUDIO_IDLE && m_runStatus < VIDEO_INIT) {
+		setVolume(m_currentVolume);
 	}
 }
 
 FxAudioItem *AudioSlot::currentFxAudio()
 {
-	if (!FxItem::exists(current_fx)) {
+	if (!FxItem::exists(m_currentFx)) {
 		return nullptr;
 	}
-	return current_fx;
+	return m_currentFx;
 }
 
 Executer *AudioSlot::currentExecuter()
 {
-	if (current_fx) {
-		return current_executer;
+	if (m_currentFx) {
+		return m_currentExecuter;
 	} else {
 		return nullptr;
 	}
@@ -521,38 +525,38 @@ Executer *AudioSlot::currentExecuter()
  */
 int AudioSlot::currentRunTime() const
 {
-	if (run_status <= AUDIO_IDLE || !current_fx || !FxItem::exists(current_fx)) {
+	if (m_runStatus <= AUDIO_IDLE || !m_currentFx || !FxItem::exists(m_currentFx)) {
 		return -1;
 	}
-	return run_time.elapsed();
+	return m_audioRunTime.elapsed();
 }
 
 void AudioSlot::emit_audio_play_progress()
 {
-	if (!FxItem::exists(current_fx)) return;
+	if (!FxItem::exists(m_currentFx)) return;
 
-	if (!current_fx->audioDuration || run_status != AUDIO_RUNNING) return;
+	if (!m_currentFx->audioDuration || m_runStatus != AUDIO_RUNNING) return;
 
-	qint64 soundlen = current_fx->audioDuration;
+	qint64 soundlen = m_currentFx->audioDuration;
 
 	int loop;
 	qint64 per_mille;
 	qint64 time_ms;
 
-	loop = audio_player->currentLoop();
-	time_ms = audio_player->currentPlayPosMs();
+	loop = m_audioPlayer->currentLoop();
+	time_ms = m_audioPlayer->currentPlayPosMs();
 	per_mille = time_ms * 1000 / soundlen;
 
-	emit audioProgressChanged(slotNumber, current_fx, int(per_mille));
+	emit audioProgressChanged(slotNumber, m_currentFx, int(per_mille));
 
-	AudioCtrlMsg msg(current_fx,slotNumber);
-	msg.currentAudioStatus = run_status;
+	AudioCtrlMsg msg(m_currentFx,slotNumber);
+	msg.currentAudioStatus = m_runStatus;
 	msg.progress = int(per_mille);
 	msg.progressTime = int(time_ms);
 	msg.loop = loop;
-	msg.executer = current_executer;
-	if (current_fx->loopTimes > 1) {
-		msg.maxloop = current_fx->loopTimes;
+	msg.executer = m_currentExecuter;
+	if (m_currentFx->loopTimes > 1) {
+		msg.maxloop = m_currentFx->loopTimes;
 	}
 	emit audioCtrlMsgEmitted(msg);
 }
@@ -560,34 +564,34 @@ void AudioSlot::emit_audio_play_progress()
 
 void AudioSlot::onPlayerStatusChanged(AudioStatus status)
 {
-	AudioStatus cur_status = run_status;
+	AudioStatus cur_status = m_runStatus;
 	if (status != cur_status) {
 		// qDebug() << "onPlayerStatusChanged" << status << cur_status << audio_player->currentAudioCmd();
 
 		switch (status) {
 		case AUDIO_MEDIA_STALLED:
 			DEBUGERROR("Audio has stalled on channel %1. Buffer underrun?",slotNumber+1);
-			run_status = AUDIO_ERROR;
+			m_runStatus = AUDIO_ERROR;
 			break;
 		case AUDIO_RUNNING:
-			if (current_fx) {
-				current_fx->startInProgress = false;
-				current_fx->startSlot = -1;
+			if (m_currentFx) {
+				m_currentFx->startInProgress = false;
+				m_currentFx->startSlot = -1;
 			}
-			LOGTEXT(tr("Slot %1: Audio buffer size used: %2").arg(slotNumber+1).arg(audio_player->audioBufferSize()));
+			LOGTEXT(tr("Slot %1: Audio buffer size used: %2").arg(slotNumber+1).arg(m_audioPlayer->audioBufferSize()));
 			//fall through
 		default:
-			run_status = status;
+			m_runStatus = status;
 		}
 	}
 
-	if (cur_status != run_status) {
-		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,run_status,current_executer);
-		msg.fxAudio = current_fx;
+	if (cur_status != m_runStatus) {
+		AudioCtrlMsg msg(slotNumber,CMD_AUDIO_STATUS_CHANGED,m_runStatus,m_currentExecuter);
+		msg.fxAudio = m_currentFx;
 
-		if (run_status == AUDIO_IDLE) {
+		if (m_runStatus == AUDIO_IDLE) {
 			emit vuLevelChanged(slotNumber,0.0,0.0);
-			emit audioProgressChanged(slotNumber,current_fx,0);
+			emit audioProgressChanged(slotNumber,m_currentFx,0);
 			msg.progress = 0;
 		}
 		emit audioCtrlMsgEmitted(msg);
@@ -600,23 +604,23 @@ void AudioSlot::on_vulevel_changed(qreal left, qreal right)
 	emit_audio_play_progress();
 
 	// Investigate if audio must be faded out or ended
-	if (current_fx) {
-		if (!FxItem::exists(current_fx)) {
-			current_fx = nullptr;
+	if (m_currentFx) {
+		if (!FxItem::exists(m_currentFx)) {
+			m_currentFx = nullptr;
 			DEBUGERROR("%s: Fx pointer invalid",Q_FUNC_INFO);
 			return;
 		}
 
 		bool stopaudio = false;
-		if (current_fx->stopAtSeekPos > 0 && currentPlayPosMs() >= current_fx->stopAtSeekPos)
+		if (m_currentFx->stopAtSeekPos > 0 && currentPlayPosMs() >= m_currentFx->stopAtSeekPos)
 				stopaudio = true;
-		if (current_fx->holdTime() > 0 && run_time.elapsed() >= current_fx->fadeInTime() + current_fx->holdTime())
+		if (m_currentFx->holdTime() > 0 && m_audioRunTime.elapsed() >= m_currentFx->fadeInTime() + m_currentFx->holdTime())
 				stopaudio = true;
 
 		if (stopaudio) {
-			if (current_fx->fadeOutTime() > 0) {
-				if (fade_timeline.state() != QTimeLine::Running)
-					fadeoutFxAudio(0,current_fx->fadeOutTime());
+			if (m_currentFx->fadeOutTime() > 0) {
+				if (m_fadeHelpTimeLine.state() != QTimeLine::Running)
+					fadeoutFxAudio(0,m_currentFx->fadeOutTime());
 			} else {
 				stopFxAudio();
 			}
@@ -633,15 +637,15 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 {
 	// calculate new volume from timeline value
 	qreal new_volume;
-	if (fade_mode == AUDIO_FADE_OUT) {
-		new_volume = fade_initial_vol;
-		new_volume -= value * qAbs(fade_initial_vol - fade_target_vol);
+	if (m_fadeModeAudio == AUDIO_FADE_OUT) {
+		new_volume = m_fadeVolumeInitial;
+		new_volume -= value * qAbs(m_fadeVolumeInitial - m_fadeVolumeTarget);
 		// some rounding before cast to integer
 		new_volume += 0.5;
 	}
-	else if (fade_mode == AUDIO_FADE_IN) {
-		new_volume = fade_initial_vol;
-		new_volume += value * qAbs(fade_target_vol - fade_initial_vol);
+	else if (m_fadeModeAudio == AUDIO_FADE_IN) {
+		new_volume = m_fadeVolumeInitial;
+		new_volume += value * qAbs(m_fadeVolumeTarget - m_fadeVolumeInitial);
 		// some rounding before cast to integer
 		new_volume += 0.5;
 	}
@@ -653,20 +657,20 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 	setVolume(new_volume);
 
 	// send message in order to update GUI
-	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,run_status,current_executer);
+	AudioCtrlMsg msg(slotNumber,CMD_STATUS_REPORT,m_runStatus,m_currentExecuter);
 	msg.volume = int(new_volume);
 	emit audioCtrlMsgEmitted(msg);
 }
 
 void AudioSlot::on_fade_finished()
 {
-	if (fade_mode == AUDIO_FADE_OUT) {
+	if (m_fadeModeAudio == AUDIO_FADE_OUT) {
 		stopFxAudio();
 
 		LOGTEXT(tr("Audio fade out finished for slot %1: '%2'")
 			.arg(slotNumber+1).arg(currentFxName()));
 	}
-	else if (fade_mode == AUDIO_FADE_IN) {
+	else if (m_fadeModeAudio == AUDIO_FADE_IN) {
 		LOGTEXT(tr("Audio fade in finished for slot %1: '%2'")
 			.arg(slotNumber+1).arg(currentFxName()));
 
@@ -675,7 +679,7 @@ void AudioSlot::on_fade_finished()
 
 void AudioSlot::on_volset_timer_finished()
 {
-	LOGTEXT(volset_text);
+	LOGTEXT(m_volumeSetMsg);
 }
 
 void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
@@ -717,7 +721,7 @@ void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
 		fadeoutFxAudio(0,msg.fadetime);
 		break;
 	case CMD_AUDIO_PAUSE:
-		pauseFxAudio(!(run_status == AUDIO_PAUSED));
+		pauseFxAudio(!(m_runStatus == AUDIO_PAUSED));
 		break;
 	case CMD_VIDEO_START:
 		startFxClipVideoControls(msg.fxAudio, msg.executer);
@@ -732,19 +736,19 @@ void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
 
 void AudioSlot::setAudioDurationMs(qint64 ms)
 {
-	if (!FxItem::exists(current_fx)) return;
+	if (!FxItem::exists(m_currentFx)) return;
 
-	current_fx->audioDuration = ms;
+	m_currentFx->audioDuration = ms;
 }
 
 bool AudioSlot::seekPosMs(qint64 ms)
 {
 	bool seek = false;
-	if (current_fx && run_status == AUDIO_RUNNING) {
-		seek = audio_player->seekPlayPosMs(ms);
-		volset_text = tr("Audio: '%1' seek to %2ms").arg(current_fx->name()).arg(ms);
-		if (!volset_timer.isActive())
-			volset_timer.start();
+	if (m_currentFx && m_runStatus == AUDIO_RUNNING) {
+		seek = m_audioPlayer->seekPlayPosMs(ms);
+		m_volumeSetMsg = tr("Audio: '%1' seek to %2ms").arg(m_currentFx->name()).arg(ms);
+		if (!m_volumeSetHelpTimer.isActive())
+			m_volumeSetHelpTimer.start();
 	}
 	return seek;
 }
@@ -752,13 +756,13 @@ bool AudioSlot::seekPosMs(qint64 ms)
 bool AudioSlot::seekPosPerMille(int perMille)
 {
 	bool seek = false;
-	if (current_fx && run_status == AUDIO_RUNNING) {
-		qint64 seekpos = current_fx->audioDuration * perMille / 1000;
-		seek = audio_player->seekPlayPosMs(seekpos);
-		volset_text = tr("Audio: '%1' seek to %2ms (%3pMille)")
-				.arg(current_fx->name()).arg(seekpos).arg(perMille);
-		if (!volset_timer.isActive())
-			volset_timer.start();
+	if (m_currentFx && m_runStatus == AUDIO_RUNNING) {
+		qint64 seekpos = m_currentFx->audioDuration * perMille / 1000;
+		seek = m_audioPlayer->seekPlayPosMs(seekpos);
+		m_volumeSetMsg = tr("Audio: '%1' seek to %2ms (%3pMille)")
+				.arg(m_currentFx->name()).arg(seekpos).arg(perMille);
+		if (!m_volumeSetHelpTimer.isActive())
+			m_volumeSetHelpTimer.start();
 	}
 	return seek;
 }
@@ -769,23 +773,23 @@ bool AudioSlot::seekPosPerMille(int perMille)
  */
 qint64 AudioSlot::currentPlayPosMs() const
 {
-	if (run_status != AUDIO_RUNNING && run_status != AUDIO_PAUSED)
+	if (m_runStatus != AUDIO_RUNNING && m_runStatus != AUDIO_PAUSED)
 		return -1;
-	return audio_player->currentPlayPosMs();
+	return m_audioPlayer->currentPlayPosMs();
 }
 
 void AudioSlot::storeCurrentSeekPos()
 {
-	if (run_status == AUDIO_RUNNING && FxItem::exists(current_fx)) {
-		current_fx->setSeekPosition(audio_player->currentPlayPosMs());
+	if (m_runStatus == AUDIO_RUNNING && FxItem::exists(m_currentFx)) {
+		m_currentFx->setSeekPosition(m_audioPlayer->currentPlayPosMs());
 	}
 }
 
 
 int AudioSlot::audioOutputBufferSize() const
 {
-	if (audio_player)
-		return audio_player->audioBufferSize();
+	if (m_audioPlayer)
+		return m_audioPlayer->audioBufferSize();
 
 	return 0;
 }
@@ -794,15 +798,15 @@ void AudioSlot::setFFTEnabled(bool state)
 {
 	if (state != m_isFFTEnabled) {
 		m_isFFTEnabled = state;
-		if (audio_player)
-			audio_player->setFFTEnabled(state);
+		if (m_audioPlayer)
+			m_audioPlayer->setFFTEnabled(state);
 	}
 }
 
 QString AudioSlot::currentFxName() const
 {
-	if (FxItem::exists(current_fx)) {
-		return current_fx->name();
+	if (FxItem::exists(m_currentFx)) {
+		return m_currentFx->name();
 	} else {
 		return tr("No FX was set");
 	}
@@ -819,8 +823,8 @@ void AudioSlot::sdlEmitProgress()
  */
 bool AudioSlot::selectFxClipVideo()
 {
-	if (run_status <= AUDIO_IDLE) {
-		run_status = VIDEO_INIT;
+	if (m_runStatus <= AUDIO_IDLE) {
+		m_runStatus = VIDEO_INIT;
 		return true;
 	}
 	return false;
@@ -834,13 +838,13 @@ bool AudioSlot::selectFxClipVideo()
  */
 void AudioSlot::startFxClipVideoControls(FxAudioItem *fx, Executer *exec)
 {
-	current_fx = fx;			// this is an FxClipItem !!
-	run_status = VIDEO_RUNNING;
-	current_volume = fx->initialVolume;
+	m_currentFx = fx;			// this is an FxClipItem !!
+	m_runStatus = VIDEO_RUNNING;
+	m_currentVolume = fx->initialVolume;
 
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fx,slotNumber, CMD_VIDEO_STATUS_CHANGED, exec);
-	msg.volume = current_volume;
+	msg.volume = m_currentVolume;
 	msg.executer = exec;
 	msg.currentAudioStatus = VIDEO_RUNNING;
 	emit audioCtrlMsgEmitted(msg);
@@ -848,9 +852,9 @@ void AudioSlot::startFxClipVideoControls(FxAudioItem *fx, Executer *exec)
 
 void AudioSlot::setFxClipVideoCtrlStatus(AudioStatus stat)
 {
-	run_status = stat;
+	m_runStatus = stat;
 	if (stat == AUDIO_IDLE)
-		current_fx = nullptr;
+		m_currentFx = nullptr;
 }
 
 bool AudioSlot::fadeoutFxClip(int targetVolume, int time_ms)
@@ -860,49 +864,64 @@ bool AudioSlot::fadeoutFxClip(int targetVolume, int time_ms)
 		return false;
 	}
 
-	if (run_status != VIDEO_RUNNING)
+	if (m_runStatus != VIDEO_RUNNING)
 		return  false;
 
-	if (!FxItem::exists(current_fx)) return false;
+	if (!FxItem::exists(m_currentFx)) return false;
 
-	fade_mode = AUDIO_FADE_OUT;
+	m_fadeModeAudio = AUDIO_FADE_OUT;
 
 	// Set Fadeout time
-	fade_initial_vol = current_volume;
-	fade_target_vol = targetVolume;
-	fade_timeline.setDuration(time_ms);
+	m_fadeVolumeInitial = m_currentVolume;
+	m_fadeVolumeTarget = targetVolume;
+	m_fadeHelpTimeLine.setDuration(time_ms);
 
 	// and start the time line ticker
-	fade_timeline.start();
+	m_fadeHelpTimeLine.start();
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
-			.arg(slotNumber+1).arg(current_fx->name()).arg(time_ms));
+			.arg(slotNumber+1).arg(m_currentFx->name()).arg(time_ms));
 
 	return true;
 }
 
 void AudioSlot::_setVolume(int vol)
 {
-	if (run_status == VIDEO_RUNNING) {
-		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, vol);
+	if (m_runStatus == VIDEO_RUNNING) {
+		// for video we always used logarithmic volume
+		qreal linearVolume = QAudio::convertVolume(vol / qreal(MAX_VOLUME),
+												   QAudio::LogarithmicVolumeScale,
+												   QAudio::LinearVolumeScale);
+		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, linearVolume);
+		return;
+	}
+	else if (!m_audioPlayer) {
 		return;
 	}
 
-	if (!audio_player) return;
-
 	int level = vol;
-	if (master_volume >= 0) {
-		level = level * master_volume / MAX_VOLUME;
+	if (m_masterVolume >= 0) {
+		level = level * m_masterVolume / MAX_VOLUME;
 	}
 
-	audio_player->setVolume(level,MAX_VOLUME);
+	bool lg = AppCentral::ref().isLogarithmicVolume();
+	if (lg) {
+		qreal linearVolume = QAudio::convertVolume(level / qreal(MAX_VOLUME),
+												   QAudio::LogarithmicVolumeScale,
+												   QAudio::LinearVolumeScale);
+		level = qRound(linearVolume * MAX_VOLUME);
+		m_volumeSetMsg = tr("Set volume for Audio Fx in slot %1: %2 (level: %3)")
+				.arg(slotNumber+1).arg(vol).arg(level);
+	}
+	else {
+		m_volumeSetMsg = tr("Change Volume for Audio Fx in slot %1: %2 ")
+				.arg(slotNumber+1).arg(vol);
+	}
 
-	current_volume = vol;
+	m_audioPlayer->setVolume(level,MAX_VOLUME);
+	m_currentVolume = vol;
 
-	volset_text = tr("Change Volume for Audio Fx in slot %1: %2 ").arg(slotNumber+1).arg(vol);
 
 	// it is not allowed to start timers from different thread
-//	if (QThread::currentThread() == this->thread())
-//		volset_timer.start();
 	// this works from every thread
-	QMetaObject::invokeMethod(&volset_timer, "start");
+	QMetaObject::invokeMethod(&m_volumeSetHelpTimer, "start");
 }

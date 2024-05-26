@@ -64,6 +64,7 @@ public:
 public:
 	// begin: saved config
 	pbool pAutoProceedSequence;
+	pbool pLogarithmicVol;						///< logarithmic volume for all sound outputs
 	pstring pSlotGuiConfig;						///< config settings for Slot widgets
 	// end: saved config
 
@@ -76,15 +77,16 @@ public:
 protected:
 	pint64 pProjectId;
 	pint32 pProjectFormat;
+	pint32 pMasterVolume;
 	pstring pProjectName;
 	pstring pComment;
 	pstring pProjectBaseDir;					///< this is the base directory for relative path names in FXs
-	pint32 pMasterVolume;
-
 
 private:
 	FxList *fxList;								///< this is the effect list, which actually holds nearly the complete configuration
 	QStringList m_mediaFileSearchDirs;			///< these are temporary entries for directories which will be scanned, if a file is not found on load
+
+	bool m_isValid	= false;					///< becomes true, after LOAD or SAVE
 
 public:
 	Project();
@@ -96,6 +98,13 @@ public:
 	bool cloneProjectFrom(const Project &o, bool keepAllFxIitemIDs = false);
 
 	void clear();
+	/**
+	 * @brief Check if the project is valid
+	 * @return true, if project was saved successfully or loaded successfully
+	 *
+	 * A project is valid, if it was at least saved once or loaded from disk
+	 */
+	bool isValid() const {return m_isValid;}
 
 	bool saveToFile(const QString & path);
 	bool loadFromFile(const QString & path);
