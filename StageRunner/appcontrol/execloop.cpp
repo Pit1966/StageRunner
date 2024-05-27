@@ -62,29 +62,31 @@ void FxExecLoop::processPendingEvents()
 {
 	// This fetches a reference to the executer list and locks it!!
 	MutexQList<Executer*> &execlist = fxContrlRef.execCenter.lockAndGetExecuterList();
+	int execcnt = execlist.size();
 
 	QMutableListIterator<Executer*> it(execlist);
 	while (it.hasNext()) {
 		Executer *exec = it.next();
-//		if (exec->isRunning()) {
-			switch (exec->state()) {
-			case Executer::EXEC_PAUSED:
-				exec->setTargetTimeToCurrent();
-				break;
-			case Executer::EXEC_RUNNING:
-			case Executer::EXEC_FINISH:
-				if (exec->processTimeReached()) {
-					bool active = exec->processExecuter();
-					if (!active) {
-						exec->destroyLater();
-					}
+		switch (exec->state()) {
+		case Executer::EXEC_PAUSED:
+			exec->setTargetTimeToCurrent();
+			break;
+		case Executer::EXEC_RUNNING:
+		case Executer::EXEC_FINISH:
+			if (exec->processTimeReached()) {
+				bool active = exec->processExecuter();
+				if (!active) {
+					exec->destroyLater();
 				}
-				exec->processProgress();
-				break;
-			default:
-				break;
 			}
-//		}
+			exec->processProgress();
+			break;
+		default:
+			break;
+		}
+
+		if (execlist.size() != execcnt) // size of list changed
+			break;			/// @todo reloop here??
 	}
 
 	// Don't forget to unlock the executer list

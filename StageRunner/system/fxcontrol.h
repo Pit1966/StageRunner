@@ -67,7 +67,6 @@ public:
 	int stopAllFxPlaylists();
 
 	ScriptExecuter *startFxScript(FxScriptItem *fxscript);
-
 	void handleDmxInputScriptEvent(FxScriptItem *fxscript, uchar dmxVal);
 	bool stopFxScript(FxScriptItem *fxscript);
 	int stopAllFxScripts();

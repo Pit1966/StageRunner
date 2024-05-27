@@ -3,6 +3,7 @@
 #include "log.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/audiocontrol.h"
+#include "system/fxcontrol.h"
 #include "system/lightcontrol.h"
 #include "system/videocontrol.h"
 #include "fx/fxitem.h"
@@ -12,6 +13,7 @@
 #include "fx/fxclipitem.h"
 #include "fx/fxsceneitem.h"
 #include "fx/fxtimelinetrack.h"
+#include "fx/fxscriptitem.h"
 #include "mods/timeline/timelinebox.h"
 #include "mods/timeline/timelinecurve.h"
 
@@ -180,7 +182,6 @@ TimeLineExecuter::~TimeLineExecuter()
 			fx->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, 500);
 		}
 	}
-	qDebug() << "destroyed timeline executer";
 }
 
 /**
@@ -386,6 +387,11 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		}
 	}
 	else if (fxtype == FX_SCRIPT) {
+		FxScriptItem *fxscript = dynamic_cast<FxScriptItem*>(fx);
+		if (fxscript) {
+			qDebug() << fxscript->rawScript();
+			ScriptExecuter *scriptexec = myApp.unitFx->startFxScript(fxscript);
+		}
 
 	}
 	else {

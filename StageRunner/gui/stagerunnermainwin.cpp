@@ -788,18 +788,20 @@ void StageRunnerMainWin::loadProject(const QString &path)
 	clearProject();
 
 	appCentral->userSettings->pLastProjectLoadPath = path;
+
 	Project *pro = appCentral->project;
-	if ( !pro->loadFromFile(path) ) {
+	if (!QFile::exists(path)) {
+		QMessageBox::critical(this,tr("Load error")
+							  ,tr("Project file not found!\n'%1'")
+							  .arg(path));
+	}
+	else if ( !pro->loadFromFile(path) ) {
 		QMessageBox::critical(this,tr("Load error")
 							  ,tr("An error occured while loading file:\n\n%1\n\nLine %2:'%3'")
 							  .arg(appCentral->userSettings->pLastProjectLoadPath)
 							  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
-		setProjectName("");
-
-		// Remove from recent project list
-		m_recentProjectPaths.removeAll(path);
-		addRecentProject("");
-	} else {
+	}
+	else {
 		pro->postLoadProcessFxList();
 		pro->postLoadResetFxScenes();
 
@@ -807,7 +809,13 @@ void StageRunnerMainWin::loadProject(const QString &path)
 		copyProjectSettingsToGui();
 		setProjectName(path);
 
+		return;
 	}
+
+	// loading failed, remove project from recent project list
+	setProjectName("");
+	m_recentProjectPaths.removeAll(path);
+	addRecentProject("");
 }
 
 void StageRunnerMainWin::setApplicationGuiStyle(QString style)

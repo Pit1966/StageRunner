@@ -63,6 +63,6 @@ void ExecLoopThreadInterface::run()
 	exec();
 	execLoop->stopLoopTimer();
 	delete execLoop;
-	execLoop = 0;
+	execLoop = nullptr;
 }
 

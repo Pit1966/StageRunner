@@ -1,5 +1,5 @@
 /// @todo faster lookup of fxitems that are hooked to an dmx channel
-- timeline executer: fade in audio fx. Do this with a ctrl command.
+- timeline executer: stop audio fx which were started from the timeline when stop is clicked in timeline editor / or if timeline is finished from outside
 
 - findScriptExecuter müsste eine Liste von Executern zurückgeben, wenn der Effekt mehrfach gestartet wurde
 

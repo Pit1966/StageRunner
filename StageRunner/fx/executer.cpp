@@ -744,7 +744,6 @@ ScriptExecuter::~ScriptExecuter()
 			scene->setDeleteOnFinished();
 		}
 	}
-	// qDebug() << "script executer destroyed";
 }
 
 /**

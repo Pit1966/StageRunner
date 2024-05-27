@@ -275,7 +275,7 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 {
 	if (!FxItem::exists(fxscript)) {
 		qDebug("FxScriptItem not found in pool");
-		return 0;
+		return nullptr;
 	}
 
 	ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);

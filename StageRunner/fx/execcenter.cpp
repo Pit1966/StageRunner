@@ -33,9 +33,9 @@
 
 #include <QTimer>
 
-ExecCenter::ExecCenter(AppCentral &app_central) :
-	QObject()
-  ,myApp(app_central)
+ExecCenter::ExecCenter(AppCentral &app_central)
+	: QObject()
+	, myApp(app_central)
 {
 	executerList.setName("ExecCenter::executerList");
 	removeQueue.setName("ExecCenter::removeQueue");
@@ -54,7 +54,7 @@ ExecCenter::~ExecCenter()
 Executer *ExecCenter::findExecuter(const FxItem *fx)
 {
 	executerList.lock();
-	foreach (Executer * exec, executerList) {
+	for (Executer *exec : qAsConst(executerList)) {
 		if (exec->originFx() == fx) {
 			executerList.unlock();
 			return exec;
@@ -159,8 +159,9 @@ FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
 
 SceneExecuter *ExecCenter::newSceneExecuter(FxSceneItem *scene, FxItem *parentFx)
 {
-	SceneExecuter *exec = new SceneExecuter(myApp,scene,parentFx);
+	qDebug() << thread()->objectName() << Q_FUNC_INFO;
 
+	SceneExecuter *exec = new SceneExecuter(myApp,scene,parentFx);
 	executerList.lockAppend(exec);
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
@@ -175,6 +176,7 @@ ScriptExecuter *ExecCenter::newScriptExecuter(FxScriptItem *script, FxItem *pare
 	ScriptExecuter *exec = new ScriptExecuter(myApp,script,parentFx);
 
 	executerList.lockAppend(exec);
+	// DEVELTEXT("add script executor: %x",exec);
 
 	connect(exec,SIGNAL(deleteMe(Executer*)),this,SLOT(deleteExecuter(Executer*)),Qt::QueuedConnection);
 	connect(exec,SIGNAL(changed(Executer*)),this,SLOT(on_executer_changed(Executer*)),Qt::DirectConnection);
@@ -232,6 +234,7 @@ void ExecCenter::deleteExecuter(Executer *exec)
 		return;
 	}
 
+	// DEBUGTEXT("remove and destroy executor: %d: %x count: %d",exec->type(), exec, executerList.count(exec));
 	if (executerList.removeOne(exec)) {
 		emit executerDeleted(exec);
 		delete exec;
@@ -240,7 +243,7 @@ void ExecCenter::deleteExecuter(Executer *exec)
 
 bool ExecCenter::executeScriptCmd(const QString &cmd)
 {
-	qDebug() << "execute script command" << cmd;
+	qDebug() << "execute script command: from Server?" << cmd;
 
 	return ScriptExecuter::executeSingleCmd(cmd);
 }
@@ -254,8 +257,8 @@ void ExecCenter::test_remove_queue()
 		executerList.lock();
 		if (exec->use_cnt <= 0) {
 			if (executerList.lockRemoveOne(exec)) {
-				delete exec;
 				emit executerDeleted(exec);
+				delete exec;
 				it.remove();
 				if (removeQueue.isEmpty()) {
 					remove_timer.stop();

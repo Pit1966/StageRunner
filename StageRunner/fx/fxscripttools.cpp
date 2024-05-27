@@ -180,10 +180,10 @@ void FxScriptList::calculateDuration()
 	for (FxScriptLine &line : *this) {
 		if (line.execTimeMs() > 0) {	// seems to be an absulute execution time for this line
 			ms = line.execTimeMs();
-			qDebug("duration %d", ms);
+			// qDebug("duration %d", ms);
 		} else {
 			ms += line.execDuration();
-			qDebug(" ++ %d", ms);
+			// qDebug("duration ++ %d", ms);
 		}
 	}
 
