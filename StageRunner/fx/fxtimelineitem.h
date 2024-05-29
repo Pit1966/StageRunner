@@ -14,7 +14,7 @@ class FxTimeLineTrack;
 
 class FxTimeLineItem : public FxItem
 {
-	Q_OBJECT			// Q_DECLARE_TR_FUNCTIONS(FxTimeLineItem)
+	Q_OBJECT
 
 private:
 	VarSetList<FxTimeLineTrack*>m_tracks;

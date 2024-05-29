@@ -73,6 +73,7 @@ QAtomicInt VarSet::instance_cnt = 0;
  * @brief VarSet::VarSet
  */
 VarSet::VarSet()
+	: QObject()
 {
 	init();
 	// This is the base class, that should be changed in derived classes
@@ -81,6 +82,7 @@ VarSet::VarSet()
 }
 
 VarSet::VarSet(const VarSet &other)
+	: QObject()
 {
 	init();
 	modified_f = false;

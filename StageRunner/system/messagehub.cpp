@@ -43,28 +43,25 @@ void VMsg::init()
 	addExistingVar(messageText,"MsgText");
 	addExistingVar(doNotShowAgain,"DoNotShowAgain",false);
 	addExistingVar((qint32&)doNotShowDefaultButton,"DoNotShowDefButton");
-
 }
 
-
-MessageHub::MessageHub() :
-	QObject()
-  , VarSet()
-  , msglist(this)
+MessageHub::MessageHub()
+	: VarSet()
+	, msglist(this)
 {
 	init();
 
 	QString path = QString("%1/.config/%2/%3.msg")
-			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+			.arg(QDir::homePath(), APP_CONFIG_PATH, APPNAME);
 	fileLoad(path);
 
-// 	readFromPref();
+	// 	readFromPref();
 }
 
 MessageHub::~MessageHub()
 {
 	QString path = QString("%1/.config/%2/%3.msg")
-			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+			.arg(QDir::homePath(), APP_CONFIG_PATH, APPNAME);
 	fileSave(path,false,true);
 
 // 	writeToPref();

@@ -68,16 +68,14 @@ KEY_TXT keyTab[104] = {
 
 
 Project::Project()
-	: QObject()
-	, VarSet()
+	: VarSet()
 {
 	init();
 	clear();
 }
 
 Project::Project(const Project &o, bool keepAllFxIitemIDs)
-	: QObject()
-	, VarSet()
+	: VarSet()
 {
 	init();
 	cloneProjectFrom(o, keepAllFxIitemIDs);

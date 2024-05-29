@@ -254,6 +254,9 @@ void TimeLineCurve::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 		m_curHoveredNode = -1;
 		update();
 	}
+
+	// if (m_myTrack->isOverlay())
+	// 	event->ignore();
 }
 
 void TimeLineCurve::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)

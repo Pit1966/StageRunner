@@ -39,8 +39,9 @@ class DBfield;
 
 template <class T> class VarSetList;
 
-class VarSet
+class VarSet : public QObject
 {
+	Q_OBJECT
 public:
 	enum RegVarType {
 		REG__NONE,				///< keine Aktion

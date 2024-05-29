@@ -39,7 +39,7 @@ void TimeLineGfxScene::drawBackground(QPainter *painter, const QRectF &/*rect*/)
 	for (int t=1; t<tracks.size(); t++) {
 		TimeLineTrack *track = tracks.at(t);
 		QColor bgcol = track->trackBgColor;
-		if (track->trackBgColor >= 0) {
+		if (track->trackBgColor >= 0 && !track->isOverlay()) {
 			painter->fillRect(0, track->yPos(), width, track->ySize(), bgcol);
 		}
 		else if (t & 1) {
@@ -208,7 +208,11 @@ bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
 				track->m_trackID = m_tracks.size();
 			}
 		}
-		track->setYPos(m_tracks.last()->yEndPos());
+		if (track->isOverlay()) {
+			track->setYPos(m_tracks.last()->yPos());
+		} else {
+			track->setYPos(m_tracks.last()->yEndPos());
+		}
 	}
 	else {
 		track->setYPos(0);

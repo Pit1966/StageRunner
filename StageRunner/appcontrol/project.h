@@ -31,7 +31,7 @@ class FxList;
 class FxItem;
 
 
-class Project : public QObject, public VarSet
+class Project : /*public QObject, */public VarSet
 {
 	Q_OBJECT
 

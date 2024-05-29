@@ -20,7 +20,8 @@ bool FxTimeLineTrack::isEqual(TimeLineTrack *o) const
 			&& m_type == o->trackType()
 			&& m_trackID == o->trackId()
 			&& m_yPos == o->yPos()
-			&& m_ySize == o->ySize();
+			&& m_ySize == o->ySize()
+			&& m_isOverlay == o->isOverlay();
 }
 
 void FxTimeLineTrack::copyDataFrom(TimeLineTrack *o)
@@ -30,6 +31,7 @@ void FxTimeLineTrack::copyDataFrom(TimeLineTrack *o)
 	m_trackID = o->trackId();
 	m_yPos = o->yPos();
 	m_ySize = o->ySize();
+	m_isOverlay = o->isOverlay();
 }
 
 void FxTimeLineTrack::copyDataTo(TimeLineTrack *o)
@@ -39,6 +41,7 @@ void FxTimeLineTrack::copyDataTo(TimeLineTrack *o)
 	o->setTrackId(m_trackID);
 	o->setYPos(m_yPos);
 	o->setYSize(m_ySize);
+	o->setOverlay(m_isOverlay);
 }
 
 void FxTimeLineTrack::init()
@@ -50,4 +53,5 @@ void FxTimeLineTrack::init()
 	addExistingVar(m_trackID, "TrackID");
 	addExistingVar(m_yPos, "yPos");
 	addExistingVar(m_ySize, "ySize");
+	addExistingVar(m_isOverlay, "overlay");
 }

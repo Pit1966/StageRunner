@@ -56,7 +56,7 @@ private:
 };
 
 
-class MessageHub : public QObject, public VarSet
+class MessageHub : public VarSet
 {
 	Q_OBJECT
 private:

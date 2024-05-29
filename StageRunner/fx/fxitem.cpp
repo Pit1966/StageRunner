@@ -31,8 +31,7 @@ QRecursiveMutex FxItem::global_fx_lock;
 qint32 FxItem::m_lowestIdForGenerator = 1;
 
 FxItem::FxItem()
-	: QObject()
-	, VarSet()
+	: VarSet()
 	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {
@@ -42,8 +41,7 @@ FxItem::FxItem()
 }
 
 FxItem::FxItem(FxList *fxList)
-	: QObject()
-	, VarSet()
+	: VarSet()
 	, myParentFxList(fxList)
 	, playedInRandomList(false)
 {
@@ -53,8 +51,7 @@ FxItem::FxItem(FxList *fxList)
 }
 
 FxItem::FxItem(const FxItem &o)
-	: QObject()
-	, VarSet()
+	: VarSet()
 	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {

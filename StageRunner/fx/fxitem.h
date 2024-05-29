@@ -66,7 +66,7 @@ class FxItem;
 typedef QList<FxItem*> FxItemList;
 
 
-class FxItem : public QObject, public VarSet
+class FxItem : public VarSet
 {
 private:
 	static QList<FxItem*> *global_fx_list;
