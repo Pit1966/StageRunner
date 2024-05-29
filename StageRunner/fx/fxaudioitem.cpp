@@ -28,6 +28,8 @@
 #include <QFileInfo>
 #include <QMediaPlayer>
 
+using namespace AUDIO;
+
 QStringList FxAudioItem::attachedCmdStrings = QStringList()
 		<< QObject::tr("None")
 		<< QObject::tr("Fade out all audio")

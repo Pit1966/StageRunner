@@ -449,6 +449,7 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 		}
 	}
 	else {
+		m_timelineExecuter->setStopAllAtFinishFlag();
 		m_timelineExecuter->setFinish();
 		// runButton->setText("Run");
 	}

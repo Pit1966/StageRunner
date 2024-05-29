@@ -11,7 +11,7 @@
 - IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht
 
 Fixme:
-Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
+done: Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
 einfadens drücken
 
 Projekt Kopie (durch Verwendung des CopyConstructors):

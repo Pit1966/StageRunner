@@ -35,7 +35,7 @@ class QMediaPlaylist;
 class PsVideoWidget;
 class VideoPlayer;
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class VideoControl : public QObject
 {

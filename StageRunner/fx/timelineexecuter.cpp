@@ -18,6 +18,7 @@
 #include "mods/timeline/timelinecurve.h"
 
 using namespace PS_TL;
+using namespace AUDIO;
 
 // -------------------------------------------------------------------------------------
 
@@ -71,8 +72,7 @@ bool TimeLineExecuter::processExecuter()
 		}
 	}
 	else if (ev.evType == EV_TIMELINE_END) {
-		emit timeLineStatusChanged(EXEC_FINISH);
-		emit listProgressChanged(0, 0);
+		_finishMe();
 		return false;			// no more active. We are ready
 	}
 	else if (ev.evType == EV_ENVELOPE_START) {
@@ -91,8 +91,7 @@ bool TimeLineExecuter::processExecuter()
 	Event nextEv = findNextObj();
 	if (nextEv.evType == EV_UNKNOWN) {
 		LOGERROR(tr("Found unknown timeline item -> timeline finished"));
-		emit timeLineStatusChanged(EXEC_FINISH);
-		emit listProgressChanged(0, 0);
+		_finishMe();
 		return false;			// no more active. We are ready
 	}
 
@@ -110,8 +109,7 @@ void TimeLineExecuter::processProgress()
 {
 	if (myState == EXEC_FINISH) {
 		qDebug() << "finish timeline" << m_fxTimeLine->name();
-		emit timeLineStatusChanged(EXEC_FINISH);
-		emit listProgressChanged(0,0);
+		_finishMe();
 		destroyLater();
 	}
 	else if (myState == EXEC_RUNNING) {
@@ -131,8 +129,8 @@ bool TimeLineExecuter::setReplayPosition(int ms)
 	if (m_sortedObjEventList.isEmpty())
 		return false;
 
-	int n = 0;
 
+	int n = 0;
 	while (n < m_sortedObjEventList.size() && m_sortedObjEventList.at(n).timeMs < ms)
 		n++;
 
@@ -144,9 +142,47 @@ bool TimeLineExecuter::setReplayPosition(int ms)
 	m_curEventPos = n;
 	setEventTargetTimeAbsolute(m_sortedObjEventList.at(n).timeMs);
 
+	if (ms > 0) {
+		// check if first item is an envelope item that we would miss, when setting the playback
+		// position to a later time
+		if (m_sortedObjEventList.at(0).evType == EV_ENVELOPE_START) {
+			m_nextCurveTrackEventAtMs = ms;
+			m_triggerCurveEvent = true;
+			// override event target time
+			setEventTargetTimeAbsolute(ms);
+		}
+	}
+
 	runTime.setMs(ms);			/// @todo not correct for loop
 	runTimeOne.setMs(ms);
 	return true;
+}
+
+/**
+ * @brief Stop all FX items that were started from this timeline and are still active
+ */
+void TimeLineExecuter::stopAllChildFx()
+{
+	// Stop audio
+	while (!m_activeFxAudioList.isEmpty()) {
+		int id = m_activeFxAudioList.takeFirst();
+		myApp.unitAudio->stopFxAudioWithID(id);
+	}
+
+	// Stop scripts
+	while (!m_activeFxScriptList.isEmpty()) {
+		int id = m_activeFxScriptList.takeFirst();
+		FxItem *fx = FxItem::findFxById(id);
+		if (fx) {
+			myApp.unitFx->stopAllFxScripts(fx);
+		}
+	}
+
+	// Stop scenes
+	for (FxSceneItem *fxs : qAsConst(m_idToClonedSceneHash)) {
+		fxs->setFadeOutTime(100);
+		myApp.unitLight->stopFxScene(fxs);
+	}
 }
 
 TimeLineExecuter::TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timeline, FxItem *parentFx)
@@ -371,10 +407,14 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 			ok = myApp.unitAudio->startFxAudio(fxa, this, startAtMs, initVol, fadeinms);
 		}
 
-		if (enve) {
-			int slot = fxa->startSlot;
-			if (!enve->usedAudioSlots.contains(slot))
-				enve->usedAudioSlots.append(slot);
+		if (ok) {
+			addFxToActiveAudioList(fx);
+
+			if (enve) {
+				int slot = fxa->startSlot;
+				if (!enve->usedAudioSlots.contains(slot))
+					enve->usedAudioSlots.append(slot);
+			}
 		}
 	}
 	else if (fxtype == FX_SCENE) {
@@ -390,8 +430,8 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		FxScriptItem *fxscript = dynamic_cast<FxScriptItem*>(fx);
 		if (fxscript) {
 			/*ScriptExecuter *scriptexec = */myApp.unitFx->startFxScript(fxscript);
+			addFxToActiveScriptList(fx);
 		}
-
 	}
 	else {
 		LOGERROR(tr("Timeline '%1': Executing of target is not supported! Time pos: %2 seconds")
@@ -454,5 +494,47 @@ bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 	}
 
 	return ok;
+}
+
+void TimeLineExecuter::addFxToActiveAudioList(FxItem *fx)
+{
+	if (fx == nullptr)
+		return;
+	if (!m_activeFxAudioList.contains(fx->id()))
+		m_activeFxAudioList.append(fx->id());
+}
+
+void TimeLineExecuter::addFxToActiveScriptList(FxItem *fx)
+{
+	if (fx == nullptr)
+		return;
+	if (!m_activeFxScriptList.contains(fx->id()))
+		m_activeFxScriptList.append(fx->id());
+}
+
+void TimeLineExecuter::_finishMe()
+{
+	if (m_stopAllFxAtFinish) {
+		m_stopAllFxAtFinish = false;
+		stopAllChildFx();
+	}
+	emit timeLineStatusChanged(EXEC_FINISH);
+	emit listProgressChanged(0, 0);
+}
+
+void TimeLineExecuter::onAudioStatusChanged(AudioCtrlMsg msg)
+{
+	// qDebug() << "TimeLineExecuter audio status received " << msg.ctrlCmd << "Status" << msg.currentAudioStatus << "fx" << msg.fxAudio << "executer" << msg.executer;
+
+	if (msg.executer != this) // not for me
+		return;
+
+	if (msg.currentAudioStatus == AUDIO_IDLE) {
+		int fxid = msg.fxAudio->id();
+		if (m_activeFxAudioList.contains(fxid)) {
+			qDebug() << this << "remove audio with id" << fxid << "from active list";
+			m_activeFxAudioList.removeOne(fxid);
+		}
+	}
 }
 

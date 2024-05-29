@@ -166,7 +166,7 @@ public:
 	 * @brief Reimplement this to give fx control the opportunity to check wheter the FxItem is active (most likely processed) or not
 	 * @return
 	 */
-	virtual bool isActive() const {return false;}
+	virtual bool isUsed() const {return false;}
 	virtual void resetFx() = 0;
 	virtual QString widgetPosition() const {return QString();}
 	virtual void setWidgetPosition(const QString &geometry) {Q_UNUSED(geometry);}

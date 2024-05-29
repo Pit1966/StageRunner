@@ -27,7 +27,7 @@
 #include "fxitem.h"
 #include <QStringList>
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class FxList;
 
@@ -71,7 +71,7 @@ public:
 	qint32 tmpMasterVolAtStart;				///< Mastervolume, if started with master volume changer
 
 protected:
-	AudioSeqState mySeqStatus;
+	AUDIO::AudioSeqState mySeqStatus;
 	qint64 mySeekPosition;					/// this is the time in ms the sound has been stopped or paused
 	int mySeekPosPerMille;					/// this is the seek position in per mille (-1 means: not known, maybe audio duration is not available)
 
@@ -79,8 +79,8 @@ public:
 	FxAudioItem(FxList *fxList);
 	FxAudioItem(const FxAudioItem &o);
 	FxAudioItem(const QString &path, FxList *fxList);
-	AudioSeqState seqStatus() const {return mySeqStatus;}
-	void setSeqStatus(AudioSeqState state) {mySeqStatus = state;}
+	AUDIO::AudioSeqState seqStatus() const {return mySeqStatus;}
+	void setSeqStatus(AUDIO::AudioSeqState state) {mySeqStatus = state;}
 	qint32 loopValue() const override {return loopTimes;}
 	void setLoopValue(qint32 val) override {loopTimes = val;}
 	void initForSequence() override;

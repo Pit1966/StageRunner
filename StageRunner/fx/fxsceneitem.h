@@ -66,6 +66,7 @@ public:
 	qint32 loopValue() const override{return 0;}
 	void setLoopValue(qint32 val) override;
 	void resetFx() override;
+	bool isUsed() const override;
 	QString widgetPosition() const override {return widgetPos;}
 	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 	qint32 durationHint() const override;
@@ -82,7 +83,7 @@ public:
 	void setLive(bool state) const;
 	void setBlacked(int mixline, bool state);
 	bool isBlacked(int mixline) const {return wasBlacked[mixline];}
-	inline bool isActive() const override {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
+	inline bool isActive() const {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
 	inline bool isLive() const {return myStatus & SCENE_STAGE_LIVE;}
 	inline bool isOnStageIntern() const {return myStatus & SCENE_STAGE_INTERN;}

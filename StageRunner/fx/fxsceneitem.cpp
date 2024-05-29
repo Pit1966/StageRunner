@@ -100,6 +100,11 @@ void FxSceneItem::resetFx()
 	mySeqStatus = SCENE_OFF;
 }
 
+bool FxSceneItem::isUsed() const
+{
+	return myStatus != SCENE_IDLE;
+}
+
 qint32 FxSceneItem::durationHint() const
 {
 	return fadeInTime() + holdTime() + fadeOutTime();

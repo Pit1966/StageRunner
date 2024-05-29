@@ -874,11 +874,11 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
  */
 void AudioControl::audioCtrlRepeater(AUDIO::AudioCtrlMsg msg)
 {
-//	qDebug() << "AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded"
-//			 << msg.ctrlCmd
-//			 << msg.currentAudioStatus
-//			 << msg.isActive
-//			 << msg.executer;
+	// qDebug() << "AudioControl::audioCtrlRepeater Ctrl Msg received and forwarded"
+	// 		 << msg.ctrlCmd
+	// 		 << msg.currentAudioStatus
+	// 		 << msg.isActive
+	// 		 << msg.executer;
 
 	if (msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED && msg.currentAudioStatus == AUDIO_IDLE)
 		executeAttachedAudioStopCmd(msg.fxAudio);
@@ -1208,13 +1208,12 @@ void AudioControl::createMediaPlayInstances()
 		}
 		slot->slotNumber = t;
 		connect(slot,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),this,SLOT(audioCtrlRepeater(AUDIO::AudioCtrlMsg)));
+		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(_vuLevelChangedReceiver(int,qreal,qreal)));
 		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(_fftSpectrumChangedReceiver(int,FrqSpectrum*)));
-		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 	}
 	// Enable FFT
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
-
 
 	// This is for video playback
 	m_videoWid = new PsVideoWidget;

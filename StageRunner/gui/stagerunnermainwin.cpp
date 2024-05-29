@@ -1457,6 +1457,10 @@ void StageRunnerMainWin::on_actionFullscreen_triggered(bool checked)
 
 void StageRunnerMainWin::on_actionDelete_FX_Item_triggered()
 {
+	if (appCentral->project->mainFxList()->nextFx()->isUsed()) {
+		POPUPERRORMSG(tr("Cancel message"), tr("FX item is used!\nIt's not allowed to delete an active FX."), this);
+		return;
+	}
 	if (QMessageBox::question(this,tr("Attention"),tr("Do you want to delete current selected FX from play?"))
 			== QMessageBox::Yes) {
 		appCentral->project->mainFxList()->deleteFx(appCentral->project->mainFxList()->nextFx());

@@ -43,7 +43,7 @@ FxList *FxListVarSet::fxList()
 
 bool FxListVarSet::isModified()
 {
-	return VarSet::isModified() | m_fxList->isModified();
+	return VarSet::isModified() || m_fxList->isModified();
 }
 
 void FxListVarSet::init()

@@ -39,7 +39,7 @@ class FxPlayListItem;
 class FxSeqItem;
 class Executer;
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 typedef QList<FxListWidgetItem*> WidItemList;
 

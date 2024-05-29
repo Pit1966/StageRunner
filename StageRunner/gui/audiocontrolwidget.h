@@ -30,7 +30,7 @@
 
 #include <QList>
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class AudioSlot;
 class AppCentral;

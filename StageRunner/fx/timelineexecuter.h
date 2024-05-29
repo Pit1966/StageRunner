@@ -56,6 +56,8 @@ protected:
 
 	QList<Event> m_sortedObjEventList;
 	QHash<int,FxSceneItem*> m_idToClonedSceneHash;	///< this is a hash Original fxID -> cloned FxItem of FxSceneItems that were started in the timeline as copy from main list
+	QList<int> m_activeFxAudioList;					///< this is a list of FxItems that were started from the scene (mainly FxAudioItems ...)
+	QList<int> m_activeFxScriptList;				///< list of FxScriptItems started in the timeline
 	QList<Envelope*> m_curveTracks;					///< this is a list of running envelopes aka curves
 
 	int m_curveIntervalMs		= 40;
@@ -63,6 +65,7 @@ protected:
 	// temp
 	int m_nextCurveTrackEventAtMs	= -1;
 	bool m_triggerCurveEvent		= false;		///< override next timeline ITEMS event with a regulary called envelope/curve event
+	bool m_stopAllFxAtFinish		= false;		///< if set, all Fx started by this timeline are stopped when timeline has finished (stop audio, script, scene)
 
 public:
 	inline TYPE type() const override {return EXEC_TIMELINE;}
@@ -70,6 +73,8 @@ public:
 	void processProgress() override;
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
 	bool setReplayPosition(int ms);
+	void setStopAllAtFinishFlag() {m_stopAllFxAtFinish = true;}
+	void stopAllChildFx();
 
 protected:
 	TimeLineExecuter(AppCentral &appCentral, FxTimeLineItem *timeline, FxItem *parentFx);
@@ -85,6 +90,16 @@ protected:
 
 	bool execObjBeginPosForFx(int fxID, Event &ev);
 	bool execObjEndPosForFx(int fxID, Event &ev);
+
+	void addFxToActiveAudioList(FxItem *fx);
+	void addFxToActiveScriptList(FxItem *fx);
+
+private:
+	void _finishMe();
+
+protected slots:
+	void onAudioStatusChanged(AUDIO::AudioCtrlMsg msg);
+
 
 signals:
 	void playPosChanged(int ms);

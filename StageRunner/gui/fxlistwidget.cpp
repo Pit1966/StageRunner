@@ -1458,8 +1458,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act->setObjectName("11");
 		}
 
-
-		act = menu.addAction(tr("------------"));
+		menu.addAction(tr("------------"));
 		if (fxtype == FX_SEQUENCE) {
 			if (AppCentral::instance()->execCenter->findExecuter(fx)) {
 				act = menu.addAction(tr("Stop Sequence"));
@@ -1477,7 +1476,12 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 		switch (act->objectName().toInt()) {
 		case 1:
-			fxList()->deleteFx(item->linkedFxItem);
+			if (item->linkedFxItem->isUsed()) {
+				POPUPERRORMSG(tr("Cancel message"), tr("FX item is used!\nIt's not allowed to delete an active FX."), this);
+				return;
+			} else {
+				fxList()->deleteFx(item->linkedFxItem);
+			}
 			break;
 		case 2:
 			setRowSelected(item->myRow,false);

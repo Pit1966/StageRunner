@@ -32,7 +32,7 @@
 #include <QString>
 #include <QElapsedTimer>
 
-using namespace AUDIO;
+// using namespace AUDIO;
 
 class FxList;
 class AppCentral;

@@ -30,6 +30,8 @@
 #include <QDebug>
 #include <QFontDatabase>
 
+using namespace AUDIO;
+
 AudioSlotWidget::AudioSlotWidget(QWidget *parent) :
 	QGroupBox(parent)
 {

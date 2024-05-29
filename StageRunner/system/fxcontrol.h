@@ -44,6 +44,7 @@ class FxListExecuter;
 class ScriptExecuter;
 class TimeLineExecuter;
 class ExecCenter;
+class FxItem;
 
 class FxControl : public QObject
 {
@@ -69,7 +70,7 @@ public:
 	ScriptExecuter *startFxScript(FxScriptItem *fxscript);
 	void handleDmxInputScriptEvent(FxScriptItem *fxscript, uchar dmxVal);
 	bool stopFxScript(FxScriptItem *fxscript);
-	int stopAllFxScripts();
+	int stopAllFxScripts(FxItem *fx = nullptr);
 
 	TimeLineExecuter *startFxTimeLine(FxTimeLineItem *fxtimeline, int atMs = 0);
 	bool stopFxTimeLine(FxTimeLineItem *fxtimeline);

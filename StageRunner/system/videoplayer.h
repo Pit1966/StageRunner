@@ -32,7 +32,7 @@
 #include "commandsystem.h"
 
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class PsVideoWidget;
 class FxClipItem;

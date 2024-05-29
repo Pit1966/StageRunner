@@ -410,8 +410,6 @@ bool Database::repairAllTables()
 	return ok;
 }
 
-
-
 bool Database::createNewTable(DBfield *entrys) {
 	if (!isValid()) return false;
 	// Default Parameter
@@ -582,7 +580,8 @@ bool Database::createNewTable(DBfield *entrys) {
 			}
 		}
 	}
-	if (ok) LOGTEXT(QString("MySQL table '%1' created in '%2'").arg(tablename).arg(databaseName));
+	if (ok)
+		LOGTEXT(QString("MySQL table '%1' created in '%2'").arg(tablename).arg(databaseName));
 	return ok;
 }
 

@@ -22,14 +22,15 @@
 //=======================================================================
 
 #include "execcenter.h"
-#include "log.h"
-#include "executer.h"
-#include "timelineexecuter.h"
-#include "appcentral.h"
-#include "lightcontrol.h"
-#include "fxcontrol.h"
 #include "fxitem.h"
 #include "fxlist.h"
+#include "executer.h"
+#include "timelineexecuter.h"
+#include "log.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "system/lightcontrol.h"
+#include "system/fxcontrol.h"
 
 #include <QTimer>
 
@@ -62,6 +63,29 @@ Executer *ExecCenter::findExecuter(const FxItem *fx)
 	}
 	executerList.unlock();
 	return nullptr;
+}
+
+/**
+ * @brief Get a list of executers that has the given FX as origin
+ * @param fx
+ * @return QList<Executer*>
+ *
+ * @note. Be aware. The pointer in the returned may not be safe to use in threads.
+ * The list is locked while searching but this is no guaranty that the Executer is still alive shortly after
+ *
+ * You may want to use lockAndGetExecuterList() from your calling code.
+ */
+QList<Executer *> ExecCenter::getExecutersFor(const FxItem *fx)
+{
+	QList<Executer*> list;
+	executerList.lock();
+	for (Executer *exec : qAsConst(executerList)) {
+		if (exec->originFx() == fx) {
+			list.append(exec);
+		}
+	}
+	executerList.unlock();
+	return list;
 }
 
 bool ExecCenter::exists(Executer *exec)
@@ -159,7 +183,7 @@ FxListExecuter *ExecCenter::findFxListExecuter(const FxItem *fx)
 
 SceneExecuter *ExecCenter::newSceneExecuter(FxSceneItem *scene, FxItem *parentFx)
 {
-	qDebug() << thread()->objectName() << Q_FUNC_INFO;
+	// qDebug() << thread()->objectName() << Q_FUNC_INFO;
 
 	SceneExecuter *exec = new SceneExecuter(myApp,scene,parentFx);
 	executerList.lockAppend(exec);
@@ -197,6 +221,7 @@ TimeLineExecuter *ExecCenter::newTimeLineExecuter(FxTimeLineItem *timeline, FxIt
 
 	executerList.lockAppend(exec);
 
+	connect(myApp.unitAudio, SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)), exec, SLOT(onAudioStatusChanged(AUDIO::AudioCtrlMsg)), Qt::DirectConnection);
 	connect(exec, SIGNAL(deleteMe(Executer*)), this, SLOT(deleteExecuter(Executer*)), Qt::QueuedConnection);
 	connect(exec, SIGNAL(changed(Executer*)), this, SLOT(on_executer_changed(Executer*)), Qt::DirectConnection);
 	connect(exec, SIGNAL(wantedDeleteFxScene(FxSceneItem*)), &myApp, SLOT(deleteFxSceneItem(FxSceneItem*)));

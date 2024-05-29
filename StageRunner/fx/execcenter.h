@@ -58,6 +58,7 @@ public:
 	~ExecCenter();
 
 	Executer * findExecuter(const FxItem *fx);
+	QList<Executer*> getExecutersFor(const FxItem *fx);
 	bool exists(Executer *exec);
 	bool useExecuter(Executer *exec);
 	bool freeExecuter(Executer *exec);

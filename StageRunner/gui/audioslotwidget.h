@@ -28,7 +28,7 @@
 #include "commandsystem.h"
 #include "frqspectrum.h"
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class AudioControlWidget;
 

@@ -349,7 +349,7 @@ bool FxControl::stopFxScript(FxScriptItem *fxscript)
 }
 
 
-int FxControl::stopAllFxScripts()
+int FxControl::stopAllFxScripts(FxItem *fx)
 {
 	int count = 0;
 	// This fetches a reference to the executer list and locks it!!
@@ -360,9 +360,10 @@ int FxControl::stopAllFxScripts()
 		Executer *exec = it.next();
 		if (exec->type() == Executer::EXEC_SCRIPT) {
 			if (exec->state() != Executer::EXEC_DELETED) {
+				if (fx && exec->originFx() != fx)
+					continue;
 				count++;
 				exec->setFinish();
-				// exec->destroyLater();
 			}
 		}
 	}

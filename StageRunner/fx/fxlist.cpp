@@ -593,7 +593,7 @@ void FxList::moveFromTo(int srcidx, int destidx)
 
 bool FxList::deleteFx(FxItem *fx)
 {
-	if (fx->isActive())
+	if (fx->isUsed())
 		return false;
 
 	bool del = m_fxList.removeOne(fx);

@@ -33,7 +33,7 @@
 #include <QMutex>
 #include <QAudioDeviceInfo>
 
-using namespace AUDIO;
+//using namespace AUDIO;
 
 class AudioSlot;
 class AudioPlayer;
