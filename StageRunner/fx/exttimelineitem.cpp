@@ -2,6 +2,7 @@
 #include "widgets/fxtimelineeditwidget.h"
 #include "fx/fxtimelineitem.h"
 #include "fx/fxitem_includes.h"
+#include "system/log.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneContextMenuEvent>
@@ -62,6 +63,13 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 			m_colorBG = 0x413f32;
 			m_colorBorder = 0x413f32;
 			break;
+
+		default:
+
+			POPUPERRORMSG(tr("System message"),
+						  tr("%1 is not supported (yet) in FX timeline").arg(FxItem::fxTypeToName(fx->fxType())),
+						  m_timeline);
+			return false;
 		}
 
 		if (minLenMs > 0)

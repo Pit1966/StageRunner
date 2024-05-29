@@ -34,6 +34,7 @@ protected:
 	int m_yPos;
 	int m_ySize;
 	QList<TimeLineItem*> m_itemList;		///< this list contains the timeline items in this timeline
+	bool m_isOverlay;						///< Curve track is overlay over other track, not displayed under
 
 public:
 	TimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, int y = 0, int ySize = 24);
@@ -42,6 +43,8 @@ public:
 	inline void setTrackType(TRACK_TYPE type) {m_type = type;}
 	inline int trackId() const {return m_trackID;}
 	inline void setTrackId(int id) {m_trackID = id;}
+	inline bool isOverlay() const {return m_isOverlay;}
+	void setOverlay(bool state);
 	inline int yPos() const {return m_yPos;}
 	inline void setYPos(int y) {m_yPos = y;}
 	inline int yEndPos() const {return m_yPos + m_ySize;}

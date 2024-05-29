@@ -107,7 +107,7 @@ public:
 	int defaultTrackHeight() const {return m_defaultTrackHeight;}
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
-	TimeLineTrack *findTrackWithId(int trackId);
+	TimeLineTrack *findTrackWithId(int trackId) const;
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
@@ -121,6 +121,9 @@ public:
 
 	bool setTrackHeight(int trackID, int h);
 	int trackHeight(int trackID);
+
+	void setTrackOverlay(int trackID, bool enable);
+	bool isTrackOverlay(int trackID) const;
 
 	qreal msPerPixel() const;
 	qreal pixelToMs(qreal x) const;

@@ -82,7 +82,7 @@ protected:
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
 	void recalcPixelPos() override;

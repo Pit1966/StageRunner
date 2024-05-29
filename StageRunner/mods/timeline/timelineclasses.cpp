@@ -11,6 +11,7 @@ TimeLineTrack::TimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, 
 	, m_trackID(id)
 	, m_yPos(y)
 	, m_ySize(ySize)
+	, m_isOverlay(false)
 {
 }
 
@@ -18,6 +19,13 @@ TimeLineTrack::~TimeLineTrack()
 {
 	while (!m_itemList.isEmpty())
 		delete m_itemList.takeFirst();
+}
+
+void TimeLineTrack::setOverlay(bool state)
+{
+	if (m_isOverlay != state) {
+		m_isOverlay = state;
+	}
 }
 
 void TimeLineTrack::appendTimeLineItem(TimeLineItem *item)

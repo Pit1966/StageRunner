@@ -50,8 +50,9 @@ void FxTimeLineScene::dropEvent(QGraphicsSceneDragDropEvent *event)
 			xMs = 0;
 		TimeLineBox *tli = m_timeLine->addTimeLineBox(xMs, 5000, "drop item", trackID);
 		ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
-		extTLI->linkToFxItem(fx);
-
+		if (!extTLI->linkToFxItem(fx)) {
+			m_timeLine->removeTimeLineItem(tli, true);
+		}
 		event->ignore();
 	} else {
 		qDebug() << Q_FUNC_INFO << "something dropped";

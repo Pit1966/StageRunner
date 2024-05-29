@@ -343,6 +343,14 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 			act->setObjectName("shrinkTrack");
 		}
 
+		if (m_myTrack->isOverlay()) {
+			act = menu.addAction(tr("Clear overlay"));
+			act->setObjectName("clearOver");
+		} else {
+			act = menu.addAction(tr("Make overlay"));
+			act->setObjectName("makeOver");
+		}
+
 		menu.addAction(tr("------------"));
 
 		act = menu.addAction(tr("Delete track"));
@@ -377,6 +385,12 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	}
 	else if (cmd == "shrinkTrack") {
 		m_timeline->setTrackHeight(m_trackId, m_timeline->defaultTrackHeight());
+	}
+	else if (cmd == "makeOver") {
+		m_timeline->setTrackOverlay(m_trackId, true);
+	}
+	else if (cmd == "clearOver") {
+		m_timeline->setTrackOverlay(m_trackId, false);
 	}
 
 	m_nodeClicked = false;
@@ -420,15 +434,16 @@ void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 	pen.setColor(m_colorBorder);
 	painter->setPen(pen);
 
-	QRectF textRect = boundingRect();
-	textRect.adjust(5,-2,-5,-10);
-	painter->drawText(textRect, m_label);
-
 	if (!m_myTrack)
 		m_myTrack = m_timeline->findTrackWithId(m_trackId);
 	if (!m_myTrack)
 		return;
 
+	if (!m_myTrack->isOverlay()) {
+		QRectF textRect = boundingRect();
+		textRect.adjust(5,-2,-5,-10);
+		painter->drawText(textRect, m_label);
+	}
 
 
 	// draw nodes

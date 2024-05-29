@@ -5,8 +5,7 @@
 
 
 FxTimeLineItem::FxTimeLineItem(FxList *fxList)
-	: QObject()
-	, FxItem(fxList)
+	: FxItem(fxList)
 	, m_tracks{}
 	, m_timelines{}
 	, m_timeLineDurationMs(0)
@@ -15,8 +14,7 @@ FxTimeLineItem::FxTimeLineItem(FxList *fxList)
 }
 
 FxTimeLineItem::FxTimeLineItem(const FxTimeLineItem &o)
-	: QObject()
-	, FxItem(o.myParentFxList)
+	: FxItem(o.myParentFxList)
 	, m_tracks{}
 	, m_timelines{}
 	, m_timeLineDurationMs(0)

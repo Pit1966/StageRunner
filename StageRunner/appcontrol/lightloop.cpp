@@ -94,7 +94,7 @@ void LightLoop::processPendingEvents()
 	QList<FxSceneItem*>inactive_scenes;
 
 	// Lets have a look onto the list with active marked scenes
-	MutexQHash<int, FxSceneItem*> & scenes = lightCtrlRef.activeScenes;
+	MutexQHash<int, QPointer<FxSceneItem>> &scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
 	// add scanner scenes
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -104,7 +104,10 @@ void LightLoop::processPendingEvents()
 	}
 
 	// Get dmx channel output for every scene in the list
-	foreach (FxSceneItem * sceneitem, scenes) {
+	for (FxSceneItem *sceneitem : qAsConst(scenes)) {
+		if (sceneitem == nullptr)
+			continue;
+
 //		if (sceneitem->id() == 1) {
 //			int a = 0;
 //		}

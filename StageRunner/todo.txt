@@ -1,6 +1,6 @@
 /// @todo faster lookup of fxitems that are hooked to an dmx channel
 - timeline executer: stop audio fx which were started from the timeline when stop is clicked in timeline editor / or if timeline is finished from outside
-
+- timeline executer dialog: fix envelope when timeline is not started from beginning
 - findScriptExecuter müsste eine Liste von Executern zurückgeben, wenn der Effekt mehrfach gestartet wurde
 
 - static global_fx_list sollte auch ein Hash sein für schnelle Suche ID->Fx

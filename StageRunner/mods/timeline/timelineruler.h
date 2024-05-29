@@ -28,7 +28,7 @@ public:
 
 protected:
 	// reimplemented from base
-	void mousePressEvent(QGraphicsSceneMouseEvent *event);
+	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void recalcPixelPos() override;
 	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
 	QRectF boundingRect() const override;

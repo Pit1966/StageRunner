@@ -389,8 +389,7 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 	else if (fxtype == FX_SCRIPT) {
 		FxScriptItem *fxscript = dynamic_cast<FxScriptItem*>(fx);
 		if (fxscript) {
-			qDebug() << fxscript->rawScript();
-			ScriptExecuter *scriptexec = myApp.unitFx->startFxScript(fxscript);
+			/*ScriptExecuter *scriptexec = */myApp.unitFx->startFxScript(fxscript);
 		}
 
 	}

@@ -29,6 +29,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QPointer>
 
 
 class AppCentral;
@@ -49,7 +50,7 @@ public:
 	AppCentral &myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
-	mutable MutexQHash<int,FxSceneItem*>activeScenes;
+	mutable MutexQHash<int,QPointer<FxSceneItem>>activeScenes;
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];

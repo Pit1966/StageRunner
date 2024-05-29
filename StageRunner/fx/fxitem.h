@@ -66,7 +66,7 @@ class FxItem;
 typedef QList<FxItem*> FxItemList;
 
 
-class FxItem : public VarSet
+class FxItem : public QObject, public VarSet
 {
 private:
 	static QList<FxItem*> *global_fx_list;
@@ -109,6 +109,7 @@ public:
 	static FxItem *checkItemUniqueId(FxItem *item);
     static QList<FxItem*> findFxByName(const QString &name, FxSearchMode mode = FXSM_EXACT);
 	static void setLowestID(int lowid) {m_lowestIdForGenerator = lowid;}
+	static QString fxTypeToName(int type);
 
 	inline void setParentFxList(FxList *fxList) {myParentFxList = fxList;}
 	inline FxList * parentFxList() const {return myParentFxList;}
@@ -161,6 +162,11 @@ public:
 	virtual void setLoopValue(qint32 val) = 0;
 	virtual bool isRandomized() const {return false;}
 	virtual void setRandomized(bool state) {Q_UNUSED(state);}
+	/**
+	 * @brief Reimplement this to give fx control the opportunity to check wheter the FxItem is active (most likely processed) or not
+	 * @return
+	 */
+	virtual bool isActive() const {return false;}
 	virtual void resetFx() = 0;
 	virtual QString widgetPosition() const {return QString();}
 	virtual void setWidgetPosition(const QString &geometry) {Q_UNUSED(geometry);}

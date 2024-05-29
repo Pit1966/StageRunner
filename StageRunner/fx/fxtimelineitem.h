@@ -12,7 +12,7 @@
 class FxTimeLineObj;
 class FxTimeLineTrack;
 
-class FxTimeLineItem : public QObject, public FxItem
+class FxTimeLineItem : public FxItem
 {
 	Q_OBJECT			// Q_DECLARE_TR_FUNCTIONS(FxTimeLineItem)
 

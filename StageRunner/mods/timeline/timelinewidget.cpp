@@ -169,7 +169,7 @@ int TimeLineWidget::timeLineHeight() const
  * @param trackId
  * @return address of TimeLineTrack instance or nullptr, if not found
  */
-TimeLineTrack *TimeLineWidget::findTrackWithId(int trackId)
+TimeLineTrack *TimeLineWidget::findTrackWithId(int trackId) const
 {
 	for (int t=0; t<m_tracks.size(); t++) {
 		if (m_tracks.at(t)->trackId() == trackId)
@@ -369,6 +369,26 @@ int TimeLineWidget::trackHeight(int trackID)
 		return 0;
 
 	return track->ySize();
+}
+
+void TimeLineWidget::setTrackOverlay(int trackID, bool enable)
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track)
+		return;
+
+	track->setOverlay(enable);
+	recalcTrackSizes();
+	updateScene();
+}
+
+bool TimeLineWidget::isTrackOverlay(int trackID) const
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track)
+		return false;
+
+	return track->isOverlay();
 }
 
 qreal TimeLineWidget::msPerPixel() const
@@ -639,6 +659,11 @@ void TimeLineWidget::recalcTrackSizes(int from)
 	int firstChangedTrack = 0;
 	for (int t = 1; t<m_tracks.size(); t++) {
 		int newy = m_tracks.at(t-1)->yEndPos();
+		if (m_tracks.at(t)->isOverlay()) {
+			newy = m_tracks.at(t-1)->yPos();
+			m_tracks.at(t)->setYSize(m_tracks.at(t-1)->ySize());
+		}
+
 		if (m_tracks.at(t)->yPos() != newy) {
 			m_tracks.at(t)->setYPos(newy);
 			if (firstChangedTrack == 0)

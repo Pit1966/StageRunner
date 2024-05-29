@@ -31,7 +31,8 @@ QRecursiveMutex FxItem::global_fx_lock;
 qint32 FxItem::m_lowestIdForGenerator = 1;
 
 FxItem::FxItem()
-	: VarSet()
+	: QObject()
+	, VarSet()
 	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {
@@ -41,7 +42,8 @@ FxItem::FxItem()
 }
 
 FxItem::FxItem(FxList *fxList)
-	: VarSet()
+	: QObject()
+	, VarSet()
 	, myParentFxList(fxList)
 	, playedInRandomList(false)
 {
@@ -51,7 +53,8 @@ FxItem::FxItem(FxList *fxList)
 }
 
 FxItem::FxItem(const FxItem &o)
-	: VarSet()
+	: QObject()
+	, VarSet()
 	, myParentFxList(nullptr)
 	, playedInRandomList(false)
 {
@@ -211,6 +214,31 @@ QList<FxItem *> FxItem::findFxByName(const QString &name, FxSearchMode mode)
 
     }
 	return list;
+}
+
+QString FxItem::fxTypeToName(int type)
+{
+	switch (type) {
+
+	case FX_AUDIO:
+		return "Audio FX";			// is Audio Fx
+	case FX_SCENE:
+		return "Light scene FX";	// is Light Scene
+	case FX_AUDIO_PLAYLIST:
+		return "Audio Playlist";	// is Audio Play List
+	case FX_SEQUENCE:
+		return "Sequence";			// is a Sequence of FxItems
+	case FX_CLIP:
+		return "Video clip";		// is a video clip (or audio)
+	case FX_SCRIPT:
+		return "Script FX";			// is a script file
+	case Fx_CUE:
+		return "Cue FX";			// is a cue list for existing other fx types
+	case FX_TIMELINE:
+		return "Timeline";			// is a time line (editable like in video editors)
+	default:
+		return "Unknown FX type";
+	}
 }
 
 /**

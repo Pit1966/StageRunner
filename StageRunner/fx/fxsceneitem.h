@@ -82,7 +82,7 @@ public:
 	void setLive(bool state) const;
 	void setBlacked(int mixline, bool state);
 	bool isBlacked(int mixline) const {return wasBlacked[mixline];}
-	inline bool isActive() const {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
+	inline bool isActive() const override {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
 	inline bool isLive() const {return myStatus & SCENE_STAGE_LIVE;}
 	inline bool isOnStageIntern() const {return myStatus & SCENE_STAGE_INTERN;}
