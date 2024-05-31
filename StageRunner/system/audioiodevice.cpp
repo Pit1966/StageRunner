@@ -44,6 +44,8 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	audio_buffer = new QByteArray;
 	m_fftEnabled = false;
 	m_currentPlaybackSamplerate = 0;
+	m_currentPan = 0;
+	m_maxPan = 200;
 
 	loop_count = 0;
 	loop_target = 0;
@@ -61,7 +63,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 		audio_error = AUDIO::AUDIO_ERR_DECODER;
 		return;
 	}
-	qDebug() << "audio:" << audio_decoder->error();
+	// qDebug() << Q_FUNC_INFO << audio_decoder->error();
 
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
@@ -151,10 +153,13 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 		maxlen = avail;
 	}
 
+
 	memcpy(data, audio_buffer->data()+bytes_read, size_t(maxlen));
 	bytes_read += maxlen;
 
-	calcVuLevel(data,maxlen,*audio_format);
+	if (m_currentPan > 0)
+		calcPanning(data, maxlen, *audio_format);
+	calcVuLevel(data, maxlen, *audio_format);
 	// emit calcVuLevel(data,maxlen,*audio_format);
 	// qDebug() << "emit calc vu level" << QThread::currentThread()->objectName();
 
@@ -201,6 +206,27 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
 	}
 
+}
+
+void AudioIODevice::setPanning(int pan, int maxPan)
+{
+	m_currentPan = pan;
+	m_maxPan = maxPan;
+	if (pan == 0)		// deactivated
+		return;
+
+	// we have to calculat amplification factors for both the left and the right channel
+
+	m_panVolLeft = qreal(maxPan - pan) / maxPan;
+	m_panVolRight = qreal(pan) / maxPan;
+
+
+	// m_panVolLeft = QAudio::convertVolume(m_panVolLeft,
+	// 									 QAudio::LogarithmicVolumeScale,
+	// 									 QAudio::LinearVolumeScale);
+	// m_panVolRight = QAudio::convertVolume(m_panVolRight,
+	// 									 QAudio::LogarithmicVolumeScale,
+	// 									 QAudio::LinearVolumeScale);
 }
 
 bool AudioIODevice::isDecoding() const
@@ -350,7 +376,8 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	}
 
 	// qDebug("left:%f right:%f",left,right);
-	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
+	if (left/frames > frame_energy_peak)
+		frame_energy_peak = left/frames;
 
 	m_leftAvg->append(left);
 	m_rightAvg->append(right);
@@ -454,6 +481,42 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 		*found = false;
 
 	return QAudioDeviceInfo();
+}
+
+void AudioIODevice::calcPanning(char *data, int size, const QAudioFormat &audioFormat)
+{
+	int channels = audioFormat.channelCount();
+	qint64 frames = size / channels;
+
+	switch (audioFormat.sampleType()) {
+	case QAudioFormat::SignedInt:
+	case QAudioFormat::UnSignedInt:
+		switch (audioFormat.sampleSize()) {
+		case 16:
+			{
+				qint16 *dat = reinterpret_cast<qint16*>(data);
+				frames /= 2;
+
+				for (int chan = 0; chan < channels; chan++) {
+					for (int frame = 0; frame<frames; frame++) {
+						const qint16 val = dat[frame*channels+chan];
+						const qreal valF = AudioIODevice::pcm16ToReal(val, audioFormat);
+						switch (chan) {
+						case 0:
+							dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolLeft);
+							break;
+						case 1:
+							dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolRight);
+							break;
+						}
+					}
+				}
+
+			}
+			break;
+		}
+		break;
+	}
 }
 
 void AudioIODevice::start(int loops)

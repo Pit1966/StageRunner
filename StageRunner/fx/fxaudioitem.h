@@ -48,7 +48,8 @@ public:
 	static QStringList attachedCmdStrings;
 
 	qint32 initialVolume;
-	qint32 currentVolume;
+	qint32 currentVolume;					///< this is set from volume dials in gui too!
+	qint32 panning;							///< 0 means no panning. Otherwise 1 - MAX_PAN (200) is complete left to complete right
 	qint64 audioDuration;					///< Length of audio stream in ms (or 0, if unknown)
 	qint64 initialSeekPos;					///< This is the time in ms the audio file should start on play
 	qint64 stopAtSeekPos;					///< Playing of audio will be stopped at this time (ms) (if not NULL)

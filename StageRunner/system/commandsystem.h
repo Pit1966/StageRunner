@@ -44,6 +44,7 @@ enum CtrlCmd {
 	CMD_SCENE_FADETO			= 12,
 	CMD_VIDEO_START				= 13,
 	CMD_VIDEO_STATUS_CHANGED	= 14,
+	CMD_AUDIO_CHANGE_PAN		= 15,
 
 
 	CMD_STATUS_REPORT		= CMD_NONE,
@@ -115,6 +116,7 @@ public:
 	CtrlCmd ctrlCmd			= CMD_STATUS_REPORT;
 	AudioStatus currentAudioStatus = AUDIO_NO_STATE;
 	int volume				= -1;
+	int pan					= -1;
 	int fadetime			= -1;
 	int progress			= -1;
 	int progressTime		= 0;

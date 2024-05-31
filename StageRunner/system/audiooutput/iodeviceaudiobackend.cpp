@@ -148,6 +148,14 @@ void IODeviceAudioBackend::setVolume(int vol, int maxvol)
 	m_audioOutput->setVolume(v);
 }
 
+void IODeviceAudioBackend::setPanning(int pan, int maxpan)
+{
+	m_currentPan = pan;
+	// we have to do the panning by hand.
+	// so audio data must be manipulated and we do that in the device where the data is read
+	m_audioIODev->setPanning(pan, maxpan);
+}
+
 int IODeviceAudioBackend::volume() const
 {
 	return m_currentVolume;

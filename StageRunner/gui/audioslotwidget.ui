@@ -204,6 +204,25 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="qsynthKnob" name="panDial">
+     <property name="maximumSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>200</number>
+     </property>
+     <property name="sliderPosition">
+      <number>100</number>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>

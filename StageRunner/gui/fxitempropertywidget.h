@@ -25,6 +25,7 @@
 #define FXITEMPROPERTYWIDGET_H
 
 #include "ui_fxitempropertywidget.h"
+#include <QPointer>
 
 class FxItem;
 class FxAudioItem;
@@ -37,7 +38,7 @@ class FxItemPropertyWidget : public QWidget, public Ui::FxItemPropertyWidget
 	Q_OBJECT
 private:
 	FxItem *cur_fx;						///< A pointer to the actually set FxItem (of NULL if none)
-	FxAudioItem *cur_fxa;				///< A convenience pointer to FxItem if it is an FxAudioItem (Type FX_AUDIO)
+	QPointer<FxAudioItem >cur_fxa;		///< A convenience pointer to FxItem if it is an FxAudioItem (Type FX_AUDIO)
 	FxSceneItem *cur_fxs;				///< A convenience pointer to FxItem if it is an FxSceneItem (Type FX_SCENE)
 	FxSeqItem *cur_fxseq;
 	FxClipItem *cur_fxclip;				///< A convenience pointer to FxItem if it is an FxClipItem (Type FX_CLIP)
@@ -56,6 +57,7 @@ public slots:
 
 private slots:
 	void on_initialVolDial_sliderMoved(int position);
+	void on_initialPanDial_sliderMoved(int position);
 	void on_videoInitialVolDial_sliderMoved(int position);
 	void on_nameEdit_textEdited(const QString &arg1);
 	void on_keyEdit_textEdited(const QString &arg1);
@@ -89,6 +91,7 @@ private slots:
 	void on_videoFilePathEdit_doubleClicked();
 
 	void on_findAudioFileButton_clicked();
+	void on_panEnableCheck_clicked(bool checked);
 
 
 signals:

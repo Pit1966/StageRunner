@@ -482,6 +482,7 @@ bool AudioControl::_startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *
 		dmx_audio_ctrl_status[slotnum] = DMX_SLOT_UNDEF;
 		AudioCtrlMsg msg(fxa, slotnum, CMD_AUDIO_START_AT, exec);
 		msg.volume = initVol;
+		msg.pan = fxa->panning;
 		msg.fadetime = fadeInMs;
 		if (fxa->isDmxStarted && initVol < 0 && fxa->initialVolume == 0) {
 			msg.isDmxVolumeLocked = true;
@@ -915,6 +916,10 @@ void AudioControl::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 		setVolume(msg.slotNumber,msg.volume);
 		setVolumeInFx(msg.slotNumber,msg.volume, msg.isActive);
 		break;
+	case CMD_AUDIO_CHANGE_PAN:
+		setPanning(msg.slotNumber,msg.pan);
+		// setPanningInFx(msg.slotNumber,msg.pan, msg.isActive);
+		break;
 	case CMD_AUDIO_PAUSE:
 		pauseFxAudio(msg.slotNumber);
 		break;
@@ -1112,6 +1117,29 @@ void AudioControl::setDmxVolumeToLocked(int slot)
 {
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
 	audioSlots[slot]->setDmxVolLockState(DMX_AUDIO_LOCKED);
+}
+
+/**
+ * @brief Set panning for audio in slot
+ * @param slot
+ * @param pan
+ *
+ * This function is called by audioCtrlReceiver slot.
+ * Usualy when the software calls it internaly not directly by a slider move
+ */
+void AudioControl::setPanning(int slot, int pan)
+{
+	QMutexLocker lock(slotMutex);
+
+	if (pan < 1) {
+		pan = 1;
+	}
+	else if (pan > MAX_PAN) {
+		pan = MAX_PAN;
+	}
+	if (slot >= 0 && slot < used_slots) {
+		audioSlots[slot]->setPanning(pan);
+	}
 }
 
 bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)

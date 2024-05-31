@@ -118,6 +118,17 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 	if (fx->fxType() == FX_AUDIO) {
 		cur_fxa = static_cast<FxAudioItem*>(fx);
 		initialVolDial->setValue(cur_fxa->initialVolume);
+		initialPanDial->setMaximum(MAX_PAN);
+		if (cur_fxa->panning > 0) {
+			panEnableCheck->setChecked(true);
+			initialPanDial->setEnabled(true);
+			initialPanDial->setValue(cur_fxa->panning);
+		} else {
+			panEnableCheck->setChecked(false);
+			initialPanDial->setEnabled(false);
+			initialPanDial->setValue(MAX_PAN / 2);
+		}
+
 		audioFilePathEdit->setText(cur_fxa->filePath());
 		if (!QFile::exists(cur_fxa->filePath()))
 				audioFilePathEdit->setStyleSheet("color: darkRed;");
@@ -160,6 +171,8 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 			videoLoopsSpin->setValue(cur_fxclip->loopTimes);
 			videoBlackAtEndCheck->setChecked(cur_fxclip->blackAtVideoEnd);
 			videoInitialVolDial->setValue(cur_fxclip->initialVolume);
+			panEnableCheck->setEnabled(false);
+			cur_fxclip->panning = 0;
 		} else {
 			videoGroup->setVisible(false);
 		}
@@ -237,12 +250,20 @@ void FxItemPropertyWidget::setEditable(bool state, bool once)
 
 void FxItemPropertyWidget::on_initialVolDial_sliderMoved(int position)
 {
-	if (FxItem::exists(cur_fxa)) {
+	if (cur_fxa) {
 		cur_fxa->initialVolume = position;
 		cur_fxa->setModified(true);
 		emit modified(cur_fxa);
 	}
+}
 
+void FxItemPropertyWidget::on_initialPanDial_sliderMoved(int position)
+{
+	if (cur_fxa) {
+		cur_fxa->panning = position;
+		cur_fxa->setModified(true);
+		emit modified(cur_fxa);
+	}
 }
 
 void FxItemPropertyWidget::on_videoInitialVolDial_sliderMoved(int position)
@@ -625,7 +646,7 @@ void FxItemPropertyWidget::on_videoFilePathEdit_doubleClicked()
 
 void FxItemPropertyWidget::on_findAudioFileButton_clicked()
 {
-	if (!FxItem::exists(cur_fxa)) return;
+	if (!cur_fxa) return;
 
 	QString name = QFileInfo(cur_fxa->filePath()).fileName();
 	static QString dir = QFileInfo(cur_fxa->filePath()).absoluteDir().path();
@@ -643,3 +664,16 @@ void FxItemPropertyWidget::on_findAudioFileButton_clicked()
 		dir = QFileInfo(newpath).absoluteDir().path();
 	}
 }
+
+void FxItemPropertyWidget::on_panEnableCheck_clicked(bool checked)
+{
+	if (!cur_fxa) return;
+
+	initialPanDial->setEnabled(checked);
+	if (checked) {
+		cur_fxa->panning = initialPanDial->value();
+	} else {
+		cur_fxa->panning = 0;
+	}
+}
+

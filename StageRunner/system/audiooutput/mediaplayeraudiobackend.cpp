@@ -166,6 +166,14 @@ void MediaPlayerAudioBackend::setVolume(int vol, int maxvol)
 	m_mediaPlayer->setVolume(v);
 }
 
+void MediaPlayerAudioBackend::setPanning(int pan, int maxpan)
+{
+	///@implement me
+	/// panning with QMediaPlayer not possible ??
+	Q_UNUSED(pan)
+	Q_UNUSED(maxpan)
+}
+
 int MediaPlayerAudioBackend::volume() const
 {
 	return m_currentVolume;

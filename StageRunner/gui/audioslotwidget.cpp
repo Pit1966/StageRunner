@@ -132,6 +132,7 @@ void AudioSlotWidget::init_vars()
 	slotNumber = -1;
 	isAbsoluteTime = false;
 	m_volumeDialPressed = false;
+	m_panDialPressed = false;
 	m_currentPauseState = false;
 	m_currentPlayState = false;
 }
@@ -145,6 +146,7 @@ void AudioSlotWidget::init_gui()
 
 	connect(meterWidget,SIGNAL(sliderMoved(float)),this,SLOT(onMeterSliderMoved(float)));
 	connect(slotVolumeDial,SIGNAL(sliderMoved(int)),this,SLOT(onVolumeDialMoved(int)));
+	connect(panDial,SIGNAL(sliderMoved(int)),this,SLOT(onPanDialMoved(int)));
 	connect(meterWidget,SIGNAL(sliderPressed()),this,SLOT(on_slotVolumeDial_sliderPressed()));
 	connect(meterWidget,SIGNAL(sliderReleased()),this,SLOT(on_slotVolumeDial_sliderReleased()));
 }
@@ -205,6 +207,11 @@ void AudioSlotWidget::onVolumeDialMoved(int val)
 	onVolumeChangedInGUI(val);
 }
 
+void AudioSlotWidget::onPanDialMoved(int val)
+{
+	onPanningChangedInGUI(val);
+}
+
 void AudioSlotWidget::onVolumeChangedInGUI(int position)
 {
 	AudioCtrlMsg msg;
@@ -214,6 +221,17 @@ void AudioSlotWidget::onVolumeChangedInGUI(int position)
 	msg.isActive = m_volumeDialPressed;
 	emit audioCtrlCmdEmitted(msg);
 	emit volumeChanged(slotNumber,position);
+}
+
+void AudioSlotWidget::onPanningChangedInGUI(int pan)
+{
+	AudioCtrlMsg msg;
+	msg.ctrlCmd = CMD_AUDIO_CHANGE_PAN;
+	msg.slotNumber = slotNumber;
+	msg.pan = pan;
+	msg.isActive = m_panDialPressed;
+	emit audioCtrlCmdEmitted(msg);
+	emit panningChanged(slotNumber,pan);
 }
 
 void AudioSlotWidget::on_slotVolumeDial_doubleClicked()
@@ -256,7 +274,7 @@ void AudioSlotWidget::setPauseState(bool state)
 
 void AudioSlotWidget::updateGuiStatus(AUDIO::AudioCtrlMsg msg)
 {
-	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus;
+	// qDebug() << "AudioSlotWidget: msg:" << msg.ctrlCmd << msg.currentAudioStatus << "vol" << msg.volume << msg.pan;
 	if (msg.ctrlCmd == CMD_STATUS_REPORT || msg.ctrlCmd == CMD_AUDIO_STATUS_CHANGED) {
 		// Set Play-Status Buttons in Audio Slot Panel
 		switch (msg.currentAudioStatus) {
@@ -310,6 +328,12 @@ void AudioSlotWidget::updateGuiStatus(AUDIO::AudioCtrlMsg msg)
 		if (msg.volume >= 0) {
 			slotVolumeDial->setValue(msg.volume);
 			meterWidget->setVolume(float(msg.volume) / float(slotVolumeDial->maximum()));
+		}
+		if (msg.pan > 0) {
+			panDial->setValue(msg.pan);
+		}
+		else if (msg.pan == 0) {
+			panDial->setValue(MAX_PAN / 2);
 		}
 	}
 	else if (msg.ctrlCmd == CMD_VIDEO_STATUS_CHANGED) {
@@ -366,6 +390,7 @@ void AudioSlotWidget::updateGuiStatus(AUDIO::AudioCtrlMsg msg)
 			slotVolumeDial->setValue(msg.volume);
 			meterWidget->setVolume(float(msg.volume) / float(slotVolumeDial->maximum()));
 		}
+		panDial->setValue(MAX_PAN / 2);
 	}
 }
 
@@ -387,8 +412,6 @@ void AudioSlotWidget::setFFTSpectrum(FrqSpectrum *spectrum)
 	fftWidget->setFrqSpectrum(spectrum);
 }
 
-
-
 void AudioSlotWidget::on_slotVolumeDial_sliderPressed()
 {
 	m_volumeDialPressed = true;
@@ -398,3 +421,14 @@ void AudioSlotWidget::on_slotVolumeDial_sliderReleased()
 {
 	m_volumeDialPressed = false;
 }
+
+void AudioSlotWidget::on_panDial_sliderPressed()
+{
+	m_panDialPressed = true;
+}
+
+void AudioSlotWidget::on_panDial_sliderReleased()
+{
+	m_panDialPressed = false;
+}
+

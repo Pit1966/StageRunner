@@ -151,6 +151,7 @@ void FxAudioItem::init()
 
 	addExistingVar(initialVolume,"InitialVolume",0,MAX_VOLUME,INITIAL_VOLUME);
 	addExistingVar(currentVolume,"CurrentVolume",0,MAX_VOLUME,INITIAL_VOLUME);
+	addExistingVar(panning,"Panning",0, MAX_PAN, 0);
 	addExistingVar(audioDuration,"DurationMS");
 	addExistingVar(initialSeekPos,"InitialSeekPos");
 	addExistingVar(stopAtSeekPos,"StopAtSeekPos");

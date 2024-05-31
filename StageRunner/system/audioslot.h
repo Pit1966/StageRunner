@@ -33,6 +33,7 @@
 #include <QFile>
 #include <QTimeLine>
 #include <QAudioFormat>
+#include <QPointer>
 
 #ifdef USE_SDL
 #  include <SDL2/SDL.h>
@@ -65,7 +66,7 @@ private:
 	AudioPlayer *m_audioPlayer;				///< base class interface for audio implementation
 
 	AudioStatus m_runStatus;
-	FxAudioItem *m_currentFx;				///< The current/last Fx loaded into this audio slot
+	QPointer<FxAudioItem> m_currentFx;				///< The current/last Fx loaded into this audio slot
 	Executer *m_currentExecuter;			///< A Pointer to an Executor if the sound was started by one
 
 	QTimer m_volumeSetHelpTimer;			///< help timer. Used to define an interval for the log output, when volume is changed manualy
@@ -91,7 +92,7 @@ public:
 	bool select();
 	void unselect();
 	bool startFxAudio(const AUDIO::AudioCtrlMsg &msg);
-	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1, int fadeInMs = -1);
+	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1, int fadeInMs = -1, int pan = -1);
 	bool stopFxAudio();
 	bool pauseFxAudio(bool state);
 	bool fadeoutFxAudio(int targetVolume, int time_ms);
@@ -102,6 +103,7 @@ public:
 	void setDmxVolLockState(DMXLockingMode state) {m_dmxVolLockState = state;}
 	inline int volume() {return m_currentVolume;}
 	void setMasterVolume(int vol);
+	void setPanning(int pan);
 	FxAudioItem *currentFxAudio();
 	Executer * currentExecuter();
 	int currentRunTime() const;
@@ -129,6 +131,7 @@ public:
 
 private:
 	void _setVolume(int vol);
+	void _setPanning(int pan);
 	void emit_audio_play_progress();
 
 private slots:

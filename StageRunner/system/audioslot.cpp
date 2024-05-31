@@ -158,7 +158,7 @@ bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
 	if (msg.ctrlCmd == CMD_AUDIO_START_AT)
 		startPosMs = -1;
 
-	bool ok = startFxAudio(msg.fxAudio, msg.executer, startPosMs, msg.volume, msg.fadetime);
+	bool ok = startFxAudio(msg.fxAudio, msg.executer, startPosMs, msg.volume, msg.fadetime, msg.pan);
 
 	if (msg.isDmxVolumeLocked)
 		setDmxVolLockState(DMX_AUDIO_LOCKED);
@@ -166,7 +166,7 @@ bool AudioSlot::startFxAudio(const AudioCtrlMsg &msg)
 	return ok;
 }
 
-bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol, int fadeInMs)
+bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs, int initVol, int fadeInMs, int pan)
 {
 	if (!m_audioPlayer) {
 		m_runStatus = AUDIO_ERROR;
@@ -239,6 +239,8 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	else {
 		setVolume(targetVolume);
 	}
+	// set panning
+	setPanning(pan);
 
 	// Start playing
 	m_audioPlayer->setStartDelay(fxa->preDelay());
@@ -247,6 +249,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fxa,slotNumber);
 	msg.volume = m_currentVolume;
+	msg.pan = pan;
 	msg.executer = exec;
 	emit audioCtrlMsgEmitted(msg);
 
@@ -502,6 +505,11 @@ void AudioSlot::setMasterVolume(int vol)
 	}
 }
 
+void AudioSlot::setPanning(int pan)
+{
+	_setPanning(pan);
+}
+
 FxAudioItem *AudioSlot::currentFxAudio()
 {
 	if (!FxItem::exists(m_currentFx)) {
@@ -533,7 +541,7 @@ int AudioSlot::currentRunTime() const
 
 void AudioSlot::emit_audio_play_progress()
 {
-	if (!FxItem::exists(m_currentFx)) return;
+	if (!m_currentFx) return;
 
 	if (!m_currentFx->audioDuration || m_runStatus != AUDIO_RUNNING) return;
 
@@ -549,7 +557,7 @@ void AudioSlot::emit_audio_play_progress()
 
 	emit audioProgressChanged(slotNumber, m_currentFx, int(per_mille));
 
-	AudioCtrlMsg msg(m_currentFx,slotNumber);
+	AudioCtrlMsg msg(m_currentFx, slotNumber);
 	msg.currentAudioStatus = m_runStatus;
 	msg.progress = int(per_mille);
 	msg.progressTime = int(time_ms);
@@ -685,7 +693,8 @@ void AudioSlot::on_volset_timer_finished()
 void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
 {
 	// Test if Message is for me
-	if (msg.slotNumber != slotNumber) return;
+	if (msg.slotNumber != slotNumber)
+		return;
 
 	switch (msg.ctrlCmd) {
 	case CMD_AUDIO_STOP:
@@ -924,4 +933,10 @@ void AudioSlot::_setVolume(int vol)
 	// it is not allowed to start timers from different thread
 	// this works from every thread
 	QMetaObject::invokeMethod(&m_volumeSetHelpTimer, "start");
+}
+
+void AudioSlot::_setPanning(int pan)
+{
+
+	m_audioPlayer->setPanning(pan, MAX_PAN);
 }

@@ -41,6 +41,7 @@ public:
 
 private:
 	bool m_volumeDialPressed;
+	bool m_panDialPressed;
 	bool m_currentPlayState;
 	bool m_currentPauseState;
 
@@ -66,13 +67,17 @@ private slots:
 	void on_slotPlayButton_clicked();
 	void on_slotStopButton_clicked();
 	void onVolumeChangedInGUI(int position);
+	void onPanningChangedInGUI(int pan);
 	void on_slotVolumeDial_doubleClicked();
 	void on_slotAbsButton_clicked(bool checked);
 	void on_slotPauseButton_clicked();
 	void onMeterSliderMoved(float valf);
 	void onVolumeDialMoved(int val);
+	void onPanDialMoved(int val);
 	void on_slotVolumeDial_sliderPressed();
 	void on_slotVolumeDial_sliderReleased();
+	void on_panDial_sliderPressed();
+	void on_panDial_sliderReleased();
 
 public slots:
 	void setPlayState(bool state);
@@ -86,6 +91,7 @@ signals:
 	void stopClicked(int slotNum);
 	void pauseClicked(int slotNum);
 	void volumeChanged(int slotNum, int vol);
+	void panningChanged(int slotNum, int pan);
 	void audioCtrlCmdEmitted(AUDIO::AudioCtrlMsg msg);
 };
 

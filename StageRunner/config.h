@@ -43,6 +43,7 @@
 // FORMAT 4 since Mai 2024: new FxTimeLine class
 #define PROJECT_FORMAT 4						// This is the datafile format for the project file
 #define MAX_VOLUME 100
+#define MAX_PAN 200								// this is the complete to the right val
 #define INITIAL_VOLUME 66
 #define LIGHT_LOOP_INTERVAL_MS 20				// Interval time the light loop will be executed with in ms
 #define MAX_DMX_FADER_RANGE 10000				// This value is mapped to 255. But the resolution in the scenes needs a better graduation

@@ -136,8 +136,9 @@ void AudioControlWidget::init_gui()
 
 void AudioControlWidget::audioCtrlReceiver(AUDIO::AudioCtrlMsg msg)
 {
-	if (debug > 5) DEBUGTEXT("%s: Cmd:%d, AudioStatus:%d, Volume:%d, Progress:%d ProgressTime: %d"
-							 ,Q_FUNC_INFO,msg.ctrlCmd,msg.currentAudioStatus,msg.volume,msg.progress,msg.progressTime);
+	if (debug > 5)
+		DEBUGTEXT("%s: Cmd:%d, AudioStatus:%d, Volume:%d, Progress:%d ProgressTime: %d"
+				  ,Q_FUNC_INFO,msg.ctrlCmd,msg.currentAudioStatus,msg.volume,msg.progress,msg.progressTime);
 	if (msg.slotNumber < 0 || msg.slotNumber >= MAX_AUDIO_SLOTS) {
 		DEBUGERROR("AudioControlWidget::audioCtrlReceiver: illegal slot number received: %d", msg.slotNumber);
 		return;

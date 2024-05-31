@@ -59,6 +59,8 @@ public:
 	void examineQAudioFormat(AudioFormat & form);
 	AudioFormat & audioFormat() const {return *audio_format;}
 
+	void setPanning(int pan, int maxPan);
+
 private:
 	QString current_filename;
 	QElapsedTimer run_time;
@@ -75,6 +77,10 @@ private:
 	double sample_peak;
 
 	int m_currentPlaybackSamplerate;
+	int m_currentPan;							// a value of 0 means, panning is disabled
+	int m_maxPan;								// usualy 200
+	qreal m_panVolLeft;							// for panning volume left channel (0-1)
+	qreal m_panVolRight;						// for panning volume right channel (0-1)
 
 	/// @todo move this to AudioPlayer
 	int loop_target;							// How many loops of the sound to play
@@ -107,12 +113,14 @@ public:
 	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
 	inline static qreal realToRealNorm(qreal real, const QAudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
 	inline static qreal realNormToReal(qreal realnorm, const QAudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
-
 	inline static qreal pcm32ToReal(qint64 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
 
 	void setLoopCount(int loops);
 
 	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
+
+protected:
+	void calcPanning(char *data, int size, const QAudioFormat &audioFormat);
 
 public slots:
 	void start(int loops = 1);

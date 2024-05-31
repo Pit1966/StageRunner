@@ -154,6 +154,11 @@ void SDL2AudioBackend::setVolume(int vol, int maxvol)
 	Mix_Volume(m_parentAudioSlot.slotNumber, v);
 }
 
+void SDL2AudioBackend::setPanning(int pan, int maxpan)
+{
+	///@implement me
+}
+
 int SDL2AudioBackend::volume() const
 {
 	return m_currentVolume;

@@ -45,6 +45,7 @@ protected:
 	int m_loopTarget;
 	int m_loopCnt;
 	int m_currentVolume;
+	int m_currentPan;						///< value of 0 means, disabled
 	CtrlCmd m_currentCtrlCmd;
 	AUDIO::AudioErrorType m_audioError;
 	QString m_audioErrorString;
@@ -89,6 +90,7 @@ public:
 	virtual qint64 currentPlayPosMs() const = 0;
 	virtual bool seekPlayPosMs(qint64 posMs) = 0;
 	virtual void setVolume(int vol, int maxvol) = 0;
+	virtual void setPanning(int pan, int maxpan) = 0;
 	virtual int volume() const = 0;
 	virtual AUDIO::AudioStatus state() const = 0;
 
