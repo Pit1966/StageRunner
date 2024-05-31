@@ -96,6 +96,7 @@ void LightLoop::processPendingEvents()
 	// Lets have a look onto the list with active marked scenes
 	MutexQHash<int, QPointer<FxSceneItem>> &scenes = lightCtrlRef.activeScenes;
 	scenes.readLock();
+	bool removeNulls = false;		// if we found nullptr scenes or scenes which look faulty, we will remove it after loop
 	// add scanner scenes
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		if (!scenes.contains(lightCtrlRef.hiddenScannerScenes[t]->id())) {
@@ -105,8 +106,11 @@ void LightLoop::processPendingEvents()
 
 	// Get dmx channel output for every scene in the list
 	for (FxSceneItem *sceneitem : qAsConst(scenes)) {
-		if (sceneitem == nullptr)
+		if (sceneitem == nullptr) {
+			LOGTEXT(tr("<font color=red>Light control warning!</font> found deleted scene in active scene list"));
+			removeNulls = true;
 			continue;
+		}
 
 //		if (sceneitem->id() == 1) {
 //			int a = 0;
@@ -125,6 +129,15 @@ void LightLoop::processPendingEvents()
 				emit sceneCueReady(sceneitem);
 		}
 
+	}
+
+	if (removeNulls) {
+		QMutableHashIterator<int, QPointer<FxSceneItem>>it(lightCtrlRef.activeScenes);
+		while (it.hasNext()) {
+			it.next();
+			if (it.value() == nullptr)
+				it.remove();
+		}
 	}
 	scenes.unlock();
 

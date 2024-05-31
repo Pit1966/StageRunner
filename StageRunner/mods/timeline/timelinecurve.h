@@ -76,7 +76,7 @@ public:
 	bool setConfigDat(const QString &dat) override;
 
 protected:
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+	// void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
@@ -84,8 +84,9 @@ protected:
 
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
-	// reimplemented functions from QGraphicsObject that actualy make the TimeLineItem work
+	// reimplemented functions from TimeLineItem (or QGraphicsObject) that actualy make the TimeLineItem work
 	void recalcPixelPos() override;
+	bool mouseHoverEvent(qreal x, qreal y) override;
 	void setTrackDuration(int ms) override;
 
 	QRectF boundingRect() const override;

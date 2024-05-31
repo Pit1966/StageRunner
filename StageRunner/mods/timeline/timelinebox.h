@@ -64,18 +64,15 @@ protected:
 
 	void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
 	void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-	void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+	// void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+
+	// reimplemented from base class
+	bool mouseHoverEvent(qreal x, qreal y) override;
 
 	// propagade some mouse events to derived classes
 	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 
-	// functions maybe implemented in derived classes in order to tweak controls
-	virtual int maxDuration() const {return 0;}
-	virtual int fadeInTime() const {return 0;}
-	virtual void setFadeInTime(int ms) {Q_UNUSED(ms);}
-	virtual void setFadeOutTime(int ms) {Q_UNUSED(ms);}
-	virtual int fadeOutTime() const {return 0;}
 
 };
 

@@ -68,5 +68,19 @@ void TimeLineItem::setYSize(qreal ySize)
 	}
 }
 
+bool TimeLineItem::isInsideScenePos(qreal sceneX, qreal sceneY)
+{
+	if (sceneX >= x() && sceneX <= x() + m_xSize && sceneY >= y() && sceneY <= y() + m_ySize)
+		return true;
+	return false;
+}
+
+bool TimeLineItem::mouseHoverEvent(qreal x, qreal y)
+{
+	Q_UNUSED(x)
+	Q_UNUSED(y)
+	return true;
+}
+
 
 } // namespace PS_TL

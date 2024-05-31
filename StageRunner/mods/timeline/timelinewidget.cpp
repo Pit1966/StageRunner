@@ -26,6 +26,7 @@ TimeLineGfxScene::TimeLineGfxScene(TimeLineWidget *timeLineWidget, QWidget *pare
 
 void TimeLineGfxScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+	m_timeLine->checkMousePos(event->scenePos().x(), event->scenePos().y());
 	emit mouseHoverPosChanged(event->scenePos());
 	QGraphicsScene::mouseMoveEvent(event);
 }
@@ -174,6 +175,24 @@ TimeLineTrack *TimeLineWidget::findTrackWithId(int trackId) const
 	for (int t=0; t<m_tracks.size(); t++) {
 		if (m_tracks.at(t)->trackId() == trackId)
 			return m_tracks.at(t);
+	}
+	return nullptr;
+}
+
+TimeLineTrack *TimeLineWidget::findTrackAboveId(int trackId) const
+{
+	for (int t=1; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t)->trackId() == trackId)
+			return m_tracks.at(t-1);
+	}
+	return nullptr;
+}
+
+TimeLineTrack *TimeLineWidget::findTrackBelowId(int trackId) const
+{
+	for (int t=0; t<m_tracks.size()-1; t++) {
+		if (m_tracks.at(t)->trackId() == trackId)
+			return m_tracks.at(t+1);
 	}
 	return nullptr;
 }
@@ -520,6 +539,104 @@ int TimeLineWidget::yPosToTrackId(int y)
 	return -1;
 }
 
+/**
+ * @brief Return track for given y position
+ * @param y
+ * @return TimeLineTrack address or NULL, if not found
+ */
+TimeLineTrack *TimeLineWidget::yPosToTrack(int y)
+{
+	for (int t=0; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t)->isInYRange(y))
+			return m_tracks.at(t);
+	}
+
+	return nullptr;
+}
+
+
+/**
+ * @brief Return a track list for given y position
+ * @param y
+ * @return
+ *
+ * Tracks could have overlay tracks. So there is a chance to have multiple tracks at same y position
+ */
+QList<TimeLineTrack*> TimeLineWidget::yPosToTrackList(int y)
+{
+	QList<TimeLineTrack*>tracks;
+	for (int t=0; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t)->isInYRange(y))
+			tracks.append(m_tracks.at(t));
+	}
+	return tracks;
+}
+
+int TimeLineWidget::trackIdBefore(int trackId)
+{
+	for (int t=1; t<m_tracks.size(); t++) {
+		if (m_tracks.at(t)->trackId() == trackId)
+			return m_tracks.at(t-1)->trackId();
+	}
+	return -1;
+}
+
+/**
+ * @brief Find ID of overlay track for given trackID
+ * @param trackId
+ * @return -1, if not found or no overlay exists for the given track. Otherwise a valid trackID
+ */
+int TimeLineWidget::findOverlayIdForTrackId(int trackId)
+{
+	TimeLineTrack *trackbelow = findTrackBelowId(trackId);
+	if (trackbelow && trackbelow->isOverlay())
+		return trackbelow->trackId();
+
+	return -1;
+}
+
+
+/**
+ * @brief This function tests if given mouse position lies inside a timeline item and calls it mouseHoverEvent, if mouse is over the item
+ * @param x mouse pos in scene
+ * @param y mouse pos in scene
+ */
+void TimeLineWidget::checkMousePos(qreal x, qreal y)
+{
+	// Is the mouse over a track? Check and get a track list
+	const QList<TimeLineTrack*> tracks = yPosToTrackList(qRound(y));
+	if (tracks.isEmpty())
+		return;
+
+	bool foundAtLeastOne = false;
+
+	for (TimeLineTrack *track : tracks) {
+		// now check if mouse is over one of the items of this track
+		QList<TimeLineItem*>items = track->itemList();
+		for (int i=0; i<items.size(); i++) {
+			TimeLineItem *item = items.at(i);
+			if (item->isInsideScenePos(x, y)) {
+				foundAtLeastOne = true;
+				// mouse is over item, now call item hover function
+				if (m_hoveredItem != item) {
+					m_hoveredItem = item;
+					qDebug() << "over" << item->label();
+				}
+
+				bool accepted = item->mouseHoverEvent(x - item->x(), y - item->y());
+			}
+		}
+	}
+
+	if (foundAtLeastOne == false) {
+		if (m_hoveredItem) {
+			qDebug() << "leave" << m_hoveredItem->label();
+			m_hoveredItem = nullptr;
+		}
+	}
+
+}
+
 void TimeLineWidget::setTimeLineDuration(int ms)
 {
 	if (m_timeLineLenMs != ms) {
@@ -718,6 +835,7 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 {
 	QPointF pos1 = m_view->mapFromGlobal(event->globalPos());
 	int clickedTrackID = yPosToTrackId(pos1.y());
+	int overlayID = -1;
 	int ms = pixelToMs(pos1.x());
 	// qDebug() << "ms" << ms << "pixel" << pos1.x();
 
@@ -737,6 +855,13 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Shrink track height"));
 			act->setObjectName("shrinkTrack");
 		}
+
+		overlayID = findOverlayIdForTrackId(clickedTrackID);
+		if (overlayID > 0) {
+			act = menu.addAction(tr("Detach overlay curve"));
+			act->setObjectName("detachOverlay");
+		}
+
 	}
 	else if (clickedTrackID < 0) {
 		act = menu.addAction(tr("Add new timeline track"));
@@ -769,6 +894,12 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	}
 	else if (cmd == "shrinkTrack") {
 		setTrackHeight(clickedTrackID, m_defaultTrackHeight);
+	}
+	else if (cmd == "detachOverlay") {
+		TimeLineTrack *track = findTrackWithId(overlayID);
+		track->setOverlay(false);
+		recalcTrackSizes(overlayID);
+		updateScene();
 	}
 }
 

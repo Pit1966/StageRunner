@@ -188,24 +188,27 @@ void TimeLineBox::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 
 void TimeLineBox::hoverEnterEvent(QGraphicsSceneHoverEvent */*event*/)
 {
-	// qDebug() << "hover enter" << m_label;
+	qDebug() << "hover enter" << m_label;
 	m_isHover = true;
 }
 
 void TimeLineBox::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
 {
-	// qDebug() << "hover leave" << m_label;
+	qDebug() << "hover leave" << m_label;
 	m_isHover = true;
 }
 
-void TimeLineBox::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+// void TimeLineBox::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+// {
+// 	if (m_isClicked)
+// 		return;
+
+// 	// qDebug() << "hover move" << m_label << event->pos() << "fadeout ms" << fadeOutTime();
+// 	mouseHoverEvent(event->pos().x(), event->pos().y());
+// }
+
+bool TimeLineBox::mouseHoverEvent(qreal x, qreal y)
 {
-	if (m_isClicked)
-		return;
-
-	//qDebug() << "hover move" << m_label << event->pos() << "fadeout ms" << fadeOutTime();
-	qreal x = event->pos().x();
-
 	int fadein_x = m_timeline->msToPixel(fadeInTime());
 	int fadeout_x = 0;
 	if (fadeOutTime() > 0)
@@ -230,8 +233,11 @@ void TimeLineBox::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 	else {
 		setCursor(m_timeline->cursor());
 		m_grabMode = GRAB_NONE;
+		return false;
 	}
 
+	return true;
 }
+
 
 } // namespace PS_TL

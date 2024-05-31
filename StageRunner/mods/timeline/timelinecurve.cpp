@@ -230,34 +230,13 @@ bool TimeLineCurve::setConfigDat(const QString &dat)
 	return setCurveData(dat, m_myTrack);
 }
 
-void TimeLineCurve::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-	qreal cx = event->pos().x();
-	qreal cy = event->pos().y();
+// void TimeLineCurve::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+// {
+// 	qreal cx = event->pos().x();
+// 	qreal cy = event->pos().y();
 
-	if (m_nodeClicked)
-		return;
-
-
-	for (int t=0; t<m_nodes.size(); t++) {
-		const Node &n = m_nodes.at(t);
-		if (qAbs(cx - n.x) < 5 && qAbs(cy - n.y) < 5) {
-			if (t != m_curHoveredNode) {
-				m_curHoveredNode = t;
-				update();
-			}
-			return;
-		}
-	}
-
-	if (m_curHoveredNode >= 0) {
-		m_curHoveredNode = -1;
-		update();
-	}
-
-	// if (m_myTrack->isOverlay())
-	// 	event->ignore();
-}
+// 	mouseHoverEvent(cx, cy);
+// }
 
 void TimeLineCurve::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
 {
@@ -272,6 +251,10 @@ void TimeLineCurve::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	if (m_curHoveredNode >= 0) {
 		m_clickNodePos = event->pos();
 		m_nodeClicked = true;
+	}
+	else if (m_myTrack->isOverlay()) {
+		event->ignore();
+		return;
 	}
 }
 
@@ -334,6 +317,9 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		act = menu.addAction(tr("Remove node"));
 		act->setObjectName("remClickedNode");
 	}
+	else if (m_myTrack->isOverlay()) {
+		event->ignore();
+	}
 	else {
 		act = menu.addAction(tr("Add node"));
 		act->setObjectName("addNode");
@@ -361,6 +347,8 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	}
 
 	act = menu.exec(globPos);
+	m_nodeClicked = false;
+	m_curHoveredNode = -1;
 	if (!act) return;
 
 	QString cmd = act->objectName();
@@ -395,9 +383,6 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	else if (cmd == "clearOver") {
 		m_timeline->setTrackOverlay(m_trackId, false);
 	}
-
-	m_nodeClicked = false;
-	m_curHoveredNode = -1;
 }
 
 void TimeLineCurve::recalcPixelPos()
@@ -409,6 +394,30 @@ void TimeLineCurve::recalcPixelPos()
 	} else {
 		m_isPixelPosValid = false;
 	}
+}
+
+bool TimeLineCurve::mouseHoverEvent(qreal x, qreal y)
+{
+	if (m_nodeClicked)
+		return false;
+
+	for (int t=0; t<m_nodes.size(); t++) {
+		const Node &n = m_nodes.at(t);
+		if (qAbs(x - n.x) < 5 && qAbs(y - n.y) < 5) {
+			if (t != m_curHoveredNode) {
+				m_curHoveredNode = t;
+				update();
+			}
+			return true;
+		}
+	}
+
+	if (m_curHoveredNode >= 0) {
+		m_curHoveredNode = -1;
+		update();
+	}
+
+	return false;
 }
 
 void TimeLineCurve::setTrackDuration(int ms)

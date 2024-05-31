@@ -96,6 +96,7 @@ protected:
 
 	// temp
 	int m_curMouseXPosMs		= 0;
+	TimeLineItem *m_hoveredItem	= nullptr;
 
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);
@@ -108,6 +109,9 @@ public:
 	int timeLineHeight() const;
 	int timeLineDuration() const {return m_timeLineLenMs;}
 	TimeLineTrack *findTrackWithId(int trackId) const;
+	TimeLineTrack *findTrackAboveId(int trackId) const;
+	TimeLineTrack *findTrackBelowId(int trackId) const;
+
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
 	bool addAudioEnvelopeTrack();
@@ -136,7 +140,14 @@ public:
 	TimeLineBox * findRightMostItem() const;
 
 	int cursorPos() const;
+
 	int yPosToTrackId(int y);
+	TimeLineTrack *yPosToTrack(int y);
+	QList<TimeLineTrack*> yPosToTrackList(int y);
+	int trackIdBefore(int trackId);
+	int findOverlayIdForTrackId(int trackId);
+
+	void checkMousePos(qreal x, qreal y);
 
 public slots:
 	void setTimeLineDuration(int ms);

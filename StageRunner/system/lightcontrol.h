@@ -50,7 +50,7 @@ public:
 	AppCentral &myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
-	mutable MutexQHash<int,QPointer<FxSceneItem>>activeScenes;
+	mutable MutexQHash<int,QPointer<FxSceneItem>>activeScenes;			///< hash with active light scenes FXid -> FxSceneItem*
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];

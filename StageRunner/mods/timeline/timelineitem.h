@@ -64,7 +64,23 @@ public:
 	void setYPos(qreal yPixelPos);
 	void setYSize(qreal ySize);
 
+	bool isInsideScenePos(qreal sceneX, qreal sceneY);
+
+	// functions must be implemented in derived classes
 	virtual void recalcPixelPos()	= 0;
+	// functions maybe implemented in derived classes in order to tweak controls
+	/**
+	 * @brief Implement in subclasses to react on hovering cursor.
+	 * @param x qreal x-position in realation to item
+	 * @param y qreal y-position in realation to item
+	 * @return bool true, if the object accepted the event.
+	 */
+	virtual bool mouseHoverEvent(qreal x, qreal y);
+	virtual int maxDuration() const {return 0;}
+	virtual int fadeInTime() const {return 0;}
+	virtual void setFadeInTime(int ms) {Q_UNUSED(ms);}
+	virtual void setFadeOutTime(int ms) {Q_UNUSED(ms);}
+	virtual int fadeOutTime() const {return 0;}
 	virtual void setTrackDuration(int ms) {Q_UNUSED(ms);}
 	virtual QString getConfigDat() const {return QString();}
 	virtual bool setConfigDat(const QString &dat) {Q_UNUSED(dat); return true;}
