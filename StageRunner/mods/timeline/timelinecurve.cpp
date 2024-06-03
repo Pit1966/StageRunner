@@ -40,6 +40,29 @@ int Node::unScaleY(qreal y) const
 // -------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------
+/// Static callback functions for context menus
+
+TimeLineCurve * TimeLineCurve::staticTmpContextObj = nullptr;
+
+void staticAddNode()
+{
+	if (TimeLineCurve::staticTmpContextObj) {
+		TimeLineCurve::staticTmpContextObj->addNodeAtXpos(TimeLineCurve::staticTmpContextObj->lastContextMenuClickPos().x());
+	}
+}
+
+void staticDetachOverlay()
+{
+	if (TimeLineCurve::staticTmpContextObj) {
+		TimeLineCurve::staticTmpContextObj->myTimeLine()->setTrackOverlay(TimeLineCurve::staticTmpContextObj->trackID(), false);
+	}
+}
+
+
+// -------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------
+
 
 /**
  * @brief Insert node at correct positon in time sorted node list
@@ -219,6 +242,44 @@ void TimeLineCurve::setTimeLineDuration(int ms)
 	recalcPixelPos();
 }
 
+bool TimeLineCurve::hasOverLayContextMenu() const
+{
+	return true;
+}
+
+QList<TimeLineContextMenuEntry> TimeLineCurve::getOverlayContextMenu(const QPointF &scenePos)
+{
+	QList<TimeLineContextMenuEntry> list;
+
+	list.append(TimeLineContextMenuEntry(tr("---------------")));
+	list.append(TimeLineContextMenuEntry(tr("Add node"), "addNode"));
+	list.last().staticCmdFunc = &staticAddNode;
+	list.append(TimeLineContextMenuEntry(tr("Show overlay in own track"), "clearOver"));
+	list.last().staticCmdFunc = &staticDetachOverlay;
+
+	staticTmpContextObj = this;
+	return list;
+}
+
+// bool TimeLineCurve::execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry)
+// {
+// 	if (menuEntry->menuId == "addNode") {
+// 		Node n(m_myTrack);
+// 		n.xMs = m_timeline->pixelToMs(m_lastContextMenuClickPos.x());
+// 		n.yPM = valAtMs(n.xMs);
+
+// 		insertNode(n);
+// 		update();
+// 	}
+// 	else if (menuEntry->menuId == "clearOver") {
+// 		m_timeline->setTrackOverlay(m_trackId, false);
+// 	}
+// 	else {
+// 		return false;
+// 	}
+
+// 	return true;
+// }
 
 QString TimeLineCurve::getConfigDat() const
 {
@@ -228,6 +289,17 @@ QString TimeLineCurve::getConfigDat() const
 bool TimeLineCurve::setConfigDat(const QString &dat)
 {
 	return setCurveData(dat, m_myTrack);
+}
+
+void TimeLineCurve::addNodeAtXpos(qreal xpix)
+{
+	qDebug() << "add node at" << xpix;
+	Node n(m_myTrack);
+	n.xMs = m_timeline->pixelToMs(xpix);
+	n.yPM = valAtMs(n.xMs);
+
+	insertNode(n);
+	update();
 }
 
 // void TimeLineCurve::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -306,6 +378,7 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 	QPoint globPos = event->screenPos();
 	QPointF pos = event->pos();
+	m_lastContextMenuClickPos = pos;
 
 	int m_selNodeWhenClicked = m_curHoveredNode;
 
@@ -318,7 +391,9 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		act->setObjectName("remClickedNode");
 	}
 	else if (m_myTrack->isOverlay()) {
+		qDebug() << "last context menu pos" << pos;
 		event->ignore();
+		return;
 	}
 	else {
 		act = menu.addAction(tr("Add node"));
@@ -333,7 +408,7 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		}
 
 		if (m_myTrack->isOverlay()) {
-			act = menu.addAction(tr("Clear overlay"));
+			act = menu.addAction(tr("Show overlay in own track"));
 			act->setObjectName("clearOver");
 		} else {
 			act = menu.addAction(tr("Make overlay"));
@@ -353,13 +428,7 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 	QString cmd = act->objectName();
 	if (cmd == "addNode") {
-		qDebug() << "add node at" << pos;
-		Node n(m_myTrack);
-		n.xMs = m_timeline->pixelToMs(pos.x());
-		n.yPM = valAtMs(n.xMs);
-
-		insertNode(n);
-		update();
+		addNodeAtXpos(pos.x());
 	}
 	else if (cmd == "delTrack") {
 		m_timeline->deleteTimeLineTrack(m_trackId);
@@ -424,7 +493,6 @@ void TimeLineCurve::setTrackDuration(int ms)
 {
 	setTimeLineDuration(ms);
 }
-
 
 QRectF TimeLineCurve::boundingRect() const
 {

@@ -1,7 +1,10 @@
-#ifndef TIMELINECLASSES_H
-#define TIMELINECLASSES_H
+#ifndef TIMELINETRACK_H
+#define TIMELINETRACK_H
+
+#include "timeline_classes.h"
 
 #include <QColor>
+#include <QPointF>
 
 namespace PS_TL {
 
@@ -9,8 +12,10 @@ enum TRACK_TYPE {
 	TRACK_UNDEF,
 	TRACK_ITEMS,
 	TRACK_RULER,
-	TRACK_AUDIO_ENV
+	TRACK_AUDIO_VOL,
+	TRACK_AUDIO_PAN
 };
+
 
 // -------------------------------------------------------------------------------------------------
 
@@ -34,7 +39,10 @@ protected:
 	int m_yPos;
 	int m_ySize;
 	QList<TimeLineItem*> m_itemList;		///< this list contains the timeline items in this timeline
-	bool m_isOverlay;						///< Curve track is overlay over other track, not displayed under
+	bool m_isOverlay	= false;			///< Is a curve track and is overlay over other track, not displayed under
+
+	TimeLineTrack *m_prev	= nullptr;		///< this is the track before
+	TimeLineTrack *m_next	= nullptr;		///< this is the track behind
 
 public:
 	TimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int id, int y = 0, int ySize = 24);
@@ -63,6 +71,10 @@ public:
 
 	void alignItemPositionsToTrack();
 
+	bool hasOverlayContextMenu() const;
+	QList<TimeLineContextMenuEntry> getOverlayContextMenu(const QPointF &scenePos);
+	// bool execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry);
+
 	friend class TimeLineWidget;
 };
 
@@ -73,4 +85,4 @@ public:
 
 }
 
-#endif // TIMELINECLASSES_H
+#endif // TIMELINETRACK_H

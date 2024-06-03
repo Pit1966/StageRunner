@@ -3,7 +3,7 @@
 
 #include "tool/varset.h"
 // TimeLineTrack is in timelineclasses.h
-#include "mods/timeline/timelineclasses.h"
+#include "mods/timeline/timelinetrack.h"
 #include <QtCore>
 
 class FxTimeLineTrack : public VarSet, public PS_TL::TimeLineTrack

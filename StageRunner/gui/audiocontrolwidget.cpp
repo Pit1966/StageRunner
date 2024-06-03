@@ -32,6 +32,7 @@
 #include <QHBoxLayout>
 #include <QDebug>
 #include <QFontDatabase>
+#include <QResizeEvent>
 
 AudioControlWidget::AudioControlWidget(QWidget *parent) :
 	QGroupBox(parent)
@@ -107,7 +108,10 @@ bool AudioControlWidget::setCompleteGuiSettings(const QString &settings)
 
 void AudioControlWidget::resizeEvent(QResizeEvent *event)
 {
-	Q_UNUSED(event);
+	bool bigicons = event->size().width() > 420;
+	for (auto slot : qAsConst(audioSlotWidgets)) {
+		slot->setBigIconsEnabled(bigicons);
+	}
 }
 
 void AudioControlWidget::init()

@@ -29,6 +29,8 @@
 
 #include <QDebug>
 #include <QFontDatabase>
+#include <QMenu>
+#include <QResizeEvent>
 
 using namespace AUDIO;
 
@@ -109,7 +111,7 @@ bool AudioSlotWidget::setAllGuiSettings(const QString &settings)
 {
 	bool ok = true;
 	const QStringList entries = settings.split(';');
-	for (QString entry : entries) {
+	for (const QString &entry : entries) {
 		QString key = entry.section('=',0,0);
 		QString val = entry.section('=', 1);
 		if (key.size() && val.size()) {
@@ -118,6 +120,21 @@ bool AudioSlotWidget::setAllGuiSettings(const QString &settings)
 		}
 	}
 	return ok;
+}
+
+void AudioSlotWidget::setBigIconsEnabled(bool state)
+{
+	if (state) {
+		slotAbsButton->setIconSize(QSize(46,46));
+		slotPauseButton->setIconSize(QSize(46,46));
+		slotPlayButton->setIconSize(QSize(46,46));
+		slotStopButton->setIconSize(QSize(46,46));
+	} else {
+		slotAbsButton->setIconSize(QSize(36,36));
+		slotPauseButton->setIconSize(QSize(36,36));
+		slotPlayButton->setIconSize(QSize(36,36));
+		slotStopButton->setIconSize(QSize(36,36));
+	}
 }
 
 void AudioSlotWidget::resizeEvent(QResizeEvent *event)
@@ -143,6 +160,9 @@ void AudioSlotWidget::init_gui()
 	slotVolumeDial->setRange(0,MAX_VOLUME);
 	slotVolumeDial->setNotchesVisible(true);
 	slotVolumeDial->setNotchTarget(18);
+
+	panDial->setNotchTarget(9);
+	panDial->setVisible(false);
 
 	connect(meterWidget,SIGNAL(sliderMoved(float)),this,SLOT(onMeterSliderMoved(float)));
 	connect(slotVolumeDial,SIGNAL(sliderMoved(int)),this,SLOT(onVolumeDialMoved(int)));
@@ -430,5 +450,31 @@ void AudioSlotWidget::on_panDial_sliderPressed()
 void AudioSlotWidget::on_panDial_sliderReleased()
 {
 	m_panDialPressed = false;
+}
+
+
+void AudioSlotWidget::on_meterWidget_customContextMenuRequested(const QPoint &pos)
+{
+	QMenu menu(this);
+	QAction *act;
+	if (panDial->isHidden()) {
+		act = menu.addAction(tr("Show panning dial"));
+		act->setObjectName("showPan");
+	} else {
+		act = menu.addAction(tr("Hide panning dial"));
+		act->setObjectName("hidePan");
+	}
+
+	act = menu.exec(meterWidget->mapToGlobal(pos));
+	if (!act)
+		return;
+
+	QString cmd = act->objectName();
+	if (cmd == "showPan") {
+		panDial->setVisible(true);
+	}
+	else if (cmd == "hidePan") {
+		panDial->setHidden(true);
+	}
 }
 

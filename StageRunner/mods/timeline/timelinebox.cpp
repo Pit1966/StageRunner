@@ -207,8 +207,11 @@ void TimeLineBox::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
 // 	mouseHoverEvent(event->pos().x(), event->pos().y());
 // }
 
-bool TimeLineBox::mouseHoverEvent(qreal x, qreal y)
+bool TimeLineBox::mouseHoverEvent(qreal x, qreal /*y*/)
 {
+	if (m_isClicked)
+		return true;
+
 	int fadein_x = m_timeline->msToPixel(fadeInTime());
 	int fadeout_x = 0;
 	if (fadeOutTime() > 0)

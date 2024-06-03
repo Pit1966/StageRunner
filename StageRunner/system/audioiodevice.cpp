@@ -217,16 +217,30 @@ void AudioIODevice::setPanning(int pan, int maxPan)
 
 	// we have to calculat amplification factors for both the left and the right channel
 
-	m_panVolLeft = qreal(maxPan - pan) / maxPan;
-	m_panVolRight = qreal(pan) / maxPan;
 
+	if (pan > maxPan/2) {
+		// panorama right
+		m_panVolRight = 1.0;
+		m_panVolLeft = qreal((maxPan - pan) * 2) / maxPan;
+	}
+	else {
+		// panorama left
+		m_panVolLeft = 1.0;
+		m_panVolRight = qreal((pan-1) * 2) / maxPan;
+	}
+	m_panVolLeft = QAudio::convertVolume(m_panVolLeft,
+										 QAudio::LogarithmicVolumeScale,
+										 QAudio::LinearVolumeScale);
+	m_panVolRight = QAudio::convertVolume(m_panVolRight,
+										 QAudio::LogarithmicVolumeScale,
+										 QAudio::LinearVolumeScale);
 
-	// m_panVolLeft = QAudio::convertVolume(m_panVolLeft,
-	// 									 QAudio::LogarithmicVolumeScale,
-	// 									 QAudio::LinearVolumeScale);
-	// m_panVolRight = QAudio::convertVolume(m_panVolRight,
-	// 									 QAudio::LogarithmicVolumeScale,
-	// 									 QAudio::LinearVolumeScale);
+	// panning vol calculation option 2
+	// m_panVolLeft = qreal(maxPan - pan) / maxPan;
+	// m_panVolRight = qreal(pan) / maxPan;
+
+	qDebug() << "pan values" << m_panVolLeft << m_panVolRight;
+
 }
 
 bool AudioIODevice::isDecoding() const

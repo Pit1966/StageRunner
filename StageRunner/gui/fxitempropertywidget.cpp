@@ -263,6 +263,11 @@ void FxItemPropertyWidget::on_initialPanDial_sliderMoved(int position)
 		cur_fxa->panning = position;
 		cur_fxa->setModified(true);
 		emit modified(cur_fxa);
+
+		int slot = AppCentral::ref().unitAudio->findAudioSlot(cur_fxa);
+		if (slot >= 0) {
+			AppCentral::ref().unitAudio->setPanning(slot, position);
+		}
 	}
 }
 

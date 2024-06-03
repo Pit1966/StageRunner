@@ -1,4 +1,5 @@
 #include "timelineitem.h"
+#include "timelinewidget.h"
 
 namespace PS_TL {
 
@@ -7,6 +8,17 @@ TimeLineItem::TimeLineItem(TimeLineWidget *timeline, int trackId)
 	, m_timeline(timeline)
 	, m_trackId(trackId)
 {
+}
+
+/**
+ * @brief Return TimeLineTrack object that is the parent of this item
+ * @return Address of TimeLineTrack or NULL, if not exists
+ *
+ * The trackID is used to find the TimeLineTrack in the TimeLineWidget
+ */
+TimeLineTrack *TimeLineItem::timeLineTrack() const
+{
+	return m_timeline->findTrackWithId(m_trackId);
 }
 
 void TimeLineItem::setLabel(const QString &label)
@@ -80,6 +92,16 @@ bool TimeLineItem::mouseHoverEvent(qreal x, qreal y)
 	Q_UNUSED(x)
 	Q_UNUSED(y)
 	return true;
+}
+
+bool TimeLineItem::hasOverLayContextMenu() const
+{
+	return false;
+}
+
+QList<TimeLineContextMenuEntry> TimeLineItem::getOverlayContextMenu(const QPointF & /*scenePos*/)
+{
+	return {};
 }
 
 

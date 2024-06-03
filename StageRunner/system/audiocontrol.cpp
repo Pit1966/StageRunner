@@ -197,7 +197,8 @@ bool AudioControl::isAnyFxAudioActive() const
 
 int AudioControl::findAudioSlot(FxAudioItem *fxa)
 {
-	if (!fxa) return false;
+	if (!fxa)
+		return -1;
 
 	for (int t=0; t<used_slots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {

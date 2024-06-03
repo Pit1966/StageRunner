@@ -146,12 +146,13 @@ SOURCES += \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
+	../mods/timeline/timeline_classes.cpp \
 	../mods/timeline/timelinebox.cpp \
-	../mods/timeline/timelineclasses.cpp \
 	../mods/timeline/timelinecursor.cpp \
 	../mods/timeline/timelinecurve.cpp \
 	../mods/timeline/timelineitem.cpp \
 	../mods/timeline/timelineruler.cpp \
+	../mods/timeline/timelinetrack.cpp \
 	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
@@ -274,13 +275,14 @@ HEADERS  += \
 	../gui/style/lightdeskstyle.h \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
+	../mods/timeline/timeline_classes.h \
 	../mods/timeline/timeline_defines.h \
 	../mods/timeline/timelinebox.h \
-	../mods/timeline/timelineclasses.h \
 	../mods/timeline/timelinecursor.h \
 	../mods/timeline/timelinecurve.h \
 	../mods/timeline/timelineitem.h \
 	../mods/timeline/timelineruler.h \
+	../mods/timeline/timelinetrack.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \
 	../system/audioformat.h \

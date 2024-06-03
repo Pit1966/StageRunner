@@ -125,7 +125,7 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 		// get references to the source list in the FxItem for this track
 		const VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 
-		if (fxtrack && fxtrack->trackType() == TRACK_AUDIO_ENV) {
+		if (fxtrack && fxtrack->trackType() == TRACK_AUDIO_VOL) {
 			if (!track) {
 				qWarning() << Q_FUNC_INFO << "missing track_audio_env";
 				continue;
@@ -220,7 +220,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 		}
 
 		// Check kind of track first
-		if (track->trackType() == TRACK_AUDIO_ENV) {
+		if (track->trackType() == TRACK_AUDIO_VOL) {
 
 		}
 

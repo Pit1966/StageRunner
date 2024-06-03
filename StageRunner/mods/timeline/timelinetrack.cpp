@@ -1,4 +1,4 @@
-#include "timelineclasses.h"
+#include "timelinetrack.h"
 
 #include "timelinebox.h"
 #include "timelinewidget.h"
@@ -69,6 +69,28 @@ void TimeLineTrack::alignItemPositionsToTrack()
 		item->setYSize(m_ySize - yAlignSize);
 		item->setYPos(m_yPos + yAlignOffset);
 	}
+}
+
+bool TimeLineTrack::hasOverlayContextMenu() const
+{
+	// joined track is the track below
+	if (m_next) {
+		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_VOL) {
+			return true;
+		}
+	}
+	return false;
+}
+
+QList<TimeLineContextMenuEntry> TimeLineTrack::getOverlayContextMenu(const QPointF &scenePos)
+{
+	// linked track or overlay is the track below
+	if (m_next) {
+		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_VOL) {
+			return m_next->m_itemList.first()->getOverlayContextMenu(scenePos);
+		}
+	}
+	return {};
 }
 
 }

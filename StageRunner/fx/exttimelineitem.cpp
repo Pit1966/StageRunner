@@ -104,6 +104,19 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	menu.addAction(tr("Edit fadeOut time"), this, &ExtTimeLineItem::contextFadeOutTime);
 
 
+	// get additional menu entries from overlays
+	TimeLineTrack *track = timeLineTrack();
+	if (track) {
+		QList<TimeLineContextMenuEntry> entries = track->getOverlayContextMenu(event->scenePos());
+		for (const TimeLineContextMenuEntry &e : qAsConst(entries)) {
+			if (e.staticCmdFunc) {
+				menu.addAction(e.menuLabel, this, e.staticCmdFunc);
+			} else {
+				menu.addAction(e.menuLabel);
+			}
+		}
+	}
+
 	menu.exec(m_timeline->gfxView()->mapToGlobal(event->scenePos().toPoint()));
 }
 

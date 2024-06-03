@@ -56,6 +56,7 @@ class TimeLineCurve : public TimeLineItem, public TimeLineCurveData
 {
 	Q_OBJECT
 public:
+	static TimeLineCurve * staticTmpContextObj;
 
 private:
 	uint m_colorNode = 0xaa9900;
@@ -65,15 +66,23 @@ private:
 	int m_curHoveredNode	= -1;
 	bool m_nodeClicked		= false;
 	QPointF m_clickNodePos;						///< coordinates when node was clicked
+	QPointF m_lastContextMenuClickPos;			///< click position when context menu was called last time (also when event was ignored)
 
 public:
 	TimeLineCurve(TimeLineWidget *timeline, int trackId);
+	TimeLineWidget *myTimeLine() const {return m_timeline;}
 
 	void setTimeLineDuration(int ms);
+	bool hasOverLayContextMenu() const override;
+	QPointF lastContextMenuClickPos() const {return m_lastContextMenuClickPos;}
+	QList<TimeLineContextMenuEntry> getOverlayContextMenu(const QPointF &scenePos) override;
+	// bool execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry);
 
 	// reimplemented functions from TimeLineItem
 	QString getConfigDat() const override;
 	bool setConfigDat(const QString &dat) override;
+
+	void addNodeAtXpos(qreal xpix);
 
 protected:
 	// void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;

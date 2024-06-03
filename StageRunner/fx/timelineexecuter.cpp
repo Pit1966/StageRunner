@@ -307,7 +307,7 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 					lastEventMs = o->endMs();
 			}
 		}
-		else if (fxtrack->trackType() == TRACK_AUDIO_ENV) {
+		else if (fxtrack->trackType() == TRACK_AUDIO_VOL) {
 			// get first Item in TimeLineCurve
 			FxTimeLineObj *o = fx->timeLineObjAt(trackid, 0);
 			if (!o) {

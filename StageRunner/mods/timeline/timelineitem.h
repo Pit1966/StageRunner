@@ -2,6 +2,7 @@
 #define TIMELINEITEM_H
 
 #include "timeline_defines.h"
+#include "timeline_classes.h"
 
 #include <QGraphicsObject>
 #include <QObject>
@@ -10,6 +11,7 @@ namespace PS_TL {
 
 class TimeLineWidget;
 class TimeLineTrack;
+
 
 class TimeLineItem : public QGraphicsObject
 {
@@ -48,6 +50,7 @@ public:
 	int type() const override {return m_itemType;}
 	int trackID() const {return m_trackId;}
 	void setTrackID(int id) {m_trackId = id;}
+	TimeLineTrack * timeLineTrack() const;
 	const QString & label() const {return m_label;}
 	void setLabel(const QString &label);
 	void setBackgroundColor(const QColor &col);
@@ -84,6 +87,10 @@ public:
 	virtual void setTrackDuration(int ms) {Q_UNUSED(ms);}
 	virtual QString getConfigDat() const {return QString();}
 	virtual bool setConfigDat(const QString &dat) {Q_UNUSED(dat); return true;}
+
+	virtual bool hasOverLayContextMenu() const;
+	virtual QList<TimeLineContextMenuEntry> getOverlayContextMenu(const QPointF &scenePos);
+	// bool execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry);
 
 signals:
 	void timePositionChanged(int ms);

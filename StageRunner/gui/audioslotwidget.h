@@ -54,6 +54,7 @@ public:
 	QString guiSetting(const QString &key);
 	QString allGuiSettings();
 	bool setAllGuiSettings(const QString &settings);
+	void setBigIconsEnabled(bool state);
 
 
 protected:
@@ -78,6 +79,8 @@ private slots:
 	void on_slotVolumeDial_sliderReleased();
 	void on_panDial_sliderPressed();
 	void on_panDial_sliderReleased();
+
+	void on_meterWidget_customContextMenuRequested(const QPoint &pos);
 
 public slots:
 	void setPlayState(bool state);

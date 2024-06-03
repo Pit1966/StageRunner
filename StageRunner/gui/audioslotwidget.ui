@@ -143,6 +143,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -208,8 +211,8 @@
     <widget class="qsynthKnob" name="panDial">
      <property name="maximumSize">
       <size>
-       <width>40</width>
-       <height>40</height>
+       <width>50</width>
+       <height>50</height>
       </size>
      </property>
      <property name="minimum">
@@ -220,6 +223,9 @@
      </property>
      <property name="sliderPosition">
       <number>100</number>
+     </property>
+     <property name="notchesVisible">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

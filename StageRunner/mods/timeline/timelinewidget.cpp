@@ -98,7 +98,7 @@ void TimeLineWidget::init()
 	connect(m_scene, SIGNAL(mouseHoverPosChanged(QPointF)), this, SLOT(onMouseHovered(QPointF)));
 
 	// create ruler track. This is always track with ID 0
-	m_tracks.append(new TimeLineTrack(this, TRACK_RULER, 0, 0, 34));
+	appendTrack(new TimeLineTrack(this, TRACK_RULER, 0, 0, 34));
 
 	// add cursor to scene
 	m_cursor = new TimeLineCursor(this);
@@ -204,7 +204,8 @@ bool TimeLineWidget::addTimeLineTrack()
 		return false;
 
 	TimeLineTrack *track = new TimeLineTrack(this, TRACK_ITEMS, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
-	m_tracks.append(track);
+	appendTrack(track);
+
 	// update scene in order to draw the background
 	m_scene->update();
 
@@ -228,7 +229,8 @@ bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
 			}
 		}
 		if (track->isOverlay()) {
-			track->setYPos(m_tracks.last()->yPos());
+			int topborder = 1;
+			track->setYPos(m_tracks.last()->yPos() + topborder);
 		} else {
 			track->setYPos(m_tracks.last()->yEndPos());
 		}
@@ -236,7 +238,7 @@ bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
 	else {
 		track->setYPos(0);
 	}
-	m_tracks.append(track);
+	appendTrack(track);
 
 	// update scene in order to draw the background
 	m_scene->update();
@@ -250,9 +252,9 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_ENV, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_VOL, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	track->trackBgColor = 0x3333555;
-	m_tracks.append(track);
+	appendTrack(track);
 
 	// add TimeLineCurve to scene on timeline
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
@@ -278,9 +280,28 @@ bool TimeLineWidget::deleteTimeLineTrack(int trackID)
 	// delete all items in the track
 	track->deleteAllItems();
 
+	QList<TimeLineTrack*>deltracks;
+	deltracks.append(track);
+
+	// find all curve  tracks below.
+	while (track) {
+		track = findTrackBelowId(track->trackId());
+		if (track && track->trackType() == TRACK_AUDIO_VOL) {
+			deltracks.append(track);
+		} else {
+			track = nullptr;
+		}
+	}
+
 	// remove track from list and delete track itself
-	m_tracks.removeOne(track);
-	delete track;
+	while (!deltracks.isEmpty()) {
+		track = deltracks.takeFirst();
+		m_tracks.removeOne(track);
+		delete track;
+	}
+
+	// relink tracks
+	relinkTracks();
 
 	// renumber all trackIDs both in track and in all track items.
 	// For now the trackID is the index in the track list
@@ -308,7 +329,7 @@ TimeLineBox *TimeLineWidget::addTimeLineBox(int posMs, int durationMs, const QSt
 {
 	while (m_tracks.size() <= trackID) {
 		TimeLineTrack *track = new TimeLineTrack(this, TRACK_ITEMS, trackID, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
-		m_tracks.append(track);
+		appendTrack(track);
 	}
 
 	// this is the track instance
@@ -624,6 +645,8 @@ void TimeLineWidget::checkMousePos(qreal x, qreal y)
 				}
 
 				bool accepted = item->mouseHoverEvent(x - item->x(), y - item->y());
+				if (accepted)
+					break;
 			}
 		}
 	}
@@ -775,14 +798,25 @@ TimeLineGfxScene *TimeLineWidget::createTimeLineScene(TimeLineWidget *timeline)
 	return new TimeLineGfxScene(timeline);
 }
 
+void TimeLineWidget::appendTrack(TimeLineTrack *track)
+{
+	TimeLineTrack *last = m_tracks.size() ? m_tracks.last() : nullptr;
+	m_tracks.append(track);
+	if (last) {
+		last->m_next = track;
+		track->m_prev = last;
+	}
+}
+
 void TimeLineWidget::recalcTrackSizes(int from)
 {
 	int firstChangedTrack = 0;
 	for (int t = 1; t<m_tracks.size(); t++) {
 		int newy = m_tracks.at(t-1)->yEndPos();
 		if (m_tracks.at(t)->isOverlay()) {
-			newy = m_tracks.at(t-1)->yPos();
-			m_tracks.at(t)->setYSize(m_tracks.at(t-1)->ySize());
+			int topborder = 1;
+			newy = m_tracks.at(t-1)->yPos() + topborder;
+			m_tracks.at(t)->setYSize(m_tracks.at(t-1)->ySize() - topborder);
 		}
 
 		if (m_tracks.at(t)->yPos() != newy) {
@@ -797,6 +831,25 @@ void TimeLineWidget::recalcTrackSizes(int from)
 
 	for (int t=firstChangedTrack; t<m_tracks.size(); t++) {
 		m_tracks.at(t)->alignItemPositionsToTrack();
+	}
+}
+
+/**
+ * @brief renew the links in the linked m_tracks list
+ */
+void TimeLineWidget::relinkTracks()
+{
+	for (int i=0; i<m_tracks.size(); i++) {
+		if (i < m_tracks.size() - 1) {
+			m_tracks[i]->m_next = m_tracks[i+1];
+		} else {
+			m_tracks[i]->m_next = nullptr;
+		}
+		if (i > 0) {
+			m_tracks[i]->m_prev = m_tracks[i-1];
+		} else {
+			m_tracks[i]->m_prev = nullptr;
+		}
 	}
 }
 

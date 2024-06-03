@@ -10,7 +10,7 @@
 #include <QPointer>
 
 #include "timeline_defines.h"
-#include "timelineclasses.h"
+#include "timelinetrack.h"
 
 namespace PS_TL {
 
@@ -96,7 +96,7 @@ protected:
 
 	// temp
 	int m_curMouseXPosMs		= 0;
-	TimeLineItem *m_hoveredItem	= nullptr;
+	QPointer<TimeLineItem> m_hoveredItem;
 
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);
@@ -163,7 +163,9 @@ protected:
 	virtual TimeLineBox *createNewTimeLineBox(TimeLineWidget *timeline, int trackId = 1);
 	virtual TimeLineGfxScene *createTimeLineScene(TimeLineWidget *timeline);
 
+	void appendTrack(TimeLineTrack *track);
 	void recalcTrackSizes(int from = 0);
+	void relinkTracks();
 	void adjustSceneRectToTimelineLength();
 	void recalcPixelPosInAllItems();
 
