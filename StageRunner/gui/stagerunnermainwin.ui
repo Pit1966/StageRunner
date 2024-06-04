@@ -411,8 +411,14 @@
    </property>
   </action>
   <action name="actionSetup">
+   <property name="icon">
+    <iconset theme="preferences-other"/>
+   </property>
    <property name="text">
     <string>Setup</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
    </property>
   </action>
   <action name="actionExit_StageRunner">

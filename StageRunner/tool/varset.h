@@ -74,6 +74,7 @@ protected:
 	QString curChildListName;
 	QString curChildItemClass;
 	QString curContextClassName;
+	QString errorString;
 	bool curChildActive;
 
 	// Essential vars
@@ -196,7 +197,7 @@ public:
 	bool readFromPref();
 
 	bool fileSave(const QString & path, bool append = false, bool empty_line = false);
-	bool fileLoad(const QString & path, bool *exists = 0, int *lineNumber = 0, QString *lineCopy = 0);
+	int fileLoad(const QString & path, bool *exists = 0, int *lineNumber = 0, QString *lineCopy = 0);
 	void setFileLoadCancelOnEmptyLine(bool state) {cancel_file_analyze_on_empty_line = state;}
 
 	bool registerDatabaseGlobal(const QString &desc, int index = 1);

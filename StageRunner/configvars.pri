@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.9.0
+APPVERSION = V0.9.9.1
 APP_MILESTONE = TimeLine
 APP_PRODUCER = 2024 Stonechip Entertainment
 APP_ORG_STRING = Stonechip

@@ -76,7 +76,7 @@ PluginMapping::~PluginMapping()
 bool PluginMapping::saveToDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
-			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+			.arg(QDir::homePath(), APP_CONFIG_PATH, APPNAME);
 
 	qDebug() << "save pluginmap" << path;
 	return fileSave(path,false,true);
@@ -85,9 +85,9 @@ bool PluginMapping::saveToDefaultFile()
 bool PluginMapping::loadFromDefaultFile()
 {
 	QString path = QString("%1/.config/%2/%3.pluginmapping")
-			.arg(QDir::homePath()).arg(APP_CONFIG_PATH).arg(APPNAME);
+			.arg(QDir::homePath(), APP_CONFIG_PATH, APPNAME);
 	qDebug() << "save pluginmap" << path;
-	bool ok = fileLoad(path);
+	bool ok = fileLoad(path) == 1;
 	return ok;
 }
 

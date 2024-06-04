@@ -44,6 +44,7 @@
 #include "sequencestatuswidget.h"
 #include "qtstatictools.h"
 #include "style/lightdeskstyle.h"
+#include "style/extmenustyle.h"
 #include "fx/fxitem.h"
 #include "fx/fxsceneitem.h"
 #include "fx/fxseqitem.h"
@@ -89,6 +90,17 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	setupUi(this);
 	setObjectName("StageRunnerMainwin");
 	setup_gui_docks();
+
+	auto acts = menuBar()->actions();
+	for (QAction *a : acts) {
+		if (a->menu()) {
+			QMenu *m = a->menu();
+			m->setStyle(new ExtMenuStyle());
+			// m->setStyleSheet("QMenu {icon-size: 30px;} QMenu::item {background: transparent;} QMenu::item:selected {background: #333;}");
+		}
+		// qDebug() << a->menu()->objectName();
+	}
+
 
 #ifndef USE_SDL
 	QAction *act = findChild<QAction*>("actionUse_SDL_audio");

@@ -183,10 +183,21 @@ bool Project::loadFromFile(const QString &path)
 		ok = loadFxMasterProject(path);
 	}
 	else {
-
 		setFileLoadCancelOnEmptyLine(false);
 
-		ok = fileLoad(path,&file_exists,&line_number,&line_copy);
+		int stat = fileLoad(path,&file_exists,&line_number,&line_copy);
+		if (stat == -2) {
+			errorString.replace("\n","<br>");
+			POPUPERRORMSG(tr("Project load warning!"),
+						  tr("Project loaded with warnings! <br><br>%1").arg(errorString));
+			ok = true;
+		}
+		else if (stat < 0) {
+			ok = false;
+		}
+		else {
+			ok = true;
+		}
 
 		if (pProjectFormat >= 2) {
 			fxList->refAllMembers();

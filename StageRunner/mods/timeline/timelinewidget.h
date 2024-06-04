@@ -96,7 +96,7 @@ protected:
 
 	// temp
 	int m_curMouseXPosMs		= 0;
-	QPointer<TimeLineItem> m_hoveredItem;
+	QPointer<TimeLineItem> m_hoveredItem[TIMELINE_MAX_TRACKS];
 
 public:
 	explicit TimeLineWidget(QWidget *parent = nullptr);

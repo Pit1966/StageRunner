@@ -70,7 +70,6 @@ public:
 
 	Ps::Button showQuestion(const QString &mainText, const QString &subText, VMsg::Type msgType = VMsg::MT_UNDEF);
 
-
 private:
 	MessageHub();
 	~MessageHub();

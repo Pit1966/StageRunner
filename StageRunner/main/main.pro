@@ -143,6 +143,7 @@ SOURCES += \
 	../gui/sequencestatuswidget.cpp \
 	../gui/setupwidget.cpp \
 	../gui/stagerunnermainwin.cpp \
+	../gui/style/extmenustyle.cpp \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
@@ -272,6 +273,7 @@ HEADERS  += \
 	../gui/sequencestatuswidget.h \
 	../gui/setupwidget.h \
 	../gui/stagerunnermainwin.h \
+	../gui/style/extmenustyle.h \
 	../gui/style/lightdeskstyle.h \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \

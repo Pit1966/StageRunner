@@ -93,6 +93,12 @@ void LightDeskStyle::polish(QPalette &pal)
 	setTexture(pal, QPalette::Window, background_img);
 }
 
+void LightDeskStyle::polish(QWidget *widget)
+{
+	Q_UNUSED(widget)
+	// widget->setAutoFillBackground(true);
+}
+
 int LightDeskStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
 {
 	switch (hint) {
@@ -105,7 +111,6 @@ int LightDeskStyle::styleHint(QStyle::StyleHint hint, const QStyleOption *option
 	default:
 		return QProxyStyle::styleHint(hint, option, widget, returnData);
 	}
-
 }
 
 int LightDeskStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
@@ -115,6 +120,8 @@ int LightDeskStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *
 		return 8;
 	case PM_ScrollBarExtent:
 		return QProxyStyle::pixelMetric(metric, option, widget) + 4;
+	case QStyle::PM_SmallIconSize:
+		return 30;
 	default:
 		return QProxyStyle::pixelMetric(metric, option, widget);
 	}
@@ -562,9 +569,3 @@ QPainterPath LightDeskStyle::drawTabRoundBox(const QRect &rect, QStyle::State st
 	return path;
 }
 
-
-void LightDeskStyle::polish(QWidget *widget)
-{
-	Q_UNUSED(widget)
-	// widget->setAutoFillBackground(true);
-}

@@ -626,24 +626,24 @@ void TimeLineWidget::checkMousePos(qreal x, qreal y)
 {
 	// Is the mouse over a track? Check and get a track list
 	const QList<TimeLineTrack*> tracks = yPosToTrackList(qRound(y));
-	if (tracks.isEmpty())
-		return;
 
-	bool foundAtLeastOne = false;
+	bool foundAtLeastOne[TIMELINE_MAX_TRACKS] = {};	// only for debug hover tracking
 
-	for (TimeLineTrack *track : tracks) {
+	for (int t=0; t<tracks.size(); t++) {
+		TimeLineTrack *track = tracks.at(t);
+		int tid = track->trackId();
 		// now check if mouse is over one of the items of this track
 		QList<TimeLineItem*>items = track->itemList();
 		for (int i=0; i<items.size(); i++) {
 			TimeLineItem *item = items.at(i);
 			if (item->isInsideScenePos(x, y)) {
-				foundAtLeastOne = true;
-				// mouse is over item, now call item hover function
-				if (m_hoveredItem != item) {
-					m_hoveredItem = item;
-					qDebug() << "over" << item->label();
+				foundAtLeastOne[tid] = true;
+				if (m_hoveredItem[tid] != item) {
+					m_hoveredItem[tid] = item;
+					qDebug() << "track" << tid << "over" << item->label();
 				}
 
+				// mouse is over item, now call item hover function
 				bool accepted = item->mouseHoverEvent(x - item->x(), y - item->y());
 				if (accepted)
 					break;
@@ -651,13 +651,14 @@ void TimeLineWidget::checkMousePos(qreal x, qreal y)
 		}
 	}
 
-	if (foundAtLeastOne == false) {
-		if (m_hoveredItem) {
-			qDebug() << "leave" << m_hoveredItem->label();
-			m_hoveredItem = nullptr;
+	for (int tid=0; tid<TIMELINE_MAX_TRACKS; tid++) {
+		if (foundAtLeastOne[tid] == false) {
+			if (m_hoveredItem[tid]) {
+				qDebug() << "track" << tid << "leave" << m_hoveredItem[tid]->label();
+				m_hoveredItem[tid] = nullptr;
+			}
 		}
 	}
-
 }
 
 void TimeLineWidget::setTimeLineDuration(int ms)

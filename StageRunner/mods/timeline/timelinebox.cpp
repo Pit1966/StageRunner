@@ -188,14 +188,14 @@ void TimeLineBox::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 
 void TimeLineBox::hoverEnterEvent(QGraphicsSceneHoverEvent */*event*/)
 {
-	qDebug() << "hover enter" << m_label;
+	// qDebug() << "hover enter" << m_label;
 	m_isHover = true;
 }
 
 void TimeLineBox::hoverLeaveEvent(QGraphicsSceneHoverEvent */*event*/)
 {
-	qDebug() << "hover leave" << m_label;
-	m_isHover = true;
+	// qDebug() << "hover leave" << m_label;
+	m_isHover = false;
 }
 
 // void TimeLineBox::hoverMoveEvent(QGraphicsSceneHoverEvent *event)

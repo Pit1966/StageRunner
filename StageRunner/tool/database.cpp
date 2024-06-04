@@ -426,7 +426,6 @@ bool Database::createNewTable(DBfield *entrys) {
 	QList<DBfield>trigger;
 
 	int idx = 0;
-	int col_cnt = 0;
 	while (strlen(entrys[idx].com) > 0) {
 		QString com = entrys[idx].com;
 		QString para = entrys[idx].para;
@@ -449,9 +448,6 @@ bool Database::createNewTable(DBfield *entrys) {
 		else if (com.startsWith("_")) {
 			// Ignorieren
 		}
-		else {
-			col_cnt++;
-		}
 		idx++;
 	}
 	if (!tablename.size()) {
@@ -468,7 +464,6 @@ bool Database::createNewTable(DBfield *entrys) {
 	QString sql = "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tablename + " (";
 	//   Die einzelnen Spalten
 	idx = 0;
-	col_cnt = 0;
 	while (strlen(entrys[idx].com) > 0) {
 		QString com = entrys[idx].com;
 		QString para = entrys[idx].para;
@@ -497,14 +492,13 @@ bool Database::createNewTable(DBfield *entrys) {
 			if (attr.size() > 1) sql += attr;
 			// Spalte fertig
 			sql += ",";
-			// Anzahl Spalten
-			col_cnt++;
 		}
 			idx++;
 	}
+
 	// Keys anhängen
 	for (int t=0; t<keys.size(); t++) {
-		QString com = keys[t].com;
+		// QString com = keys[t].com;
 		QString para = keys[t].para;
 		QString attr = keys[t].attr;
 		if (para == "_PRIMARY")
@@ -602,7 +596,6 @@ bool Database::updateTable(DBfield *entrys) {
 
 	// Tabellendaten vorbereiten
 	int idx = 0;
-	int col_cnt = 0;
 	while (strlen(entrys[idx].com) > 0) {
 		QString com = entrys[idx].com;
 		QString para = entrys[idx].para;
@@ -619,7 +612,6 @@ bool Database::updateTable(DBfield *entrys) {
 			// Ignorieren
 		}
 		else {
-			col_cnt++;
 			cols.append(entrys[idx]);
 			addflags.append(0);
 		}
