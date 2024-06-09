@@ -65,11 +65,13 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	}
 	// qDebug() << Q_FUNC_INFO << audio_decoder->error();
 
+	qRegisterMetaType<AudioFormat>("AudioFormat");
+
 	connect(audio_decoder,SIGNAL(bufferReady()),this,SLOT(process_decoder_buffer()));
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
-	connect(this,SIGNAL(rawDataProcessed(const char*,int,QAudioFormat)),this,SLOT(calcVuLevel(const char*,int,QAudioFormat)),Qt::QueuedConnection);
+	connect(this,SIGNAL(rawDataProcessed(const char*,int,AudioFormat)),this,SLOT(calcVuLevel(const char*,int,AudioFormat)),Qt::QueuedConnection);
 
 }
 
@@ -255,7 +257,7 @@ bool AudioIODevice::isDecoding() const
  * @param size
  * @param audioFormat
  */
-void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat & audioFormat)
+void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat & audioFormat)
 {
 //	static QTime checktime;
 //	qDebug("calcLast %dms",checktime.elapsed());
@@ -272,80 +274,67 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 	if (frames == 0) return;
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
 
-	switch (audioFormat.sampleType()) {
-	case QAudioFormat::SignedInt:
-	case QAudioFormat::UnSignedInt:
-		switch (audioFormat.sampleSize()) {
-		case 16:
-			{
-				const qint16 *dat = reinterpret_cast<const qint16*>(data);
-				frames /= 2;
+	switch (audioFormat.sampleFormat()) {
+	case AudioFormat::Int16:
+		{
+			const qint16 *dat = reinterpret_cast<const qint16*>(data);
+			frames /= 2;
 
-				for (int chan = 0; chan < channels; chan++) {
-					for (int frame = 0; frame<frames; frame++) {
-						const qint16 val = dat[frame*channels+chan];
-						const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
-						if (valF > sample_peak)
-							sample_peak = valF;
-						if (valF > peak[chan])
-							peak[chan] = valF;
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint16 val = dat[frame*channels+chan];
+					const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
+					if (valF > sample_peak)
+						sample_peak = valF;
+					if (valF > peak[chan])
+						peak[chan] = valF;
 
-						energy[chan] += valF * valF;
-						if (m_fftEnabled) {
-							switch (chan) {
-							case 0:
-								m_leftFFT.appendToBuffer(valF);
-								break;
-							case 1:
-								m_rightFFT.appendToBuffer(valF);
-								break;
-							}
+					energy[chan] += valF * valF;
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
 						}
 					}
 				}
 			}
-			break;
-		case 32:
-			{
-				const qint32 *dat = reinterpret_cast<const qint32*>(data);
-				frames /= 4;
-
-				for (int chan = 0; chan < channels; chan++) {
-					for (int frame = 0; frame<frames; frame++) {
-						const qint32 val = dat[frame*channels+chan];
-						const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
-						if (valF > sample_peak)
-							sample_peak = valF;
-						if (valF > peak[chan])
-							peak[chan] = valF;
-
-						energy[chan] += valF * valF;
-						if (m_fftEnabled) {
-							switch (chan) {
-							case 0:
-								m_leftFFT.appendToBuffer(valF);
-								break;
-							case 1:
-								m_rightFFT.appendToBuffer(valF);
-								break;
-							}
-						}
-					}
-				}
-			}
-			break;
-		default:
-			DEBUGERROR("Sampletype in audiostream not supported");
-			break;
 		}
-		left = sqrt(energy[0] / frames);
-		right = sqrt(energy[1] / frames);
+		break;
+	case AudioFormat::Int32:
+		{
+			const qint32 *dat = reinterpret_cast<const qint32*>(data);
+			frames /= 4;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint32 val = dat[frame*channels+chan];
+					const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
+					if (valF > sample_peak)
+						sample_peak = valF;
+					if (valF > peak[chan])
+						peak[chan] = valF;
+
+					energy[chan] += valF * valF;
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
+						}
+					}
+				}
+			}
+		}
 		break;
 
-	case QAudioFormat::Float:
-		{
-		switch (audioFormat.sampleSize()) {
-		case 32:
+	case AudioFormat::Float:
 		{
 			const float *dat = reinterpret_cast<const float*>(data);
 			frames /= 4;
@@ -375,19 +364,15 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const QAudioFormat &
 				}
 			}
 		}
-			break;
-		default:
-			DEBUGERROR("Sampletype in audiostream not supported");
-			break;
-		}
-		left = sqrt(energy[0] / frames);
-		right = sqrt(energy[1] / frames);
-	}
 		break;
-	case QAudioFormat::Unknown:
-		DEBUGERROR("Sampletype in audiostream unknown");
-		break;
+	case AudioFormat::Uint8:
+	case AudioFormat::Unknown:
+		DEBUGERROR("Sampletype in audiostream unknown or unsupported");
+		return;
 	}
+
+	left = sqrt(energy[0] / frames);
+	right = sqrt(energy[1] / frames);
 
 	// qDebug("left:%f right:%f",left,right);
 	if (left/frames > frame_energy_peak)
@@ -497,37 +482,32 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 	return QAudioDeviceInfo();
 }
 
-void AudioIODevice::calcPanning(char *data, int size, const QAudioFormat &audioFormat)
+void AudioIODevice::calcPanning(char *data, int size, const	AudioFormat &audioFormat)
 {
 	int channels = audioFormat.channelCount();
 	qint64 frames = size / channels;
 
-	switch (audioFormat.sampleType()) {
-	case QAudioFormat::SignedInt:
-	case QAudioFormat::UnSignedInt:
-		switch (audioFormat.sampleSize()) {
-		case 16:
-			{
-				qint16 *dat = reinterpret_cast<qint16*>(data);
-				frames /= 2;
+	switch (audioFormat.sampleFormat()) {
+	case AudioFormat::Int16:
+		{
+			qint16 *dat = reinterpret_cast<qint16*>(data);
+			frames /= 2;
 
-				for (int chan = 0; chan < channels; chan++) {
-					for (int frame = 0; frame<frames; frame++) {
-						const qint16 val = dat[frame*channels+chan];
-						const qreal valF = AudioIODevice::pcm16ToReal(val, audioFormat);
-						switch (chan) {
-						case 0:
-							dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolLeft);
-							break;
-						case 1:
-							dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolRight);
-							break;
-						}
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint16 val = dat[frame*channels+chan];
+					const qreal valF = AudioIODevice::pcm16ToReal(val, audioFormat);
+					switch (chan) {
+					case 0:
+						dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolLeft);
+						break;
+					case 1:
+						dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolRight);
+						break;
 					}
 				}
-
 			}
-			break;
+
 		}
 		break;
 	}

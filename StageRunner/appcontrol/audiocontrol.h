@@ -31,7 +31,9 @@
 #include <QThread>
 #include <QList>
 #include <QMutex>
-#include <QAudioDeviceInfo>
+#ifdef IS_QT5
+#  include <QAudioDeviceInfo>
+#endif
 
 //using namespace AUDIO;
 
@@ -61,8 +63,10 @@ protected:
 	int m_masterVolume;
 	bool m_isValid;
 	bool m_initInThread;
+#ifdef IS_QT5
 	QAudioDeviceInfo m_extraDevice;
 	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
+#endif
 	QStringList m_audioDeviceNames;						///< A list of audio devices by names
 
 	// Video player stuff (as hyper extension)

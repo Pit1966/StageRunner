@@ -28,8 +28,11 @@
 #include "fxclipitem.h"
 #include "audiocontrol.h"
 #include "audioslot.h"
-#include "videoplayer.h"
 #include "customwidget/psvideowidget.h"
+
+#ifdef IS_QT5
+#	include "videoplayer.h"
+#endif
 
 #include <QElapsedTimer>
 #include <QApplication>

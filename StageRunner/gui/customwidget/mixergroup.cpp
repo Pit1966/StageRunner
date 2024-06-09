@@ -43,7 +43,7 @@ MixerGroup::MixerGroup(QWidget *parent) :
 
 	mixerlayout = new QHBoxLayout;
 	mixerlayout->setSpacing(0);
-	mixerlayout->setMargin(0);
+	mixerlayout->setContentsMargins(0,0,0,0);
 	setLayout(mixerlayout);
 
 	setAcceptDrops(true);

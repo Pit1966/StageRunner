@@ -59,21 +59,28 @@ unix:!macx {
 	}
 }
 
-
 QT += core gui
 QT += sql
-QT += multimedia
 
-# QT		+= network
+equals(QT_MAJOR_VERSION, 6) {
+	QT += widgets
+	QT += network
+	QT += multimedia
 
-greaterThan(QT_MAJOR_VERSION, 4) {
+	DEFINES += IS_QT6
+	message(Compile with Qt6)
+}
+else: equals(QT_MAJOR_VERSION, 5) {
 	QT += widgets
 	QT += multimediawidgets
-
+	QT += multimedia
 	DEFINES += IS_QT5
-} else {
+}
+else {
 	message(Compiling with Qt4 is not supported!. Please use Qt5)
 }
+
+
 
 win32 {
 QMAKE_LFLAGS += /INCREMENTAL:NO
@@ -127,7 +134,6 @@ SOURCES += \
 	../gui/customwidget/pspushbutton.cpp \
 	../gui/customwidget/psspectrometer.cpp \
 	../gui/customwidget/psspinbox.cpp \
-	../gui/customwidget/psvideowidget.cpp \
 	../gui/customwidget/psvumeter.cpp \
 	../gui/deviceinfowidget.cpp \
 	../gui/fxitempropertywidget.cpp \
@@ -181,7 +187,6 @@ SOURCES += \
 	../system/runguard.cpp \
 	../system/variantmapserializer.cpp \
 	../system/videocontrol.cpp \
-	../system/videoplayer.cpp \
 	../thirdparty/widget/qsynthdialclassicstyle.cpp \
 	../thirdparty/widget/qsynthdialpeppinostyle.cpp \
 	../thirdparty/widget/qsynthknob.cpp \
@@ -257,7 +262,6 @@ HEADERS  += \
 	../gui/customwidget/pspushbutton.h \
 	../gui/customwidget/psspectrometer.h \
 	../gui/customwidget/psspinbox.h \
-	../gui/customwidget/psvideowidget.h \
 	../gui/customwidget/psvumeter.h \
 	../gui/deviceinfowidget.h \
 	../gui/fxitempropertywidget.h \
@@ -314,7 +318,6 @@ HEADERS  += \
 	../system/runguard.h \
 	../system/variantmapserializer.h \
 	../system/videocontrol.h \
-	../system/videoplayer.h \
 	../thirdparty/fftreal2/ffft/Array.h \
 	../thirdparty/fftreal2/ffft/Array.hpp \
 	../thirdparty/fftreal2/ffft/DynArray.h \
@@ -383,6 +386,18 @@ FORMS    += \
 
 RESOURCES += \
 	../gfx_ressource.qrc
+
+
+contains(DEFINES,IS_QT5) {
+HEADERS += \
+	../gui/customwidget/psvideowidget.h \
+	../system/videoplayer.h
+
+SOURCES += \
+	../gui/customwidget/psvideowidget.cpp \
+	../system/videoplayer.cpp
+
+}
 
 
 contains(DEFINES,USE_SDL) {

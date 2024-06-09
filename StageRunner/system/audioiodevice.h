@@ -32,9 +32,13 @@
 
 #include <QIODevice>
 #include <QElapsedTimer>
-#include <QAudioDeviceInfo>
 #include <QAudioDecoder>
 #include <QMutex>
+
+#ifdef IS_QT5
+#	include <QAudioDeviceInfo>
+#endif
+
 
 class QAudioFormat;
 
@@ -109,23 +113,23 @@ public:
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
-	inline static qreal pcm16ToReal(qint16 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
-	inline static qint16 realToPcm16(qreal real, const QAudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
-	inline static qreal realToRealNorm(qreal real, const QAudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
-	inline static qreal realNormToReal(qreal realnorm, const QAudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
-	inline static qreal pcm32ToReal(qint64 pcm, const QAudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
+	inline static qreal pcm16ToReal(qint16 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
+	inline static qint16 realToPcm16(qreal real, const AudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
+	inline static qreal realToRealNorm(qreal real, const AudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
+	inline static qreal realNormToReal(qreal realnorm, const AudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
+	inline static qreal pcm32ToReal(qint64 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
 
 	void setLoopCount(int loops);
 
 	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
 
 protected:
-	void calcPanning(char *data, int size, const QAudioFormat &audioFormat);
+	void calcPanning(char *data, int size, const AudioFormat &audioFormat);
 
 public slots:
 	void start(int loops = 1);
 	void stop();
-	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 private slots:
 	void process_decoder_buffer();
@@ -138,7 +142,7 @@ signals:
 	void vuLevelChanged(qreal left, qreal right);
 	void frqSpectrumChanged(FrqSpectrum *spec);
 	void audioDurationDetected(qint64 ms);
-	void rawDataProcessed(const char *data, int size, const QAudioFormat &audioFormat);
+	void rawDataProcessed(const char *data, int size, const AudioFormat &audioFormat);
 
 };
 

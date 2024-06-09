@@ -48,6 +48,7 @@
 #include "system/dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
+#include "audioformat.h"
 
 #include <QFileDialog>
 

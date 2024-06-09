@@ -31,7 +31,6 @@
 
 #include "commandsystem.h"
 
-
 //using namespace AUDIO;
 
 class PsVideoWidget;

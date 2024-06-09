@@ -21,6 +21,7 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
+#include "audioformat.h"
 #include "mediaplayeraudiobackend.h"
 #include "log.h"
 #include "audioslot.h"
@@ -320,5 +321,4 @@ void MediaPlayerAudioBackend::calculateVuLevel(QAudioBuffer buffer)
 	calcVuLevel(reinterpret_cast<const char *>(buffer.constData())
 				,buffer.byteCount()
 				,buffer.format());
-
 }

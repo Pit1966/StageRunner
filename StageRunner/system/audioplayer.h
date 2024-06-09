@@ -25,7 +25,6 @@
 #define AUDIOPLAYER_H
 
 #include <QObject>
-#include <QAudioFormat>
 
 #include "commandsystem.h"
 #include "fftrealfixlenwrapper.h"
@@ -33,6 +32,7 @@
 
 
 class AudioSlot;
+class AudioFormat;
 
 template <class T> class PsMovingAverage;
 
@@ -104,7 +104,7 @@ public:
 
 //protected:
 	// some helper fucntions, that can be used by any backend implementation
-	void calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat);
+	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 protected:
 	void timerEvent(QTimerEvent *event);

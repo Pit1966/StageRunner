@@ -23,7 +23,10 @@
 
 #include "lightcontrolwidget.h"
 #include "appcentral.h"
-#include "system/videoplayer.h"
+
+#ifdef IS_QT5
+#	include "system/videoplayer.h"
+#endif
 
 #include <QMessageBox>
 

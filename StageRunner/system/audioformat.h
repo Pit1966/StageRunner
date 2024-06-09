@@ -29,9 +29,19 @@
 class AudioFormat : public QAudioFormat
 {
 public:
+	enum SampleFormat {
+		Unknown,
+		Uint8,
+		Int16,
+		Int32,
+		Float
+	};
+
 	AudioFormat();
 //	AudioFormat(const AudioFormat &other);
 	AudioFormat(const QAudioFormat &other);
+
+	SampleFormat sampleFormat() const;			// compat function Qt6 / Qt5
 
 	static AudioFormat defaultFormat();
 

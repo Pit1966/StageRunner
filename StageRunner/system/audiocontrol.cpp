@@ -38,21 +38,23 @@
 #include "fxlist.h"
 #include "fxclipitem.h"
 #include "customwidget/psvideowidget.h"
-#include "videoplayer.h"
 #include "videocontrol.h"
 #include "system/fxtimer.h"
 
 #include <QStringList>
 #include <QDebug>
+#include <QUrl>
+#include <QThread>
 
 #ifdef IS_QT5
-#include <QAudioDeviceInfo>
-#include <QMediaPlaylist>
-#include <QMediaPlayer>
-#include <QUrl>
-#include <QVideoWidget>
-#include <QThread>
+#	include "videoplayer.h"
+
+#	include <QAudioDeviceInfo>
+#	include <QMediaPlaylist>
+#	include <QMediaPlayer>
+#	include <QVideoWidget>
 #endif
+
 
 #ifdef USE_SDL
 #include "audiooutput/sdl2audiobackend.h"

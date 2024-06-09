@@ -26,7 +26,9 @@
 #include "system/audiooutput/audiofileinfo.h"
 
 #include <QFileInfo>
-#include <QMediaPlayer>
+#ifdef IS_QT5
+#  include <QMediaPlayer>
+#endif
 
 using namespace AUDIO;
 

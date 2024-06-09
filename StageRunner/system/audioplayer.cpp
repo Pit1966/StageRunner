@@ -21,6 +21,7 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
+#include "audioformat.h"
 #include "audioplayer.h"
 #include "log.h"
 #include "audioslot.h"
@@ -79,7 +80,7 @@ bool AudioPlayer::setSourceFilename(const QString &path, const QString &fxName)
 	return true;
 }
 
-void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &audioFormat)
+void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &audioFormat)
 {
 	//	static QTime checktime;
 	//	qDebug("calcLast %dms",checktime.elapsed());
@@ -95,126 +96,109 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const QAudioFormat &au
 
 	if (frames == 0) return;
 	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName();
-
-	switch (audioFormat.sampleType()) {
-	case QAudioFormat::SignedInt:
-	case QAudioFormat::UnSignedInt:
-		switch (audioFormat.sampleSize()) {
-		case 16:
-			{
-				const qint16 *dat = reinterpret_cast<const qint16*>(data);
-				frames /= 2;
-
-				for (int chan = 0; chan < channels; chan++) {
-					for (int frame = 0; frame<frames; frame++) {
-						const qint16 val = dat[frame*channels+chan];
-						const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
-						if (valF > sample_peak)
-							sample_peak = valF;
-						if (valF > peak[chan])
-							peak[chan] = valF;
-
-						energy[chan] += valF * valF;
-						if (m_fftEnabled) {
-							switch (chan) {
-							case 0:
-								m_leftFFT.appendToBuffer(valF);
-								break;
-							case 1:
-								m_rightFFT.appendToBuffer(valF);
-								break;
-							}
-						}
-					}
-				}
-			}
-			break;
-		case 32:
-			{
-				const qint32 *dat = reinterpret_cast<const qint32*>(data);
-				frames /= 4;
-
-				for (int chan = 0; chan < channels; chan++) {
-					for (int frame = 0; frame<frames; frame++) {
-						const qint32 val = dat[frame*channels+chan];
-						const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
-						if (valF > sample_peak)
-							sample_peak = valF;
-						if (valF > peak[chan])
-							peak[chan] = valF;
-
-						energy[chan] += valF * valF;
-						if (m_fftEnabled) {
-							switch (chan) {
-							case 0:
-								m_leftFFT.appendToBuffer(valF);
-								break;
-							case 1:
-								m_rightFFT.appendToBuffer(valF);
-								break;
-							}
-						}
-					}
-				}
-			}
-			break;
-		default:
-			DEBUGERROR("Sampletype in audiostream not supported");
-			break;
-		}
-		left = sqrt(energy[0] / frames);
-		right = sqrt(energy[1] / frames);
-		break;
-
-	case QAudioFormat::Float:
+	switch (audioFormat.sampleFormat()) {
+	case AudioFormat::Int16:
 		{
-			switch (audioFormat.sampleSize()) {
-			case 32:
-				{
-					const float *dat = reinterpret_cast<const float*>(data);
-					frames /= 4;
+			const qint16 *dat = reinterpret_cast<const qint16*>(data);
+			frames /= 2;
 
-					for (int chan = 0; chan < channels; chan++) {
-						for (int frame = 0; frame<frames; frame++) {
-							const float val = dat[frame*channels+chan];
-							// const qreal valF = AudioIODevice::realToRealNorm(val,audioFormat);
-							const float valF = val;
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint16 val = dat[frame*channels+chan];
+					const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
+					if (valF > sample_peak)
+						sample_peak = valF;
+					if (valF > peak[chan])
+						peak[chan] = valF;
 
-							if (valF > sample_peak)
-								sample_peak = valF;
-							if (valF > peak[chan])
-								peak[chan] = valF;
-
-							energy[chan] += valF * valF;
-							if (m_fftEnabled) {
-								switch (chan) {
-								case 0:
-									m_leftFFT.appendToBuffer(valF);
-									break;
-								case 1:
-									m_rightFFT.appendToBuffer(valF);
-									break;
-								}
-							}
+					energy[chan] += valF * valF;
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
 						}
 					}
 				}
-				break;
-			default:
-				DEBUGERROR("Sampletype in audiostream not supported");
-				break;
 			}
-			left = sqrt(energy[0] / frames);
-			right = sqrt(energy[1] / frames);
 		}
 		break;
-	case QAudioFormat::Unknown:
-		DEBUGERROR("Sampletype in audiostream unknown");
+	case AudioFormat::Int32:
+		{
+			const qint32 *dat = reinterpret_cast<const qint32*>(data);
+			frames /= 4;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint32 val = dat[frame*channels+chan];
+					const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
+					if (valF > sample_peak)
+						sample_peak = valF;
+					if (valF > peak[chan])
+						peak[chan] = valF;
+
+					energy[chan] += valF * valF;
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
+						}
+					}
+				}
+			}
+		}
 		break;
+
+	case AudioFormat::Float:
+		{
+			const float *dat = reinterpret_cast<const float*>(data);
+			frames /= 4;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const float val = dat[frame*channels+chan];
+					// const qreal valF = AudioIODevice::realToRealNorm(val,audioFormat);
+					const float valF = val;
+
+					if (valF > sample_peak)
+						sample_peak = valF;
+					if (valF > peak[chan])
+						peak[chan] = valF;
+
+					energy[chan] += valF * valF;
+					if (m_fftEnabled) {
+						switch (chan) {
+						case 0:
+							m_leftFFT.appendToBuffer(valF);
+							break;
+						case 1:
+							m_rightFFT.appendToBuffer(valF);
+							break;
+						}
+					}
+				}
+			}
+		}
+		break;
+	case AudioFormat::Uint8:
+	case AudioFormat::Unknown:
+		DEBUGERROR("Sampletype in audiostream unknown or unsupported");
+		return;
 	}
 
+	left = sqrt(energy[0] / frames);
+	right = sqrt(energy[1] / frames);
+
 	// qDebug("left:%f right:%f",left,right);
-	if (left/frames > frame_energy_peak) frame_energy_peak = left/frames;
+	if (left/frames > frame_energy_peak)
+		frame_energy_peak = left/frames;
 
 	m_leftAvg->append(left);
 	m_rightAvg->append(right);

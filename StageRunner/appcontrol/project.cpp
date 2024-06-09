@@ -41,6 +41,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QRegularExpression>
 
 
 
@@ -124,7 +125,7 @@ void Project::clear()
 	m_isValid = false;
 
 	pProjectName = "Default Project";
-	pProjectId = QDateTime::currentDateTimeUtc().toLocalTime().toTime_t();
+	pProjectId = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
 	pProjectFormat = 0;
 	pProjectBaseDir = QString();
 	pComment = QString();
@@ -335,7 +336,7 @@ bool Project::consolidateToDir(const QString &exportProName, const QString &dirn
 
 	tpro.pComment = QString("Consolidated from: %1, at: %2")
 			.arg(curProjectFilePath, QDateTime::currentDateTime().toString());
-	tpro.pProjectId = QDateTime::currentDateTimeUtc().toLocalTime().toTime_t();
+	tpro.pProjectId = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
 	tpro.pProjectName = proname;
 
 
@@ -721,12 +722,11 @@ bool Project::fxmLoadChunkName(QDataStream &in, QString &name)
 	name = QString::fromLocal8Bit(namedat);
 
 #ifdef __unix__
-	if (name.contains(QRegExp("^.:\\\\"))) {
+	if (name.contains(QRegularExpression("^.:\\\\"))) {
 		name = name.remove(0,2);
 		name.replace("\\","/");
 		// fprintf(stderr, "match");
 	}
-
 #endif
 
 	return true;
@@ -842,7 +842,7 @@ bool Project::fxmLoadChunkUserName(QDataStream &in, quint32 size)
 	in.readRawData(read.data(), size);
 	fprintf(stderr, "Found CHUNK_USERNAME: %s: id: %d\n",read.data(),id);
 	QString uname = QString::fromLocal8Bit(read);
-	if (uname.contains(QRegExp("(\\.wav|\\.ogg|\\.WAV|\\.OGG)$")))
+	if (uname.contains(QRegularExpression("(\\.wav|\\.ogg|\\.WAV|\\.OGG)$")))
 		uname.chop(4);
 
 
