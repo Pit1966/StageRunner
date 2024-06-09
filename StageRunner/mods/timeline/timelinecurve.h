@@ -3,7 +3,10 @@
 
 #include "timelineitem.h"
 
+
 namespace PS_TL {
+
+class TimeLineTrack;
 
 // -------------------------------------------------------------------------------------
 
@@ -19,11 +22,26 @@ public:
 	mutable qreal y	= 0;	///< real position after first draw
 
 public:
-	Node(TimeLineTrack *track, int x = 0, int yPM = 0)
+    Node(PS_TL::TimeLineTrack *track = nullptr, int x = 0, int yPM = 0)
 		: m_myTrack(track)
 		, xMs(x)
 		, yPM(yPM)
 	{}
+    Node(const Node &o) = default;
+    Node & operator=(const Node &o) = default;
+    Node & operator=(Node &o) = default;
+
+    // Node(const Node &o)
+    // 	: m_myTrack(o.m_myTrack)
+    // 	, xMs(o.xMs)
+    // 	, yPM(o.yPM)
+    // {}
+    // Node & operator=(const Node &o) {
+    // 	m_myTrack = o.m_myTrack;
+    // 	xMs = o.xMs;
+    // 	yPM = o.yPM;
+    // 	return *this;
+    // }
 	QPointF nodePixel(qreal msPerPix) const;
 	int scaledY() const;
 	int unScaleY(qreal y) const;
