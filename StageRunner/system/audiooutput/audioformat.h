@@ -43,6 +43,10 @@ public:
 
 	SampleFormat sampleFormat() const;			// compat function Qt6 / Qt5
 
+	static qreal pcm16ToReal(qint16 pcm16);
+	static qint16 realToPcm16(qreal real);
+	static qreal pcm32ToReal(qint64 pcm32);
+	static qint64 realToPcm32(qreal real);
 	static AudioFormat defaultFormat();
 
 };

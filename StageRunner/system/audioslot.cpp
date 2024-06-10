@@ -22,10 +22,14 @@
 //=======================================================================
 
 #include "audioslot.h"
-#include "audioformat.h"
 
-#include "system/audiooutput/mediaplayeraudiobackend.h"
+#include "system/audiooutput/audioformat.h"
+#ifdef IS_QT5 // QMediaPlayer only exists in Qt5
+#	include "system/audiooutput/mediaplayeraudiobackend.h"
+#endif
 #include "system/audiooutput/iodeviceaudiobackend.h"
+#include "system/audiooutput/audioiodevice.h"
+#include "system/audiooutput/audioplayer.h"
 
 #ifdef USE_SDL
 #  include "system/audiooutput/sdl2audiobackend.h"
@@ -36,7 +40,6 @@
 #include "fxplaylistitem.h"
 #include "system/log.h"
 #include "config.h"
-#include "audioiodevice.h"
 #include "audiocontrol.h"
 #include "videocontrol.h"
 #include "appcentral.h"
@@ -44,7 +47,6 @@
 #include "executer.h"
 #include "execcenter.h"
 #include "fxlist.h"
-#include "audioplayer.h"
 #include "qtstatictools.h"
 
 #include <QApplication>

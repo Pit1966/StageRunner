@@ -40,10 +40,25 @@
 #endif
 
 
-class QAudioFormat;
+class AudioFormat;
 
 class AudioDecoder : public QAudioDecoder
 {
+	Q_OBJECT
+public:
+	enum Error
+	{
+		NoError,
+		ResourceError,
+		FormatError,
+		AccessDeniedError,
+		NotSupportedError
+	};
+	Q_ENUM(Error)
+
+	bool isDecoding() const;
+	void setSourceFilename(const QString &filename);
+	QString sourceFilename() const;
 
 };
 
@@ -60,7 +75,9 @@ public:
 	qint64 bytesAvailable() const override;
 
 	bool setSourceFilename(const QString & filename);
-	void examineQAudioFormat(AudioFormat & form);
+#ifndef IS_QT6
+	void examineAudioFormat(AudioFormat & form);
+#endif
 	AudioFormat & audioFormat() const {return *audio_format;}
 
 	void setPanning(int pan, int maxPan);
@@ -108,20 +125,14 @@ public:
 	qint64 currentPlayPosUs() const;
 	bool seekPlayPosMs(qint64 posMs);
 	inline AUDIO::AudioErrorType audioError() const {return audio_error;}
-	inline qreal pcm16ToReal(qint16 pcm) { return qreal(pcm * 2) / ((1<<audio_format->sampleSize())-1);}
-	inline qint16 realToPcm16(qreal real) { return real * ((1<<audio_format->sampleSize())-1) / 2;}
 	inline void setFFTEnabled(bool state) {m_fftEnabled = state;}
 	inline bool isFFTEnabled() const {return m_fftEnabled;}
 
-	inline static qreal pcm16ToReal(qint16 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((1<<audio.sampleSize())-1);}
-	inline static qint16 realToPcm16(qreal real, const AudioFormat &audio) { return real * ((1<<audio.sampleSize())-1) / 2;}
-	inline static qreal realToRealNorm(qreal real, const AudioFormat &audio) {return real * 2 / ((1<<audio.sampleSize())-1);}
-	inline static qreal realNormToReal(qreal realnorm, const AudioFormat &audio) { return realnorm * ((1<<audio.sampleSize())-1) / 2;}
-	inline static qreal pcm32ToReal(qint64 pcm, const AudioFormat &audio) {return qreal(pcm * 2) / ((qint64(1)<<audio.sampleSize())-1);}
-
 	void setLoopCount(int loops);
 
+#ifndef IS_QT6
 	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
+#endif
 
 protected:
 	void calcPanning(char *data, int size, const AudioFormat &audioFormat);

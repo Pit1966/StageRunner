@@ -66,6 +66,7 @@ equals(QT_MAJOR_VERSION, 6) {
 	QT += widgets
 	QT += network
 	QT += multimedia
+	QT += multimediawidgets
 
 	DEFINES += IS_QT6
 	message(Compile with Qt6)
@@ -163,12 +164,11 @@ SOURCES += \
 	../mods/timeline/timelinewidget.cpp \
 	../plugins/yadi/src/dmxmonitor.cpp \
 	../system/audiocontrol.cpp \
-	../system/audioformat.cpp \
-	../system/audioiodevice.cpp \
 	../system/audiooutput/audiofileinfo.cpp \
+	../system/audiooutput/audioformat.cpp \
+	../system/audiooutput/audioiodevice.cpp \
+	../system/audiooutput/audioplayer.cpp \
 	../system/audiooutput/iodeviceaudiobackend.cpp \
-	../system/audiooutput/mediaplayeraudiobackend.cpp \
-	../system/audioplayer.cpp \
 	../system/audioslot.cpp \
 	../system/convtools.cpp \
 	../system/dmx/fixture.cpp \
@@ -291,12 +291,11 @@ HEADERS  += \
 	../mods/timeline/timelinetrack.h \
 	../mods/timeline/timelinewidget.h \
 	../plugins/yadi/src/dmxmonitor.h \
-	../system/audioformat.h \
-	../system/audioiodevice.h \
 	../system/audiooutput/audiofileinfo.h \
+	../system/audiooutput/audioformat.h \
+	../system/audiooutput/audioiodevice.h \
+	../system/audiooutput/audioplayer.h \
 	../system/audiooutput/iodeviceaudiobackend.h \
-	../system/audiooutput/mediaplayeraudiobackend.h \
-	../system/audioplayer.h \
 	../system/audioslot.h \
 	../system/commandsystem.h \
 	../system/convtools.h \
@@ -348,6 +347,7 @@ HEADERS  += \
 	../tool/frqspectrum.h \
 	../tool/prefvar.h \
 	../tool/psmovingaverage.h \
+	../tool/qt6_qt5_compat.h \
 	../tool/qtstatictools.h \
 	../tool/toolclasses.h \
 	../tool/varset.h \
@@ -391,10 +391,12 @@ RESOURCES += \
 contains(DEFINES,IS_QT5) {
 HEADERS += \
 	../gui/customwidget/psvideowidget.h \
+	../system/audiooutput/mediaplayeraudiobackend.h \
 	../system/videoplayer.h
 
 SOURCES += \
 	../gui/customwidget/psvideowidget.cpp \
+	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../system/videoplayer.cpp
 
 }

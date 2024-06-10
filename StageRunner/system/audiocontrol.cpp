@@ -25,7 +25,6 @@
 #include "config.h"
 #include "log.h"
 #include "audioslot.h"
-#include "audioiodevice.h"
 #include "appcentral.h"
 #include "usersettings.h"
 #include "fxaudioitem.h"
@@ -34,12 +33,13 @@
 #include "execcenter.h"
 #include "fxlistwidget.h"
 #include "fxcontrol.h"
-#include "audioformat.h"
 #include "fxlist.h"
 #include "fxclipitem.h"
 #include "customwidget/psvideowidget.h"
 #include "videocontrol.h"
 #include "system/fxtimer.h"
+#include "system/audiooutput/audioiodevice.h"
+#include "system/audiooutput/audioformat.h"
 
 #include <QStringList>
 #include <QDebug>

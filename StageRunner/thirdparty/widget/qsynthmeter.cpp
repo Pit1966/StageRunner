@@ -319,7 +319,7 @@ qsynthMeter::qsynthMeter ( QWidget *pParent )
 	m_colors[ColorFore] = QColor( 80, 80, 80);
 
 	m_pHBoxLayout = new QHBoxLayout();
-	m_pHBoxLayout->setMargin(0);
+	m_pHBoxLayout->setContentsMargins(0,0,0,0);
 	m_pHBoxLayout->setSpacing(0);
 	QWidget::setLayout(m_pHBoxLayout);
 

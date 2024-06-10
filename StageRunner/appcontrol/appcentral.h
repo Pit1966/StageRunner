@@ -35,10 +35,10 @@
 #include <QTcpSocket>
 #include <QElapsedTimer>
 
-#ifdef USE_SDL
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
-#endif
+// #ifdef USE_SDL
+// #include <SDL2/SDL.h>
+// #include <SDL2/SDL_mixer.h>
+// #endif
 
 
 class AudioControl;
@@ -122,11 +122,6 @@ public:
 	ExecCenter *execCenter				= nullptr;
 	FxListVarSet *templateFxList		= nullptr;
 
-#ifdef USE_SDL
-	Mix_Music *testsdl					= nullptr;
-#endif
-
-
 public:
 	static AppCentral * instance();
 	static AppCentral & ref();
@@ -180,7 +175,6 @@ public:
 	AUDIO::AudioOutputType usedAudioOutputType() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 	bool isLogarithmicVolume() const;
-
 
 	// Sytem
 	qint64 uptimeMs() const {return m_uptime.elapsed();}

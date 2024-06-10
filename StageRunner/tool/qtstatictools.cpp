@@ -25,7 +25,7 @@
 
 #include <QKeySequence>
 #include <QDebug>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QDir>
 
@@ -54,10 +54,12 @@ QString QtStaticTools::keyToString(int key1, int modifier)
 
 int QtStaticTools::timeStringToMS(const QString &str)
 {
+	static QRegularExpression regex("\\D");
+
 	int time_ms = 0;
 	QString number = str.simplified().toLower();
 	QString arg = number;
-	number.replace(QRegExp("\\D"),"");
+	number.replace(regex,"");
 	if (arg.endsWith("s")  && !arg.contains("m")) {
 		time_ms = number.toInt() * 1000;
 	} else {

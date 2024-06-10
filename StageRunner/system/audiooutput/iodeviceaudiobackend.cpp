@@ -22,9 +22,9 @@
 //=======================================================================
 
 #include "iodeviceaudiobackend.h"
+#include "audioiodevice.h"
 #include "audioslot.h"
 #include "log.h"
-#include "audioiodevice.h"
 
 #include <QAudioOutput>
 

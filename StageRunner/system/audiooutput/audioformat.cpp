@@ -41,6 +41,9 @@ AudioFormat::AudioFormat(const QAudioFormat &other)
 
 AudioFormat::SampleFormat AudioFormat::sampleFormat() const
 {
+#ifdef IS_QT6
+	return AudioFormat::SampleFormat(QAudioFormat::sampleFormat());
+#else // QT5
 	if (sampleSize() == 8) {
 		return AudioFormat::Uint8;
 	}
@@ -64,6 +67,37 @@ AudioFormat::SampleFormat AudioFormat::sampleFormat() const
 		}
 	}
 	return AudioFormat::Unknown;
+#endif
+}
+
+/**
+ * @brief Normalize a 16bit audio sample amplitude to 1.0f
+ * @param pcm
+ * @return normalized qreal [0.0 - 1.0]
+ */
+qreal AudioFormat::pcm16ToReal(qint16 pcm16)
+{
+	return qreal(pcm16 * 2) / 65535;
+}
+
+qint16 AudioFormat::realToPcm16(qreal real)
+{
+	return real * 65535 / 2;
+}
+
+/**
+ * @brief Normalize a 32bit audio sample amplitude to 1.0f
+ * @param pcm
+ * @return normalized qreal [0.0 - 1.0]
+ */
+qreal AudioFormat::pcm32ToReal(qint64 pcm32)
+{
+	return qreal(pcm32 * 2) / ((1ll<<32) - 1);
+}
+
+qint64 AudioFormat::realToPcm32(qreal real)
+{
+	return real * ((1ll<<32) - 1) / 2;
 }
 
 AudioFormat AudioFormat::defaultFormat()

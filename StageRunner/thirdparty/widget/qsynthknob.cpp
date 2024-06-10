@@ -32,6 +32,8 @@
 
 #include <cmath>
 
+#include "tool/qt6_qt5_compat.h"
+
 
 //-------------------------------------------------------------------------
 // qsynthKnob - Instance knob widget class.
@@ -74,7 +76,7 @@ float qsynthKnob::mouseAngle ( const QPoint& pos )
 // Alternate mouse behavior event handlers.
 void qsynthKnob::mousePressEvent ( QMouseEvent *pMouseEvent )
 {
-	if (pMouseEvent->button() == Qt::MidButton) {
+	if (pMouseEvent->button() == Qt::MiddleButton) {
 		// Reset to default value...
 		if (m_iDefaultValue < minimum() || m_iDefaultValue > maximum())
 			m_iDefaultValue = (maximum() + minimum()) / 2;
@@ -137,7 +139,7 @@ void qsynthKnob::mouseMoveEvent ( QMouseEvent *pMouseEvent )
 
 void qsynthKnob::mouseReleaseEvent ( QMouseEvent *pMouseEvent )
 {
-	if (m_dialMode == DefaultMode && pMouseEvent->button() != Qt::MidButton) {
+	if (m_dialMode == DefaultMode && pMouseEvent->button() != Qt::MiddleButton) {
 		QDial::mouseReleaseEvent(pMouseEvent);
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;

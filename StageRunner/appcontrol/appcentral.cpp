@@ -48,7 +48,7 @@
 #include "system/dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
-#include "audioformat.h"
+// #include "audioformat.h"
 
 #include <QFileDialog>
 
@@ -87,7 +87,7 @@ bool AppCentral::destroyInstance()
 void AppCentral::startupReady()
 {
 	// m_isApplicationStart = false;
-	QTimer::singleShot(1000, [this]() { m_isApplicationStart = false; } );
+	QTimer::singleShot(1000, this, [this]() { m_isApplicationStart = false; } );
 }
 
 void AppCentral::clearProject()
@@ -414,25 +414,6 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 
 	QString path = QFileDialog::getOpenFileName(widget,tr("Choose Audio File")
 												,userSettings->pLastAudioFxImportPath);
-
-	/* load the song */
-//	if (testsdl=Mix_LoadMUS(path.toLocal8Bit().data())) {
-//		Mix_MusicType type=Mix_GetMusicType(testsdl);
-//		qDebug("Music type: %s\n",
-//			   type==MUS_NONE?"MUS_NONE":
-//							  type==MUS_CMD?"MUS_CMD":
-//											type==MUS_WAV?"MUS_WAV":
-//														  type==MUS_MOD?"MUS_MOD":
-//																		type==MUS_MID?"MUS_MID":
-//																					  type==MUS_OGG?"MUS_OGG":
-//																									type==MUS_MP3?"MUS_MP3":
-//																												  type==MUS_MP3_MAD?"MUS_MP3_MAD":
-//																																	type==MUS_FLAC?"MUS_FLAC":
-//																																				   "Unknown");
-//		Mix_PlayMusic(testsdl,1);
-//		Mix_VolumeMusic(MIX_MAX_VOLUME);
-//	}
-
 
 
 	if (path.size()) {

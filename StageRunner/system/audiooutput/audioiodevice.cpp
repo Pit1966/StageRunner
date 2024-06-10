@@ -29,6 +29,7 @@
 #include <QTime>
 #include <QByteArray>
 #include <qmath.h>
+#include <QUrl>
 
 AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	QIODevice(parent)
@@ -58,7 +59,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	m_leftFFT.setOversampling(4);
 
 	audio_decoder = new AudioDecoder;
-	if (audio_decoder->error() == QAudioDecoder::ServiceMissingError) {
+	if (AudioDecoder::Error(audio_decoder->error()) == AudioDecoder::NotSupportedError) {
 		m_lastErrorText = tr("Audio decoder not initialized. No decode/play service available");
 		audio_error = AUDIO::AUDIO_ERR_DECODER;
 		return;
@@ -183,7 +184,7 @@ qint64 AudioIODevice::bytesAvailable() const
 
 bool AudioIODevice::setSourceFilename(const QString &filename)
 {
-	if (audio_decoder->state() == QAudioDecoder::DecodingState) {
+	if (isDecoding()) {
 		qWarning() << "audio decoding while starting" << filename;
 	} else {
 		if (debug > 1)
@@ -196,7 +197,8 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 	return true;
 }
 
-void AudioIODevice::examineQAudioFormat(AudioFormat &form)
+#ifndef IS_QT6
+void AudioIODevice::examineAudioFormat(AudioFormat &form)
 {
 	int samplesize = form.sampleSize();
 	int channels = form.channelCount();
@@ -207,8 +209,8 @@ void AudioIODevice::examineQAudioFormat(AudioFormat &form)
 		qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
 			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
 	}
-
 }
+#endif
 
 void AudioIODevice::setPanning(int pan, int maxPan)
 {
@@ -283,7 +285,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat & 
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const qint16 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
+					const qreal valF = AudioFormat::pcm16ToReal(val);
 					if (valF > sample_peak)
 						sample_peak = valF;
 					if (valF > peak[chan])
@@ -312,7 +314,7 @@ void AudioIODevice::calcVuLevel(const char *data, int size, const AudioFormat & 
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const qint32 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
+					const qreal valF = AudioFormat::pcm32ToReal(val);
 					if (valF > sample_peak)
 						sample_peak = valF;
 					if (valF > peak[chan])
@@ -465,6 +467,11 @@ void AudioIODevice::setLoopCount(int loops)
 	loop_count = 1;
 }
 
+#ifdef IS_QT6
+
+
+
+#else
 QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
 {
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -481,6 +488,7 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 
 	return QAudioDeviceInfo();
 }
+#endif
 
 void AudioIODevice::calcPanning(char *data, int size, const	AudioFormat &audioFormat)
 {
@@ -496,13 +504,13 @@ void AudioIODevice::calcPanning(char *data, int size, const	AudioFormat &audioFo
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const qint16 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm16ToReal(val, audioFormat);
+					const qreal valF = AudioFormat::pcm16ToReal(val);
 					switch (chan) {
 					case 0:
-						dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolLeft);
+						dat[frame*channels+chan] = AudioFormat::realToPcm16(valF * m_panVolLeft);
 						break;
 					case 1:
-						dat[frame*channels+chan] = AudioIODevice::realToPcm16(valF * m_panVolRight);
+						dat[frame*channels+chan] = AudioFormat::realToPcm16(valF * m_panVolRight);
 						break;
 					}
 				}
@@ -601,3 +609,30 @@ void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 	audio_error = AUDIO::AUDIO_ERR_DECODER;
 }
 
+
+bool AudioDecoder::isDecoding() const
+{
+#ifdef IS_QT6
+	return QAudioDecoder::isDecoding();
+#else
+	return QAudioDecoder::state() == QAudioDecoder::DecodingState;
+#endif
+}
+
+void AudioDecoder::setSourceFilename(const QString &filename)
+{
+#ifdef IS_QT6
+	QAudioDecoder::setSource(QUrl::fromLocalFile(filename));
+#else
+	QAudioDecoder::setSourceFilename(filename);
+#endif
+}
+
+QString AudioDecoder::sourceFilename() const
+{
+#ifdef IS_QT6
+	return QAudioDecoder::source().toLocalFile();
+#else
+	return QAudioDecoder::sourceFilename();
+#endif
+}

@@ -105,7 +105,7 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &aud
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const qint16 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm16ToReal(val,audioFormat);
+					const qreal valF = AudioFormat::pcm16ToReal(val);
 					if (valF > sample_peak)
 						sample_peak = valF;
 					if (valF > peak[chan])
@@ -134,7 +134,7 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &aud
 			for (int chan = 0; chan < channels; chan++) {
 				for (int frame = 0; frame<frames; frame++) {
 					const qint32 val = dat[frame*channels+chan];
-					const qreal valF = AudioIODevice::pcm32ToReal(val,audioFormat);
+					const qreal valF = AudioFormat::pcm32ToReal(val);
 					if (valF > sample_peak)
 						sample_peak = valF;
 					if (valF > peak[chan])

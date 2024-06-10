@@ -24,9 +24,6 @@
 #ifndef LIGHTDESKSTYLE_H
 #define LIGHTDESKSTYLE_H
 
-#ifdef IS_QT5
-#include <QtWidgets>
-#else
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QPen>
@@ -37,7 +34,6 @@
 #include <QPainter>
 #include <QStyleOption>
 #include <QGroupBox>
-#endif
 
 class LightDeskStyle : public QProxyStyle
 {

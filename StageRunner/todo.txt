@@ -35,3 +35,11 @@ als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewart
 
 - Dokumentation der Script Funktionen
 - Grap DMX in Prüfen
+
+
+
+----------------------------------------------------------------------------------------------------
+Qt6 port  :  entfernte oder zu bearbeitende Funktionen
+----------------------------------------------------------------------------------------------------
+QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found);
+void LightControlWidget::setVideoStatus(int viewState, int oldState)

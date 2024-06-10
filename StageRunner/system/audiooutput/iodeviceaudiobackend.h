@@ -24,8 +24,8 @@
 #ifndef IODEVICEAUDIOBACKEND_H
 #define IODEVICEAUDIOBACKEND_H
 
-#include "system/audioplayer.h"
-#include "commandsystem.h"
+#include "audioplayer.h"
+#include "system/commandsystem.h"
 
 #include <QObject>
 #include <QAudio>

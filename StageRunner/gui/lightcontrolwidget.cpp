@@ -40,8 +40,12 @@ LightControlWidget::LightControlWidget(QWidget *parent) :
 void LightControlWidget::setVideoStatus(int viewState, int oldState)
 {
 	Q_UNUSED(oldState)
+#ifdef IS_QT5
 	QString txt = VideoPlayer::viewStateToString(VIDEO::VideoViewStatus(viewState));
 	videoViewStateLabel->setText(txt);
+#else
+	Q_UNUSED(viewState)
+#endif
 }
 
 void LightControlWidget::init()

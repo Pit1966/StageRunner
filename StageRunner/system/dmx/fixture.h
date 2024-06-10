@@ -9,45 +9,45 @@ class QXmlStreamReader;
 #include <QJsonObject>
 
 // Fixture document type
-#define SR_FIXTURE_DEF_DOCUMENT "FixtureDefinition"
+#define SR_FIXTURE_DEF_DOCUMENT QStringLiteral("FixtureDefinition")
 
 // Fixture definition XML tags
-#define SR_FIXTURE_DEF "FixtureDefinition"
-#define SR_FIXTURE_DEF_MANUFACTURER "Manufacturer"
-#define SR_FIXTURE_DEF_MODEL "Model"
-#define SR_FIXTURE_DEF_TYPE "Type"
+#define SR_FIXTURE_DEF				QStringLiteral("FixtureDefinition")
+#define SR_FIXTURE_DEF_MANUFACTURER	QStringLiteral("Manufacturer")
+#define SR_FIXTURE_DEF_MODEL		QStringLiteral("Model")
+#define SR_FIXTURE_DEF_TYPE			QStringLiteral("Type")
 
-#define SR_FIXTURE_PHYSICAL	"Physical"
+#define SR_FIXTURE_PHYSICAL			QStringLiteral("Physical")
 
 // Fixture instance XML tags
-#define SR_FIXTURE_NAME "Name"
-#define SR_FIXTURE_ID "ID"
-#define SR_FIXTURE_UNIVERSE "Universe"
-#define SR_FIXTURE_ADDRESS "Address"
+#define SR_FIXTURE_NAME		QStringLiteral("Name")
+#define SR_FIXTURE_ID		QStringLiteral("ID")
+#define SR_FIXTURE_UNIVERSE	QStringLiteral("Universe")
+#define SR_FIXTURE_ADDRESS	QStringLiteral("Address")
 
-#define SR_CHANNEL	         QString("Channel")
-#define SR_CHANNEL_NAME      QString("Name")
-#define SR_CHANNEL_PRESET    QString("Preset")
-#define SR_CHANNEL_GROUP     QString("Group")
-#define SR_CHANNEL_DEFAULT   QString("Default")
-#define SR_CHANNEL_GROUPBYTE QString("Byte")
-#define SR_CHANNEL_COLOUR    QString("Colour")
+#define SR_CHANNEL	         QStringLiteral("Channel")
+#define SR_CHANNEL_NAME      QStringLiteral("Name")
+#define SR_CHANNEL_PRESET    QStringLiteral("Preset")
+#define SR_CHANNEL_GROUP     QStringLiteral("Group")
+#define SR_CHANNEL_DEFAULT   QStringLiteral("Default")
+#define SR_CHANNEL_GROUPBYTE QStringLiteral("Byte")
+#define SR_CHANNEL_COLOUR    QStringLiteral("Colour")
 
 /* Compound strings used by PaletteGenerator to identify
  * special fixture modes
  */
-#define SR_CHANNEL_MOVEMENT  QString("Movement")
-#define SR_CHANNEL_RGB       QString("RGB")
-#define SR_CHANNEL_CMY       QString("CMY")
-#define SR_CHANNEL_WHITE     QString("White")
+#define SR_CHANNEL_MOVEMENT  QStringLiteral("Movement")
+#define SR_CHANNEL_RGB       QStringLiteral("RGB")
+#define SR_CHANNEL_CMY       QStringLiteral("CMY")
+#define SR_CHANNEL_WHITE     QStringLiteral("White")
 
-#define SR_FIXTURE_MODE               "Mode"
-#define SR_FIXTURE_MODE_NAME          "Name"
-#define SR_FIXTURE_MODE_CHANNEL       "Channel"
-#define SR_FIXTURE_MODE_CANNEL_NUM    "Number"
+#define SR_FIXTURE_MODE               QStringLiteral("Mode")
+#define SR_FIXTURE_MODE_NAME          QStringLiteral("Name")
+#define SR_FIXTURE_MODE_CHANNEL       QStringLiteral("Channel")
+#define SR_FIXTURE_MODE_CANNEL_NUM    QStringLiteral("Number")
 
-#define SR_FIXTURE_HEAD				"Head"
-#define SR_FIXTURE_HEAD_CHANNEL		"Channel"
+#define SR_FIXTURE_HEAD				QStringLiteral("Head")
+#define SR_FIXTURE_HEAD_CHANNEL		QStringLiteral("Channel")
 
 
 class SR_Fixture;
