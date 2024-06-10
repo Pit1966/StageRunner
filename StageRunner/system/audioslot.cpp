@@ -79,7 +79,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 
 	if (audioEngineType == OUT_SDL2) {
 #ifdef USE_SDL
-		audio_player = new SDL2AudioBackend(*this);
+		m_audioPlayer = new SDL2AudioBackend(*this);
 #else
 		qWarning("Configured SDL output is not compiled in!");
 #endif

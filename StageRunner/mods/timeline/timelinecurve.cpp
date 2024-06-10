@@ -70,10 +70,10 @@ void staticDetachOverlay()
  */
 void TimeLineCurveData::insertNode(const Node &n)
 {
-	int i = 0;
+    int i = 0;
 	while (i < m_nodes.size() && n.xMs > m_nodes.at(i).xMs)
 		i++;
-	m_nodes.insert(i, n);
+    m_nodes.insert(i, n);
 }
 
 
