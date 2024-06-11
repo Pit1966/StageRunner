@@ -24,6 +24,7 @@
 #include "fxlistwidgetitem.h"
 #include "customwidget/pslineedit.h"
 #include "fxitem.h"
+#include "tool/qt6_qt5_compat.h"
 
 #include <QtWidgets>
 
@@ -147,7 +148,7 @@ void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
 	if (current_button == Qt::LeftButton) {
 		drag_begin_pos = event->pos();
 	}
-	else if (current_button == Qt::MidButton) {
+	else if (current_button == Qt::MiddleButton) {
 		seek_mode_f = true;
 	}
 }

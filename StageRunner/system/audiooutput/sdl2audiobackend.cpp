@@ -37,9 +37,11 @@ SDL2AudioBackend::SDL2AudioBackend(AudioSlot &audioSlot)
 	, m_currentStatus(AUDIO_NO_STATE)
 {
 	m_sdlAudioFormat.setChannelCount(2);
-	m_sdlAudioFormat.setSampleSize(16);
-	m_sdlAudioFormat.setSampleType(QAudioFormat::SignedInt);
+	m_sdlAudioFormat.setSampleFormat(AudioFormat::Int16);
 	m_sdlAudioFormat.setSampleRate(44100);
+
+	// m_sdlAudioFormat.setSampleSize(16);
+	// m_sdlAudioFormat.setSampleType(QAudioFormat::SignedInt);
 }
 
 SDL2AudioBackend::~SDL2AudioBackend()

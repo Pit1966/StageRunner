@@ -21,37 +21,34 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#ifndef SDL2AUDIOBACKEND_H
-#define SDL2AUDIOBACKEND_H
+#ifndef IODEVICEAUDIOBACKEND_H
+#define IODEVICEAUDIOBACKEND_H
 
 #include "audioplayer.h"
-#include "audioformat.h"
-#include "commandsystem.h"
+#include "system/commandsystem.h"
 
-#include <QElapsedTimer>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mixer.h>
+#include <QObject>
+#include <QAudio>
+#include <QMutex>
 
 
-#define SDL_MAX_VOLUME MIX_MAX_VOLUME
+class AudioIODevice;
+class QAudioSink;
 
-class SDL2AudioBackend : public AudioPlayer
+class IODeviceAudioBackend : public AudioPlayer
 {
 	Q_OBJECT
 private:
-	AudioFormat m_sdlAudioFormat;
-	Mix_Chunk *m_sdlChunk;
-	Mix_Chunk m_sdlChunkCopy;
-	AUDIO::AudioStatus m_currentStatus;
+	AudioIODevice *m_audioIODev;
+	QAudioSink *m_audioSink;
+	QAudio::State m_currentOutputState;
+	AUDIO::AudioStatus m_currentAudioStatus;			///< This is AudioIODevice state and output state translated to StageRunner audio state
 
-	QElapsedTimer m_runtime;
 
 public:
-	SDL2AudioBackend(AudioSlot &audioSlot);
-	~SDL2AudioBackend() override;
-
-	AUDIO::AudioOutputType outputType() const override {return AUDIO::OUT_SDL2;}
+	IODeviceAudioBackend(AudioSlot &audioChannel, const QString &devName);
+	~IODeviceAudioBackend() override;
+	AUDIO::AudioOutputType outputType() const override {return AUDIO::OUT_DEVICE;}
 
 	bool setSourceFilename(const QString &path, const QString &fxName) override;
 	void start(int loops) override;
@@ -70,21 +67,15 @@ public:
 
 	void delayedStartEvent() override;
 
-	// SDL Callbacks
-	static void sdlChannelDone(int chan);
-	static void sdlPostMix(void *udata, quint8 *stream, int len);
+	void setFFTEnabled(bool state) override;
+	bool isFFTEnabled() const override;
 
-protected:
-	void sdlSetRunStatus(AUDIO::AudioStatus state);
 
-private:
-	void sdlChannelProcessStream(void *stream, int len, void *udata);
-	void sdlSetFinished();
-
-	// SDL callbacks
-	static void sdlChannelProcessor(int chan, void *stream, int len, void *udata);
-	static void sdlChannelProcessorFxDone(int chan, void *udata);
+private slots:
+	void onAudioOutputStatusChanged(QAudio::State state);
+	void onAudioIODevReadReady();
+	void onMediaDurationDetected(qint64 ms);
 
 };
 
-#endif // SDL2AUDIOBACKEND_H
+#endif // IODEVICEAUDIOBACKEND_H

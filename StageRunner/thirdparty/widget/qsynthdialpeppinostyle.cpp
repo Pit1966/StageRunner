@@ -24,10 +24,7 @@
 *****************************************************************************/
 
 #include <QtGui>
-
-#if IS_QT5
 #include <QtWidgets>
-#endif
 
 #include <iostream>
 #include <cmath>

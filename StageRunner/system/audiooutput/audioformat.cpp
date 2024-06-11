@@ -23,6 +23,8 @@
 
 #include "audioformat.h"
 
+#include <QDebug>
+
 AudioFormat::AudioFormat() :
 	QAudioFormat()
 {
@@ -70,6 +72,34 @@ AudioFormat::SampleFormat AudioFormat::sampleFormat() const
 #endif
 }
 
+void AudioFormat::setSampleFormat(SampleFormat format)
+{
+#ifdef IS_QT6
+	QAudioFormat::setSampleFormat(QAudioFormat::SampleFormat(format));
+#else // QT5
+	switch (format) {
+	case AudioFormat::Uint8:
+		setSampleSize(8);
+		setSampleType(QAudioFormat::UnSignedInt);
+		break;
+	case AudioFormat::Int16:
+		setSampleSize(16);
+		setSampleType(QAudioFormat::SignedInt);
+		break;
+	case AudioFormat::Int32:
+		setSampleSize(32);
+		setSampleType(QAudioFormat::SignedInt);
+		break;
+	case AudioFormat::Float:
+		setSampleSize(32);
+		setSampleType(QAudioFormat::Float);
+		break;
+	default:
+		qWarning() << "AudioFormat" << format << "not supported";
+	}
+#endif
+}
+
 /**
  * @brief Normalize a 16bit audio sample amplitude to 1.0f
  * @param pcm
@@ -106,7 +136,7 @@ AudioFormat AudioFormat::defaultFormat()
 	format.setSampleRate(48000);
 	format.setChannelCount(2);
 #ifdef IS_QT6
-	format.setSampleFormat(QAudioFormat::Int16);
+	format.setSampleFormat(AudioFormat::Int16);
 #else
 	format.setSampleType(QAudioFormat::SignedInt);
 	format.setSampleSize(16);

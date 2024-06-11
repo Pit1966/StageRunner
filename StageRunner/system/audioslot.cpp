@@ -24,11 +24,16 @@
 #include "audioslot.h"
 
 #include "system/audiooutput/audioformat.h"
+#ifdef IS_QT6
+#	include "system/audiooutput/audioiodevice6.h"
+#	include "system/audiooutput/iodeviceaudiobackend6.h"
+#endif
+
 #ifdef IS_QT5 // QMediaPlayer only exists in Qt5
 #	include "system/audiooutput/mediaplayeraudiobackend.h"
+#	include "system/audiooutput/audioiodevice.h"
+#	include "system/audiooutput/iodeviceaudiobackend.h"
 #endif
-#include "system/audiooutput/iodeviceaudiobackend.h"
-#include "system/audiooutput/audioiodevice.h"
 #include "system/audiooutput/audioplayer.h"
 
 #ifdef USE_SDL
@@ -87,6 +92,7 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 	else if (audioEngineType == OUT_DEVICE) {
 		m_audioPlayer = new IODeviceAudioBackend(*this, devName);
 	}
+#ifdef IS_QT5
 	else if (audioEngineType == OUT_MEDIAPLAYER) {
 		m_audioPlayer = new MediaPlayerAudioBackend(*this);
 		m_audioPlayer->setVolume(MAX_VOLUME,MAX_VOLUME);
@@ -96,6 +102,11 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 		m_audioPlayer = new MediaPlayerAudioBackend(*this);
 		m_audioPlayer->setVolume(MAX_VOLUME,MAX_VOLUME);
 	}
+#else
+	else {	// default implementation for Qt6
+		m_audioPlayer = new IODeviceAudioBackend(*this, devName);
+	}
+#endif
 
 	if (m_audioPlayer->audioError()) {
 		m_lastAudioError = m_audioPlayer->audioError();

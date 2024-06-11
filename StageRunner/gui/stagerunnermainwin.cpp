@@ -1312,7 +1312,8 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
 
 #ifdef __unix__
-	msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
+	// msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
+	msg += QString("Git timestamp: %1\n").arg(QDateTime::fromSecsSinceEpoch(GIT_APP_TIME).toString());
 	msg += QString("Build date: %1\n").arg(BUILD_DATE);
 	msg += QString("Build path: %1\n").arg(BUILD_PATH);
 #endif

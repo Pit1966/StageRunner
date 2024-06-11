@@ -166,9 +166,7 @@ SOURCES += \
 	../system/audiocontrol.cpp \
 	../system/audiooutput/audiofileinfo.cpp \
 	../system/audiooutput/audioformat.cpp \
-	../system/audiooutput/audioiodevice.cpp \
 	../system/audiooutput/audioplayer.cpp \
-	../system/audiooutput/iodeviceaudiobackend.cpp \
 	../system/audioslot.cpp \
 	../system/convtools.cpp \
 	../system/dmx/fixture.cpp \
@@ -293,9 +291,7 @@ HEADERS  += \
 	../plugins/yadi/src/dmxmonitor.h \
 	../system/audiooutput/audiofileinfo.h \
 	../system/audiooutput/audioformat.h \
-	../system/audiooutput/audioiodevice.h \
 	../system/audiooutput/audioplayer.h \
-	../system/audiooutput/iodeviceaudiobackend.h \
 	../system/audioslot.h \
 	../system/commandsystem.h \
 	../system/convtools.h \
@@ -388,14 +384,30 @@ RESOURCES += \
 	../gfx_ressource.qrc
 
 
+
+contains(DEFINES,IS_QT6) {
+HEADERS += \
+../system/audiooutput/audioiodevice6.h \
+../system/audiooutput/iodeviceaudiobackend6.h
+
+SOURCES += \
+../system/audiooutput/audioiodevice6.cpp \
+../system/audiooutput/iodeviceaudiobackend6.cpp
+}
+
+
 contains(DEFINES,IS_QT5) {
 HEADERS += \
 	../gui/customwidget/psvideowidget.h \
+	../system/audiooutput/audioiodevice.h \
+	../system/audiooutput/iodeviceaudiobackend.h \
 	../system/audiooutput/mediaplayeraudiobackend.h \
 	../system/videoplayer.h
 
 SOURCES += \
 	../gui/customwidget/psvideowidget.cpp \
+	../system/audiooutput/audioiodevice.cpp \
+	../system/audiooutput/iodeviceaudiobackend.cpp \
 	../system/audiooutput/mediaplayeraudiobackend.cpp \
 	../system/videoplayer.cpp
 

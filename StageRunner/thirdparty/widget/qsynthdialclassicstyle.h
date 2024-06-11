@@ -32,10 +32,7 @@
 #define CLASSICTYLE_H_
 
 #include <QtGui>
-
-#if IS_QT5
 #include <QtWidgets>
-#endif
 
 class qsynthDialClassicStyle : public QCommonStyle
 {

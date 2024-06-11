@@ -1089,7 +1089,11 @@ bool VarSet::fileSave(const QString &path, bool append, bool empty_line)
 	QFile file(path);
 	if ( file.open(QIODevice::ReadWrite | QIODevice::Text | append_flag) ) {
 		QTextStream write(&file);
+#ifdef IS_QT6
+		write.setEncoding(QStringConverter::Utf8);
+#else
 		write.setCodec("UTF-8");
+#endif
 
 		int child_level = 0;
 		ok = file_save_append(write,child_level,empty_line);

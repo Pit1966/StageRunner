@@ -31,7 +31,9 @@
 #include <QThread>
 #include <QList>
 #include <QMutex>
-#ifdef IS_QT5
+#ifdef IS_QT6
+#  include <QAudioDevice>
+#else
 #  include <QAudioDeviceInfo>
 #endif
 
@@ -63,7 +65,10 @@ protected:
 	int m_masterVolume;
 	bool m_isValid;
 	bool m_initInThread;
-#ifdef IS_QT5
+#ifdef IS_QT6
+	QAudioDevice m_extraDevice;
+	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
+#else
 	QAudioDeviceInfo m_extraDevice;
 	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
 #endif

@@ -38,23 +38,27 @@
 #include "customwidget/psvideowidget.h"
 #include "videocontrol.h"
 #include "system/fxtimer.h"
-#include "system/audiooutput/audioiodevice.h"
+
 #include "system/audiooutput/audioformat.h"
 
 #include <QStringList>
 #include <QDebug>
 #include <QUrl>
 #include <QThread>
+#include <QVideoWidget>
 
 #ifdef IS_QT5
 #	include "videoplayer.h"
+#	include "system/audiooutput/audioiodevice.h"
 
-#	include <QAudioDeviceInfo>
 #	include <QMediaPlaylist>
 #	include <QMediaPlayer>
-#	include <QVideoWidget>
 #endif
 
+#ifdef IS_QT6
+#	include <QMediaDevices>
+#	include "system/audiooutput/audioiodevice6.h"
+#endif
 
 #ifdef USE_SDL
 #include "audiooutput/sdl2audiobackend.h"
@@ -127,8 +131,40 @@ void AudioControl::getAudioDevices()
 //	qDebug() << "getAudioDevices";
 
 	m_audioDeviceNames.clear();
-
 	AudioFormat default_format = AudioFormat::defaultFormat();
+
+#ifdef IS_QT6
+
+	QList<QAudioDevice> devList = QMediaDevices::audioOutputs();
+	for (int t=0; t<devList.size(); t++) {
+		QAudioDevice &dev = devList[t];
+		bool default_format_supported = dev.isFormatSupported(default_format);
+		QString dev_name = dev.description();
+		if (default_format_supported) {
+			m_audioDeviceNames.append(dev_name);
+			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
+			/// @todo this takes a hardcoded device name and should be adjustable
+			if (dev_name.contains("UA-25EX")) {
+				m_extraDevice = dev;
+			}
+		}
+	}
+
+	if (!m_extraDevice.isNull())
+		LOGTEXT(tr("<font color=info>Extra Audio: %1</font>").arg(m_extraDevice.description()));
+
+	QAudioDevice def_dev = QMediaDevices::defaultAudioOutput();
+	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(def_dev.description()));
+	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
+		LOGTEXT(tr("<font color=ok>Default format supported</font>"));
+	} else {
+		LOGTEXT(tr("<font color=error>Default audio format not supported by audio device"));
+	}
+
+	if (audioSlots.size())
+		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
+
+#else
 
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	for (int t=0; t<devList.size(); t++) {
@@ -157,6 +193,8 @@ void AudioControl::getAudioDevices()
 
 	if (audioSlots.size())
 		LOGTEXT(tr("Audio buffer size is: %1").arg(audioSlots[0]->audioOutputBufferSize()));
+
+#endif
 }
 
 /**
@@ -338,10 +376,11 @@ int AudioControl::getSlotForFxAudio(FxAudioItem *fxa)
 
 void AudioControl::closeVideoWidget()
 {
-	if (m_videoWid) {
-		m_videoWid->setPicClipOverlaysActive(false);
-		m_videoWid->close();
-	}
+	///@todo qt6
+	// if (m_videoWid) {
+	// 	m_videoWid->setPicClipOverlaysActive(false);
+	// 	m_videoWid->close();
+	// }
 }
 
 bool AudioControl::isVideoWidgetVisible(QWidget ** videoWid) const
@@ -1219,7 +1258,11 @@ void AudioControl::createMediaPlayInstances()
 				myApp.setModuleError(AppCentral::E_AUDIO_MULTI_OUT_FAIL);
 			} else {
 				bool ok;
+#ifdef IS_QT6
+				QAudioDevice dev = AudioIODevice::getAudioDevice(audiodev, &ok);
+#else
 				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
+#endif
 				if (!ok) {
 					if (!errmsg)
 						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
@@ -1247,8 +1290,8 @@ void AudioControl::createMediaPlayInstances()
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
 
 	// This is for video playback
-	m_videoWid = new PsVideoWidget;
-	m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+	///@todo qt6 m_videoWid = new PsVideoWidget;
+	///@todo qt6 m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
 	// m_videoWid->setVideoPlayer(m_videoPlayer);
 
 #ifdef USE_SDL

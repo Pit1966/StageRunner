@@ -42,6 +42,7 @@ public:
 	AudioFormat(const QAudioFormat &other);
 
 	SampleFormat sampleFormat() const;			// compat function Qt6 / Qt5
+	void setSampleFormat(SampleFormat format);
 
 	static qreal pcm16ToReal(qint16 pcm16);
 	static qint16 realToPcm16(qreal real);

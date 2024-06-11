@@ -50,7 +50,14 @@
 #include "system/netserver.h"
 // #include "audioformat.h"
 
+
+
 #include <QFileDialog>
+
+#ifdef USE_SDL
+#	include <SDL2/SDL.h>
+#	include <SDL2/SDL_mixer.h>
+#endif
 
 using namespace AUDIO;
 
