@@ -105,7 +105,7 @@ void LightLoop::processPendingEvents()
 	}
 
 	// Get dmx channel output for every scene in the list
-	for (FxSceneItem *sceneitem : qAsConst(scenes)) {
+	for (FxSceneItem *sceneitem : std::as_const(scenes)) {
 		if (sceneitem == nullptr) {
 			LOGTEXT(tr("<font color=red>Light control warning!</font> found deleted scene in active scene list"));
 			removeNulls = true;

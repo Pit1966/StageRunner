@@ -104,7 +104,7 @@ void IODeviceAudioBackend::start(int loops)
 		m_audioSink->start(m_audioIODev);
 		pause(true);
 		LOGTEXT(tr("Start IODeviceBackend audio in delay mode: %1 (%2)")
-				.arg(m_mediaPath).arg(m_audioErrorString));
+				.arg(m_mediaPath, m_audioErrorString));
 	}
 
 	if (m_audioSink->error() != QAudio::NoError)

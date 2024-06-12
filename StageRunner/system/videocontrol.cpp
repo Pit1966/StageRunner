@@ -28,10 +28,13 @@
 #include "fxclipitem.h"
 #include "audiocontrol.h"
 #include "audioslot.h"
-#include "customwidget/psvideowidget.h"
 
-#ifdef IS_QT5
+#ifdef IS_QT6
+#	include "videoplayer6.h"
+#	include "customwidget/psvideowidget6.h"
+#else
 #	include "videoplayer.h"
+#	include "customwidget/psvideowidget.h"
 #endif
 
 #include <QElapsedTimer>
@@ -97,9 +100,6 @@ bool VideoControl::startFxClipById(qint32 id)
  */
 bool VideoControl::startFxClip(FxClipItem *fxc)
 {
-	qDebug() << "VideoControl::Start FxClip"<< fxc->name();
-	qWarning() << "Qt6 implement me";
-
 	bool videoRunning = false;
 	int slot = myApp.unitAudio->selectFreeVideoSlot(&videoRunning);
 	if (slot < 0) {
@@ -111,21 +111,21 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 	if (!vp)
 		return false;
 
-	// // check if there is already a video running in this slot.
-	// // If so, we have to stop the video first.
-	// if (videoRunning && !fxc->isPicClip) {
-	// 	if (vp->isCurrentFxClipAPicClip()) {
-	// 		vp->stop();
-	// 	}
-	// 	else if (!vp->stopAndWait())
-	// 		return false;
+	// check if there is already a video running in this slot.
+	// If so, we have to stop the video first.
+	if (videoRunning && !fxc->isPicClip) {
+		if (vp->isCurrentFxClipAPicClip()) {
+			vp->stop();
+		}
+		else if (!vp->stopAndWait())
+			return false;
 
-	// 	// select it
-	// 	if (!myApp.unitAudio->selectVideoSlot(slot))
-	// 		return false;
-	// }
+		// select it
+		if (!myApp.unitAudio->selectVideoSlot(slot))
+			return false;
+	}
 
-	// vp->playFxClip(fxc, slot);
+	vp->playFxClip(fxc, slot);
 
 	return true;
 }
@@ -135,51 +135,48 @@ void VideoControl::videoBlack(qint32 time_ms)
 	if (!myApp.unitAudio->isValid())
 		return;
 
-	qWarning() << "Qt6 implement me";
-
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	Q_ASSERT(vp);
 
-	// qDebug() << "videoBlack PicOverlayActive" << vp->isPicClipOverlaysActive();
+	qDebug() << "videoBlack PicOverlayActive" << vp->isPicClipOverlaysActive();
 
-	// if (vp->currentFxClipItem())
-	// 	LOGTEXT(tr("<font color=green>BLACK video screen</font> <b>%1</b>")
-	// 			.arg(vp->currentFxClipItem()->fileName()));
+	if (vp->currentFxClipItem())
+		LOGTEXT(tr("<font color=green>BLACK video screen</font> <b>%1</b>")
+				.arg(vp->currentFxClipItem()->fileName()));
 
-	// if (vp->isPicClipOverlaysActive()) {
+	if (vp->isPicClipOverlaysActive()) {
 
-	// 	if (vp->fadePicClipOverlayOut(time_ms, 0)) {
-	// 		if (time_ms > 0) {
-	// 			LOGTEXT(tr("<font color=green>Fade to BLACK back overlay</font>: %1ms").arg(time_ms));
-	// 		} else {
-	// 			LOGTEXT(tr("<font color=green>BLACK back overlay</font>"));
-	// 		}
-	// 	}
-	// 	if (vp->fadePicClipOverlayOut(time_ms, 1)) {
-	// 		if (time_ms > 0) {
-	// 			LOGTEXT(tr("<font color=green>Fade to BLACK top overlay</font>: %1ms").arg(time_ms));
-	// 		} else {
-	// 			LOGTEXT(tr("<font color=green>BLACK top overlay</font>"));
-	// 		}
-	// 	}
+		if (vp->fadePicClipOverlayOut(time_ms, 0)) {
+			if (time_ms > 0) {
+				LOGTEXT(tr("<font color=green>Fade to BLACK back overlay</font>: %1ms").arg(time_ms));
+			} else {
+				LOGTEXT(tr("<font color=green>BLACK back overlay</font>"));
+			}
+		}
+		if (vp->fadePicClipOverlayOut(time_ms, 1)) {
+			if (time_ms > 0) {
+				LOGTEXT(tr("<font color=green>Fade to BLACK top overlay</font>: %1ms").arg(time_ms));
+			} else {
+				LOGTEXT(tr("<font color=green>BLACK top overlay</font>"));
+			}
+		}
 
-	// 	if (vp->isRunning()) {
-	// 		LOGTEXT(tr("<font color=orange>BLACK video</font>"));
-	// 		vp->stop();
-	// 	}
-	// }
-	// else {
-	// 	if (time_ms < 1) {
-	// 		vp->stop();
-	// 		vp->setPicClipOverlaysDisabled();		// ??? Should be disabled at this time ???
-	// 	}
-	// 	else {
-	// 		vp->fadeVideoToBlack(time_ms);
-	// 	}
-	// }
+		if (vp->isRunning()) {
+			LOGTEXT(tr("<font color=orange>BLACK video</font>"));
+			vp->stop();
+		}
+	}
+	else {
+		if (time_ms < 1) {
+			vp->stop();
+			vp->setPicClipOverlaysDisabled();		// ??? Should be disabled at this time ???
+		}
+		else {
+			vp->fadeVideoToBlack(time_ms);
+		}
+	}
 
-	// myApp.unitAudio->videoWidget()->update();
-
+	myApp.unitAudio->videoWidget()->update();
 }
 
 /**
@@ -193,11 +190,10 @@ void VideoControl::videoBlack(qint32 time_ms)
 bool VideoControl::setVideoVolume(int slotnum, int vol)
 {
 	Q_UNUSED(slotnum)
-	qWarning() << "Qt6 implement me";
 
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	if (vp) {
-		// vp->setVolume(vol);
+		vp->setVolume(vol);
 		return true;
 	}
 
@@ -206,10 +202,9 @@ bool VideoControl::setVideoVolume(int slotnum, int vol)
 
 bool VideoControl::setVideoMasterVolume(int vol)
 {
-	qWarning() << "Qt6 implement me";
 	VideoPlayer *vp = myApp.unitAudio->videoPlayer();
 	if (vp) {
-		// vp->setMasterVolume(vol);
+		vp->setMasterVolume(vol);
 		return true;
 	}
 

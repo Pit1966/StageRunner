@@ -55,7 +55,7 @@ ExecCenter::~ExecCenter()
 Executer *ExecCenter::findExecuter(const FxItem *fx)
 {
 	executerList.lock();
-	for (Executer *exec : qAsConst(executerList)) {
+	for (Executer *exec : std::as_const(executerList)) {
 		if (exec->originFx() == fx) {
 			executerList.unlock();
 			return exec;
@@ -79,7 +79,7 @@ QList<Executer *> ExecCenter::getExecutersFor(const FxItem *fx)
 {
 	QList<Executer*> list;
 	executerList.lock();
-	for (Executer *exec : qAsConst(executerList)) {
+	for (Executer *exec : std::as_const(executerList)) {
 		if (exec->originFx() == fx) {
 			list.append(exec);
 		}

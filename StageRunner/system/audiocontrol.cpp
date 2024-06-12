@@ -35,7 +35,6 @@
 #include "fxcontrol.h"
 #include "fxlist.h"
 #include "fxclipitem.h"
-#include "customwidget/psvideowidget.h"
 #include "videocontrol.h"
 #include "system/fxtimer.h"
 
@@ -46,17 +45,18 @@
 #include <QUrl>
 #include <QThread>
 #include <QVideoWidget>
+#include <QMediaPlayer>
 
 #ifdef IS_QT5
-#	include "videoplayer.h"
+#	include "system/videoplayer.h"
+#	include "customwidget/psvideowidget.h"
 #	include "system/audiooutput/audioiodevice.h"
-
-#	include <QMediaPlaylist>
-#	include <QMediaPlayer>
 #endif
 
 #ifdef IS_QT6
 #	include <QMediaDevices>
+#	include "system/videoplayer6.h"
+#	include "customwidget/psvideowidget6.h"
 #	include "system/audiooutput/audioiodevice6.h"
 #endif
 
@@ -376,11 +376,10 @@ int AudioControl::getSlotForFxAudio(FxAudioItem *fxa)
 
 void AudioControl::closeVideoWidget()
 {
-	///@todo qt6
-	// if (m_videoWid) {
-	// 	m_videoWid->setPicClipOverlaysActive(false);
-	// 	m_videoWid->close();
-	// }
+	if (m_videoWid) {
+		m_videoWid->setPicClipOverlaysActive(false);
+		m_videoWid->close();
+	}
 }
 
 bool AudioControl::isVideoWidgetVisible(QWidget ** videoWid) const
@@ -1226,7 +1225,6 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 
 void AudioControl::init()
 {
-	m_playlist = nullptr;
 	m_videoPlayer = nullptr;
 	m_videoWid = nullptr;
 
@@ -1290,8 +1288,8 @@ void AudioControl::createMediaPlayInstances()
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
 
 	// This is for video playback
-	///@todo qt6 m_videoWid = new PsVideoWidget;
-	///@todo qt6 m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+	m_videoWid = new PsVideoWidget;
+	m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
 	// m_videoWid->setVideoPlayer(m_videoPlayer);
 
 #ifdef USE_SDL
@@ -1314,6 +1312,4 @@ void AudioControl::destroyMediaPlayInstances()
 	m_videoWid = nullptr;
 	delete m_videoPlayer;
 	m_videoPlayer = nullptr;
-	delete m_playlist;
-	m_playlist = nullptr;
 }

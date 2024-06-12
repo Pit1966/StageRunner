@@ -76,7 +76,6 @@ protected:
 
 	// Video player stuff (as hyper extension)
 	VideoPlayer *m_videoPlayer;
-	QMediaPlaylist *m_playlist;
 	PsVideoWidget *m_videoWid;
 
 private:

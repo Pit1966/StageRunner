@@ -7,9 +7,6 @@
 
 #else
 
-namespace Qt {
-#define MiddleButton MidButton
-}
 
 #endif
 

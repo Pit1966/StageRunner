@@ -913,7 +913,7 @@ void AudioSlot::_setVolume(int vol)
 		qreal linearVolume = QAudio::convertVolume(vol / qreal(MAX_VOLUME),
 												   QAudio::LogarithmicVolumeScale,
 												   QAudio::LinearVolumeScale);
-		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, linearVolume);
+		AppCentral::ref().unitVideo->setVideoVolume(slotNumber, qRound(linearVolume * MAX_VOLUME));
 		return;
 	}
 	else if (!m_audioPlayer) {

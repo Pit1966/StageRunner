@@ -16,8 +16,8 @@ TARGET   = stagerunner
 
 # CONFIG += static
 
-CONFIG += c++11
-QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++17
+QMAKE_CXXFLAGS += -std=c++17
 
 INCLUDEPATH  += .
 INCLUDEPATH  += ../
@@ -387,12 +387,16 @@ RESOURCES += \
 
 contains(DEFINES,IS_QT6) {
 HEADERS += \
+../gui/customwidget/psvideowidget6.h \
 ../system/audiooutput/audioiodevice6.h \
-../system/audiooutput/iodeviceaudiobackend6.h
+../system/audiooutput/iodeviceaudiobackend6.h \
+../system/videoplayer6.h
 
 SOURCES += \
+../gui/customwidget/psvideowidget6.cpp \
 ../system/audiooutput/audioiodevice6.cpp \
-../system/audiooutput/iodeviceaudiobackend6.cpp
+../system/audiooutput/iodeviceaudiobackend6.cpp \
+../system/videoplayer6.cpp
 }
 
 

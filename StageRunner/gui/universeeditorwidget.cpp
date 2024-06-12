@@ -113,7 +113,7 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 		SR_Fixture *fix = fixList->at(t);
 		SR_Mode *mode = fix->mode(fix->currentMode());
 		int c = 0;
-		for (SR_Channel *chan : qAsConst(mode->channels())) {
+		for (SR_Channel *chan : std::as_const(mode->channels())) {
 			if (c++ == 0) {
 				if (fix->dmxAdr()-1 > dmx)
 					dmx = fix->dmxAdr()-1;

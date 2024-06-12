@@ -56,7 +56,11 @@
 #include "scenedeskwidget.h"
 #include "fx/fxitemobj.h"
 #include "appcontrol/fxlistvarset.h"
-#include "gui/customwidget/psvideowidget.h"
+#ifdef IS_QT6
+#	include "gui/customwidget/psvideowidget6.h"
+#else
+#	include "gui/customwidget/psvideowidget.h"
+#endif
 #include "system/dmxuniverseproperty.h"
 #include "fxscriptwidget.h"
 #include "gui/customwidget/psinfodialog.h"
@@ -1172,7 +1176,7 @@ void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 	QString msg = QString("<font color=#222222>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
 	msg_dialog->setStyleSheet("");
-	msg_dialog->showMessage(text,where);
+	msg_dialog->showMessage(msg,where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("Information"));
 
@@ -1183,7 +1187,7 @@ void StageRunnerMainWin::showErrorMsg(const QString &where, const QString &text)
 	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
 			.arg(text,where);
 	msg_dialog->setStyleSheet("color:#ff7722;");
-	msg_dialog->showMessage(text,where);
+	msg_dialog->showMessage(msg,where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
 }
@@ -1199,7 +1203,7 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 	SetupWidget setup(appCentral);
 	connect(&setup,SIGNAL(applicationStyleChanged(QString)),this,SLOT(setApplicationGuiStyle(QString)));
 	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateButtonStyles(QString)));
-	connect(&setup,SIGNAL(setupChanged(UserSettings *)),this,SLOT(applyUserSettingsToGui(UserSettings*)));
+	connect(&setup,SIGNAL(setupChanged(UserSettings*)),this,SLOT(applyUserSettingsToGui(UserSettings*)));
 
 
 	setup.show();

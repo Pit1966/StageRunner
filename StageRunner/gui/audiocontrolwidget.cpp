@@ -109,7 +109,7 @@ bool AudioControlWidget::setCompleteGuiSettings(const QString &settings)
 void AudioControlWidget::resizeEvent(QResizeEvent *event)
 {
 	bool bigicons = event->size().width() > 420;
-	for (auto slot : qAsConst(audioSlotWidgets)) {
+	for (auto slot : std::as_const(audioSlotWidgets)) {
 		slot->setBigIconsEnabled(bigicons);
 	}
 }

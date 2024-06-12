@@ -92,11 +92,17 @@ FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)
 
 bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 {
+	sceneGroup->setVisible(false);
+	sequenceGroup->setVisible(false);
+	audioGroup->setVisible(false);
+	hookedToGroup->setVisible(false);
+	videoGroup->setVisible(false);
+
 	if (!FxItem::exists(fx)) {
 		cur_fx = 0;
-		audioGroup->setVisible(false);
-		sceneGroup->setVisible(false);
-		sequenceGroup->setVisible(false);
+		// audioGroup->setVisible(false);
+		// sceneGroup->setVisible(false);
+		// sequenceGroup->setVisible(false);
 		return false;
 	}
 	cur_fx = fx;
@@ -157,14 +163,12 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 			audioOnStopEdit->setText(QString::number(cur_fxa->attachedStopPara1));
 		}
 
-		audioGroup->setVisible(true);
 		hookedToGroup->setVisible(true);
 
 		// Is not audio but Video in Audio slot
 		if (cur_fxa->isFxClip) {
 			cur_fxa = 0;
 			cur_fxclip = static_cast<FxClipItem*>(cur_fx);
-			audioGroup->setVisible(false);
 			videoGroup->setVisible(true);
 			videoFilePathEdit->setText(cur_fxclip->filePath());
 			videoFilePathEdit->setToolTip(cur_fxclip->filePath());
@@ -174,7 +178,7 @@ bool FxItemPropertyWidget::setFxItem(FxItem *fx)
 			panEnableCheck->setEnabled(false);
 			cur_fxclip->panning = 0;
 		} else {
-			videoGroup->setVisible(false);
+			audioGroup->setVisible(true);
 		}
 	}
 	else if (fx->fxType() == FX_AUDIO_PLAYLIST) {

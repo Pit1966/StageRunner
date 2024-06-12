@@ -29,12 +29,9 @@
 #include <QGraphicsOpacityEffect>
 #include <QMenu>
 
-#include "psvideowidget.h"
-#ifdef IS_QT6
-#	include "videoplayer6.h"
-#else
-#	include "videoplayer.h"
-#endif
+#include "psvideowidget6.h"
+#include "videoplayer6.h"
+
 #include "psoverlaylabel.h"
 #include "configrev.h"
 
@@ -49,31 +46,34 @@ PsVideoWidget::PsVideoWidget(QWidget *parent)
 	, m_doubleClicked(false)
 {
 	setAttribute(Qt::WA_ShowWithoutActivating);
-	setAutoFillBackground(false);
+	//setAutoFillBackground(false);
 	setWindowTitle("Video screen");
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	// setWindowFlag(Qt::WindowTransparentForInput);
 
-	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
-		m_overlay[i] = new PsOverlayLabel();
+	if (1) {
+		for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
+			m_overlay[i] = new PsOverlayLabel();
 
-		// qDebug("winflags %x", int(m_overlay[i]->windowFlags()));
-		// m_overlay[i]->setWindowFlags(Qt::ToolTip);
-		m_overlay[i]->setWindowFlags(Qt::FramelessWindowHint | Qt::BypassWindowManagerHint | Qt::WindowTransparentForInput);		// this prevents windows from being listed in task bar
+			// qDebug("winflags %x", int(m_overlay[i]->windowFlags()));
+			// m_overlay[i]->setWindowFlags(Qt::ToolTip);
+			m_overlay[i]->setWindowFlags(Qt::FramelessWindowHint | Qt::BypassWindowManagerHint | Qt::WindowTransparentForInput);		// this prevents windows from being listed in task bar
 
-		m_overlay[i]->move(pos());
-		m_overlay[i]->resize(size());
-		m_overlay[i]->show();
-		m_overlay[i]->raise();
-		m_overlay[i]->setWindowOpacity(0.0);
-		m_overlay[i]->setWindowTitle(QString("Video overlay %1").arg(i+1));
+			m_overlay[i]->move(pos());
+			m_overlay[i]->resize(size());
+			m_overlay[i]->show();
+			m_overlay[i]->raise();
+			m_overlay[i]->setWindowOpacity(0.0);
+			m_overlay[i]->setWindowTitle(QString("Video overlay %1").arg(i+1));
 
-		// not necessary since Qt::WindowTransparentForInput is set for overlays
-		// connect(m_overlay[i], SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
+			// not necessary since Qt::WindowTransparentForInput is set for overlays
+			// connect(m_overlay[i], SIGNAL(doubleClicked()), this, SLOT(toggleFullScreen()));
+
+			m_hasOverlays = true;
+		}
 	}
 
-	m_hasOverlays = true;
 
 	setPrefsSettings();
 
@@ -329,11 +329,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 {
 	m_mousePressed = true;
-#ifdef IS_QT6
 	m_clickStartPos = ev->globalPosition().toPoint();
-#else
-	m_clickStartPos = ev->globalPos();
-#endif
 	m_clickWindowPos = pos();
 	m_doubleClicked = false;
 }
@@ -376,11 +372,7 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 
 		act = menu.addAction(tr("Close video window"));
 		act->setProperty("cmd","close");
-#ifdef IS_QT6
 		act = menu.exec(event->globalPosition().toPoint());
-#else
-		act = menu.exec(event->globalPos());
-#endif
 		if (!act)
 			return;
 
@@ -399,11 +391,7 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
 {
-#ifdef IS_QT6
 	QPoint curpos = event->globalPosition().toPoint();
-#else
-	QPoint curpos = event->globalPos();
-#endif
 	QPoint movevec = m_clickStartPos - curpos;
 
 	if (!isFullScreen() && !m_doubleClicked) {
@@ -481,6 +469,8 @@ void PsVideoWidget::resizeEvent(QResizeEvent *event)
 		}
 		checkOverlayShow();
 	}
+
+	QVideoWidget::resizeEvent(event);
 }
 
 void PsVideoWidget::showEvent(QShowEvent *)

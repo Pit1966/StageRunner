@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>335</width>
-    <height>1047</height>
+    <width>357</width>
+    <height>1048</height>
    </rect>
   </property>
   <property name="font">
@@ -22,10 +22,7 @@
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>2</number>
-   </property>
+  <layout class="QVBoxLayout" name="editorLayout">
    <property name="leftMargin">
     <number>2</number>
    </property>
@@ -39,653 +36,734 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="fxGroup">
-     <property name="title">
-      <string>Fx</string>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <item row="2" column="0">
-       <widget class="QLabel" name="nameLabel">
-        <property name="text">
-         <string>Name:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="3">
-       <layout class="QGridLayout" name="fadeTimeLayout">
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="verticalSpacing">
-         <number>0</number>
-        </property>
-        <item row="4" column="0">
-         <widget class="QLabel" name="postDelayLabel">
-          <property name="text">
-           <string>Post Delay</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="PsLineEdit" name="fadeOutTimeEdit">
-          <property name="frame">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="PsLineEdit" name="preDelayEdit">
-          <property name="frame">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="preDelayLabel">
-          <property name="text">
-           <string>Pre Delay</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="fadeInTimeLabel">
-          <property name="text">
-           <string>Fade In Time</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="PsLineEdit" name="fadeInTimeEdit">
-          <property name="frame">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="fadeOutTimeLabel">
-          <property name="text">
-           <string>Fade Out Time</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="holdTimeLabel">
-          <property name="text">
-           <string>Hold Time</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="PsLineEdit" name="holdTimeEdit">
-          <property name="frame">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="PsLineEdit" name="postDelayEdit">
-          <property name="frame">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="keyClearButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Clear</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="PsLineEdit" name="idEdit">
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="idLabel">
-        <property name="text">
-         <string>Id:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="PsLineEdit" name="keyEdit">
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-          <italic>false</italic>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="maxLength">
-         <number>10</number>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="keyLabel">
-        <property name="text">
-         <string>Key:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="PsLineEdit" name="nameEdit"/>
-      </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="PsPushButton" name="editOnceButton">
-        <property name="text">
-         <string>Edit once</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="hookedToGroup">
-     <property name="title">
-      <string>Hooked to</string>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>0</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QSpinBox" name="hookedToUniverseSpin">
-        <property name="maximum">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="hookedToChannelLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Channel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="hookedToUniverseLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Universe</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QSpinBox" name="hookedToChannelSpin">
-        <property name="maximum">
-         <number>512</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="videoGroup">
-     <property name="title">
-      <string>Video</string>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
-     <layout class="QGridLayout" name="videoGroupLayout">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <item row="1" column="0">
-       <widget class="QLabel" name="videoLoopsLabel">
-        <property name="text">
-         <string>Loops</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QSpinBox" name="videoLoopsSpin">
-        <property name="minimum">
-         <number>-1</number>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="videoFilePathLabel">
-        <property name="text">
-         <string>File path:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="PsLineEdit" name="videoFilePathEdit"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="videoInitialVolumeLabel">
-        <property name="text">
-         <string>Initial
-Volume</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="qsynthKnob" name="videoInitialVolDial"/>
-      </item>
-      <item row="3" column="2">
-       <widget class="QCheckBox" name="videoBlackAtEndCheck">
-        <property name="text">
-         <string>Black at End</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="audioGroup">
-     <property name="title">
-      <string>Audio</string>
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="leftMargin">
-       <number>2</number>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>-93</y>
+        <width>337</width>
+        <height>1102</height>
+       </rect>
       </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>0</number>
-      </property>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="audioLoopsSpin">
-        <property name="minimum">
-         <number>-1</number>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="audioSlotLabel">
-        <property name="text">
-         <string>Slot</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <layout class="QHBoxLayout" name="onStopLayout">
-        <item>
-         <widget class="QComboBox" name="audioOnStopCombo"/>
-        </item>
-        <item>
-         <widget class="PsLineEdit" name="audioOnStopEdit">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="audioStartAtLabel">
-        <property name="text">
-         <string>Start at</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="audioOnStartLabel">
-        <property name="text">
-         <string>on Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="audioOnStopLabel">
-        <property name="text">
-         <string>on Stop</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="PsLineEdit" name="audioStartAtEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="PsLineEdit" name="audioStopAtEdit">
-        <property name="frame">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <layout class="QHBoxLayout" name="onStartLayout">
-        <item>
-         <widget class="QComboBox" name="audioOnStartCombo"/>
-        </item>
-        <item>
-         <widget class="PsLineEdit" name="audioOnStartEdit">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="audioInitVolLabel">
-        <property name="text">
-         <string>Initial
-Volume</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="audioFilePathLabel">
-        <property name="text">
-         <string>File path:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <layout class="QHBoxLayout" name="initVolLayout">
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="qsynthKnob" name="initialVolDial">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>60</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>80</width>
-            <height>80</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Set initial volume for audio fx</string>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="notchTarget">
-           <double>10.000000000000000</double>
-          </property>
-          <property name="notchesVisible">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="setToCurrentVolButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Set to
-current</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>10</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="panLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="fxGroup">
+         <property name="title">
+          <string>Fx</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
           <property name="leftMargin">
-           <number>0</number>
+           <number>2</number>
           </property>
-          <item>
-           <widget class="QCheckBox" name="panEnableCheck">
-            <property name="toolTip">
-             <string>Enable panning dial</string>
-            </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item row="2" column="0">
+           <widget class="QLabel" name="nameLabel">
             <property name="text">
-             <string>Pan</string>
+             <string>Name:</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="qsynthKnob" name="initialPanDial">
-            <property name="enabled">
-             <bool>false</bool>
+          <item row="5" column="0" colspan="3">
+           <layout class="QGridLayout" name="fadeTimeLayout">
+            <property name="topMargin">
+             <number>0</number>
             </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
+            <item row="4" column="0">
+             <widget class="QLabel" name="postDelayLabel">
+              <property name="text">
+               <string>Post Delay</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="PsLineEdit" name="fadeOutTimeEdit">
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="PsLineEdit" name="preDelayEdit">
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="preDelayLabel">
+              <property name="text">
+               <string>Pre Delay</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="fadeInTimeLabel">
+              <property name="text">
+               <string>Fade In Time</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="PsLineEdit" name="fadeInTimeEdit">
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="fadeOutTimeLabel">
+              <property name="text">
+               <string>Fade Out Time</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="holdTimeLabel">
+              <property name="text">
+               <string>Hold Time</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="PsLineEdit" name="holdTimeEdit">
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="PsLineEdit" name="postDelayEdit">
+              <property name="frame">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="2">
+           <widget class="QPushButton" name="keyClearButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="PsLineEdit" name="idEdit">
             <property name="minimumSize">
              <size>
-              <width>50</width>
-              <height>50</height>
+              <width>60</width>
+              <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="idLabel">
+            <property name="text">
+             <string>Id:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="PsLineEdit" name="keyEdit">
+            <property name="minimumSize">
              <size>
-              <width>50</width>
-              <height>50</height>
+              <width>60</width>
+              <height>0</height>
              </size>
             </property>
-            <property name="toolTip">
-             <string>Set panning for audio fx</string>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
             </property>
-            <property name="minimum">
-             <number>1</number>
+            <property name="maxLength">
+             <number>10</number>
             </property>
-            <property name="maximum">
-             <number>200</number>
+            <property name="frame">
+             <bool>true</bool>
             </property>
-            <property name="value">
-             <number>100</number>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="keyLabel">
+            <property name="text">
+             <string>Key:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="PsLineEdit" name="nameEdit"/>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="PsPushButton" name="editOnceButton">
+            <property name="text">
+             <string>Edit once</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-       </layout>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="audioStopAtLabel">
-        <property name="text">
-         <string>Stop at</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="audioLoopsLabel">
-        <property name="text">
-         <string>Loops</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="audioSlotSpin">
-        <property name="maximum">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="PsLineEdit" name="audioFilePathEdit"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="findAudioFileButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="hookedToGroup">
+         <property name="title">
+          <string>Hooked to</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <property name="leftMargin">
+           <number>2</number>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>28</width>
-            <height>16777215</height>
-           </size>
+          <property name="topMargin">
+           <number>2</number>
           </property>
-          <property name="text">
-           <string>...</string>
+          <property name="rightMargin">
+           <number>2</number>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="sceneGroup">
-     <property name="title">
-      <string>Scene</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>0</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="PsLineEdit" name="faderCountEdit">
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="faderCountLabel">
-        <property name="text">
-         <string>Fader
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>0</number>
+          </property>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="hookedToUniverseSpin">
+            <property name="maximum">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="hookedToChannelLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Channel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="hookedToUniverseLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Universe</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QSpinBox" name="hookedToChannelSpin">
+            <property name="maximum">
+             <number>512</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="videoGroup">
+         <property name="title">
+          <string>Video</string>
+         </property>
+         <layout class="QGridLayout" name="videoGroupLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="videoLoopsLabel">
+            <property name="text">
+             <string>Loops</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QSpinBox" name="videoLoopsSpin">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="videoFilePathLabel">
+            <property name="text">
+             <string>File path:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="PsLineEdit" name="videoFilePathEdit"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="videoInitialVolumeLabel">
+            <property name="text">
+             <string>Initial
+Volume</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="qsynthKnob" name="videoInitialVolDial"/>
+          </item>
+          <item row="3" column="2">
+           <widget class="QCheckBox" name="videoBlackAtEndCheck">
+            <property name="text">
+             <string>Black at End</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="audioGroup">
+         <property name="title">
+          <string>Audio</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>0</number>
+          </property>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="audioLoopsSpin">
+            <property name="minimum">
+             <number>-1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="audioSlotLabel">
+            <property name="text">
+             <string>Slot</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <layout class="QHBoxLayout" name="onStopLayout">
+            <item>
+             <widget class="QComboBox" name="audioOnStopCombo"/>
+            </item>
+            <item>
+             <widget class="PsLineEdit" name="audioOnStopEdit">
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="audioStartAtLabel">
+            <property name="text">
+             <string>Start at</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="audioOnStartLabel">
+            <property name="text">
+             <string>on Start</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="audioOnStopLabel">
+            <property name="text">
+             <string>on Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="PsLineEdit" name="audioStartAtEdit">
+            <property name="frame">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="PsLineEdit" name="audioStopAtEdit">
+            <property name="frame">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <layout class="QHBoxLayout" name="onStartLayout">
+            <item>
+             <widget class="QComboBox" name="audioOnStartCombo"/>
+            </item>
+            <item>
+             <widget class="PsLineEdit" name="audioOnStartEdit">
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="audioInitVolLabel">
+            <property name="text">
+             <string>Initial
+Volume</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="audioFilePathLabel">
+            <property name="text">
+             <string>File path:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="initVolLayout">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="qsynthKnob" name="initialVolDial">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>60</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>80</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Set initial volume for audio fx</string>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="notchTarget">
+               <double>10.000000000000000</double>
+              </property>
+              <property name="notchesVisible">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="setToCurrentVolButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Set to
+current</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="panLayout">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QCheckBox" name="panEnableCheck">
+                <property name="toolTip">
+                 <string>Enable panning dial</string>
+                </property>
+                <property name="text">
+                 <string>Pan</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="qsynthKnob" name="initialPanDial">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Set panning for audio fx</string>
+                </property>
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>200</number>
+                </property>
+                <property name="value">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="audioStopAtLabel">
+            <property name="text">
+             <string>Stop at</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="audioLoopsLabel">
+            <property name="text">
+             <string>Loops</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="audioSlotSpin">
+            <property name="maximum">
+             <number>4</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="PsLineEdit" name="audioFilePathEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="findAudioFileButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>28</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="sceneGroup">
+         <property name="title">
+          <string>Scene</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>0</number>
+          </property>
+          <item row="0" column="1">
+           <widget class="PsLineEdit" name="faderCountEdit">
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="faderCountLabel">
+            <property name="text">
+             <string>Fader
 count</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="sequenceGroup">
+         <property name="title">
+          <string>Sequence</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="seqStopOtherCheck">
+            <property name="text">
+             <string>STOP other
+on start</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="seqBlackOtherCheck">
+            <property name="text">
+             <string>BLACK
+on start</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -694,59 +772,6 @@ count</string>
       <string>Close</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="sequenceGroup">
-     <property name="title">
-      <string>Sequence</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <property name="spacing">
-       <number>4</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="seqStopOtherCheck">
-        <property name="text">
-         <string>STOP other
-on start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="seqBlackOtherCheck">
-        <property name="text">
-         <string>BLACK
-on start</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>0</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

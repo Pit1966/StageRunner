@@ -179,7 +179,7 @@ void TimeLineExecuter::stopAllChildFx()
 	}
 
 	// Stop scenes
-	for (FxSceneItem *fxs : qAsConst(m_idToClonedSceneHash)) {
+	for (FxSceneItem *fxs : std::as_const(m_idToClonedSceneHash)) {
 		fxs->setFadeOutTime(100);
 		myApp.unitLight->stopFxScene(fxs);
 	}
@@ -210,7 +210,7 @@ TimeLineExecuter::~TimeLineExecuter()
 		delete enve;
 	}
 
-	for (FxSceneItem *fx : qAsConst(m_idToClonedSceneHash)) {
+	for (FxSceneItem *fx : std::as_const(m_idToClonedSceneHash)) {
 		if (!fx->isOnStageIntern() && !fx->isActive()) {
 			emit wantedDeleteFxScene(fx);
 		} else {
@@ -365,7 +365,7 @@ bool TimeLineExecuter::processEnvelopes(int estTimeMs)
 		Envelope *enve = m_curveTracks.at(i);
 		TimeLineCurveData *dat = enve->curveDat;
 		int vol = dat->valAtMs(estTimeMs) / 10;
-		for (int slot : qAsConst(enve->usedAudioSlots)) {
+		for (int slot : std::as_const(enve->usedAudioSlots)) {
 			myApp.unitAudio->setVolumeFromTimeLine(slot, vol);
 		}
 		// qDebug() << "yMP at" << estTimeMs << "=" << vol;

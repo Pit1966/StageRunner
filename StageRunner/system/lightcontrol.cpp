@@ -457,7 +457,7 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 		return myApp.assignInputToSelectedFxItem(universe, channel, value);
 
 	/// @todo faster lookup of fxitems that are hooked to an dmx channel
-	for (FxItem * fx : qAsConst(FxItem::globalFxList())) {
+	for (FxItem * fx : std::as_const(FxItem::globalFxList())) {
 		if (fx->isHookedToInput(universe,channel)) {
 			if (fx->fxType() == FX_SCENE) {
 				FxSceneItem *scene = static_cast<FxSceneItem*>(fx);

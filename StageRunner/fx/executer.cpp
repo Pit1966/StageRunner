@@ -707,7 +707,7 @@ void ScriptExecuter::processProgress()
 	if (state() == EXEC_FINISH && m_breakOnCancel) {
 		if (m_currentLineNum < m_script.size()) {
 			// fadeout all scenes that where cloned by this executer
-			for (FxSceneItem *fxs : qAsConst(m_clonedSceneList)) {
+			for (FxSceneItem *fxs : std::as_const(m_clonedSceneList)) {
 				fxs->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT, 200);
 			}
 			LOGTEXT(tr("<font color=darkGreen>Script</font> '%1' <font color=darkOrange>Canceled</font>")

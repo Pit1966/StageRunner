@@ -348,7 +348,7 @@ FxTimeLineEditWidget::~FxTimeLineEditWidget()
 
 FxTimeLineEditWidget *FxTimeLineEditWidget::openTimeLinePanel(FxTimeLineItem *fx, QWidget *parent)
 {
-	for (FxTimeLineEditWidget *tlwid : qAsConst(m_timelineEditWidgetList)) {
+	for (FxTimeLineEditWidget *tlwid : std::as_const(m_timelineEditWidgetList)) {
 		if (tlwid->currentFxItem() == fx) {
 			tlwid->setWindowState(tlwid->windowState() & (~Qt::WindowMinimized | Qt::WindowActive));
 			tlwid->raise();
@@ -383,7 +383,7 @@ void FxTimeLineEditWidget::destroyAllTimelinePanels()
 
 FxTimeLineEditWidget *FxTimeLineEditWidget::findParentFxTimeLinePanel(FxItem *fx)
 {
-	for (FxTimeLineEditWidget *tlwid : qAsConst(m_timelineEditWidgetList)) {
+	for (FxTimeLineEditWidget *tlwid : std::as_const(m_timelineEditWidgetList)) {
 		if (tlwid->currentFxItem() == fx)
 			return tlwid;
 	}

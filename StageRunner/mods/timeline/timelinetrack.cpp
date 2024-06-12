@@ -49,7 +49,7 @@ void TimeLineTrack::deleteAllItems()
 void TimeLineTrack::setTrackIdOfEachItem(int trackId, bool adjustYPosAlso)
 {
 	int id = trackId < 0 ? m_trackID : trackId;
-	for (TimeLineItem *it : qAsConst(m_itemList)) {
+	for (TimeLineItem *it : std::as_const(m_itemList)) {
 		it->setTrackID(id);
 		if (adjustYPosAlso)
 			it->setYPos(m_yPos);
@@ -65,7 +65,7 @@ void TimeLineTrack::setTrackDuration(int ms)
 
 void TimeLineTrack::alignItemPositionsToTrack()
 {
-	for (TimeLineItem* item : qAsConst(m_itemList)) {
+	for (TimeLineItem* item : std::as_const(m_itemList)) {
 		item->setYSize(m_ySize - yAlignSize);
 		item->setYPos(m_yPos + yAlignOffset);
 	}

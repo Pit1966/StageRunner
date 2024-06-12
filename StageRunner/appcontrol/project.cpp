@@ -258,7 +258,7 @@ bool Project::loadFromFile(const QString &path)
 		ok = checkFxItemList(fxList, result);
 		if (!ok) {
 			QString msg = QString("Project load was ok, but <font color=darkOrange>consistance check found some errors</font>:<br>");
-			for (const QString &txt : qAsConst(result.errorMessageList)) {
+			for (const QString &txt : std::as_const(result.errorMessageList)) {
 				msg += QString("- %1<br>").arg(txt);
 			}
 			POPUPINFOMSG("Load project",msg);
@@ -266,7 +266,7 @@ bool Project::loadFromFile(const QString &path)
 		}
 		else if (result.resultMessageList.size()) {
 			QString msg = QString("<font color=green>Project loaded successfully!</font><br>");
-			for (const QString &txt : qAsConst(result.resultMessageList)) {
+			for (const QString &txt : std::as_const(result.resultMessageList)) {
 				msg += QString("- %1<br>").arg(txt);
 			}
 			POPUPINFOMSG("Load project",msg);
