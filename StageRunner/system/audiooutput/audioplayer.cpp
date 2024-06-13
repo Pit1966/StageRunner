@@ -93,7 +93,7 @@ void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &aud
 	qint64 frames = size / channels;
 
 	if (frames == 0) return;
-	qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName() << "sampleformat" << audioFormat.sampleFormat();
+	// qDebug() << "calcVuLevel" << size << QThread::currentThread()->objectName() << "sampleformat" << audioFormat.sampleFormat();
 	switch (audioFormat.sampleFormat()) {
 	case AudioFormat::Int16:
 		{

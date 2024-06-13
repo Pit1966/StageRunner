@@ -255,9 +255,12 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	// set panning
 	setPanning(pan);
 
+	DEVELTEXT("FxAudio prepare start time [ms] %.1f", float(m_audioRunTime.nsecsElapsed() / 1e6));
+
 	// Start playing
 	m_audioPlayer->setStartDelay(fxa->preDelay());
 	m_audioPlayer->start(fxa->loopTimes);
+
 
 	// Emit Control Msg to send Status of Volume and Name
 	AudioCtrlMsg msg(fxa,slotNumber);
@@ -599,6 +602,7 @@ void AudioSlot::onPlayerStatusChanged(AudioStatus status)
 				m_currentFx->startInProgress = false;
 				m_currentFx->startSlot = -1;
 			}
+			DEVELTEXT("Audio running after [ms] %.1f", float(m_audioRunTime.nsecsElapsed()/1000)/1000);
 			LOGTEXT(tr("Slot %1: Audio buffer size used: %2").arg(slotNumber+1).arg(m_audioPlayer->audioBufferSize()));
 			//fall through
 		default:
