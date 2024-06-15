@@ -52,7 +52,7 @@ public:
 	};
 	Q_ENUM(Error)
 
-	bool isDecoding() const;
+	// bool isDecoding() const;
 	void setSourceFilename(const QString &filename);
 	QString sourceFilename() const;
 

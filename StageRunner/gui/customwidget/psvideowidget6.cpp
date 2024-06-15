@@ -320,7 +320,15 @@ void PsVideoWidget::closeOverlays()
 
 void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
-	setFullScreen(!isFullScreen());
+	if (isFullScreen()) {
+		setFullScreen(false);
+		if (!m_windowGeometry.isEmpty())
+			restoreGeometry(m_windowGeometry);
+	}
+	else {
+		m_windowGeometry = saveGeometry();
+		setFullScreen(true);
+	}
 	m_mousePressed = false;
 	m_isWindowMoveMode = false;
 	m_doubleClicked = true;

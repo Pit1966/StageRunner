@@ -197,7 +197,6 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 	return true;
 }
 
-#ifndef IS_QT6
 void AudioIODevice::examineAudioFormat(AudioFormat &form)
 {
 	int samplesize = form.sampleSize();
@@ -210,7 +209,6 @@ void AudioIODevice::examineAudioFormat(AudioFormat &form)
 			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
 	}
 }
-#endif
 
 void AudioIODevice::setPanning(int pan, int maxPan)
 {
@@ -219,7 +217,7 @@ void AudioIODevice::setPanning(int pan, int maxPan)
 	if (pan == 0)		// deactivated
 		return;
 
-	// we have to calculat amplification factors for both the left and the right channel
+	// we have to calculate amplification factors for both the left and the right channel
 
 
 	if (pan > maxPan/2) {
@@ -467,11 +465,6 @@ void AudioIODevice::setLoopCount(int loops)
 	loop_count = 1;
 }
 
-#ifdef IS_QT6
-
-
-
-#else
 QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
 {
 	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
@@ -488,7 +481,6 @@ QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool 
 
 	return QAudioDeviceInfo();
 }
-#endif
 
 void AudioIODevice::calcPanning(char *data, int size, const	AudioFormat &audioFormat)
 {

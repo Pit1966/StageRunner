@@ -48,6 +48,7 @@ private:
 
 	QPoint m_clickStartPos;
 	QPoint m_clickWindowPos;
+	QByteArray m_windowGeometry;		///< Window geometry before switch to fullscreen
 
 public:
 	PsVideoWidget(QWidget *parent = nullptr);

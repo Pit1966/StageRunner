@@ -1173,10 +1173,10 @@ void StageRunnerMainWin::resizeEvent(QResizeEvent *event)
 
 void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 {
-	QString msg = QString("<font color=#222222>%1</font><br><br>Reported from function:%2")
-			.arg(text,where);
+	// QString msg = QString("<font color=#222222>%1</font><br><br>Reported from function:%2")
+	// 		.arg(text,where);
 	msg_dialog->setStyleSheet("");
-	msg_dialog->showMessage(msg,where);
+	msg_dialog->showMessage(text, where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("Information"));
 
@@ -1184,10 +1184,10 @@ void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 
 void StageRunnerMainWin::showErrorMsg(const QString &where, const QString &text)
 {
-	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
-			.arg(text,where);
+	// QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
+	// 		.arg(text,where);
 	msg_dialog->setStyleSheet("color:#ff7722;");
-	msg_dialog->showMessage(msg,where);
+	msg_dialog->showMessage(text, where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
 }

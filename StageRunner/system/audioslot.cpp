@@ -290,7 +290,7 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	/// @todo remove this wait loop. Do it with timer or callback ...
 	bool ok = false;
-	while (m_audioRunTime.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
+	while (0 && m_audioRunTime.elapsed() < FX_AUDIO_START_WAIT_DELAY && !ok) {
 		QApplication::processEvents();
 		if (m_runStatus == AUDIO_RUNNING) {
 			m_currentFx->startInProgress = false;

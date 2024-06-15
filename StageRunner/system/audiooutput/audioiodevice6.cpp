@@ -628,29 +628,17 @@ void AudioIODevice::if_error_occurred(QAudioDecoder::Error error)
 }
 
 
-bool AudioDecoder::isDecoding() const
-{
-#ifdef IS_QT6
-	return QAudioDecoder::isDecoding();
-#else
-	return QAudioDecoder::state() == QAudioDecoder::DecodingState;
-#endif
-}
+// bool AudioDecoder::isDecoding() const
+// {
+// 	return QAudioDecoder::isDecoding();
+// }
 
 void AudioDecoder::setSourceFilename(const QString &filename)
 {
-#ifdef IS_QT6
 	QAudioDecoder::setSource(QUrl::fromLocalFile(filename));
-#else
-	QAudioDecoder::setSourceFilename(filename);
-#endif
 }
 
 QString AudioDecoder::sourceFilename() const
 {
-#ifdef IS_QT6
 	return QAudioDecoder::source().toLocalFile();
-#else
-	return QAudioDecoder::sourceFilename();
-#endif
 }

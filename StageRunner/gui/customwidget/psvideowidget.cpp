@@ -320,7 +320,15 @@ void PsVideoWidget::closeOverlays()
 
 void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 {
-	setFullScreen(!isFullScreen());
+	if (isFullScreen()) {
+		setFullScreen(false);
+		if (!m_windowGeometry.isEmpty())
+			restoreGeometry(m_windowGeometry);
+	}
+	else {
+		m_windowGeometry = saveGeometry();
+		setFullScreen(true);
+	}
 	m_mousePressed = false;
 	m_isWindowMoveMode = false;
 	m_doubleClicked = true;
@@ -329,11 +337,7 @@ void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
 void PsVideoWidget::mousePressEvent(QMouseEvent *ev)
 {
 	m_mousePressed = true;
-#ifdef IS_QT6
-	m_clickStartPos = ev->globalPosition().toPoint();
-#else
 	m_clickStartPos = ev->globalPos();
-#endif
 	m_clickWindowPos = pos();
 	m_doubleClicked = false;
 }
@@ -376,11 +380,7 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 
 		act = menu.addAction(tr("Close video window"));
 		act->setProperty("cmd","close");
-#ifdef IS_QT6
-		act = menu.exec(event->globalPosition().toPoint());
-#else
 		act = menu.exec(event->globalPos());
-#endif
 		if (!act)
 			return;
 
@@ -399,11 +399,7 @@ void PsVideoWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void PsVideoWidget::mouseMoveEvent(QMouseEvent *event)
 {
-#ifdef IS_QT6
-	QPoint curpos = event->globalPosition().toPoint();
-#else
 	QPoint curpos = event->globalPos();
-#endif
 	QPoint movevec = m_clickStartPos - curpos;
 
 	if (!isFullScreen() && !m_doubleClicked) {

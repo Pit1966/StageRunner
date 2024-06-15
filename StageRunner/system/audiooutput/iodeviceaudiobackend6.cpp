@@ -24,7 +24,8 @@
 #include "iodeviceaudiobackend6.h"
 #include "audioiodevice6.h"
 #include "audioslot.h"
-#include "log.h"
+#include "system/log.h"
+#include "system/extelapsedtimer.h"
 
 #include <QAudioSink>
 #include <QMediaDevices>
@@ -113,8 +114,11 @@ void IODeviceAudioBackend::start(int loops)
 
 void IODeviceAudioBackend::stop()
 {
-	m_audioIODev->stop();
+	ExtElapsedTimer debugtime;
 	m_audioSink->stop();
+	m_audioIODev->stop();
+	qint64 t = debugtime.nsecsElapsed() / 1000;
+	qDebug() << "stop audio tooks" << t << "µs";
 }
 
 void IODeviceAudioBackend::pause(bool state)
