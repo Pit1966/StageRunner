@@ -74,7 +74,6 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
 	connect(this,SIGNAL(rawDataProcessed(const char*,int,AudioFormat)),this,SLOT(calcVuLevel(const char*,int,AudioFormat)),Qt::QueuedConnection);
-
 }
 
 AudioIODevice::~AudioIODevice()
@@ -127,12 +126,14 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 	// Check for regular end of playing
 	if (avail == 0 && bytes_read > 0 && decoding_finished_f) {
 		if (loop_count < loop_target || loop_target < 0) {
-			if (debug > 1) LOGTEXT(tr("Loop audio file '%1' -> Loop: %2").arg(current_filename).arg(loop_count));
+			if (debug > 1)
+				LOGTEXT(tr("Loop audio file '%1' -> Loop: %2").arg(current_filename).arg(loop_count));
 			bytes_read = 0;
 			avail = bytes_avail;
 			loop_count++;
 		} else {
-			if (debug > 2) qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
+			if (debug > 2)
+				qDebug("maxlen %lli, bytes_read: %lli, avail %lli",maxlen,bytes_read,avail);
 			emit readReady();
 			return 0;
 		}
@@ -153,7 +154,7 @@ qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 	}
 
 	// qDebug("  -> readData %lli",maxlen);
-	if (maxlen>avail) {
+	if (maxlen > avail) {
 		maxlen = avail;
 	}
 
@@ -197,21 +198,6 @@ bool AudioIODevice::setSourceFilename(const QString &filename)
 	m_currentPlaybackSamplerate = 0;
 	return true;
 }
-
-#ifndef IS_QT6
-void AudioIODevice::examineAudioFormat(AudioFormat &form)
-{
-	int samplesize = form.sampleSize();
-	int channels = form.channelCount();
-	int samplerate = form.sampleRate();
-	QString codec = form.codec();
-
-	if (debug) {
-		qDebug("Audioformat: %dHz, %d Channels, Size per sample: %d (Codec:%s)"
-			   ,samplerate,channels,samplesize,codec.toLocal8Bit().data());
-	}
-}
-#endif
 
 void AudioIODevice::setPanning(int pan, int maxPan)
 {
@@ -468,8 +454,6 @@ void AudioIODevice::setLoopCount(int loops)
 	loop_count = 1;
 }
 
-#ifdef IS_QT6
-
 QAudioDevice AudioIODevice::getAudioDevice(const QString &devName, bool *found)
 {
 	const QList<QAudioDevice> devList = QMediaDevices::audioOutputs();
@@ -487,26 +471,6 @@ QAudioDevice AudioIODevice::getAudioDevice(const QString &devName, bool *found)
 	return QAudioDevice();
 }
 
-#else
-
-QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found)
-{
-	QList<QAudioDeviceInfo> devList = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-	for (int t=0; t<devList.size(); t++) {
-		if (devList.at(t).deviceName() == devName) {
-			if (found)
-				*found = true;
-			return devList.at(t);
-		}
-	}
-
-	if (found)
-		*found = false;
-
-	return QAudioDeviceInfo();
-}
-
-#endif
 
 void AudioIODevice::calcPanning(char *data, int size, const	AudioFormat &audioFormat)
 {
@@ -577,10 +541,17 @@ void AudioIODevice::stop()
 			fprintf(stderr, "wait for stop");
 		}
 	}
+
 	close();
 
 	decoding_finished_f = true;
+	m_mutex.unlock();
+}
 
+void AudioIODevice::softStop()
+{
+	m_mutex.lock();
+	bytes_avail = bytes_read;
 	m_mutex.unlock();
 }
 

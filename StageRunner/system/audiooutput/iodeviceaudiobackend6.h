@@ -43,7 +43,7 @@ private:
 	QAudioSink *m_audioSink;
 	QAudio::State m_currentOutputState;
 	AUDIO::AudioStatus m_currentAudioStatus;			///< This is AudioIODevice state and output state translated to StageRunner audio state
-
+	bool m_suspendToStopWanted;							///< this is a workaround flag. To avoid stucks we first suspend the audio device and than stop it
 
 public:
 	IODeviceAudioBackend(AudioSlot &audioChannel, const QString &devName);
@@ -72,6 +72,7 @@ public:
 
 
 private slots:
+	void _stopMySink();
 	void onAudioOutputStatusChanged(QAudio::State state);
 	void onAudioIODevReadReady();
 	void onMediaDurationDetected(qint64 ms);

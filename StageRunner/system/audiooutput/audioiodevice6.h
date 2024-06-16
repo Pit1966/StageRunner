@@ -71,9 +71,6 @@ public:
 	qint64 bytesAvailable() const override;
 
 	bool setSourceFilename(const QString & filename);
-#ifndef IS_QT6
-	void examineAudioFormat(AudioFormat & form);
-#endif
 	AudioFormat & audioFormat() const {return *audio_format;}
 
 	void setPanning(int pan, int maxPan);
@@ -126,11 +123,7 @@ public:
 
 	void setLoopCount(int loops);
 
-#ifdef IS_QT6
 	static 	QAudioDevice getAudioDevice(const QString &devName, bool *found = nullptr);
-#else
-	static 	QAudioDeviceInfo getAudioDeviceInfo(const QString &devName, bool *found = nullptr);
-#endif
 
 protected:
 	void calcPanning(char *data, int size, const AudioFormat &audioFormat);
@@ -138,6 +131,7 @@ protected:
 public slots:
 	void start(int loops = 1);
 	void stop();
+	void softStop();
 	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 private slots:

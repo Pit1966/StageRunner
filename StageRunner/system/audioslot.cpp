@@ -58,7 +58,7 @@
 
 
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audioEngineType, const QString &devName)
-	: QObject()
+	: QObject(parent)
 	, slotNumber(pSlotNumber)
 	, m_audioCtrlUnit(parent)
 	, m_audioPlayer(nullptr)
