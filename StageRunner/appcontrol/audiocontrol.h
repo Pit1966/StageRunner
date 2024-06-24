@@ -124,6 +124,9 @@ public:
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
 
 	inline const QStringList & audioDeviceNames() const {return m_audioDeviceNames;}
+	static QString audioOutTypeToString(AUDIO::AudioOutputType type);
+	static bool isAudioOutAvailable(AUDIO::AudioOutputType type);
+	static AUDIO::AudioOutputType defaultAudioOut();
 
 private:
 	void run();

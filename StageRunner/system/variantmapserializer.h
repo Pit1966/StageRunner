@@ -33,7 +33,7 @@ class VariantMapSerializer
 public:
 	VariantMapSerializer();
 
-	static QString toString(const QVariantMap map);
+	static QString toString(const QVariantMap &map);
 	static QVariantMap toMap(const QString &str);
 private:
 	static bool parseString(int &pos, const QString &str, QVariantMap &map);

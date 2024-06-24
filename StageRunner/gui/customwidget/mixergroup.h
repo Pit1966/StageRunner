@@ -28,6 +28,8 @@
 #include <QList>
 #include <QHBoxLayout>
 
+#include "tool/qt6_qt5_compat.h"
+
 class MixerChannel;
 
 class MixerGroup : public QWidget
@@ -70,11 +72,11 @@ public:
 	QHBoxLayout * mixerLayout() const {return mixerlayout;}
 
 protected:
-	void resizeEvent(QResizeEvent *event);
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dragMoveEvent(QDragMoveEvent *event);
-	void dragLeaveEvent(QDragLeaveEvent *event);
-	void dropEvent(QDropEvent *event);
+	void resizeEvent(QResizeEvent *qevent) override;
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dragMoveEvent(QDragMoveEvent *qevent) override;
+	void dragLeaveEvent(QDragLeaveEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
 
 public slots:
 	void notifyChangedDmxUniverse(int universe, const QByteArray & dmxValues);

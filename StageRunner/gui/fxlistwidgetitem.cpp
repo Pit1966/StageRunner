@@ -24,7 +24,6 @@
 #include "fxlistwidgetitem.h"
 #include "customwidget/pslineedit.h"
 #include "fxitem.h"
-#include "tool/qt6_qt5_compat.h"
 
 #include <QtWidgets>
 
@@ -159,8 +158,9 @@ void FxListWidgetItem::mouseReleaseEvent(QMouseEvent *)
 	seek_mode_f = false;
 }
 
-void FxListWidgetItem::mouseMoveEvent(QMouseEvent *event)
+void FxListWidgetItem::mouseMoveEvent(QMouseEvent *qevent)
 {
+	PMouseEvent *event = static_cast<PMouseEvent*>(qevent);
 	QPoint dist = event->pos() - drag_begin_pos;
 
 	if (seek_mode_f) {

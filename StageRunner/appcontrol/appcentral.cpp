@@ -201,9 +201,15 @@ FxList *AppCentral::getRegisteredFxList(int id)
 	return nullptr;
 }
 
+/**
+ * @brief AppCentral::isExperimentalAudio
+ * @return
+ *
+ * @todo audiooutname
+ */
 bool AppCentral::isExperimentalAudio() const
 {
-	return userSettings->pAltAudioEngine;
+	return userSettings->pAudioOutputType == OUT_MEDIAPLAYER;
 }
 
 void AppCentral::setEditMode(bool state)
@@ -212,12 +218,6 @@ void AppCentral::setEditMode(bool state)
 		edit_mode_f = state;
 		emit editModeChanged(state);
 	}
-}
-
-void AppCentral::setAudioOutputType(AudioOutputType type)
-{
-	userSettings->pAltAudioEngine = (type == OUT_MEDIAPLAYER || type == OUT_NONE);
-	userSettings->pUseSDLAudio = (type == OUT_SDL2);
 }
 
 void AppCentral::setFFTAudioChannelMask(qint32 mask)
@@ -497,17 +497,18 @@ QString AppCentral::moduleErrorText(AppCentral::MODUL_ERROR e)
 	return estr;
 }
 
+void AppCentral::setAudioOutputType(AudioOutputType type)
+{
+	userSettings->pAudioOutputType = type;
+}
+
 AudioOutputType AppCentral::usedAudioOutputType() const
 {
-	if (m_isSDLAvailable && userSettings->pUseSDLAudio) {
-		return AUDIO::OUT_SDL2;
-	}
-	else if (userSettings->pAltAudioEngine) {
-		return AUDIO::OUT_MEDIAPLAYER;
-	}
-	else {
-		return AUDIO::OUT_DEVICE;
-	}
+	AudioOutputType type = AudioOutputType(int(userSettings->pAudioOutputType));
+	if (type == AUDIO::OUT_SDL2 && !m_isSDLAvailable)
+		type = AUDIO::OUT_NONE;
+
+	return type;
 }
 
 /**

@@ -28,6 +28,9 @@
 #include <QList>
 #include <QtWidgets>
 
+#include "tool/toolclasses.h"
+#include "tool/qt6_qt5_compat.h"
+
 class PTableWidget : public QTableWidget
 {
 	Q_OBJECT
@@ -51,10 +54,10 @@ protected:
 	Qt::DropActions supportedDropActions() const;
 
 private:
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dropEvent(QDropEvent *event);
-	void dragLeaveEvent(QDragLeaveEvent *event);
-	void dragMoveEvent(QDragMoveEvent *event);
+	void dragEnterEvent(QDragEnterEvent *qevent) override;
+	void dropEvent(QDropEvent *qevent) override;
+	void dragLeaveEvent(QDragLeaveEvent *qevent) override;
+	void dragMoveEvent(QDragMoveEvent *event) override;
 
 signals:
 	void dropEventReceived(QString text, int row);

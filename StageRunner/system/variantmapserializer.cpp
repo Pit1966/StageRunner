@@ -24,13 +24,14 @@
 #include "variantmapserializer.h"
 
 #include <QDebug>
+#include <QMetaType>
 
 VariantMapSerializer::VariantMapSerializer()
 {
 
 }
 
-QString VariantMapSerializer::toString(const QVariantMap map)
+QString VariantMapSerializer::toString(const QVariantMap &map)
 {
 	QString out;
 	out += "{";
@@ -44,6 +45,23 @@ QString VariantMapSerializer::toString(const QVariantMap map)
 		out += key;
 		out += '"';
 		out += ":";
+#ifdef	IS_QT6
+		switch (var.typeId()) {
+		case QMetaType::QString:
+			out += '"';
+			out += var.toString();
+			out += '"';
+			break;
+
+		case QMetaType::Int:
+		case QMetaType::UInt:
+			out += var.toString();
+			break;
+
+		default:
+			qDebug() << __func__ << "Format not supported:" << var.metaType().name();
+		}
+#else
 		switch (var.type()) {
 		case QVariant::String:
 			out += '"';
@@ -59,6 +77,7 @@ QString VariantMapSerializer::toString(const QVariantMap map)
 		default:
 			qDebug() << __func__ << "Format not supported:" << var.typeName();
 		}
+#endif
 
 		elements++;
 	}

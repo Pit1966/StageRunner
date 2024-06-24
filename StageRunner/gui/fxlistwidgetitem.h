@@ -26,6 +26,7 @@
 
 #include "ui_fxlistwidgetitem.h"
 #include "commandsystem.h"
+#include "tool/qt6_qt5_compat.h"
 
 class FxItem;
 
@@ -88,11 +89,11 @@ private:
 	void init();
 
 protected:
-	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *);
-	void mouseMoveEvent(QMouseEvent *event);
-	void paintEvent(QPaintEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *) override;
+	void mouseMoveEvent(QMouseEvent *qevent) override;
+	void paintEvent(QPaintEvent *event) override;
+	void keyPressEvent(QKeyEvent *event) override;
 
 
 public slots:

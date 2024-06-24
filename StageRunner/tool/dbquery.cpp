@@ -21,11 +21,12 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************************************/
 
-
 #include "dbquery.h"
 #include "database.h"
 #include "../system/log.h"
 #include "toolclasses.h"
+
+#include <QMetaType>
 
 extern Log *logThread;
 extern QThread * main_thread;
@@ -256,9 +257,15 @@ bool DBquery::prepareValue(const QString & field, QVariant value)
 		return false;
 	}
 	// Keine leeren Strings vorbereiten
+#ifdef IS_QT6
+	if (value.typeId() == QMetaType::QString && value.isNull() && (mode == INSERT)) {
+		return true;
+	}
+#else
 	if (value.type() == QVariant::String && value.isNull() && (mode == INSERT)) {
 		return true;
 	}
+#endif
 
 	// Feldnamen merken
 	field_list.append(field);
@@ -716,7 +723,11 @@ bool DBquery::exec_insert()
 			if (debug > 5) {
 				LOGTEXT(QString("DB->exec: Bind value #%1: %2").arg(t+1).arg(val_list.at(t).toString()));
 			}
+#ifdef IS_QT6
+			if ( val_list.at(t).typeId() == QMetaType::QString &&  val_list.at(t).isNull() ) {
+#else
 			if ( val_list.at(t).type() == QVariant::String &&  val_list.at(t).isNull() ) {
+#endif
 				if (debug > 1) DEBUGTEXT("DBquery::exec_insert substitute NULL value to '' in field %s",field_list.at(t).toLatin1().data());
 				query->addBindValue("");
 			} else {
@@ -784,7 +795,11 @@ bool DBquery::exec_replace()
 	sql = "UPDATE " + fromtable + " SET ";
 	for (int t=0;t<field_list.size();t++) {
 		if (t) sql += ",";
+#ifdef IS_QT6
+		if (val_list.at(t).typeId() == QMetaType::Bool)
+#else
 		if (val_list.at(t).type() == QVariant::Bool)
+#endif
 			sql += field_list.at(t) + " = " + QString::number(val_list.at(t).toInt());
 		else
 			sql += field_list.at(t) + " = '" + val_list.at(t).toString() + "'";;
@@ -830,7 +845,11 @@ bool DBquery::exec_update()
 	sql = "UPDATE " + fromtable + " SET ";
 	for (int t=0;t<field_list.size();t++) {
 		if (t) sql += ",";
+#ifdef IS_QT6
+		if (val_list.at(t).typeId() == QMetaType::Bool)
+#else
 		if (val_list.at(t).type() == QVariant::Bool)
+#endif
 			sql += field_list.at(t) + " = " + QString::number(val_list.at(t).toInt());
 		else
 			sql += field_list.at(t) + " = '" + val_list.at(t).toString() + "'";;

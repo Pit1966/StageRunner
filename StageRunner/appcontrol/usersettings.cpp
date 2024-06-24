@@ -80,8 +80,7 @@ void UserSettings::init()
 		addExistingVar(pSlotAudioDevice[t],QString("SlotAudioDevice%1").arg(t+1));
 	}
 	addExistingVar(pAudioPlayListChannel,"AudioPlayListChannel",0,3,3);
-	addExistingVar(pAltAudioEngine,"AlternativeAudioEngine");
-	addExistingVar(pUseSDLAudio,"UseSDLAudio");
+	addExistingVar(pAudioOutputType,"AudioOutputType");
 	addExistingVar(pFFTAudioMask,"FFTAudioMask",0,15,7);
 	addExistingVar(pFxTemplatePath,"FxTemplatePath",templatePath);
 	addExistingVar(pVolumeDialMask,"ShowVolumeDialMask",0,15,8);

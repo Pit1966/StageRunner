@@ -25,6 +25,7 @@
 #include "customwidget/extmimedata.h"
 #include "fxitem.h"
 #include "fxlistwidgetitem.h"
+#include "qt6_qt5_compat.h"
 
 #include <QDropEvent>
 #include <QMimeData>
@@ -74,8 +75,9 @@ void PTableWidget::setDropAllowedIndices(QList<int> list)
 	allowed_indices = list;
 }
 
-void PTableWidget::dragEnterEvent(QDragEnterEvent *event)
+void PTableWidget::dragEnterEvent(QDragEnterEvent *qevent)
 {
+	PDragEnterEvent* event = static_cast<PDragEnterEvent*>(qevent);
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 	QObject * src = event->source();
@@ -119,8 +121,9 @@ void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 	}
 }
 
-void PTableWidget::dragMoveEvent(QDragMoveEvent *event)
+void PTableWidget::dragMoveEvent(QDragMoveEvent *qevent)
 {
+	PDragMoveEvent* event = static_cast<PDragMoveEvent*>(qevent);
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 
@@ -159,8 +162,9 @@ Qt::DropActions PTableWidget::supportedDropActions() const
 
 
 
-void PTableWidget::dropEvent(QDropEvent *event)
+void PTableWidget::dropEvent(QDropEvent *qevent)
 {
+	PDropEvent* event = static_cast<PDropEvent*>(qevent);
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 

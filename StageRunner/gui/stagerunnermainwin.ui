@@ -326,6 +326,7 @@
     </property>
     <addaction name="actionSetup"/>
     <addaction name="actionInitialize_plugins_DMX"/>
+    <addaction name="actionConfigDefaultAudio"/>
     <addaction name="actionClassic_audio_mode"/>
     <addaction name="actionExperimental_audio_mode"/>
     <addaction name="actionUse_SDL_audio"/>
@@ -459,7 +460,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Default audio mode</string>
+    <string>Audio mode: Mediaplayer</string>
+   </property>
+   <property name="toolTip">
+    <string>Use Qt mediaplayer audio output.</string>
    </property>
   </action>
   <action name="actionOpen_FxItem">
@@ -511,7 +515,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Use SDL audio</string>
+    <string>Audio mode: Use SDL2</string>
    </property>
   </action>
   <action name="actionClassic_audio_mode">
@@ -519,7 +523,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Classic audio mode</string>
+    <string>Audio mode: I/O Device</string>
    </property>
   </action>
   <action name="actionConsolidate_Project">
@@ -563,6 +567,14 @@
   <action name="actionTest">
    <property name="text">
     <string>Test</string>
+   </property>
+  </action>
+  <action name="actionConfigDefaultAudio">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default Audio output mode</string>
    </property>
   </action>
  </widget>

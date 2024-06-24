@@ -247,7 +247,7 @@ bool TimeLineCurve::hasOverLayContextMenu() const
 	return true;
 }
 
-QList<TimeLineContextMenuEntry> TimeLineCurve::getOverlayContextMenu(const QPointF &scenePos)
+QList<TimeLineContextMenuEntry> TimeLineCurve::getOverlayContextMenu(const QPointF &/*scenePos*/)
 {
 	QList<TimeLineContextMenuEntry> list;
 

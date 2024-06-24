@@ -238,8 +238,9 @@ void MixerGroup::resizeEvent(QResizeEvent *event)
 	}
 }
 
-void MixerGroup::dragEnterEvent(QDragEnterEvent *event)
+void MixerGroup::dragEnterEvent(QDragEnterEvent *qevent)
 {
+	PDragEnterEvent* event = static_cast<PDragEnterEvent*>(qevent);
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 
@@ -286,8 +287,9 @@ void MixerGroup::dragEnterEvent(QDragEnterEvent *event)
 	}
 }
 
-void MixerGroup::dragMoveEvent(QDragMoveEvent *event)
+void MixerGroup::dragMoveEvent(QDragMoveEvent *qevent)
 {
+	PDragEnterEvent* event = static_cast<PDragEnterEvent*>(qevent);
 	const QMimeData * mime = event->mimeData();
 	const ExtMimeData * extmime = qobject_cast<const ExtMimeData*>(mime);
 

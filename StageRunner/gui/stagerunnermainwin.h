@@ -111,7 +111,7 @@ public slots:
 	void openFxPropertyEditor(FxItem *item);
 	void openFxItemPanel(FxItem *fx);
 	void applyUserSettingsToGui(UserSettings *set);
-	void guiSetAudioOutput(AUDIO::AudioOutputType type);
+	AUDIO::AudioOutputType guiSetAudioOutput(AUDIO::AudioOutputType type);
 	void addRecentProject(const QString &pathname);
 
 private slots:
@@ -139,8 +139,9 @@ private slots:
 	void on_actionInitialize_plugins_DMX_triggered();
 	void on_actionInfo_triggered();
 	void on_addFxSeqButton_clicked();
-	void on_actionExperimental_audio_mode_triggered(bool checked);
+	void on_actionConfigDefaultAudio_triggered(bool checked);
 	void on_actionClassic_audio_mode_triggered(bool checked);
+	void on_actionExperimental_audio_mode_triggered(bool checked);
 	void on_actionUse_SDL_audio_triggered(bool arg1);
 	void on_actionOpen_FxItem_triggered();
 	void on_saveTemplatesButton_clicked();
@@ -158,8 +159,8 @@ private slots:
 	void on_actionFullscreen_triggered(bool checked);
 	void on_actionDelete_FX_Item_triggered();
 	void on_actionClose_video_window_triggered();
-
 	void on_showFontsButton_clicked();
+
 
 private:
 	void init();

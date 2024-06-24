@@ -105,15 +105,20 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 		// qDebug() << a->menu()->objectName();
 	}
 
+	AudioControl *ac = myapp->unitAudio;
 
-#ifndef USE_SDL
-	QAction *act = findChild<QAction*>("actionUse_SDL_audio");
-	if (act) {
-		delete act;
-        actionUse_SDL_audio = nullptr;
-		myapp->userSettings->pUseSDLAudio = false;
+	if (!ac->isAudioOutAvailable(OUT_SDL2)) {
+		delete actionUse_SDL_audio;
+		actionUse_SDL_audio = nullptr;
 	}
-#endif
+	if (!ac->isAudioOutAvailable(OUT_DEVICE)) {
+		delete actionClassic_audio_mode;
+		actionClassic_audio_mode = nullptr;
+	}
+	if (!ac->isAudioOutAvailable(OUT_MEDIAPLAYER)) {
+		delete actionExperimental_audio_mode;
+		actionExperimental_audio_mode = nullptr;
+	}
 
 	fxListWidget->setFxList(appCentral->project->mainFxList());
 
@@ -557,16 +562,37 @@ void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
 	audioCtrlGroup->setVolumeDialVisibleFromMask(set->pVolumeDialMask);
 }
 
-void StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
+AUDIO::AudioOutputType StageRunnerMainWin::guiSetAudioOutput(AudioOutputType type)
 {
 	if (actionExperimental_audio_mode)
-		actionExperimental_audio_mode->setChecked(type == OUT_MEDIAPLAYER || type == OUT_NONE);
-#ifdef USE_SDL
+		actionExperimental_audio_mode->setChecked(false);
 	if (actionUse_SDL_audio)
-		actionUse_SDL_audio->setChecked(type == OUT_SDL2);
-#endif
+		actionUse_SDL_audio->setChecked(false);
 	if (actionClassic_audio_mode)
-		actionClassic_audio_mode->setChecked(type == OUT_DEVICE);
+		actionClassic_audio_mode->setChecked(false);
+	actionConfigDefaultAudio->setChecked(false);
+
+	if (!AppCentral::ref().unitAudio->isAudioOutAvailable(type)) {
+		type = OUT_NONE;		// this is default type
+		actionConfigDefaultAudio->setChecked(true);
+	}
+	else if (type == OUT_NONE) {
+		actionConfigDefaultAudio->setChecked(true);
+	}
+	else if (type == OUT_DEVICE && actionClassic_audio_mode) {
+		actionClassic_audio_mode->setChecked(true);
+	}
+	else if (type == OUT_MEDIAPLAYER && actionExperimental_audio_mode) {
+		actionExperimental_audio_mode->setChecked(true);
+	}
+	else if (type == OUT_SDL2 && actionUse_SDL_audio) {
+		actionUse_SDL_audio->setChecked(true);
+	}
+	else {
+		type = OUT_NONE;
+	}
+
+	return type;
 }
 
 /**
@@ -1326,30 +1352,30 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 }
 
 
-void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
+void StageRunnerMainWin::on_actionConfigDefaultAudio_triggered(bool checked)
 {
 	if (checked) {
-		appCentral->setAudioOutputType(OUT_MEDIAPLAYER);
-		actionClassic_audio_mode->setChecked(false);
-#ifdef USE_SDL
-		if (actionUse_SDL_audio)
-			actionUse_SDL_audio->setChecked(false);
-#endif
+		AudioOutputType audioType = guiSetAudioOutput(OUT_NONE);
+		appCentral->setAudioOutputType(audioType);
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	}
-
 }
+
 
 void StageRunnerMainWin::on_actionClassic_audio_mode_triggered(bool checked)
 {
 	if (checked) {
-		appCentral->setAudioOutputType(OUT_DEVICE);
-		if (actionExperimental_audio_mode)
-			actionExperimental_audio_mode->setChecked(false);
-#ifdef USE_SDL
-		if (actionUse_SDL_audio)
-			actionUse_SDL_audio->setChecked(false);
-#endif
+		AudioOutputType audioType = guiSetAudioOutput(OUT_DEVICE);
+		appCentral->setAudioOutputType(audioType);
+		appCentral->unitAudio->reCreateMediaPlayerInstances();
+	}
+}
+
+void StageRunnerMainWin::on_actionExperimental_audio_mode_triggered(bool checked)
+{
+	if (checked) {
+		AudioOutputType audioType = guiSetAudioOutput(OUT_MEDIAPLAYER);
+		appCentral->setAudioOutputType(audioType);
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	}
 }
@@ -1357,10 +1383,8 @@ void StageRunnerMainWin::on_actionClassic_audio_mode_triggered(bool checked)
 void StageRunnerMainWin::on_actionUse_SDL_audio_triggered(bool arg1)
 {
 	if (arg1) {
-		appCentral->setAudioOutputType(OUT_SDL2);
-		if (actionExperimental_audio_mode)
-			actionExperimental_audio_mode->setChecked(false);
-		actionClassic_audio_mode->setChecked(false);
+		AudioOutputType audioType = guiSetAudioOutput(OUT_SDL2);
+		appCentral->setAudioOutputType(audioType);
 		appCentral->unitAudio->reCreateMediaPlayerInstances();
 	};
 }

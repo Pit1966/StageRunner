@@ -172,6 +172,7 @@ public:
 	static QString moduleErrorText(MODUL_ERROR e);
 
 	// Audio
+	void setAudioOutputType(AUDIO::AudioOutputType type);
 	AUDIO::AudioOutputType usedAudioOutputType() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 	bool isLogarithmicVolume() const;
@@ -200,7 +201,6 @@ public slots:
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);
-	void setAudioOutputType(AUDIO::AudioOutputType type);
 	void setFFTAudioChannelMask(qint32 mask);
 
 	void testSetDmxChannel(int val, int channel);

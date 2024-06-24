@@ -395,6 +395,84 @@ bool AudioControl::isVideoWidgetVisible(QWidget ** videoWid) const
 	return false;
 }
 
+QString AudioControl::audioOutTypeToString(AUDIO::AudioOutputType type)
+{
+	switch (type) {
+	case OUT_NONE:
+		return "Default";
+	case OUT_DEVICE:
+		return "I/O Audio Device";
+	case OUT_MEDIAPLAYER:
+		return "Mediaplayer";
+	case OUT_SDL2:
+		return "SDL2";
+	default:
+		return "Unknown audio output";
+	}
+}
+
+bool AudioControl::isAudioOutAvailable(AUDIO::AudioOutputType type)
+{
+#ifdef IS_QT6
+	switch (type) {
+	case OUT_NONE:
+		return true;
+	case OUT_DEVICE:
+		return true;
+	case OUT_MEDIAPLAYER:
+		return false;
+	case OUT_SDL2:
+#	ifdef USE_SDL
+		return true;
+#	else
+		return false;
+#	endif
+	default:
+		return false;
+	}
+#else
+	switch (type) {
+	case OUT_NONE:
+		return true;
+	case OUT_DEVICE:
+		return true;
+	case OUT_MEDIAPLAYER:
+		return true;
+	case OUT_SDL2:
+#	ifdef USE_SDL
+		return true;
+#	else
+		return false;
+#	endif
+	default:
+		return false;
+	}
+#endif
+}
+
+AudioOutputType AudioControl::defaultAudioOut()
+{
+#ifdef IS_QT6
+	// not optimal for Linux, cause of stop audio and swithch paused to stopped issue
+	// but works well on mac.
+	return AUDIO::OUT_DEVICE;
+
+#else
+
+#	ifdef IS_MAC
+#		ifdef USE_SDL
+			return AUDIO::OUT_SDL2
+#		else
+			return AUDIO::OUT_MEDIAPLAYER
+#		endif
+#	else
+		return AUDIO::OUT_DEVICE;
+#	endif
+
+#endif
+}
+
+
 void AudioControl::run()
 {
 	if (m_initInThread)
@@ -1240,13 +1318,24 @@ void AudioControl::createMediaPlayInstances()
 {
 	UserSettings *set = myApp.userSettings;
 	AudioOutputType outputType = myApp.usedAudioOutputType();
-	LOGTEXT(tr("Create media player instances %1").arg(m_initInThread?"in thread":"from main"));
+	if (outputType == AUDIO::OUT_NONE) {
+		outputType = defaultAudioOut();
+	}
+	else if (!isAudioOutAvailable(outputType)) {
+		LOGTEXT(tr("<font color=red>Warning!</font> Audio output type %1 not available!").arg(audioOutTypeToString(outputType)));
+		outputType = defaultAudioOut();
+		LOGTEXT(tr("<font color=red>Warning!</font> Switch to default audio type %1").arg(audioOutTypeToString(outputType)));
+	}
+
+	LOGTEXT(tr("Create media player instances of type %1 %2")
+			.arg(audioOutTypeToString(outputType),
+				 m_initInThread ? "in thread" : "from main"));
 
 	// This is for audio use
 	bool errmsg = false;
 	for (int t=0; t<used_slots; t++) {
-		QString audiodev = set->pSlotAudioDevice[t];
-		if (!audiodev.isEmpty() && audiodev != "system default") {
+		QString audioDevName = set->pSlotAudioDevice[t];
+		if (!audioDevName.isEmpty() && audioDevName != "system default") {
 			if (outputType != OUT_DEVICE) {
 				if (!errmsg)
 					POPUPERRORMSG("Init audio", tr("There is a dedicated audio device specified for audio slot %1,\n"
@@ -1257,22 +1346,23 @@ void AudioControl::createMediaPlayInstances()
 			} else {
 				bool ok;
 #ifdef IS_QT6
-				QAudioDevice dev = AudioIODevice::getAudioDevice(audiodev, &ok);
+				QAudioDevice dev = AudioIODevice::getAudioDevice(audioDevName, &ok);
 #else
-				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audiodev, &ok);
+				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audioDevName, &ok);
 #endif
 				if (!ok) {
 					if (!errmsg)
 						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
 													  "Configuration for audio slot %2 failed.\n"
 													  "Multi device output not possible! Default audio from system will be used.")
-									  .arg(audiodev).arg(t+1));
+									  .arg(audioDevName).arg(t+1));
 					errmsg = true;
 					myApp.setModuleError(AppCentral::E_AUDIO_DEVICE_NOT_FOUND);
 				}
 			}
 		}
-		AudioSlot *slot = new AudioSlot(this, t, outputType, audiodev);
+
+		AudioSlot *slot = new AudioSlot(this, t, outputType, audioDevName);
 		audioSlots.append(slot);
 		AudioErrorType aerror = slot->lastAudioError();
 		if (aerror == AUDIO_ERR_DECODER) {
