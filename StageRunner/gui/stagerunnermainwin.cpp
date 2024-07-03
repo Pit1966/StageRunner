@@ -76,6 +76,7 @@
 #include <QErrorMessage>
 #include <QTextEdit>
 #include <QFont>
+#include <QSplitterHandle>
 
 using namespace PS_TL;
 
@@ -325,6 +326,14 @@ void StageRunnerMainWin::restore_window()
 		restoreGeometry(set.value("MainWinGeometry").toByteArray());
 		restoreState(set.value("MainWinDocks").toByteArray());
 		resize(set.value("MainWinSize").toSize());
+		if (set.contains("SplitterPos")) {
+			const QStringList s = set.value("SplitterPos").toString().split(';', Qt::SkipEmptyParts);
+			QList<int>sizes;
+			for (const QString &e : s) {
+				sizes.append(e.toInt());
+			}
+			splitter->setSizes(sizes);
+		}
 	}
 	set.endGroup();
 
@@ -952,9 +961,12 @@ void StageRunnerMainWin::on_actionConsolidate_Project_triggered()
 
 void StageRunnerMainWin::on_actionLoad_Project_triggered()
 {
+	QString curpath = appCentral->userSettings->pLastProjectLoadPath;
+	if (curpath.isEmpty())
+		curpath = QDir::homePath();
 
 	QString path = QFileDialog::getOpenFileName(this,tr("Choose Project")
-												,appCentral->userSettings->pLastProjectLoadPath
+												,curpath
 												,tr("StageRunner projects (*.srp);;FxMaster projects (*.fxm);;All files (*)"));
 	if (path.size())
 		loadProject(path);
@@ -1173,6 +1185,14 @@ void StageRunnerMainWin::closeEvent(QCloseEvent *event)
 	set.setValue("MainWinGeometry",saveGeometry());
 	set.setValue("MainWinSize",size());
 	set.setValue("MainWinDocks",saveState());
+
+	QString s;
+	for (int w : splitter->sizes()) {
+		s += QString::number(w);
+		s += ';';
+	}
+
+	set.setValue("SplitterPos", s);
 	set.endGroup();
 
 	bool videoWinEnabled = appCentral->unitAudio->videoWidget() && appCentral->unitAudio->videoWidget()->isVisible();

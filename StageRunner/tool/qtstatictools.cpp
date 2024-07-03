@@ -36,10 +36,15 @@ QtStaticTools::QtStaticTools()
 int QtStaticTools::stringToKey(const QString &str)
 {
 	QKeySequence seq(str);
-	uint keyCode = 0;
+    int keyCode = 0;
 
-	if(seq.count() >= 1) {
+    if (seq.count() >= 1) {
+#ifdef IS_QT5
 		keyCode = seq[0];
+#else
+        QKeyCombination keycomb = seq[0];
+        keyCode = keycomb.toCombined();
+#endif
 	}
 
 	return keyCode;
