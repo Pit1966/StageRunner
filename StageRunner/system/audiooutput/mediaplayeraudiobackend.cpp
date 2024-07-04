@@ -26,6 +26,9 @@
 #include "log.h"
 #include "audioslot.h"
 
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+
 #include <QAudioProbe>
 #include <QApplication>
 
@@ -33,12 +36,15 @@ using namespace AUDIO;
 
 MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 	: AudioPlayer(audioChannel)
-	, m_mediaPlayer(new QMediaPlayer())
-	, m_audioProbe(new QAudioProbe())
+	, m_mediaPlayer(nullptr)
+	, m_audioProbe(nullptr)
 	, m_currentMediaPlayerState(QMediaPlayer::StoppedState)
 	, m_currentAudioStatus(AUDIO_IDLE)
 {
 #ifndef IS_MAC
+	m_mediaPlayer = new QMediaPlayer(this);
+	m_audioProbe = new QAudioProbe();
+
 	if (m_audioProbe->setSource(m_mediaPlayer)) {
 		connect(m_audioProbe,SIGNAL(audioBufferProbed(QAudioBuffer)),this,SLOT(calculateVuLevel(QAudioBuffer)));
 	} else {

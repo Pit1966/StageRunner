@@ -58,7 +58,7 @@
 
 
 AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audioEngineType, const QString &devName)
-	: QObject(parent)
+	: QObject(/*parent*/)				// audiothread
 	, slotNumber(pSlotNumber)
 	, m_audioCtrlUnit(parent)
 	, m_audioPlayer(nullptr)
@@ -394,7 +394,9 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 	m_fadeHelpTimeLine.setDuration(time_ms);
 
 	// and start the time line ticker
-	m_fadeHelpTimeLine.start();
+	// timers can must be started from thread they belongs to so we use the invoke trick,
+	// which will send a signal if we are in another thread instead of calling m_fadeHelpTimeLine.start() directly
+	QMetaObject::invokeMethod(&m_fadeHelpTimeLine, "start");
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
 			.arg(slotNumber+1).arg(m_currentFx->name()).arg(time_ms));
 

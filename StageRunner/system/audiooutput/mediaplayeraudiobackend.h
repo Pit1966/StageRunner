@@ -33,6 +33,7 @@
 
 
 class QAudioProbe;
+class AudioControl;
 
 class MediaPlayerAudioBackend : public AudioPlayer
 {

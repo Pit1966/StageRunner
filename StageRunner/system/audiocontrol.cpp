@@ -66,25 +66,43 @@
 
 AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 	: QThread()
-	,myApp(app_central)
-	,m_initInThread(initInThread)
-	,used_slots(MAX_AUDIO_SLOTS)
-	,slotMutex(new QRecursiveMutex())
+	, myApp(app_central)
+	, m_initInThread(initInThread)
+	, m_isInThread(false)
+	, used_slots(MAX_AUDIO_SLOTS)
+	, slotMutex(new QRecursiveMutex())
 {
 	init();
 	getAudioDevices();
 
+	qDebug() << "Init AudioControl in thread" << thread() << "current" << QThread::currentThread();
 	if (!m_initInThread)
 		createMediaPlayInstances();
 
+	// create video widget and player always in main thread
+	createVideoWidget();
+	m_isInThread = m_initInThread;
+
 	// Audio Thread starten
 	start();
+
 	if (!isRunning()) {
 		DEBUGERROR("%s: Could not start audio control thread",Q_FUNC_INFO);
-		m_isValid = false;
 	} else {
-		m_isValid = true;
+		// wait for thread startup finished
+		ExtElapsedTimer wait;
+		while (wait.elapsed() < 500) {
+			if (m_isValid)
+				break;
+		}
 	}
+
+	// QObject *obj = QApplication::instance();
+	// const QList<QObject*> objs = obj->children();
+
+	// for (const QObject *o : objs) {
+	// 	qDebug() << "o" << o;
+	// }
 }
 
 AudioControl::~AudioControl()
@@ -96,6 +114,8 @@ AudioControl::~AudioControl()
 
 	if (!m_initInThread)
 		destroyMediaPlayInstances();
+
+	destroyVideoWidget();
 
 	delete slotMutex;
 }
@@ -110,20 +130,36 @@ void AudioControl::reCreateMediaPlayerInstances()
 		wait(500);
 	}
 
+
 	if (!m_initInThread) {
 		destroyMediaPlayInstances();
 		createMediaPlayInstances();
+	}
+	else {
+		destroyVideoWidget();
+		createVideoWidget();
 	}
 
 	if (!isRunning()) {
 		start();
 		if (isRunning()) {
 			m_isValid = true;
+			m_isInThread = m_initInThread;
 		}
 	} else {
 		DEBUGERROR("Restart of audio control failed!");
 	}
+}
 
+void AudioControl::setAudioInThreadEnabled(bool state)
+{
+	if (state != m_initInThread) {
+		m_initInThread = state;
+		if (m_initInThread != m_isInThread) {
+			LOGTEXT(tr("Audio in background task was %1. Audio must be restarted!")
+					.arg(m_initInThread ? tr("activated") : tr("deactivated")));
+		}
+	}
 }
 
 void AudioControl::getAudioDevices()
@@ -324,6 +360,10 @@ bool AudioControl::selectVideoSlot(int slotnum)
 void AudioControl::setFFTAudioChannelFromMask(qint32 mask)
 {
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		if (t >= audioSlots.size()) {
+			LOGERROR("Slots not initialized!");
+			break;
+		}
 		if (mask & (1<<t)) {
 			audioSlots[t]->setFFTEnabled(true);
 		} else {
@@ -475,15 +515,25 @@ AudioOutputType AudioControl::defaultAudioOut()
 
 void AudioControl::run()
 {
-	if (m_initInThread)
+	if (m_initInThread) {
 		createMediaPlayInstances();
+
+		// test test test
+		// qDebug() << "-------- test ---- mediaplayer -----";
+		// qDebug() << "application" << QApplication::instance();
+		// QMediaPlayer *mp = new QMediaPlayer();
+	}
 
 	LOGTEXT(tr("Audio control is running"));
 
+	m_isValid = true;
+
 	exec();
 
+	m_isValid = false;
 	if (m_initInThread)
 		destroyMediaPlayInstances();
+
 
 	LOGTEXT(tr("Audio control finished"));
 }
@@ -1070,6 +1120,10 @@ void AudioControl::setMasterVolume(int vol)
 
 	// And now update the volume settings in all active audioslots
 	for (int t=0; t<used_slots; t++) {
+		if (t >= audioSlots.size()) {
+			LOGERROR(QString("Only %1 of %2 audio slots available!").arg(audioSlots.size()).arg(used_slots));
+			break;
+		}
 		audioSlots[t]->setMasterVolume(vol);
 	}
 }
@@ -1330,6 +1384,7 @@ void AudioControl::createMediaPlayInstances()
 	LOGTEXT(tr("Create media player instances of type %1 %2")
 			.arg(audioOutTypeToString(outputType),
 				 m_initInThread ? "in thread" : "from main"));
+	qDebug() << "Create mediaplayer in thread" << thread() << "current" << QThread::currentThread();
 
 	// This is for audio use
 	bool errmsg = false;
@@ -1378,15 +1433,21 @@ void AudioControl::createMediaPlayInstances()
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
 
 	// This is for video playback
-	m_videoWid = new PsVideoWidget;
-	m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
-	// m_videoWid->setVideoPlayer(m_videoPlayer);
+	// moved to createVideoWidgets
 
 #ifdef USE_SDL
 	Mix_AllocateChannels(used_slots);
 	Mix_ChannelFinished(SDL2AudioBackend::sdlChannelDone);
 	Mix_SetPostMix(SDL2AudioBackend::sdlPostMix, nullptr);
 #endif
+}
+
+void AudioControl::createVideoWidget()
+{
+	if (!m_videoWid) {
+		m_videoWid = new PsVideoWidget;
+		m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+	}
 }
 
 void AudioControl::destroyMediaPlayInstances()
@@ -1397,7 +1458,10 @@ void AudioControl::destroyMediaPlayInstances()
 		}
 		delete audioSlots.takeFirst();
 	}
+}
 
+void AudioControl::destroyVideoWidget()
+{
 	delete m_videoWid;
 	m_videoWid = nullptr;
 	delete m_videoPlayer;

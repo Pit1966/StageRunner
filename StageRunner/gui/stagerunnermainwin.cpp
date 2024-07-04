@@ -1251,7 +1251,6 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateButtonStyles(QString)));
 	connect(&setup,SIGNAL(setupChanged(UserSettings*)),this,SLOT(applyUserSettingsToGui(UserSettings*)));
 
-
 	setup.show();
 	setup.exec();
 

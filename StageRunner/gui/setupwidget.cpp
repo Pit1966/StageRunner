@@ -120,12 +120,14 @@ void SetupWidget::copy_settings_to_gui()
 	dialKnobStyleCombo->addItem("QSynth Dial Classic");
 	dialKnobStyleCombo->addItem("QSynth Dial Peppino");
 	idx = dialKnobStyleCombo->findText(set->pDialKnobStyle);
-	if (idx >= 0) dialKnobStyleCombo->setCurrentIndex(idx);
+	if (idx >= 0)
+		dialKnobStyleCombo->setCurrentIndex(idx);
 
 	noInterfaceFeedbackCheck->setChecked(set->pNoInterfaceDmxFeedback);
 	prohibitAudioDoubleStartCheck->setChecked(set->pProhibitAudioDoubleStart);
 	useLogVolumeDefaultCheck->setChecked(set->pLogarithmicVolDials);
 	useLogVolumeProjectCheck->setChecked(myapp->project->pLogarithmicVol);
+	audioInTaskCheck->setChecked(set->pIsAudioInThread);
 	reactivateAudioTimeSpin->setValue(set->pAudioAllowReactivateTime);
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
@@ -182,6 +184,7 @@ void SetupWidget::copy_gui_to_settings()
 	set->pNoInterfaceDmxFeedback = noInterfaceFeedbackCheck->isChecked();
 	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();
 	set->pLogarithmicVolDials = useLogVolumeDefaultCheck->isChecked();
+	set->pIsAudioInThread = audioInTaskCheck->isChecked();
 	myapp->project->pLogarithmicVol = useLogVolumeProjectCheck->isChecked();
 	set->pAudioAllowReactivateTime = reactivateAudioTimeSpin->value();
 
@@ -242,6 +245,7 @@ void SetupWidget::on_okButton_clicked()
 	}
 	emit setupChanged(myapp->userSettings);
 
+	AppCentral::ref().unitAudio->setAudioInThreadEnabled(myapp->userSettings->pIsAudioInThread);
 	if (m_restartAudioSlotsOnExit)
 		AppCentral::ref().unitAudio->reCreateMediaPlayerInstances();
 

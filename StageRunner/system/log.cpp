@@ -77,7 +77,7 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     if (debug)
 		srcContext = QString("file: %1 line: %2 : %3").arg(context.file).arg(context.line).arg(context.function);
 
-	if (localMsg.contains("Cannot create"))
+	if (localMsg.contains("Cannot create") || localMsg.contains("Timers"))
 		fprintf(stderr, "Catch: %s\n",localMsg.constData());
 	else if (localMsg.contains("libpng"))
 		fprintf(stderr, "Catch: %s\n",localMsg.constData());

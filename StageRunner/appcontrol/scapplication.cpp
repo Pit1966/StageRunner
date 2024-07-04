@@ -29,6 +29,7 @@
 
 #include <QApplication>
 #include <QFontDatabase>
+#include <QThread>
 // #include <typeinfo>
 
 ScApplication::ScApplication(int &argc, char **argv)
@@ -40,6 +41,8 @@ ScApplication::ScApplication(int &argc, char **argv)
 
 	mySignalCatcher = new UnixSignalCatcher;
 #endif
+
+	QThread::currentThread()->setObjectName("StageRunnerMain");
 
 	QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
 	QFontDatabase::addApplicationFont(":/fonts/DejaVuSans.ttf");

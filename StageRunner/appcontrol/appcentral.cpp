@@ -938,7 +938,7 @@ void AppCentral::init()
 	universeLayout = new DmxUniverseProperty;
 	pluginCentral = new IOPluginCentral;
 	unitVideo = new VideoControl(*this);
-	unitAudio = new AudioControl(*this,false);		// do not init in thread.
+	unitAudio = new AudioControl(*this, userSettings->pIsAudioInThread);
 	unitLight = new LightControl(*this);
 	tcpServer = new NetServer(*this);
 

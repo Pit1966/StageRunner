@@ -63,8 +63,9 @@ public:
 protected:
 	QList<AudioSlot*> audioSlots;
 	int m_masterVolume;
-	bool m_isValid;
+	volatile bool m_isValid;
 	bool m_initInThread;
+	bool m_isInThread;
 #ifdef IS_QT6
 	QAudioDevice m_extraDevice;
 	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
@@ -92,12 +93,12 @@ private:
 
 	QRecursiveMutex *slotMutex;
 
-
 public:
 	AudioControl(AppCentral &app_central, bool initInThread);
 	~AudioControl();
 
 	void reCreateMediaPlayerInstances();
+	void setAudioInThreadEnabled(bool state);
 
 	void getAudioDevices();
 	bool isFxAudioActive(FxAudioItem *fxa);
@@ -181,7 +182,9 @@ public slots:
 private:
 	void init();
 	void createMediaPlayInstances();
+	void createVideoWidget();
 	void destroyMediaPlayInstances();
+	void destroyVideoWidget();
 
 signals:
 	void audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
