@@ -52,8 +52,9 @@ class VideoPlayer;
 class PsVideoWidget;
 class FxClipItem;
 class FxItem;
+class AudioWorker;
 
-class AudioControl : public QThread
+class AudioControl : public QObject
 {
 	Q_OBJECT
 
@@ -62,10 +63,10 @@ public:
 
 protected:
 	QList<AudioSlot*> audioSlots;
-	int m_masterVolume;
-	volatile bool m_isValid;
-	bool m_initInThread;
-	bool m_isInThread;
+	int m_masterVolume			= 0;
+	volatile bool m_isValid		= false;
+	bool m_initInThread			= false;
+	bool m_isInThread			= false;
 #ifdef IS_QT6
 	QAudioDevice m_extraDevice;
 	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
@@ -73,11 +74,15 @@ protected:
 	QAudioDeviceInfo m_extraDevice;
 	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
 #endif
-	QStringList m_audioDeviceNames;						///< A list of audio devices by names
+	QStringList m_audioDeviceNames;							///< A list of audio devices by names
 
 	// Video player stuff (as hyper extension)
-	VideoPlayer *m_videoPlayer;
-	PsVideoWidget *m_videoWid;
+	VideoPlayer *m_videoPlayer		= nullptr;
+	PsVideoWidget *m_videoWid		= nullptr;
+
+	// audio control (threaded)
+	AudioWorker *m_audioWorker		= nullptr;
+	QThread m_audioThread;
 
 private:
 	enum {
@@ -89,13 +94,17 @@ private:
 	};
 	int dmx_audio_ctrl_status[MAX_AUDIO_SLOTS];
 	int dmx_audio_ctrl_last_vol[MAX_AUDIO_SLOTS];
-	int used_slots;
+	int m_usedSlots		= 0;
 
 	QRecursiveMutex *slotMutex;
 
 public:
 	AudioControl(AppCentral &app_central, bool initInThread);
 	~AudioControl();
+
+	bool createAudioWorker();
+	AudioWorker *audioWorker();
+	QThread *audioThread();
 
 	void reCreateMediaPlayerInstances();
 	void setAudioInThreadEnabled(bool state);
@@ -130,7 +139,7 @@ public:
 	static AUDIO::AudioOutputType defaultAudioOut();
 
 private:
-	void run();
+	// void run();
 	bool _startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 	bool _startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 #ifdef USE_SDL
@@ -141,6 +150,7 @@ private:
 private slots:
 	void _vuLevelChangedReceiver(int slotnum, qreal left, qreal right);
 	void _fftSpectrumChangedReceiver(int slotnum, FrqSpectrum *spec);
+	void _audioWorkerFinished();
 
 public slots:
 	bool startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
@@ -192,6 +202,8 @@ signals:
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void fftSpectrumChanged(int slotnum, FrqSpectrum * spec);
 	void masterVolumeChanged(int vol);
+
+	friend class AudioWorker;
 };
 
 #endif // AUDIOCONTROL_H

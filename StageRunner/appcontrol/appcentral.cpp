@@ -23,7 +23,8 @@
 
 #include "log.h"
 #include "appcentral.h"
-#include "audiocontrol.h"
+#include "appcontrol/audiocontrol.h"
+#include "system/audioworker.h"
 #include "fxcontrol.h"
 #include "fx/fxlist.h"
 #include "fx/fxitem.h"
@@ -524,6 +525,16 @@ bool AppCentral::isLogarithmicVolume() const
 		return project->pLogarithmicVol;
 
 	return userSettings->pLogarithmicVolDials;
+}
+
+QObject *AppCentral::audioWorker()
+{
+	return unitAudio->audioWorker();
+}
+
+QThread *AppCentral::audioThread()
+{
+	return unitAudio->audioThread();
 }
 
 void AppCentral::closeVideoWidget()

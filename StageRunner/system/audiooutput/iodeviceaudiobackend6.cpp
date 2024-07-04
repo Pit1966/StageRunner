@@ -38,9 +38,7 @@ IODeviceAudioBackend::IODeviceAudioBackend(AudioSlot &audioChannel, const QStrin
 	, m_audioSink(nullptr)
 	, m_currentOutputState(QAudio::StoppedState)
 	, m_currentAudioStatus(AUDIO_NO_STATE)
-	, m_suspendToStopWanted(false)
 {
-	// No AudioIODevice SoundOutputSupport for MAC OS X
 	m_audioIODev = new AudioIODevice(AudioFormat::defaultFormat(), this);
 	if (m_audioIODev->audioError()) {
 		m_audioError = m_audioIODev->audioError();
@@ -115,13 +113,15 @@ void IODeviceAudioBackend::start(int loops)
 
 void IODeviceAudioBackend::stop()
 {
+	// workaround for qt6 bug (at least on linux) where
+	// thread freezes, if switched from suspended to stopped directly
+	if (m_audioSink->state() == QtAudio::SuspendedState) {
+		m_audioSink->reset();
+		m_audioSink->resume();
+	}
+
 	m_audioSink->stop();
 	m_audioIODev->stop();
-
-	//stop audio bei setting available byte count in device to 0
-	//m_audioIODev->softStop();
-
-	// m_suspendToStopWanted = true;
 }
 
 void IODeviceAudioBackend::pause(bool state)
@@ -209,13 +209,6 @@ bool IODeviceAudioBackend::isFFTEnabled() const
 	return m_audioIODev->isFFTEnabled();
 }
 
-void IODeviceAudioBackend::_stopMySink()
-{
-	DEVELTEXT("_stopMySink");
-	m_audioSink->stop();
-	m_audioIODev->stop();
-}
-
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
@@ -231,13 +224,7 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 		audiostatus = AUDIO_IDLE;
 		break;
 	case QAudio::SuspendedState:
-		if (m_suspendToStopWanted) {
-			m_suspendToStopWanted = false;
-			qDebug() << "QAudioSink suspended -> stopped ";
-			QMetaObject::invokeMethod(this, "_stopMySink", Qt::QueuedConnection);
-		} else {
-			audiostatus = AUDIO_PAUSED;
-		}
+		audiostatus = AUDIO_PAUSED;
 		break;
 	case QAudio::StoppedState:
 		if (!m_audioIODev->isDecodingFinished()) {

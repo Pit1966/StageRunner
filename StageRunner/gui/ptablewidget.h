@@ -51,7 +51,7 @@ public:
 	void setDropAllowedIndices(QList<int>list);
 
 protected:
-	Qt::DropActions supportedDropActions() const;
+	Qt::DropActions supportedDropActions() const override;
 
 private:
 	void dragEnterEvent(QDragEnterEvent *qevent) override;

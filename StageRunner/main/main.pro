@@ -168,6 +168,7 @@ SOURCES += \
 	../system/audiooutput/audioformat.cpp \
 	../system/audiooutput/audioplayer.cpp \
 	../system/audioslot.cpp \
+	../system/audioworker.cpp \
 	../system/convtools.cpp \
 	../system/dmx/fixture.cpp \
 	../system/dmxchannel.cpp \
@@ -293,6 +294,7 @@ HEADERS  += \
 	../system/audiooutput/audioformat.h \
 	../system/audiooutput/audioplayer.h \
 	../system/audioslot.h \
+	../system/audioworker.h \
 	../system/commandsystem.h \
 	../system/convtools.h \
 	../system/dmx/fixture.h \

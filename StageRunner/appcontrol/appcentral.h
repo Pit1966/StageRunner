@@ -176,6 +176,8 @@ public:
 	AUDIO::AudioOutputType usedAudioOutputType() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 	bool isLogarithmicVolume() const;
+	QObject * audioWorker();
+	QThread * audioThread();
 
 	// Sytem
 	qint64 uptimeMs() const {return m_uptime.elapsed();}

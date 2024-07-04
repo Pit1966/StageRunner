@@ -316,6 +316,8 @@ void PsVideoWidget::closeOverlays()
 		m_overlay[i]->close();
 		m_currentPicPaths[i].clear();
 	}
+
+	m_isOverlayVisible = false;
 }
 
 void PsVideoWidget::mouseDoubleClickEvent(QMouseEvent *)
@@ -426,6 +428,8 @@ void PsVideoWidget::closeEvent(QCloseEvent *event)
 		m_myPlayer->clearViewState();
 	}
 
+	m_isOverlayVisible = false;
+
 #if QT_VERSION >= 0x050600
 	if (m_hasOverlays)
 		hideOverlays();
@@ -452,8 +456,12 @@ void PsVideoWidget::paintEvent(QPaintEvent */*event*/)
 	//	gradient.setColorAt(1,QColor::fromRgbF(0.27f,0.35f,0.54f,0.9f));
 	//	painter.setBrush(gradient);
 
+	// if (m_myPlayer->viewState() == VIDEO::VIEW_BLACK) {
+	// 	painter.setBrush(Qt::blue);
+	// } else {
+
 	painter.setBrush(Qt::black);
-	painter.drawRect(0, 0, width(), height());
+	painter.drawRect(-1, -1, width()+2, height()+2);
 
 	// qDebug() << "paintEvent";
 }

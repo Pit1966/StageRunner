@@ -114,8 +114,9 @@ signals:
 	void audioCtrlMsgEmitted(const AUDIO::AudioCtrlMsg &msg);
 	void viewStateChanged(int viewState, int oldViewState);
 
-	void endReached(qint64 ms);
+	// void endReached(qint64 ms);
 	void seekMe(qint64 ms);
+	void fadeToBlackFinished();
 };
 
 #endif // VIDEOPLAYER_H

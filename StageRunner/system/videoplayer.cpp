@@ -35,9 +35,9 @@
 
 using namespace VIDEO;
 
-VideoPlayer::VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid)
+VideoPlayer::VideoPlayer(VideoControl *unitVideo, PsVideoWidget *videoWid)
 	: QMediaPlayer()
-	, m_videoCtrl(parent)
+	, m_videoCtrl(unitVideo)
 	, m_videoWid(videoWid)
 	, loopTarget(1)
 	, loopCnt(1)
@@ -732,6 +732,10 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 			if (FxItem::exists(m_currentFxClipItem) && m_currentFxClipItem) {
 				LOGTEXT(tr("<font color=green>VIDEO fade out end</font> <b>%1</b>").arg(m_currentFxClipItem->fileName()));
 				m_currentFxClipItem = nullptr;
+				// stop video playback and send signal in order to stop audio slot
+				stop();
+
+				emit fadeToBlackFinished();
 			}
 		}
 

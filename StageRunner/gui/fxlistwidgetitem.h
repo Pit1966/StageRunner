@@ -79,8 +79,8 @@ public:
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
 	QPoint dragBeginPos() const {return drag_begin_pos;}
-	QSize sizeHint() const;
-	QSize minimumSizeHint() const;
+	QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 	void setTextColor(const QString &col);
 	void setTextCentered(bool state);
 

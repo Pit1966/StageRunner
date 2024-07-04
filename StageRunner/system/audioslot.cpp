@@ -905,7 +905,8 @@ bool AudioSlot::fadeoutFxClip(int targetVolume, int time_ms)
 	m_fadeHelpTimeLine.setDuration(time_ms);
 
 	// and start the time line ticker
-	m_fadeHelpTimeLine.start();
+	QMetaObject::invokeMethod(&m_fadeHelpTimeLine, "start");
+	//m_fadeHelpTimeLine.start();
 	LOGTEXT(tr("Fade out for slot %1: '%2' started with duration %3ms")
 			.arg(slotNumber+1).arg(m_currentFx->name()).arg(time_ms));
 

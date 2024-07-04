@@ -22,6 +22,7 @@
 //=======================================================================
 
 #include "audiocontrol.h"
+#include "audioworker.h"
 #include "config.h"
 #include "log.h"
 #include "audioslot.h"
@@ -65,89 +66,105 @@
 #endif
 
 AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
-	: QThread()
+	: QObject()
 	, myApp(app_central)
 	, m_initInThread(initInThread)
-	, m_isInThread(false)
-	, used_slots(MAX_AUDIO_SLOTS)
 	, slotMutex(new QRecursiveMutex())
 {
+	setObjectName("AudioControl");
+
 	init();
 	getAudioDevices();
 
-	qDebug() << "Init AudioControl in thread" << thread() << "current" << QThread::currentThread();
-	if (!m_initInThread)
-		createMediaPlayInstances();
-
-	// create video widget and player always in main thread
-	createVideoWidget();
-	m_isInThread = m_initInThread;
-
 	// Audio Thread starten
-	start();
+	createAudioWorker();
 
-	if (!isRunning()) {
-		DEBUGERROR("%s: Could not start audio control thread",Q_FUNC_INFO);
-	} else {
-		// wait for thread startup finished
+	if (!m_initInThread) {
+		createMediaPlayInstances();
+	}
+	else {
+		QMetaObject::invokeMethod(m_audioWorker, "initMediaPlayerInstances");
 		ExtElapsedTimer wait;
 		while (wait.elapsed() < 500) {
-			if (m_isValid)
+			if (m_audioWorker->isValid)
 				break;
 		}
 	}
 
-	// QObject *obj = QApplication::instance();
-	// const QList<QObject*> objs = obj->children();
+	// create video widget and player always in main thread
+	createVideoWidget();
 
-	// for (const QObject *o : objs) {
-	// 	qDebug() << "o" << o;
-	// }
+	m_isInThread = m_initInThread;
+	m_isValid = true;
 }
 
 AudioControl::~AudioControl()
 {
-	if (isRunning()) {
-		quit();
-		wait(500);
-	}
 
 	if (!m_initInThread)
 		destroyMediaPlayInstances();
 
 	destroyVideoWidget();
 
+	if (m_audioWorker) {
+		m_audioThread.quit();
+		m_audioThread.wait(2000);
+	}
+
 	delete slotMutex;
+}
+
+bool AudioControl::createAudioWorker()
+{
+	if (m_audioWorker)
+		return false;
+
+	m_audioThread.setObjectName("AudioThread");
+	m_audioWorker = new AudioWorker(this);
+	m_audioWorker->setObjectName("AudioWorker");
+	m_audioWorker->moveToThread(&m_audioThread);
+
+	connect(&m_audioThread, SIGNAL(finished()), this, SLOT(_audioWorkerFinished()));
+
+	m_audioThread.start();
+	return true;
+}
+
+AudioWorker *AudioControl::audioWorker()
+{
+	return m_audioWorker;
+}
+
+QThread *AudioControl::audioThread()
+{
+	return &m_audioThread;
 }
 
 void AudioControl::reCreateMediaPlayerInstances()
 {
+	LOGTEXT(tr("<font color=orange>Reinit audio slots</font>"));
+
 	stopAllFxAudio();
+	destroyVideoWidget();
 
-	if (isRunning()) {
-		m_isValid = false;
-		quit();
-		wait(500);
-	}
-
-
+	destroyMediaPlayInstances();
 	if (!m_initInThread) {
-		destroyMediaPlayInstances();
 		createMediaPlayInstances();
 	}
 	else {
-		destroyVideoWidget();
-		createVideoWidget();
+		QMetaObject::invokeMethod(m_audioWorker, "initMediaPlayerInstances");
+		ExtElapsedTimer wait;
+		while (wait.elapsed() < 500) {
+			if (m_audioWorker->isValid)
+				break;
+		}
 	}
 
-	if (!isRunning()) {
-		start();
-		if (isRunning()) {
-			m_isValid = true;
-			m_isInThread = m_initInThread;
-		}
-	} else {
-		DEBUGERROR("Restart of audio control failed!");
+	createVideoWidget();
+
+	if (m_usedSlots != audioSlots.size()) {
+		POPUPERRORMSG("Reinit mediaplayer",
+					  tr("Reinit of audio slots failed!"));
 	}
 }
 
@@ -164,7 +181,7 @@ void AudioControl::setAudioInThreadEnabled(bool state)
 
 void AudioControl::getAudioDevices()
 {
-//	qDebug() << "getAudioDevices";
+	//	qDebug() << "getAudioDevices";
 
 	m_audioDeviceNames.clear();
 	AudioFormat default_format = AudioFormat::defaultFormat();
@@ -242,7 +259,7 @@ bool AudioControl::isFxAudioActive(FxAudioItem *fxa)
 {
 	if (!fxa) return false;
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa)
 			return audioSlots[t]->isActive() || fxa->startInProgress;
 	}
@@ -252,7 +269,7 @@ bool AudioControl::isFxAudioActive(FxAudioItem *fxa)
 
 bool AudioControl::isFxAudioActive(int slotnum)
 {
-	if (slotnum < 0 || slotnum >= used_slots)
+	if (slotnum < 0 || slotnum >= m_usedSlots)
 		return false;
 
 	return audioSlots[slotnum]->isActive();
@@ -264,7 +281,7 @@ bool AudioControl::isFxAudioActive(int slotnum)
  */
 bool AudioControl::isAnyFxAudioActive() const
 {
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->isActive())
 			return true;
 	}
@@ -276,7 +293,7 @@ int AudioControl::findAudioSlot(FxAudioItem *fxa)
 	if (!fxa)
 		return -1;
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {
 			return t;
 		}
@@ -292,14 +309,14 @@ int AudioControl::findAudioSlot(FxAudioItem *fxa)
 */
 int AudioControl::selectFreeAudioSlot(int slotnum)
 {
-	if (slotnum > used_slots)
+	if (slotnum > m_usedSlots)
 		return -1;
 
 	int slot = -1;
 	slotMutex->lock();
 	if (slotnum < 0) {
 		int i = 0;
-		while (slot < 0 && i < used_slots) {
+		while (slot < 0 && i < audioSlots.size()) {
 			if (audioSlots[i]->status() <= AUDIO_IDLE) {
 				audioSlots[i]->select();
 				slot = i;
@@ -388,7 +405,7 @@ AudioPlayer *AudioControl::audioPlayer(int i) const
 int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
 {
 	int curvol = -1;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {
 			AudioSlot *slot = audioSlots[t];
 			curvol = slot->volume();
@@ -406,7 +423,7 @@ int AudioControl::evaluateCurrentVolumeForFxAudio(FxAudioItem *fxa)
  */
 int AudioControl::getSlotForFxAudio(FxAudioItem *fxa)
 {
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa)
 			return t;
 	}
@@ -501,42 +518,42 @@ AudioOutputType AudioControl::defaultAudioOut()
 
 #	ifdef IS_MAC
 #		ifdef USE_SDL
-			return AUDIO::OUT_SDL2
-#		else
-			return AUDIO::OUT_MEDIAPLAYER
-#		endif
-#	else
-		return AUDIO::OUT_DEVICE;
+	return AUDIO::OUT_SDL2
+		#		else
+	return AUDIO::OUT_MEDIAPLAYER
+		#		endif
+		#	else
+	return AUDIO::OUT_DEVICE;
 #	endif
 
 #endif
 }
 
 
-void AudioControl::run()
-{
-	if (m_initInThread) {
-		createMediaPlayInstances();
+// void AudioControl::run()
+// {
+// 	if (m_initInThread) {
+// 		createMediaPlayInstances();
 
-		// test test test
-		// qDebug() << "-------- test ---- mediaplayer -----";
-		// qDebug() << "application" << QApplication::instance();
-		// QMediaPlayer *mp = new QMediaPlayer();
-	}
+// 		// test test test
+// 		// qDebug() << "-------- test ---- mediaplayer -----";
+// 		// qDebug() << "application" << QApplication::instance();
+// 		// QMediaPlayer *mp = new QMediaPlayer();
+// 	}
 
-	LOGTEXT(tr("Audio control is running"));
+// 	LOGTEXT(tr("Audio control is running"));
 
-	m_isValid = true;
+// 	m_isValid = true;
 
-	exec();
+// 	exec();
 
-	m_isValid = false;
-	if (m_initInThread)
-		destroyMediaPlayInstances();
+// 	m_isValid = false;
+// 	if (m_initInThread)
+// 		destroyMediaPlayInstances();
 
 
-	LOGTEXT(tr("Audio control finished"));
-}
+// 	LOGTEXT(tr("Audio control finished"));
+// }
 
 void AudioControl::_vuLevelChangedReceiver(int slotnum, qreal left, qreal right)
 {
@@ -552,8 +569,17 @@ void AudioControl::_vuLevelChangedReceiver(int slotnum, qreal left, qreal right)
 
 void AudioControl::_fftSpectrumChangedReceiver(int slotnum, FrqSpectrum *spec)
 {
-	if (slotnum < 0 || slotnum >= used_slots) return;
+	if (slotnum < 0 || slotnum >= m_usedSlots) return;
 	emit fftSpectrumChanged(slotnum,spec);
+}
+
+void AudioControl::_audioWorkerFinished()
+{
+	if (m_audioWorker) {
+		m_audioWorker->deleteLater();
+		m_audioWorker = nullptr;
+		LOGTEXT(tr("Audio background task finished"));
+	}
 }
 
 bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
@@ -567,7 +593,7 @@ bool AudioControl::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 atMs, i
 
 bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
 {
-	if (slotnum < 0 || slotnum >= used_slots)
+	if (slotnum < 0 || slotnum >= m_usedSlots)
 		return false;
 
 	if (audioSlots[slotnum]->select()) {
@@ -585,7 +611,7 @@ bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 
 
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
 	if (!exec && myApp.userSettings->pProhibitAudioDoubleStart) {
-		for (int t=0; t<used_slots; t++) {
+		for (int t=0; t<audioSlots.size(); t++) {
 			if (audioSlots[t]->currentFxAudio() == fxa) {
 				// Ok, audio is already running -> Check the time
 				int cur_run_time = audioSlots[t]->currentRunTime();
@@ -602,11 +628,13 @@ bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 
 	int slot;
 	if (fxa->playBackSlot == 0) {
 		slot = selectFreeAudioSlot();
-		if (slot < 0)
+		if (slot < 0) {
+			LOGERROR(tr("No free audio slot available!"));
 			return false;
+		}
 	} else {
 		slot = fxa->playBackSlot-1;
-		if (slot >= used_slots)
+		if (slot >= m_usedSlots)
 			return false;
 		if (audioSlots[slot]->status() > AUDIO_IDLE)
 			return false;
@@ -699,7 +727,7 @@ bool AudioControl::startFxClipItemInSlot(FxClipItem *fxc, int slotnum, Executer 
 
 bool AudioControl::restartFxAudioInSlot(int slotnum)
 {
-	if (slotnum < 0 || slotnum >= used_slots) return false;
+	if (slotnum < 0 || slotnum >= m_usedSlots) return false;
 
 	QMutexLocker lock(slotMutex);
 
@@ -732,7 +760,7 @@ int AudioControl::stopAllFxAudio()
 	QMutexLocker lock(slotMutex);
 
 	int stopcnt = 0;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->status() > AUDIO_IDLE)
 			stopcnt++;
 		stopFxAudio(t);
@@ -744,7 +772,7 @@ bool AudioControl::stopFxAudioWithID(int fxID)
 {
 	QMutexLocker lock(slotMutex);
 	bool found = false;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->status() > AUDIO_IDLE && audioSlots[t]->currentFxAudio()->id() == fxID) {
 			found = true;
 			stopFxAudio(t);
@@ -755,7 +783,7 @@ bool AudioControl::stopFxAudioWithID(int fxID)
 
 void AudioControl::pauseFxAudio(int slot)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -770,7 +798,7 @@ void AudioControl::pauseFxAudio(int slot)
 
 void AudioControl::stopFxAudio(int slot)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -792,7 +820,7 @@ void AudioControl::stopFxAudio(FxAudioItem *fxa)
 	if (!fxa) return;
 	QMutexLocker lock(slotMutex);
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {
 			dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 			stopFxAudio(t);
@@ -804,14 +832,14 @@ void AudioControl::storeCurrentSeekPositions()
 {
 	QMutexLocker lock(slotMutex);
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		audioSlots[t]->storeCurrentSeekPos();
 	}
 }
 
 void AudioControl::storeCurrentSeekPos(int slot)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -820,7 +848,7 @@ void AudioControl::storeCurrentSeekPos(int slot)
 
 void AudioControl::fadeVolTo(int slot, int targetVolume, int time_ms)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -854,7 +882,7 @@ int AudioControl::fadeoutAllFxAudio(int time_ms)
 	QMutexLocker lock(slotMutex);
 
 	int fadecnt = 0;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->status() > AUDIO_IDLE)
 			fadecnt++;
 		fadeoutFxAudio(t,time_ms);
@@ -864,7 +892,7 @@ int AudioControl::fadeoutAllFxAudio(int time_ms)
 
 void AudioControl::fadeoutFxAudio(int slot, int time_ms)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -886,7 +914,7 @@ void AudioControl::fadeoutFxAudio(FxAudioItem *fxa, int time_ms)
 {
 	QMutexLocker lock(slotMutex);
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {
 			fadeoutFxAudio(t,time_ms);
 		}
@@ -897,7 +925,7 @@ void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
 {
 	QMutexLocker lock(slotMutex);
 
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentExecuter() == exec) {
 			fadeoutFxAudio(t,time_ms);
 		}
@@ -914,7 +942,7 @@ void AudioControl::fadeoutFxAudio(Executer *exec, int time_ms)
  */
 void AudioControl::fadeinFxAudio(int slot, int targetVolume, int time_ms)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return;
 
 	QMutexLocker lock(slotMutex);
@@ -940,7 +968,7 @@ void AudioControl::fadeinFxAudio(int slot, int targetVolume, int time_ms)
 
 bool AudioControl::seekPosPerMilleFxAudio(int slot, int perMille)
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return false;
 
 	QMutexLocker lock(slotMutex);
@@ -960,7 +988,7 @@ bool AudioControl::seekPosPerMilleFxAudio(FxAudioItem *fxa, int perMille)
 	QMutexLocker lock(slotMutex);
 
 	bool seek = false;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (audioSlots[t]->currentFxAudio() == fxa) {
 			seek = audioSlots[t]->seekPosPerMille(perMille);
 		}
@@ -982,7 +1010,7 @@ bool AudioControl::executeAttachedAudioStartCmd(FxAudioItem *fxa)
 		break;
 	case FxAudioItem::ATTACHED_CMD_START_FX:
 		myApp.executeFxCmd(fxa->attachedStartPara1, CMD_FX_START, nullptr);
-//		myApp.unitVideo->startFxClipById(fxa->attachedStartPara1);
+		//		myApp.unitVideo->startFxClipById(fxa->attachedStartPara1);
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
 		myApp.stopAllSequencesAndPlaylists();
@@ -1015,7 +1043,7 @@ bool AudioControl::executeAttachedAudioStopCmd(FxAudioItem *fxa)
 		break;
 	case FxAudioItem::ATTACHED_CMD_START_FX:
 		myApp.executeFxCmd(fxa->attachedStopPara1, CMD_FX_START, nullptr);
-//		myApp.unitVideo->startFxClipById(fxa->attachedStopPara1);
+		//		myApp.unitVideo->startFxClipById(fxa->attachedStopPara1);
 		break;
 	case FxAudioItem::ATTACHED_CMD_STOP_ALL_SEQ_AND_SCRIPTS:
 		myApp.stopAllSequencesAndPlaylists();
@@ -1119,9 +1147,9 @@ void AudioControl::setMasterVolume(int vol)
 	myApp.unitVideo->setVideoMasterVolume(vol);
 
 	// And now update the volume settings in all active audioslots
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		if (t >= audioSlots.size()) {
-			LOGERROR(QString("Only %1 of %2 audio slots available!").arg(audioSlots.size()).arg(used_slots));
+			LOGERROR(QString("Only %1 of %2 audio slots available!").arg(audioSlots.size()).arg(m_usedSlots));
 			break;
 		}
 		audioSlots[t]->setMasterVolume(vol);
@@ -1147,7 +1175,7 @@ void AudioControl::setVolume(int slot, int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < used_slots) {
+	if (slot >= 0 && slot < m_usedSlots) {
 		audioSlots[slot]->setVolume(vol);
 		dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 		dmx_audio_ctrl_last_vol[slot] = vol;
@@ -1170,7 +1198,7 @@ void AudioControl::setVolumeFromTimeLine(int slot, int vol)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < used_slots) {
+	if (slot >= 0 && slot < m_usedSlots) {
 		audioSlots[slot]->setVolumeFromTimeLine(vol);
 		// dmx_audio_ctrl_status[slot] = DMX_SLOT_UNDEF;
 		// dmx_audio_ctrl_last_vol[slot] = vol;
@@ -1187,7 +1215,7 @@ void AudioControl::setVolumeInFx(int slot, int vol, bool setAsInitVolume)
 	else if (vol > MAX_VOLUME) {
 		vol = MAX_VOLUME;
 	}
-	if (slot >= 0 && slot < used_slots) {
+	if (slot >= 0 && slot < m_usedSlots) {
 		FxAudioItem *fx = audioSlots[slot]->currentFxAudio();
 		if (fx)
 			fx->currentVolume = vol;
@@ -1207,7 +1235,7 @@ void AudioControl::setVolumeInFx(int slot, int vol, bool setAsInitVolume)
 
 int AudioControl::getVolume(int slot) const
 {
-	if (slot < 0 || slot >= used_slots)
+	if (slot < 0 || slot >= m_usedSlots)
 		return 0;
 
 	return audioSlots[slot]->volume();
@@ -1271,8 +1299,8 @@ void AudioControl::setVolumeByDmxInput(int slot, int vol)
 void AudioControl::setVolumeFromDmxLevel(int slot, int vol)
 {
 	if (slot < 0 || slot >= MAX_AUDIO_SLOTS) return;
-//	if (debug)
-//		qDebug("Set Volume slot %d, %d",slot,vol);
+	//	if (debug)
+	//		qDebug("Set Volume slot %d, %d",slot,vol);
 
 	vol = MAX_VOLUME * vol / 255;
 	bool locked = audioSlots[slot]->setVolumeFromDMX(vol);
@@ -1310,7 +1338,7 @@ void AudioControl::setPanning(int slot, int pan)
 	else if (pan > MAX_PAN) {
 		pan = MAX_PAN;
 	}
-	if (slot >= 0 && slot < used_slots) {
+	if (slot >= 0 && slot < m_usedSlots) {
 		audioSlots[slot]->setPanning(pan);
 	}
 }
@@ -1357,12 +1385,10 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 
 void AudioControl::init()
 {
-	m_videoPlayer = nullptr;
-	m_videoWid = nullptr;
-
-	setObjectName("Audio Control");
+	m_usedSlots = MAX_AUDIO_SLOTS;
 	m_masterVolume = MAX_VOLUME;
-	for (int t=0; t<used_slots; t++) {
+
+	for (int t=0; t<m_usedSlots; t++) {
 		dmx_audio_ctrl_last_vol[t] = 0;
 		dmx_audio_ctrl_status[t] = DMX_SLOT_UNDEF;
 	}
@@ -1381,21 +1407,21 @@ void AudioControl::createMediaPlayInstances()
 		LOGTEXT(tr("<font color=red>Warning!</font> Switch to default audio type %1").arg(audioOutTypeToString(outputType)));
 	}
 
-	LOGTEXT(tr("Create media player instances of type %1 %2")
+	LOGTEXT(tr("Create media player instances of type %1 %2 %3")
 			.arg(audioOutTypeToString(outputType),
-				 m_initInThread ? "in thread" : "from main"));
-	qDebug() << "Create mediaplayer in thread" << thread() << "current" << QThread::currentThread();
+				 m_initInThread ? "in thread" : "from main",
+				 QThread::currentThread()->objectName()));
 
 	// This is for audio use
 	bool errmsg = false;
-	for (int t=0; t<used_slots; t++) {
+	for (int t=0; t<m_usedSlots; t++) {
 		QString audioDevName = set->pSlotAudioDevice[t];
 		if (!audioDevName.isEmpty() && audioDevName != "system default") {
 			if (outputType != OUT_DEVICE) {
 				if (!errmsg)
 					POPUPERRORMSG("Init audio", tr("There is a dedicated audio device specified for audio slot %1,\n"
-												  "but this is only supported for CLASSIC audio mode.\n"
-												  "Multi device output not possible! Default audio from system will be used.").arg(t+1));
+												   "but this is only supported for CLASSIC audio mode.\n"
+												   "Multi device output not possible! Default audio from system will be used.").arg(t+1));
 				errmsg = true;
 				myApp.setModuleError(AppCentral::E_AUDIO_MULTI_OUT_FAIL);
 			} else {
@@ -1408,12 +1434,13 @@ void AudioControl::createMediaPlayInstances()
 				if (!ok) {
 					if (!errmsg)
 						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
-													  "Configuration for audio slot %2 failed.\n"
-													  "Multi device output not possible! Default audio from system will be used.")
+													   "Configuration for audio slot %2 failed.\n"
+													   "Multi device output not possible! Default audio from system will be used.")
 									  .arg(audioDevName).arg(t+1));
 					errmsg = true;
 					myApp.setModuleError(AppCentral::E_AUDIO_DEVICE_NOT_FOUND);
 				}
+				Q_UNUSED(dev)
 			}
 		}
 
@@ -1432,11 +1459,8 @@ void AudioControl::createMediaPlayInstances()
 	// Enable FFT
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);
 
-	// This is for video playback
-	// moved to createVideoWidgets
-
 #ifdef USE_SDL
-	Mix_AllocateChannels(used_slots);
+	Mix_AllocateChannels(m_usedSlots);
 	Mix_ChannelFinished(SDL2AudioBackend::sdlChannelDone);
 	Mix_SetPostMix(SDL2AudioBackend::sdlPostMix, nullptr);
 #endif
@@ -1447,6 +1471,7 @@ void AudioControl::createVideoWidget()
 	if (!m_videoWid) {
 		m_videoWid = new PsVideoWidget;
 		m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+		// m_videoPlayer->setVideoOutput(m_videoWid);
 	}
 }
 
@@ -1458,6 +1483,8 @@ void AudioControl::destroyMediaPlayInstances()
 		}
 		delete audioSlots.takeFirst();
 	}
+
+	m_audioWorker->isValid = false;
 }
 
 void AudioControl::destroyVideoWidget()

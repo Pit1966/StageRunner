@@ -40,7 +40,7 @@ class Executer;
 
 #define PIC_OVERLAY_COUNT 2
 
-class VideoPlayer : protected QMediaPlayer
+class VideoPlayer : public QMediaPlayer
 {
 	Q_OBJECT
 protected:
@@ -62,7 +62,7 @@ protected:
 	bool m_stopVideoAtEventEnd;				///< video player has to be stopped. Usaly after a fade out
 
 public:
-	VideoPlayer(VideoControl *parent, PsVideoWidget *videoWid);
+	VideoPlayer(VideoControl *unitVideo, PsVideoWidget *videoWid);
 	FxClipItem *currentFxClipItem();
 
 	VIDEO::VideoViewStatus viewState() const {return m_viewState;}
@@ -115,6 +115,7 @@ signals:
 
 	void endReached(qint64 ms);
 	void seekMe(qint64 ms);
+	void fadeToBlackFinished();
 };
 
 #endif // VIDEOPLAYER_H

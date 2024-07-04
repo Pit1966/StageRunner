@@ -42,7 +42,7 @@ MediaPlayerAudioBackend::MediaPlayerAudioBackend(AudioSlot &audioChannel)
 	, m_currentAudioStatus(AUDIO_IDLE)
 {
 #ifndef IS_MAC
-	m_mediaPlayer = new QMediaPlayer(this);
+	m_mediaPlayer = new QMediaPlayer();
 	m_audioProbe = new QAudioProbe();
 
 	if (m_audioProbe->setSource(m_mediaPlayer)) {

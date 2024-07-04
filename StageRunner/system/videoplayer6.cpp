@@ -670,7 +670,7 @@ void VideoPlayer::on_playback_position_changed(qint64 pos)
 
 void VideoPlayer::onVideoEnd()
 {
-	qDebug() << "3 video stat" << VIDEO_IDLE;
+	qDebug() << "onVideoEnd" << VIDEO_IDLE;
 
 	AudioCtrlMsg msg(m_currentFxClipItem, m_slotNumber, CMD_VIDEO_STATUS_CHANGED);
 	msg.currentAudioStatus = VIDEO_IDLE;
@@ -736,6 +736,10 @@ void VideoPlayer::setOverlayFadeFinished(int layer)
 			if (FxItem::exists(m_currentFxClipItem) && m_currentFxClipItem) {
 				LOGTEXT(tr("<font color=green>VIDEO fade out end</font> <b>%1</b>").arg(m_currentFxClipItem->fileName()));
 				m_currentFxClipItem = nullptr;
+				// stop video playback and send signal in order to stop audio slot
+				stop();
+
+				emit fadeToBlackFinished();
 			}
 		}
 
