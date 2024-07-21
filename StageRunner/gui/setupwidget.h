@@ -62,8 +62,8 @@ private slots:
 
 	void onPluginLineUniverseChanged(int val);
 	void onPluginLineResponseTimeChanged(int val);
-	void on_appStyleCombo_currentIndexChanged(const QString &arg1);
-	void on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1);
+	void on_appStyleCombo_currentIndexChanged(int idx);
+	void on_dialKnobStyleCombo_currentIndexChanged(int idx);
 
 	void on_addDmxUniverseToTemplateButton_clicked();
 	void on_restartAudioVideoSlots_clicked();

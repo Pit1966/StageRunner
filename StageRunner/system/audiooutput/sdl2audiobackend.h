@@ -60,8 +60,8 @@ public:
 	qint64 currentPlayPosUs() const override;
 	qint64 currentPlayPosMs() const override;
 	bool seekPlayPosMs(qint64 posMs) override;
-	void setVolume(int vol, int maxvol) override;
-	void setPanning(int pan, int maxpan) override;
+	void setVolume(int vol, int maxVol) override;
+	void setPanning(int pan, int maxPan) override;
 	int volume() const override;
 	AUDIO::AudioStatus state() const override;
 

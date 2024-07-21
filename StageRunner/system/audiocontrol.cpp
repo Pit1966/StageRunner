@@ -22,21 +22,22 @@
 //=======================================================================
 
 #include "audiocontrol.h"
-#include "audioworker.h"
 #include "config.h"
 #include "log.h"
 #include "audioslot.h"
 #include "appcentral.h"
 #include "usersettings.h"
-#include "fxaudioitem.h"
 #include "fxplaylistitem.h"
-#include "executer.h"
-#include "execcenter.h"
 #include "fxlistwidget.h"
-#include "fxcontrol.h"
-#include "fxlist.h"
-#include "fxclipitem.h"
-#include "videocontrol.h"
+#include "fx/fxaudioitem.h"
+#include "fx/executer.h"
+#include "fx/execcenter.h"
+#include "fx/fxlist.h"
+#include "fx/fxclipitem.h"
+#include "system/fxcontrol.h"
+#include "system/videocontrol.h"
+#include "system/audioslot.h"
+#include "system/audioworker.h"
 #include "system/fxtimer.h"
 
 #include "system/audiooutput/audioformat.h"
@@ -142,9 +143,14 @@ QThread *AudioControl::audioThread()
 
 void AudioControl::reCreateMediaPlayerInstances()
 {
-	LOGTEXT(tr("<font color=orange>Reinit audio slots</font>"));
+	LOGTEXT(tr("<font color=orange>Reinit audio slots</font> %1")
+			.arg(m_initInThread ? tr("for background playing") : tr("for main thread playing")));
 
-	stopAllFxAudio();
+
+	if (videoPlayer())
+		videoPlayer()->stop();
+
+	stopAllFxAudio(true);
 	destroyVideoWidget();
 
 	destroyMediaPlayInstances();
@@ -755,16 +761,28 @@ bool AudioControl::restartFxAudioInSlot(int slotnum)
 	return false;
 }
 
-int AudioControl::stopAllFxAudio()
+int AudioControl::stopAllFxAudio(bool waitForEnd)
 {
 	QMutexLocker lock(slotMutex);
 
 	int stopcnt = 0;
-	for (int t=0; t<m_usedSlots; t++) {
-		if (audioSlots[t]->status() > AUDIO_IDLE)
+	for (int t=0; t<audioSlots.size(); t++) {
+		if (audioSlots.at(t)->status() > AUDIO_IDLE)
 			stopcnt++;
 		stopFxAudio(t);
 	}
+
+	if (stopcnt > 0 && waitForEnd) {
+		bool audioactive;
+		do {
+			audioactive = false;
+			for (int t=0; t<audioSlots.size(); t++) {
+				if (audioSlots.at(t)->status() > AUDIO_IDLE)
+					audioactive = true;
+			}
+		} while (audioactive == true);
+	}
+
 	return stopcnt;
 }
 

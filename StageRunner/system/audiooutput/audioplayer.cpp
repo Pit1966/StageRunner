@@ -40,6 +40,9 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	, m_loopCnt(1)
 	, m_currentVolume(100)
 	, m_currentPan(0)
+	, m_maxPan(200)
+	, m_panVolLeft(1)
+	, m_panVolRight(1)
 	, m_currentCtrlCmd(CMD_NONE)
 	, m_audioError(AUDIO_ERR_NONE)
 	, m_currentPlaybackSamplerate(0)
@@ -76,6 +79,37 @@ bool AudioPlayer::setSourceFilename(const QString &path, const QString &fxName)
 		m_fxName = fxName;
 
 	return true;
+}
+
+void AudioPlayer::calcPanning(char *data, int size, const AudioFormat &audioFormat)
+{
+	int channels = audioFormat.channelCount();
+	qint64 frames = size / channels;
+
+	switch (audioFormat.sampleFormat()) {
+	case AudioFormat::Int16:
+		{
+			qint16 *dat = reinterpret_cast<qint16*>(data);
+			frames /= 2;
+
+			for (int chan = 0; chan < channels; chan++) {
+				for (int frame = 0; frame<frames; frame++) {
+					const qint16 val = dat[frame*channels+chan];
+					const qreal valF = AudioFormat::pcm16ToReal(val);
+					switch (chan) {
+					case 0:
+						dat[frame*channels+chan] = AudioFormat::realToPcm16(valF * m_panVolLeft);
+						break;
+					case 1:
+						dat[frame*channels+chan] = AudioFormat::realToPcm16(valF * m_panVolRight);
+						break;
+					}
+				}
+			}
+
+		}
+		break;
+	}
 }
 
 void AudioPlayer::calcVuLevel(const char *data, int size, const AudioFormat &audioFormat)

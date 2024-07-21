@@ -472,15 +472,16 @@ void SetupWidget::onPluginLineResponseTimeChanged(int val)
 	}
 }
 
-void SetupWidget::on_appStyleCombo_currentIndexChanged(const QString &arg1)
+void SetupWidget::on_appStyleCombo_currentIndexChanged(int idx)
 {
-	emit applicationStyleChanged(arg1);
-
+	if (idx >= 0)
+		emit applicationStyleChanged(appStyleCombo->currentText());
 }
 
-void SetupWidget::on_dialKnobStyleCombo_currentIndexChanged(const QString &arg1)
+void SetupWidget::on_dialKnobStyleCombo_currentIndexChanged(int idx)
 {
-	emit dialKnobStyleChanged(arg1);
+	if (idx >= 0)
+		emit dialKnobStyleChanged(dialKnobStyleCombo->currentText());
 }
 
 void SetupWidget::on_addDmxUniverseToTemplateButton_clicked()

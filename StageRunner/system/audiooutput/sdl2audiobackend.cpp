@@ -148,17 +148,45 @@ bool SDL2AudioBackend::seekPlayPosMs(qint64 posMs)
 	return true;
 }
 
-void SDL2AudioBackend::setVolume(int vol, int maxvol)
+void SDL2AudioBackend::setVolume(int vol, int maxVol)
 {
 	m_currentVolume = vol;
 
-	int v = vol * SDL_MAX_VOLUME / maxvol;
+	int v = vol * SDL_MAX_VOLUME / maxVol;
 	Mix_Volume(m_parentAudioSlot.slotNumber, v);
 }
 
-void SDL2AudioBackend::setPanning(int pan, int maxpan)
+void SDL2AudioBackend::setPanning(int pan, int maxPan)
 {
-	///@implement me
+	m_currentPan = pan;
+	m_maxPan = maxPan;
+	if (pan == 0)		// deactivated
+		return;
+
+	// we have to calculat amplification factors for both the left and the right channel
+	if (pan > maxPan/2) {
+		// panorama right
+		m_panVolRight = 1.0;
+		m_panVolLeft = qreal((maxPan - pan) * 2) / maxPan;
+	}
+	else {
+		// panorama left
+		m_panVolLeft = 1.0;
+		m_panVolRight = qreal((pan-1) * 2) / maxPan;
+	}
+	m_panVolLeft = QAudio::convertVolume(m_panVolLeft,
+										 QAudio::LogarithmicVolumeScale,
+										 QAudio::LinearVolumeScale);
+	m_panVolRight = QAudio::convertVolume(m_panVolRight,
+										 QAudio::LogarithmicVolumeScale,
+										 QAudio::LinearVolumeScale);
+
+	// panning vol calculation option 2
+	// m_panVolLeft = qreal(maxPan - pan) / maxPan;
+	// m_panVolRight = qreal(pan) / maxPan;
+
+	// qDebug() << "pan values" << m_panVolLeft << m_panVolRight;
+
 }
 
 int SDL2AudioBackend::volume() const
@@ -209,6 +237,9 @@ void SDL2AudioBackend::sdlSetRunStatus(AudioStatus state)
 void SDL2AudioBackend::sdlChannelProcessStream(void *stream, int len, void *udata)
 {
 	Q_UNUSED(udata)
+	if (m_currentPan > 0)
+		calcPanning(reinterpret_cast<char*>(stream), len, m_sdlAudioFormat);
+
 	calcVuLevel(reinterpret_cast<const char*>(stream), len, m_sdlAudioFormat);
 	m_parentAudioSlot.sdlEmitProgress();
 }

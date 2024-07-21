@@ -46,6 +46,11 @@ protected:
 	int m_loopCnt;
 	int m_currentVolume;
 	int m_currentPan;						///< value of 0 means, disabled
+
+	int m_maxPan;							// usualy 200
+	qreal m_panVolLeft;						// for panning volume left channel (0-1)
+	qreal m_panVolRight;					// for panning volume right channel (0-1)
+
 	CtrlCmd m_currentCtrlCmd;
 	AUDIO::AudioErrorType m_audioError;
 	QString m_audioErrorString;
@@ -104,6 +109,7 @@ public:
 
 //protected:
 	// some helper fucntions, that can be used by any backend implementation
+	void calcPanning(char *data, int size, const AudioFormat &audioFormat);
 	void calcVuLevel(const char *data, int size, const AudioFormat &audioFormat);
 
 protected:
