@@ -115,7 +115,7 @@ void IODeviceAudioBackend::stop()
 {
 	// workaround for qt6 bug (at least on linux) where
 	// thread freezes, if switched from suspended to stopped directly
-	if (m_audioSink->state() == QtAudio::SuspendedState) {
+	if (m_audioSink->state() == 1 /*QtAudio::SuspendedState*/) {
 		m_audioSink->reset();
 		m_audioSink->resume();
 	}

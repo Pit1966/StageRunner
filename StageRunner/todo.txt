@@ -26,8 +26,8 @@ In der GUI (AudioControl) wird die Ablaufzeit der Sounddatei nicht zurückgesetz
 
 Features:
 
-- Position des Splitters zwischen Liste und Kontrollen speichern
-- Audio in eigenen Thread?
+- done: Position des Splitters zwischen Liste und Kontrollen speichern
+- done: Audio in eigenen Thread?
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
 
@@ -43,5 +43,4 @@ als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewart
 ----------------------------------------------------------------------------------------------------
 Qt6 port  :  entfernte oder zu bearbeitende Funktionen
 ----------------------------------------------------------------------------------------------------
-QAudioDeviceInfo AudioIODevice::getAudioDeviceInfo(const QString &devName, bool *found);
-void LightControlWidget::setVideoStatus(int viewState, int oldState)
+
