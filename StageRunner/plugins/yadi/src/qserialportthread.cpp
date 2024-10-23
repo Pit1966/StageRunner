@@ -69,7 +69,7 @@ QSerialPortThread::~QSerialPortThread()
 
 QString QSerialPortThread::deviceNode() const
 {
-	if (!m_portInfo.isValid())
+	if (m_portInfo.isNull())
 		return QString();
 
 	return m_portInfo.portName();
@@ -406,7 +406,7 @@ bool QSerialPortThread::_processSendQueue()
 			if (m_yadiDev->debug > 1) {
 				if (!isbin)
 					qDebug("Yadi: %s write serial: %s (queued: %d)"
-						   ,YadiDevice::threadNameAsc(),data.left(data.size()-1).constData(),m_sendDataList.size());
+						   ,YadiDevice::threadNameAsc(),data.left(data.size()-1).constData(),int(m_sendDataList.size()));
 				else
 					qDebug("Yadi: %s write serial: %s",YadiDevice::threadNameAsc(),data.toHex().constData());
 			}
@@ -418,7 +418,7 @@ bool QSerialPortThread::_processSendQueue()
 			m_serialMutex.unlock();
 
 			if (written != data.size())
-				qWarning("Yadi: %s serial wrote only %lli of %d",YadiDevice::threadNameAsc(),written,data.size());
+				qWarning("Yadi: %s serial wrote only %lli of %d",YadiDevice::threadNameAsc(),written,int(data.size()));
 		}
 
 		// check if queue is empty and reset the flag if so

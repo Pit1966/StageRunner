@@ -353,7 +353,7 @@ void YadiDMXUSBOut::writeUniverse(quint32 universe, quint32 output, const QByteA
 			qDebug("Yadi: out burst %dms hi_changed:%d(%d) size bytes: %d %d: channel 1: %d",
 				   int(stop.nsecsElapsed() / 1000),
 				   hi_changed_channel,
-				   data.size(),
+				   int(data.size()),
 				   out[1], out[2], data.at(0));
 	} else {
 		for (int t=0; t<hi_changed_channel; t++) {
@@ -689,7 +689,7 @@ void YadiDMXUSBOut::update_output_monitor(quint32 output, const QByteArray &univ
 	DmxMonitor *mon = yadi->dmxOutMonWidget;
 
 	if (debug > 2)
-		fprintf(stderr, "Yadi: update output monitor (cnt:%d) %s\n",universe.size(),universe.toHex().data());
+		fprintf(stderr, "Yadi: update output monitor (cnt:%d) %s\n",int(universe.size()),universe.toHex().data());
 
 	if (mon) {
 		for (int t=0; t<mon->visibleBars(); t++) {
@@ -724,7 +724,7 @@ bool YadiDMXUSBOut::internOpenOutput(quint32 output, int universe)
 		}
 
 	} else {
-		qDebug("Yadi: %s: openOutput(%d) failed! Device list own %d outputs",YadiDevice::threadNameAsc(),output+1,output_devices.size());
+		qDebug("Yadi: %s: openOutput(%d) failed! Device list own %d outputs",YadiDevice::threadNameAsc(),output+1,int(output_devices.size()));
 	}
 	return ok;
 }
