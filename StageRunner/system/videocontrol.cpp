@@ -108,8 +108,14 @@ bool VideoControl::startFxClip(FxClipItem *fxc)
 	}
 
 	VideoPlayer *vp = videoSlot(slot);
-	if (!vp)
-		return false;
+	if (!vp) {
+		LOGERROR(tr("Video output not available -> create it now!"));
+		vp = myApp.unitAudio->createVideoPlayer();
+		if (!vp) {
+			LOGERROR("Video output creation failed.");
+			return false;
+		}
+	}
 
 	// check if there is already a video running in this slot.
 	// If so, we have to stop the video first.

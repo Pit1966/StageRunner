@@ -68,8 +68,8 @@ VideoPlayer::VideoPlayer(VideoControl *unitVideo, PsVideoWidget *videoWid)
 	for (int i=0; i<PIC_OVERLAY_COUNT; i++) {
 		// m_overlayFadeTimeLine[i].setObjectName(QString("picover%1").arg(i));
 
-		connect(&m_overlayFadeTimeLine[i], &QTimeLine::valueChanged, [this, i](qreal newValue) { this->setOverlayFade(newValue, i);});
-		connect(&m_overlayFadeTimeLine[i], &QTimeLine::finished, [this, i]() { this->setOverlayFadeFinished(i); });
+		connect(&m_overlayFadeTimeLine[i], &QTimeLine::valueChanged, this, [this, i](qreal newValue) { this->setOverlayFade(newValue, i);});
+		connect(&m_overlayFadeTimeLine[i], &QTimeLine::finished, this, [this, i]() { this->setOverlayFadeFinished(i); });
 	}
 
 	m_videoWid->setVideoPlayer(this);

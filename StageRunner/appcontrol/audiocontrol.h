@@ -67,6 +67,7 @@ protected:
 	volatile bool m_isValid		= false;
 	bool m_initInThread			= false;
 	bool m_isInThread			= false;
+	bool m_isSmallAudioBufFix	= false;
 #ifdef IS_QT6
 	QAudioDevice m_extraDevice;
 	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
@@ -108,6 +109,8 @@ public:
 
 	void reCreateMediaPlayerInstances();
 	void setAudioInThreadEnabled(bool state);
+	void setSmallAudioBufFix(bool state);
+	bool isSmallAudioBufFix() const {return m_isSmallAudioBufFix;}
 
 	void getAudioDevices();
 	bool isFxAudioActive(FxAudioItem *fxa);
@@ -188,6 +191,8 @@ public slots:
 	void setPanning(int slot, int pan);
 
 	bool handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value);
+
+	VideoPlayer *createVideoPlayer();
 
 private:
 	void init();

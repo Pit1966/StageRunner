@@ -97,6 +97,8 @@ AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 
 	m_isInThread = m_initInThread;
 	m_isValid = true;
+
+	m_isSmallAudioBufFix = myApp.userSettings->pIsSmallAudioBufferFix;
 }
 
 AudioControl::~AudioControl()
@@ -183,6 +185,11 @@ void AudioControl::setAudioInThreadEnabled(bool state)
 					.arg(m_initInThread ? tr("activated") : tr("deactivated")));
 		}
 	}
+}
+
+void AudioControl::setSmallAudioBufFix(bool state)
+{
+	m_isSmallAudioBufFix = state;
 }
 
 void AudioControl::getAudioDevices()
@@ -1398,6 +1405,21 @@ bool AudioControl::handleDmxInputAudioEvent(FxAudioItem *fxa, uchar value)
 		}
 	}
 	return ok;
+}
+
+VideoPlayer * AudioControl::createVideoPlayer()
+{
+	if (m_videoPlayer)
+		return m_videoPlayer;
+
+	if (!m_videoWid) {
+		LOGERROR(tr("No video widget available for videoplayer!"));
+		return nullptr;
+	}
+
+	m_videoPlayer = new VideoPlayer(myApp.unitVideo, m_videoWid);
+
+	return m_videoPlayer;
 }
 
 

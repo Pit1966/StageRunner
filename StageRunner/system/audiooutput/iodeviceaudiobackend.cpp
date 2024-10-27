@@ -217,7 +217,11 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 		audiostatus = AUDIO_RUNNING;
 		break;
 	case QAudio::IdleState:
-		audiostatus = AUDIO_IDLE;
+		if (m_activateSmallBufferWorkAround && m_currentAudioStatus == AUDIO_RUNNING) {
+			audiostatus = AUDIO_RUNNING;
+		} else {
+			audiostatus = AUDIO_IDLE;
+		}
 		break;
 	case QAudio::SuspendedState:
 		audiostatus = AUDIO_PAUSED;

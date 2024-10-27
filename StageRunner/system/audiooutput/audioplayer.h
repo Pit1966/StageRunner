@@ -76,6 +76,9 @@ protected:
 	// delayed start of audio fx
 	int m_startDelayedTimerId;
 
+	// special
+	bool m_activateSmallBufferWorkAround = false;
+
 public:
 	AudioPlayer(AudioSlot &audioChannel);
 	virtual AUDIO::AudioOutputType outputType() const = 0;
@@ -86,6 +89,8 @@ public:
 	inline int currentLoop() const {return m_loopCnt;}
 	bool setStartDelay(int ms);
 	inline void setFxName(const QString &name) {m_fxName = name;}
+
+	void activateSmallAudioBufferWorkaround(bool state) {m_activateSmallBufferWorkAround = state;}
 
 	virtual bool setSourceFilename(const QString &path, const QString &fxName);
 	virtual void start(int loops) = 0;

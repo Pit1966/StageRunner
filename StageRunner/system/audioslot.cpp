@@ -117,9 +117,10 @@ AudioSlot::AudioSlot(AudioControl *parent, int pSlotNumber, AudioOutputType audi
 	if (m_lastAudioError == AUDIO_ERR_NONE || m_lastAudioError == AUDIO_ERR_DECODER ) {
 	}
 
-	if (parent->myApp.userSettings->pAudioBufferSize >= 16384) {
+	if (parent->myApp.userSettings->pAudioBufferSize >= 16384 || debug > 0) {
 		m_audioPlayer->setAudioBufferSize(parent->myApp.userSettings->pAudioBufferSize);
 	}
+	m_audioPlayer->activateSmallAudioBufferWorkaround(parent->isSmallAudioBufFix());
 
 	//Fadeout Timeline
 	connect(&m_fadeHelpTimeLine,SIGNAL(valueChanged(qreal)),this,SLOT(on_fade_frame_changed(qreal)));
@@ -217,10 +218,13 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 	}
 
 	// Set Audio Buffer Size
-	if (m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize  >= 16384) {
+	if (m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize  >= 16384 || debug > 0) {
 		m_audioPlayer->setAudioBufferSize(m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize);
 		LOGTEXT(tr("Set audio buffer size to: %1").arg(m_audioCtrlUnit->myApp.userSettings->pAudioBufferSize));
 	}
+	m_audioPlayer->activateSmallAudioBufferWorkaround(m_audioCtrlUnit->isSmallAudioBufFix());
+	if (m_audioCtrlUnit->isSmallAudioBufFix())
+		LOGTEXT(tr("Activate small audio buffer workaround (fix)"));
 
 	if (startPosMs < 0) {
 		// We get the start play position in ms from the last played seek position in the FxAudio instance

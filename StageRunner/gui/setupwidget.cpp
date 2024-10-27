@@ -128,6 +128,7 @@ void SetupWidget::copy_settings_to_gui()
 	useLogVolumeDefaultCheck->setChecked(set->pLogarithmicVolDials);
 	useLogVolumeProjectCheck->setChecked(myapp->project->pLogarithmicVol);
 	audioInTaskCheck->setChecked(set->pIsAudioInThread);
+	smallAudioBufWorkAroundCheck->setChecked(set->pIsSmallAudioBufferFix);
 	reactivateAudioTimeSpin->setValue(set->pAudioAllowReactivateTime);
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
@@ -185,6 +186,7 @@ void SetupWidget::copy_gui_to_settings()
 	set->pProhibitAudioDoubleStart = prohibitAudioDoubleStartCheck->isChecked();
 	set->pLogarithmicVolDials = useLogVolumeDefaultCheck->isChecked();
 	set->pIsAudioInThread = audioInTaskCheck->isChecked();
+	set->pIsSmallAudioBufferFix = smallAudioBufWorkAroundCheck->isChecked();
 	myapp->project->pLogarithmicVol = useLogVolumeProjectCheck->isChecked();
 	set->pAudioAllowReactivateTime = reactivateAudioTimeSpin->value();
 
@@ -235,6 +237,9 @@ void SetupWidget::copy_gui_to_settings()
 	set->pVideoOutXSize = videoXSizeEdit->text().toInt();
 	set->pVideoOutYSize = videoYSizeEdit->text().toInt();
 	set->pVideoForceSecondDesktop = videoForceSecondCheck->isChecked();
+
+	// Set options in order to avoid necessary restart of application
+	AppCentral::ref().unitAudio->setSmallAudioBufFix(set->pIsSmallAudioBufferFix);
 }
 
 void SetupWidget::on_okButton_clicked()
