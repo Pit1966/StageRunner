@@ -225,6 +225,7 @@ void StageRunnerMainWin::initConnects()
 	connect(appCentral->unitAudio,SIGNAL(vuLevelChanged(int,qreal,qreal)),audioCtrlGroup,SLOT(setVuMeterLevel(int,qreal,qreal)));
 	connect(appCentral->unitAudio,SIGNAL(fftSpectrumChanged(int,FrqSpectrum*)),audioCtrlGroup,SLOT(setFFTSpectrum(int,FrqSpectrum*)));
 	connect(appCentral->unitAudio,SIGNAL(masterVolumeChanged(int)),seqCtrlGroup,SLOT(setMasterVolume(int)));
+	connect(appCentral->unitAudio,SIGNAL(mediaPlayerInstancesCreated(QString)),audioCtrlGroup,SLOT(setStatus(QString)));
 
 	// Light Control -> SceneStatusWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
@@ -479,8 +480,8 @@ void StageRunnerMainWin::initAppDefaults()
 		}
 	}
 
-	// Test Audio Features
-	appCentral->unitAudio->getAudioDevices();
+	// Test Audio Features -> removed: already done in initAudioControl()
+	// appCentral->unitAudio->getAudioDevices();
 
 	// Set Audio Defaults
 	if (appCentral->unitAudio->isValid()) {
@@ -567,6 +568,7 @@ void StageRunnerMainWin::openFxItemPanel(FxItem *fx)
 
 void StageRunnerMainWin::applyUserSettingsToGui(UserSettings *set)
 {
+	appCentral->unitAudio->checkAudioLimits();
 	audioCtrlGroup->setFFTGraphVisibleFromMask(set->pFFTAudioMask);
 	audioCtrlGroup->setVolumeDialVisibleFromMask(set->pVolumeDialMask);
 }

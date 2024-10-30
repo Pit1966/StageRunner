@@ -67,6 +67,8 @@ public slots:
 	void audioCtrlRepeater(AUDIO::AudioCtrlMsg msg);
 	void setVuMeterLevel(int channel, qreal left, qreal right);
 	void setFFTSpectrum(int channel, FrqSpectrum *spectrum);
+	void setStatus(const QString &statMsg);
+
 
 signals:
 	void playClicked(int slotNum);

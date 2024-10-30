@@ -562,8 +562,8 @@ QWidget * Log::setStatusWidget(QWidget * wid)
 
 		loggingEnabled = true;
 		m_statusWid->setUndoRedoEnabled(false);
-		connect(this,SIGNAL(newtext(const QString &)),m_statusWid,SLOT(append(const QString &)),Qt::QueuedConnection);
-		connect(this,SIGNAL(newcolor(const QColor &)),m_statusWid,SLOT(setTextColor(const QColor &)),Qt::QueuedConnection);
+		connect(this,SIGNAL(newtext(QString)),m_statusWid,SLOT(append(QString)),Qt::QueuedConnection);
+		connect(this,SIGNAL(newcolor(QColor)),m_statusWid,SLOT(setTextColor(QColor)),Qt::QueuedConnection);
 		connect(this,SIGNAL(clearlog()),m_statusWid,SLOT(clear()),Qt::QueuedConnection);
 	}
 	else {

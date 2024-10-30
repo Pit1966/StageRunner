@@ -113,6 +113,14 @@ bool AppCentral::setFxExecLoopEnabled(bool state)
 	return unitFx->setExecLoopEnabled(state);
 }
 
+bool AppCentral::initAudioControl()
+{
+	if (unitAudio)
+		return unitAudio->initAudio(userSettings->pIsAudioInThread);
+
+	return false;
+}
+
 /**
  * @brief Stop all Audio FXs and set running FxAudioPlaylists into pause mode
  */
@@ -510,6 +518,11 @@ AudioOutputType AppCentral::usedAudioOutputType() const
 		type = AUDIO::OUT_NONE;
 
 	return type;
+}
+
+bool AppCentral::isAudioInThread() const
+{
+	return userSettings->pIsAudioInThread;
 }
 
 /**

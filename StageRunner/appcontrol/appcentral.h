@@ -134,6 +134,8 @@ public:
 	bool setLightLoopEnabled(bool state);
 	bool setFxExecLoopEnabled(bool state);
 
+	bool initAudioControl();
+
 	void stopAllFxAudio();
 	void fadeoutAllFxAudio(int fadeoutTimeMs = 5000);
 	void stopAllSequencesAndPlaylists();
@@ -174,6 +176,7 @@ public:
 	// Audio
 	void setAudioOutputType(AUDIO::AudioOutputType type);
 	AUDIO::AudioOutputType usedAudioOutputType() const;
+	bool isAudioInThread() const;
 	inline bool hasSDL() const {return m_isSDLAvailable;}
 	bool isLogarithmicVolume() const;
 	QObject * audioWorker();

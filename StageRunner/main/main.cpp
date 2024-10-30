@@ -380,8 +380,8 @@ int main(int argc, char *argv[])
 	AppCentral *myapp = AppCentral::instance();
 	StageRunnerMainWin *mywin = new StageRunnerMainWin(myapp);
 
-	logThread->initLog(mywin->logWidget);
-	logThread->emitShadowLog(false);
+	// logThread->initLog(mywin->logWidget);
+	// logThread->emitShadowLog(false);
 
 	// Init GUI
 	mywin->setApplicationGuiStyle(myapp->userSettings->pApplicationGuiStyle);
@@ -389,8 +389,16 @@ int main(int argc, char *argv[])
 	mywin->initModules();
 	mywin->show();
 	mywin->initConnects();
+
 	// Bring to top
 	mywin->raise();
+
+	// init Audio and media players
+	myapp->initAudioControl();
+
+	logThread->initLog(mywin->logWidget);
+	logThread->emitShadowLog(false);
+
 	// This also loads the last project
 	mywin->initAppDefaults();
 

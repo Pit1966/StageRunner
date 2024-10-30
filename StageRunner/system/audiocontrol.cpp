@@ -73,12 +73,37 @@ AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 	, slotMutex(new QRecursiveMutex())
 {
 	setObjectName("AudioControl");
+	initDefaults();
 
-	init();
+	// initAudio(initInThread);
+}
+
+AudioControl::~AudioControl()
+{
+
+	if (!m_initInThread)
+		destroyMediaPlayInstances();
+
+	destroyVideoWidget();
+
+	if (m_audioWorker) {
+		m_audioThread.quit();
+		m_audioThread.wait(2000);
+	}
+
+	delete slotMutex;
+}
+
+bool AudioControl::initAudio(bool initInThread)
+{
+	m_initInThread = initInThread;
+
 	getAudioDevices();
 
 	// Audio Thread starten
 	createAudioWorker();
+
+	checkAudioLimits();
 
 	if (!m_initInThread) {
 		createMediaPlayInstances();
@@ -97,24 +122,9 @@ AudioControl::AudioControl(AppCentral &app_central, bool initInThread)
 
 	m_isInThread = m_initInThread;
 	m_isValid = true;
-
 	m_isSmallAudioBufFix = myApp.userSettings->pIsSmallAudioBufferFix;
-}
 
-AudioControl::~AudioControl()
-{
-
-	if (!m_initInThread)
-		destroyMediaPlayInstances();
-
-	destroyVideoWidget();
-
-	if (m_audioWorker) {
-		m_audioThread.quit();
-		m_audioThread.wait(2000);
-	}
-
-	delete slotMutex;
+	return m_isValid;
 }
 
 bool AudioControl::createAudioWorker()
@@ -148,6 +158,7 @@ void AudioControl::reCreateMediaPlayerInstances()
 	LOGTEXT(tr("<font color=orange>Reinit audio slots</font> %1")
 			.arg(m_initInThread ? tr("for background playing") : tr("for main thread playing")));
 
+	checkAudioLimits();
 
 	if (videoPlayer())
 		videoPlayer()->stop();
@@ -190,6 +201,27 @@ void AudioControl::setAudioInThreadEnabled(bool state)
 void AudioControl::setSmallAudioBufFix(bool state)
 {
 	m_isSmallAudioBufFix = state;
+}
+
+bool AudioControl::checkAudioLimits()
+{
+	AudioOutputType outputType = myApp.usedAudioOutputType();
+	if (outputType == AUDIO::OUT_NONE) {
+		outputType = defaultAudioOut();
+	}
+	else if (!isAudioOutAvailable(outputType)) {
+		outputType = defaultAudioOut();
+	}
+
+	if (outputType == AUDIO::OUT_MEDIAPLAYER && myApp.isAudioInThread()) {
+		POPUPERRORMSG(tr("Audio control"),
+					  tr("Audio output mode Mediaplayer and background audio play is not compatible!\n"
+						 "Please deactivate background audio or use I/O audio or SDL!\n\n"
+						 "By chance all works correct, but video player may cause problems"));
+		return false;
+	}
+
+	return true;
 }
 
 void AudioControl::getAudioDevices()
@@ -1423,7 +1455,7 @@ VideoPlayer * AudioControl::createVideoPlayer()
 }
 
 
-void AudioControl::init()
+void AudioControl::initDefaults()
 {
 	m_usedSlots = MAX_AUDIO_SLOTS;
 	m_masterVolume = MAX_VOLUME;
@@ -1504,6 +1536,14 @@ void AudioControl::createMediaPlayInstances()
 	Mix_ChannelFinished(SDL2AudioBackend::sdlChannelDone);
 	Mix_SetPostMix(SDL2AudioBackend::sdlPostMix, nullptr);
 #endif
+
+	QString statMsg = tr("Audio mode: %1 (%2)")
+			.arg(audioOutTypeToString(outputType),
+				 m_initInThread ? "background" : "main");
+
+	if (errmsg)
+		statMsg += tr(" : Init failed!");
+	emit mediaPlayerInstancesCreated(statMsg);
 }
 
 void AudioControl::createVideoWidget()

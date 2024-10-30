@@ -103,6 +103,7 @@ public:
 	AudioControl(AppCentral &app_central, bool initInThread);
 	~AudioControl();
 
+	bool initAudio(bool initInThread);
 	bool createAudioWorker();
 	AudioWorker *audioWorker();
 	QThread *audioThread();
@@ -111,6 +112,7 @@ public:
 	void setAudioInThreadEnabled(bool state);
 	void setSmallAudioBufFix(bool state);
 	bool isSmallAudioBufFix() const {return m_isSmallAudioBufFix;}
+	bool checkAudioLimits();
 
 	void getAudioDevices();
 	bool isFxAudioActive(FxAudioItem *fxa);
@@ -195,7 +197,7 @@ public slots:
 	VideoPlayer *createVideoPlayer();
 
 private:
-	void init();
+	void initDefaults();
 	void createMediaPlayInstances();
 	void createVideoWidget();
 	void destroyMediaPlayInstances();
@@ -207,6 +209,7 @@ signals:
 	void vuLevelChanged(int slotnum, qreal left, qreal right);
 	void fftSpectrumChanged(int slotnum, FrqSpectrum * spec);
 	void masterVolumeChanged(int vol);
+	void mediaPlayerInstancesCreated(const QString &status);
 
 	friend class AudioWorker;
 };

@@ -178,3 +178,8 @@ void AudioControlWidget::setFFTSpectrum(int channel, FrqSpectrum *spectrum)
 		audioSlotWidgets[channel]->setFFTSpectrum(spectrum);
 	}
 }
+
+void AudioControlWidget::setStatus(const QString &statMsg)
+{
+	statusLabel->setText(statMsg);
+}
