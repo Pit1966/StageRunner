@@ -4,7 +4,7 @@
 //  and lighting systems on small to medium-sized stages
 //
 //  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
-//  (C) Copyright 2019 stonechip entertainment
+//  (C) Copyright 2024 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

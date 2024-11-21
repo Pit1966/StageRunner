@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QDebug>
 
 AudioFileInfo::AudioFileInfo()
 	: QObject()
