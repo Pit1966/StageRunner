@@ -912,6 +912,15 @@ FxItemList ScriptExecuter::getExecuterTempCopiesOfFx(FxItem *fx) const
     return list;
 }
 
+
+/**
+ * @brief ScriptExecuter::executeLine
+ * @param line
+ * @param reExecDelayed
+ * @return
+ *
+ * @attention m_fxScriptItem maybe NULL in execution!
+ */
 bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 {
 	bool ok = true;
@@ -1040,9 +1049,10 @@ bool ScriptExecuter::executeCmdStart(FxScriptLine *line)
 			ok &= myApp.unitLight->startFxScene(static_cast<FxSceneItem*>(fx));
 			break;
 		default:
-			LOGERROR(tr("Script '%1': Executing of target is not supported! Line #%2")
-					 .arg(m_fxScriptItem->name())
-					 .arg(line->lineNumber()));
+			LOGERROR(tr("Script '%1': Executing of target is not supported! Line #%2: %3 %4")
+					 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script name"))
+					 .arg(line->lineNumber())
+					 .arg(line->command(), line->parameters()));
 		}
 	}
 
