@@ -328,7 +328,7 @@ void StageRunnerMainWin::restore_window()
 		restoreState(set.value("MainWinDocks").toByteArray());
 		resize(set.value("MainWinSize").toSize());
 		if (set.contains("SplitterPos")) {
-			const QStringList s = set.value("SplitterPos").toString().split(';', Qt::SkipEmptyParts);
+			const QStringList s = set.value("SplitterPos").toString().split(';', QT_SKIP_EMPTY_PARTS);
 			QList<int>sizes;
 			for (const QString &e : s) {
 				sizes.append(e.toInt());
