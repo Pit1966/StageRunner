@@ -46,6 +46,10 @@ private:
     void fillMappingTree();
     void showIPAlert(QString ip);
 
+private slots:
+	void onAddOutputButtonClicked();
+	void onRemOutputButtonClicked();
+
 private:
     ArtNetPlugin* m_plugin;
 

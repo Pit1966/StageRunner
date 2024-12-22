@@ -31,21 +31,25 @@
 #endif
 #include <QMutex>
 #include <QTimer>
+#include <QList>
 
 #include "artnetpacketizer.h"
 
 #define ARTNET_PORT      6454
 
-typedef struct
+class UniverseInfo
 {
+public:
+	int outputTransmissionMode;
+	int type;
     ushort inputUniverse;
+	ushort outputUniverse;
 
-    QHostAddress outputAddress;
-    ushort outputUniverse;
-    int outputTransmissionMode;
+	QList<QHostAddress> outputAddresses;
+};
 
-    int type;
-} UniverseInfo;
+Q_DECLARE_METATYPE(UniverseInfo *)
+
 
 class ArtNetController : public QObject
 {
@@ -88,6 +92,8 @@ public:
     /** Set a specific output IP address for the given QLC+ universe.
      *  Return true if this restores default output IP address */
     bool setOutputIPAddress(quint32 universe, QString address);
+
+	bool setOutputAddIPAddress(quint32 universe, QString addrStr);
 
     /** Set a specific ArtNet output universe for the given QLC+ universe.
      *  Return true if this restores default output universe */

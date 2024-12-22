@@ -41,6 +41,7 @@ typedef struct
 #define ARTNET_OUTPUTIP "outputIP"
 #define ARTNET_OUTPUTUNI "outputUni"
 #define ARTNET_TRANSMITMODE "transmitMode"
+#define ARTNET_OUTPUT_ADD_IP "outputAddIP"
 
 class ArtNetPlugin : public QLCIOPlugin
 {

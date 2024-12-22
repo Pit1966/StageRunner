@@ -346,12 +346,17 @@ void ArtNetPlugin::setParameter(quint32 universe, quint32 line, Capability type,
     }
     else // if (type == Output)
     {
+		// this is live data config
+
         if (name == ARTNET_OUTPUTIP)
             unset = controller->setOutputIPAddress(universe, value.toString());
         else if (name == ARTNET_OUTPUTUNI)
             unset = controller->setOutputUniverse(universe, value.toUInt());
         else if (name == ARTNET_TRANSMITMODE)
             unset = controller->setTransmissionMode(universe, ArtNetController::stringToTransmissionMode(value.toString()));
+		else if (name.startsWith(ARTNET_OUTPUT_ADD_IP)) {
+			unset = controller->setOutputAddIPAddress(universe, value.toString());
+		}
         else
         {
             qWarning() << Q_FUNC_INFO << name << "is not a valid ArtNet output parameter";
@@ -359,6 +364,7 @@ void ArtNetPlugin::setParameter(quint32 universe, quint32 line, Capability type,
         }
     }
 
+	// this is plugin save parameter config
     if (unset)
         QLCIOPlugin::unSetParameter(universe, line, type, name);
     else

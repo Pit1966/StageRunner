@@ -114,7 +114,7 @@ void ArtNetController::addUniverse(quint32 universe, ArtNetController::Type type
     {
         UniverseInfo info;
         info.inputUniverse = universe;
-        info.outputAddress = m_broadcastAddr;
+		info.outputAddresses.append(m_broadcastAddr);
         info.outputUniverse = universe;
         info.outputTransmissionMode = Full;
         info.type = type;
@@ -169,9 +169,12 @@ bool ArtNetController::setOutputIPAddress(quint32 universe, QString address)
 	if (!m_universeMap.contains(universe))
         return false;
 
+	QList<QHostAddress> &outaddrs = m_universeMap[universe].outputAddresses;
+
     if (address.size() == 0)
     {
-        m_universeMap[universe].outputAddress = m_broadcastAddr;
+		if (!outaddrs.contains(m_broadcastAddr))
+			outaddrs.append(m_broadcastAddr);
         return true;
     }
 
@@ -194,9 +197,27 @@ bool ArtNetController::setOutputIPAddress(quint32 universe, QString address)
 
     qDebug() << "[setOutputIPAddress] transmit to IP: " << hostAddress.toString();
 
-    m_universeMap[universe].outputAddress = hostAddress;
+	if (outaddrs.isEmpty()) {
+		outaddrs.append(hostAddress);
+	}
+	else {
+		outaddrs[0] = hostAddress;
+	}
 
     return hostAddress == m_broadcastAddr;
+}
+
+bool ArtNetController::setOutputAddIPAddress(quint32 universe, QString addrStr)
+{
+	if (!m_universeMap.contains(universe))
+		return false;
+
+	QList<QHostAddress> &outaddrs = m_universeMap[universe].outputAddresses;
+	QHostAddress addr = QHostAddress(addrStr);
+	if (!outaddrs.contains(addr))
+		outaddrs.append(addr);
+
+	return false;
 }
 
 bool ArtNetController::setOutputUniverse(quint32 universe, quint32 artnetUni)
@@ -260,37 +281,44 @@ void ArtNetController::sendDmx(const quint32 universe, const QByteArray &data)
 {
     QMutexLocker locker(&m_dataMutex);
     QByteArray dmxPacket;
-    QHostAddress outAddress = m_broadcastAddr;
+	QList<QHostAddress> outAddressList;
+	outAddressList.append(m_broadcastAddr);
+
     quint32 outUniverse = universe;
     TransmissionMode transmitMode = Full;
 
-    if (m_universeMap.contains(universe))
-    {
+	if (m_universeMap.contains(universe))
+	{
         UniverseInfo info = m_universeMap[universe];
-        outAddress = info.outputAddress;
+		outAddressList = info.outputAddresses;
         outUniverse = info.outputUniverse;
         transmitMode = TransmissionMode(info.outputTransmissionMode);
     }
 
-    if (transmitMode == Full)
-    {
+	if (transmitMode == Full)
+	{
         QByteArray wholeuniverse(512, 0);
         wholeuniverse.replace(0, data.length(), data);
         m_packetizer->setupArtNetDmx(dmxPacket, outUniverse, wholeuniverse);
     }
-    else
+	else
+	{
         m_packetizer->setupArtNetDmx(dmxPacket, outUniverse, data);
+	}
 
-    qint64 sent = m_udpSocket->writeDatagram(dmxPacket, outAddress, ARTNET_PORT);
-    if (sent < 0)
-    {
-        qWarning() << "sendDmx failed";
-        qWarning() << "Errno: " << m_udpSocket->error();
-        qWarning() << "Errmgs: " << m_udpSocket->errorString();
-    }
-	else {
-        m_packetSent++;
-		// qDebug() << "write udp datagramm" << outAddress;
+	for (int t=0; t<outAddressList.size(); t++) {
+		QHostAddress host = outAddressList.at(t);
+		qint64 sent = m_udpSocket->writeDatagram(dmxPacket, outAddressList.at(t), ARTNET_PORT);
+		if (sent < 0)
+		{
+			qWarning() << "sendDmx failed" << outAddressList.at(t);
+			qWarning() << "Errno: " << m_udpSocket->error();
+			qWarning() << "Errmgs: " << m_udpSocket->errorString();
+		}
+		else {
+			m_packetSent++;
+			// qDebug() << "write udp datagramm" << host;
+		}
 	}
 }
 

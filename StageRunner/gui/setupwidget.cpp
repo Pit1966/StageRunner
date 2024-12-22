@@ -418,6 +418,7 @@ void SetupWidget::on_configurePluginButton_clicked()
 				if (!lineconf)
 					continue;
 				QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Output);
+				qDebug() << "get paras" << map;
 				if (lineconf->pUniverse == uni+1) {
 					QString ser = VariantMapSerializer::toString(map);
 					lineconf->pParameters = ser;
