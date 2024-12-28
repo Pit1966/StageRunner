@@ -3,9 +3,9 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V0.9.9.91
-APP_MILESTONE = TimeLine Qt6 threaded
-APP_PRODUCER = 2024 Stonechip Entertainment
+APPVERSION = V1.00.00.00
+APP_MILESTONE = 1h22
+APP_PRODUCER = 2025 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
 
