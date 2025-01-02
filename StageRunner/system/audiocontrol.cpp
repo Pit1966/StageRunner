@@ -918,14 +918,19 @@ void AudioControl::fadeVolTo(int slot, int targetVolume, int time_ms)
 
 	int currentVol = audioSlots[slot]->volume();
 	if (targetVolume == currentVol) {
-		LOGTEXT(tr("FADEVOL canceled since tareget volume is already reached in slot #%1").arg(slot+1));
+		LOGTEXT(tr("FADEVOL canceled since target volume is already reached in slot #%1").arg(slot+1));
 		return;
 	}
 
 	// This is a private message to my audio thread
 	AudioCtrlMsg msg(slot,CMD_AUDIO_FADEIN);
-	if (currentVol > targetVolume)
-		msg.ctrlCmd = CMD_AUDIO_FADEOUT;
+	if (currentVol > targetVolume) {
+		if (targetVolume > 0) {
+			msg.ctrlCmd = CMD_AUDIO_FADETO;
+		} else {
+			msg.ctrlCmd = CMD_AUDIO_FADEOUT;
+		}
+	}
 	msg.volume = targetVolume;
 	msg.fadetime = time_ms;
 	msg.executer = audioSlots[slot]->currentExecuter();

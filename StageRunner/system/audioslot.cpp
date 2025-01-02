@@ -377,7 +377,7 @@ bool AudioSlot::pauseFxAudio(bool state)
 	return true;
 }
 
-bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
+bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms, bool fadeToMode)
 {
 	if (time_ms <= 0) {
 		qDebug("AudioSlot::fadeoutFxAudio Fade out time = %d",time_ms);
@@ -390,7 +390,7 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
 	if (!FxItem::exists(m_currentFx))
 		return false;
 
-	m_fadeModeAudio = AUDIO_FADE_OUT;
+	m_fadeModeAudio = fadeToMode ? AUDIO_FADE_TO : AUDIO_FADE_OUT;
 
 	// Set Fadeout time
 	m_fadeVolumeInitial = m_currentVolume;
@@ -415,7 +415,7 @@ bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms)
  *
  * @note must be called from main thread !!
  */
-bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
+bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms, bool fadeToMode)
 {
 	if (time_ms <= 0) {
 		qDebug("Fade in time = %d",time_ms);
@@ -426,7 +426,7 @@ bool AudioSlot::fadeinFxAudio(int targetVolume, int time_ms)
 
 	if (!FxItem::exists(m_currentFx)) return false;
 
-	m_fadeModeAudio = AUDIO_FADE_IN;
+	m_fadeModeAudio = fadeToMode ? AUDIO_FADE_TO : AUDIO_FADE_IN;
 
 	// Set Fadein time
 	m_fadeVolumeInitial = m_currentVolume;
@@ -673,12 +673,33 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 		new_volume -= value * qAbs(m_fadeVolumeInitial - m_fadeVolumeTarget);
 		// some rounding before cast to integer
 		new_volume += 0.5;
+
+		qDebug() << "fadeout volume" << new_volume << "of target" << m_fadeVolumeTarget;
 	}
 	else if (m_fadeModeAudio == AUDIO_FADE_IN) {
 		new_volume = m_fadeVolumeInitial;
 		new_volume += value * qAbs(m_fadeVolumeTarget - m_fadeVolumeInitial);
 		// some rounding before cast to integer
 		new_volume += 0.5;
+	}
+	else if (m_fadeModeAudio == AUDIO_FADE_TO) {
+		if (m_fadeVolumeInitial > m_fadeVolumeTarget) {
+			new_volume = m_fadeVolumeInitial;
+			new_volume -= value * qAbs(m_fadeVolumeInitial - m_fadeVolumeTarget);
+			// some rounding before cast to integer
+			new_volume += 0.5;
+			// qDebug() << "fadeto volume down" << new_volume << "of target" << m_fadeVolumeTarget;
+		}
+		else if (m_fadeVolumeInitial < m_fadeVolumeTarget) {
+			new_volume = m_fadeVolumeInitial;
+			new_volume += value * qAbs(m_fadeVolumeTarget - m_fadeVolumeInitial);
+			// some rounding before cast to integer
+			new_volume += 0.5;
+			// qDebug() << "fadeto volume up" << new_volume << "of target" << m_fadeVolumeTarget;
+		}
+		else {
+			return;
+		}
 	}
 	else {
 		return;
@@ -699,6 +720,11 @@ void AudioSlot::on_fade_finished()
 		stopFxAudio();
 
 		LOGTEXT(tr("Audio fade out finished for slot %1: '%2'")
+			.arg(slotNumber+1).arg(currentFxName()));
+	}
+	else if (m_fadeModeAudio == AUDIO_FADE_TO) {
+		qDebug() << "fade to finished";
+		LOGTEXT(tr("Audio fade to volume finished for slot %1: '%2'")
 			.arg(slotNumber+1).arg(currentFxName()));
 	}
 	else if (m_fadeModeAudio == AUDIO_FADE_IN) {
@@ -747,10 +773,18 @@ void AudioSlot::audioCtrlReceiver(const AUDIO::AudioCtrlMsg &msg)
 		setVolume(msg.volume);
 		break;
 	case CMD_AUDIO_FADEIN:
-		fadeinFxAudio(msg.volume,msg.fadetime);
+		fadeinFxAudio(msg.volume, msg.fadetime);
 		break;
 	case CMD_AUDIO_FADEOUT:
-		fadeoutFxAudio(0,msg.fadetime);
+		fadeoutFxAudio(0, msg.fadetime);
+		break;
+	case CMD_AUDIO_FADETO:
+		if (m_currentVolume > msg.volume) {
+			fadeoutFxAudio(msg.volume, msg.fadetime, true);
+		}
+		else if (m_currentVolume < msg.volume) {
+			fadeinFxAudio(msg.volume, msg.fadetime, true);
+		}
 		break;
 	case CMD_AUDIO_PAUSE:
 		pauseFxAudio(!(m_runStatus == AUDIO_PAUSED));

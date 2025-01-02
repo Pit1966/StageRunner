@@ -44,7 +44,8 @@ enum CtrlCmd {
 	CMD_SCENE_FADETO			= 12,
 	CMD_VIDEO_START				= 13,
 	CMD_VIDEO_STATUS_CHANGED	= 14,
-	CMD_AUDIO_CHANGE_PAN		= 15,
+	CMD_AUDIO_CHANGE_PAN		= 15,			// todo maybe we can move this and the next behind CMD_AUDIO_FADEOUT
+	CMD_AUDIO_FADETO			= 16,
 
 
 	CMD_STATUS_REPORT		= CMD_NONE,
@@ -85,7 +86,8 @@ enum AudioSeqState {
 enum AudioFadeMode {
 	AUDIO_FADE_IDLE,
 	AUDIO_FADE_IN,
-	AUDIO_FADE_OUT
+	AUDIO_FADE_OUT,
+	AUDIO_FADE_TO
 };
 
 enum AudioErrorType {

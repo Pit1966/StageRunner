@@ -95,8 +95,8 @@ public:
 	bool startFxAudio(FxAudioItem * fxa, Executer *exec, qint64 startPosMs = 0, int initVol = -1, int fadeInMs = -1, int pan = -1);
 	bool stopFxAudio();
 	bool pauseFxAudio(bool state);
-	bool fadeoutFxAudio(int targetVolume, int time_ms);
-	bool fadeinFxAudio(int targetVolume, int time_ms);
+	bool fadeoutFxAudio(int targetVolume, int time_ms, bool fadeToMode = false);
+	bool fadeinFxAudio(int targetVolume, int time_ms, bool fadeToMode = false);
 	void setVolume(int vol);
 	void setVolumeFromTimeLine(int vol);
 	bool setVolumeFromDMX(int dmxvol);

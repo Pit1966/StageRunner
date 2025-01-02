@@ -1417,7 +1417,9 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		}
 
-	} else {
+	}
+	else {
+		// item is is selected
 		if (!FxItem::exists(item->linkedFxItem))
 			return;
 		FxItem *fx = item->linkedFxItem;
@@ -1451,6 +1453,9 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		if (fxtype == FX_SCRIPT) {
 			act = menu.addAction(tr("Clone Fx script"));
 			act->setObjectName("12");
+		} else {
+			act = menu.addAction(tr("Add Fx script"));
+			act->setObjectName("13");
 		}
 
 		if (fxtype == FX_AUDIO) {
@@ -1533,8 +1538,13 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		case 12:
 			fxList()->cloneSelectedScriptItem();
 			refreshList(curScrollPos);
-
 			break;
+
+		case 13:
+			fxList()->addFxScript();
+			refreshList(curScrollPos);
+			break;
+
 		default:
 			break;
 		}

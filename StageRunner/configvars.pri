@@ -3,7 +3,7 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V1.00.00.00
+APPVERSION = V1.00.01.00
 APP_MILESTONE = 1h22
 APP_PRODUCER = 2025 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
