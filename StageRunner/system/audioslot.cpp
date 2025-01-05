@@ -674,7 +674,7 @@ void AudioSlot::on_fade_frame_changed(qreal value)
 		// some rounding before cast to integer
 		new_volume += 0.5;
 
-		qDebug() << "fadeout volume" << new_volume << "of target" << m_fadeVolumeTarget;
+		// qDebug() << "fadeout volume" << new_volume << "of target" << m_fadeVolumeTarget;
 	}
 	else if (m_fadeModeAudio == AUDIO_FADE_IN) {
 		new_volume = m_fadeVolumeInitial;
