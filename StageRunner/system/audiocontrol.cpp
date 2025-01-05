@@ -652,6 +652,27 @@ bool AudioControl::startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *e
 
 bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
 {
+	if (debug) {
+		qDebug() << "_startFxAudioStage2" << fxa->name()
+				 << (exec ? QString("executer:%1").arg(exec->getIdString()) : QString("no executer"))
+				 << QString("atMs: %1").arg(atMs)
+				 << "initVol" << initVol
+				 << QString("fadeInMs: %1").arg(fadeInMs);
+	}
+
+	// redirect command, if executed  from main thread, but we are in background task mode
+	if (m_isInThread && Log::isMainThread()) {
+		bool ok = QMetaObject::invokeMethod(m_audioWorker, "acStartFxAudioStage2", Qt::QueuedConnection,
+									   // Q_RETURN_ARG(bool, retok),
+									   Q_ARG(FxAudioItem*, fxa),
+									   Q_ARG(Executer*, exec),
+									   Q_ARG(qint64, atMs),
+									   Q_ARG(int, initVol),
+									   Q_ARG(int, fadeInMs));
+
+		return ok;
+	}
+
 	QMutexLocker lock(slotMutex);
 
 	// Let us test if Audio is already running in a slot (if double start prohibition is enabled)
@@ -694,6 +715,23 @@ bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 
 	if (atMs < 0)
 		atMs = 0;
 
+
+	// // redirect command, if executed  from main thread, but we are in background task mode
+	// if (m_isInThread && Log::isMainThread()) {
+	// 	bool ok = QMetaObject::invokeMethod(m_audioWorker, "acStartFxAudioInSlot", Qt::QueuedConnection,
+	// 										// Q_RETURN_ARG(bool, retok),
+	// 										Q_ARG(FxAudioItem*, fxa),
+	// 										Q_ARG(int, slot),
+	// 										Q_ARG(Executer*, exec),
+	// 										Q_ARG(qint64, atMs),
+	// 										Q_ARG(int, initVol),
+	// 										Q_ARG(int, fadeInMs));
+
+	// 	qDebug() << "redirect _startFxAudioInSlot" << ok;
+
+	// 	return ok;
+	// }
+
 	return _startFxAudioInSlot(fxa, slot, exec, atMs, initVol, fadeInMs);
 }
 
@@ -712,6 +750,15 @@ bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 
  */
 bool AudioControl::_startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec, qint64 atMs, int initVol, int fadeInMs)
 {
+	if (debug) {
+		qDebug() << "_startFxAudioInSlot" << fxa->name()
+				 << "slotnum" << slotnum
+				 << (exec ? QString("executer:%1").arg(exec->getIdString()) : QString("no executer"))
+				 << QString("atMs: %1").arg(atMs)
+				 << "initVol" << initVol
+				 << QString("fadeInMs: %1").arg(fadeInMs);
+	}
+
 	QMutexLocker lock(slotMutex);
 
 	if (audioSlots[slotnum]->status() == AUDIO_INIT) {

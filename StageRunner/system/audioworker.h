@@ -4,6 +4,9 @@
 #include <QObject>
 
 class AudioControl;
+class FxAudioItem;
+class Executer;
+
 
 class AudioWorker : public QObject
 {
@@ -19,6 +22,8 @@ public:
 
 public slots:
 	void initMediaPlayerInstances();
+	bool acStartFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
+	bool acStartFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 
 signals:
 

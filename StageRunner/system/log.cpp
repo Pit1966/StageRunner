@@ -87,7 +87,9 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 
 	switch (type) {
 	case QtDebugMsg:
-		fprintf(stderr, "Debug: %s\n", localMsg.constData());
+		fprintf(stderr, "DEBUG(%s): %s\n",
+				QThread::currentThread()->objectName().toLocal8Bit().constData(),
+				localMsg.constData());
 //		printf("Debug: %s\n",msg.toLocal8Bit().data());
 		break;
 #if QT_VERSION >= 0x050500
@@ -96,7 +98,7 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 		break;
 #endif
 	case QtWarningMsg:
-		LOGERROR(QString("Warning(Qt): %1  %2").arg(msg,srcContext));
+		LOGERROR(QString("Warning(Qt): %1  %2").arg(msg, srcContext));
 		break;
 	case QtCriticalMsg:
 		fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -300,6 +302,11 @@ void Log::do_append_log_text (const QString & txt, int level, MsgLogType type, b
 		emit newtext(msg);
 
 		msg += "\n";
+
+		if (debug)
+			fprintf(stderr, "LOGTEXT(%s): %s", QThread::currentThread()->objectName().toLocal8Bit().constData(),
+					msg.toLocal8Bit().constData());
+
 		m_logfileMutex.lock();
 		if (logfileEnabled) {
 			m_logfile.write(msg.toUtf8());

@@ -145,14 +145,15 @@ public:
 
 private:
 	// void run();
-	bool _startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
-	bool _startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
 #ifdef USE_SDL
 	static void sdlChannelDone(int chan);
 	static void sdlPostMix(void *udata, quint8 *stream, int len);
 #endif
 
 private slots:
+	bool _startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
+	bool _startFxAudioInSlot(FxAudioItem *fxa, int slotnum, Executer *exec = nullptr, qint64 atMs = -1, int initVol = -1, int fadeInMs = -1);
+
 	void _vuLevelChangedReceiver(int slotnum, qreal left, qreal right);
 	void _fftSpectrumChangedReceiver(int slotnum, FrqSpectrum *spec);
 	void _audioWorkerFinished();

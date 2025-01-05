@@ -55,6 +55,15 @@ AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 {
 }
 
+/**
+ * @brief Return slot number (aka channel number) of this audio player instance
+ * @return
+ */
+int AudioPlayer::currentAudioSlotNumber() const
+{
+	return m_parentAudioSlot.slotNumber;
+}
+
 bool AudioPlayer::setStartDelay(int ms)
 {
 	if (ms <= 0)

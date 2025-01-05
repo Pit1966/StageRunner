@@ -95,6 +95,9 @@ public:
 
 private:
 	void init();
+
 };
+
+Q_DECLARE_METATYPE(FxAudioItem *)
 
 #endif // FXAUDIOITEM_H

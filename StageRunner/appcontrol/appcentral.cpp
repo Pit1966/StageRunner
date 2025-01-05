@@ -988,6 +988,8 @@ void AppCentral::init()
 	qRegisterMetaType<AUDIO::AudioStatus>("AUDIO::AudioStatus");
 	// qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
 	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
+	qRegisterMetaType<FxAudioItem*>();
+	qRegisterMetaType<Executer*>();
 	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules

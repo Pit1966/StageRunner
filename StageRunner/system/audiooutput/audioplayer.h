@@ -87,6 +87,7 @@ public:
 	inline const QString & audioErrorString() const {return m_audioErrorString;}
 	inline CtrlCmd currentAudioCmd() const {return m_currentCtrlCmd;}
 	inline int currentLoop() const {return m_loopCnt;}
+	int currentAudioSlotNumber() const;
 	bool setStartDelay(int ms);
 	inline void setFxName(const QString &name) {m_fxName = name;}
 

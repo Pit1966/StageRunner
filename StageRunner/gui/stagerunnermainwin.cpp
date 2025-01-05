@@ -1101,6 +1101,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 				}
 
 				if (!isAutoRepeat) {
+					// get all fx items, that are bound to the pressed key combination
+					// and start each of this
 					QList<FxItem *>fxlist = appCentral->project->mainFxList()->getFxListByKeyCode(key + activeKeyModifiers);
 					if (fxlist.size()) {
 						for (int t=0; t<fxlist.size(); t++) {
