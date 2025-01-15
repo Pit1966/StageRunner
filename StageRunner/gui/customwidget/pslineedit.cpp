@@ -23,6 +23,7 @@
 
 #include "pslineedit.h"
 #include "qtstatictools.h"
+#include "qt_versions.h"
 
 #include <QDebug>
 
@@ -84,7 +85,13 @@ QSize PsLineEdit::sizeHint() const
 	ensurePolished();
 	QFontMetrics fm(font());
 	int h = qMax(fm.height(), 10);
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+    int w = fm.width(text()) + 8;
+#else
 	int w = fm.horizontalAdvance(text()) + 8;
+#endif
+
 	return QSize(w,h);
 }
 

@@ -696,9 +696,13 @@ void StageRunnerMainWin::onStatusTimer()
 		QString time = dt.toLocalTime().toString("ddd d. MMMM hh:mm:ss");
 		m_timeLabel->setText(time);
 
-		// calculate size of text
-		QFontMetrics fm(m_timeLabel->font());
-		int fw = fm.horizontalAdvance(time) + 8;
+        // calculate size of text
+        QFontMetrics fm(m_timeLabel->font());
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+        int fw = fm.width(time) + 8;
+#else
+        int fw = fm.horizontalAdvance(time) + 8;
+#endif
 		// qDebug() << "mainwin fw" << fw << m_timeLabel->width();
 		if (fw > m_timeLabel->width() || m_timeLabel->x() > height() - fw) {
 			m_timeLabel->resize(fw, m_timeLabel->height());
