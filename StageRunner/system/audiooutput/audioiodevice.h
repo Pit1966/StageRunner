@@ -149,7 +149,7 @@ signals:
 	void vuLevelChanged(qreal left, qreal right);
 	void frqSpectrumChanged(FrqSpectrum *spec);
 	void audioDurationDetected(qint64 ms);
-	void rawDataProcessed(const char *data, int size, const AudioFormat &audioFormat);
+	// void rawDataProcessed(const char *data, int size, const AudioFormat &audioFormat);
 
 };
 

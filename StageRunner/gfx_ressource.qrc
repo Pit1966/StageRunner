@@ -80,5 +80,9 @@
         <file>fonts/SourceCodePro-Regular.otf</file>
         <file>fonts/SourceCodePro-Semibold.otf</file>
         <file>fonts/SourceSansPro-ExtraLight.otf</file>
+        <file>gfx/icons/dialog-warning.png</file>
+        <file>gfx/icons/bulb.png</file>
+        <file>gfx/icons/usbstick.png</file>
+        <file alias="warning">gfx/icons/gainknob.png</file>
     </qresource>
 </RCC>

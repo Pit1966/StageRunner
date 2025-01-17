@@ -89,6 +89,7 @@ bool IODeviceAudioBackend::setSourceFilename(const QString &path, const QString 
 
 void IODeviceAudioBackend::start(int loops)
 {
+	qDebug() << "start " << Q_FUNC_INFO;
 	m_loopCnt = 1;
 	if (loops > 1) {
 		m_loopTarget = loops;

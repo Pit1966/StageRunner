@@ -72,8 +72,7 @@ AudioIODevice::AudioIODevice(AudioFormat format, QObject *parent) :
 	connect(audio_decoder,SIGNAL(finished()),this,SLOT(on_decoding_finished()));
 	connect(audio_decoder,SIGNAL(error(QAudioDecoder::Error)),this,SLOT(if_error_occurred(QAudioDecoder::Error)));
 	connect(audio_decoder,SIGNAL(durationChanged(qint64)),this,SLOT(if_audio_duration_changed(qint64)));
-	connect(this,SIGNAL(rawDataProcessed(const char*,int,AudioFormat)),this,SLOT(calcVuLevel(const char*,int,AudioFormat)),Qt::QueuedConnection);
-
+	// connect(this,SIGNAL(rawDataProcessed(const char*,int,AudioFormat)),this,SLOT(calcVuLevel(const char*,int,AudioFormat)),Qt::QueuedConnection);
 }
 
 AudioIODevice::~AudioIODevice()
@@ -99,7 +98,7 @@ bool AudioIODevice::open(QIODevice::OpenMode mode)
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
-	// qDebug("want readData %lli",maxlen);
+	qDebug("want readData %lli",maxlen);
 	if (maxlen == 0)
 		return 0;
 

@@ -153,16 +153,28 @@ void SetupWidget::copy_settings_to_gui()
 
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		qDebug() << "slot" << t+1 << "audiodevice" << set->pSlotAudioDevice[t];
 		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
 		if (!combo) continue;
 		combo->clear();
 		combo->addItem("system default");
 
+		bool devAvailable = false;
+
 		foreach (QString devname, myapp->unitAudio->audioDeviceNames()) {
 			combo->addItem(devname);
 			// set current configuration
-			if (devname == set->pSlotAudioDevice[t])
+			if (devname == set->pSlotAudioDevice[t]) {
 				combo->setCurrentIndex(combo->count()-1);
+				devAvailable = true;
+			}
+		}
+
+		if (!devAvailable) {
+			QString configuredDev = QString("%1").arg(set->pSlotAudioDevice[t]);
+			combo->addItem(configuredDev);
+			combo->setItemIcon(combo->count()-1, QIcon(":/gfx/icons/dialog-warning.png"));
+			combo->setCurrentIndex(combo->count()-1);
 		}
 	}
 

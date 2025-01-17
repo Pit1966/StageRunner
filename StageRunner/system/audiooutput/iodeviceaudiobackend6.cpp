@@ -71,6 +71,12 @@ IODeviceAudioBackend::~IODeviceAudioBackend()
 	delete m_audioIODev;
 }
 
+/**
+ * @brief Set source filename, and implicitly open it and start decoding
+ * @param path
+ * @param fxName
+ * @return
+ */
 bool IODeviceAudioBackend::setSourceFilename(const QString &path, const QString &fxName)
 {
 	if (!QFile::exists(path))
