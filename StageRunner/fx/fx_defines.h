@@ -4,6 +4,7 @@
 /// TimeLine Obj types
 enum LINKED_OBJ_TYPE {
 	LINKED_UNDEF	= 0,
+	CMD_PAUSE		= 1,
 	LINKED_FX_SCENE	= 10,
 	LINKED_FX_AUDIO,
 	LINKED_FX_CLIP,

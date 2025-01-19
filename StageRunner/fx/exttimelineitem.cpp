@@ -98,6 +98,9 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 	menu.addAction(tr("Delete item"), this, &ExtTimeLineItem::contextDeleteMe);
 	menu.addAction(tr("Link to Fx"), this, &ExtTimeLineItem::contextLinkToFx);
+	if (m_fxID == 0) {
+		menu.addAction(tr("Link to PAUSE"), this, &ExtTimeLineItem::contextLinkToPause);
+	}
 	menu.addAction(tr("Edit label"), this, &ExtTimeLineItem::contextEditLabel);
 
 	menu.addAction(tr("Edit fadeIN time"), this, &ExtTimeLineItem::contextFadeInTime);
@@ -234,11 +237,15 @@ void ExtTimeLineItem::contextDeleteMe()
 
 void ExtTimeLineItem::contextEditLabel()
 {
+	bool ok;
 	QString newlabel = QInputDialog::getText(m_timeline,
 											 tr("Item config"),
 											 tr("Edit Label"),
 											 QLineEdit::Normal,
-											 m_label);
+											 m_label,
+											 &ok);
+	if (!ok)
+		return;
 
 	if (newlabel != m_label) {
 		if (newlabel.isEmpty()) {
@@ -259,6 +266,14 @@ void ExtTimeLineItem::contextLinkToFx()
 									tr("Enter ID of Fx"));
 
 	linkToFxWithId(fxId);
+}
+
+void ExtTimeLineItem::contextLinkToPause()
+{
+	m_linkedObjType = CMD_PAUSE;
+	m_colorBG = 0xb02127;
+	setDuration(1000);
+	m_maxDurationMs = 5000;
 }
 
 void ExtTimeLineItem::contextFadeInTime()

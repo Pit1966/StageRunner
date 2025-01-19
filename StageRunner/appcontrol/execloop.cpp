@@ -30,6 +30,7 @@
 
 #include <QObject>
 #include <QEventLoop>
+#include <QDebug>
 
 FxExecLoop::FxExecLoop(FxControl &unit_fx)
 	: QObject()
@@ -69,10 +70,12 @@ void FxExecLoop::processPendingEvents()
 		Executer *exec = it.next();
 		switch (exec->state()) {
 		case Executer::EXEC_PAUSED:
-			exec->setTargetTimeToCurrent();
+			if (exec->type() != Executer::EXEC_TIMELINE)
+				exec->setTargetTimeToCurrent();
 			break;
 		case Executer::EXEC_RUNNING:
 		case Executer::EXEC_FINISH:
+			// qDebug() << "current runtime" << exec->currentRunTimeMs() << exec->currentTargetTimeMs();
 			if (exec->processTimeReached()) {
 				bool active = exec->processExecuter();
 				if (!active) {

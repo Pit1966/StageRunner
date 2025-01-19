@@ -381,7 +381,11 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atM
 	}
 
 	TimeLineExecuter *exec = myApp.execCenter->findTimeLineExecuter(fxtimeline);
-	if (exec && exec->isMultiStartDisabled()) {
+	if (exec && exec->isPaused()) {
+		exec->setPaused(false);
+		return exec;
+	}
+	else if (exec && exec->isMultiStartDisabled()) {
 		LOGTEXT(tr("<font color=green>Start timeline</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
 				.arg(fxtimeline->name()));
 		return nullptr;

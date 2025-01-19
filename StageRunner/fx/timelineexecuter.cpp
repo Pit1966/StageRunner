@@ -24,6 +24,14 @@ using namespace AUDIO;
 
 // -------------------------------------------------------------------------------------
 
+void TimeLineExecuter::onPauseEvent(bool active)
+{
+	if (!active) {
+		runTime.cont();
+		runTimeOne.cont();
+	}
+}
+
 bool TimeLineExecuter::processExecuter()
 {
 	if (myState == EXEC_IDLE) {
@@ -62,6 +70,13 @@ bool TimeLineExecuter::processExecuter()
 
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			execObjBeginPosForFx(obj->fxID(), ev);
+		}
+		else if (obj->type() == CMD_PAUSE) {
+			m_pausedAtMs = ev.timeMs;
+			setPaused(true);
+			runTime.stop();
+			runTimeOne.stop();
+			qDebug() << " timeline -> set paused";
 		}
 	}
 	else if (ev.evType == EV_STOP) {

@@ -65,6 +65,8 @@ private:
 	QPointer<FxTimeLineItem> m_curFxItem;
 	QPointer<TimeLineExecuter> m_timelineExecuter;
 
+	bool m_timelineIsRunning	= false;
+
 	static QList<FxTimeLineEditWidget*>m_timelineEditWidgetList;
 
 public:
@@ -80,6 +82,8 @@ public:
 
 	bool setFxTimeLineItem(FxTimeLineItem *fxt);
 	bool copyToFxTimeLineItem(FxTimeLineItem *fxt);
+
+	bool stopRunningTimeLine();
 
 public slots:
 	void onChildRunStatusChanged(int runStatus);

@@ -93,6 +93,7 @@ public:
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
 	virtual void processProgress();
+	virtual void onPauseEvent(bool active);
 
 	void destroyLater();
 	bool activateProcessing(bool continueProcessing = false);
@@ -100,6 +101,7 @@ public:
 	bool setPaused(bool state);
 	bool setFinish();
 	inline bool isRunning() const {return (myState == EXEC_RUNNING || myState == EXEC_FINISH);}
+	inline bool isPaused() const {return myState == EXEC_PAUSED;}
 	inline qint64 currentTargetTimeMs() {return eventTargetTimeMs;}
 	inline qint64 currentRunTimeMs() {return runTime.elapsed();}
 	inline bool processTimeReached() {return (runTime.elapsed() >= eventTargetTimeMs);}

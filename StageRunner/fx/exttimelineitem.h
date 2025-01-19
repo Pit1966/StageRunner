@@ -36,6 +36,7 @@ private:
 	void contextDeleteMe();
 	void contextEditLabel();
 	void contextLinkToFx();
+	void contextLinkToPause();
 	void contextFadeInTime();
 	void contextFadeOutTime();
 

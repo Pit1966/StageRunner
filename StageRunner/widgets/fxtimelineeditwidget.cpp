@@ -172,6 +172,10 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 					extTLI->setBackgroundColor(QColor(0x413f32));
 					extTLI->setBorderColor(QColor(0x413f32));
 				}
+				else if (extTLI->linkedObjType() == CMD_PAUSE) {
+					extTLI->setBackgroundColor(QColor(0xb02127));
+					extTLI->setBorderColor(QColor(0xb02127));
+				}
 
 				hasItems = true;
 			}
@@ -409,13 +413,38 @@ bool FxTimeLineEditWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	return m_timeline->copyToFxTimeLineItem(fxt);
 }
 
+bool FxTimeLineEditWidget::stopRunningTimeLine()
+{
+	if (!m_timelineExecuter) {
+		qDebug() << "timeline executer not known";
+		if (m_curFxItem == nullptr) {
+			qWarning() << "FxTimeLineItem not available!";
+			return false;
+		}
+		m_timelineExecuter = m_aC->execCenter->findTimeLineExecuter(m_curFxItem);
+
+		if (m_timelineExecuter == nullptr) {
+			qWarning() << "TimeLineExecutor for TimeLineItem not found";
+			m_timelineIsRunning = false;
+			return false;
+		}
+	}
+
+	m_timelineExecuter->setStopAllAtFinishFlag();
+	m_timelineExecuter->setFinish();
+
+	return false;
+}
+
 void FxTimeLineEditWidget::onChildRunStatusChanged(int runStatus)
 {
 	if (runStatus == Executer::EXEC_RUNNING) {
 		runButton->setText("Stop");
+		m_timelineIsRunning = true;
 	}
 	else {
 		runButton->setText("Run");
+		m_timelineIsRunning = false;
 	}
 }
 
@@ -437,6 +466,11 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 	if (!m_curFxItem)
 		return;
 
+	if (m_timelineIsRunning) {
+		bool stopped = stopRunningTimeLine();
+		return;
+	}
+
 	// we have to update the FxItem with timeline changes
 	/// @todo modify flag would be nice here.
 	copyToFxTimeLineItem(m_curFxItem);
@@ -444,9 +478,9 @@ void FxTimeLineEditWidget::on_runButton_clicked()
 	if (!m_timelineExecuter) {
 		m_timelineExecuter = m_fxCtrl->startFxTimeLine(m_curFxItem, m_timeline->cursorPos());
 
-		if (m_timelineExecuter && m_timelineExecuter->isRunning()) {
-			runButton->setText("Stop");
-		}
+		// if (m_timelineExecuter && m_timelineExecuter->isRunning()) {
+		// 	runButton->setText("Stop");
+		// }
 	}
 	else {
 		m_timelineExecuter->setStopAllAtFinishFlag();

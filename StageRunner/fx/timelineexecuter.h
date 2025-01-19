@@ -63,12 +63,14 @@ protected:
 	int m_curveIntervalMs		= 40;
 
 	// temp
+	int m_pausedAtMs				= -1;			///< run time when pause started
 	int m_nextCurveTrackEventAtMs	= -1;
 	bool m_triggerCurveEvent		= false;		///< override next timeline ITEMS event with a regulary called envelope/curve event
 	bool m_stopAllFxAtFinish		= false;		///< if set, all Fx started by this timeline are stopped when timeline has finished (stop audio, script, scene)
 
 public:
 	inline TYPE type() const override {return EXEC_TIMELINE;}
+	void onPauseEvent(bool active) override;
 	bool processExecuter() override;
 	void processProgress() override;
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}

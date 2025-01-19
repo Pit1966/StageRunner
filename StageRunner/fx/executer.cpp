@@ -87,6 +87,11 @@ void Executer::processProgress()
 {
 }
 
+void Executer::onPauseEvent(bool active)
+{
+	Q_UNUSED(active)
+}
+
 QString Executer::getIdString() const
 {
 	if (idString.isEmpty()) {
@@ -150,6 +155,7 @@ bool Executer::setPaused(bool state)
 	switch (myState) {
 	case EXEC_RUNNING:
 		if (state) {
+			onPauseEvent(true);
 			myState = EXEC_PAUSED;
 			emit changed(this);
 			return true;
@@ -157,6 +163,7 @@ bool Executer::setPaused(bool state)
 		break;
 	case EXEC_PAUSED:
 		if (!state) {
+			onPauseEvent(false);
 			myState = EXEC_RUNNING;
 			emit changed(this);
 			return true;
