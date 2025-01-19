@@ -74,6 +74,7 @@ private slots:
 	void onAudioIODevReadReady();
 	void onMediaDurationDetected(qint64 ms);
 
+
 };
 
 #endif // IODEVICEAUDIOBACKEND_H

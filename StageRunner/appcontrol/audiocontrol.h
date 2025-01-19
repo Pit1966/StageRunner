@@ -212,6 +212,8 @@ signals:
 	void masterVolumeChanged(int vol);
 	void mediaPlayerInstancesCreated(const QString &status);
 
+	void audioIdleEventCountChanged(int count);
+
 	friend class AudioWorker;
 };
 

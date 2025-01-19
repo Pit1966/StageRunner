@@ -183,3 +183,8 @@ void AudioControlWidget::setStatus(const QString &statMsg)
 {
 	statusLabel->setText(statMsg);
 }
+
+void AudioControlWidget::setStatusExt(const QString &statMsgExt)
+{
+	extStatusLabel->setText(statMsgExt);
+}

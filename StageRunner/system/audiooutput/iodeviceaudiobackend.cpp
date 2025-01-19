@@ -209,7 +209,9 @@ bool IODeviceAudioBackend::isFFTEnabled() const
 void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 {
 	m_currentOutputState = state;
-	qDebug() << QThread::currentThread()->objectName() << "Slot" << currentAudioSlotNumber() << ", QAudioDevice state changed" << state;
+	// qDebug() << QThread::currentThread()->objectName() << "Slot" << currentAudioSlotNumber()
+	// 		 << ", QAudioDevice state changed" << state
+	// 		 << "current audiostatus" << m_currentAudioStatus;
 
 	AudioStatus audiostatus;
 
@@ -223,6 +225,7 @@ void IODeviceAudioBackend::onAudioOutputStatusChanged(QAudio::State state)
 		} else {
 			audiostatus = AUDIO_IDLE;
 		}
+		emit audioIdleEventsChanged(++m_audioIdleEventCount);
 		break;
 	case QAudio::SuspendedState:
 		audiostatus = AUDIO_PAUSED;

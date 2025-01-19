@@ -60,6 +60,9 @@ protected:
 	// run time
 	int m_currentPlaybackSamplerate;
 
+	// debug and help
+	int m_audioIdleEventCount;							///< amount of QAudioDevice::Idle events. Used to check if audio buffer ist to small
+
 	// VU meter
 	double frame_energy_peak;
 	double sample_peak;
@@ -127,6 +130,9 @@ signals:
 	void mediaDurationChanged(qint64 ms);
 	void vuLevelChanged(qreal left, qreal right);
 	void frqSpectrumChanged(FrqSpectrum *spec);
+
+	// not used by all audio backends
+	void audioIdleEventsChanged(int count);
 
 };
 

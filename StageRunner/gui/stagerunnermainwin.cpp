@@ -225,7 +225,8 @@ void StageRunnerMainWin::initConnects()
 	connect(appCentral->unitAudio,SIGNAL(vuLevelChanged(int,qreal,qreal)),audioCtrlGroup,SLOT(setVuMeterLevel(int,qreal,qreal)));
 	connect(appCentral->unitAudio,SIGNAL(fftSpectrumChanged(int,FrqSpectrum*)),audioCtrlGroup,SLOT(setFFTSpectrum(int,FrqSpectrum*)));
 	connect(appCentral->unitAudio,SIGNAL(masterVolumeChanged(int)),seqCtrlGroup,SLOT(setMasterVolume(int)));
-	connect(appCentral->unitAudio,SIGNAL(mediaPlayerInstancesCreated(QString)),audioCtrlGroup,SLOT(setStatus(QString)));
+	connect(appCentral->unitAudio,SIGNAL(mediaPlayerInstancesCreated(QString)),this,SLOT(onMediaPlayerInstancesCreated(QString)));
+	connect(appCentral->unitAudio,SIGNAL(audioIdleEventCountChanged(int)),this,SLOT(onAudioIdleEventsChanged(int)));
 
 	// Light Control -> SceneStatusWidget
 	connect(appCentral->unitLight,SIGNAL(sceneChanged(FxSceneItem*)),sceneStatusDisplay,SLOT(propagateScene(FxSceneItem*)));
@@ -705,6 +706,23 @@ void StageRunnerMainWin::onStatusTimer()
 			m_timeLabel->move(width() - fw, m_timeLabel->y());
 		}
 	}
+}
+
+void StageRunnerMainWin::onAudioIdleEventsChanged(int count)
+{
+	if (count == 0) {
+		audioCtrlGroup->setStatusExt(QString());
+	}
+	else {
+		QString stat = QString("Audio Idle count: (buffer underrun): %1").arg(count);
+		audioCtrlGroup->setStatusExt(stat);
+	}
+}
+
+void StageRunnerMainWin::onMediaPlayerInstancesCreated(const QString &msg)
+{
+	audioCtrlGroup->setStatus(msg);
+	onAudioIdleEventsChanged(0);
 }
 
 void StageRunnerMainWin::openFxSceneItemPanel(FxSceneItem *fx)

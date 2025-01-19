@@ -1579,6 +1579,9 @@ void AudioControl::createMediaPlayInstances()
 		connect(this,SIGNAL(audioThreadCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),slot,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));
 		connect(slot,SIGNAL(vuLevelChanged(int,qreal,qreal)),this,SLOT(_vuLevelChangedReceiver(int,qreal,qreal)));
 		connect(slot,SIGNAL(frqSpectrumChanged(int,FrqSpectrum*)),this,SLOT(_fftSpectrumChangedReceiver(int,FrqSpectrum*)));
+
+		// buffer underrun detection
+		connect(slot->audioPlayer(), SIGNAL(audioIdleEventsChanged(int)), this, SIGNAL(audioIdleEventCountChanged(int)));
 	}
 	// Enable FFT
 	setFFTAudioChannelFromMask(myApp.userSettings->pFFTAudioMask);

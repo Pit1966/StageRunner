@@ -98,7 +98,7 @@ bool AudioIODevice::open(QIODevice::OpenMode mode)
 qint64 AudioIODevice::readData(char *data, qint64 maxlen)
 {
 	qint64 avail = bytes_avail-bytes_read;
-	qDebug("want readData %lli",maxlen);
+	// qDebug("want readData %lli",maxlen);
 	if (maxlen == 0)
 		return 0;
 

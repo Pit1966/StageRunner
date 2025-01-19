@@ -68,6 +68,7 @@ public slots:
 	void setVuMeterLevel(int channel, qreal left, qreal right);
 	void setFFTSpectrum(int channel, FrqSpectrum *spectrum);
 	void setStatus(const QString &statMsg);
+	void setStatusExt(const QString &statMsgExt);
 
 
 signals:

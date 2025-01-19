@@ -117,6 +117,8 @@ public slots:
 private slots:
 	void setStatusMessage(const QString &msg, int displayTimeMs);
 	void onStatusTimer();
+	void onAudioIdleEventsChanged(int count);
+	void onMediaPlayerInstancesCreated(const QString &msg);
 
 	void on_addAudioFxButton_clicked();
 	void on_actionLoad_Project_triggered();
