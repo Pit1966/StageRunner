@@ -25,4 +25,5 @@ public:
 
 #endif
 
+
 #endif // QT_VERSIONS_H
