@@ -152,10 +152,40 @@ void SetupWidget::copy_settings_to_gui()
 	}
 
 
+	// primara audio devices for slots
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		QString curDevName = set->pSlotAudioDevice[t];
 		qDebug() << "slot" << t+1 << "audiodevice" << curDevName;
 		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
+		if (!combo)
+			continue;
+		combo->clear();
+		combo->addItem("system default");
+
+		bool devAvailable = false;
+
+		foreach (QString devname, myapp->unitAudio->audioDeviceNames()) {
+			combo->addItem(devname);
+			// set current configuration
+			if (devname == curDevName) {
+				combo->setCurrentIndex(combo->count()-1);
+				devAvailable = true;
+			}
+		}
+
+		if (!devAvailable && !curDevName.isEmpty()) {
+			QString configuredDev = QString("%1").arg(set->pSlotAudioDevice[t]);
+			combo->addItem(configuredDev);
+			combo->setItemIcon(combo->count()-1, QIcon(":/gfx/icons/dialog-warning.png"));
+			combo->setCurrentIndex(combo->count()-1);
+		}
+	}
+
+	// alternative audio devices for slots
+	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
+		QString curDevName = set->pSlotAltAudioDevice[t];
+		qDebug() << "slot" << t+1 << "alternative audiodevice" << curDevName;
+		QComboBox *combo = findChild<QComboBox*>(QString("slotAltDeviceCombo%1").arg(t+1));
 		if (!combo)
 			continue;
 		combo->clear();
@@ -238,13 +268,22 @@ void SetupWidget::copy_gui_to_settings()
 
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
-		if (!combo) continue;
-		if (combo->currentIndex() > 0) {
-			set->pSlotAudioDevice[t] = combo->currentText();
-		} else {
-			set->pSlotAudioDevice[t] = QString();
+		if (combo) {
+			if (combo->currentIndex() > 0) {
+				set->pSlotAudioDevice[t] = combo->currentText();
+			} else {
+				set->pSlotAudioDevice[t] = QString();
+			}
 		}
 
+		combo = findChild<QComboBox*>(QString("slotAltDeviceCombo%1").arg(t+1));
+		if (combo) {
+			if (combo->currentIndex() > 0) {
+				set->pSlotAltAudioDevice[t] = combo->currentText();
+			} else {
+				set->pSlotAltAudioDevice[t] = QString();
+			}
+		}
 	}
 
 	// Video Tab

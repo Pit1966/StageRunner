@@ -40,7 +40,7 @@
           </sizepolicy>
          </property>
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
          <property name="handleWidth">
           <number>8</number>
@@ -50,7 +50,7 @@
          </property>
          <widget class="QSplitter" name="splitter">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
           <property name="handleWidth">
            <number>8</number>
@@ -96,7 +96,7 @@
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Horizontal</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -125,7 +125,7 @@
        <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -145,23 +145,46 @@
        <property name="horizontalSpacing">
         <number>10</number>
        </property>
-       <item row="0" column="4" colspan="2">
-        <widget class="QCheckBox" name="audioInTaskCheck">
+       <item row="12" column="4" colspan="2">
+        <widget class="QPushButton" name="restartAudioVideoSlots">
          <property name="text">
-          <string>Play audio in
-background task</string>
+          <string>Restart Audio and Video Slots</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="2">
-        <widget class="QSpinBox" name="mapAudioToDmx4">
+       <item row="13" column="1">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="12" column="2">
+        <widget class="QSpinBox" name="defaultAudioFadeOutMsSpin">
          <property name="maximum">
-          <number>512</number>
+          <number>10000</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>5000</number>
          </property>
         </widget>
        </item>
-       <item row="5" column="5">
-        <widget class="QComboBox" name="slotDeviceCombo3"/>
+       <item row="0" column="3">
+        <widget class="QCheckBox" name="smallAudioBufWorkAroundCheck">
+         <property name="text">
+          <string>Small audio buffer
+workaround</string>
+         </property>
+        </widget>
        </item>
        <item row="2" column="2">
         <widget class="QCheckBox" name="useLogVolumeDefaultCheck">
@@ -170,21 +193,58 @@ background task</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="4">
-        <widget class="QLabel" name="chanOutputLabel0">
+       <item row="0" column="4" colspan="2">
+        <widget class="QCheckBox" name="audioInTaskCheck">
          <property name="text">
-          <string>Slot 1 Output device</string>
+          <string>Play audio in
+background task</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="mapAudioToChannelLabel1_4">
-         <property name="toolTip">
-          <string>Map audio volumefor slot 4 to a DMX input channel
-Enables volume control on your light console</string>
-         </property>
+       <item row="5" column="4">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Map Audio Slot 4 to DMX</string>
+          <string>Slot 2 Output device</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5">
+        <widget class="QComboBox" name="slotDeviceCombo1"/>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv1">
+         <property name="toolTip">
+          <string>Universe for sound slot 1</string>
+         </property>
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="4">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Slot 4 Output device</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv4">
+         <property name="toolTip">
+          <string>Universe for sound slot 4</string>
+         </property>
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv2">
+         <property name="toolTip">
+          <string>Universe for sound slot 2</string>
+         </property>
+         <property name="maximum">
+          <number>4</number>
          </property>
         </widget>
        </item>
@@ -201,37 +261,59 @@ Enables volume control on your light console</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="7" column="1">
-        <widget class="QSpinBox" name="playlistChannelSpin">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>4</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="prohibitAudioDoubleStartCheck">
          <property name="text">
-          <string>Audio buffer size (bytes)</string>
+          <string>Prohibit double start</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="7" column="5">
+        <widget class="QComboBox" name="slotDeviceCombo3"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="audioBufferSizeEdit"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="useLogVolumeProjectCheck">
+         <property name="text">
+          <string>in project</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1_4">
+         <property name="toolTip">
+          <string>Map audio volumefor slot 4 to a DMX input channel
+Enables volume control on your light console</string>
+         </property>
+         <property name="text">
+          <string>Map Audio Slot 4 to DMX</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="0">
+        <widget class="QLabel" name="playlistChannelLabel">
+         <property name="text">
+          <string>FX Audio playlist default slot</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QLabel" name="chanOutputLabel0">
+         <property name="text">
+          <string>Slot 1 Output device</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="reactivateAudioLabel">
+         <property name="text">
+          <string>reactivate after (ms)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
         <widget class="QLabel" name="mapAudioToChannelLabel1_3">
          <property name="toolTip">
           <string>Map audio volumefor slot 3 to a DMX input channel
@@ -242,40 +324,31 @@ Enables volume control on your light console</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0" colspan="2">
-        <widget class="QLabel" name="defaultAudioFadeOutTimeMs">
+       <item row="2" column="0">
+        <widget class="QLabel" name="useLogVolumeLabel">
          <property name="text">
-          <string>Default audio fadeout time [ms]</string>
+          <string>Use logarithmic volume dials</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QCheckBox" name="useLogVolumeProjectCheck">
+       <item row="7" column="4">
+        <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>in project</string>
+          <string>Slot 3 Output device</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="2">
-        <widget class="QSpinBox" name="defaultAudioFadeOutMsSpin">
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-         <property name="singleStep">
-          <number>100</number>
-         </property>
-         <property name="value">
-          <number>5000</number>
-         </property>
-        </widget>
+       <item row="6" column="5">
+        <widget class="QComboBox" name="slotAltDeviceCombo2"/>
        </item>
-       <item row="5" column="1">
-        <widget class="QSpinBox" name="mapAudioToUniv3">
+       <item row="5" column="0">
+        <widget class="QLabel" name="mapAudioToChannelLabel1_2">
          <property name="toolTip">
-          <string>Universe for sound slot 3</string>
+          <string>Map audio volumefor slot 2 to a DMX input channel
+Enables volume control on your light console</string>
          </property>
-         <property name="maximum">
-          <number>4</number>
+         <property name="text">
+          <string>Map Audio Slot 2 to DMX</string>
          </property>
         </widget>
        </item>
@@ -290,6 +363,9 @@ Enables volume control on your light console</string>
          </property>
         </widget>
        </item>
+       <item row="5" column="5">
+        <widget class="QComboBox" name="slotDeviceCombo2"/>
+       </item>
        <item row="3" column="2">
         <widget class="QSpinBox" name="mapAudioToDmx1">
          <property name="toolTip">
@@ -300,123 +376,24 @@ Enables volume control on your light console</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="playlistChannelLabel">
-         <property name="text">
-          <string>FX Audio playlist default slot</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="useLogVolumeLabel">
-         <property name="text">
-          <string>Use logarithmic volume dials</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="5">
-        <widget class="QComboBox" name="slotDeviceCombo4"/>
-       </item>
-       <item row="4" column="4">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Slot 2 Output device</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="5">
-        <widget class="QComboBox" name="slotDeviceCombo2"/>
-       </item>
-       <item row="6" column="1">
-        <widget class="QSpinBox" name="mapAudioToUniv4">
-         <property name="toolTip">
-          <string>Universe for sound slot 4</string>
-         </property>
-         <property name="maximum">
-          <number>4</number>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="4">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Slot 3 Output device</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="5">
-        <widget class="QComboBox" name="slotDeviceCombo1"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="prohibitAudioDoubleStartCheck">
-         <property name="text">
-          <string>Prohibit double start</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="4" colspan="2">
-        <widget class="QPushButton" name="restartAudioVideoSlots">
-         <property name="text">
-          <string>Restart Audio and Video Slots</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QSpinBox" name="mapAudioToUniv2">
-         <property name="toolTip">
-          <string>Universe for sound slot 2</string>
-         </property>
-         <property name="maximum">
-          <number>4</number>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="4">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Slot 4 Output device</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="mapAudioToUniv1">
-         <property name="toolTip">
-          <string>Universe for sound slot 1</string>
-         </property>
-         <property name="maximum">
-          <number>4</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="reactivateAudioLabel">
-         <property name="text">
-          <string>reactivate after (ms)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
-        <widget class="QSpinBox" name="mapAudioToDmx3">
+       <item row="9" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx4">
          <property name="maximum">
           <number>512</number>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="mapAudioToChannelLabel1_2">
-         <property name="toolTip">
-          <string>Map audio volumefor slot 2 to a DMX input channel
-Enables volume control on your light console</string>
-         </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Map Audio Slot 2 to DMX</string>
+          <string>Audio buffer size (bytes)</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="audioBufferSizeEdit"/>
+       <item row="8" column="5">
+        <widget class="QComboBox" name="slotAltDeviceCombo3"/>
        </item>
-       <item row="4" column="2">
+       <item row="5" column="2">
         <widget class="QSpinBox" name="mapAudioToDmx2">
          <property name="toolTip">
           <string>DMX Channel</string>
@@ -426,13 +403,48 @@ Enables volume control on your light console</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QCheckBox" name="smallAudioBufWorkAroundCheck">
-         <property name="text">
-          <string>Small audio buffer
-workaround</string>
+       <item row="7" column="1">
+        <widget class="QSpinBox" name="mapAudioToUniv3">
+         <property name="toolTip">
+          <string>Universe for sound slot 3</string>
+         </property>
+         <property name="maximum">
+          <number>4</number>
          </property>
         </widget>
+       </item>
+       <item row="11" column="1">
+        <widget class="QSpinBox" name="playlistChannelSpin">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>4</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <widget class="QComboBox" name="slotAltDeviceCombo1"/>
+       </item>
+       <item row="9" column="5">
+        <widget class="QComboBox" name="slotDeviceCombo4"/>
+       </item>
+       <item row="7" column="2">
+        <widget class="QSpinBox" name="mapAudioToDmx3">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0" colspan="2">
+        <widget class="QLabel" name="defaultAudioFadeOutTimeMs">
+         <property name="text">
+          <string>Default audio fadeout time [ms]</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="5">
+        <widget class="QComboBox" name="slotAltDeviceCombo4"/>
        </item>
       </layout>
      </widget>
@@ -501,7 +513,7 @@ workaround</string>
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -553,7 +565,7 @@ in case there are white edges in your output video  </string>
           <item>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -585,7 +597,7 @@ in case there are white edges in your output video  </string>
        <item>
         <spacer name="verticalSpacer_4">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -604,7 +616,7 @@ in case there are white edges in your output video  </string>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

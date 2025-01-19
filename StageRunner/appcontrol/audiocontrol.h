@@ -69,10 +69,8 @@ protected:
 	bool m_isInThread			= false;
 	bool m_isSmallAudioBufFix	= false;
 #ifdef IS_QT6
-	QAudioDevice m_extraDevice;
 	QAudioDevice m_audioDevInfos[MAX_AUDIO_SLOTS];
 #else
-	QAudioDeviceInfo m_extraDevice;
 	QAudioDeviceInfo m_audioDevInfos[MAX_AUDIO_SLOTS];
 #endif
 	QStringList m_audioDeviceNames;							///< A list of audio devices by names

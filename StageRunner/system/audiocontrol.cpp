@@ -240,16 +240,9 @@ void AudioControl::getAudioDevices()
 		QString dev_name = dev.description();
 		if (default_format_supported) {
 			m_audioDeviceNames.append(dev_name);
-			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
-			/// @todo this takes a hardcoded device name and should be adjustable
-			if (dev_name.contains("UA-25EX")) {
-				m_extraDevice = dev;
-			}
+			LOGTEXT(tr("Audio device available: %1").arg(dev_name));
 		}
 	}
-
-	if (!m_extraDevice.isNull())
-		LOGTEXT(tr("<font color=info>Extra Audio: %1</font>").arg(m_extraDevice.description()));
 
 	QAudioDevice def_dev = QMediaDevices::defaultAudioOutput();
 	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(def_dev.description()));
@@ -271,16 +264,10 @@ void AudioControl::getAudioDevices()
 		QString dev_name = dev.deviceName();
 		if (default_format_supported) {
 			m_audioDeviceNames.append(dev_name);
-			LOGTEXT(tr("Audio Device: %1").arg(dev_name));
-			/// @todo this takes a hardcoded device name and should be adjustable
-			if (dev_name.contains("UA-25EX")) {
-				m_extraDevice = dev;
-			}
+			LOGTEXT(tr("Audio device available: %1").arg(dev_name));
 		}
 	}
 	LOGTEXT(tr("<font color=info>Default Audio: %1</font>").arg(QAudioDeviceInfo::defaultOutputDevice().deviceName()));
-	if (!m_extraDevice.isNull())
-		LOGTEXT(tr("<font color=info>Extra Audio: %1</font>").arg(m_extraDevice.deviceName()));
 
 	QAudioDeviceInfo def_dev(QAudioDeviceInfo::defaultOutputDevice());
 	if (def_dev.isFormatSupported(AudioFormat::defaultFormat())) {
@@ -1540,6 +1527,7 @@ void AudioControl::createMediaPlayInstances()
 	bool errmsg = false;
 	for (int t=0; t<m_usedSlots; t++) {
 		QString audioDevName = set->pSlotAudioDevice[t];
+		QString alternativeAudioDevName = set->pSlotAltAudioDevice[t];
 		if (!audioDevName.isEmpty() && audioDevName != "system default") {
 			if (outputType != OUT_DEVICE) {
 				if (!errmsg)
@@ -1552,8 +1540,22 @@ void AudioControl::createMediaPlayInstances()
 				bool ok;
 #ifdef IS_QT6
 				QAudioDevice dev = AudioIODevice::getAudioDevice(audioDevName, &ok);
+				if (!ok && !alternativeAudioDevName.isEmpty()) {
+					dev = AudioIODevice::getAudioDevice(alternativeAudioDevName, &ok);
+					if (ok) {
+						LOGTEXT(tr("Audio slot %1: Use alternative audio device: %2").arg(t+1).arg(alternativeAudioDevName));
+						audioDevName = alternativeAudioDevName;
+					}
+				}
 #else
 				QAudioDeviceInfo dev = AudioIODevice::getAudioDeviceInfo(audioDevName, &ok);
+				if (!ok && !alternativeAudioDevName.isEmpty()) {
+					dev = AudioIODevice::getAudioDeviceInfo(alternativeAudioDevName, &ok);
+					if (ok) {
+						audioDevName = alternativeAudioDevName;
+						LOGTEXT(tr("Audio slot %1: Use alternative audio device: %2").arg(t+1).arg(alternativeAudioDevName));
+					}
+				}
 #endif
 				if (!ok) {
 					if (!errmsg)
