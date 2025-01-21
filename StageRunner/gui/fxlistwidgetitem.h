@@ -69,6 +69,7 @@ private:
 	QColor indicator_a_color;
 	QColor indicator_b_color;
 	QColor marked_color;
+	QString m_statusText;
 
 	bool seek_mode_f;
 
@@ -104,6 +105,7 @@ public slots:
 	void setActivationProgress(int perMilleA, int perMilleB);
 	void setActivationProgressB(int perMilleB);
 	void setActivationProgressA(int perMilleA);
+	void setStatusText(const QString &txt);
 
 private slots:
 	void if_edit_item_clicked();

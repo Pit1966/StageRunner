@@ -128,12 +128,20 @@ void TimeLineExecuter::processProgress()
 		destroyLater();
 	}
 	else if (myState == EXEC_RUNNING) {
-		if (m_lastState != EXEC_RUNNING)
+		if (m_lastState != EXEC_RUNNING) {
 			emit timeLineStatusChanged(EXEC_RUNNING);
+			emit timeLineStatusMsgChanged(parentFxItem, QString());
+		}
 		int ranMs = runTimeOne.elapsed();
 		emit playPosChanged(ranMs);
 		int perMille = ranMs * 1000 / m_finalEventAtMs;
 		emit listProgressChanged(perMille, 0);
+	}
+	else if (myState == EXEC_PAUSED) {
+		if (m_lastState != EXEC_PAUSED) {
+			emit timeLineStatusChanged(EXEC_PAUSED);
+			emit timeLineStatusMsgChanged(parentFxItem, tr("Paused"));
+		}
 	}
 
 	m_lastState = myState;

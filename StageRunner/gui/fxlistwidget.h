@@ -118,6 +118,7 @@ public slots:
 	void propagateAudioStatus(const AUDIO::AudioCtrlMsg &msg);
 	void cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int destRow, bool removeSrc);
 	void onFxItemSelectedInChildWidget(FxItem *fx);
+	void propagateStatusMsg(FxItem *fx, const QString &msg);
 
 private slots:
 	void on_fxTable_itemClicked(QTableWidgetItem *item);

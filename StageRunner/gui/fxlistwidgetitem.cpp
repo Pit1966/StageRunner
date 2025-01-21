@@ -214,6 +214,10 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 		p.drawRect(0,h-5,wp,2);
 	}
 
+	if (m_statusText.size()) {
+		QPainter p(this);
+		p.drawText(rect(), m_statusText, QTextOption(Qt::AlignRight));
+	}
 }
 
 void FxListWidgetItem::keyPressEvent(QKeyEvent *event)
@@ -304,6 +308,12 @@ void FxListWidgetItem::setActivationProgressA(int perMilleA)
 		activation_indicator_a = perMilleA;
 		update();
 	}
+}
+
+void FxListWidgetItem::setStatusText(const QString &txt)
+{
+	m_statusText = txt;
+	update();
 }
 
 void FxListWidgetItem::if_edit_item_clicked()

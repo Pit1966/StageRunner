@@ -1100,6 +1100,22 @@ void FxListWidget::onFxItemSelectedInChildWidget(FxItem *fx)
 	emit fxItemSelectedInChildFxListWidget(fx);
 }
 
+void FxListWidget::propagateStatusMsg(FxItem *fx, const QString &msg)
+{
+	int row = getRowThatContainsFxItem(fx);
+	if (row < 0)
+		return;
+
+	WidItemList widlist = getItemListForRow(row);
+	if (widlist.size()) {
+		int column = 0;
+		if (fxList()->showColumnKeyFlag)
+			column = 1;
+		FxListWidgetItem *item = widlist.at(column);
+		item->setStatusText(msg);
+	}
+}
+
 void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 {
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
