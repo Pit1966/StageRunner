@@ -119,6 +119,7 @@ signals:
 	void changed(Executer *exec);
 	void sceneExecuterStartSignal(FxSceneItem *scene);
 	void wantedDeleteFxScene(FxSceneItem *scene);
+	void executerStatusChanged(FxItem *fx, const QString &msg);
 
 	friend class ExecCenter;
 };

@@ -1102,6 +1102,8 @@ void FxListWidget::onFxItemSelectedInChildWidget(FxItem *fx)
 
 void FxListWidget::propagateStatusMsg(FxItem *fx, const QString &msg)
 {
+	qDebug() << "timeline status changed:" << msg << fx->name();
+
 	int row = getRowThatContainsFxItem(fx);
 	if (row < 0)
 		return;

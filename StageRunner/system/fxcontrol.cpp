@@ -406,6 +406,7 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atM
 	if (parentwid) {
 		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxtimeline);
 		connect(exec, SIGNAL(listProgressChanged(int,int)), listitem, SLOT(setActivationProgress(int,int)));
+		connect(exec, SIGNAL(executerStatusChanged(FxItem*,QString)), listitem, SLOT(setFxStatus(FxItem*,QString)));
 	}
 
 	// Determine wheter there is a FxTimeLineEditWidget that is currently the editor for this timeline
@@ -542,12 +543,14 @@ FxListExecuter *FxControl::continueFxAudioPlayList(FxPlayListItem *fxplay, FxAud
 			exe->setPaused(false);
 		}
 	}
+
 	// Determine what the FxListWidget Window is where the FxPlayListItem lives in
 	FxList *fxlist = fxplay->parentFxList();
 	FxListWidget *wid = FxListWidget::findFxListWidget(fxlist);
 	if (wid) {
 		FxListWidgetItem *listitem = wid->getFxListWidgetItemFor(fxplay);
 		connect(exe,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+		connect(exe,SIGNAL(executerStatusChanged(FxItem*,QString)),listitem,SLOT(setFxStatus(FxItem*,QString)));
 	}
 
 	// Maybe there is a FxListWidget window opened. Than we can do some monitoring

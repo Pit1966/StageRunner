@@ -34,10 +34,11 @@ FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType c
   ,columnType(coltype)
   ,myRow(-1)
   ,myColumn(-1)
-  ,is_editable_f(false)
-  ,is_never_editable_f(false)
-  ,is_selected_f(false)
-  ,is_marked_f(false)
+  ,m_isEditable(false)
+  ,m_isNeverEditable(false)
+  ,m_isSelected(false)
+  ,m_isMarked(false)
+  ,m_isSeeked(false)
 {
 	init();
 }
@@ -49,10 +50,13 @@ FxListWidgetItem::FxListWidgetItem(const FxListWidgetItem &other) :
   ,columnType(other.columnType)
   ,myRow(other.myRow)
   ,myColumn(other.myColumn)
-  ,is_editable_f(other.is_editable_f)
-  ,is_never_editable_f(other.is_never_editable_f)
-  ,is_selected_f(false)
-  ,is_marked_f(false)
+  ,m_isEditable(other.m_isEditable)
+  ,m_isNeverEditable(other.m_isNeverEditable)
+  ,m_isSelected(false)
+  ,m_isMarked(false)
+  ,m_colorMarked(other.m_colorMarked)
+  ,m_statusFont(other.m_statusFont)
+  ,m_statusText(other.m_statusText)
 {
 	init();
 	itemEdit->setReadOnly(other.itemEdit->isReadOnly());
@@ -102,14 +106,15 @@ void FxListWidgetItem::setTextCentered(bool state)
 
 void FxListWidgetItem::init()
 {
-	current_button = 0;
-	activation_indicator_a = 0;
-	activation_indicator_b = 0;
-	indicator_a_color = QColor(QColor(220,180,0));   // orange
-	indicator_b_color = QColor(Qt::darkRed);
-	marked_color = QColor(QColor(20,20,200,80));
+	m_currentButton = 0;
+	m_activationIndicatorA = 0;
+	m_activationIndicatorB = 0;
+	m_colorIndicatorA = QColor(QColor(220,180,0));   // orange
+	m_colorIndicatorB = QColor(Qt::darkRed);
+	m_colorMarked = QColor(QColor(20,20,200,80));
+	m_colorStatus = QColor(Qt::darkYellow);
 
-	seek_mode_f = false;
+	m_isSeeked = false;
 
 	setupUi(this);
 	itemLabel->clear();
@@ -125,9 +130,9 @@ void FxListWidgetItem::init()
 	connect(itemEdit,SIGNAL(enterPressed()),this,SLOT(if_edit_item_enter_pressed()));
 	connect(itemLabel,SIGNAL(doubleClicked()),this,SLOT(if_label_item_doubleclicked()));
 
-	org_palette = palette();
-	org_palette.setBrush(QPalette::Base,Qt::NoBrush);
-	setPalette(org_palette);
+	m_orginalPalette = palette();
+	m_orginalPalette.setBrush(QPalette::Base,Qt::NoBrush);
+	setPalette(m_orginalPalette);
 
 	setAutoFillBackground(false);
 	itemEdit->setAutoFillBackground(false);
@@ -139,31 +144,34 @@ void FxListWidgetItem::init()
 	itemExtra->setContextMenuPolicy(Qt::NoContextMenu);
 
 	itemExtra->hide();
+
+	m_statusFont = font();
+	m_statusFont.setPointSize(8);
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
 {
-	current_button = event->button();
-	if (current_button == Qt::LeftButton) {
-		drag_begin_pos = event->pos();
+	m_currentButton = event->button();
+	if (m_currentButton == Qt::LeftButton) {
+		m_dragBeginPos = event->pos();
 	}
-	else if (current_button == Qt::MiddleButton) {
-		seek_mode_f = true;
+	else if (m_currentButton == Qt::MiddleButton) {
+		m_isSeeked = true;
 	}
 }
 
 void FxListWidgetItem::mouseReleaseEvent(QMouseEvent *)
 {
-	current_button = 0;
-	seek_mode_f = false;
+	m_currentButton = 0;
+	m_isSeeked = false;
 }
 
 void FxListWidgetItem::mouseMoveEvent(QMouseEvent *qevent)
 {
 	PMouseEvent *event = static_cast<PMouseEvent*>(qevent);
-	QPoint dist = event->pos() - drag_begin_pos;
+	QPoint dist = event->pos() - m_dragBeginPos;
 
-	if (seek_mode_f) {
+	if (m_isSeeked) {
 		int pMille = 1000 * event->x() / width();
 		if (pMille < 0) {
 			emit seekToPerMille(this,0);
@@ -175,47 +183,49 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *qevent)
 			emit seekToPerMille(this,pMille);
 		}
 	}
-	else if (current_button == Qt::LeftButton && dist.manhattanLength() > 10) {
+	else if (m_currentButton == Qt::LeftButton && dist.manhattanLength() > 10) {
 		emit draged(this);
-		current_button = 0;
+		m_currentButton = 0;
 	}
 }
 
 void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
-	if (is_marked_f) {
-		QPainter p(this);
+	QPainter p(this);
+	if (m_isMarked) {
 		p.setPen(Qt::NoPen);
-		p.setBrush(marked_color);
+		p.setBrush(m_colorMarked);
 		p.drawRect(event->rect());
 	}
 	else if (linkedFxItem->playedRandom()) {
-		QPainter p(this);
+		// QPainter p(this);
 		p.setPen(Qt::NoPen);
-		p.setBrush(marked_color);
+		p.setBrush(m_colorMarked);
 		p.drawRect(event->rect());
 	}
-	if (activation_indicator_a) {
-		QPainter p(this);
-		p.setPen(indicator_a_color);
-		p.setBrush(indicator_a_color);
+	if (m_activationIndicatorA) {
+		// QPainter p(this);
+		p.setPen(m_colorIndicatorA);
+		p.setBrush(m_colorIndicatorA);
 		int w = event->rect().width();
 		int h = event->rect().height();
-		int wp = activation_indicator_a * w / 1000;
+		int wp = m_activationIndicatorA * w / 1000;
 		p.drawRect(0,h-2,wp,2);
 	}
-	if (activation_indicator_b) {
-		QPainter p(this);
-		p.setPen(indicator_b_color);
-		p.setBrush(indicator_b_color);
+	if (m_activationIndicatorB) {
+		// QPainter p(this);
+		p.setPen(m_colorIndicatorB);
+		p.setBrush(m_colorIndicatorB);
 		int w = event->rect().width();
 		int h = event->rect().height();
-		int wp = activation_indicator_b * w / 1000;
+		int wp = m_activationIndicatorB * w / 1000;
 		p.drawRect(0,h-5,wp,2);
 	}
 
 	if (m_statusText.size()) {
-		QPainter p(this);
+		// QPainter p(this);
+		p.setFont(m_statusFont);
+		p.setPen(m_colorStatus);
 		p.drawText(rect(), m_statusText, QTextOption(Qt::AlignRight));
 	}
 }
@@ -237,11 +247,11 @@ void FxListWidgetItem::keyPressEvent(QKeyEvent *event)
 
 void FxListWidgetItem::setEditable(bool state)
 {
-	if (is_never_editable_f) state = false;
+	if (m_isNeverEditable) state = false;
 
-	if (state != is_editable_f) {
+	if (state != m_isEditable) {
 
-		is_editable_f = state;
+		m_isEditable = state;
 		itemEdit->setReadOnly(!state);
 		itemEdit->setWarnColor(state);
 		itemEdit->setEditable(state);
@@ -251,7 +261,7 @@ void FxListWidgetItem::setEditable(bool state)
 			pal.setBrush(QPalette::Base, itemEdit->palette().base());
 			setPalette(pal);
 		} else {
-			setPalette(org_palette);
+			setPalette(m_orginalPalette);
 		}
 		update();
 	}
@@ -259,16 +269,16 @@ void FxListWidgetItem::setEditable(bool state)
 
 void FxListWidgetItem::setNeverEditable(bool state)
 {
-	if (state != is_never_editable_f) {
-		is_never_editable_f = state;
+	if (state != m_isNeverEditable) {
+		m_isNeverEditable = state;
 		if (state) setEditable(false);
 	}
 }
 
 void FxListWidgetItem::setSelected(bool state)
 {
-	if (is_selected_f != state) {
-		is_selected_f = state;
+	if (m_isSelected != state) {
+		m_isSelected = state;
 		update();
 	}
 
@@ -276,8 +286,8 @@ void FxListWidgetItem::setSelected(bool state)
 
 void FxListWidgetItem::setMarked(bool state)
 {
-	if (state != is_marked_f) {
-		is_marked_f = state;
+	if (state != m_isMarked) {
+		m_isMarked = state;
 		update();
 	}
 }
@@ -293,8 +303,8 @@ void FxListWidgetItem::setActivationProgressB(int perMilleB)
 	if (perMilleB < 0)
 		return;
 
-	if (perMilleB != activation_indicator_b) {
-		activation_indicator_b = perMilleB;
+	if (perMilleB != m_activationIndicatorB) {
+		m_activationIndicatorB = perMilleB;
 		update();
 	}
 }
@@ -304,8 +314,8 @@ void FxListWidgetItem::setActivationProgressA(int perMilleA)
 	if (perMilleA < 0)
 		return;
 
-	if (perMilleA != activation_indicator_a) {
-		activation_indicator_a = perMilleA;
+	if (perMilleA != m_activationIndicatorA) {
+		m_activationIndicatorA = perMilleA;
 		update();
 	}
 }
@@ -313,6 +323,12 @@ void FxListWidgetItem::setActivationProgressA(int perMilleA)
 void FxListWidgetItem::setStatusText(const QString &txt)
 {
 	m_statusText = txt;
+	update();
+}
+
+void FxListWidgetItem::setFxStatus(FxItem */*fx*/, const QString &msg)
+{
+	m_statusText = msg;
 	update();
 }
 

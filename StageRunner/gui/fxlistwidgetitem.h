@@ -56,22 +56,23 @@ public:
 	int myColumn;
 
 private:
-	bool is_editable_f;
-	bool is_never_editable_f;
-	bool is_selected_f;
-	bool is_marked_f;
+	bool m_isEditable;
+	bool m_isNeverEditable;
+	bool m_isSelected;
+	bool m_isMarked;
+	bool m_isSeeked;
 
-	int current_button;
-	int activation_indicator_a;
-	int activation_indicator_b;
-	QPoint drag_begin_pos;
-	QPalette org_palette;
-	QColor indicator_a_color;
-	QColor indicator_b_color;
-	QColor marked_color;
+	int m_currentButton;
+	int m_activationIndicatorA;
+	int m_activationIndicatorB;
+	QPoint m_dragBeginPos;
+	QPalette m_orginalPalette;
+	QColor m_colorIndicatorA;
+	QColor m_colorIndicatorB;
+	QColor m_colorMarked;
+	QColor m_colorStatus;
 	QString m_statusText;
-
-	bool seek_mode_f;
+	QFont m_statusFont;
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -79,12 +80,11 @@ public:
 	~FxListWidgetItem();
 	void setText(const QString &txt);
 	inline QString text() const {return itemText;}
-	QPoint dragBeginPos() const {return drag_begin_pos;}
+	QPoint dragBeginPos() const {return m_dragBeginPos;}
 	QSize sizeHint() const override;
 	QSize minimumSizeHint() const override;
 	void setTextColor(const QString &col);
 	void setTextCentered(bool state);
-
 
 private:
 	void init();
@@ -106,6 +106,7 @@ public slots:
 	void setActivationProgressB(int perMilleB);
 	void setActivationProgressA(int perMilleA);
 	void setStatusText(const QString &txt);
+	void setFxStatus(FxItem *fx, const QString &msg);
 
 private slots:
 	void if_edit_item_clicked();

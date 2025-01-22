@@ -106,7 +106,6 @@ protected slots:
 signals:
 	void playPosChanged(int ms);
 	void timeLineStatusChanged(int executerStatus);
-	void timeLineStatusMsgChanged(FxItem *fx, const QString &msg);
 	void listProgressChanged(int step1, int step2);
 
 	friend class ExecCenter;

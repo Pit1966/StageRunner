@@ -203,6 +203,7 @@ FxListExecuter::FxListExecuter(AppCentral &app_central, FxList *fx_list)
 
 FxListExecuter::~FxListExecuter()
 {
+	emit executerStatusChanged(nullptr, QString());
 	emit listProgressStepChanged(0,0);
 }
 
@@ -211,6 +212,7 @@ void FxListExecuter::setCurrentFx(FxItem *fx)
 	if (fx != curFx) {
 		if (fx) {
 			fx->initForSequence();
+			emit executerStatusChanged(fx, fx->name());
 		}
 		curFx = fx;
 		emit currentFxChanged(fx);

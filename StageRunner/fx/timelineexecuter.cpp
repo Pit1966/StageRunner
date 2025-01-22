@@ -123,6 +123,7 @@ bool TimeLineExecuter::processExecuter()
 void TimeLineExecuter::processProgress()
 {
 	if (myState == EXEC_FINISH) {
+		emit executerStatusChanged(parentFxItem, QString());
 		qDebug() << "finish timeline" << m_fxTimeLine->name();
 		_finishMe();
 		destroyLater();
@@ -130,7 +131,7 @@ void TimeLineExecuter::processProgress()
 	else if (myState == EXEC_RUNNING) {
 		if (m_lastState != EXEC_RUNNING) {
 			emit timeLineStatusChanged(EXEC_RUNNING);
-			emit timeLineStatusMsgChanged(parentFxItem, QString());
+			emit executerStatusChanged(parentFxItem, QString());
 		}
 		int ranMs = runTimeOne.elapsed();
 		emit playPosChanged(ranMs);
@@ -140,7 +141,7 @@ void TimeLineExecuter::processProgress()
 	else if (myState == EXEC_PAUSED) {
 		if (m_lastState != EXEC_PAUSED) {
 			emit timeLineStatusChanged(EXEC_PAUSED);
-			emit timeLineStatusMsgChanged(parentFxItem, tr("Paused"));
+			emit executerStatusChanged(parentFxItem, tr("Paused"));
 		}
 	}
 

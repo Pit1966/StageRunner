@@ -372,14 +372,14 @@ FxTimeLineEditWidget *FxTimeLineEditWidget::openTimeLinePanel(FxTimeLineItem *fx
 		connect(exec, SIGNAL(timeLineStatusChanged(int)), editwid, SLOT(onChildRunStatusChanged(int)));
 		connect (exec, SIGNAL(playPosChanged(int)), editwid->timeLineWidget(), SLOT(setCursorPos(int)));
 
-		// Determine what the FxListWidget Window is where the FxPlayListItem lives in
-		FxList *fxlist = fx->parentFxList();
-		FxListWidget *wid = FxListWidget::findFxListWidget(fxlist);
-		if (wid) {
-			// FxListWidgetItem *listitem = wid->getFxListWidgetItemFor(fx);
-			connect(exec, SIGNAL(timeLineStatusMsgChanged(FxItem*,QString)), wid, SLOT(propagateStatusMsg(FxItem*,QString)));
-			// connect(exe,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
-		}
+		// // Determine what the FxListWidget Window is where the FxPlayListItem lives in
+		// FxList *fxlist = fx->parentFxList();
+		// FxListWidget *wid = FxListWidget::findFxListWidget(fxlist);
+		// if (wid) {
+		// 	// FxListWidgetItem *listitem = wid->getFxListWidgetItemFor(fx);
+		// 	connect(exec, SIGNAL(timeLineStatusMsgChanged(FxItem*,QString)), wid, SLOT(propagateStatusMsg(FxItem*,QString)));
+		// 	// connect(exe,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+		// }
 
 		if (exec->isRunning())
 			editwid->onChildRunStatusChanged(Executer::EXEC_RUNNING);
