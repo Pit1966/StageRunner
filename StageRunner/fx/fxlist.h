@@ -142,6 +142,7 @@ public:
 	FxItem * findSequenceForerunner(FxItem *curfx = 0, bool turnover = true);
 	FxItem * findSequenceRandomFxItem();
 	FxItem * findSequenceFirstItem();
+	int countRandomPlayedItemInList() const;
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();

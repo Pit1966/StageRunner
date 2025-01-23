@@ -89,8 +89,10 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *qevent)
 		extmime->dragObject->setDragCursor(QPixmap(),Qt::MoveAction);
 
 	if (extmime && extmime->fxListWidgetItem) { // note: this functionality can be done by event->source() too
+#ifdef QT_DEBUG
 		qDebug("PTableWidget::dragEnterEvent: Mime:'%s': ObjectName:%s, row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),src->objectName().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
+#endif
 
 		// event->setDropAction(Qt::MoveAction);
 		event->accept();
@@ -102,7 +104,9 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *qevent)
 		drag_temp_row = current_row;
 
 	} else {
+#ifdef QT_DEBUG
 		qDebug ("PTableWidget::dragEnterEvent: external");
+#endif
 		event->setDropAction(Qt::CopyAction);
 		event->accept();
 	}
@@ -111,8 +115,9 @@ void PTableWidget::dragEnterEvent(QDragEnterEvent *qevent)
 void PTableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
 	Q_UNUSED(event);
+#ifdef QT_DEBUG
 	qDebug("PTableWidget::dragLeaveEvent");
-
+#endif
 	if (drag_temp_row >= 0) {
 		saveScrollPos();
 		removeRow(drag_temp_row);
@@ -173,9 +178,11 @@ void PTableWidget::dropEvent(QDropEvent *qevent)
 
 	if (extmime && extmime->fxListWidgetItem) {
 		// The DragObject is an fxListWidgetItem
+#ifdef QT_DEBUG
 		qDebug("PTableWidget::dropEvent: Mime:'%s': from row:%d, col:%d "
 			   ,mime->text().toLocal8Bit().data(),extmime->tableRow,extmime->tableCol);
 		qDebug() << "  Dropaction:" << event->dropAction();
+#endif
 
 		event->setDropAction(Qt::MoveAction);
 		event->accept();
@@ -189,7 +196,9 @@ void PTableWidget::dropEvent(QDropEvent *qevent)
 				}
 			}
 		} else {
+#ifdef QT_DEBUG
 			qDebug("   Entry moved from row %d to %d",extmime->tableRow, drag_dest_row);
+#endif
 			emit rowMovedFromTo(extmime->tableRow,drag_dest_row);
 		}
 	} else {

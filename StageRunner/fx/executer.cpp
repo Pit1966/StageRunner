@@ -432,7 +432,11 @@ FxItem *FxListExecuter::move_to_next_fx()
 			while (pos < fxList->size() && fxList->at(pos) != next) {
 				pos++;
 			}
-			m_playbackProgress = (pos + 1) * 1000 / fxList->size();
+			if (fxList->isRandomized()) {
+				m_playbackProgress = fxList->countRandomPlayedItemInList() * 1000 / fxList->size();
+			} else {
+				m_playbackProgress = (pos + 1) * 1000 / fxList->size();
+			}
 			emit listProgressStepChanged(-1, m_playbackProgress);
 		}
 	}

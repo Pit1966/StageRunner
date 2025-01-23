@@ -141,7 +141,7 @@ void TimeLineExecuter::processProgress()
 	else if (myState == EXEC_PAUSED) {
 		if (m_lastState != EXEC_PAUSED) {
 			emit timeLineStatusChanged(EXEC_PAUSED);
-			emit executerStatusChanged(parentFxItem, tr("Paused"));
+			emit executerStatusChanged(parentFxItem, tr("$$Paused"));		// $$ is a control code in order to let the display blink
 		}
 	}
 

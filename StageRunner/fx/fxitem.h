@@ -92,7 +92,7 @@ protected:
 	qint32 hookedToInputDmxChannel;				// default -1 (not hooked to any channel)
 
 	FxList *myParentFxList;
-	bool playedInRandomList;
+	bool playedInRandomList;			///< true, if item is in a FxList and was played in random mode (e.g. FxAudioList)
 
     FxItem *m_isTempCopyOf;				///< FX is temporary copy (maybe a work copy);
 

@@ -462,6 +462,7 @@ FxItem *FxList::findSequenceRandomFxItem()
 		}
 		i++;
 	}
+
 	return fx;
 }
 
@@ -472,6 +473,17 @@ FxItem *FxList::findSequenceFirstItem()
 		fx = m_fxList.first();
 
 	return fx;
+}
+
+int FxList::countRandomPlayedItemInList() const
+{
+	// count random played fxitems;
+	int played = 0;
+	for (int i=0; i<m_fxList.size(); i++) {
+		if (m_fxList.at(i)->playedInRandomList)
+			played++;
+	}
+	return played;
 }
 
 FxAudioItem *FxList::addFxAudioSimple(const QString &path, int pos)

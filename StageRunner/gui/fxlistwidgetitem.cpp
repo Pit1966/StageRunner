@@ -27,36 +27,43 @@
 
 #include <QtWidgets>
 
-FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype) :
-	QWidget()
-  ,linkedFxItem(fx)
-  ,itemText(text)
-  ,columnType(coltype)
-  ,myRow(-1)
-  ,myColumn(-1)
-  ,m_isEditable(false)
-  ,m_isNeverEditable(false)
-  ,m_isSelected(false)
-  ,m_isMarked(false)
-  ,m_isSeeked(false)
+FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype)
+	: QWidget()
+	, linkedFxItem(fx)
+	, itemText(text)
+	, columnType(coltype)
+	, myRow(-1)
+	, myColumn(-1)
+	, m_isEditable(false)
+	, m_isNeverEditable(false)
+	, m_isSelected(false)
+	, m_isMarked(false)
+	, m_isSeeked(false)
+	, m_isStatusBlinking(false)
+	, m_blinkState(false)
+	, m_blinkTimer(nullptr)
 {
 	init();
 }
 
-FxListWidgetItem::FxListWidgetItem(const FxListWidgetItem &other) :
-	QWidget()
-  ,linkedFxItem(other.linkedFxItem)
-  ,itemText(other.itemText)
-  ,columnType(other.columnType)
-  ,myRow(other.myRow)
-  ,myColumn(other.myColumn)
-  ,m_isEditable(other.m_isEditable)
-  ,m_isNeverEditable(other.m_isNeverEditable)
-  ,m_isSelected(false)
-  ,m_isMarked(false)
-  ,m_colorMarked(other.m_colorMarked)
-  ,m_statusFont(other.m_statusFont)
-  ,m_statusText(other.m_statusText)
+FxListWidgetItem::FxListWidgetItem(const FxListWidgetItem &other)
+	: QWidget()
+	, linkedFxItem(other.linkedFxItem)
+	, itemText(other.itemText)
+	, columnType(other.columnType)
+	, myRow(other.myRow)
+	, myColumn(other.myColumn)
+	, m_isEditable(other.m_isEditable)
+	, m_isNeverEditable(other.m_isNeverEditable)
+	, m_isSelected(false)
+	, m_isMarked(false)
+	, m_isSeeked(false)
+	, m_isStatusBlinking(false)
+	, m_blinkState(false)
+	, m_colorMarked(other.m_colorMarked)
+	, m_statusText(other.m_statusText)
+	, m_statusFont(other.m_statusFont)
+	, m_blinkTimer(nullptr)
 {
 	init();
 	itemEdit->setReadOnly(other.itemEdit->isReadOnly());
@@ -146,7 +153,7 @@ void FxListWidgetItem::init()
 	itemExtra->hide();
 
 	m_statusFont = font();
-	m_statusFont.setPointSize(8);
+	m_statusFont.setPointSize(9);
 }
 
 void FxListWidgetItem::mousePressEvent(QMouseEvent *event)
@@ -192,6 +199,7 @@ void FxListWidgetItem::mouseMoveEvent(QMouseEvent *qevent)
 void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
 	QPainter p(this);
+	p.setRenderHints(QPainter::Antialiasing);
 	if (m_isMarked) {
 		p.setPen(Qt::NoPen);
 		p.setBrush(m_colorMarked);
@@ -225,8 +233,22 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 	if (m_statusText.size()) {
 		// QPainter p(this);
 		p.setFont(m_statusFont);
+		QFontMetrics fm(m_statusFont);
+		QRect boundrect = fm.boundingRect(rect(), Qt::AlignRight | Qt::AlignVCenter, m_statusText);
+		boundrect.adjust(-4, 0, 0, 0);
+		QPen pen(QBrush(Qt::darkGray), 2);
+		QBrush brush(QColor(0,0,0,100));
+		if (m_isStatusBlinking) {
+			if (m_blinkState)
+				brush.setColor(Qt::darkRed);
+		}
+		p.setPen(pen);
+		p.setBrush(brush);
+		p.drawRoundedRect(boundrect, 10, 10);
+
 		p.setPen(m_colorStatus);
-		p.drawText(rect(), m_statusText, QTextOption(Qt::AlignRight));
+		p.drawText(boundrect, Qt::AlignHCenter, m_statusText);
+		// p.drawText(rect(), m_statusText, QTextOption(Qt::AlignRight));
 	}
 }
 
@@ -320,15 +342,60 @@ void FxListWidgetItem::setActivationProgressA(int perMilleA)
 	}
 }
 
+/**
+ * @brief Set Status Text
+ * @param txt
+ *
+ * Text will be displayed in right area of item and looks like a rounded button.
+ * @note if txt starts with $$, blinking is enabled (the $$ are not displayed, of course)
+ */
 void FxListWidgetItem::setStatusText(const QString &txt)
 {
-	m_statusText = txt;
+	if (txt.isEmpty()) {
+		m_statusText.clear();
+		if (m_isStatusBlinking)
+			setStatusBlinkEnabled(false);
+	} else {
+		if (txt.startsWith("$$")) {
+			m_statusText = QString(" %1 ").arg(txt.mid(2));
+			setStatusBlinkEnabled(true);
+		} else {
+			m_statusText = QString(" %1 ").arg(txt);
+		}
+	}
 	update();
 }
 
 void FxListWidgetItem::setFxStatus(FxItem */*fx*/, const QString &msg)
 {
-	m_statusText = msg;
+	setStatusText(msg);
+}
+
+void FxListWidgetItem::setStatusBlinkEnabled(bool state)
+{
+	if (state != m_isStatusBlinking) {
+		if (state) {
+			if (m_blinkTimer == nullptr) {
+				m_blinkTimer = new QTimer();
+				connect(m_blinkTimer, SIGNAL(timeout()), this, SLOT(onBlinkTimer()));
+			}
+			m_blinkTimer->start(800);
+		}
+		else {
+			if (m_blinkTimer)
+				m_blinkTimer->stop();
+		}
+		m_isStatusBlinking = state;
+	}
+}
+
+void FxListWidgetItem::onBlinkTimer()
+{
+	if (m_blinkState) {
+		m_blinkState = false;
+	} else {
+		m_blinkState = true;
+	}
 	update();
 }
 

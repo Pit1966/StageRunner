@@ -61,6 +61,8 @@ private:
 	bool m_isSelected;
 	bool m_isMarked;
 	bool m_isSeeked;
+	bool m_isStatusBlinking;
+	bool m_blinkState;
 
 	int m_currentButton;
 	int m_activationIndicatorA;
@@ -73,6 +75,9 @@ private:
 	QColor m_colorStatus;
 	QString m_statusText;
 	QFont m_statusFont;
+
+	// tmp
+	QTimer *m_blinkTimer;
 
 public:
 	FxListWidgetItem(FxItem *fx, const QString &text, ColumnType coltype = CT_UNDEF);
@@ -107,8 +112,10 @@ public slots:
 	void setActivationProgressA(int perMilleA);
 	void setStatusText(const QString &txt);
 	void setFxStatus(FxItem *fx, const QString &msg);
+	void setStatusBlinkEnabled(bool state);
 
 private slots:
+	void onBlinkTimer();
 	void if_edit_item_clicked();
 	void if_edit_item_doubleclicked();
 	void if_edit_item_edited(const QString & text);
