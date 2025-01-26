@@ -689,8 +689,11 @@ bool AudioControl::_startFxAudioStage2(FxAudioItem *fxa, Executer *exec, qint64 
 		slot = fxa->playBackSlot-1;
 		if (slot >= m_usedSlots)
 			return false;
-		if (audioSlots[slot]->status() > AUDIO_IDLE)
+		if (audioSlots[slot]->status() > AUDIO_IDLE) {
+			LOGERROR(tr("Could not start audio FX '%1' in slot %2, since the slot is already occupied!")
+					 .arg(fxa->name()).arg(fxa->playBackSlot));
 			return false;
+		}
 
 		audioSlots[slot]->select();
 	}

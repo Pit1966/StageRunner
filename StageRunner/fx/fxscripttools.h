@@ -45,7 +45,8 @@ enum KEY_WORD {
 	KW_BLACK,
 	KW_REMOTE,
 	KW_FADE_VOL,
-	KW_MODE
+	KW_MODE,
+	KW_PAUSE
 };
 
 }

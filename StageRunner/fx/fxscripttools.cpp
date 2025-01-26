@@ -40,6 +40,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("remote",KW_REMOTE);
 	m_keywordHash.insert("fadevol",KW_FADE_VOL);
 	m_keywordHash.insert("mode",KW_MODE);
+	m_keywordHash.insert("pause",KW_PAUSE);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)

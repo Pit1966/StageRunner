@@ -279,7 +279,11 @@ ScriptExecuter *FxControl::startFxScript(FxScriptItem *fxscript)
 	}
 
 	ScriptExecuter *fxexec = myApp.execCenter->findScriptExecuter(fxscript);
-	if (fxexec && fxexec->isMultiStartDisabled()) {
+	if (fxexec && fxexec->isPaused()) {
+		fxexec->setPaused(false);
+		return fxexec;
+	}
+	else if (fxexec && fxexec->isMultiStartDisabled()) {
 		LOGTEXT(tr("<font color=green>Start script</font> %1 -> <font color=darkOrange>canceled multiple start</font>")
 				.arg(fxscript->name()));
 		return nullptr;
@@ -484,6 +488,7 @@ ScriptExecuter *FxControl::_startFxScript(FxScriptItem *fxscript)
 		/// @todo script
 		FxListWidgetItem *listitem = parentwid->getFxListWidgetItemFor(fxscript);
 		connect(fxexec,SIGNAL(listProgressStepChanged(int,int)),listitem,SLOT(setActivationProgress(int,int)),Qt::UniqueConnection);
+		connect(fxexec,SIGNAL(executerStatusChanged(FxItem*,QString)),listitem,SLOT(setFxStatus(FxItem*,QString)),Qt::UniqueConnection);
 	}
 
 	// Determine the FxScriptWidget that is the editing widget of the current script

@@ -49,11 +49,6 @@ Executer::Executer(AppCentral &app_central, FxItem *originFx)
 	: myApp(app_central)
 	, originFxItem(originFx)
 	, parentFxItem(nullptr)
-	, eventTargetTimeMs(0)
-	, lastProgressTimeMs(0)
-	, isWaitingForAudio(false)
-	, myState(EXEC_IDLE)
-	, use_cnt(0)
 {
 	runTime.start();
 	runTimeOne.start();
@@ -687,13 +682,14 @@ bool ScriptExecuter::processExecuter()
 
 	while (proceed) {
 		FxScriptLine *line = m_script.at(m_currentLineNum);
-		if (line) {
+		if (line && myState == EXEC_RUNNING) {
 			bool reExecLineDelayed = false;
 			if (line->command().size() > 2 && !line->command().startsWith("#"))
 				proceed = executeLine(line, reExecLineDelayed);
 
 			if (!reExecLineDelayed)
 				m_currentLineNum++;
+
 		} else {
 			proceed = false;
 			active = false;
@@ -717,7 +713,17 @@ void ScriptExecuter::processProgress()
 		emit listProgressStepChanged(perMille, 0);
 	}
 
-	if (state() == EXEC_FINISH && m_breakOnCancel) {
+	if (myState == EXEC_PAUSED) {
+		if (m_lastState != EXEC_PAUSED) {
+			emit executerStatusChanged(parentFxItem, tr("$$Paused"));		// $$ is a control code in order to let the display blink
+		}
+	}
+	else if (myState == EXEC_RUNNING) {
+		if (m_lastState != EXEC_RUNNING) {
+			emit executerStatusChanged(parentFxItem, QString());
+		}
+	}
+	else if (myState == EXEC_FINISH && m_breakOnCancel) {
 		if (m_currentLineNum < m_script.size()) {
 			// fadeout all scenes that where cloned by this executer
 			for (FxSceneItem *fxs : std::as_const(m_clonedSceneList)) {
@@ -727,6 +733,17 @@ void ScriptExecuter::processProgress()
 					.arg(m_fxScriptItem->name()));
 			destroyLater();
 		}
+		emit executerStatusChanged(parentFxItem, QString());
+	}
+
+	m_lastState = myState;
+}
+
+void ScriptExecuter::onPauseEvent(bool active)
+{
+	if (!active) {
+		runTime.cont();
+		runTimeOne.cont();
 	}
 }
 
@@ -748,6 +765,7 @@ ScriptExecuter::ScriptExecuter(AppCentral &app_central, FxScriptItem *script, Fx
 ScriptExecuter::~ScriptExecuter()
 {
 	emit listProgressStepChanged(0, 0);
+	emit executerStatusChanged(nullptr, QString());
 
 	while (!m_clonedSceneList.isEmpty()) {
 		FxSceneItem *scene = m_clonedSceneList.takeFirst();
@@ -1005,6 +1023,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 	case KW_MODE:
 		ok = executeMode(line);
 		break;
+
+	case KW_PAUSE:
+		ok = executePause(line);
+		return false;
 
 	default:
 		ok = false;
@@ -1480,6 +1502,18 @@ bool ScriptExecuter::executeMode(FxScriptLine *line)
 	if (!ok)
 		m_lastScriptError.chop(1);
 	return ok;
+}
+
+bool ScriptExecuter::executePause(FxScriptLine *line)
+{
+	Q_UNUSED(line)
+
+	m_pausedAtMs = runTimeOne.elapsed();
+	setPaused(true);
+	runTime.stop();
+	runTimeOne.stop();
+
+	return true;
 }
 
 bool ScriptExecuter::executeSingleCmd(const QString &linestr)

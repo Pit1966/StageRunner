@@ -66,7 +66,9 @@ bool TimeLineExecuter::processExecuter()
 	Event &ev = m_sortedObjEventList[m_curEventPos];
 	FxTimeLineObj *obj = ev.obj;
 	if (ev.evType == EV_BEGIN) {
+#ifdef QT_DEBUG
 		qDebug() << "EV" << ev.evNum  << "begin time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
+#endif
 
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			execObjBeginPosForFx(obj->fxID(), ev);
@@ -76,11 +78,15 @@ bool TimeLineExecuter::processExecuter()
 			setPaused(true);
 			runTime.stop();
 			runTimeOne.stop();
+#ifdef QT_DEBUG
 			qDebug() << " timeline -> set paused";
+#endif
 		}
 	}
 	else if (ev.evType == EV_STOP) {
+#ifdef QT_DEBUG
 		qDebug() << "EV" << ev.evNum << "end time:" << runTime.elapsed() << ev.timeMs << ev.obj->label;
+#endif
 
 		if (obj->type() >= LINKED_FX_SCENE && obj->type() <= LINKED_FX_LAST) {
 			execObjEndPosForFx(obj->fxID(), ev);

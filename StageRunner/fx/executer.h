@@ -74,13 +74,16 @@ protected:
 	QString idString;
 	ExtElapsedTimer runTime;					///< This timer holds the overall running time of the executer
 	ExtElapsedTimer runTimeOne;					///< Timer holds runtime for current loop (only used for progress!!)
-	qint64 eventTargetTimeMs;					///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
-	qint64 lastProgressTimeMs;					///< May get used by derived classes
-	bool isWaitingForAudio;
-	volatile STATE myState;
+	qint64 eventTargetTimeMs	= 0;			///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
+	qint64 lastProgressTimeMs	= 0;			///< May get used by derived classes
+
+	int m_pausedAtMs			= -1;			///< run time when pause started
+
+	bool isWaitingForAudio		= false;
+	volatile STATE myState		= EXEC_IDLE;
 
 private:
-	int use_cnt;								///< if this usage counter is > 0 the object should not been deleted
+	int use_cnt					= 0;			///< if this usage counter is > 0 the object should not been deleted
 
 protected:
 	Executer(AppCentral &app_central, FxItem *originFx = 0);
@@ -217,6 +220,8 @@ protected:
 	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
 	FxScriptList m_script;
 	int m_currentLineNum;
+	volatile STATE m_lastState	= EXEC_IDLE;
+
 	QList<FxSceneItem*> m_clonedSceneList;
 	QString m_lastScriptError;
 
@@ -228,6 +233,7 @@ public:
 	inline TYPE type() const override {return EXEC_SCRIPT;}
 	bool processExecuter() override;
 	void processProgress() override;
+	void onPauseEvent(bool active) override;
 	bool isMultiStartDisabled() const {return m_disableMultiStart;}
 	void setDmxStarted(bool state) {m_startedByDMX = state;}
 	bool isStartedByDmx() const {return m_startedByDMX;}
@@ -255,6 +261,7 @@ protected:
 	bool executeRemote(FxScriptLine *line);
 	bool executeFadeVolume(FxScriptLine *line);
 	bool executeMode(FxScriptLine *line);
+	bool executePause(FxScriptLine *line);
 
 
 	static bool executeSingleCmd(const QString &linestr);

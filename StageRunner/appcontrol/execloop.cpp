@@ -70,7 +70,7 @@ void FxExecLoop::processPendingEvents()
 		Executer *exec = it.next();
 		switch (exec->state()) {
 		case Executer::EXEC_PAUSED:
-			if (exec->type() != Executer::EXEC_TIMELINE)
+			if (exec->type() < Executer::EXEC_SCRIPT)
 				exec->setTargetTimeToCurrent();
 			break;
 		case Executer::EXEC_RUNNING:
