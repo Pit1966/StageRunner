@@ -1562,9 +1562,10 @@ void AudioControl::createMediaPlayInstances()
 #endif
 				if (!ok) {
 					if (!errmsg)
-						POPUPERRORMSG("Init audio", tr("Audio device '%1' not found!\n"
+						POPUPERRORMSG("Init audio", tr("Audio device '<font color=grey>%1</font>' not found!\n"
 													   "Configuration for audio slot %2 failed.\n"
-													   "Multi device output not possible! Default audio from system will be used.")
+													   "Multi device output not possible!\n"
+													   "Default audio from system will be used.")
 									  .arg(audioDevName).arg(t+1));
 					errmsg = true;
 					myApp.setModuleError(AppCentral::E_AUDIO_DEVICE_NOT_FOUND);

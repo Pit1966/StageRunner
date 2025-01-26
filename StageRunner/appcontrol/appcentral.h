@@ -191,6 +191,7 @@ public:
 	bool hasSecondScreen() const {return m_hasSecondScreen;}
 	QSize secondScreenSize() const;
 	QPoint secondScreenCenterPoint() const;
+	QStyle *mainDialWidgetStyle() const;
 
 private:
 	AppCentral();

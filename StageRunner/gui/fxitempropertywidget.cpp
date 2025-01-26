@@ -76,6 +76,18 @@ FxItemPropertyWidget::FxItemPropertyWidget(QWidget *parent) :
 	connect(audioStopAtEdit,SIGNAL(editingFinished()),this,SLOT(finish_edit()));
 }
 
+void FxItemPropertyWidget::updateDialWidgetStyle(QStyle *dialWidStyle)
+{
+	if (!dialWidStyle)
+		return;
+
+	QList<qsynthKnob *> all_dials = findChildren<qsynthKnob *>();
+	foreach(qsynthKnob* dial, all_dials) {
+		dial->setStyle(dialWidStyle);
+		dial->setDialMode(qsynthKnob::LinearMode);
+	}
+}
+
 FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)
 {
 	if (!FxItem::exists(fx)) return 0;
@@ -84,6 +96,7 @@ FxItemPropertyWidget *FxItemPropertyWidget::openFxPropertyEditor(FxItem *fx)
 	itemEditor->setFxItem(fx);
 	itemEditor->setAttribute(Qt::WA_DeleteOnClose);
 	itemEditor->editOnceButton->hide();
+	itemEditor->updateDialWidgetStyle(AppCentral::ref().mainDialWidgetStyle());
 	itemEditor->show();
 
 	itemEditor->setEditable(true);

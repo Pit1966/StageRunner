@@ -152,10 +152,12 @@ void SetupWidget::copy_settings_to_gui()
 	}
 
 
-	// primara audio devices for slots
+	// primary audio devices for slots
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		QString curDevName = set->pSlotAudioDevice[t];
+#ifdef QT_DEBUG
 		qDebug() << "slot" << t+1 << "audiodevice" << curDevName;
+#endif
 		QComboBox *combo = findChild<QComboBox*>(QString("slotDeviceCombo%1").arg(t+1));
 		if (!combo)
 			continue;
@@ -174,8 +176,7 @@ void SetupWidget::copy_settings_to_gui()
 		}
 
 		if (!devAvailable && !curDevName.isEmpty()) {
-			QString configuredDev = QString("%1").arg(set->pSlotAudioDevice[t]);
-			combo->addItem(configuredDev);
+			combo->addItem(curDevName);
 			combo->setItemIcon(combo->count()-1, QIcon(":/gfx/icons/dialog-warning.png"));
 			combo->setCurrentIndex(combo->count()-1);
 		}
@@ -184,7 +185,9 @@ void SetupWidget::copy_settings_to_gui()
 	// alternative audio devices for slots
 	for (int t=0; t<MAX_AUDIO_SLOTS; t++) {
 		QString curDevName = set->pSlotAltAudioDevice[t];
+#ifdef QT_DEBUG
 		qDebug() << "slot" << t+1 << "alternative audiodevice" << curDevName;
+#endif
 		QComboBox *combo = findChild<QComboBox*>(QString("slotAltDeviceCombo%1").arg(t+1));
 		if (!combo)
 			continue;
@@ -203,8 +206,7 @@ void SetupWidget::copy_settings_to_gui()
 		}
 
 		if (!devAvailable && !curDevName.isEmpty()) {
-			QString configuredDev = QString("%1").arg(set->pSlotAudioDevice[t]);
-			combo->addItem(configuredDev);
+			combo->addItem(curDevName);
 			combo->setItemIcon(combo->count()-1, QIcon(":/gfx/icons/dialog-warning.png"));
 			combo->setCurrentIndex(combo->count()-1);
 		}

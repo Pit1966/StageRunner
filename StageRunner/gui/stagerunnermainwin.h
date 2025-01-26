@@ -106,8 +106,8 @@ private:
 public slots:
 	void showInfoMsg(const QString &where, const QString &text);
 	void showErrorMsg(const QString &where, const QString &text);
-	void setApplicationGuiStyle(QString style);
-	void updateButtonStyles(QString style = "");
+	void setApplicationGuiStyle(const QString &style);
+	void updateDialWidgetStyle(const QString &style = "");
 	void openFxPropertyEditor(FxItem *item);
 	void openFxItemPanel(FxItem *fx);
 	void applyUserSettingsToGui(UserSettings *set);

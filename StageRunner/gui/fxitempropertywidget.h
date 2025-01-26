@@ -48,6 +48,8 @@ private:
 public:
 	FxItemPropertyWidget(QWidget *parent = 0);
 	bool isOnceEdit() {return once_edit_f;}
+	void updateDialWidgetStyle(QStyle *dialWidStyle);
+
 
 	static FxItemPropertyWidget *openFxPropertyEditor(FxItem *fx);
 

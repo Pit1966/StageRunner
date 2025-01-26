@@ -49,8 +49,8 @@
 #include "system/dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
-// #include "audioformat.h"
 
+// #include "audioformat.h"
 
 
 #include <QFileDialog>
@@ -575,6 +575,18 @@ QPoint AppCentral::secondScreenCenterPoint() const
 	QSize halfsize = m_secondScreenSize / 2;
 
 	return m_secondScreenPos + QPoint(halfsize.width(), halfsize.height());
+}
+
+QStyle *AppCentral::mainDialWidgetStyle() const
+{
+	if (!mainwinWidget)
+		return nullptr;
+
+	QDial *dial = mainwinWidget->findChild<QDial *>();
+	if (dial)
+		return dial->style();
+
+	return nullptr;
 }
 
 

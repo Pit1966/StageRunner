@@ -359,7 +359,7 @@ void StageRunnerMainWin::restore_window()
 		m_timeLabel->setVisible(isFullScreen());
 }
 
-void StageRunnerMainWin::updateButtonStyles(QString style)
+void StageRunnerMainWin::updateDialWidgetStyle(const QString &style)
 {
 	LOGTEXT(tr("Set dial knob style to '%1'").arg(style));
 
@@ -893,7 +893,7 @@ void StageRunnerMainWin::loadProject(const QString &path)
 	addRecentProject("");
 }
 
-void StageRunnerMainWin::setApplicationGuiStyle(QString style)
+void StageRunnerMainWin::setApplicationGuiStyle(const QString &style)
 {
 	LOGTEXT(tr("Set Application GUI style to '%1'").arg(style));
 
@@ -1256,10 +1256,13 @@ void StageRunnerMainWin::showInfoMsg(const QString &where, const QString &text)
 
 void StageRunnerMainWin::showErrorMsg(const QString &where, const QString &text)
 {
-	// QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function:%2")
-	// 		.arg(text,where);
+	QString msg = QString("<font color=#ff7722>%1</font><br><br>Reported from function: %2")
+			.arg(text,where);
+	msg.replace('\n',"<br>");
+
+
 	msg_dialog->setStyleSheet("color:#ff7722;");
-	msg_dialog->showMessage(text, where);
+	msg_dialog->showMessage(msg, where);
 	msg_dialog->resize(800,200);
 	msg_dialog->setWindowTitle(tr("StageRunner error message"));
 }
@@ -1274,7 +1277,7 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 {
 	SetupWidget setup(appCentral);
 	connect(&setup,SIGNAL(applicationStyleChanged(QString)),this,SLOT(setApplicationGuiStyle(QString)));
-	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateButtonStyles(QString)));
+	connect(&setup,SIGNAL(dialKnobStyleChanged(QString)),this,SLOT(updateDialWidgetStyle(QString)));
 	connect(&setup,SIGNAL(setupChanged(UserSettings*)),this,SLOT(applyUserSettingsToGui(UserSettings*)));
 
 	setup.show();
