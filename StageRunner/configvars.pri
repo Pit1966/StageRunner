@@ -3,8 +3,8 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V1.00.01.01
-APP_MILESTONE = 1h22
+APPVERSION = V1.00.02.00
+APP_MILESTONE = 1h22 danach
 APP_PRODUCER = 2025 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
