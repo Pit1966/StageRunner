@@ -38,6 +38,8 @@
 #include "usersettings.h"
 #include "thirdparty/widget/qsynthdialpeppinostyle.h"
 #include "thirdparty/widget/qsynthdialclassicstyle.h"
+#include "thirdparty/widget/qsynthdialvokistyle.h"
+#include "thirdparty/widget/qsynthdialskulpturestyle.h"
 #include "setupwidget.h"
 #include "fxitempropertywidget.h"
 #include "scenestatuswidget.h"
@@ -375,6 +377,13 @@ void StageRunnerMainWin::updateDialWidgetStyle(const QString &style)
 	else if (style == "QSynth Dial Peppino") {
 		dialWidgetStyle = new qsynthDialPeppinoStyle();
 	}
+	else if (style == "QSynth Dial Voki") {
+		dialWidgetStyle = new qsynthDialVokiStyle();
+	}
+	else if (style == "QSynth Dial Skulpture") {
+		dialWidgetStyle = new qsynthDialSkulptureStyle();
+	}
+
 
 	// if (!dialWidgetStyle) return;
 

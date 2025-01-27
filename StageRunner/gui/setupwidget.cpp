@@ -119,6 +119,9 @@ void SetupWidget::copy_settings_to_gui()
 	dialKnobStyleCombo->addItem("Default");
 	dialKnobStyleCombo->addItem("QSynth Dial Classic");
 	dialKnobStyleCombo->addItem("QSynth Dial Peppino");
+	dialKnobStyleCombo->addItem("QSynth Dial Voki");
+	dialKnobStyleCombo->addItem("QSynth Dial Skulpture");
+
 	idx = dialKnobStyleCombo->findText(set->pDialKnobStyle);
 	if (idx >= 0)
 		dialKnobStyleCombo->setCurrentIndex(idx);

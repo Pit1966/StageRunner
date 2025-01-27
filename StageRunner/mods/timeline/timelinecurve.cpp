@@ -510,6 +510,8 @@ void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 	// painter->setPen(Qt::NoPen);
 	// painter->drawRect(0, 0, m_xSize, m_ySize);
 
+	painter->setRenderHint(QPainter::Antialiasing);
+
 	QPen pen;
 	pen.setColor(m_colorBorder);
 	painter->setPen(pen);

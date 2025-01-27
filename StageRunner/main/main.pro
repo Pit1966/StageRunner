@@ -188,6 +188,8 @@ SOURCES += \
 	../system/videocontrol.cpp \
 	../thirdparty/widget/qsynthdialclassicstyle.cpp \
 	../thirdparty/widget/qsynthdialpeppinostyle.cpp \
+	../thirdparty/widget/qsynthdialskulpturestyle.cpp \
+	../thirdparty/widget/qsynthdialvokistyle.cpp \
 	../thirdparty/widget/qsynthknob.cpp \
 	../thirdparty/widget/qsynthmeter.cpp \
 	../tool/database.cpp \
@@ -337,6 +339,8 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/def.h \
 	../thirdparty/widget/qsynthdialclassicstyle.h \
 	../thirdparty/widget/qsynthdialpeppinostyle.h \
+	../thirdparty/widget/qsynthdialskulpturestyle.h \
+	../thirdparty/widget/qsynthdialvokistyle.h \
 	../thirdparty/widget/qsynthknob.h \
 	../thirdparty/widget/qsynthmeter.h \
 	../tool/database.h \
