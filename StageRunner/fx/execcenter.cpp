@@ -25,6 +25,7 @@
 #include "fxitem.h"
 #include "fxlist.h"
 #include "executer.h"
+#include "scriptexecuter.h"
 #include "timelineexecuter.h"
 #include "log.h"
 #include "appcontrol/appcentral.h"

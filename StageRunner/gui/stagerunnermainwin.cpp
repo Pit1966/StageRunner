@@ -1395,8 +1395,8 @@ void StageRunnerMainWin::on_actionInitialize_plugins_DMX_triggered()
 
 void StageRunnerMainWin::on_actionInfo_triggered()
 {
-	QString msg = QString("%1 %2\n%3\n\n%4\n\n").arg(APPNAME).arg(APPVERSION).arg(APP_MILESTONE).arg(APP_PRODUCER);
-	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR).arg(qVersion());
+	QString msg = QString("%1 %2\n%3\n\n%4\n\n").arg(APPNAME, APPVERSION, APP_MILESTONE, APP_PRODUCER);
+	msg += QString("Qt version (binary): %1\nQt version (runtime): %2\n\n").arg(QT_VERSION_STR, qVersion());
 
 #ifdef __unix__
 	// msg += QString("Git timestamp: %1\n").arg(QDateTime::fromTime_t(GIT_APP_TIME).toString());
@@ -1404,7 +1404,18 @@ void StageRunnerMainWin::on_actionInfo_triggered()
 	msg += QString("Build date: %1\n").arg(BUILD_DATE);
 	msg += QString("Build path: %1\n").arg(BUILD_PATH);
 #endif
-	QMessageBox::information(this,tr("About Info"),msg);
+
+	msg += QString("\nStageRunner uses code from:\n"
+				   " - QDial styles and vu meter from QSynth by Rui Nuno Capela\n"
+				   " - some DMX plugins and interface from QLCplus");
+
+	QMessageBox msgbox(QMessageBox::Information,
+					   QString("StageRunner information"),
+					   msg);
+	msgbox.findChild<QLabel*>("qt_msgbox_label")->setFixedWidth(700);
+	msgbox.exec();
+
+	// QMessageBox::information(this,tr("About Info"),msg);
 
 }
 
@@ -1531,6 +1542,9 @@ void StageRunnerMainWin::on_actionNotes_triggered()
 	edit->resize(1000,700);
 	edit->setAttribute(Qt::WA_DeleteOnClose);
 	edit->setReadOnly(true);
+#if QT_VERSION >= 0x050a00
+	edit->setTabStopDistance(40);
+#endif
 
 	QFile file(":/docs/help.txt");
 	if (file.open(QFile::ReadOnly | QFile::Text)) {

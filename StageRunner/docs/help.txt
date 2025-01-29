@@ -8,3 +8,99 @@ Set preDelay to -1 and postDelay to desired pause time in ms. This will execute 
 Prevent current FX of being stopped when "Start next FX" was clicked or executed:
 Set Hold time of FX that must not be stopped to -1.
 
+
+FxScript commands:
+
+START { id <FX_ID> | name <FX_NAME> | <FX_NAME_OR_ID> }
+	Start FX item from global FX list
+	Start FX by name:
+		START name <FX_NAME>
+	Start FX by ID (given in list ID column)
+		START id <ID>
+	- If neither "name" nor "id" is given, the parameter is handles as ID if it is a number, otherwise FX name will be assumed
+	- You may use wildcard char '*' in order to start multiple FX items with matching names. But only in this fashion:
+		START *<NAME_END>  or START <NAME_START>*  or START *<NAME_PART>*
+
+
+STOP { id <FX_ID> | name <FX_NAME> | <FX_NAME_OR_ID> }
+	Stop running FX item from global FX list
+
+
+FADEIN { id <FX_SCENE_ID> | name <FX_SCENE_NAME> | <FX_SCENE_NAME_OR_ID> } [<FADE_IN_TIME>]
+	Fade in FxScene (DMX light scene) from global FX list
+	If FADE_IN_TIME is not given, the command will use the default fadein time from FxScene item.
+
+FADEOUT { id <FX_SCENE_ID> | name <FX_SCENE_NAME> | <FX_SCENE_NAME_OR_ID> | all } [<FADE_OUT_TIME>]
+	Fade out FxScene (DMX light scene) from global FX list, if it is on stage
+	If FADE_OUT_TIME is not given, the command will use the default fadein time from FxScene item.
+
+DMXMERGE <INPUT_NUM> <MERGE_MODE>
+	Set DMX merge mode of a connected YADI DMX interface to the given merge mode.
+	The merge mode controls how the different DMX inputs are merged and routed to the DMX output of the interface.
+	MERGE_MODE
+	htp		- highest takes precedence. For each DMX channel the highest value from all inputs are set in the output
+	dmxin	- the DMX input will be routed to the DMX output. Computer (USB) output is switched off.
+	usb		- the computer (USB) output is routed to the DMX output of the interface. DMX input is off
+
+GRAPSCENE { in | out } <FX_SCENE_NAME_OR_ID>
+	Grab current DMX input or output and copy the universe data to specified FX scene
+	Example:
+	This example script shows how the StageRunner application takes over the control of a lightdesk, fades out the
+	current lightdesk output, activate a FX scene and than gives control back to lightdesk
+
+	grapscene in grap_scene				# copy current DMX input to FX scene with name grap_scene (must exist)
+	fadein grap_scene					# fade in the grap_scene
+	wait 10ms
+	dmxmerge 1 usb						# switch to exclusive PC control. Deactivate lightdesk
+	fadein light_vision 1000ms			# fade in some arbitrary special scene
+	fadeout grap_scene 2000ms			# fade out the grabed scene. This fades out the original lightdesk DMX output
+	wait 24s
+	fadeout light_vision 1000ms			# fade out the special scene
+	fadein grap_scene 1000ms			# fade in the grabed scene. This shows the previous output of the lightdesk again
+	wait 2s
+	dmxmerge 1 htp						# reactivate lightdesk
+	fadeout grap_scene					# fadeout grap_scene. Control is now completly back to the lightdesk
+
+
+BLACK { video | scene | light | all } [FADE_OUT_TIME]
+	Black or fadeout FX scenes (DMX) or Video playback or all together.
+	If FADE_OUT_TIME is omitted, a sudden black will be done
+
+REMOTE <REMOTE_HOST_ADDRESS> <SCRIPT_COMMAND>
+	Execute script commands on remote StageRunner instances available via network connection.
+	The commands are send with UDP network protocol
+	REMOTE_HOST_ADDRESS may be an IP address or a hostname. (Maybe IP is better, since it don't needs name resolution)
+	SCRIPT_COMMAND is any command described here
+
+FADEVOL slot <AUDIO_SLOT_NUMBER> { <TARGET_VOLUME_ABS>|<TARGET_VOLUME_PERCENT>% } [FADE_TIME]
+	Fade given audio slot to arbitrary volume.
+	Use absolute volume scale (0-100)
+		FADEVOL 1 70
+	or use percentage volume scale
+		FADEVOL 1 70%
+	(for now absolute and percentage is the same, but absolute volume scale may change in future)
+	You may provide a fade time also
+
+MODE [breakoncancel][,disablemultistart][,enablemultistart]
+	Set one ore more script execution mode(s).
+	breakoncancel: Stopping a script will immediately stop all commands inside the script. Otherwise the script will be stopped
+		after the command has finished.
+	enablemultistart and disablemultistart: Set if multiple start of FX script is allowed or not
+
+WAIT <TIME>
+	Pauses the script for the given time.
+	This is an essential feature in order to control the timing of the script commands.
+	Example:
+	This starts the FX item with id 5 and 5 seconds later it starts the FX item with id 3
+		START id 5
+		wait 5s
+		START id 3
+
+LOOP [<LINE_NUMBER>] [<LOOP_COUNT>]
+	Allows to loop a script for the given number times.
+	Reaching the LOOP command line, the script will jump to the given LINE_NUMBER, increment the loop counter and break the
+	loop if LOOP_COUNT is reached
+
+PAUSE
+	Stop execution of script at line position the PAUSE command appears and set the FX script item into paused mode.
+	Starting the script again (e.g. by key press, double click or other command) the script will continue execution.
