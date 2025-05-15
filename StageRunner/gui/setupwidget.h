@@ -57,6 +57,8 @@ private slots:
 	void on_okButton_clicked();
 	void on_cancelButton_clicked();
 	void on_qlcPluginsList_itemActivated(QListWidgetItem *item);
+	void on_qlcPluginsList_itemClicked(QListWidgetItem *item);
+	void on_qlcPluginsList_itemChanged(QListWidgetItem *item);
 	void on_configurePluginButton_clicked();
 	void on_saveDmxConfigButton_clicked();
 
@@ -69,7 +71,7 @@ private slots:
 	void on_restartAudioVideoSlots_clicked();
 
 	void on_updateLinesButton_clicked();
-	void on_qlcPluginsList_itemChanged(QListWidgetItem *item);
+
 
 signals:
 	void applicationStyleChanged(QString style);

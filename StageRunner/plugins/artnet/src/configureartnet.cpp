@@ -314,7 +314,7 @@ void ConfigureArtNet::accept()
 				m_plugin->setParameter(universe, line, cap, ARTNET_OUTPUTIP, hostAddress.toString());
 			}
 			else {	// outNum > 0
-				// this is additional configuration for plug in in last line. But, only available for output!
+				// this is additional configuration for plugin in last line. But, only available for output!
 				if (cap == QLCIOPlugin::Output) {
 					m_plugin->setParameter(universe, line, cap, ARTNET_OUTPUT_ADD_IP + QString::number(outNum), hostAddress.toString());
 				}

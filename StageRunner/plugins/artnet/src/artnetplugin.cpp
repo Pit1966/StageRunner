@@ -348,7 +348,7 @@ void ArtNetPlugin::setParameter(quint32 universe, quint32 line, Capability type,
     {
 		// this is live data config
 
-        if (name == ARTNET_OUTPUTIP)
+		if (name == ARTNET_OUTPUTIP)
             unset = controller->setOutputIPAddress(universe, value.toString());
         else if (name == ARTNET_OUTPUTUNI)
             unset = controller->setOutputUniverse(universe, value.toUInt());
@@ -363,6 +363,14 @@ void ArtNetPlugin::setParameter(quint32 universe, quint32 line, Capability type,
             return;
         }
     }
+
+	// workaround: we have to remove additional ARTNET_OUTPUT_ADD_IP parameters. We do not see if one was removed
+	// so we must delete them all, when ARTNET_OUTPUTIP is set
+	if (name == ARTNET_OUTPUTIP) {
+		for (int i=1; i<4; i++) {
+			QLCIOPlugin::unSetParameter(universe, line, type, QString(ARTNET_OUTPUT_ADD_IP) + QString::number(i));
+		}
+	}
 
 	// this is plugin save parameter config
     if (unset)

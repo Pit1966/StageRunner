@@ -113,12 +113,15 @@ void QLCIOPlugin::setParameter(quint32 universe, quint32 line,
     if (m_universesMap.contains(universe) == false)
         return;
 
-    qDebug() << "[QLCIOPlugin] set parameter:" << universe << line << name << value;
+	// qDebug() << "[QLCIOPlugin] set parameter:" << universe << line << name << value;
 
     if (type == Input && m_universesMap[universe].inputLine == line)
         m_universesMap[universe].inputParameters[name] = value;
-    else if (type == Output && m_universesMap[universe].outputLine == line)
-        m_universesMap[universe].outputParameters[name] = value;
+	else if (type == Output && m_universesMap[universe].outputLine == line) {
+		QMap<QString, QVariant> &outParas = m_universesMap[universe].outputParameters;
+		outParas[name] = value;
+		// m_universesMap[universe].outputParameters[name] = value;
+	}
 }
 
 void QLCIOPlugin::unSetParameter(quint32 universe, quint32 line, QLCIOPlugin::Capability type, QString name)
@@ -126,7 +129,7 @@ void QLCIOPlugin::unSetParameter(quint32 universe, quint32 line, QLCIOPlugin::Ca
     if (m_universesMap.contains(universe) == false)
         return;
 
-    qDebug() << "[QLCIOPlugin] unset parameter:" << universe << line << name;
+	// qDebug() << "[QLCIOPlugin] unset parameter:" << universe << line << name;
 
     if (type == Input && m_universesMap[universe].inputLine == line)
     {

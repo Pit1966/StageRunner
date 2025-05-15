@@ -322,9 +322,27 @@ void SetupWidget::on_cancelButton_clicked()
 
 void SetupWidget::on_qlcPluginsList_itemActivated(QListWidgetItem *item)
 {
+}
+
+
+void SetupWidget::on_qlcPluginsList_itemClicked(QListWidgetItem *item)
+{
 	m_selectedPlugin = myapp->pluginCentral->getQLCPluginByName(item->text());
 
 	update_gui_plugin_info();
+}
+
+void SetupWidget::on_qlcPluginsList_itemChanged(QListWidgetItem *item)
+{
+	// DEBUGTEXT("item changed %s\n", item->text().toLocal8Bit().constData());
+
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("Plugins");
+	if (item->checkState() == Qt::Unchecked) {
+		set.setValue(item->text(), false);
+	} else {
+		set.setValue(item->text(), true);
+	}
 }
 
 void SetupWidget::update_gui_plugin_info()
@@ -476,10 +494,11 @@ void SetupWidget::on_configurePluginButton_clicked()
 				if (!lineconf)
 					continue;
 				QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Output);
-				qDebug() << "get paras" << map;
+				qDebug() << "uni" << uni << "get paras" << map;
 				if (lineconf->pUniverse == uni+1) {
 					QString ser = VariantMapSerializer::toString(map);
 					lineconf->pParameters = ser;
+					qDebug() << "uni" << uni << "  serializer" << ser;
 				}
 			}
 		}
@@ -578,16 +597,4 @@ void SetupWidget::on_updateLinesButton_clicked()
 	myapp->reOpenPlugins();
 }
 
-void SetupWidget::on_qlcPluginsList_itemChanged(QListWidgetItem *item)
-{
-	// DEBUGTEXT("item changed %s\n", item->text().toLocal8Bit().constData());
-
-	QSettings set(QSETFORMAT,APPNAME);
-	set.beginGroup("Plugins");
-	if (item->checkState() == Qt::Unchecked) {
-		set.setValue(item->text(), false);
-	} else {
-		set.setValue(item->text(), true);
-	}
-}
 
