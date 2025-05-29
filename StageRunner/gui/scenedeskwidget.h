@@ -36,14 +36,14 @@ class SceneDeskWidget : public QWidget, private Ui::SceneDeskWidget
 {
 	Q_OBJECT
 private:
-	static QList<SceneDeskWidget*>scene_desk_list;		//
-	FxSceneItem *origin_fxscene;
+	static QList<SceneDeskWidget*>m_sceneDeskList;		//
+	FxSceneItem *m_originFxScene;
 
-	QList<int>selected_tube_ids;		//List of tube Ids currently selected in MixerGroup
+	QList<int>m_selectedTubeIds;		//List of tube Ids currently selected in MixerGroup
 
-	bool scene_is_live_f;
-	bool ctrl_pressed_f;
-	bool shift_pressed_f;
+	bool m_isSceneLive;
+	bool m_isCtrlPressed;
+	bool m_isShiftPressed;
 
 public:
 	static SceneDeskWidget *openSceneDesk(FxSceneItem *scene, QWidget *parent = 0);
@@ -67,6 +67,7 @@ protected:
 	bool deleteSelectedTubes();
 	bool unhideAllTubes();
 	int setLabelInSelectedTubes(const QString &text);
+	int setUniverseInTubes(int universe);
 
 private:
 	SceneDeskWidget(FxSceneItem *scene, QWidget *parent = 0);
@@ -99,6 +100,7 @@ private slots:
 
 	void on_cloneCurrentInputButton_clicked();
 	void on_cloneCurrentOutputButton_clicked();
+	void on_universeSpin_valueChanged(int arg1);
 
 signals:
 	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

@@ -88,6 +88,11 @@ void MixerChannel::setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP)
 	my_dmx_channel_ref = dmxChP;
 }
 
+void MixerChannel::setUniverse(int universe)
+{
+	my_universe = universe;
+}
+
 void MixerChannel::setRange(int min, int max)
 {
 	QAbstractSlider::setRange(min,max);
@@ -235,6 +240,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	if (!do_paint_f) return;
 
 	QPainter p(this);
+	QFont unifont(p.font());
 
 	if (knob_over_f) {
 		p.drawPixmap(event->rect(),org_pix_back_active);
@@ -358,6 +364,14 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.setPen(Qt::red);
 		QRect bound(QPoint(0,0),QPoint(width(),height()));
 		p.drawText(bound,tstr,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+	}
+
+	if (my_universe > 0) {
+		p.setFont(unifont);
+		p.setPen(Qt::gray);
+		QRect bound(QPoint(0,20),QPoint(width(), height()));
+		QString uniTxt = QString("U%1").arg(my_universe + 1);
+		p.drawText(bound, uniTxt, QTextOption(Qt::AlignHCenter | Qt::AlignTop));
 	}
 
 

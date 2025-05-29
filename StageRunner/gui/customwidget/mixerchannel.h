@@ -93,6 +93,7 @@ public:
 	inline void setId(int id) {my_id = id;}
 	inline int id() {return my_id;}
 	void setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP);
+	void setUniverse(int universe);
 	inline int dmxUniverse() const {return my_universe;}
 	inline int dmxChannel() const {return my_dmx_channel;}
 	void setRange(int min, int max);

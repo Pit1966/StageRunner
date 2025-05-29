@@ -205,7 +205,7 @@ void ArtNetPlugin::closeOutput(quint32 output, quint32 universe)
 
 void ArtNetPlugin::writeUniverse(quint32 universe, quint32 output, const QByteArray &data)
 {
-//	qDebug() << "[ArtNet] write Universe :" << universe << output;
+	// qDebug() << "[ArtNet] write Universe :" << universe << output;
     if (output >= (quint32)m_IOmapping.count())
         return;
     ArtNetController *controller = m_IOmapping.at(output).controller;
