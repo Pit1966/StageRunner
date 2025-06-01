@@ -54,6 +54,13 @@ void ArtNetPlugin::init()
                 if (alreadyInList == false)
                 {
                     m_IOmapping.append(tmpIO);
+					// Add address a second time in order to create multiple targets for
+					// different universes (up to 4)
+					if (addr != QHostAddress::LocalHost) {
+						m_IOmapping.append(tmpIO);
+						m_IOmapping.append(tmpIO);
+						m_IOmapping.append(tmpIO);
+					}
                 }
             }
         }
@@ -205,12 +212,12 @@ void ArtNetPlugin::closeOutput(quint32 output, quint32 universe)
 
 void ArtNetPlugin::writeUniverse(quint32 universe, quint32 output, const QByteArray &data)
 {
-	// qDebug() << "[ArtNet] write Universe :" << universe << output;
     if (output >= (quint32)m_IOmapping.count())
         return;
     ArtNetController *controller = m_IOmapping.at(output).controller;
 	if (controller != NULL) {
-        controller->sendDmx(universe, data);
+		// qDebug() << "[ArtNet ] write Universe :" << universe + 1 << QString("Output: TX%1").arg(output + 1);
+		controller->sendDmx(universe, data);
 	}
 }
 
@@ -228,6 +235,10 @@ QStringList ArtNetPlugin::inputs()
     {
         list << QString("%1: %2").arg(j + 1).arg(line.address.ip().toString());
         j++;
+		// this is a hack, amount of inputs is the same as amount of outputs, but since wie use different output
+		// IPs on the same output interface, wie skip them for input
+		if (j == 2)
+			break;
     }
     return list;
 }
@@ -429,7 +440,7 @@ void ArtNetPlugin::slotReadyRead()
 
 void ArtNetPlugin::handlePacket(QByteArray const& datagram, QHostAddress const& senderAddress)
 {
-	qDebug() << "getudp packet from" << senderAddress.toString();
+	qDebug() << "[ArtNet] getudp packet from" << senderAddress.toString();
 
     // A firts filter: look for a controller on the same subnet as the sender.
     // This allows having the same ArtNet Universe on 2 different network interfaces.

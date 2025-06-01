@@ -40,6 +40,7 @@
 #define KMapColumnIPAddress     2
 #define KMapColumnArtNetUni     3
 #define KMapColumnTransmitMode  4
+#define KMapColumnAddIP			5
 #define KMapColumnAddOutput		5
 
 #define PROP_UNIVERSE (Qt::UserRole + 0)
@@ -130,6 +131,10 @@ void ConfigureArtNet::fillMappingTree()
 			outputItem = new QTreeWidgetItem(m_uniMapTree);
 			outputItem->setText(KMapColumnInterface, tr("Outputs"));
 			outputItem->setExpanded(true);
+
+			// QPushButton *addbut = new QPushButton("Add output");
+			// connect(addbut, SIGNAL(clicked()), this, SLOT(onAddOutputButtonClicked()));
+			// m_uniMapTree->setItemWidget(outputItem, KMapColumnAddOutput, addbut);
 		}
 		foreach(quint32 universe, controller->universesList())
 		{
@@ -187,13 +192,13 @@ void ConfigureArtNet::fillMappingTree()
 					combo->setCurrentIndex(1);
 				m_uniMapTree->setItemWidget(item, KMapColumnTransmitMode, combo);
 
-				//item->setText(KMapColumnAddOutput, QString("Add output"));
-				QPushButton *addbut = new QPushButton("Add output");
+				//item->setText(KMapColumnAddOutput, QString("Add target IP"));
+				QPushButton *addbut = new QPushButton("Add target IP");
 				QVariant var;
 				var.setValue(info);
 				addbut->setProperty("universe_info", var);
-				connect(addbut, SIGNAL(clicked()), this, SLOT(onAddOutputButtonClicked()));
-				m_uniMapTree->setItemWidget(item, KMapColumnAddOutput, addbut);
+				connect(addbut, SIGNAL(clicked()), this, SLOT(onAddTargetIPButtonClicked()));
+				m_uniMapTree->setItemWidget(item, KMapColumnAddIP, addbut);
 				addbut->setStyle(nullptr);
 
 				// add additional lines, if there are more target host addresses
@@ -213,8 +218,8 @@ void ConfigureArtNet::fillMappingTree()
 					var.setValue(info);
 					rembut->setProperty("universe_info", var);
 					rembut->setProperty("output_num", i);
-					connect(rembut, SIGNAL(clicked()), this, SLOT(onRemOutputButtonClicked()));
-					m_uniMapTree->setItemWidget(subitem, KMapColumnAddOutput, rembut);
+					connect(rembut, SIGNAL(clicked()), this, SLOT(onRemoveTargetIPButtonClicked()));
+					m_uniMapTree->setItemWidget(subitem, KMapColumnAddIP, rembut);
 				}
 
 			}
@@ -229,7 +234,7 @@ void ConfigureArtNet::showIPAlert(QString ip)
 	QMessageBox::critical(this, tr("Invalid IP"), tr("%1 is not a valid IP.\nPlease fix it before confirming.").arg(ip));
 }
 
-void ConfigureArtNet::onAddOutputButtonClicked()
+void ConfigureArtNet::onAddTargetIPButtonClicked()
 {
 	QPushButton *addbut = qobject_cast<QPushButton *>(sender());
 	if (!addbut) return;
@@ -250,7 +255,7 @@ void ConfigureArtNet::onAddOutputButtonClicked()
 	fillMappingTree();
 }
 
-void ConfigureArtNet::onRemOutputButtonClicked()
+void ConfigureArtNet::onRemoveTargetIPButtonClicked()
 {
 	QPushButton *rembut = qobject_cast<QPushButton *>(sender());
 	if (!rembut) return;
@@ -266,6 +271,12 @@ void ConfigureArtNet::onRemOutputButtonClicked()
 		m_uniMapTree->clear();
 		fillMappingTree();
 	}
+}
+
+void ConfigureArtNet::onAddOutputButtonClicked()
+{
+
+
 }
 
 ConfigureArtNet::~ConfigureArtNet()

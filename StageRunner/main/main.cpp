@@ -365,8 +365,6 @@ int main(int argc, char *argv[])
 	PrefVarCore::registerVarClasses();
 
 	ScApplication app(argc, argv);
-
-
 	app.setApplicationName(APPNAME);
 	app.setOrganizationName(APP_ORG_STRING);
 	app.setOrganizationDomain(APP_ORG_DOMAIN);

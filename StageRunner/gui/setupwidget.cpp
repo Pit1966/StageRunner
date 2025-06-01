@@ -487,20 +487,53 @@ void SetupWidget::on_configurePluginButton_clicked()
 		update_gui_plugin_info();
 
 		QString plugin_name = m_selectedPlugin->name();
-		for (int line=0; line<2; line++) {
-			for (int uni=0; uni<MAX_DMX_UNIVERSE; uni++) {
-				QString line_name = IOPluginCentral::outputOf(line, m_selectedPlugin);
-				PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name, line_name);
-				if (!lineconf)
-					continue;
-				QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Output);
-				qDebug() << "uni" << uni << "get paras" << map;
-				if (lineconf->pUniverse == uni+1) {
-					QString ser = VariantMapSerializer::toString(map);
-					lineconf->pParameters = ser;
-					qDebug() << "uni" << uni << "  serializer" << ser;
-				}
+
+		// get configuration for output lines from setup widget)
+		int outlinecnt = m_selectedPlugin->outputs().size();
+		qDebug() << "plugin" << plugin_name << "has" << outlinecnt << "output lines";
+
+		// search PluginConfig for each output line and store configuration if PluginConfig contains an active line
+		for (int line=0; line<outlinecnt; line++) {
+			QString line_name = IOPluginCentral::outputOf(line, m_selectedPlugin);
+			// Must return a PluginConfig. PluginConfig will be created if not exists for line_name
+			PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name, line_name);
+			Q_ASSERT(lineconf);
+			// this is used universe for line. 0 means, not used, otherwise it's the universe number
+			int uni = lineconf->pUniverse - 1;
+			if (uni < 0) {
+				qDebug() << "inactiv output:" << plugin_name << line_name;
+				continue;
 			}
+
+			// get parameters from setup widget for universe, that is configured in PluginConfig;
+			QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Output);
+			QString ser = VariantMapSerializer::toString(map);	// make a single string from all parameters
+			lineconf->pParameters = ser;
+			qDebug() << "active output:" << plugin_name << line_name << "universe:" << uni+1 << "parameters:" << ser;
+		}
+
+		// get configuration for input lines from setup widget)
+		int inlinecnt = m_selectedPlugin->inputs().size();
+		qDebug() << "plugin" << plugin_name << "has" << inlinecnt << "input lines";
+
+		// search PluginConfig for each input line and store configuration if PluginConfig contains an active line
+		for (int line=0; line<inlinecnt; line++) {
+			QString line_name = IOPluginCentral::inputOf(line, m_selectedPlugin);
+			// Must return a PluginConfig. PluginConfig will be created if not exists for line_name
+			PluginConfig *lineconf = m_curPluginMap->getCreatePluginLineConfig(plugin_name, line_name);
+			Q_ASSERT(lineconf);
+			// this is used universe for line. 0 means, not used, otherwise it's the universe number
+			int uni = lineconf->pUniverse - 1;
+			if (uni < 0) {
+				qDebug() << "inactiv input:" << plugin_name << line_name;
+				continue;
+			}
+
+			// get parameters from setup widget for universe, that is configured in PluginConfig;
+			QVariantMap map = m_selectedPlugin->getParameters(uni, line, QLCIOPlugin::Input);
+			QString ser = VariantMapSerializer::toString(map);	// make a single string from all parameters
+			lineconf->pParameters = ser;
+			qDebug() << "active input:" << plugin_name << line_name << "universe:" << uni+1 << "parameters:" << ser;
 		}
 	}
 }

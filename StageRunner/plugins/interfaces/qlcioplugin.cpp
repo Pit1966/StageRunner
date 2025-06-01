@@ -107,20 +107,19 @@ bool QLCIOPlugin::canConfigure()
     return false;
 }
 
-void QLCIOPlugin::setParameter(quint32 universe, quint32 line,
-                               Capability type, QString name, QVariant value)
+void QLCIOPlugin::setParameter(quint32 universe, quint32 line, Capability type, QString name, QVariant value)
 {
-    if (m_universesMap.contains(universe) == false)
-        return;
+	if (m_universesMap.contains(universe) == false)
+		return;
 
-	// qDebug() << "[QLCIOPlugin] set parameter:" << universe << line << name << value;
+	// qDebug() << "[QLCIOPlugin]" << this->name() << "set parameter: universe:" << universe << "line:" << line << "name:" << name << value;
 
-    if (type == Input && m_universesMap[universe].inputLine == line)
-        m_universesMap[universe].inputParameters[name] = value;
+	if (type == Input && m_universesMap[universe].inputLine == line)
+		m_universesMap[universe].inputParameters[name] = value;
 	else if (type == Output && m_universesMap[universe].outputLine == line) {
 		QMap<QString, QVariant> &outParas = m_universesMap[universe].outputParameters;
 		outParas[name] = value;
-		// m_universesMap[universe].outputParameters[name] = value;
+		m_universesMap[universe].outputParameters[name] = value;
 	}
 }
 
@@ -129,7 +128,7 @@ void QLCIOPlugin::unSetParameter(quint32 universe, quint32 line, QLCIOPlugin::Ca
     if (m_universesMap.contains(universe) == false)
         return;
 
-	// qDebug() << "[QLCIOPlugin] unset parameter:" << universe << line << name;
+	// qDebug() << "[QLCIOPlugin]"  << this->name() << "unset parameter:" << universe << line << name;
 
     if (type == Input && m_universesMap[universe].inputLine == line)
     {

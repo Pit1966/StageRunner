@@ -87,6 +87,8 @@ void srMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 
 	switch (type) {
 	case QtDebugMsg:
+		if (localMsg.startsWith("[ArtNet]"))
+			return;
 		fprintf(stderr, "DEBUG(%s): %s\n",
 				QThread::currentThread()->objectName().toLocal8Bit().constData(),
 				localMsg.constData());

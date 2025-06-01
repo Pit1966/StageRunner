@@ -47,8 +47,9 @@ private:
     void showIPAlert(QString ip);
 
 private slots:
+	void onAddTargetIPButtonClicked();
+	void onRemoveTargetIPButtonClicked();
 	void onAddOutputButtonClicked();
-	void onRemOutputButtonClicked();
 
 private:
     ArtNetPlugin* m_plugin;

@@ -175,8 +175,8 @@ bool ArtNetPacketizer::fillArtPollReplyInfo(QByteArray const& data, ArtNetNodeIn
     info.shortName = QString(shortName.data()).simplified();
     info.longName = QString(longName.data()).simplified();
 
-    qDebug() << "getArtPollReplyInfo shortName: " << info.shortName;
-    qDebug() << "getArtPollReplyInfo longName: " << info.longName;
+	qDebug() << "[ArtNet] getArtPollReplyInfo shortName: " << info.shortName;
+	qDebug() << "[ArtNet] getArtPollReplyInfo longName: " << info.longName;
 
     return true;
 }

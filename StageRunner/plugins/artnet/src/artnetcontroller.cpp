@@ -295,6 +295,8 @@ void ArtNetController::sendDmx(const quint32 universe, const QByteArray &data)
         transmitMode = TransmissionMode(info.outputTransmissionMode);
     }
 
+	// qDebug() << "[ArtNet ] -> out universe:" << outUniverse << "addresses" << outAddressList;
+
 	if (transmitMode == Full)
 	{
         QByteArray wholeuniverse(512, 0);
@@ -308,10 +310,10 @@ void ArtNetController::sendDmx(const quint32 universe, const QByteArray &data)
 
 	for (int t=0; t<outAddressList.size(); t++) {
 		QHostAddress host = outAddressList.at(t);
-		qint64 sent = m_udpSocket->writeDatagram(dmxPacket, outAddressList.at(t), ARTNET_PORT);
+		qint64 sent = m_udpSocket->writeDatagram(dmxPacket, host, ARTNET_PORT);
 		if (sent < 0)
 		{
-			qWarning() << "sendDmx failed" << outAddressList.at(t);
+			qWarning() << "sendDmx failed" << host;
 			qWarning() << "Errno: " << m_udpSocket->error();
 			qWarning() << "Errmgs: " << m_udpSocket->errorString();
 		}

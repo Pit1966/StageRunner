@@ -72,7 +72,6 @@ private slots:
 
 	void on_updateLinesButton_clicked();
 
-
 signals:
 	void applicationStyleChanged(QString style);
 	void dialKnobStyleChanged(QString style);

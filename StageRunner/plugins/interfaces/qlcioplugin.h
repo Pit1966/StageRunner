@@ -321,8 +321,7 @@ public:
 	 * @param name A string containing the parameter name
 	 * @param value A QVariant value representing the parameter data
 	 */
-	virtual void setParameter(quint32 universe, quint32 line, Capability type,
-							  QString name, QVariant value);
+	virtual void setParameter(quint32 universe, quint32 line, Capability type, QString name, QVariant value);
 
 	/**
 	 * When a custom parameter is set and the user revert back to defaults, this method

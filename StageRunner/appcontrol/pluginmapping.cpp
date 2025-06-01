@@ -93,9 +93,9 @@ bool PluginMapping::loadFromDefaultFile()
 
 PluginConfig *PluginMapping::getCreatePluginLineConfig(const QString &plugin_name, const QString &line_name)
 {
-	PluginConfig *lineconfig = 0;
+	PluginConfig *lineconfig = nullptr;
 	int t = 0;
-	while (lineconfig == 0 && t<pluginLineConfigs.size()) {
+	while (lineconfig == nullptr && t<pluginLineConfigs.size()) {
 		PluginConfig *config = pluginLineConfigs.at(t);
 		if (config->pPluginName == plugin_name && config->pLineName == line_name) {
 			lineconfig = config;
