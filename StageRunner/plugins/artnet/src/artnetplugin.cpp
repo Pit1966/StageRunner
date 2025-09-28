@@ -131,19 +131,29 @@ QStringList ArtNetPlugin::outputs()
 
 QString ArtNetPlugin::outputInfo(quint32 output)
 {
-    if (output >= (quint32)m_IOmapping.length())
-        return QString();
+	if (output >= quint32(m_IOmapping.length()))
+		return QString();
 
-    QString str;
+	QString str;
+	QString outputAddr;
 
-    str += QString("<H3>%1 %2</H3>").arg(tr("Output")).arg(outputs()[output]);
+	ArtNetController *ctrl = m_IOmapping.at(output).controller;
+	if (ctrl) {
+		QList<quint32> universes = ctrl->universesList();
+		if (universes.size()) {
+			UniverseInfo *uniInf = ctrl->getUniverseInfo(universes.first());
+			if (uniInf->outputAddresses.size())
+				outputAddr = QString(" -> IP: %1").arg(uniInf->outputAddresses.first().toString());
+		}
+	}
+
+	str += QString("<H3>%1:%2<font color=\"#888888\">%3</font></H3>").arg(tr("TX"), outputs().at(output), outputAddr);
     str += QString("<P>");
-    ArtNetController *ctrl = m_IOmapping.at(output).controller;
-    if (ctrl == NULL || ctrl->type() == ArtNetController::Input)
+	if (ctrl == NULL || ctrl->type() == ArtNetController::Input) {
         str += tr("Status: Not open");
-    else
-    {
-        str += tr("Status: Open");
+	}
+	else {
+		str += tr("Status: Open");
         str += QString("<BR>");
 
         QString boundString;
@@ -151,7 +161,7 @@ QString ArtNetPlugin::outputInfo(quint32 output)
             boundString = QString("<FONT COLOR=\"#aa0000\">%1</FONT>").arg(tr("No"));
         else
            boundString = QString("<FONT COLOR=\"#00aa00\">%1</FONT>").arg(tr("Yes"));
-        str += QString("<B>%1:</B> %2").arg(tr("Can receive nodes information")).arg(boundString);
+		str += QString("<B>%1:</B> %2").arg(tr("Can receive nodes information"), boundString);
         str += QString("<BR>");
 
         str += tr("Nodes discovered: ");
@@ -233,7 +243,7 @@ QStringList ArtNetPlugin::inputs()
 
     foreach (ArtNetIO line, m_IOmapping)
     {
-        list << QString("%1: %2").arg(j + 1).arg(line.address.ip().toString());
+		list << QString("%1: %2").arg(j + 1).arg(line.address.ip().toString());
         j++;
 		// this is a hack, amount of inputs is the same as amount of outputs, but since wie use different output
 		// IPs on the same output interface, wie skip them for input
@@ -292,7 +302,7 @@ QString ArtNetPlugin::inputInfo(quint32 input)
 
     QString str;
 
-    str += QString("<H3>%1 %2</H3>").arg(tr("Input")).arg(inputs()[input]);
+	str += QString("<H3>%1 RX:%2</H3>").arg(tr("Input"), inputs().at(input));
     str += QString("<P>");
     ArtNetController *ctrl = m_IOmapping.at(input).controller;
     if (ctrl == NULL || ctrl->type() == ArtNetController::Output)
@@ -304,7 +314,7 @@ QString ArtNetPlugin::inputInfo(quint32 input)
             boundString = QString("<FONT COLOR=\"#aa0000\">%1</FONT>").arg(tr("Bind failed"));
         else
            boundString = QString("<FONT COLOR=\"#00aa00\">%1</FONT>").arg(tr("Open"));
-        str += QString("<B>%1:</B> %2").arg(tr("Status")).arg(boundString);
+		str += QString("<B>%1:</B> %2").arg(tr("Status"), boundString);
         str += QString("<BR>");
 
         str += tr("Packets received: ");

@@ -101,6 +101,7 @@ public:
 	void setMaximum(int max);
 	void setValues(int val, int refval);
 	void setRefValue(int val, int colidx = -1);
+	void emitCurrentValue();
 	int refValue();
 	inline void setChannelShown(bool state) {prop_channel_shown_f = state;}
 	inline bool channelShown() const {return prop_channel_shown_f;}

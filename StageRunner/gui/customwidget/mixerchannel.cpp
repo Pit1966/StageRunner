@@ -128,6 +128,14 @@ void MixerChannel::setRefValue(int val, int colidx)
 	}
 }
 
+/**
+ * @brief Force emit if signal mixerSliderMoved with the current value
+ */
+void MixerChannel::emitCurrentValue()
+{
+	emit mixerSliderMoved(value(), my_id);
+}
+
 int MixerChannel::refValue()
 {
 	return refSlider.value();
@@ -153,8 +161,7 @@ void MixerChannel::setSelectable(bool state)
 
 void MixerChannel::mousePressEvent(QMouseEvent *event)
 {
-	qDebug() << "left click";
-	if (knob_rect.contains(event->pos() )) {
+	if (knob_rect.contains(event->pos())  && event->button() == Qt::LeftButton) {
 		knob_selected_f = true;
 		knob_over_f = true;
 		click_position = event->pos();
@@ -184,8 +191,8 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 		int new_value = float(click_value) + ( movedif * maximum() / (pos_range_percent * height()));
 		if (new_value != value()) {
 			setValue( new_value );
-			emit sliderMoved(value());
-			emit mixerSliderMoved(value(),int(my_id));
+			emit sliderMoved(new_value);
+			emit mixerSliderMoved(new_value, my_id);
 		}
 		update();
 	} else {

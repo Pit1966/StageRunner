@@ -332,7 +332,6 @@ void ConfigureArtNet::accept()
 				continue;
 			}
 
-
 			QSpinBox *spin = qobject_cast<QSpinBox*>(m_uniMapTree->itemWidget(item, KMapColumnArtNetUni));
 			Q_ASSERT(spin != NULL);
 

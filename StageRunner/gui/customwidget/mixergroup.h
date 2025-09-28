@@ -42,8 +42,8 @@ private:
 	QHBoxLayout *mixerlayout;
 	QList<MixerChannel*>mixerlist;			///< List with pointers to MixerChannel instances
 	QList<MixerChannel*>selected_mixer;
-	int default_min;						///< Default minimum value used for new Mixer
-	int default_max;						///< Default maximum value user for new Mixer
+	int m_defaultMinValue;					///< Default minimum value used for new Mixer
+	int m_defaultMaxValue;					///< Default maximum value used for new Mixer
 
 	bool m_propEnableMultiSelect;			///< If true, multiple mixer can be selected at the same time
 	bool m_propEnableRangeSelect;			///< If true, multiple mixer can be selected in a range
@@ -60,6 +60,8 @@ public:
 	bool removeMixer(MixerChannel *mixer, bool renumberIds = false);
 	void setIdsToMixerListIndex();
 	void setRange(int min, int max);
+	void setDefaultMax(int max);
+	int defaultMax() const {return m_defaultMaxValue;}
 	inline bool isMultiSelectEnabled() const {return m_propEnableMultiSelect;}
 	void setMultiSelectEnabled(bool state);
 	void setRangeSelectEnabled(bool state);

@@ -69,6 +69,9 @@ protected:
 	int setLabelInSelectedTubes(const QString &text);
 	int setUniverseInTubes(int universe);
 
+	// Helper
+	// DmxChannel *getSingleSelectedDmxChannelAtPos()
+
 private:
 	SceneDeskWidget(FxSceneItem *scene, QWidget *parent = 0);
 	void init();

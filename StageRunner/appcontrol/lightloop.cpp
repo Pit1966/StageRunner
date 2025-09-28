@@ -155,6 +155,7 @@ void LightLoop::processPendingEvents()
 		for (int chan=0; chan<512; chan++) {
 			if (dmxtout[t].at(chan) != lightCtrlRef.dmxOutputValues[t].at(chan)) {
 				lightCtrlRef.dmxOutputChanged[t] = true;
+				// qDebug() << "changed dmx uni" << t+1 << "chan" << chan+1 << "to" << QString::number(quint8(dmxtout[t].at(chan)));
 			}
 			lightCtrlRef.dmxOutputValues[t][chan] = dmxtout[t].at(chan);
 		}

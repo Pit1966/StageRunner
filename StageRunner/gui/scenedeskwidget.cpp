@@ -145,6 +145,9 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setId(dmx->tempTubeListIdx);
 			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel, dmx);
 			fader->setRange(0,dmx->targetFullValue);
+			if (dmx->targetFullValue > faderAreaWidget->defaultMax())
+				faderAreaWidget->setDefaultMax(dmx->targetFullValue);
+
 			fader->setValue(dmx->targetValue);
 			fader->setChannelShown(true);
 			fader->setLabelText(dmx->labelText);
@@ -218,7 +221,7 @@ DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
  */
 DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **dmxChannel)
 {
-	DmxChannel *tube = 0;
+	DmxChannel *tube = nullptr;
 	// First find the mixer at postion
 	MixerChannel *mixer = faderAreaWidget->findMixerAtPos(faderAreaWidget->mapFrom(this,pos));
 	if (dmxChannel) {
@@ -354,9 +357,17 @@ void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 		return;
 	}
 
-	m_originFxScene->tubes.at(id)->targetValue = val;
+	DmxChannel *tube = m_originFxScene->tubes.at(id);
+	if (val > tube->targetFullValue) {
+		val = tube->targetFullValue;
+	}
+	else if (val < 0) {
+		val = 0;
+	}
+
+	tube->targetValue = val;
 	if (m_isSceneLive) {
-		m_originFxScene->tubes.at(id)->curValue[MIX_INTERN] = val;
+		tube->curValue[MIX_INTERN] = val;
 	}
 }
 
@@ -462,7 +473,7 @@ void SceneDeskWidget::keyReleaseEvent(QKeyEvent *event)
  * @return true if a Mixer and Tube were found and Mixer was removed
  *
  * This function removes the Mixer from current SceneDesk and sets
- * the corresponding "deskVisableFlag" for the tube to false
+ * the corresponding "deskVisibleFlag" for the tube to false
  *
  */
 bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
@@ -614,9 +625,15 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	if (!m_selectedTubeIds.size()) {
 		act = menu.addAction(tr("Edit Label"));
 		act->setObjectName("3");
+		act = menu.addAction(tr("Set DMX Level Value"));
+		act->setObjectName("5");
 	}
-	act = menu.addAction(tr("Hide Channel(s)"));
-	act->setObjectName("1");
+	else {
+		act = menu.addAction(tr("Unselect all"));
+		act->setObjectName("6");
+		act = menu.addAction(tr("Hide selected Channel(s)"));
+		act->setObjectName("1");
+	}
 	act = menu.addAction(tr("Add Channel"));
 	act->setObjectName("2");
 	act = menu.addAction(tr("Show hidden channels"));
@@ -626,7 +643,7 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	if (!act) return;
 
 	MixerChannel *mixer;
-	DmxChannel *tube = getTubeAtPos(event->pos(),&mixer);
+	DmxChannel *tube = getTubeAtPos(event->pos(), &mixer);
 
 	switch (act->objectName().toInt()) {
 	case 1:
@@ -643,25 +660,61 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		emit modified();
 		break;
 
-	case 3: {
-		mixer->setLabelText(QInputDialog::getText(this
+	case 3:
+		if (mixer && tube) {
+			bool ok;
+			QString label = QInputDialog::getText(this
 												  ,tr("Edit")
 												  ,tr("Enter text for channel")
 												  ,QLineEdit::Normal
-												  ,mixer->labelText()));
+												  ,mixer->labelText()
+												  ,&ok);
 
-		DmxChannel *tube = m_originFxScene->tube(mixer->id());
-		if (tube && tube->labelText != mixer->labelText()) {
-			tube->labelText = mixer->labelText();
-			m_originFxScene->setModified(true);
-			emit modified();
+			if (ok && tube->labelText != label) {
+				mixer->setLabelText(label);
+				tube->labelText = label;
+				m_originFxScene->setModified(true);
+				emit modified();
+			}
 		}
 		break;
-	}
 
 	case 4:
 		unhideAllTubes();
 		break;
+
+	case 5:		// set DMX level
+		if (mixer && tube) {
+			// calculate dmx level from current mixer level
+			int curDmxVal = mixer->value() * 255 / mixer->maximum();
+			int dmxChan = tube->dmxChannel;
+			bool ok;
+			int newDmxVal = QInputDialog::getInt(this,
+											  tr("Edit"),
+											  tr("Enter DMX level [0-255] for DMX channel %1").arg(dmxChan + 1),
+											  curDmxVal,
+											  0, 255, 1, &ok);
+			if (ok && curDmxVal != newDmxVal) {
+				int newTargetValue = (float(newDmxVal) + 0.5) * mixer->maximum() / 255;
+				newTargetValue = qMin(newTargetValue, mixer->maximum());
+				mixer->setValue(newTargetValue);
+				mixer->emitCurrentValue();
+				tube->targetValue= newTargetValue;
+				m_originFxScene->setModified(true);
+				emit modified();
+			}
+		}
+		break;
+
+	case 6:		//unselect all selected channels
+		auto ids = m_selectedTubeIds;
+		while (!ids.isEmpty()) {
+			MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
+			if (mix)
+				mix->setSelected(false);
+		}
+		break;
+
 	}
 }
 

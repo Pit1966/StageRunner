@@ -71,7 +71,7 @@ void DmxChannel::init()
 	addExistingVar(dmxValue,"DmxValue",0,255,0);
 	addExistingVar(curValue[MIX_INTERN],"Value",0,255,0);
 	addExistingVar(curValue[MIX_EXTERN],"DirectValue",0,255,0);
-	addExistingVar(targetFullValue,"TargetFullValue",255,100000,10000);
+	addExistingVar(targetFullValue,"TargetFullValue",255,100000,MAX_DMX_FADER_RANGE);
 	addExistingVar(targetValue,"TargetValue",0,100000,0);
 	addExistingVar(deskVisibleFlag,"DeskVisible",true);
 	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);

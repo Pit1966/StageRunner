@@ -35,8 +35,8 @@ MixerGroup::MixerGroup(QWidget *parent) :
 	m_propEnableMultiSelect = false;
 	m_propEnableRangeSelect = false;
 
-	default_min = 0;
-	default_max = 100;
+	m_defaultMinValue = 0;
+	m_defaultMaxValue = 100;
 	temp_drag_move_idx = -1;
 	temp_drag_start_move_idx = -1;
 	temp_drag_widget = 0;
@@ -81,7 +81,7 @@ MixerChannel *MixerGroup::appendMixer()
 {
 	MixerChannel *mixer = new MixerChannel;
 	mixer->setId(mixerlist.size());
-	mixer->setRange(default_min,default_max);
+	mixer->setRange(m_defaultMinValue,m_defaultMaxValue);
 	mixer->setSelectable(true);
 	mixerlist.append(mixer);
 	mixerlayout->addWidget(mixer);
@@ -123,14 +123,19 @@ void MixerGroup::setIdsToMixerListIndex()
 
 void MixerGroup::setRange(int min, int max)
 {
-	default_min = min;
-	default_max = max;
+	m_defaultMinValue = min;
+	m_defaultMaxValue = max;
 
 	for (int t=0; t<mixerlist.size(); t++) {
 		MixerChannel *mixer = mixerlist.at(t);
 		mixer->setRange(min,max);
 		mixer->update();
 	}
+}
+
+void MixerGroup::setDefaultMax(int max)
+{
+	m_defaultMaxValue = max;
 }
 
 void MixerGroup::setMultiSelectEnabled(bool state)
@@ -372,6 +377,13 @@ void MixerGroup::dropEvent(QDropEvent *event)
 void MixerGroup::on_mixer_moved(int val, int id)
 {
 	if (id >= 0) {
+		if (val < 0)  {
+			val = 0;
+		}
+		else if (val > m_defaultMaxValue) {
+			val = m_defaultMaxValue;
+		}
+
 		emit mixerSliderMoved(val, id);
 	}
 }
