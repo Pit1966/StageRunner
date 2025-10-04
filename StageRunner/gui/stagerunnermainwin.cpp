@@ -1146,7 +1146,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 			break;
 		}
 
-
+		appCentral->setCurrentKeyModifiers(activeKeyModifiers);
 		return true;
 	}
 

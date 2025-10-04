@@ -422,7 +422,7 @@ bool EnttecDMXUSBPro::writeUniverse(quint32 universe, quint32 output, const QByt
             m_outUniverse.fill(0, 512);
 
         // send only values that changed
-        for (int i = 0; i < data.count(); i++)
+		for (int i = 0; i < data.size(); i++)
         {
             if (data.at(i) == m_outUniverse.at(i))
                 continue;

@@ -41,6 +41,7 @@
 #include "system/fxtimer.h"
 
 #include "system/audiooutput/audioformat.h"
+#include "system/audiooutput/audioplayer.h"
 
 #include <QStringList>
 #include <QDebug>

@@ -105,6 +105,7 @@ private:
 
 	// system
 	QElapsedTimer m_uptime;
+	uint m_activeKeyModifiers	= 0;
 
 public:
 	QWidget *mainwinWidget				= nullptr;
@@ -186,6 +187,8 @@ public:
 	qint64 uptimeMs() const {return m_uptime.elapsed();}
 	void closeVideoWidget();
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
+	void setCurrentKeyModifiers(uint val) {m_activeKeyModifiers = val;}
+	uint currentKeyModifiers() const {return m_activeKeyModifiers;}
 
 	// Gui
 	bool hasSecondScreen() const {return m_hasSecondScreen;}
