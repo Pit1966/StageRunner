@@ -31,6 +31,7 @@
 
 #define MAX_AUDIO_SLOTS 4
 #define MAX_DMX_UNIVERSE 4
+#define MAX_STATIC_SCENES 4
 #define NET_UDP_PORT 11101
 #define NET_TCP_PORT 11102
 

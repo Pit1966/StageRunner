@@ -41,6 +41,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("fadevol",KW_FADE_VOL);
 	m_keywordHash.insert("mode",KW_MODE);
 	m_keywordHash.insert("pause",KW_PAUSE);
+	m_keywordHash.insert("dmx",KW_DMX);
 }
 
 QString ScriptKeyWord::keyWord(SCRIPT::KEY_WORD keyword)

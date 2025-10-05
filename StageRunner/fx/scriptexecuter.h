@@ -52,6 +52,7 @@ protected:
 	bool executeFadeVolume(FxScriptLine *line);
 	bool executeMode(FxScriptLine *line);
 	bool executePause(FxScriptLine *line);
+	bool executeDMX(FxScriptLine *line);
 
 
 	static bool executeSingleCmd(const QString &linestr);

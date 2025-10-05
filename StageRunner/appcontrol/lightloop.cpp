@@ -103,6 +103,16 @@ void LightLoop::processPendingEvents()
 			scenes.insert(lightCtrlRef.hiddenScannerScenes[t]->id(),lightCtrlRef.hiddenScannerScenes[t]);
 		}
 	}
+	// add static scenes
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		for (int i=0; i<MAX_STATIC_SCENES; i++) {
+			if (lightCtrlRef.staticScenes[t][i]) {
+				if (!scenes.contains(lightCtrlRef.staticScenes[t][i]->id())) {
+					scenes.insert(lightCtrlRef.staticScenes[t][i]->id(),lightCtrlRef.staticScenes[t][i]);
+				}
+			}
+		}
+	}
 
 	// Get dmx channel output for every scene in the list
 	for (FxSceneItem *sceneitem : std::as_const(scenes)) {

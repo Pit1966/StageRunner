@@ -54,6 +54,19 @@ LightControl::~LightControl()
 {
 	delete lightLoopInterface;
 
+	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
+		if (hiddenScannerScenes[t]) {
+			myApp.deleteFxSceneItem(hiddenScannerScenes[t]);
+			hiddenScannerScenes[t] = nullptr;
+		}
+
+		for (int i=0; i<MAX_STATIC_SCENES; i++) {
+			if (staticScenes[t][i]) {
+				myApp.deleteFxSceneItem(staticScenes[t][i]);
+				staticScenes[t][i] = nullptr;
+			}
+		}
+	}
 }
 
 bool LightControl::setLightLoopEnabled(bool state)
@@ -171,7 +184,12 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 				.arg(scene->name()));
 	}
 	else if (!scene->isOnStageIntern()) {
-		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
+		if (myApp.currentKeyModifiers() & Qt::SHIFT) {
+			// Test Test Test
+			active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
+		} else {
+			active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN);
+		}
 		if (active) {
 			setSceneActive(scene);
 			LOGTEXT(tr("<font color=green>Start FADE IN scene %1</font> Duration: %2")
@@ -179,7 +197,8 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 						 QtStaticTools::msToTimeString(scene->fadeInTime())));
 
 		}
-	} else {
+	}
+	else {
 		active = scene->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEOUT);
 		LOGTEXT(tr("<font color=green>Start FADE OUT scene %1</font> Duration: %2")
 				.arg(scene->name(),
@@ -380,6 +399,20 @@ bool LightControl::setYadiInOutMergeMode(quint32 mode)
 	return true;
 }
 
+FxSceneItem *LightControl::staticScene(int universe, int number)
+{
+	Q_ASSERT(universe < MAX_DMX_UNIVERSE);
+	Q_ASSERT(number < MAX_STATIC_SCENES);
+
+	if (staticScenes[universe][number] == nullptr) {
+		staticScenes[universe][number] = new FxSceneItem;
+		staticScenes[universe][number]->setTubeCount(512);
+		staticScenes[universe][number]->setName(QString("StaticUNI%1NO%2").arg(universe+1).arg(number+1));
+	}
+
+	return staticScenes[universe][number];
+}
+
 void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
@@ -394,6 +427,10 @@ void LightControl::init()
 		hiddenScannerScenes[t] = new FxSceneItem;
 		hiddenScannerScenes[t]->setTubeCount(512);
 		hiddenScannerScenes[t]->setName(QString("ScanMove%1").arg(t+1));
+
+		for (int i=0; i<MAX_STATIC_SCENES; i++) {
+			staticScenes[t][i] = nullptr;
+		}
 	}
 	FxItem::setLowestID(1);
 

@@ -46,7 +46,8 @@ enum KEY_WORD {
 	KW_REMOTE,
 	KW_FADE_VOL,
 	KW_MODE,
-	KW_PAUSE
+	KW_PAUSE,
+	KW_DMX
 };
 
 }

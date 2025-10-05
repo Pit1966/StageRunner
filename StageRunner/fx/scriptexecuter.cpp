@@ -365,8 +365,12 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		break;
 
 	case KW_PAUSE:
-		ok = executePause(line);
+		/*ok = */executePause(line);
 		return false;
+
+	case KW_DMX:
+		ok = executeDMX(line);
+		break;
 
 	default:
 		ok = false;
@@ -376,10 +380,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 
 	if (!ok) {
 		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': Line #%2: <font color=darkOrange>Failed to execute script line</font> ('<font color=#6666ff>%3</font>')%4")
-				 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script name"))
-				 .arg(line->lineNumber())
-				 .arg(QString("%1 %2").arg(line->command(), line->parameters()))
-				 .arg(m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
+				 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script name"),
+					  QString::number(line->lineNumber()),
+					  QString("%1 %2").arg(line->command(), line->parameters()),
+					  m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
 
 		m_lastScriptError.clear();
 	}
@@ -866,6 +870,67 @@ bool ScriptExecuter::executePause(FxScriptLine *line)
 	setPaused(true);
 	runTime.stop();
 	runTimeOne.stop();
+
+	return true;
+}
+
+bool ScriptExecuter::executeDMX(FxScriptLine *line)
+{
+	qDebug() << "execute DMX:" << line->parameters();
+	QString parastr = line->parameters();
+	QString dmxtarget = getFirstParaOfString(parastr);
+
+	int uni = 0;		// default DMX universe 1 (intern 0:MAX_UNIVERSE-1, user [1:MAX-UNIVERSE])
+	int sceneNum = 0;	// default static scene number
+
+	// DMX target should look like this dmx <UNIVERSE>::<SCENE>:<DMXCHANNEL> e.g. 1::1:100 for Universe 1, Scene 1, DMX 100
+	// universe or scene could be ommitted
+
+	// first extract universe number, if there is one
+	if (dmxtarget.contains("::")) {
+		QString unistr = dmxtarget.section("::", 0, 0);
+		uni = unistr.toInt() - 1;
+		dmxtarget = dmxtarget.section("::", 1);
+
+		if (uni < 0 || uni >= MAX_DMX_UNIVERSE) {
+			m_lastScriptError += tr("Invalid DMX universe: %1\n").arg(unistr);
+			return false;
+		}
+	}
+
+	// second extract scene number
+	if (dmxtarget.contains(':')) {
+		QString scenestr = dmxtarget.section(':', 0, 0);
+		sceneNum = scenestr.toInt() - 1;
+		dmxtarget = dmxtarget.section(':', 1);
+
+		if (sceneNum < 0 || sceneNum >= MAX_STATIC_SCENES)  {
+			m_lastScriptError += tr("Invalid static scene number: %1\n").arg(scenestr);
+			return false;
+		}
+	}
+
+	// next must be the DMX channel number
+	int dmxchan = dmxtarget.toInt() - 1;
+	if (dmxchan < 0 || dmxchan > 511) {
+		m_lastScriptError += tr("Invalid DMX channel number: %1\n").arg(dmxtarget);
+		return false;
+	}
+
+	// now get DMX value
+	QString dmxvaluestr = getFirstParaOfString(parastr);
+	int dmxval = dmxvaluestr.toInt();
+	if (dmxval < 0 || dmxval > 255) {
+		m_lastScriptError += tr("Invalid DMX value: %1\n").arg(dmxvaluestr);
+		return false;
+	}
+
+	// get scene instance.
+	FxSceneItem *fxs = myApp.unitLight->staticScene(uni, sceneNum);
+	DmxChannel *tube = fxs->tube(dmxchan);
+	qint32 target_value = tube->targetFullValue * dmxval / 255;
+	tube->targetValue = target_value;
+	tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO, 2000, target_value);
 
 	return true;
 }

@@ -42,6 +42,7 @@ class FxSceneItem;
 class FxSeqItem;
 
 
+
 class LightControl : public QObject
 {
 	Q_OBJECT
@@ -56,6 +57,8 @@ public:
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
 	bool dmxInputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
+	FxSceneItem *staticScenes[MAX_DMX_UNIVERSE][MAX_STATIC_SCENES];
+
 
 public:
 	LightControl(AppCentral &app_central);
@@ -78,6 +81,9 @@ public:
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
 	bool setYadiInOutMergeMode(quint32 mode);
+
+	// static scenes
+	FxSceneItem * staticScene(int universe, int number);
 
 private:
 	void init();
