@@ -10,6 +10,9 @@ protected:
 	FxScriptItem *m_fxScriptItem;			///< pointer to FxScriptItem, which is the parent
 	FxScriptList m_script;
 	int m_currentLineNum;
+	int m_defUniverse		= 0;			///< default option for some script commands (intern 0:MAX_UNIVERSE-1, user [1:MAX-UNIVERSE])
+	int m_defStaticSceneNum	= 0;			///< default option for some script commands
+	int m_defFadeTimeMs		= 0;			///< default fadeout/in time in milliseconds for some commands
 	volatile STATE m_lastState	= EXEC_IDLE;
 
 	QList<FxSceneItem*> m_clonedSceneList;
@@ -34,12 +37,14 @@ protected:
 	virtual ~ScriptExecuter();
 
 	QString getTargetFxItemFromPara(FxScriptLine *line, const QString &paras, FxItemList &fxList);
-	QString getFirstParaOfString(QString &parastr);
+	QString getFirstParaOfString(QString &parastr, bool allowCommaSep = false);
+	int getFrontIntOfString(QString &parastr, bool *ok = nullptr, const QString &errHint = {});
 	int getPos(QString &restPara);
 
 	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 
 	bool executeLine(FxScriptLine *line, bool & reExecDelayed);
+
 	bool executeCmdStart(FxScriptLine *line);
 	bool executeCmdStop(FxScriptLine *line);
 	bool executeFadeIn(FxScriptLine * line);
@@ -53,6 +58,7 @@ protected:
 	bool executeMode(FxScriptLine *line);
 	bool executePause(FxScriptLine *line);
 	bool executeDMX(FxScriptLine *line);
+	bool executeDefault(FxScriptLine *line);
 
 
 	static bool executeSingleCmd(const QString &linestr);

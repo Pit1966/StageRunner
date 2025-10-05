@@ -10,6 +10,8 @@
 #include "appcontrol/appcentral.h"
 #include "fx/fxitem_includes.h"
 
+#include <QRegularExpression>
+
 
 using namespace SCRIPT;
 
@@ -222,14 +224,50 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 	return returnparas;
 }
 
-QString ScriptExecuter::getFirstParaOfString(QString &parastr)
+QString ScriptExecuter::getFirstParaOfString(QString &parastr, bool allowCommaSep)
 {
 	parastr = parastr.simplified();
 
-	QString first = parastr.section(' ', 0, 0);
+	QString first;
+	if (allowCommaSep) {
+		static QRegularExpression re("[ ,]");
+		first = parastr.section(re, 0, 0);
+	} else {
+		first = parastr.section(' ', 0, 0);
+	}
 	parastr.remove(0, first.size() + 1);
 
 	return first;
+}
+
+int ScriptExecuter::getFrontIntOfString(QString &parastr, bool *ok, const QString &errHint)
+{
+	parastr = parastr.simplified();
+	QString front = parastr.section(' ', 0, 0);
+	bool intok;
+	int val = front.toInt(&intok);
+	if (front.isEmpty()) {
+		m_lastScriptError += tr("Missing numeric parameter");
+		if (errHint.size())
+			m_lastScriptError.append(tr("at %1").arg(errHint));
+		m_lastScriptError.append('\n');
+		if (ok)
+			*ok = false;
+		return 0;
+	}
+	else if (!intok) {
+		m_lastScriptError += tr("Parameter must be numeric");
+		if (errHint.size())
+			m_lastScriptError.append(tr("at %1").arg(errHint));
+		m_lastScriptError.append('\n');
+		if (ok)
+			*ok = false;
+		return 0;
+	}
+
+	if (ok)
+		*ok = true;
+	return val;
 }
 
 int ScriptExecuter::getPos(QString &restPara)
@@ -370,6 +408,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 
 	case KW_DMX:
 		ok = executeDMX(line);
+		break;
+
+	case KW_DEFAULT:
+		ok = executeDefault(line);
 		break;
 
 	default:
@@ -876,12 +918,11 @@ bool ScriptExecuter::executePause(FxScriptLine *line)
 
 bool ScriptExecuter::executeDMX(FxScriptLine *line)
 {
-	qDebug() << "execute DMX:" << line->parameters();
 	QString parastr = line->parameters();
 	QString dmxtarget = getFirstParaOfString(parastr);
 
-	int uni = 0;		// default DMX universe 1 (intern 0:MAX_UNIVERSE-1, user [1:MAX-UNIVERSE])
-	int sceneNum = 0;	// default static scene number
+	int uni = m_defUniverse;			// default DMX universe 1 (intern 0:MAX_UNIVERSE-1, user [1:MAX-UNIVERSE])
+	int sceneNum = m_defStaticSceneNum;	// default static scene number
 
 	// DMX target should look like this dmx <UNIVERSE>::<SCENE>:<DMXCHANNEL> e.g. 1::1:100 for Universe 1, Scene 1, DMX 100
 	// universe or scene could be ommitted
@@ -933,6 +974,58 @@ bool ScriptExecuter::executeDMX(FxScriptLine *line)
 	tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO, 2000, target_value);
 
 	return true;
+}
+
+bool ScriptExecuter::executeDefault(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+
+	bool ok = true;
+	while (!parastr.isEmpty()) {
+		bool paraok;
+		QString subcmd = getFirstParaOfString(parastr).toLower();
+		if (subcmd == "universe" || subcmd == "uni") {
+			int val = getFrontIntOfString(parastr, &paraok);
+			if (!paraok)
+				return false;
+			if ( (val < 1) || (val > MAX_DMX_UNIVERSE) ) {
+				m_lastScriptError += tr("universe number out of valid range: %1\n").arg(val);
+				return false;
+			}
+
+			m_defUniverse = val - 1;
+		}
+		else if (subcmd == "staticscene") {
+			int val = getFrontIntOfString(parastr, &paraok);
+			if (!paraok)
+				return false;
+			if ( (val < 1) || (val > MAX_STATIC_SCENES) ) {
+				m_lastScriptError += tr("static scene number out of valid range: %1 (max is: %2)\n")
+						.arg(val).arg(MAX_STATIC_SCENES);
+				return false;
+			}
+
+			m_defStaticSceneNum = val - 1;
+		}
+		else if (subcmd == "fadetime") {
+			QString timestr = getFirstParaOfString(parastr);
+			if (timestr.isEmpty())  {
+				m_lastScriptError += tr("Missing fadetime parameter");
+				return false;
+			}
+
+			m_defFadeTimeMs = QtStaticTools::timeStringToMS(timestr);
+		}
+		else {
+			m_lastScriptError += tr("Unknown option: %1").arg(subcmd);
+			return false;
+		}
+
+		// remove commata from beginning of parastr
+		/// @todo
+	}
+
+	return ok;
 }
 
 bool ScriptExecuter::executeSingleCmd(const QString &linestr)
