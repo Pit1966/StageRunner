@@ -958,7 +958,7 @@ bool ScriptExecuter::executeDMX(FxScriptLine *line)
 		return false;
 	}
 
-	// now get DMX value
+	// now get DMX value from command
 	QString dmxvaluestr = getFirstParaOfString(parastr);
 	int dmxval = dmxvaluestr.toInt();
 	if (dmxval < 0 || dmxval > 255) {
@@ -966,12 +966,20 @@ bool ScriptExecuter::executeDMX(FxScriptLine *line)
 		return false;
 	}
 
+	// get fade time from command
+	int fadems = m_defFadeTimeMs;
+	if (parastr.size() > 2) {
+		QString fadestr = getFirstParaOfString(parastr);
+		fadems = QtStaticTools::timeStringToMS(fadestr);
+	}
+
 	// get scene instance.
 	FxSceneItem *fxs = myApp.unitLight->staticScene(uni, sceneNum);
 	DmxChannel *tube = fxs->tube(dmxchan);
-	qint32 target_value = tube->targetFullValue * dmxval / 255;
-	tube->targetValue = target_value;
-	tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO, 2000, target_value);
+	qint32 target_value = (float(dmxval) + 0.5) * tube->targetFullValue / 255;
+
+	tube->targetValue = qMin(target_value, tube->targetFullValue);
+	/*bool fadeactive = */tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO, fadems, target_value);
 
 	return true;
 }

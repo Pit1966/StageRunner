@@ -47,7 +47,7 @@ void DmxMonitor::init()
 
 	m_barsBorderColor = Qt::blue;
 	m_barsColor = Qt::darkGreen;
-	m_barsSecColor = "#7070d0";
+	m_barsSecColor = 0x7070d0;
 	m_valueColor = Qt::yellow;
 }
 
