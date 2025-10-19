@@ -39,8 +39,8 @@
 #include "ioplugincentral.h"
 #include "qlcioplugin.h"
 #include "system/lightcontrol.h"
+#include "system/messagehub.h"
 #include "appcontrol/pluginmapping.h"
-#include "messagehub.h"
 #include "fx/execcenter.h"
 #include "fx/executer.h"
 #include "fxlistvarset.h"
@@ -998,10 +998,11 @@ void AppCentral::init()
 	qRegisterMetaType<CtrlCmd>("CtrlCmd");
 	qRegisterMetaType<AudioStatus>("AudioStatus");
 	qRegisterMetaType<AUDIO::AudioStatus>("AUDIO::AudioStatus");
-	// qRegisterMetaType<AudioStatus>("AUDIO::AudioStatus");
 	qRegisterMetaType<QAbstractSocket::SocketState>("QAbstractSocket::SocketState");
 	qRegisterMetaType<FxAudioItem*>();
 	qRegisterMetaType<Executer*>();
+	qRegisterMetaType<TubeData>("TubeData");
+
 	QThread::currentThread()->setObjectName("MainThread");
 
 	// Load Message Rules

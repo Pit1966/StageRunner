@@ -531,3 +531,22 @@ void LightControl::onInputUniverseChannelChanged(quint32 universe, quint32 chann
 		}
 	}
 }
+
+void LightControl::setValueInHiddenScannerScene(const TubeData &tubeDat)
+{
+	if ((tubeDat.universe < 0) || (tubeDat.universe > MAX_DMX_UNIVERSE))
+		return;
+	qDebug() << "changed in hidden scanner scene uni:" << tubeDat.universe+1 << "channel:" << tubeDat.dmxChan+1
+			 << "val[0]:" << tubeDat.curValue[0] << "val[1]:" << tubeDat.curValue[1];
+	FxSceneItem *scanscene = hiddenScannerScenes[tubeDat.universe];
+	DmxChannel *scantube = scanscene->tube(tubeDat.dmxChan);
+	if (tubeDat.dmxType >= 0)
+		scantube->dmxType = tubeDat.dmxType;
+	if (tubeDat.targetValue >= 0)
+		scantube->targetValue = tubeDat.targetValue;
+	if (tubeDat.fullValue > 0)
+		scantube->targetFullValue = tubeDat.fullValue;
+
+	scantube->curValue[0] = tubeDat.curValue[0];
+	scantube->curValue[1] = tubeDat.curValue[1];
+}

@@ -27,6 +27,7 @@
 #include "ui_scenedeskwidget.h"
 
 #include "dmxtypes.h"
+#include "tubedata.h"
 
 class FxSceneItem;
 class FxItem;
@@ -62,6 +63,7 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 
 	bool hideTube(DmxChannel *tube, MixerChannel *mixer);
+	bool setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer);
 	bool hideSelectedTubes();
 	bool setTypeOfSelectedTubes(DmxChannelType type);
 	bool deleteSelectedTubes();
@@ -106,9 +108,9 @@ private slots:
 	void on_universeSpin_valueChanged(int arg1);
 
 signals:
-	void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
+	// void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);
 	void modified();
-
+	void dmxPositionTubeChanged(const TubeData &tubeDat);
 };
 
 #endif // SCENEDESKWIDGET_H

@@ -24,6 +24,7 @@
 #include "mixerchannel.h"
 #include "customwidget/extmimedata.h"
 #include "dmxchannel.h"
+#include "dmx/dmxhelp.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -156,6 +157,14 @@ void MixerChannel::setSelectable(bool state)
 	prop_selectable_f = state;
 	if (!state) {
 		prop_selected_f = false;
+	}
+}
+
+void MixerChannel::setDmxType(DmxChannelType type)
+{
+	if (my_dmx_type != type) {
+		my_dmx_type = type;
+		update();
 	}
 }
 
@@ -350,25 +359,14 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 //	}
 
 	if (my_dmx_type > DMX_GENERIC) {
-		QString tstr;
-
-		if (my_dmx_type >= DMX_INTENSITY_MASTER_DIMMER && my_dmx_type <= DMX_INTENSITY_VALUE_FINE)
-			tstr = "I";
-		else if (my_dmx_type >= DMX_POSITION_PAN && my_dmx_type <= DMX_POSITION_PAN_FINE)
-			tstr = "PAN";
-		else if (my_dmx_type >= DMX_POSITION_TILT && my_dmx_type <= DMX_POSITION_TILT_FINE)
-			tstr = "TILT";
-		else if (my_dmx_type >= DMX_COLOR_MACRO && my_dmx_type <= DMX_COLOR_CTB_MIXER)
-			tstr = "COL";
-		else
-			tstr.clear();
+		QString tstr = DMXHelp::dmxTypeToShortString(my_dmx_type);
 
 		QFont font(p.font());
 		font.setFixedPitch(true);
 		font.setItalic(false);
 		font.setBold(false);
 		p.setFont(font);
-		p.setPen(Qt::red);
+		p.setPen(Qt::black);
 		QRect bound(QPoint(0,0),QPoint(width(),height()));
 		p.drawText(bound,tstr,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
 	}

@@ -26,6 +26,7 @@
 
 #include "config.h"
 #include "toolclasses.h"
+#include "tubedata.h"
 
 #include <QObject>
 #include <QByteArray>
@@ -58,7 +59,6 @@ public:
 	bool dmxInputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 	FxSceneItem *staticScenes[MAX_DMX_UNIVERSE][MAX_STATIC_SCENES];
-
 
 public:
 	LightControl(AppCentral &app_central);
@@ -102,6 +102,7 @@ public slots:
 	void onSceneFadeProgressChanged(FxSceneItem *scene, int perMilleA, int perMilleB);
 	void onSceneCueReady(FxSceneItem *scene);
 	void onInputUniverseChannelChanged(quint32 universe, quint32 channel, uchar value);
+	void setValueInHiddenScannerScene(const TubeData &tubeDat);
 
 };
 

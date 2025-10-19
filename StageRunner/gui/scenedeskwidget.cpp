@@ -30,6 +30,7 @@
 #include "qtstatictools.h"
 #include "customwidget/mixergroup.h"
 #include "customwidget/mixerchannel.h"
+#include "dmx/dmxtypeselectorwidget.h"
 
 #include <QContextMenuEvent>
 #include <QKeyEvent>
@@ -281,8 +282,8 @@ void SceneDeskWidget::setCurrentSceneLiveState(bool state)
 			tube->curValue[MIX_INTERN] = tube->targetValue;
 		}
 		AppCentral::instance()->unitLight->setSceneActive(m_originFxScene);
-
-	} else {
+	}
+	else {
 		faderAreaWidget->setRefSliderColorIndex(0);
 		if (!m_originFxScene->isOnStageIntern()) {
 			for (int t=0; t<m_originFxScene->tubeCount(); t++) {
@@ -368,6 +369,15 @@ void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 	tube->targetValue = val;
 	if (m_isSceneLive) {
 		tube->curValue[MIX_INTERN] = val;
+		if (tube->dmxChannelType() >= DMX_POSITION_PAN) {
+			TubeData d;
+			d.universe = tube->dmxUniverse;
+			d.dmxChan = tube->dmxChannel;
+			d.dmxType = tube->dmxType;
+			d.fullValue = tube->targetFullValue;
+			d.curValue[MIX_INTERN] = val;
+			emit dmxPositionTubeChanged(d);
+		}
 	}
 }
 
@@ -489,6 +499,19 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 			return true;
 		}
 	}
+	return false;
+}
+
+bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
+{
+	DmxTypeSelectorWidget wid(DmxChannelType(tube->dmxType));
+	wid.show();
+	if (wid.exec()) {
+		tube->dmxType = wid.selectedType();
+		mixer->setDmxType(wid.selectedType());
+		return true;
+	}
+
 	return false;
 }
 
@@ -638,6 +661,8 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	act->setObjectName("2");
 	act = menu.addAction(tr("Show hidden channels"));
 	act->setObjectName("4");
+	act = menu.addAction(tr("Set channel DMX type"));
+	act->setObjectName("7");
 
 	act = menu.exec(event->globalPos());
 	if (!act) return;
@@ -707,14 +732,19 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		break;
 
 	case 6:		//unselect all selected channels
-		auto ids = m_selectedTubeIds;
-		while (!ids.isEmpty()) {
-			MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
-			if (mix)
-				mix->setSelected(false);
+		{
+			auto ids = m_selectedTubeIds;
+			while (!ids.isEmpty()) {
+				MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
+				if (mix)
+					mix->setSelected(false);
+			}
 		}
 		break;
 
+	case 7:		// set DMX channel type
+		setDmxTypeForTube(tube, mixer);
+		break;
 	}
 }
 
@@ -789,6 +819,9 @@ SceneDeskWidget * SceneDeskWidget::openSceneDesk(FxSceneItem *scene, QWidget *pa
 
 	SceneDeskWidget *scenedesk = new SceneDeskWidget(scene,parent);
 	m_sceneDeskList.append( scenedesk );
+
+	LightControl *unitLight = AppCentral::instance()->unitLight;
+	connect(scenedesk, SIGNAL(dmxPositionTubeChanged(TubeData)), unitLight, SLOT(setValueInHiddenScannerScene(TubeData)));
 
 	scenedesk->setWindowIcon(QPixmap(":/gfx/icons/scene_mixer.png"));
 	return scenedesk;

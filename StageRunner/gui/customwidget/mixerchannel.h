@@ -113,7 +113,7 @@ public:
 	inline int backGroundWidth() const {return org_pix_back.size().width();}
 	inline int backGroundHeight() const {return org_pix_back.size().height();}
 	inline const QString & labelText() const {return label;}
-	inline void setDmxType(DmxChannelType type) {my_dmx_type = type;}
+	void setDmxType(DmxChannelType type);
 
 private:
 	void mousePressEvent(QMouseEvent *event);

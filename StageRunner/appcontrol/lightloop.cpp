@@ -78,7 +78,8 @@ void LightLoop::processPendingEvents()
 		first_process_event_f = false;
 	}
 
-	if (loop_time.elapsed() < loop_exec_target_time_ms) return;
+	if (loop_time.elapsed() < loop_exec_target_time_ms)
+		return;
 	// It seems to be the time for an update of DMX output and other light (scene) tasks
 	// First set the target time the next update should be done
 	loop_exec_target_time_ms += LIGHT_LOOP_INTERVAL_MS;
@@ -122,9 +123,6 @@ void LightLoop::processPendingEvents()
 			continue;
 		}
 
-//		if (sceneitem->id() == 1) {
-//			int a = 0;
-//		}
 		// Fill channel data into temp dmx data and determine if scene is still active
 		if (!processFxSceneItem(sceneitem)) {
 			if (debug > 1 && !sceneitem->name().startsWith("ScanMove"))
@@ -167,6 +165,7 @@ void LightLoop::processPendingEvents()
 				lightCtrlRef.dmxOutputChanged[t] = true;
 				// qDebug() << "changed dmx uni" << t+1 << "chan" << chan+1 << "to" << QString::number(quint8(dmxtout[t].at(chan)));
 			}
+			/// @todo move into condition block above?
 			lightCtrlRef.dmxOutputValues[t][chan] = dmxtout[t].at(chan);
 		}
 	}
@@ -208,9 +207,9 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 
 		tube->dmxValue = value * 255 / tube->targetFullValue;
 
-			//		if (tube->dmxValue > 0) {
-//			qDebug() << "channel " << tube->dmxChannel << "dmx" << tube->dmxValue << "universe" << tube->dmxUniverse;
-//		}
+		// if (tube->dmxValue > 0 && tube->dmxChannel == 17) {
+		// 	qDebug() << scene->name() << "channel:" << tube->dmxChannel << "dmx:" << tube->dmxValue << "universe:" << tube->dmxUniverse;
+		// }
 		if (tube->dmxValue > quint8(dmxtout[universe].at(channel)) ) {
 			dmxtout[universe][channel] = tube->dmxValue;
 		}

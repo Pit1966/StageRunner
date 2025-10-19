@@ -171,6 +171,8 @@ SOURCES += \
 	../system/audioslot.cpp \
 	../system/audioworker.cpp \
 	../system/convtools.cpp \
+	../system/dmx/dmxhelp.cpp \
+	../system/dmx/dmxtypeselectorwidget.cpp \
 	../system/dmx/fixture.cpp \
 	../system/dmxchannel.cpp \
 	../system/dmxchanproperty.cpp \
@@ -301,6 +303,8 @@ HEADERS  += \
 	../system/audioworker.h \
 	../system/commandsystem.h \
 	../system/convtools.h \
+	../system/dmx/dmxhelp.h \
+	../system/dmx/dmxtypeselectorwidget.h \
 	../system/dmx/fixture.h \
 	../system/dmxchannel.h \
 	../system/dmxchanproperty.h \
@@ -317,6 +321,7 @@ HEADERS  += \
 	../system/netserver.h \
 	../system/qt_versions.h \
 	../system/runguard.h \
+	../system/tubedata.h \
 	../system/variantmapserializer.h \
 	../system/videocontrol.h \
 	../thirdparty/fftreal2/ffft/Array.h \
@@ -385,6 +390,7 @@ FORMS    += \
 	../gui/stagerunnermainwin.ui \
 	../gui/universeeditorwidget.ui \
 	../gui/videostatuswidget.ui \
+	../system/dmx/dmxtypeselectorwidget.ui \
 	../system/messagedialog.ui \
 	../widgets/fxtimelineeditwidget.ui
 

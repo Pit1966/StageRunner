@@ -49,6 +49,7 @@ private:
 	qint64 loop_exec_target_time_ms;
 	bool first_process_event_f;
 
+	// Temporary DMX output data, cleared and filled in every processPendingEvents() iteration
 	QByteArray dmxtout[MAX_DMX_UNIVERSE];
 
 protected:

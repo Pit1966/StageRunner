@@ -113,4 +113,5 @@ enum DmxChannelType {
 	DMX_TYPES
 };
 
+
 #endif // DMXTYPES_H

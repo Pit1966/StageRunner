@@ -26,8 +26,8 @@
 
 #include "varset.h"
 #include "commandsystem.h"
-
 #include "dmxtypes.h"
+#include <QPointer>
 
 #ifndef MIX_LINES
 #define MIX_INTERN 0
@@ -61,6 +61,9 @@ public:
 
 	int tempTubeListIdx;				///< index in tubeList of scene, which is the parent for this DmxChannel
 	bool curValueChanged[MIX_LINES];
+
+	// combined channel support. Such as 16bit pan/tilt
+	QPointer<DmxChannel> pairedDmxChannel;	///< this is the DmxChannel instance, that is combined with this channel
 
 protected:
 	// These Vars are mainly for animation/fading control in the scenes

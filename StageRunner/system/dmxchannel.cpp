@@ -175,7 +175,8 @@ bool DmxChannel::loopFunction(int mixline)
 {
 	int i = mixline;
 
-	if (curCmd[i] == CMD_NONE) return false;
+	if (curCmd[i] == CMD_NONE)
+		return false;
 
 	fadeValue[i] += fadeStep[i];
 	int val = fadeValue[i];

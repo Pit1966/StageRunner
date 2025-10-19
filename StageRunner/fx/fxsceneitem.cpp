@@ -214,8 +214,10 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 				scantube->dmxType = tube->dmxType;
 
 				if (scantube->initFadeCmd(mixline,CMD_SCENE_FADETO,movetime,tube->targetValue)) {
-					scanscene->setActiveIntern();
-					lightctrl->setSceneActive(scanscene);
+					if (!scanscene->isActiveIntern()) {
+						scanscene->setActiveIntern();
+						lightctrl->setSceneActive(scanscene);
+					}
 				}
 			}
 			break;
