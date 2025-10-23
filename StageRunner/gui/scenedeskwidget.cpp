@@ -47,6 +47,10 @@ SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 	setupUi(this);
 	setFxScene(scene);
 	init_gui();
+
+	setFocusPolicy(Qt::StrongFocus);
+	setFocusProxy(nullptr);
+	// setAttribute(Qt::WA_KeyCompression, false);
 }
 
 SceneDeskWidget::~SceneDeskWidget()
@@ -440,6 +444,7 @@ void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 
 void SceneDeskWidget::keyPressEvent(QKeyEvent *event)
 {
+	// qDebug() << "key press" << event->key();
 	int key = event->key();
 	switch(key) {
 	case Qt::Key_Control:
@@ -459,6 +464,36 @@ void SceneDeskWidget::keyPressEvent(QKeyEvent *event)
 		break;
 	case Qt::Key_Delete:
 		deleteSelectedTubes();
+		break;
+
+	case Qt::Key_Up:
+	case Qt::Key_PageUp:
+		for (int t=0; t<m_selectedTubeIds.size(); t++) {
+			int id = m_selectedTubeIds.at(t);
+			MixerChannel *mix = faderAreaWidget->getMixerById(id);
+			if (mix->setDmxPlusOne()) {
+				if (mix->dmxType() == DmxChannelType::DMX_POSITION_PAN_FINE || mix->dmxType() == DmxChannelType::DMX_POSITION_TILT_FINE) {
+					MixerChannel *mixh = faderAreaWidget->getMixerById(id-1);
+					if (mixh)
+						mixh->setDmxPlusOne();
+				}
+			}
+		}
+		break;
+
+	case Qt::Key_Down:
+	case Qt::Key_PageDown:
+		for (int t=0; t<m_selectedTubeIds.size(); t++) {
+			int id = m_selectedTubeIds.at(t);
+			MixerChannel *mix = faderAreaWidget->getMixerById(id);
+			if (mix->setDmxMinusOne()) {
+				if (mix->dmxType() == DmxChannelType::DMX_POSITION_PAN_FINE || mix->dmxType() == DmxChannelType::DMX_POSITION_TILT_FINE) {
+					MixerChannel *mixh = faderAreaWidget->getMixerById(id-1);
+					if (mixh)
+						mixh->setDmxMinusOne();
+				}
+			}
+		}
 		break;
 	}
 }
@@ -505,11 +540,12 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
 {
 	DmxTypeSelectorWidget wid(DmxChannelType(tube->dmxType));
+	wid.setScaler(tube->scalerNumerator, tube->scalerDenominator);
 	wid.show();
 	if (wid.exec()) {
 		tube->dmxType = wid.selectedType();
 		mixer->setDmxType(wid.selectedType());
-		return true;
+		return wid.getScaler(tube->scalerNumerator, tube->scalerDenominator);
 	}
 
 	return false;

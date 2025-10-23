@@ -25,6 +25,8 @@
 #include "customwidget/extmimedata.h"
 #include "dmxchannel.h"
 #include "dmx/dmxhelp.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/colorsettings.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -32,6 +34,7 @@
 #include <QMouseEvent>
 #include <QRect>
 #include <QPen>
+#include <QToolTip>
 
 #define SHADOW_X_PERCENT 10
 #define SHADOW_Y_PERCENT 10
@@ -72,9 +75,15 @@ MixerChannel::MixerChannel(QWidget *parent)
 	org_pix_knob = QPixmap(":/gfx/customwidget/slider_button.png");
 	org_pix_knob_active = QPixmap(":/gfx/customwidget/slider_button_active.png");
 
-	minimum_size_hint = QSize(org_pix_back.width() / 4,org_pix_back.height()/2);
+	minimum_size_hint = QSize(org_pix_back.width() / 3,org_pix_back.height()/2);
 	setMaximumWidth(org_pix_back.width());
 	setMouseTracking(true);
+
+	setFocusPolicy(Qt::NoFocus);
+
+	// setFocusPolicy(Qt::StrongFocus);
+	// setFocusProxy(nullptr);
+	// setAttribute(Qt::WA_KeyCompression, false);
 }
 
 MixerChannel::~MixerChannel()
@@ -165,6 +174,43 @@ void MixerChannel::setDmxType(DmxChannelType type)
 	if (my_dmx_type != type) {
 		my_dmx_type = type;
 		update();
+	}
+}
+
+bool MixerChannel::setDmxPlusOne()
+{
+	int dmx = value() * 255 / maximum() + 1;
+	if (dmx < 256) {
+		setDmxValue(dmx);
+		return false;
+	}
+	else {
+		setDmxValue(0);
+		return true;
+	}
+}
+
+bool MixerChannel::setDmxMinusOne()
+{
+	int dmx = value() * 255 / maximum() - 1;
+	if (dmx >= 0) {
+		setDmxValue(dmx);
+		return false;
+	}
+	else {
+		setDmxValue(255);
+		return true;
+	}
+}
+
+void MixerChannel::setDmxValue(int dmxVal)
+{
+	int newTargetValue = (float(dmxVal) + 0.5) * maximum() / 255;
+	newTargetValue = qMin(newTargetValue, maximum());
+	if (newTargetValue != value()) {
+		setValue(newTargetValue);
+		update();
+		emitCurrentValue();
 	}
 }
 
@@ -261,7 +307,10 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	if (knob_over_f) {
 		p.drawPixmap(event->rect(),org_pix_back_active);
 	} else {
-		p.drawPixmap(event->rect(),org_pix_back);
+		//QRect prect(event->rect());
+		QPixmap pix = org_pix_back.scaled(width(), height());
+		p.drawPixmap(0,0,pix);
+		// qDebug() << "paint" << my_id << "w" << width() << "wpix" << pix.width() << prect;
 	}
 
 	// If Selected draw a box if selected
@@ -358,6 +407,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 //		p.drawText(bound,s,QTextOption(Qt::AlignRight | Qt::AlignBottom));
 //	}
 
+	// DMX type
 	if (my_dmx_type > DMX_GENERIC) {
 		QString tstr = DMXHelp::dmxTypeToShortString(my_dmx_type);
 
@@ -369,6 +419,18 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.setPen(Qt::black);
 		QRect bound(QPoint(0,0),QPoint(width(),height()));
 		p.drawText(bound,tstr,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+	}
+
+	// current value
+	if (knob_over_f) {
+		p.setPen(QColor(AppCentral::ref().colorSettings->pKeyColumn));
+		QString val = QString("%1").arg(value() * 255 / maximum(), 3, 10, QLatin1Char('0'));
+		QRect bound(QPoint(0,50),QPoint(width(), height() - 50));
+		if (value() < maximum() / 2) {
+			p.drawText(bound, val, QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+		} else {
+			p.drawText(bound, val, QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
+		}
 	}
 
 	if (my_universe > 0) {

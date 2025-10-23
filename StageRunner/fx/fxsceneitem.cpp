@@ -196,7 +196,35 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		switch (tube->dmxType) {
+		DmxChannelType dmxtype = tube->dmxChannelType();
+
+		if (tube->isPairedSub)
+			continue;
+
+		if (t+1 < tubeCount()) {
+			// detect paired Channels (eg. for 16 bit access)
+			// We assume that the XXXFine channel is the next channel
+			switch (dmxtype) {
+			case DmxChannelType::DMX_POSITION_PAN:
+				if (tubes.at(t+1)->dmxChannelType() == DmxChannelType::DMX_POSITION_PAN_FINE) {
+					tube->setPairedWith(tubes.at(t+1));
+				} else {
+					tube->clrPairedWith();
+				}
+				break;
+			case DmxChannelType::DMX_POSITION_TILT:
+				if (tubes.at(t+1)->dmxChannelType() == DmxChannelType::DMX_POSITION_TILT_FINE) {
+					tube->setPairedWith(tubes.at(t+1));
+				} else {
+					tube->clrPairedWith();
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		switch (dmxtype) {
 		case DMX_INTENSITY_DIMMER:
 			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
 				active = true;
@@ -212,8 +240,32 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 				scantube->targetFullValue = tube->targetFullValue;
 				scantube->targetValue = tube->targetValue;
 				scantube->dmxType = tube->dmxType;
+				scantube->scalerNumerator = tube->scalerNumerator;
+				scantube->scalerDenominator = tube->scalerDenominator;
 
-				if (scantube->initFadeCmd(mixline,CMD_SCENE_FADETO,movetime,tube->targetValue)) {
+
+				qint32 target_value = tube->targetValue;
+				if (tube->isPairedMain) {
+					// We have to pair the channel in the hidden scanner scene
+					// We assume, that paired channel is the next channel in dmx universe.
+					/// @todo we could check the dmx channel numbers here
+					DmxChannel *scanpaired = scanscene->tube(tube->dmxChannel + 1);
+					scantube->setPairedWith(scanpaired);    ///< @todo needed? haben wir oben schon gemacht
+					// now copy channel parameter of the paired channel.
+					scanpaired->targetFullValue = tube->pairedDmxChannel->targetFullValue;
+					scanpaired->targetValue = tube->pairedDmxChannel->targetValue;
+					scanpaired->dmxType = tube->pairedDmxChannel->dmxType;
+					scanpaired->scalerNumerator = tube->pairedDmxChannel->scalerNumerator;
+					scanpaired->scalerDenominator = tube->pairedDmxChannel->scalerDenominator;
+
+					target_value *= tube->pairedDmxChannel->targetFullValue;
+					target_value += tube->pairedDmxChannel->targetValue;
+				}
+				else {
+					scantube->clrPairedWith();
+				}
+
+				if (scantube->initFadeCmd(mixline, CMD_SCENE_FADETO, movetime, target_value)) {
 					if (!scanscene->isActiveIntern()) {
 						scanscene->setActiveIntern();
 						lightctrl->setSceneActive(scanscene);

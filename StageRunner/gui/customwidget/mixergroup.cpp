@@ -49,7 +49,6 @@ MixerGroup::MixerGroup(QWidget *parent) :
 	setAcceptDrops(true);
 
 	setMixerCount(12);
-
 }
 
 /**

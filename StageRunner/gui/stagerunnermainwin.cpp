@@ -1058,7 +1058,7 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 
 
 	if (event->type() == QEvent::KeyPress) {
-		QKeyEvent *ev = static_cast<QKeyEvent *>(event);
+	QKeyEvent *ev = static_cast<QKeyEvent *>(event);
 		int key = ev->key();
 		bool isAutoRepeat = ev->isAutoRepeat();
 

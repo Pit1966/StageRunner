@@ -205,7 +205,10 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 
 		}
 
-		tube->dmxValue = value * 255 / tube->targetFullValue;
+		// tube->dmxValue = value * 255 / tube->targetFullValue;
+		int dmxval = value * 255 * tube->scalerNumerator / (tube->targetFullValue * tube->scalerDenominator);
+		tube->dmxValue = std::clamp(dmxval, 0, 255);
+
 
 		// if (tube->dmxValue > 0 && tube->dmxChannel == 17) {
 		// 	qDebug() << scene->name() << "channel:" << tube->dmxChannel << "dmx:" << tube->dmxValue << "universe:" << tube->dmxUniverse;

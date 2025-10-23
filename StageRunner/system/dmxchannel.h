@@ -55,14 +55,18 @@ public:
 	qint32 curValue[MIX_LINES];			///< current output value (0 - targetFullRange) HTP with directValue
 	qint32 targetFullValue;				///< The maximum value this channel can be set to (default 10000)
 	qint32 targetValue;					///< 100% Output value target in a scene (0 - targetFullValue) The dmx Output will be scaled to this
-	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
 	qint32 deskPositionIndex;			///< The Index the Channel will be positioned in the DeskSceneWidget
+	qint32 scalerNumerator;				///< for range scaling e.g. Pan fine
+	qint32 scalerDenominator;			///< for range scaling e.g. Pan fine
+	int tempTubeListIdx;				///< index in tubeList of scene, which is the parent for this DmxChannel
 	QString labelText;					///< Spezielle Beschriftung des Kanals
 
-	int tempTubeListIdx;				///< index in tubeList of scene, which is the parent for this DmxChannel
+	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
 	bool curValueChanged[MIX_LINES];
 
 	// combined channel support. Such as 16bit pan/tilt
+	bool isPairedMain;					///< is the main component of 2 paired channels.
+	bool isPairedSub;					///< is the sub component of 2 paired channels.
 	QPointer<DmxChannel> pairedDmxChannel;	///< this is the DmxChannel instance, that is combined with this channel
 
 protected:
@@ -82,6 +86,12 @@ public:
 	bool initFadeScannerCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 curScanValue=0);
 	bool loopFunction(int mixline);
 	inline DmxChannelType dmxChannelType() {return DmxChannelType(dmxType);}
+
+	int dmxTargetValue() const;
+	int scaledTargetValue() const;
+
+	bool setPairedWith(DmxChannel *other);
+	bool clrPairedWith();
 
 private:
 	void init();

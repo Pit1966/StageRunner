@@ -46,13 +46,18 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 	targetValue = o.targetValue;
 	deskVisibleFlag = o.deskVisibleFlag;
 	deskPositionIndex = o.deskPositionIndex;
+	scalerNumerator = o.scalerNumerator;
+	scalerDenominator = o.scalerDenominator;
 	labelText = o.labelText;
+
+	tempTubeListIdx = 0;
+	isPairedMain = o.isPairedMain;
+	isPairedSub = o.isPairedSub;
 }
 
 
 void DmxChannel::init()
 {
-	tempTubeListIdx = 0;
 	for (int i=0; i<MIX_LINES; i++) {
 		fadeStartValue[i] = 0;
 		fadeTargetValue[i] = 0;
@@ -61,6 +66,11 @@ void DmxChannel::init()
 		curCmd[i] = CMD_NONE;
 		curValueChanged[i] = false;
 	}
+
+	tempTubeListIdx = 0;
+
+	isPairedMain = false;
+	isPairedSub = false;
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
 	setDescription("Output mapping from tube number to dmx channel and configuration");
@@ -75,6 +85,8 @@ void DmxChannel::init()
 	addExistingVar(targetValue,"TargetValue",0,100000,0);
 	addExistingVar(deskVisibleFlag,"DeskVisible",true);
 	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
+	addExistingVar(scalerNumerator,"ScalerNum",1,0xfffffff,1);
+	addExistingVar(scalerDenominator,"ScalerDen",1,0xfffffff,1);
 	addExistingVar(labelText,"LabelText");
 }
 
@@ -93,25 +105,81 @@ DmxChannel::~DmxChannel()
  */
 bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 target_value)
 {
-	fadeStartValue[mixline] = curValue[mixline];
-	fadeValue[mixline] = curValue[mixline];
+	if (isPairedSub) {
+		return false;
+	}
+	else if (!isPairedMain) {
+		fadeStartValue[mixline] = curValue[mixline];
+		fadeValue[mixline] = curValue[mixline];
+
+		switch(cmd) {
+		case CMD_SCENE_BLACK:
+			if (curValue[mixline] == 0) return false;
+			fadeTargetValue[mixline] = 0;
+			// time_ms = 0;
+			break;
+		case CMD_SCENE_FADEIN:
+			if (curValue[mixline] >= targetValue) return false;
+			fadeTargetValue[mixline] = targetValue;
+			break;
+		case CMD_SCENE_FADEOUT:
+			if (curValue[mixline] <= 0) return false;
+			fadeTargetValue[mixline] = 0;
+			break;
+		case CMD_SCENE_FADETO:
+			if (curValue[mixline] == target_value) return false;
+			fadeTargetValue[mixline] = target_value;
+			break;
+		default:
+			return false;
+		}
+
+		// Calculate the fade step size as a function of the LightLoop time interval
+		qint32 steps = time_ms / LIGHT_LOOP_INTERVAL_MS;
+		if (steps < 1) {
+			fadeStep[mixline] = fadeTargetValue[mixline] - fadeStartValue[mixline];
+		} else {
+			fadeStep[mixline] = (fadeTargetValue[mixline] - fadeStartValue[mixline]) / steps;
+		}
+
+		curCmd[mixline] = cmd;
+		return true;
+	}
+
+	if (!pairedDmxChannel)
+		return false;
+
+	// init fade with paired channel
+	qint32 curpairvalue = curValue[mixline] * pairedDmxChannel->targetFullValue + pairedDmxChannel->curValue[mixline];
+	qint32 targetpairvalue = targetValue * pairedDmxChannel->targetFullValue + pairedDmxChannel->targetValue;
+
+	fadeStartValue[mixline] = curpairvalue;
+	fadeValue[mixline] = curpairvalue;
+
+	if (dmxType == DMX_POSITION_TILT) {
+		qDebug() << "cur" << curpairvalue << "target" << target_value;
+	}
 
 	switch(cmd) {
 	case CMD_SCENE_BLACK:
-		if (curValue[mixline] == 0) return false;
+		if (curpairvalue == 0)
+			return false;
 		fadeTargetValue[mixline] = 0;
 		// time_ms = 0;
 		break;
 	case CMD_SCENE_FADEIN:
-		if (curValue[mixline] >= targetValue) return false;
-		fadeTargetValue[mixline] = targetValue;
+		if (curpairvalue >= targetpairvalue)
+			return false;
+		fadeTargetValue[mixline] = targetpairvalue;
 		break;
 	case CMD_SCENE_FADEOUT:
-		if (curValue[mixline] <= 0) return false;
+		if (curpairvalue <= 0)
+			return false;
 		fadeTargetValue[mixline] = 0;
 		break;
 	case CMD_SCENE_FADETO:
-		if (curValue[mixline] == target_value) return false;
+		if (curpairvalue == target_value)
+			return false;
 		fadeTargetValue[mixline] = target_value;
 		break;
 	default:
@@ -173,59 +241,172 @@ bool DmxChannel::initFadeScannerCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qi
  */
 bool DmxChannel::loopFunction(int mixline)
 {
+	if (isPairedSub)
+		return false;
+
 	int i = mixline;
 
 	if (curCmd[i] == CMD_NONE)
 		return false;
 
-	fadeValue[i] += fadeStep[i];
-	int val = fadeValue[i];
-	if (val != curValue[i]) {
-		curValue[i] = fadeValue[i];
-		curValueChanged[i] = true;
+	if (!isPairedMain) {
+		fadeValue[i] += fadeStep[i];
+		int val = fadeValue[i];
+		if (val != curValue[i]) {
+			curValue[i] = fadeValue[i];
+			curValueChanged[i] = true;
+		}
+
+		switch(curCmd[i]) {
+		case CMD_SCENE_BLACK:
+			if (fadeValue[i] <= 0) {
+				curValue[i] = 0;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADEIN:
+			if (fadeValue[i] >= fadeTargetValue[i]) {
+				curValue[i] = targetValue;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADEOUT:
+			if (fadeValue[i] <= 0) {
+				curValue[i] = 0;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADETO:
+			if (fadeStep[i] > 0 && fadeValue[i] >= fadeTargetValue[i]) {
+				curValue[i] = fadeTargetValue[i];
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			else if (fadeStep[i] < 0 && fadeValue[i] <= fadeTargetValue[i]) {
+				curValue[i] = fadeTargetValue[i];
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		default:
+			return false;
+		}
 	}
+	else {
+		// this is paired 16bit dmx processing for 2 channels
+		fadeValue[i] += fadeStep[i];
+		// int val = fadeValue[i];
 
-	switch(curCmd[i]) {
-	case CMD_SCENE_BLACK:
-		if (fadeValue[i] <= 0) {
-			curValue[i] = 0;
-			curCmd[i] = CMD_NONE;
+		int max = targetFullValue * pairedDmxChannel->targetFullValue;
+		int dmxmax = 65565;
+		int dmxval = fadeValue[i] * dmxmax / max;
+		if (dmxval > dmxmax)
+			dmxval = dmxmax;
+
+		int val_hi = (dmxval >> 8) * targetFullValue / 255;
+		int val_lo = (dmxval & 0xff) * pairedDmxChannel->targetFullValue / 255;
+
+		if (val_hi != curValue[i] || val_lo != pairedDmxChannel->curValue[i]) {
+			curValue[i] = val_hi;
+			curValueChanged[i] = true;
+			pairedDmxChannel->curValue[i] = val_lo;
+			pairedDmxChannel->curValueChanged[i] = true;
+			// qDebug() << "kanal" << dmxChannel + 1 << "val" << val << "mix" << val_hi << val_lo << "dmx" << val_hi * 255 / 10000 << val_lo * 255 / 10000;
+		}
+
+		// check fade end conditions
+		switch(curCmd[i]) {
+		case CMD_SCENE_BLACK:
+			if (fadeValue[i] <= 0) {
+				curValue[i] = 0;
+				pairedDmxChannel->curValue[i] = 0;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADEIN:
+			if (fadeValue[i] >= fadeTargetValue[i]) {
+				curValue[i] = targetValue;
+				pairedDmxChannel->curValue[i] = pairedDmxChannel->targetValue;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADEOUT:
+			if (fadeValue[i] <= 0) {
+				curValue[i] = 0;
+				pairedDmxChannel->curValue[i] = 0;
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		case CMD_SCENE_FADETO:
+			if (fadeStep[i] > 0 && fadeValue[i] >= fadeTargetValue[i]) {
+				curValue[i] = fadeTargetValue[i] / pairedDmxChannel->targetFullValue;
+				pairedDmxChannel->curValue[i] = fadeTargetValue[i] - (curValue[i] * pairedDmxChannel->targetFullValue);
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			else if (fadeStep[i] < 0 && fadeValue[i] <= fadeTargetValue[i]) {
+				curValue[i] = fadeTargetValue[i] / pairedDmxChannel->targetFullValue;
+				pairedDmxChannel->curValue[i] = fadeTargetValue[i] - (curValue[i] * pairedDmxChannel->targetFullValue);
+				curCmd[i] = CMD_NONE;
+				return false;
+			}
+			break;
+		default:
 			return false;
 		}
-		break;
-	case CMD_SCENE_FADEIN:
-		if (fadeValue[i] >= fadeTargetValue[i]) {
-			curValue[i] = targetValue;
-			curCmd[i] = CMD_NONE;
-			return false;
-		}
-		break;
-	case CMD_SCENE_FADEOUT:
-		if (fadeValue[i] <= 0) {
-			curValue[i] = 0;
-			curCmd[i] = CMD_NONE;
-			return false;
-		}
-		break;
-	case CMD_SCENE_FADETO:
-		if (fadeStep[i] > 0 && fadeValue[i] >= fadeTargetValue[i]) {
-			curValue[i] = fadeTargetValue[i];
-			curCmd[i] = CMD_NONE;
-			return false;
-		}
-		else if (fadeStep[i] < 0 && fadeValue[i] <= fadeTargetValue[i]) {
-			curValue[i] = fadeTargetValue[i];
-			curCmd[i] = CMD_NONE;
-			return false;
-		}
-		break;
-	default:
-		return false;
+
 	}
-
-
 
 	return true;
+}
+
+int DmxChannel::dmxTargetValue() const
+{
+	int dmx = targetValue * 255 * scalerNumerator / ( targetFullValue * scalerDenominator);
+
+	return qMin(qMax(0, dmx), 255);
+}
+
+int DmxChannel::scaledTargetValue() const
+{
+	int scaledTargetValue = targetValue * scalerNumerator / scalerDenominator;
+	return qMin(qMax(0, scaledTargetValue), targetFullValue);
+}
+
+bool DmxChannel::setPairedWith(DmxChannel *other)
+{
+	if (other) {
+		pairedDmxChannel = other;
+		other->pairedDmxChannel = nullptr;
+
+		isPairedMain = true;
+		isPairedSub = false;
+		other->isPairedSub = true;
+		other->isPairedMain = false;
+		return true;
+	}
+
+	return false;
+}
+
+bool DmxChannel::clrPairedWith()
+{
+	isPairedMain = false;
+	isPairedSub = false;
+	if (pairedDmxChannel) {
+		pairedDmxChannel->isPairedMain = false;
+		pairedDmxChannel->isPairedSub = false;
+		pairedDmxChannel = nullptr;
+		return true;
+	}
+
+	return false;
 }
 
 

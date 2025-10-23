@@ -22,6 +22,23 @@ DmxTypeSelectorWidget::~DmxTypeSelectorWidget()
 	delete ui;
 }
 
+void DmxTypeSelectorWidget::setScaler(int num, int denom)
+{
+	ui->numeratorEdit->setText(QString::number(num));
+	ui->denominatorEdit->setText(QString::number(denom));
+}
+
+bool DmxTypeSelectorWidget::getScaler(int &num, int &denom)
+{
+	int n = ui->numeratorEdit->text().toInt();
+	int d = ui->denominatorEdit->text().toInt();
+	if (n == 0 || d == 0)
+		return false;
+	num = n;
+	denom = d;
+	return true;
+}
+
 void DmxTypeSelectorWidget::guiInitTypes()
 {
 	int row = 1;

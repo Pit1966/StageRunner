@@ -114,6 +114,10 @@ public:
 	inline int backGroundHeight() const {return org_pix_back.size().height();}
 	inline const QString & labelText() const {return label;}
 	void setDmxType(DmxChannelType type);
+	DmxChannelType dmxType() const {return my_dmx_type;}
+	bool setDmxPlusOne();
+	bool setDmxMinusOne();
+	void setDmxValue(int dmxVal);
 
 private:
 	void mousePressEvent(QMouseEvent *event);
@@ -124,7 +128,6 @@ private:
 	void leaveEvent(QEvent *event);
 	bool generate_scaled_knob();
 	QSize minimumSizeHint() const;
-
 
 public slots:
 	void notifyChangedDmxChannel(int universe, int dmxchannel, int dmxvalue);

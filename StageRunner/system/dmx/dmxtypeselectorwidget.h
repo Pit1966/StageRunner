@@ -21,6 +21,8 @@ public:
 	~DmxTypeSelectorWidget();
 
 	DmxChannelType selectedType() const {return m_type;}
+	void setScaler(int num, int denom);
+	bool getScaler(int &num, int &denom);
 
 private:
 	void guiInitTypes();
