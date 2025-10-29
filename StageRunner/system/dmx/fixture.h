@@ -298,6 +298,7 @@ public:
 	int lastUsedDmxAddr() const;
 
 	void addFixture(SR_Fixture *fix, int dmxAddr = 0);
+	bool removeFixtureAt(int dmxAddr);
 	bool addQLCFixture(const QString &path, int dmxAddr = 0);
 
 	QJsonObject toJson() const;

@@ -637,11 +637,45 @@ void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
 	if (dmxAddr == 0)
 		dmxAddr = nextFreeDmxAddr;
 
-	if (dmxAddr < nextFreeDmxAddr)
-		return;
+	if (dmxAddr < nextFreeDmxAddr) {
+		int i = 0;
+		bool found = false;
+		while (i < m_list.size()) {
+			if (m_list.at(i)->dmxAdr() > dmxAddr) {
+				found = true;
+				break;
+			}
+			else {
+				i++;
+			}
+		}
 
-	fix->setDmxAdr(dmxAddr);
-	m_list.append(fix);
+		if (found) {
+			fix->setDmxAdr(dmxAddr);
+			m_list.insert(i, fix);
+		}
+
+		return;
+	}
+	else {
+		fix->setDmxAdr(dmxAddr);
+		m_list.append(fix);
+	}
+}
+
+bool SR_FixtureList::removeFixtureAt(int dmxAddr)
+{
+	int i = -1;
+	while (++i < m_list.size()) {
+		SR_Fixture *fix = m_list.at(i);
+		if (dmxAddr >= fix->dmxAdr() && dmxAddr <= fix->dmxAdr() + fix->usedChannelCount()) {
+			m_list.removeAt(i);
+			delete fix;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool SR_FixtureList::addQLCFixture(const QString &path, int dmxAddr)

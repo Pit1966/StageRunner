@@ -45,6 +45,7 @@ UniverseEditorWidget::UniverseEditorWidget(QWidget *parent)
 	setupUi(this);
 
 	universeTable->setRowCount(512);
+	universeTable->setSelectionBehavior(QTableWidget::SelectRows);
 	copyFixturesToGui(m_fixtureList);
 
 	QSettings set(QSETFORMAT,APPNAME);
@@ -91,9 +92,9 @@ bool UniverseEditorWidget::loadFromFilesystem(const QString &path)
 QString UniverseEditorWidget::defaultFilepath()
 {
 	QString defaultpath = QString("%1/.config/%2/%3.dmx.default")
-			.arg(QDir::homePath())
-			.arg(APP_CONFIG_PATH)
-			.arg(APPNAME);
+			.arg(QDir::homePath(),
+				 APP_CONFIG_PATH,
+				 APPNAME);
 
 	return defaultpath;
 }
@@ -177,7 +178,8 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 		dmx++;
 	}
 
-	universeTable->resizeColumnsToContents();
+	// universeTable->resizeColumnsToContents();
+	universeTable->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
 	m_currentTargetDmxAddr = 0;
 
 	return true;
@@ -217,6 +219,11 @@ void UniverseEditorWidget::on_addDeviceButton_clicked()
 
 void UniverseEditorWidget::on_removeDeviceButton_clicked()
 {
+	if (m_currentTargetDmxAddr <= 0)
+		return;
+
+	m_fixtureList->removeFixtureAt(m_currentTargetDmxAddr);
+	copyFixturesToGui(m_fixtureList);
 }
 
 
