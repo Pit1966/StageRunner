@@ -42,6 +42,8 @@ using namespace LIGHT;
 
 class FxSceneItem : public FxItem
 {
+	Q_OBJECT
+
 public:
 	DmxChannel *sceneMaster;				///< Not used
 	VarSetList<DmxChannel*>tubes;
@@ -53,15 +55,17 @@ protected:
 	SceneSeqState mySeqStatus;
 
 private:
-	quint32 my_last_status;
-	bool my_last_active_flag;
-	bool wasBlacked[MIX_LINES];
+	uint mLastStatus;
+	bool mLastActiveFlag;
+	bool m_wasBlacked[MIX_LINES];
 	bool m_deleteMeOnFinished;
 
 public:
 	FxSceneItem();
 	FxSceneItem(FxList *fxList);
 	FxSceneItem(const FxSceneItem &o);
+
+	void cloneFrom(const FxSceneItem &o);
 
 	qint32 loopValue() const override{return 0;}
 	void setLoopValue(qint32 val) override;
@@ -82,7 +86,7 @@ public:
 	bool loopFunction();
 	void setLive(bool state) const;
 	void setBlacked(int mixline, bool state);
-	bool isBlacked(int mixline) const {return wasBlacked[mixline];}
+	bool isBlacked(int mixline) const {return m_wasBlacked[mixline];}
 	inline bool isActive() const {return myStatus & (SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN);}
 	inline bool isActiveIntern() const {return myStatus & SCENE_ACTIVE_INTERN;}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
@@ -108,6 +112,7 @@ private:
 	void init();
 
 	friend class AppCentral;
+	friend class SceneDeskWidget;
 };
 
 #endif // FXSCENEITEM_H

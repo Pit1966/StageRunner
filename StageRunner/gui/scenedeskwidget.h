@@ -37,14 +37,17 @@ class SceneDeskWidget : public QWidget, private Ui::SceneDeskWidget
 {
 	Q_OBJECT
 private:
-	static QList<SceneDeskWidget*>m_sceneDeskList;		//
-	FxSceneItem *m_originFxScene;
+	static QList<SceneDeskWidget*>m_sceneDeskList;
 
-	QList<int>m_selectedTubeIds;		//List of tube Ids currently selected in MixerGroup
+	FxSceneItem *m_originFxScene	= nullptr;
+	FxSceneItem *m_backupScene		= nullptr;	// Backup copy of the m_originFxScene (for cancel function)
+	QList<int>m_selectedTubeIds;				//List of tube Ids currently selected in MixerGroup
 
-	bool m_isSceneLive;
-	bool m_isCtrlPressed;
-	bool m_isShiftPressed;
+	bool m_isSceneLive		= false;
+	bool m_isCtrlPressed	= false;
+	bool m_isShiftPressed	= false;
+	bool m_closeClicked		= false;
+	bool m_orgWasModified	= false;
 
 public:
 	static SceneDeskWidget *openSceneDesk(FxSceneItem *scene, QWidget *parent = 0);
@@ -76,7 +79,6 @@ protected:
 
 private:
 	SceneDeskWidget(FxSceneItem *scene, QWidget *parent = 0);
-	void init();
 	void init_gui();
 	void closeEvent(QCloseEvent *);
 
@@ -106,6 +108,8 @@ private slots:
 	void on_cloneCurrentInputButton_clicked();
 	void on_cloneCurrentOutputButton_clicked();
 	void on_universeSpin_valueChanged(int arg1);
+
+	void on_closeButton_clicked();
 
 signals:
 	// void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

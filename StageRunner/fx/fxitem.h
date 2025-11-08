@@ -68,6 +68,7 @@ typedef QList<FxItem*> FxItemList;
 
 class FxItem : public VarSet
 {
+	Q_OBJECT
 private:
 	static QList<FxItem*> *global_fx_list;
 	static QRecursiveMutex global_fx_lock;

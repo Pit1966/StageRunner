@@ -140,7 +140,6 @@ void VarSet::init()
 	curChildActive = false;
 	cancel_file_analyze_on_empty_line = false;
 	leave_child_level_on_empty_line = false;
-
 }
 
 /**

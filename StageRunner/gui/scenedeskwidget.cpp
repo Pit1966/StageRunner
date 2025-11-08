@@ -43,7 +43,6 @@ QList<SceneDeskWidget*>SceneDeskWidget::m_sceneDeskList;
 SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 	: QWidget(parent)
 {
-	init();
 	setupUi(this);
 	setFxScene(scene);
 	init_gui();
@@ -56,6 +55,7 @@ SceneDeskWidget::SceneDeskWidget(FxSceneItem *scene, QWidget *parent)
 SceneDeskWidget::~SceneDeskWidget()
 {
 	m_sceneDeskList.removeOne(this);
+	delete m_backupScene;
 	DEBUGTEXT("Desk destroyed");
 }
 
@@ -89,10 +89,17 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 
 	QByteArray (&dmxout)[MAX_DMX_UNIVERSE] = AppCentral::instance()->unitLight->dmxOutputValues;
 
+	// check if scene is valid
+	if (!FxItem::exists(scene))
+		return false;
+
 	// First we save the pointer to the scene;
 	m_originFxScene = const_cast<FxSceneItem*>(scene);
+	m_orgWasModified = scene->isModified();
 
-	if (!FxItem::exists(scene)) return false;
+	// make a backup of the the original scene
+	if (!m_backupScene)
+		m_backupScene = new FxSceneItem(*scene);
 
 	this->blockSignals(true);
 
@@ -321,23 +328,28 @@ void SceneDeskWidget::if_input_was_assigned(FxItem *fx)
 	setSceneEditable(false);
 }
 
-void SceneDeskWidget::init()
-{
-	m_isSceneLive = false;
-	m_isCtrlPressed = false;
-	m_isShiftPressed = false;
-
-}
-
 void SceneDeskWidget::closeEvent(QCloseEvent *)
 {
 	setCurrentSceneLiveState(false);
 
 	if (m_originFxScene) {
 		m_originFxScene->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
+
+		if (m_closeClicked) {
+			m_closeClicked = false;
+		}
+		else {
+			// cancelled -> restore original scene
+			if (m_backupScene) {
+				m_originFxScene->cloneFrom(*m_backupScene);
+				m_originFxScene->setModified(m_orgWasModified);
+			}
+		}
 	}
 
-	if (debug) DEBUGTEXT("Close scene desk");
+	m_originFxScene = nullptr;
+	if (debug)
+		DEBUGTEXT("Close scene desk");
 }
 
 
@@ -873,6 +885,7 @@ void SceneDeskWidget::destroyAllSceneDesks()
 void SceneDeskWidget::onChannelCountSpinClickedAndChanged(int arg1)
 {
 	if (!m_originFxScene) return;
+
 	m_originFxScene->setTubeCount(arg1);
 	setFxScene(m_originFxScene);
 }
@@ -880,6 +893,7 @@ void SceneDeskWidget::onChannelCountSpinClickedAndChanged(int arg1)
 void SceneDeskWidget::onChannelCountSpinEditingFinished()
 {
 	if (!m_originFxScene) return;
+
 	if (channelCountSpin->value() != m_originFxScene->tubeCount()) {
 		m_originFxScene->setTubeCount(channelCountSpin->value());
 		setFxScene(m_originFxScene);
@@ -906,3 +920,10 @@ void SceneDeskWidget::on_universeSpin_valueChanged(int arg1)
 {
 	setUniverseInTubes(arg1 - 1);
 }
+
+void SceneDeskWidget::on_closeButton_clicked()
+{
+	m_closeClicked = true;
+	this->close();
+}
+

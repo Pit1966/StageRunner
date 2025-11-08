@@ -112,7 +112,7 @@ public:
 
 	bool checkModified();
 	void setModified(bool state);
-	bool isModified() {return modified_f;}
+	bool isModified() const {return modified_f;}
 
 	inline PrefVarCore::VarClass classType() const {return myclass;}
 	inline const QString & className() const {return myclassname;}

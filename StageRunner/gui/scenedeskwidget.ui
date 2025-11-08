@@ -484,22 +484,5 @@
  <resources>
   <include location="../gfx_ressource.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>closeButton</sender>
-   <signal>clicked()</signal>
-   <receiver>SceneDeskWidget</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>830</x>
-     <y>474</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>941</x>
-     <y>356</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

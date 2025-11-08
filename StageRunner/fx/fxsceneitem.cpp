@@ -47,12 +47,29 @@ FxSceneItem::FxSceneItem(const FxSceneItem &o)
 	, tubes(this)
 {
 	init();
-	cloneFrom(o);
-
+	VarSet::cloneFrom(o);
 	for (int t=0; t<o.tubes.size(); t++) {
 		DmxChannel *tube = new DmxChannel(*o.tubes.at(t));
 		tubes.append(tube);
 	}
+}
+
+void FxSceneItem::cloneFrom(const FxSceneItem &o)
+{
+	VarSet::cloneFrom(o);
+	for (int t=0; t<o.tubes.size(); t++) {
+		DmxChannel *tube = new DmxChannel(*o.tubes.at(t));
+		if (tubes.size() > t) {
+			delete tubes[t];
+			tubes[t] = tube;
+		}
+		else {
+			tubes.append(tube);
+		}
+	}
+
+	while (tubes.size() > o.tubes.size())
+		delete tubes.takeLast();
 }
 
 void FxSceneItem::init()
@@ -61,13 +78,13 @@ void FxSceneItem::init()
 	myclass = PrefVarCore::FX_SCENE_ITEM;
 	myStatus = SCENE_IDLE;
 	mySeqStatus = SCENE_OFF;
-	my_last_status = SCENE_IDLE;
-	my_last_active_flag = false;
+	mLastStatus = SCENE_IDLE;
+	mLastActiveFlag = false;
 
 	m_deleteMeOnFinished = false;
 
 	for (int t=0; t<MIX_LINES; t++) {
-		wasBlacked[t] = false;
+		m_wasBlacked[t] = false;
 	}
 
 	sceneMaster = new DmxChannel;
@@ -76,7 +93,6 @@ void FxSceneItem::init()
 	addExistingVar(widgetPos,"WidgetPos");
 	addExistingVar(*sceneMaster,"DmxChannelDummy");
 	addExistingVarSetList(tubes,"SceneTubes",PrefVarCore::DMX_CHANNEL);
-
 }
 
 FxSceneItem::~FxSceneItem()
@@ -162,23 +178,23 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 		cmd_time = 0;
 		if (myStatus & STAGE_FLAG) {
 			myStatus &= ~STAGE_FLAG;
-			wasBlacked[mixline] = true;
+			m_wasBlacked[mixline] = true;
 		}
 		break;
 	case CMD_SCENE_FADEIN:
 		cmd_time = defaultFadeInTime;
 		myStatus |= STAGE_FLAG;
-		wasBlacked[mixline] = false;
+		m_wasBlacked[mixline] = false;
 		break;
 	case CMD_SCENE_FADEOUT:
 		cmd_time = defaultFadeOutTime;
 		myStatus &= ~STAGE_FLAG;
-		wasBlacked[mixline] = false;
+		m_wasBlacked[mixline] = false;
 		break;
 	case CMD_SCENE_FADETO:
 		cmd_time = defaultFadeInTime;
 		myStatus |= STAGE_FLAG;
-		wasBlacked[mixline] = false;
+		m_wasBlacked[mixline] = false;
 		break;
 	default:
 		return false;
@@ -385,7 +401,7 @@ void FxSceneItem::setLive(bool state) const
 
 void FxSceneItem::setBlacked(int mixline, bool state)
 {
-	wasBlacked[mixline] = state;
+	m_wasBlacked[mixline] = state;
 }
 
 
@@ -398,8 +414,8 @@ void FxSceneItem::setBlacked(int mixline, bool state)
  */
 bool FxSceneItem::getClearStatusHasChanged()
 {
-	if (myStatus != my_last_status) {
-		my_last_status = myStatus;
+	if (myStatus != mLastStatus) {
+		mLastStatus = myStatus;
 		return true;
 	}
 	return false;
@@ -408,8 +424,8 @@ bool FxSceneItem::getClearStatusHasChanged()
 bool FxSceneItem::getClearActiveHasChanged()
 {
 	bool active = isActive();
-	if (active != my_last_active_flag) {
-		my_last_active_flag = active;
+	if (active != mLastActiveFlag) {
+		mLastActiveFlag = active;
 		return true;
 	}
 	return false;
