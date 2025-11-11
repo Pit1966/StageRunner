@@ -77,6 +77,7 @@ private:
 protected:
 	QAtomicInt refCount;
 	qint32 myId;
+	qint32 mySubId;								// unique SubID for special use cases. 1-4 = universe layout template scenes
 	qint32 myInitId;							// Id, first assigned at object initialisation. the final ID (myID) may change later. e.g. after load
 	qint32 myFxType;
 	QString myName;
@@ -128,8 +129,10 @@ public:
 	inline int fxType() const {return myFxType;}
 	inline const QString & name() const {return myName;}
 	void setName(const QString &name);
-	inline int id() const {return myId;}
-	inline void setMyId(int id) {myId = id; myInitId = id;}		///< Do not use this, unless you know what you do!
+	inline qint32 id() const {return myId;}
+	inline void setMyId(qint32 id) {myId = id; myInitId = id;}		///< Do not use this, unless you know what you do!
+	inline qint32 subId() const {return mySubId;}
+	inline void setSubId(qint32 id) {mySubId = id;}
 	inline int initID() const {return myInitId;}
 	inline const QString & filePath() const {return myPath;}
 	inline const QString & fileName() const {return myFile;}

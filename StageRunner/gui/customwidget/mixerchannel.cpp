@@ -44,28 +44,6 @@
 MixerChannel::MixerChannel(QWidget *parent)
 	: QAbstractSlider(parent)
 {
-	my_id = -1;
-	my_universe = -1;
-	my_dmx_channel = -1;
-	my_dmx_channel_ref = nullptr;
-
-	prop_channel_shown_f = false;
-	prop_selectable_f = false;
-	prop_selected_f = false;
-
-	knob_scaled_xsize = 0;
-	knob_scaled_ysize = 0;
-	knob_xoffset = 0;
-	knob_yoffset = 0;
-
-	knob_selected_f = false;
-	knob_over_f = false;
-	do_paint_f = false;
-
-	click_value = 0;
-	currentButton = 0;
-
-
 	lo_pos_percent = float(LO_POS_PERCENT) / 100;
 	hi_pos_percent = float(HI_POS_PERCENT) / 100;
 	pos_range_percent = 1.0f - (1.0f - lo_pos_percent) - hi_pos_percent;
@@ -169,12 +147,50 @@ void MixerChannel::setSelectable(bool state)
 	}
 }
 
-void MixerChannel::setDmxType(DmxChannelType type)
+void MixerChannel::setDmxType(DmxChannelType type, DmxChannelType globalType)
 {
-	if (my_dmx_type != type) {
-		my_dmx_type = type;
-		update();
+	bool changed = false;
+	if (m_myDmxType != type) {
+		m_myDmxType = type;
+		changed = true;
 	}
+	if (m_globalDmxType != globalType) {
+		m_globalDmxType = globalType;
+		changed = true;
+	}
+
+	if (changed) {
+		update();
+		if (m_myDmxType > DmxChannelType::DMX_GENERIC) {
+			setToolTip(DMXHelp::dmxTypeToString(type));
+		} else {
+			setToolTip(DMXHelp::dmxTypeToString(globalType));
+		}
+	}
+}
+
+void MixerChannel::setLocalDmxType(DmxChannelType type)
+{
+	if (m_myDmxType != type) {
+		m_myDmxType = type;
+		update();
+		setToolTip(DMXHelp::dmxTypeToString(type));
+	}
+}
+
+/**
+ * @brief Get DMX Channel type.
+ * @return
+ *
+ * The DMX channel type is fetched from member m_myDmxType, if it is > DMX_GENERIC
+ * otherwise the type will be fetched from global universe layout type
+ */
+DmxChannelType MixerChannel::dmxType() const
+{
+	if (m_myDmxType > DMX_GENERIC)
+		return m_myDmxType;
+
+	return m_globalDmxType;
 }
 
 bool MixerChannel::setDmxPlusOne()
@@ -408,17 +424,25 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 //	}
 
 	// DMX type
-	if (my_dmx_type > DMX_GENERIC) {
-		QString tstr = DMXHelp::dmxTypeToShortString(my_dmx_type);
+	if (dmxType() > DMX_GENERIC) {
+		QString tstr = DMXHelp::dmxTypeToShortString(dmxType());
 
 		QFont font(p.font());
 		font.setFixedPitch(true);
+		font.setPointSize(width() < 48 ? 8 : 9);
 		font.setItalic(false);
 		font.setBold(false);
 		p.setFont(font);
-		p.setPen(Qt::black);
+		if (m_myDmxType == DmxChannelType::DMX_GENERIC) {
+			p.setPen(Qt::gray);
+		} else {
+			p.setPen(Qt::yellow);
+		}
+		if (tstr.size() > 6)
+			tstr.insert(tstr.size() / 2, '\n');
 		QRect bound(QPoint(0,0),QPoint(width(),height()));
 		p.drawText(bound,tstr,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+		// qDebug() << width();
 	}
 
 	// current value

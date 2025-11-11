@@ -24,17 +24,6 @@
 #ifndef DMXTYPES_H
 #define DMXTYPES_H
 
-//enum DmxChannelType {
-//	DMX_GENERIC,
-//	DMX_Intensity,
-//	DMX_PAN,
-//	DMX_TILT,
-//	DMX_GOBO,
-//	DMX_Color_,
-
-
-//	DMX_TYPES					///< entry count
-//};
 
 enum DmxChannelType {
 	DMX_GENERIC,

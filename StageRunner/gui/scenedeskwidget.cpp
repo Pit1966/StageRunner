@@ -163,7 +163,8 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setValue(dmx->targetValue);
 			fader->setChannelShown(true);
 			fader->setLabelText(dmx->labelText);
-			fader->setDmxType(dmx->dmxChannelType());
+			fader->setDmxType(dmx->localDmxType(), dmx->globalDmxType());
+
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
 			ref_val = ref_val * dmx->targetFullValue / 255;
@@ -556,7 +557,7 @@ bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
 	wid.show();
 	if (wid.exec()) {
 		tube->dmxType = wid.selectedType();
-		mixer->setDmxType(wid.selectedType());
+		mixer->setLocalDmxType(wid.selectedType());
 		return wid.getScaler(tube->scalerNumerator, tube->scalerDenominator);
 	}
 
@@ -586,7 +587,7 @@ bool SceneDeskWidget::setTypeOfSelectedTubes(DmxChannelType type)
 		DmxChannel *tube = m_originFxScene->tubes.at(id);
 		MixerChannel *mix = faderAreaWidget->getMixerById(id);
 		tube->dmxType = type;
-		mix->setDmxType(type);
+		mix->setLocalDmxType(type);
 		mix->update();
 	}
 	return true;

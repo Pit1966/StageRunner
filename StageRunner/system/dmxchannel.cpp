@@ -23,6 +23,7 @@
 
 #include "dmxchannel.h"
 #include "config.h"
+#include "appcontrol/appcentral.h"
 
 DmxChannel::DmxChannel()
 	: VarSet()
@@ -364,6 +365,24 @@ bool DmxChannel::loopFunction(int mixline)
 	}
 
 	return true;
+}
+
+DmxChannelType DmxChannel::dmxChannelType() const
+{
+	if (dmxType > DmxChannelType::DMX_GENERIC)
+		return DmxChannelType(dmxType);
+
+	return AppCentral::ref().globalDmxType(dmxUniverse, dmxChannel);
+}
+
+DmxChannelType DmxChannel::localDmxType() const
+{
+	return DmxChannelType(dmxType);
+}
+
+DmxChannelType DmxChannel::globalDmxType() const
+{
+	return AppCentral::ref().globalDmxType(dmxUniverse, dmxChannel);
 }
 
 int DmxChannel::dmxTargetValue() const

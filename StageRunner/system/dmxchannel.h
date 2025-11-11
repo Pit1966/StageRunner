@@ -85,7 +85,9 @@ public:
 	bool initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 target_value=0 );
 	bool initFadeScannerCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 curScanValue=0);
 	bool loopFunction(int mixline);
-	inline DmxChannelType dmxChannelType() {return DmxChannelType(dmxType);}
+	DmxChannelType dmxChannelType() const;
+	DmxChannelType localDmxType() const;
+	DmxChannelType globalDmxType() const;
 
 	int dmxTargetValue() const;
 	int scaledTargetValue() const;

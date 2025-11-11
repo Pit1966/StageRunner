@@ -66,7 +66,7 @@ QJsonObject SR_Channel::toJson() const
 	json["preset"] = m_preset;
 	json["dmxtype"] = int(stringToPreset(m_preset));
 	json["dmxoffset"] = m_dmxOffset;
-	json["dmxfineoffseet"] = m_dmxFineOffset;
+	json["dmxfineoffset"] = m_dmxFineOffset;
 
 
 	return json;
@@ -78,7 +78,9 @@ bool SR_Channel::setFromJson(const QJsonObject &json)
 	m_group = json["group"].toString();
 	m_preset =json["preset"].toString();
 	m_dmxOffset = json["dmxoffset"].toInt();
-	m_dmxFineOffset = json["dmxfineoffseet"].toInt();
+	m_dmxFineOffset = json["dmxfineoffset"].toInt();
+	if (json.contains("dmxfineoffseet"))
+		m_dmxFineOffset = json["dmxfineoffseet"].toInt();
 	return true;
 }
 
@@ -207,8 +209,8 @@ QStringList SR_Mode::getChannelAndPresetTexts() const
 	for (auto chan : m_channels) {
 		QString s = QString("%1: %2%3")
 				.arg(++chanNum)
-				.arg(chan->name())
-				.arg(chan->preset().size() ? QString(" (%1)").arg(chan->preset()) : QString());
+				.arg(chan->name(),
+					 chan->preset().size() ? QString(" (%1)").arg(chan->preset()) : QString());
 		list.append(s);
 	}
 	return list;

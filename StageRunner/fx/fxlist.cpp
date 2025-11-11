@@ -475,6 +475,26 @@ FxItem *FxList::findSequenceFirstItem()
 	return fx;
 }
 
+FxItem *FxList::findFxItemById(qint32 id)
+{
+	for (int i=0; i<m_fxList.size(); i++) {
+		if (m_fxList.at(i)->id() == id)
+			return m_fxList.at(i);
+	}
+
+	return nullptr;
+}
+
+FxItem *FxList::findFxItemBySubId(qint32 subId)
+{
+	for (int i=0; i<m_fxList.size(); i++) {
+		if (m_fxList.at(i)->subId() == subId)
+			return m_fxList.at(i);
+	}
+
+	return nullptr;
+}
+
 int FxList::countRandomPlayedItemInList() const
 {
 	// count random played fxitems;
@@ -817,6 +837,25 @@ void FxList::addFx(FxItem *newfx)
 	newfx->refCount.ref();
 	m_fxList.append(newfx);
 	m_isModified = true;
+}
+
+bool FxList::removeFx(FxItem *fx)
+{
+	if (!fx)
+		return false;
+
+	int i = m_fxList.indexOf(fx);
+	if (i >= 0) {
+		m_fxList.removeAt(i);
+		if (!fx->refCount.deref()) {
+			delete fx;
+		} else {
+			qWarning() << "Fx" << fx->name() << "still used when removed -> keep in memory";
+		}
+		return true;
+	}
+
+	return false;
 }
 
 /**

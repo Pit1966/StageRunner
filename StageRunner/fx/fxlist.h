@@ -137,11 +137,14 @@ public:
 
 	FxItem * addFx(int fxtype, int option = -1);
 	void addFx(FxItem *newfx);
+	bool removeFx(FxItem *fx);
 	void refAllMembers();
 	FxItem * findSequenceFollower(FxItem *curfx = 0, bool turnover = true);
 	FxItem * findSequenceForerunner(FxItem *curfx = 0, bool turnover = true);
 	FxItem * findSequenceRandomFxItem();
 	FxItem * findSequenceFirstItem();
+	FxItem * findFxItemById(qint32 id);
+	FxItem * findFxItemBySubId(qint32 subId);
 	int countRandomPlayedItemInList() const;
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;

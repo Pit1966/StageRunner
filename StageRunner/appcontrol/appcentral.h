@@ -26,6 +26,7 @@
 
 #include "commandsystem.h"
 #include "config.h"
+#include "dmxtypes.h"
 
 #include <QList>
 #include <QObject>
@@ -189,6 +190,10 @@ public:
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
 	void setCurrentKeyModifiers(uint val) {m_activeKeyModifiers = val;}
 	uint currentKeyModifiers() const {return m_activeKeyModifiers;}
+
+	// query functions for universe layout scenes
+	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
+
 
 	// Gui
 	bool hasSecondScreen() const {return m_hasSecondScreen;}

@@ -44,48 +44,49 @@ public:
 	int myLayoutIndex;				///< Index in parent layout
 
 private:
-	int my_id;						///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
-	int my_universe;				///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
-	int my_dmx_channel;				///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
-	DmxChannel *my_dmx_channel_ref;	///< not realy used, only for debug
+	qint32 my_id			= -1;	///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
+	qint32 my_universe		= -1;	///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
+	qint32 my_dmx_channel	= -1;	///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
 	QString label;
-	DmxChannelType my_dmx_type;		///< The type of the dmx channel
+	DmxChannelType m_myDmxType		= DmxChannelType::DMX_GENERIC;	///< The type of the dmx channel
+	DmxChannelType m_globalDmxType	= DmxChannelType::DMX_GENERIC;	///< type from global universe layout
+	DmxChannel *my_dmx_channel_ref	= nullptr;						///< not realy used, only for debug
 
-	bool prop_channel_shown_f;
-	bool prop_selectable_f;
-	bool prop_selected_f;
+
+	bool prop_channel_shown_f	= false;
+	bool prop_selectable_f		= false;
+	bool prop_selected_f		= false;
+	bool do_paint_f				= false;	///< Widget Resources ok and can be drawn
+	bool knob_selected_f		= false;	///< Slider knob is clicked and selected
+	bool knob_over_f			= false;	///< Mouse is over knob
 
 	QPixmap org_pix_back;
 	QPixmap org_pix_knob;
 	QPixmap org_pix_knob_active;
 	QPixmap org_pix_back_active;
-
-	int knob_xsize;					///< Width of scaled knob without shadow border
-	int knob_ysize;					///< Height of scaled knob without shadow border
-	float knob_scaled_xsize;		///< Width of scaled knob including shadow border
-	float knob_scaled_ysize;		///< Height of scaled knob including shadow border
-	int knob_xoffset;
-	int knob_yoffset;
 	QRect knob_scaled_rect;			///< The position of the knob on screen
 	QRect knob_rect;				///< The position of the knob on screen without shadow
 
-	float lo_pos_percent;
-	float hi_pos_percent;
-	float pos_range_percent;
+	int knob_xsize			= 0;	///< Width of scaled knob without shadow border
+	int knob_ysize			= 0;	///< Height of scaled knob without shadow border
+	float knob_scaled_xsize	= 0;	///< Width of scaled knob including shadow border
+	float knob_scaled_ysize	= 0;	///< Height of scaled knob including shadow border
+	int knob_xoffset		= 0;
+	int knob_yoffset		= 0;
 
-	bool do_paint_f;				///< Widget Resources ok and can be drawn
+	float lo_pos_percent	= 0;
+	float hi_pos_percent	= 0;
+	float pos_range_percent	= 0;
 
-	bool knob_selected_f;			///< Slider knob is clicked and selected
-	bool knob_over_f;				///< Mouse is over knob
-	QPoint click_position;			///< Mouseposition when clicked in Widget
-	int click_value;				///< Value when mouse clicked in widget
+	QPoint click_position;				///< Mouseposition when clicked in Widget
+	int click_value			= 0;		///< Value when mouse clicked in widget
 	QSize minimum_size_hint;
 	QPoint drag_begin_pos;
 
 protected:
-	int refSliderColorIndex;
 	QAbstractSlider refSlider;
-	int currentButton;				///< Current pressed mouse button
+	int refSliderColorIndex	= 0;
+	int currentButton		= 0;		///< Current pressed mouse button
 
 public:
 	MixerChannel(QWidget *parent = 0);
@@ -96,6 +97,7 @@ public:
 	void setUniverse(int universe);
 	inline int dmxUniverse() const {return my_universe;}
 	inline int dmxChannel() const {return my_dmx_channel;}
+
 	void setRange(int min, int max);
 	void setMinimum(int min);
 	void setMaximum(int max);
@@ -113,8 +115,9 @@ public:
 	inline int backGroundWidth() const {return org_pix_back.size().width();}
 	inline int backGroundHeight() const {return org_pix_back.size().height();}
 	inline const QString & labelText() const {return label;}
-	void setDmxType(DmxChannelType type);
-	DmxChannelType dmxType() const {return my_dmx_type;}
+	void setDmxType(DmxChannelType type, DmxChannelType globalType);
+	void setLocalDmxType(DmxChannelType type);
+	DmxChannelType dmxType() const;
 	bool setDmxPlusOne();
 	bool setDmxMinusOne();
 	void setDmxValue(int dmxVal);

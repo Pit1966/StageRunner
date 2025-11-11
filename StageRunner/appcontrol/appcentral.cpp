@@ -50,6 +50,8 @@
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
 
+#include "system/dmxchannel.h"
+
 // #include "audioformat.h"
 
 
@@ -558,6 +560,17 @@ void AppCentral::closeVideoWidget()
 bool AppCentral::isVideoWidgetVisible(QWidget **videoWid) const
 {
 	return unitAudio->isVideoWidgetVisible(videoWid);
+}
+
+DmxChannelType AppCentral::globalDmxType(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return DmxChannelType(tube->dmxType);
+	}
+
+	return DmxChannelType::DMX_GENERIC;
 }
 
 QSize AppCentral::secondScreenSize() const

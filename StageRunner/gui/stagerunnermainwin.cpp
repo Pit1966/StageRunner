@@ -468,6 +468,7 @@ void StageRunnerMainWin::initAppDefaults()
 	restore_window();
 
 	// Load Default Template FxList
+	// and also the default universe DMX layout, which is part of the template scenes
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
 		on_loadTemplatesButton_clicked();
 

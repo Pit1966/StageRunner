@@ -28,10 +28,11 @@
 #include "lightloopthreadinterface.h"
 #include "lightloop.h"
 #include "fxitem.h"
-#include "fxsceneitem.h"
-#include "fxseqitem.h"
-#include "fxaudioitem.h"
-#include "fxlist.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxseqitem.h"
+#include "fx/fxaudioitem.h"
+#include "fx/fxlist.h"
+#include "appcontrol/fxlistvarset.h"
 #include "qlcioplugin.h"
 #include "ioplugincentral.h"
 #include "usersettings.h"
@@ -73,6 +74,9 @@ bool LightControl::setLightLoopEnabled(bool state)
 {
 	bool ok = true;
 	if (state) {
+		// update the universe dmx channel layout before start
+		populateUniverseLayoutScenes();
+
 		ok = lightLoopInterface->startThread();
 		if (ok) {
 			connect(lightLoopInterface->getLightLoopInstance(),SIGNAL(sceneStatusChanged(FxSceneItem*,quint32))
@@ -347,6 +351,21 @@ bool LightControl::fillSceneFromInputUniverses(FxSceneItem *scene, int *feedback
 	return ok;
 }
 
+int LightControl::populateUniverseLayoutScenes()
+{
+	FxList *templateList = AppCentral::ref().templateFxList->fxList();
+
+	int universeFoundCount = 0;
+	for (int i=0; i<MAX_DMX_UNIVERSE; i++) {
+		FxItem *fx = templateList->findFxItemBySubId(i+1);
+		if (fx && fx->fxType() == FX_SCENE) {
+			universeLayoutScenes[i] = static_cast<FxSceneItem*>(fx);
+			universeFoundCount++;
+		}
+	}
+	return universeFoundCount;
+}
+
 /**
  * @brief LightControl::setYadiInOutMergeMode
  * @param input
@@ -420,6 +439,8 @@ void LightControl::init()
 		dmxInputChanged[t] = true;
 		dmxOutputValues[t].fill(0, 512);
 		dmxInputValues[t].fill(0, 512);
+
+		universeLayoutScenes[t] = nullptr;
 	}
 	// initialize the hidden scene that will catch all scanner events.
 	FxItem::setLowestID(10000);

@@ -27,6 +27,7 @@
 #include "appcentral.h"
 #include "lightloop.h"
 #include "lightloopthreadinterface.h"
+#include "system/dmx/dmxhelp.h"
 
 FxSceneItem::FxSceneItem()
 	:FxItem()
@@ -133,7 +134,7 @@ void FxSceneItem::createDefaultTubes(int tubecount)
 		dmx->tube = t;
 		dmx->dmxUniverse = 0;
 		dmx->dmxChannel = t;
-		dmx->dmxType = DMX_INTENSITY_DIMMER;
+		dmx->dmxType = DMX_GENERIC;
 		tubes.append(dmx);
 	}
 }
@@ -149,10 +150,11 @@ void FxSceneItem::setTubeCount(int tubecount)
 		dmx->tube = tubes.size();
 		dmx->dmxUniverse = 0;
 		dmx->dmxChannel = tubes.size();
-		dmx->dmxType = DMX_INTENSITY_DIMMER;
+		dmx->dmxType = DMX_GENERIC;
 		tubes.append(dmx);
 	}
 }
+
 /**
  * @brief Init command for FxScene
  * @param mixline MIX_INTERN, MIX_EXTERN to distinguish between manualy fades and automatic fades
@@ -241,11 +243,8 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 		}
 
 		switch (dmxtype) {
-		case DMX_INTENSITY_DIMMER:
-			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
-				active = true;
-			}
-			break;
+		// case DMX_INTENSITY_DIMMER:
+		// 	break;
 		case DMX_POSITION_PAN:
 		case DMX_POSITION_TILT:
 			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
@@ -290,7 +289,12 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 			}
 			break;
 		default:
+			// all other types are handled like dimmers
+			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
+				active = true;
+			}
 			break;
+
 		}
 
 	}
@@ -322,7 +326,7 @@ bool FxSceneItem::directFadeToDmx(qint32 dmxval, qint32 time_ms)
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		if (tube->dmxType == DMX_INTENSITY_DIMMER) {
+		if (DMXHelp::isTypeDimmer(tube->dmxChannelType())) {
 			qint32 target_value = tube->targetValue * dmxval / 255;
 			if (tube->initFadeCmd(MIX_EXTERN, CMD_SCENE_FADETO,time_ms,target_value)) {
 				active = true;
@@ -499,7 +503,7 @@ bool FxSceneItem::updateSceneFromOlderProjectVersion(int oldVer)
 			DmxChannel *tu = tube(t);
 			switch (tu->dmxType) {
 			case 0: tu->dmxType = DMX_GENERIC; break;
-			case 1: tu->dmxType = DMX_INTENSITY_DIMMER; break;
+			case 1: tu->dmxType = DMX_GENERIC; break;
 			case 2: tu->dmxType = DMX_POSITION_PAN; break;
 			case 3: tu->dmxType = DMX_POSITION_TILT; break;
 			case 4: tu->dmxType = DMX_GOBO_INDEX; break;
@@ -517,7 +521,7 @@ bool FxSceneItem::updateSceneFromOlderProjectVersion(int oldVer)
 DmxChannel *FxSceneItem::tube(int id) const
 {
 	if (id < 0 || id >= tubes.size())
-		return 0;
+		return nullptr;
 
 	return tubes.at(id);
 }

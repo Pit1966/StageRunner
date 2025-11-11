@@ -59,6 +59,7 @@ public:
 	bool dmxInputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 	FxSceneItem *staticScenes[MAX_DMX_UNIVERSE][MAX_STATIC_SCENES];
+	QPointer<FxSceneItem> universeLayoutScenes[MAX_DMX_UNIVERSE];				///< these scenes are not used as stage scenes, but only for dmx channel type evalutation
 
 public:
 	LightControl(AppCentral &app_central);
@@ -78,6 +79,7 @@ public:
 	qint32 blackFxItem(FxItem *fx, qint32 time_ms);
 
 	bool fillSceneFromInputUniverses(FxSceneItem *scene, int *feedbackActiveChannels = nullptr);
+	int populateUniverseLayoutScenes();
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
 	bool setYadiInOutMergeMode(quint32 mode);

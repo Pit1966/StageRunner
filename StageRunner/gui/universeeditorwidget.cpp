@@ -4,7 +4,8 @@
 #include "log.h"
 #include "system/dmx/fixture.h"
 #include "deviceinfowidget.h"
-#include "fxsceneitem.h"
+#include "fx/fxitem.h"
+#include "fx/fxsceneitem.h"
 #include "dmxchannel.h"
 
 #include "appcentral.h"
@@ -247,10 +248,19 @@ void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
 	FxSceneItem *sc = createSceneFromFixtureList(m_fixtureList);
 	if (!sc) return;
 
+	/// @todo we will have at least 4 universes with subID 1-4
 	sc->setName("Default_Universe_0");
 	sc->generateNewID(11000);
-	AppCentral::ref().templateFxList->fxList()->addFx(sc);
-	AppCentral::ref().templateFxList->fxList()->emitListChangedSignal();
+	sc->setSubId(1);
+
+	FxList *templateList = AppCentral::ref().templateFxList->fxList();
+
+	// remove existing scene from template list
+	FxItem *oldfx = templateList->findFxItemBySubId(1);
+	templateList->removeFx(oldfx);
+
+	templateList->addFx(sc);
+	templateList->emitListChangedSignal();
 }
 
 void UniverseEditorWidget::on_universeTable_cellClicked(int row, int column)
