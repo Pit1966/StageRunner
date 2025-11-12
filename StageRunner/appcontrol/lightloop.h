@@ -32,6 +32,7 @@
 class LightControl;
 class FxList;
 class FxSceneItem;
+class DmxChannel;
 
 class LightLoop : public QObject
 {

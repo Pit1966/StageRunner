@@ -914,12 +914,14 @@ void Project::init()
 	addExistingVar(pMasterVolume,"MasterVolume");
 	addExistingVar(pLogarithmicVol,"LogarithmicVolScale");
 	addExistingVar(pAutoProceedSequence,"FxListAutoProceedSequence");
-	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
-	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");
 	addExistingVar(fxList->showColumnFadeinFlag,"FxListShowFadeInTime");
-	addExistingVar(fxList->showColumnHoldFlag,"FxListShowHoldTime");
 	addExistingVar(fxList->showColumnFadeoutFlag,"FxListShowFadeOutTime");
+	addExistingVar(fxList->showColumnIdFlag,"FxListShowId");
+	addExistingVar(fxList->showColumnHoldFlag,"FxListShowHoldTime");
+	addExistingVar(fxList->showColumnPredelayFlag,"FxListShowPreDelay");
 	addExistingVar(fxList->showColumnPostdelayFlag,"FxListShowPostDelay");
+	addExistingVar(fxList->showColumnKeyFlag,"FxListShowKey");
+	addExistingVar(fxList->showColumnMoveFlag,"FxListShowMoveDelay");
 
 	addExistingVar(pSlotGuiConfig,"SlotGuiConfig");
 

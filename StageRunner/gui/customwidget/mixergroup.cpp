@@ -155,7 +155,7 @@ MixerChannel *MixerGroup::findMixerAtPos(QPoint pos)
 			return mixerlist.at(t);
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 MixerChannel *MixerGroup::getMixerById(int id)
@@ -164,7 +164,7 @@ MixerChannel *MixerGroup::getMixerById(int id)
 		if (mixerlist.at(t)->id() == id)
 			return mixerlist.at(t);
 	}
-	return 0;
+	return nullptr;
 }
 
 bool MixerGroup::selectMixer(MixerChannel *mixer, int id, bool state)

@@ -58,7 +58,7 @@ public:
 	void setControlKey(bool state);
 	void setShiftKey(bool state);
 	DmxChannel * getTubeFromMixer(const MixerChannel * mixer) const;
-	DmxChannel * getTubeAtPos(QPoint pos, MixerChannel **dmxChannel = 0);
+	DmxChannel * getTubeAtPos(QPoint pos, MixerChannel **mixerChannel = 0);
 
 protected:
 	void contextMenuEvent(QContextMenuEvent *event);

@@ -432,6 +432,48 @@ FxSceneItem *LightControl::staticScene(int universe, int number)
 	return staticScenes[universe][number];
 }
 
+DmxChannel *LightControl::globalDmxChannel(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && universeLayoutScenes[universe]) {
+		return universeLayoutScenes[universe]->tube(dmxChan);
+	}
+
+	return nullptr;
+}
+
+DmxChannelType LightControl::globalDmxType(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && universeLayoutScenes[universe]) {
+		DmxChannel *tube = universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return DmxChannelType(tube->dmxType);
+	}
+
+	return DmxChannelType::DMX_GENERIC;
+}
+
+qint32 LightControl::globalDmxScalerNumerator(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && universeLayoutScenes[universe]) {
+		DmxChannel *tube = universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return tube->scalerNumerator;
+	}
+
+	return 1;
+}
+
+qint32 LightControl::globalDmxScalerDenominator(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && universeLayoutScenes[universe]) {
+		DmxChannel *tube = universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return tube->scalerDenominator;
+	}
+
+	return 1;
+}
+
 void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {

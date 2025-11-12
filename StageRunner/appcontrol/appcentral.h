@@ -61,6 +61,7 @@ class DmxUniverseProperty;
 class FxSceneItem;
 class QThread;
 class NetServer;
+class DmxChannel;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -192,7 +193,10 @@ public:
 	uint currentKeyModifiers() const {return m_activeKeyModifiers;}
 
 	// query functions for universe layout scenes
+	DmxChannel *globalDmxChannel(quint32 universe, qint32 dmxChan);
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
+	qint32 globalScalerNumerator(quint32 universe, qint32 dmxChan);
+	qint32 globalScalerDenominator(quint32 universe, qint32 dmxChan);
 
 
 	// Gui

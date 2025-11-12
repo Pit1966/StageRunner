@@ -229,16 +229,16 @@ DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
 /**
  * @brief Find Tube at mouse position
  * @param pos Mouse position relativ to this widget
- * @param dmxChannel Pointer to variable that will receive the DmxChannel instance at position or NULL if not needed
+ * @param mixerChannel Pointer to variable that will receive the DmxChannel instance at position or NULL if not needed
  * @return Pointer to DmxChannel instance at position or NULL if not found
  */
-DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **dmxChannel)
+DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **mixerChannel)
 {
 	DmxChannel *tube = nullptr;
 	// First find the mixer at postion
 	MixerChannel *mixer = faderAreaWidget->findMixerAtPos(faderAreaWidget->mapFrom(this,pos));
-	if (dmxChannel) {
-		*dmxChannel = mixer;
+	if (mixerChannel) {
+		*mixerChannel = mixer;
 	}
 
 	if (!m_originFxScene) return tube;
@@ -705,6 +705,8 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		act->setObjectName("6");
 		act = menu.addAction(tr("Hide selected Channel(s)"));
 		act->setObjectName("1");
+		act = menu.addAction(tr("Set channel DMX type to default"));
+		act->setObjectName("8");
 	}
 	act = menu.addAction(tr("Add Channel"));
 	act->setObjectName("2");
@@ -793,6 +795,23 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 
 	case 7:		// set DMX channel type
 		setDmxTypeForTube(tube, mixer);
+		break;
+
+	case 8:		// set dmx type of selected channels to default
+		auto ids = m_selectedTubeIds;
+		while (!ids.isEmpty()) {
+			MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
+			if (mix) {
+				mix->setLocalDmxType(DMX_GENERIC);
+				DmxChannel *tube = getTubeFromMixer(mix);
+				if (tube) {
+					tube->dmxType = DMX_GENERIC;
+					tube->scalerNumerator = 1;
+					tube->scalerDenominator = 1;
+				}
+			}
+		}
+
 		break;
 	}
 }

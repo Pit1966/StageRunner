@@ -27,6 +27,7 @@
 #include "config.h"
 #include "toolclasses.h"
 #include "tubedata.h"
+#include "dmxtypes.h"
 
 #include <QObject>
 #include <QByteArray>
@@ -41,8 +42,7 @@ class FxSceneItem;
 class FxItem;
 class FxSceneItem;
 class FxSeqItem;
-
-
+class DmxChannel;
 
 class LightControl : public QObject
 {
@@ -86,6 +86,12 @@ public:
 
 	// static scenes
 	FxSceneItem * staticScene(int universe, int number);
+
+	// Access to global universe layout
+	DmxChannel *globalDmxChannel(quint32 universe, qint32 dmxChan);
+	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
+	qint32 globalDmxScalerNumerator(quint32 universe, qint32 dmxChan);
+	qint32 globalDmxScalerDenominator(quint32 universe, qint32 dmxChan);
 
 private:
 	void init();

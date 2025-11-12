@@ -1312,7 +1312,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act->setObjectName("26");
 
 
-			act = menu.addAction("--------------------");
+			menu.addAction("--------------------");
 			if (isEditable()) {
 				act = menu.addAction(tr("Deactivate Edit Mode"));
 			} else {

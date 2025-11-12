@@ -198,17 +198,23 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 		DmxChannel *tube = scene->tubes.at(t);
 		int channel = tube->dmxChannel;
 		int universe = tube->dmxUniverse;
+		// Attention, this maybe null!
+		DmxChannel *gTube = lightCtrlRef.globalDmxChannel(universe, channel);
+
 		int value = 0;
 		for (int i=0; i<MIX_LINES; i++) {
 			if (tube->curValue[i] > value)
 				value = tube->curValue[i];
-
 		}
 
 		// tube->dmxValue = value * 255 / tube->targetFullValue;
-		int dmxval = value * 255 * tube->scalerNumerator / (tube->targetFullValue * tube->scalerDenominator);
+		int dmxval;
+		if (tube->scalerNumerator > 1 || tube->scalerDenominator > 1 || gTube == nullptr) {
+			dmxval = value * 255 * tube->scalerNumerator / (tube->targetFullValue * tube->scalerDenominator);
+		} else {
+			dmxval = value * 255 * gTube->scalerNumerator / (tube->targetFullValue * gTube->scalerDenominator);
+		}
 		tube->dmxValue = std::clamp(dmxval, 0, 255);
-
 
 		// if (tube->dmxValue > 0 && tube->dmxChannel == 17) {
 		// 	qDebug() << scene->name() << "channel:" << tube->dmxChannel << "dmx:" << tube->dmxValue << "universe:" << tube->dmxUniverse;

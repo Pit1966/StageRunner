@@ -562,6 +562,15 @@ bool AppCentral::isVideoWidgetVisible(QWidget **videoWid) const
 	return unitAudio->isVideoWidgetVisible(videoWid);
 }
 
+DmxChannel *AppCentral::globalDmxChannel(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		return unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+	}
+
+	return nullptr;
+}
+
 DmxChannelType AppCentral::globalDmxType(quint32 universe, qint32 dmxChan)
 {
 	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
@@ -571,6 +580,28 @@ DmxChannelType AppCentral::globalDmxType(quint32 universe, qint32 dmxChan)
 	}
 
 	return DmxChannelType::DMX_GENERIC;
+}
+
+qint32 AppCentral::globalScalerNumerator(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return tube->scalerNumerator;
+	}
+
+	return 1;
+}
+
+qint32 AppCentral::globalScalerDenominator(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return tube->scalerDenominator;
+	}
+
+	return 1;
 }
 
 QSize AppCentral::secondScreenSize() const

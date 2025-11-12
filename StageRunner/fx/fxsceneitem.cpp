@@ -214,24 +214,27 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		DmxChannelType dmxtype = tube->dmxChannelType();
-
 		if (tube->isPairedSub)
 			continue;
+
+		DmxChannelType dmxtype = tube->dmxChannelType();
+		qint32 dmxUniv = tube->dmxUniverse;
+		qint32 dmxChan = tube->dmxChannel;
+		DmxChannel *gTube = lightctrl->globalDmxChannel(dmxUniv, dmxChan);
 
 		if (t+1 < tubeCount()) {
 			// detect paired Channels (eg. for 16 bit access)
 			// We assume that the XXXFine channel is the next channel
 			switch (dmxtype) {
-			case DmxChannelType::DMX_POSITION_PAN:
-				if (tubes.at(t+1)->dmxChannelType() == DmxChannelType::DMX_POSITION_PAN_FINE) {
+			case DMX_POSITION_PAN:
+				if (tubes.at(t+1)->dmxChannelType() == DMX_POSITION_PAN_FINE) {
 					tube->setPairedWith(tubes.at(t+1));
 				} else {
 					tube->clrPairedWith();
 				}
 				break;
-			case DmxChannelType::DMX_POSITION_TILT:
-				if (tubes.at(t+1)->dmxChannelType() == DmxChannelType::DMX_POSITION_TILT_FINE) {
+			case DMX_POSITION_TILT:
+				if (tubes.at(t+1)->dmxChannelType() == DMX_POSITION_TILT_FINE) {
 					tube->setPairedWith(tubes.at(t+1));
 				} else {
 					tube->clrPairedWith();
@@ -250,14 +253,22 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
 				scanscene = lightctrl->hiddenScannerScenes[tube->dmxUniverse];
 				DmxChannel *scantube = scanscene->tube(tube->dmxChannel);
+
 				qint32 movetime = moveTime();
 				// copy channel parameter to hidden scanner scene
 				scantube->targetFullValue = tube->targetFullValue;
 				scantube->targetValue = tube->targetValue;
-				scantube->dmxType = tube->dmxType;
-				scantube->scalerNumerator = tube->scalerNumerator;
-				scantube->scalerDenominator = tube->scalerDenominator;
 
+				scantube->dmxType = dmxtype;
+				if (tube->scalerNumerator > 1 || tube->scalerDenominator > 1 || gTube == nullptr) {
+					// set local scale values
+					scantube->scalerNumerator = tube->scalerNumerator;
+					scantube->scalerDenominator = tube->scalerDenominator;
+				} else {
+					// set global scale values
+					scantube->scalerNumerator = gTube->scalerNumerator;
+					scantube->scalerDenominator = gTube->scalerDenominator;
+				}
 
 				qint32 target_value = tube->targetValue;
 				if (tube->isPairedMain) {
@@ -267,14 +278,27 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 					DmxChannel *scanpaired = scanscene->tube(tube->dmxChannel + 1);
 					scantube->setPairedWith(scanpaired);    ///< @todo needed? haben wir oben schon gemacht
 					// now copy channel parameter of the paired channel.
-					scanpaired->targetFullValue = tube->pairedDmxChannel->targetFullValue;
-					scanpaired->targetValue = tube->pairedDmxChannel->targetValue;
-					scanpaired->dmxType = tube->pairedDmxChannel->dmxType;
-					scanpaired->scalerNumerator = tube->pairedDmxChannel->scalerNumerator;
-					scanpaired->scalerDenominator = tube->pairedDmxChannel->scalerDenominator;
+					DmxChannel *tubePaired = tube->pairedDmxChannel;
+					scanpaired->targetFullValue = tubePaired->targetFullValue;
+					scanpaired->targetValue = tubePaired->targetValue;
 
-					target_value *= tube->pairedDmxChannel->targetFullValue;
-					target_value += tube->pairedDmxChannel->targetValue;
+					// find global tube for pairedDmxChannel for global defined attributes
+					DmxChannel *gpTube = lightctrl->globalDmxChannel(tubePaired->dmxUniverse, tubePaired->dmxChannel);
+					if (tubePaired->dmxType > DMX_GENERIC || gpTube == nullptr) {
+						scanpaired->dmxType = tubePaired->dmxType;
+					} else {
+						scanpaired->dmxType = gpTube->dmxType;
+					}
+					if (tubePaired->scalerNumerator > 1 || tubePaired->scalerDenominator > 1 || gpTube == nullptr) {
+						scanpaired->scalerNumerator = tubePaired->scalerNumerator;
+						scanpaired->scalerDenominator = tubePaired->scalerDenominator;
+					} else {
+						scanpaired->scalerNumerator = gpTube->scalerNumerator;
+						scanpaired->scalerDenominator = gpTube->scalerDenominator;
+					}
+
+					target_value *= tubePaired->targetFullValue;
+					target_value += tubePaired->targetValue;
 				}
 				else {
 					scantube->clrPairedWith();

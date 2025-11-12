@@ -118,12 +118,15 @@ void FxSeqItem::init()
 	addExistingVar(seqList->myLoopTimes,"LoopTimes");
 	addExistingVar(seqList->myRandomizedFlag,"RandomizedList");
 	addExistingVar(seqList->myAutoProceedFlag,"AutoProceedList");
-	addExistingVar(seqList->showColumnIdFlag,"FxListShowId");
-	addExistingVar(seqList->showColumnPredelayFlag,"FxListShowPreDelay");
 	addExistingVar(seqList->showColumnFadeinFlag,"FxListShowFadeInTime");
-	addExistingVar(seqList->showColumnHoldFlag,"FxListShowHoldTime");
 	addExistingVar(seqList->showColumnFadeoutFlag,"FxListShowFadeOutTime");
+	addExistingVar(seqList->showColumnIdFlag,"FxListShowId");
+	addExistingVar(seqList->showColumnHoldFlag,"FxListShowHoldTime");
+	addExistingVar(seqList->showColumnPredelayFlag,"FxListShowPreDelay");
 	addExistingVar(seqList->showColumnPostdelayFlag,"FxListShowPostDelay");
+	addExistingVar(seqList->showColumnKeyFlag,"FxListShowKey");
+	addExistingVar(seqList->showColumnMoveFlag,"FxListShowMoveDelay");
+
 
 	addExistingVarSetList(seqList->nativeFxList(),"Sequence",PrefVarCore::FX_ITEM);
 }
