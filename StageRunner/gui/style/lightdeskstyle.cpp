@@ -38,6 +38,9 @@ LightDeskStyle::LightDeskStyle(const QString &basekey)
 	pixButtonL = QPixmap(":/gfx/customwidget/desk_knob_left.png");
 	pixButtonM = QPixmap(":/gfx/customwidget/desk_knob_mid.png");
 	pixButtonR = QPixmap(":/gfx/customwidget/desk_knob_right.png");
+	pixButtonL_red = QPixmap(":/gfx/customwidget/desk_knob_left_red.png");
+	pixButtonM_red = QPixmap(":/gfx/customwidget/desk_knob_mid_red.png");
+	pixButtonR_red = QPixmap(":/gfx/customwidget/desk_knob_right_red.png");
 
 	setObjectName("lightdesk");
 }
@@ -211,9 +214,16 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 			QRect area_l = QRect(area.topLeft() + QPoint(1,1),QSize(30,area.height()-2));
 			QRect area_r = QRect(area.topRight()- QPoint(30,-1),QSize(30,area.height()-2));
 
-			painter->drawPixmap(area_m,pixButtonM);
-			painter->drawPixmap(area_l,pixButtonL);
-			painter->drawPixmap(area_r,pixButtonR);
+			if (but && but->isChecked()) {
+				painter->drawPixmap(area_m,pixButtonM_red);
+				painter->drawPixmap(area_l,pixButtonL_red);
+				painter->drawPixmap(area_r,pixButtonR_red);
+			}
+			else {
+				painter->drawPixmap(area_m,pixButtonM);
+				painter->drawPixmap(area_l,pixButtonL);
+				painter->drawPixmap(area_r,pixButtonR);
+			}
 
 			painter->restore();
 		}

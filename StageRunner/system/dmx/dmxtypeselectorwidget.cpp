@@ -2,6 +2,8 @@
 #include "ui_dmxtypeselectorwidget.h"
 
 #include "dmx/dmxhelp.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/colorsettings.h"
 
 #include <QLabel>
 #include <QPushButton>
@@ -9,7 +11,8 @@
 DmxTypeSelectorWidget::DmxTypeSelectorWidget(DmxChannelType type, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::DmxTypeSelectorWidget),
-	m_type(type)
+	m_type(type),
+	m_iType(type)
 {
 	ui->setupUi(this);
 	guiInitTypes();
@@ -26,17 +29,24 @@ void DmxTypeSelectorWidget::setScaler(int num, int denom)
 {
 	ui->numeratorEdit->setText(QString::number(num));
 	ui->denominatorEdit->setText(QString::number(denom));
+	m_iNum = num;
+	m_iDen = denom;
 }
 
 bool DmxTypeSelectorWidget::getScaler(int &num, int &denom)
 {
+	bool modified = m_type != m_iType;
+
 	int n = ui->numeratorEdit->text().toInt();
 	int d = ui->denominatorEdit->text().toInt();
-	if (n == 0 || d == 0)
-		return false;
-	num = n;
-	denom = d;
-	return true;
+	if (n != 0 && d != 0) {
+		num = n;
+		denom = d;
+		if (n != m_iNum || d != m_iDen)
+			modified = true;
+	}
+
+	return modified;
 }
 
 void DmxTypeSelectorWidget::guiInitTypes()
@@ -52,8 +62,9 @@ void DmxTypeSelectorWidget::guiInitTypes()
 		QPushButton *but = new QPushButton(typeShort);
 		but->setProperty("type", i);
 		if (i == m_type) {
-			lab->setStyleSheet("font-weight: bold");
-			but->setStyleSheet("font-weight: bold");
+			but->setStyleSheet("font-weight: bold; color: blue");
+			lab->setStyleSheet(QString("font-weight: bold; color: %1").arg(AppCentral::ref().colorSettings->pKeyColumn));
+			but->setFocus();
 		}
 		connect(but, SIGNAL(clicked()), this, SLOT(onButtonClicked()));
 		ui->buttonLayout->addWidget(lab, row, 0);

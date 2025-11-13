@@ -15,6 +15,9 @@ class DmxTypeSelectorWidget : public QDialog
 private:
 	Ui::DmxTypeSelectorWidget *ui;
 	DmxChannelType m_type;
+	DmxChannelType m_iType;
+	int m_iNum = 0;		// modification detection
+	int m_iDen = 0;		// modification detection
 
 public:
 	explicit DmxTypeSelectorWidget(DmxChannelType type = DmxChannelType::DMX_GENERIC, QWidget *parent = nullptr);

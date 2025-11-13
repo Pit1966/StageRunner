@@ -80,8 +80,9 @@ public:
 private:
 	static AppCentral *myinstance;
 	QList<FxList*>registered_fx_lists;
-	bool edit_mode_f						= false;
-	bool input_assign_mode_f				= false;
+	bool m_isEditMode						= false;
+	bool m_isFadeToMode						= false;
+	bool m_isInputAssignMode				= false;
 	FxItem * input_assign_target_fxitem		= nullptr;
 	FxItem * last_global_selected_fxitem	= nullptr;
 
@@ -149,9 +150,8 @@ public:
 
 	int registerFxList(FxList *fxlist);
 	FxList *getRegisteredFxList(int id);
-	inline bool isEditMode() const {return edit_mode_f;}
 	bool isExperimentalAudio() const;
-	inline bool isInputAssignMode() const {return input_assign_mode_f;}
+	inline bool isInputAssignMode() const {return m_isInputAssignMode;}
 	void setInputAssignMode(bool state);
 	void setInputAssignMode(FxItem *fx);
 
@@ -169,6 +169,10 @@ public:
 	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = nullptr, int row = -1);
 	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
 	FxItem *addDefaultSceneToFxList(FxList *fxlist);
+
+	// Modes
+	inline bool isFadeToMode() const {return m_isFadeToMode;}
+	inline bool isEditMode() const {return m_isEditMode;}
 
 	// Module error handling
 	void setModuleError(MODUL_ERROR e, bool state = true);
@@ -219,6 +223,7 @@ public slots:
 	void moveToFollowerFx(int listID);
 	void moveToForeRunnerFx(int listID);
 	void setEditMode(bool state);
+	void setFadeToMode(bool state);
 	void setFFTAudioChannelMask(qint32 mask);
 
 	void testSetDmxChannel(int val, int channel);
@@ -236,6 +241,7 @@ private slots:
 signals:
 	void audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg msg);
 	void editModeChanged(bool state);
+	void fadeSceneToModeChanged(bool state);
 	void inputAssignModeChanged(bool state);
 	void inputAssigned(FxItem *);
 

@@ -89,7 +89,6 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 
 	init();
 
-
 	// DocWidgets defauls
 	setTabPosition(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea, QTabWidget::North);
 	setTabPosition(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea, QTabWidget::West);
@@ -124,6 +123,7 @@ StageRunnerMainWin::StageRunnerMainWin(AppCentral *myapp) :
 	}
 
 	fxListWidget->setFxList(appCentral->project->mainFxList());
+	fxListWidget->setFadeToButtonVisible(true);
 
 	debugLevelSpin->setValue(debug);
 
@@ -220,6 +220,7 @@ void StageRunnerMainWin::initConnects()
 	connect(fxListWidget,SIGNAL(fxTypeColumnDoubleClicked(FxItem*)),this,SLOT(openFxItemPanel(FxItem*)));
 	connect(fxItemEditor,SIGNAL(modified(FxItem*)),fxListWidget,SLOT(refreshFxItem(FxItem*)));
 	connect(fxListWidget,SIGNAL(editableChanged(bool)),appCentral,SLOT(setEditMode(bool)));
+	connect(fxListWidget,SIGNAL(fadeToModeChanged(bool)),appCentral,SLOT(setFadeToMode(bool)));
 
 	// Audio Control Panel <-> Audio Control
 	connect(appCentral->unitAudio,SIGNAL(audioCtrlMsgEmitted(AUDIO::AudioCtrlMsg)),audioCtrlGroup,SLOT(audioCtrlReceiver(AUDIO::AudioCtrlMsg)));

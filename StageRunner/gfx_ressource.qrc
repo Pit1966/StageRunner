@@ -84,5 +84,8 @@
         <file>gfx/icons/bulb.png</file>
         <file>gfx/icons/usbstick.png</file>
         <file alias="warning">gfx/icons/gainknob.png</file>
+        <file>gfx/customwidget/desk_knob_left_red.png</file>
+        <file>gfx/customwidget/desk_knob_mid_red.png</file>
+        <file>gfx/customwidget/desk_knob_right_red.png</file>
     </qresource>
 </RCC>

@@ -225,9 +225,18 @@ bool AppCentral::isExperimentalAudio() const
 
 void AppCentral::setEditMode(bool state)
 {
-	if (state != edit_mode_f) {
-		edit_mode_f = state;
+	if (state != m_isEditMode) {
+		m_isEditMode = state;
 		emit editModeChanged(state);
+	}
+}
+
+void AppCentral::setFadeToMode(bool state)
+{
+	if (state != m_isFadeToMode) {
+		m_isFadeToMode = state;
+		emit fadeSceneToModeChanged(state);
+		qDebug() << "set fadeto mode" << state;
 	}
 }
 
@@ -242,8 +251,8 @@ void AppCentral::setFFTAudioChannelMask(qint32 mask)
 
 void AppCentral::setInputAssignMode(bool state)
 {
-	if (state != input_assign_mode_f) {
-		input_assign_mode_f = state;
+	if (state != m_isInputAssignMode) {
+		m_isInputAssignMode = state;
 		emit inputAssignModeChanged(state);
 	}
 }

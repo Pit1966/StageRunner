@@ -556,9 +556,15 @@ bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
 	wid.setScaler(tube->scalerNumerator, tube->scalerDenominator);
 	wid.show();
 	if (wid.exec()) {
-		tube->dmxType = wid.selectedType();
+		if (tube->dmxType != wid.selectedType()) {
+			tube->dmxType = wid.selectedType();
+		}
 		mixer->setLocalDmxType(wid.selectedType());
-		return wid.getScaler(tube->scalerNumerator, tube->scalerDenominator);
+		if (wid.getScaler(tube->scalerNumerator, tube->scalerDenominator)) {
+			emit modified();
+			m_originFxScene->setModified(true);
+			return true;
+		}
 	}
 
 	return false;

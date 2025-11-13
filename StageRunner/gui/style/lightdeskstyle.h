@@ -46,6 +46,9 @@ protected:
 	QPixmap pixButtonL;
 	QPixmap pixButtonM;
 	QPixmap pixButtonR;
+	QPixmap pixButtonL_red;
+	QPixmap pixButtonM_red;
+	QPixmap pixButtonR_red;
 
 	mutable QPalette m_standardPalette;
 	mutable bool m_isPaletteInitialized;

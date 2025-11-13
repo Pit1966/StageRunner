@@ -68,6 +68,7 @@ public:
 	void resizeTableElements();
 	inline FxList * fxList() const {return myfxlist;}
 	void setAutoProceedSequence(bool state);
+	void setFadeToButtonVisible(bool state);
 	void setLoop(int loops);
 	inline bool isEditable() {return is_editable_f;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
@@ -141,6 +142,7 @@ private slots:
 	void on_editButton_clicked(bool checked);
 
 	void on_showRowNumCheck_clicked(bool checked);
+	void on_fadeToButton_clicked(bool checked);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);
@@ -151,6 +153,7 @@ signals:
 	void dropEventReceived(QString text, int row);
 	void listModified();
 	void editableChanged(bool state);
+	void fadeToModeChanged(bool state);
 };
 
 #endif // FXLISTWIDGET_H

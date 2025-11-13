@@ -65,6 +65,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 
 	setupUi(this);
 	setStandAlone(false);
+	fadeToButton->setVisible(false);
 
 	fxTable->setDragEnabled(true);
 	fxTable->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -207,6 +208,11 @@ void FxListWidget::setAutoProceedSequence(bool state)
 		autoProceedCheck->setChecked(state);
 		myfxlist->setAutoProceedSequence(state);
 	}
+}
+
+void FxListWidget::setFadeToButtonVisible(bool state)
+{
+	fadeToButton->setVisible(state);
 }
 
 void FxListWidget::setLoop(int loops)
@@ -1735,5 +1741,10 @@ void FxListWidget::on_editButton_clicked(bool checked)
 void FxListWidget::on_showRowNumCheck_clicked(bool checked)
 {
 	fxTable->verticalHeader()->setVisible(checked);
+}
+
+void FxListWidget::on_fadeToButton_clicked(bool checked)
+{
+	emit fadeToModeChanged(checked);
 }
 
