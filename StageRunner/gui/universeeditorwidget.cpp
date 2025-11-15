@@ -1,5 +1,4 @@
 #include "universeeditorwidget.h"
-#include "config.h"
 #include "configrev.h"
 #include "log.h"
 #include "system/dmx/fixture.h"
@@ -15,9 +14,10 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QDebug>
-
+#include <QMessageBox>
 
 #define COL_DEVICE 0
 #define COL_DMX 1
@@ -41,35 +41,61 @@ DMXTableWidgetItem::DMXTableWidgetItem(int dmxChan, const QString &text, int typ
 
 UniverseEditorWidget::UniverseEditorWidget(QWidget *parent)
 	: QWidget(parent)
-	, m_fixtureList(new SR_FixtureList())
 {
 	setupUi(this);
+
+	for (int i=0; i<MAX_DMX_UNIVERSE; i++) {
+		m_universeLayouts[i] = new SR_FixtureList();
+	}
+
+	m_fixtureList = m_universeLayouts[0];
 
 	universeTable->setRowCount(512);
 	universeTable->setSelectionBehavior(QTableWidget::SelectRows);
 	copyFixturesToGui(m_fixtureList);
 
 	QSettings set(QSETFORMAT,APPNAME);
-	set.beginGroup("UserSettings");
+	set.beginGroup("UniverseEditor");
 	m_lastFixturePath = set.value("LastFixturePath").toString();
-
 }
 
 UniverseEditorWidget::~UniverseEditorWidget()
 {
-	delete m_fixtureList;
+	for (int i=0; i<MAX_DMX_UNIVERSE; i++) {
+		delete m_universeLayouts[i];
+	}
 }
 
-bool UniverseEditorWidget::saveToFilesystem(const QString &path)
+bool UniverseEditorWidget::saveToFilesystem(const QString &path, bool saveCurrent)
 {
 	bool ok = false;
 
-	QJsonObject json = m_fixtureList->toJson();
-	QByteArray jsonstr = QJsonDocument(json).toJson(QJsonDocument::Indented);
-	QFile file(path);
-	if (file.open(QFile::WriteOnly)) {
-		file.write(jsonstr);
-		ok = true;
+	if (saveCurrent) {
+		QJsonObject json = m_fixtureList->toJson();
+		json["universeNum"] = m_universe + 1;
+		QByteArray jsonstr = QJsonDocument(json).toJson(QJsonDocument::Indented);
+		QFile file(path);
+		if (file.open(QFile::WriteOnly)) {
+			file.write(jsonstr);
+			ok = true;
+		}
+	}
+	else {
+		QJsonObject jsonAll;
+		QJsonArray universes;
+		for (int i=0; i<MAX_DMX_UNIVERSE; i++) {
+			QJsonObject jsonOneUniv = m_universeLayouts[i]->toJson();
+			universes.append(jsonOneUniv);
+		}
+		jsonAll["universeLayouts"] = universes;
+		jsonAll["universeCount"] = MAX_DMX_UNIVERSE;
+
+		QByteArray jsonstr = QJsonDocument(jsonAll).toJson(QJsonDocument::Indented);
+		QFile file(path);
+		if (file.open(QFile::WriteOnly)) {
+			file.write(jsonstr);
+			ok = true;
+		}
 	}
 
 	return ok;
@@ -85,7 +111,24 @@ bool UniverseEditorWidget::loadFromFilesystem(const QString &path)
 
 	QJsonParseError error;
 	QJsonObject json = QJsonDocument::fromJson(dat, &error).object();
-	m_fixtureList->setFromJson(json);
+	if (error.error)
+		return false;
+
+	if (json.contains("universeCount")) { // multi universe file
+		int count = json["universeCount"].toInt();
+		if (count > MAX_DMX_UNIVERSE)
+			count = MAX_DMX_UNIVERSE;
+		// get universe list
+		QJsonArray universes = json["universeLayouts"].toArray();
+		for (int i=0; i<count; i++) {
+			QJsonObject jsonOneUniv = universes.at(i).toObject();
+			m_universeLayouts[i]->setFromJson(jsonOneUniv);
+		}
+	}
+	else { // single universe file
+		// load to current active fixture list
+		m_fixtureList->setFromJson(json);
+	}
 
 	return true;
 }
@@ -100,14 +143,14 @@ QString UniverseEditorWidget::defaultFilepath()
 	return defaultpath;
 }
 
-FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fixList)
+FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fixList, uint universe)
 {
 	int tubes = fixList->lastUsedDmxAddr();
 	if (tubes == 0)
 		return nullptr;
 
 	FxSceneItem *sc = new FxSceneItem();
-	sc->createDefaultTubes(tubes);
+	sc->createDefaultTubes(tubes, universe);
 
 	// Loop over fixtures and add them to scene
 	int dmx = 0;
@@ -129,7 +172,6 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 			dmx++;
 		}
 	}
-
 
 	return sc;
 }
@@ -181,7 +223,7 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 
 	// universeTable->resizeColumnsToContents();
 	universeTable->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-	m_currentTargetDmxAddr = 0;
+	m_currentTargetDmxAddr[m_universe] = 0;
 
 	return true;
 }
@@ -213,17 +255,17 @@ void UniverseEditorWidget::on_addDeviceButton_clicked()
 	if (deviceInfoWidget->isValid()) {
 		SR_Fixture *newfix = new SR_Fixture(*deviceInfoWidget->device());
 		newfix->setCurrentMode(deviceInfoWidget->modeNumber());
-		m_fixtureList->addFixture(newfix, m_currentTargetDmxAddr);
+		m_fixtureList->addFixture(newfix, m_currentTargetDmxAddr[m_universe]);
 		copyFixturesToGui(m_fixtureList);
 	}
 }
 
 void UniverseEditorWidget::on_removeDeviceButton_clicked()
 {
-	if (m_currentTargetDmxAddr <= 0)
+	if (m_currentTargetDmxAddr[m_universe] <= 0)
 		return;
 
-	m_fixtureList->removeFixtureAt(m_currentTargetDmxAddr);
+	m_fixtureList->removeFixtureAt(m_currentTargetDmxAddr[m_universe]);
 	copyFixturesToGui(m_fixtureList);
 }
 
@@ -245,13 +287,12 @@ void UniverseEditorWidget::on_pushButton_loadLayout_clicked()
 
 void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
 {
-	FxSceneItem *sc = createSceneFromFixtureList(m_fixtureList);
+	FxSceneItem *sc = createSceneFromFixtureList(m_fixtureList, m_universe);
 	if (!sc) return;
 
-	/// @todo we will have at least 4 universes with subID 1-4
-	sc->setName("Default_Universe_0");
+	sc->setName(QString("Default_Universe_%1").arg(m_universe));
 	sc->generateNewID(11000);
-	sc->setSubId(1);
+	sc->setSubId(m_universe + 1);
 
 	FxList *templateList = AppCentral::ref().templateFxList->fxList();
 
@@ -266,7 +307,7 @@ void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
 void UniverseEditorWidget::on_universeTable_cellClicked(int row, int column)
 {
 	qDebug() << Q_FUNC_INFO << row << column;
-	m_currentTargetDmxAddr = row +1;
+	m_currentTargetDmxAddr[m_universe] = row +1;
 }
 
 void UniverseEditorWidget::on_universeTable_cellChanged(int row, int column)
@@ -281,5 +322,63 @@ void UniverseEditorWidget::on_universeTable_currentCellChanged(int currentRow, i
 	Q_UNUSED(previousColumn)
 
 	qDebug() << Q_FUNC_INFO << currentRow << currentColumn;
+}
+
+
+void UniverseEditorWidget::on_universeSpin_valueChanged(int arg1)
+{
+	int univ = arg1-1;
+	if (m_universe != univ) {
+		m_universe = univ;
+		m_fixtureList = m_universeLayouts[univ];
+		copyFixturesToGui(m_fixtureList);
+	}
+}
+
+void UniverseEditorWidget::on_saveAsButton_clicked()
+{
+	QString currentDir = QDir::homePath();
+
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("UniverseEditor");
+	if (set.contains("LastUniverseSavePath"))
+		currentDir = set.value("LastUniverseSavePath").toString();
+
+	QString filepath = QFileDialog::getSaveFileName(this, tr("Save as ..."), currentDir);
+	if (filepath.isEmpty())
+		return;
+
+	if (!filepath.endsWith(".srdmx", Qt::CaseInsensitive))
+		filepath.append(".srdmx");
+
+	if (saveToFilesystem(filepath, true)) {
+		QMessageBox::information(this, tr("Info"), tr("Layout of universe %1\nsuccessfully saved!").arg(m_universe + 1));
+		set.setValue("LastUniverseSavePath", filepath);;
+	}
+}
+
+
+void UniverseEditorWidget::on_loadButton_clicked()
+{
+	QString currentDir = QDir::homePath();
+
+	QSettings set(QSETFORMAT,APPNAME);
+	set.beginGroup("UniverseEditor");
+	if (set.contains("LastUniverseSavePath"))
+		currentDir = set.value("LastUniverseSavePath").toString();
+
+	if (set.contains("LastUniverseLoadPath"))
+		currentDir = set.value("LastUniverseLoadPath").toString();
+
+	QString filepath = QFileDialog::getOpenFileName(this, "Load universe to current", currentDir);
+	if (filepath.isEmpty())
+		return;
+
+	if (!loadFromFilesystem(filepath)) {
+		QMessageBox::critical(this, tr("System error"), tr("Could not load json universe config from %1").arg(filepath));
+	}
+	else {
+		copyFixturesToGui(m_fixtureList);
+	}
 }
 
