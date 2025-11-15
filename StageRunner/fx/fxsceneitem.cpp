@@ -220,6 +220,8 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 		DmxChannel *tube = tubes.at(t);
 		if (tube->isPairedSub)
 			continue;
+		if (tube->deskVisibleFlag == false)
+			continue;
 
 		DmxChannelType dmxtype = tube->dmxChannelType();
 		qint32 dmxUniv = tube->dmxUniverse;

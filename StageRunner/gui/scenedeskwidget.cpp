@@ -186,7 +186,10 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 	}
 
 	// Set additional information widgets;
-	sceneNameEdit->setText(m_originFxScene->name());
+	QString name = m_originFxScene->name();
+	if (m_originFxScene->subId() > 0)
+		name += QString(" SubID %1").arg(m_originFxScene->subId());
+	sceneNameEdit->setText(name);
 	faderGroup->setTitle(m_originFxScene->name());
 	hookedUniverseSpin->setValue(m_originFxScene->hookedUniverse()+1);
 	hookedChannelSpin->setValue(m_originFxScene->hookedChannel()+1);
