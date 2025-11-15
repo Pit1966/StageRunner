@@ -111,7 +111,7 @@ public:
 	void cloneFrom(const VarSet &other);
 
 	bool checkModified();
-	void setModified(bool state);
+	void setModified(bool state = true, bool all = false);
 	bool isModified() const {return modified_f;}
 
 	inline PrefVarCore::VarClass classType() const {return myclass;}

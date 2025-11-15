@@ -44,7 +44,7 @@ public:
 	 * This is the internal channel number.
 	 * Channels are called tubes and they do not automatically respond to a dmx channel (but can)
 	 */
-	qint32 tube;
+	qint32 tubeId;
 	/**
 	 * Type or Function this channel is used for
 	 */

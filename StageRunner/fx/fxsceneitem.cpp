@@ -134,7 +134,7 @@ void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 
 	for (int t=0; t<tubecount; t++) {
 		DmxChannel *dmx = new DmxChannel;
-		dmx->tube = t;
+		dmx->tubeId = t;
 		dmx->dmxUniverse = universe;
 		dmx->dmxChannel = t;
 		dmx->dmxType = DMX_GENERIC;
@@ -144,18 +144,23 @@ void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 
 void FxSceneItem::setTubeCount(int tubecount)
 {
+	if (tubes.size() == tubecount)
+		return;
+
 	while (tubes.size() > tubecount) {
 		delete tubes.takeAt(tubes.size()-1);
 	}
 
 	while (tubes.size() < tubecount) {
 		DmxChannel *dmx = new DmxChannel;
-		dmx->tube = tubes.size();
+		dmx->tubeId = tubes.size();
 		dmx->dmxUniverse = 0;
 		dmx->dmxChannel = tubes.size();
 		dmx->dmxType = DMX_GENERIC;
 		tubes.append(dmx);
 	}
+
+	setModified();
 }
 
 /**
@@ -590,21 +595,79 @@ bool FxSceneItem::updateSceneFromOlderProjectVersion(int oldVer)
 	return true;
 }
 
-DmxChannel *FxSceneItem::tube(int id) const
+bool FxSceneItem::isEqual(const FxSceneItem *o) const
 {
-	if (id < 0 || id >= tubes.size())
-		return nullptr;
+	if (tubes.size() != o->tubes.size())
+		return false;
 
-	return tubes.at(id);
-}
-
-bool FxSceneItem::removeTube(int id)
-{
-	if (id < 0 || id >= tubes.size()) return false;
-
-	DmxChannel *tube = tubes.takeAt(id);
-	delete tube;
+	for (int i=0; i<tubes.size(); i++) {
+		if (tubes.at(i)->targetValue != o->tubes.at(i)->targetValue)
+			return false;
+		if (tubes.at(i)->dmxUniverse != o->tubes.at(i)->dmxUniverse)
+			return false;
+		if (tubes.at(i)->dmxChannel != o->tubes.at(i)->dmxChannel)
+			return false;
+		if (tubes.at(i)->dmxType != o->tubes.at(i)->dmxType)
+			return false;
+		if (tubes.at(i)->labelText != o->tubes.at(i)->labelText)
+			return false;
+	}
 
 	return true;
+}
+
+DmxChannel *FxSceneItem::tube(int idx) const
+{
+	if (idx < 0 || idx >= tubes.size())
+		return nullptr;
+
+	return tubes.at(idx);
+}
+
+DmxChannel *FxSceneItem::findTube(int tubeId) const
+{
+	for (int i=0; i<tubes.size(); i++) {
+		if (tubes.at(i)->tubeId == tubeId)
+			return tubes.at(i);
+	}
+
+	return nullptr;
+}
+
+DmxChannel *FxSceneItem::findTube(int univ, int dmxchan) const
+{
+	for (int t=0; t<tubes.size(); t++) {
+		DmxChannel *dmx = tubes.at(t);
+		if (dmx->dmxChannel == dmxchan && dmx->dmxUniverse == univ) {
+			return dmx;
+		}
+	}
+	return nullptr;
+}
+
+bool FxSceneItem::removeTubeById(int tubeId)
+{
+	for (int i=0; i<tubes.size(); i++) {
+		if (tubes.at(i)->tubeId == tubeId) {
+			DmxChannel *tube = tubes.takeAt(i);
+			delete tube;
+			setModified();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool FxSceneItem::removeTube(DmxChannel *tube)
+{
+	for (int i=0; i<tubes.size(); i++) {
+		if (tubes.at(i) == tube) {
+			DmxChannel *tube = tubes.takeAt(i);
+			delete tube;
+			setModified();
+			return true;
+		}
+	}
+	return false;
 }
 

@@ -56,8 +56,8 @@ public:
 	explicit MixerGroup(QWidget *parent = 0);
 	void setMixerCount(int number);
 	void clear();
-	MixerChannel * appendMixer();
-	bool removeMixer(MixerChannel *mixer, bool renumberIds = false);
+	MixerChannel * appendMixer(int tubeId);
+	bool removeMixer(MixerChannel *mixer);
 	void setIdsToMixerListIndex();
 	void setRange(int min, int max);
 	void setDefaultMax(int max);
@@ -67,6 +67,8 @@ public:
 	void setRangeSelectEnabled(bool state);
 	MixerChannel *findMixerAtPos(QPoint pos);
 	MixerChannel *getMixerById(int id);
+	int getNewId() const;
+	bool deleteMixerById(int id);
 	bool selectMixer(MixerChannel *mixer, int id, bool state);
 	bool selectMixerRange(MixerChannel *fromMixer, MixerChannel *toMixer, bool state);
 	QList<MixerChannel*> & selectedMixer() {return selected_mixer;}

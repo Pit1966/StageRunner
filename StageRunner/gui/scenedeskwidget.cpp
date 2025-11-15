@@ -36,6 +36,7 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QInputDialog>
+#include <QMessageBox>
 
 QList<SceneDeskWidget*>SceneDeskWidget::m_sceneDeskList;
 
@@ -108,7 +109,6 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 
 	for (int t=0; t<scene->tubes.size(); t++) {
 		DmxChannel *tube = scene->tubes.at(t);
-		tube->tempTubeListIdx = t;
 		if (tube->deskPositionIndex >= 0) {
 			if (tube->deskPositionIndex >= sort.size()) {
 				qWarning("%s position %d not available for tube %d",Q_FUNC_INFO, tube->deskPositionIndex, t);
@@ -150,12 +150,13 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
-			// Create a new Mixer an fill in relevant data
-			MixerChannel *fader = faderAreaWidget->appendMixer();
-			// We will need the Id to determine which DmxChannel an incoming fader signal belongs to
-			// We have to keep the Id of the mixer channel in sync with Tubes list index!
-			fader->setId(dmx->tempTubeListIdx);
-			fader->setDmxId(dmx->dmxUniverse,dmx->dmxChannel, dmx);
+			// Create a new Mixer an fill in relevant data. The tubeId is the identifier
+			MixerChannel *fader = faderAreaWidget->appendMixer(dmx->tubeId);
+			if (!fader) {
+				QMessageBox::critical(this, "error", QString("Could not add mixer channel for id: %1").arg(dmx->tubeId));
+				continue;
+			}
+			fader->setDmxId(dmx->dmxUniverse, dmx->dmxChannel, dmx);
 			fader->setRange(0,dmx->targetFullValue);
 			if (dmx->targetFullValue > faderAreaWidget->defaultMax())
 				faderAreaWidget->setDefaultMax(dmx->targetFullValue);
@@ -220,13 +221,9 @@ void SceneDeskWidget::setShiftKey(bool state)
 
 DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
 {
-	for (int t=0; t<m_originFxScene->tubeCount(); t++) {
-		DmxChannel *dmx = m_originFxScene->tubes.at(t);
-		if (dmx->dmxChannel == mixer->dmxChannel() && dmx->dmxUniverse == mixer->dmxUniverse()) {
-			return dmx;
-		}
-	}
-	return 0;
+	if (!m_originFxScene) return nullptr;
+
+	return m_originFxScene->findTube(mixer->dmxUniverse(), mixer->dmxChannel());
 }
 
 /**
@@ -244,7 +241,7 @@ DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **mixerChanne
 		*mixerChannel = mixer;
 	}
 
-	if (!m_originFxScene) return tube;
+	if (!mixer || !m_originFxScene) return tube;
 
 	// Now get tube for MixerChannel Id in scene Tube list
 	if (mixer->id() >= 0 && mixer->id() < m_originFxScene->tubes.size()) {
@@ -259,9 +256,9 @@ void SceneDeskWidget::setTubeSelected(bool state, int id)
 
 	if (state) {
 		if (!m_selectedTubeIds.contains(id)) {
-			if (id >=0 && id < m_originFxScene->tubeCount()) {
+			// only add to list, if tubeId exists in original scene
+			if (m_originFxScene->findTube(id))
 				m_selectedTubeIds.append(id);
-			}
 		}
 		copyTubeSettingsToGui(id);
 	} else {
@@ -313,7 +310,7 @@ void SceneDeskWidget::copyTubeSettingsToGui(int id)
 {
 	if (!FxItem::exists(m_originFxScene)) return;
 
-	DmxChannel *tube = m_originFxScene->tube(id);
+	DmxChannel *tube = m_originFxScene->findTube(id);
 	if (tube) {
 		tubeCommentEdit->setText(tube->labelText);
 	} else {
@@ -341,6 +338,12 @@ void SceneDeskWidget::closeEvent(QCloseEvent *)
 
 		if (m_closeClicked) {
 			m_closeClicked = false;
+
+			// check if scene was modified
+			if (m_backupScene) {
+				if (!m_backupScene->isEqual(m_originFxScene))
+					m_originFxScene->setModified();
+			}
 		}
 		else {
 			// cancelled -> restore original scene
@@ -378,7 +381,10 @@ void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
 		return;
 	}
 
-	DmxChannel *tube = m_originFxScene->tubes.at(id);
+	DmxChannel *tube = m_originFxScene->findTube(id);
+	if (!tube)
+		return;
+
 	if (val > tube->targetFullValue) {
 		val = tube->targetFullValue;
 	}
@@ -444,7 +450,7 @@ void SceneDeskWidget::if_mixerDraged (int fromIdx, int toIdx)
 		for (int t=0; t<m_originFxScene->tubeCount(); t++) {
 			DmxChannel *tube = m_originFxScene->tubes.at(t);
 			if (tube->tempTubeListIdx == mix->id()) {
-				if (tube->tube != pos) {
+				if (tube->tubeId != pos) {
 					tube->deskPositionIndex = pos;
 				} else {
 					tube->deskPositionIndex = -1;
@@ -563,11 +569,8 @@ bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
 			tube->dmxType = wid.selectedType();
 		}
 		mixer->setLocalDmxType(wid.selectedType());
-		if (wid.getScaler(tube->scalerNumerator, tube->scalerDenominator)) {
-			emit modified();
-			m_originFxScene->setModified(true);
+		if (wid.getScaler(tube->scalerNumerator, tube->scalerDenominator))
 			return true;
-		}
 	}
 
 	return false;
@@ -606,11 +609,32 @@ bool SceneDeskWidget::deleteSelectedTubes()
 {
 	if (!m_originFxScene) return false;
 
-	for (int t=m_selectedTubeIds.size()-1; t>=0; t--) {
-		int id = m_selectedTubeIds.at(t);
+	auto ids = m_selectedTubeIds;
+	while (!ids.isEmpty()) {
+		int id = ids.takeFirst();
 		MixerChannel *mix = faderAreaWidget->getMixerById(id);
-		m_originFxScene->removeTube(id);
-		faderAreaWidget->removeMixer(mix);
+		if (mix) {
+			qDebug() << "---> mix id" << id << "dmx" << mix->dmxChannel()+1;
+			DmxChannel *tube1 = getTubeFromMixer(mix);
+			DmxChannel *tube2 = m_originFxScene->findTube(id);
+			if (tube1)
+				qDebug() << "tube1" << tube1->tubeId << tube1->dmxChannel+1;
+			if (tube2)
+				qDebug() << "tube2" << tube2->tubeId << tube2->dmxChannel+1;
+			if (!tube1 || tube1 != tube2) {
+				qWarning() << "Tube mismatch on delete";
+				if (!tube1) {
+					QMessageBox::critical(this, "Error", QString("Could not remove tube with ID %1").arg(id));
+				} else {
+					QMessageBox::critical(this, "Error", QString("Could not remove tube for dmx channel %1").arg(tube1->dmxChannel));
+				}
+				return false;
+			}
+			// delete mixer from widget
+			faderAreaWidget->deleteMixerById(id);
+			// delete channel from scene
+			m_originFxScene->removeTubeById(id);
+		}
 	}
 
 
@@ -663,9 +687,8 @@ int SceneDeskWidget::setUniverseInTubes(int universe)
 		for (int i=0; i<m_originFxScene->tubeCount(); i++) {
 			if (m_originFxScene->tubes.at(i)->dmxUniverse != universe) {
 				m_originFxScene->tubes.at(i)->dmxUniverse = universe;
-				m_originFxScene->setModified(true);
 
-				int id = m_originFxScene->tubes.at(i)->tube;
+				int id = m_originFxScene->tubes.at(i)->tubeId;
 				MixerChannel *mix = faderAreaWidget->getMixerById(id);
 				if (mix)
 					mix->setUniverse(universe);
@@ -714,6 +737,8 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		act->setObjectName("6");
 		act = menu.addAction(tr("Hide selected Channel(s)"));
 		act->setObjectName("1");
+		act = menu.addAction(tr("Delete selected channel(s)"));
+		act->setObjectName("9");
 		act = menu.addAction(tr("Set channel DMX type to default"));
 		act->setObjectName("8");
 	}
@@ -758,7 +783,6 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 			if (ok && tube->labelText != label) {
 				mixer->setLabelText(label);
 				tube->labelText = label;
-				m_originFxScene->setModified(true);
 				emit modified();
 			}
 		}
@@ -785,7 +809,6 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 				mixer->setValue(newTargetValue);
 				mixer->emitCurrentValue();
 				tube->targetValue= newTargetValue;
-				m_originFxScene->setModified(true);
 				emit modified();
 			}
 		}
@@ -807,20 +830,25 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		break;
 
 	case 8:		// set dmx type of selected channels to default
-		auto ids = m_selectedTubeIds;
-		while (!ids.isEmpty()) {
-			MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
-			if (mix) {
-				mix->setLocalDmxType(DMX_GENERIC);
-				DmxChannel *tube = getTubeFromMixer(mix);
-				if (tube) {
-					tube->dmxType = DMX_GENERIC;
-					tube->scalerNumerator = 1;
-					tube->scalerDenominator = 1;
+		{
+			auto ids = m_selectedTubeIds;
+			while (!ids.isEmpty()) {
+				MixerChannel *mix = faderAreaWidget->getMixerById(ids.takeFirst());
+				if (mix) {
+					mix->setLocalDmxType(DMX_GENERIC);
+					DmxChannel *tube = getTubeFromMixer(mix);
+					if (tube) {
+						tube->dmxType = DMX_GENERIC;
+						tube->scalerNumerator = 1;
+						tube->scalerDenominator = 1;
+					}
 				}
 			}
 		}
+		break;
 
+	case 9:
+		deleteSelectedTubes();
 		break;
 	}
 }

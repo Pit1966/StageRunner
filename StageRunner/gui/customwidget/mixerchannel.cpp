@@ -132,7 +132,7 @@ int MixerChannel::refValue()
 void MixerChannel::setSelected(bool state)
 {
 	if (prop_selected_f != state) {
-//		qDebug() << Q_FUNC_INFO << "mixer" << my_id << state;
+		// qDebug() << Q_FUNC_INFO << "mixer" << my_id << state;
 		prop_selected_f = state;
 		update();
 		emit mixerSelected(state,int(my_id));

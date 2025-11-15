@@ -65,7 +65,7 @@ void MixerGroup::setMixerCount(int number)
 	}
 
 	while (mixerlist.size() < number) {
-		appendMixer();
+		appendMixer(getNewId());
 	}
 }
 
@@ -76,10 +76,13 @@ void MixerGroup::clear()
 	}
 }
 
-MixerChannel *MixerGroup::appendMixer()
+MixerChannel *MixerGroup::appendMixer(int tubeId)
 {
+	if (getMixerById(tubeId))
+		return nullptr;
+
 	MixerChannel *mixer = new MixerChannel;
-	mixer->setId(mixerlist.size());
+	mixer->setId(tubeId);
 	mixer->setRange(m_defaultMinValue,m_defaultMaxValue);
 	mixer->setSelectable(true);
 	mixerlist.append(mixer);
@@ -98,19 +101,17 @@ MixerChannel *MixerGroup::appendMixer()
 	return mixer;
 }
 
-bool MixerGroup::removeMixer(MixerChannel *mixer, bool renumberIds)
+bool MixerGroup::removeMixer(MixerChannel *mixer)
 {
 	bool removed = mixerlist.removeOne(mixer);
 
 	if (removed) {
 		selected_mixer.removeOne(mixer);
 		delete mixer;
+		return true;
 	}
 
-	if (removed && renumberIds) {
-		setIdsToMixerListIndex();
-	}
-	return removed;
+	return false;
 }
 
 void MixerGroup::setIdsToMixerListIndex()
@@ -165,6 +166,32 @@ MixerChannel *MixerGroup::getMixerById(int id)
 			return mixerlist.at(t);
 	}
 	return nullptr;
+}
+
+int MixerGroup::getNewId() const
+{
+	int newid = -1;
+	for (int t=0; t<mixerlist.size(); t++) {
+		newid = qMax(mixerlist.at(t)->id(), newid);
+	}
+	return newid + 1;
+
+}
+
+bool MixerGroup::deleteMixerById(int id)
+{
+	MixerChannel *mix = nullptr;
+	for (int t=0; t<mixerlist.size(); t++) {
+		if (mixerlist.at(t)->id() == id) {
+			mix = mixerlist.takeAt(t);
+			break;
+		}
+	}
+
+	if (mix)
+		delete mix;
+
+	return false;
 }
 
 bool MixerGroup::selectMixer(MixerChannel *mixer, int id, bool state)

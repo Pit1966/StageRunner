@@ -36,7 +36,7 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 {
 	init();
 
-	tube = o.tube;
+	tubeId = o.tubeId;
 	dmxType = o.dmxType;
 	dmxUniverse = o.dmxUniverse;
 	dmxChannel = o.dmxChannel;
@@ -51,7 +51,7 @@ DmxChannel::DmxChannel(const DmxChannel &o)
 	scalerDenominator = o.scalerDenominator;
 	labelText = o.labelText;
 
-	tempTubeListIdx = 0;
+	tempTubeListIdx = -1;
 	isPairedMain = o.isPairedMain;
 	isPairedSub = o.isPairedSub;
 }
@@ -68,14 +68,14 @@ void DmxChannel::init()
 		curValueChanged[i] = false;
 	}
 
-	tempTubeListIdx = 0;
+	tempTubeListIdx = -1;
 
 	isPairedMain = false;
 	isPairedSub = false;
 
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
 	setDescription("Output mapping from tube number to dmx channel and configuration");
-	addExistingVar(tube,"TubeNumber",0,1000,0);
+	addExistingVar(tubeId,"TubeNumber",0,1000,0);
 	addExistingVar(dmxType,"DmxType",DMX_GENERIC,DMX_TYPES,DMX_GENERIC);
 	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);
 	addExistingVar(dmxChannel,"DmxChannel",0,511,0);

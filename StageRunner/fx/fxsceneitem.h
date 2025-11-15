@@ -78,8 +78,11 @@ public:
 	void createDefaultTubes(int tubecount, uint universe = 0);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
-	DmxChannel *tube(int id) const;
-	bool removeTube(int id);
+	DmxChannel *tube(int idx) const;
+	DmxChannel *findTube(int tubeId) const;
+	DmxChannel *findTube(int univ, int dmxchan) const;
+	bool removeTubeById(int tubeId);
+	bool removeTube(DmxChannel *tube);
 
 	bool initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime = 0);
 	bool directFadeToDmx(qint32 dmxval, qint32 time_ms);
@@ -107,6 +110,8 @@ public:
 	QString statusString();
 	bool postLoadInitTubes(bool restore_light);
 	bool updateSceneFromOlderProjectVersion(int oldVer);
+
+	bool isEqual(const FxSceneItem *o) const;
 
 private:
 	~FxSceneItem();

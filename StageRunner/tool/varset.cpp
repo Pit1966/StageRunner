@@ -553,11 +553,13 @@ bool VarSet::checkModified()
 	return false;
 }
 
-void VarSet::setModified(bool state)
+void VarSet::setModified(bool state, bool all)
 {
 	modified_f = state;
-	for (int t=0; t<varList.size(); t++) {
-		varList.at(t)->setModified(state);
+	if (all || !state) {
+		for (int t=0; t<varList.size(); t++) {
+			varList.at(t)->setModified(state);
+		}
 	}
 }
 
