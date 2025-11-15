@@ -127,12 +127,15 @@ qint32 FxSceneItem::durationHint() const
 	return fadeInTime() + holdTime() + fadeOutTime();
 }
 
-void FxSceneItem::createDefaultTubes(int tubecount)
+void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 {
+	if (universe >= MAX_DMX_UNIVERSE)
+		universe = MAX_DMX_UNIVERSE-1;
+
 	for (int t=0; t<tubecount; t++) {
 		DmxChannel *dmx = new DmxChannel;
 		dmx->tube = t;
-		dmx->dmxUniverse = 0;
+		dmx->dmxUniverse = universe;
 		dmx->dmxChannel = t;
 		dmx->dmxType = DMX_GENERIC;
 		tubes.append(dmx);
@@ -208,8 +211,9 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 
 	// qDebug("initSceneCommand: %d, status: %d for scene: %s",cmd,myStatus,name().toLocal8Bit().data());
 	bool active = false;
+	bool onStage = false;
 
-	FxSceneItem *scanscene = 0;
+	FxSceneItem *scanscene = nullptr;
 
 	// Iterate over all tubes and set parameters
 	for (int t=0; t<tubeCount(); t++) {
@@ -316,6 +320,8 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 			// all other types are handled like dimmers
 			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
 				active = true;
+				if (tube->dmxType < DMX_POSITION_PAN)
+					onStage = true;
 			}
 			break;
 
@@ -324,7 +330,16 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 	}
 
 	// This is for Progress only
-	sceneMaster->initFadeCmd(mixline,cmd,cmd_time);
+	sceneMaster->initFadeCmd(mixline, cmd, cmd_time);
+	if (scanscene) {
+		int activeTime = qMax(defaultMoveTime, cmd_time);
+		scanscene->sceneMaster->curValue[mixline] = 0;
+		scanscene->sceneMaster->initFadeCmd(mixline, cmd, activeTime);
+	}
+
+
+	if (mixline == MIX_INTERN && cmd >= CMD_SCENE_FADEIN && onStage == false)
+		myStatus &= ~SCENE_STAGE_INTERN;
 
 	if (active) {
 		myStatus |= ACTIVE_FLAG;
@@ -405,6 +420,12 @@ bool FxSceneItem::loopFunction()
 		myStatus |= SCENE_ACTIVE_INTERN;
 	} else {
 		myStatus &= ~SCENE_ACTIVE_INTERN;
+		// if fade has finished, check, if Scene is on Stage.
+		if (mLastStatus & SCENE_ACTIVE_INTERN/* && mLastStatus & SCENE_STAGE_INTERN*/) {
+			qDebug() << myName;
+			if (!evaluateOnStageIntern())
+				myStatus &= ~SCENE_STAGE_INTERN;
+		}
 	}
 	if (active_direct) {
 		myStatus |= SCENE_ACTIVE_EXTERN;
@@ -430,6 +451,31 @@ void FxSceneItem::setLive(bool state) const
 void FxSceneItem::setBlacked(int mixline, bool state)
 {
 	m_wasBlacked[mixline] = state;
+}
+
+bool FxSceneItem::isOnStageIntern() const
+{
+	bool onstage = myStatus & SCENE_STAGE_INTERN;
+
+	if (onstage == true && !evaluateOnStageIntern()) {
+		myStatus &= ~SCENE_STAGE_INTERN;
+		qDebug() << "scene" << myName << "marked active, but has no active intensity dimmers";
+		return false;
+	}
+
+	return onstage;
+}
+
+bool FxSceneItem::evaluateOnStageIntern() const
+{
+	for (int t=0; t<tubeCount(); t++) {
+		DmxChannel *tube = tubes.at(t);
+		if (tube->dmxType < DMX_POSITION_PAN && 0 < tube->curValue[MIX_INTERN]) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 

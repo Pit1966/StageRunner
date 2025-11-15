@@ -75,7 +75,7 @@ public:
 	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 	qint32 durationHint() const override;
 
-	void createDefaultTubes(int tubecount);
+	void createDefaultTubes(int tubecount, uint universe = 0);
 	void setTubeCount(int tubecount);
 	inline int tubeCount() const {return tubes.size();}
 	DmxChannel *tube(int id) const;
@@ -91,8 +91,9 @@ public:
 	inline bool isActiveIntern() const {return myStatus & SCENE_ACTIVE_INTERN;}
 	inline bool isIdle() const {return (myStatus == SCENE_IDLE);}
 	inline bool isLive() const {return myStatus & SCENE_STAGE_LIVE;}
-	inline bool isOnStageIntern() const {return myStatus & SCENE_STAGE_INTERN;}
+	bool isOnStageIntern() const;
 	inline bool isOnStageExtern() const {return myStatus & SCENE_STAGE_EXTERN;}
+	bool evaluateOnStageIntern() const;
 	inline bool isVisible() const {return myStatus & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN | SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN | SCENE_STAGE_LIVE);}
 	inline void setDeleteOnFinished() {m_deleteMeOnFinished = true;}
 	inline bool deleteOnFinished() const {return m_deleteMeOnFinished;}

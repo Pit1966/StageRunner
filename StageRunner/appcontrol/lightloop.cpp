@@ -192,8 +192,9 @@ bool LightLoop::processFxSceneItem(FxSceneItem *scene)
 {
 	// Now call the function that processes all active fades. If this functions returns
 	// false no channel is active anymore
-	scene->loopFunction();
+	/*bool active = */scene->loopFunction();
 
+	// copy to real dmx arrays
 	for (int t=0; t<scene->tubeCount(); t++) {
 		DmxChannel *tube = scene->tubes.at(t);
 		int channel = tube->dmxChannel;
