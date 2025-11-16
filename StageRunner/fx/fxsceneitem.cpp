@@ -127,6 +127,31 @@ qint32 FxSceneItem::durationHint() const
 	return fadeInTime() + holdTime() + fadeOutTime();
 }
 
+qint32 FxSceneItem::getNewTubeId() const
+{
+	int newid = -1;
+	for (int t=0; t<tubes.size(); t++) {
+		newid = qMax(tubes.at(t)->tubeId, newid);
+	}
+	return newid + 1;
+}
+
+qint32 FxSceneItem::getNextUnusedDmxChannel(int universe) const
+{
+	int newchan = -1;
+	for (int t=0; t<tubes.size(); t++) {
+		if (tubes.at(t)->dmxUniverse == universe) {
+			newchan = qMax(tubes.at(t)->dmxChannel, newchan);
+		}
+	}
+	return newchan + 1;
+}
+
+qint32 FxSceneItem::guessUniverse() const
+{
+	return tubes.size() ? tubes.last()->dmxUniverse : 0;
+}
+
 void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 {
 	if (universe >= MAX_DMX_UNIVERSE)
@@ -142,7 +167,7 @@ void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 	}
 }
 
-void FxSceneItem::setTubeCount(int tubecount)
+void FxSceneItem::setTubeCount(int tubecount, int defaultUniverse)
 {
 	if (tubes.size() == tubecount)
 		return;
@@ -153,14 +178,20 @@ void FxSceneItem::setTubeCount(int tubecount)
 
 	while (tubes.size() < tubecount) {
 		DmxChannel *dmx = new DmxChannel;
-		dmx->tubeId = tubes.size();
-		dmx->dmxUniverse = 0;
-		dmx->dmxChannel = tubes.size();
+		dmx->tubeId = getNewTubeId();
+		dmx->dmxUniverse = defaultUniverse;
+		dmx->dmxChannel = getNextUnusedDmxChannel(defaultUniverse);
 		dmx->dmxType = DMX_GENERIC;
 		tubes.append(dmx);
 	}
 
 	setModified();
+}
+
+void FxSceneItem::addTube()
+{
+	int univ = tubes.size() ? tubes.last()->dmxUniverse : 0;
+	return setTubeCount(tubes.size() + 1, univ);
 }
 
 /**

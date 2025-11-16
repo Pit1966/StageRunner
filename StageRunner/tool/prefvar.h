@@ -97,6 +97,7 @@ protected:
 	QString myname;				///< Name der Variable wie er in Textdateien und in der Datenbank angelegt wird
 	QString dispname;			///< Anzeigename der Variable auf der Oberfläche
 	QString description;		///< Beschreibung der Variable
+	QString loadsecond;			///< this could be a second varname, this will be automatically set on load, when myname key was found
 	PrefVarType mytype;			///< Der Type der Variable
 	VarClass contextClass;		///< This is class context of the PrefVar instance. Could be a VarSet class that contains the instance.
 
@@ -131,6 +132,8 @@ public:
 	bool writeToPrefGroup(QSettings * setting, const QString & group = "");
 	bool readFromPrefGroupSystem(QSettings * setting, const QString & group = "");
 	inline const QString & pVarName() const {return myname;}
+	inline const QString & pLoadSecond() const {return loadsecond;}
+	inline void setLoadSecond(const QString &secondVarName) {loadsecond = secondVarName;}
 	inline const QString & pDisplayName() const {return dispname;}
 	inline const QString & pDescription() const {return description;}
 	inline PrefVarType pType() const {return mytype;}

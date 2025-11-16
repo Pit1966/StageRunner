@@ -425,7 +425,7 @@ FxSceneItem *LightControl::staticScene(int universe, int number)
 
 	if (staticScenes[universe][number] == nullptr) {
 		staticScenes[universe][number] = new FxSceneItem;
-		staticScenes[universe][number]->setTubeCount(512);
+		staticScenes[universe][number]->setTubeCount(512, universe);
 		staticScenes[universe][number]->setName(QString("StaticUNI%1NO%2").arg(universe+1).arg(number+1));
 	}
 
@@ -488,7 +488,7 @@ void LightControl::init()
 	FxItem::setLowestID(10000);
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {
 		hiddenScannerScenes[t] = new FxSceneItem;
-		hiddenScannerScenes[t]->setTubeCount(512);
+		hiddenScannerScenes[t]->setTubeCount(512, t);
 		hiddenScannerScenes[t]->setName(QString("ScanMove%1").arg(t+1));
 
 		for (int i=0; i<MAX_STATIC_SCENES; i++) {

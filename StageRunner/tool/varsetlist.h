@@ -117,7 +117,14 @@ public:
 	inline T first() {
 		return list.first();
 	}
+	inline const T first() const {
+		return list.first();
+	}
+
 	inline T last() {
+		return list.last();
+	}
+	inline const T last() const {
 		return list.last();
 	}
 

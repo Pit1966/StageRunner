@@ -450,6 +450,16 @@ int VarSet::analyzeLine(QTextStream &read, VarSet *varset, int child_level, int 
 			if (key == var->pVarName()) {
 				var->set_value(val);
 				var->exists_in_file_f = true;
+				if (!var->pLoadSecond().isEmpty()) {
+					QString secondkey = var->pLoadSecond();
+					while (++i < varset->varList.size()) {
+						var = varset->varList.at(i);
+						if (secondkey == var->pVarName()) {
+							var->set_value(val);
+							return 0;
+						}
+					}
+				}
 				return 0;
 			}
 			i++;
@@ -1135,6 +1145,11 @@ bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_e
 		}
 		write << "\n";
 	}
+
+	// secondVarName list. This is to skip storage, if a variable has the same value as
+	// another variable, that appeared before
+	QHash<QString, QVariant> secKeyHash;
+
 	for (int t=0; t<varList.size(); t++) {
 		PrefVarCore *var = varList.at(t);
 		if (var->function != PrefVarCore::FUNC_NORMAL) {
@@ -1168,11 +1183,17 @@ bool VarSet::file_save_append(QTextStream &write, int child_level, bool append_e
 				write << "[" << func_para << "]" << "\n";
 			}
 		} else {
-			if (var->pValue() != var->pDefaultValue()) {
+			if (secKeyHash.contains(var->pVarName()) && secKeyHash[var->pVarName()] == var->pValue()) {
+				secKeyHash.remove(var->pVarName());
+			}
+			else if (var->pValue() != var->pDefaultValue()) {
 				// Insert an indent depending on the recursion deep
 				write << child_indent_str(child_level+1);
 				// Write a simple date from the varset
 				write << var->pVarName() << "=" << var->pValue().toString() << "\n";
+
+				if (!var->pLoadSecond().isEmpty())
+					secKeyHash.insert(var->pLoadSecond(), var->pValue());
 			}
 		}
 	}

@@ -75,8 +75,12 @@ public:
 	void setWidgetPosition(const QString & geometry) override {widgetPos = geometry;}
 	qint32 durationHint() const override;
 
+	qint32 getNewTubeId() const;
+	qint32 getNextUnusedDmxChannel(int universe) const;
+	qint32 guessUniverse() const;
 	void createDefaultTubes(int tubecount, uint universe = 0);
-	void setTubeCount(int tubecount);
+	void setTubeCount(int tubecount, int defaultUniverse);
+	void addTube();
 	inline int tubeCount() const {return tubes.size();}
 	DmxChannel *tube(int idx) const;
 	DmxChannel *findTube(int tubeId) const;

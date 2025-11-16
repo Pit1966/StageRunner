@@ -76,6 +76,7 @@ void DmxChannel::init()
 	setClass(PrefVarCore::DMX_CHANNEL,"DmxChannel");
 	setDescription("Output mapping from tube number to dmx channel and configuration");
 	addExistingVar(tubeId,"TubeNumber",0,1000,0);
+	varList.last()->setLoadSecond("DmxChannel");
 	addExistingVar(dmxType,"DmxType",DMX_GENERIC,DMX_TYPES,DMX_GENERIC);
 	addExistingVar(dmxUniverse,"DmxUniverse",0,3,0);
 	addExistingVar(dmxChannel,"DmxChannel",0,511,0);

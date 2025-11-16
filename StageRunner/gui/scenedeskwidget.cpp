@@ -765,7 +765,7 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 		break;
 
 	case 2:
-		m_originFxScene->setTubeCount(m_originFxScene->tubeCount()+1);
+		m_originFxScene->addTube();
 		setFxScene(m_originFxScene);
 		emit modified();
 		break;
@@ -943,7 +943,7 @@ void SceneDeskWidget::onChannelCountSpinClickedAndChanged(int arg1)
 {
 	if (!m_originFxScene) return;
 
-	m_originFxScene->setTubeCount(arg1);
+	m_originFxScene->setTubeCount(arg1, m_originFxScene->guessUniverse());
 	setFxScene(m_originFxScene);
 }
 
@@ -952,7 +952,7 @@ void SceneDeskWidget::onChannelCountSpinEditingFinished()
 	if (!m_originFxScene) return;
 
 	if (channelCountSpin->value() != m_originFxScene->tubeCount()) {
-		m_originFxScene->setTubeCount(channelCountSpin->value());
+		m_originFxScene->setTubeCount(channelCountSpin->value(), m_originFxScene->guessUniverse());
 		setFxScene(m_originFxScene);
 	}
 }

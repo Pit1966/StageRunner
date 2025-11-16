@@ -329,7 +329,7 @@ void FxItemPropertyWidget::on_faderCountEdit_textEdited(const QString &arg1)
 		bool ok;
 		int num = arg1.toInt(&ok);
 		if (ok && num != cur_fxs->tubeCount()) {
-			cur_fxs->setTubeCount(num);
+			cur_fxs->setTubeCount(num, cur_fxs->guessUniverse());
 			cur_fxs->setModified(true);
 			emit modified(cur_fxs);
 		}
