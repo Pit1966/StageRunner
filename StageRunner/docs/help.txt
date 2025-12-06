@@ -62,7 +62,7 @@ GRAPSCENE { in | out } <FX_SCENE_NAME_OR_ID>
 	fadeout grap_scene					# fadeout grap_scene. Control is now completly back to the lightdesk
 
 
-BLACK { video | scene | light | all } [FADE_OUT_TIME]
+BLACK { video | scene | light | all } [<FADE_OUT_TIME>]
 	Black or fadeout FX scenes (DMX) or Video playback or all together.
 	If FADE_OUT_TIME is omitted, a sudden black will be done
 
@@ -72,7 +72,7 @@ REMOTE <REMOTE_HOST_ADDRESS> <SCRIPT_COMMAND>
 	REMOTE_HOST_ADDRESS may be an IP address or a hostname. (Maybe IP is better, since it don't needs name resolution)
 	SCRIPT_COMMAND is any command described here
 
-FADEVOL slot <AUDIO_SLOT_NUMBER> { <TARGET_VOLUME_ABS>|<TARGET_VOLUME_PERCENT>% } [FADE_TIME]
+FADEVOL slot <AUDIO_SLOT_NUMBER> { <TARGET_VOLUME_ABS>|<TARGET_VOLUME_PERCENT>% } [<FADE_TIME>]
 	Fade given audio slot to arbitrary volume.
 	Use absolute volume scale (0-100)
 		FADEVOL 1 70
@@ -86,6 +86,12 @@ MODE [breakoncancel][,disablemultistart][,enablemultistart]
 	breakoncancel: Stopping a script will immediately stop all commands inside the script. Otherwise the script will be stopped
 		after the command has finished.
 	enablemultistart and disablemultistart: Set if multiple start of FX script is allowed or not
+
+DEFAULT {universe|uni|staticscene|fadetime}
+	Set default options for current executed fx(scene)
+	universe <UNIVERSE_NUM> : set the default used universe
+	staticscene <SCENE_NUM> : set the unvisible static scene used by default. e.g. in DMX command
+	fadetime <FADE_TIME>	: defines default fadein/fadeout time
 
 WAIT <TIME>
 	Pauses the script for the given time.
@@ -104,3 +110,13 @@ LOOP [<LINE_NUMBER>] [<LOOP_COUNT>]
 PAUSE
 	Stop execution of script at line position the PAUSE command appears and set the FX script item into paused mode.
 	Starting the script again (e.g. by key press, double click or other command) the script will continue execution.
+
+DMX [<UNIVERSE>::][<SCENE>:]<CHANNEL> <VALUE> [<FADE_TIME>]
+	Modify static invisible scene SCENE
+	Set DMX channel CHANNEL in UNIVERSE to value VALUE with optional fade time FADE_TIME
+	CHANNEL can be 1 - 512
+	VALUE cab be 0 - 255
+	SCENE 1 - 4 (We have 4 static scenes)
+	UNIVERSE 1 - 4 (We have 4 DMX universes for now)
+	Note: The default SCENE and UNIVERSE is 1, but can be changed with script command "DEFAULT"
+

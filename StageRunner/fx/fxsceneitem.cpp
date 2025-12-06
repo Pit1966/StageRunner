@@ -288,8 +288,6 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 		}
 
 		switch (dmxtype) {
-		// case DMX_INTENSITY_DIMMER:
-		// 	break;
 		case DMX_POSITION_PAN:
 		case DMX_POSITION_TILT:
 			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
@@ -354,6 +352,33 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 				}
 			}
 			break;
+
+		case DMX_SPEED_PAN_TILT_FAST_SLOW:
+		case DMX_SPEED_PAN_TILT_SLOW_FAST:
+
+			if (cmd == CMD_SCENE_FADETO || cmd == CMD_SCENE_FADEIN) {
+				scanscene = lightctrl->hiddenScannerScenes[tube->dmxUniverse];
+				DmxChannel *scantube = scanscene->tube(tube->dmxChannel);
+
+				qint32 movetime = moveTime();
+				qint32 target_value = tube->targetValue;
+
+				// copy channel parameter to hidden scanner scene
+				scantube->targetFullValue = tube->targetFullValue;
+				scantube->targetValue = target_value;
+				scantube->dmxType = dmxtype;
+
+				scantube->clrPairedWith();
+
+				if (scantube->initFadeCmd(mixline, CMD_SCENE_FADETO, movetime, target_value)) {
+					if (!scanscene->isActiveIntern()) {
+						scanscene->setActiveIntern();
+						lightctrl->setSceneActive(scanscene);
+					}
+				}
+			}
+			break;
+
 		default:
 			// all other types are handled like dimmers
 			if (tube->initFadeCmd(mixline,cmd,cmd_time)) {
@@ -375,6 +400,7 @@ bool FxSceneItem::initSceneCommand(int mixline, CtrlCmd cmd, int cmdTime)
 		scanscene->sceneMaster->initFadeCmd(mixline, cmd, activeTime);
 	}
 
+	// qDebug() << "init scene" << name() << "now: onstage" << onStage << "active" << active;
 
 	if (mixline == MIX_INTERN && cmd >= CMD_SCENE_FADEIN && onStage == false)
 		myStatus &= ~SCENE_STAGE_INTERN;
@@ -494,21 +520,33 @@ void FxSceneItem::setBlacked(int mixline, bool state)
 bool FxSceneItem::isOnStageIntern() const
 {
 	bool onstage = myStatus & SCENE_STAGE_INTERN;
+	// bool evalonstage = evaluateOnStageIntern();
+	// qDebug() << "scene" << name() << "onstage" << onstage << "eval" << evalonstage;
 
 	if (onstage == true && !evaluateOnStageIntern()) {
 		myStatus &= ~SCENE_STAGE_INTERN;
-		qDebug() << "scene" << myName << "marked active, but has no active intensity dimmers";
+		qWarning() << "scene" << myName << "marked active, but has no active intensity dimmers";
 		return false;
 	}
 
 	return onstage;
 }
 
+/**
+ * @brief Check all tubes of the scene and decide, if the scene is on stage
+ * @return
+ *
+ * on stage means, that there are dimmers with levels > 0.
+ * PAN/TILT and similar DMX channel types are not taken into account
+ */
 bool FxSceneItem::evaluateOnStageIntern() const
 {
 	for (int t=0; t<tubeCount(); t++) {
 		DmxChannel *tube = tubes.at(t);
-		if (tube->dmxType < DMX_POSITION_PAN && 0 < tube->curValue[MIX_INTERN]) {
+		// this gets local dmxType in tube, if set, otherwise the global DMX type
+		// from universe layout. May result in DMX_GENERIC(0)
+		DmxChannelType type = tube->dmxChannelType();
+		if (type < DMX_POSITION_PAN && 0 < tube->curValue[MIX_INTERN]) {
 			return true;
 		}
 	}
@@ -642,6 +680,11 @@ bool FxSceneItem::isEqual(const FxSceneItem *o) const
 			return false;
 		if (tubes.at(i)->labelText != o->tubes.at(i)->labelText)
 			return false;
+		if (tubes.at(i)->scalerNumerator != o->tubes.at(i)->scalerNumerator)
+			return false;
+		if (tubes.at(i)->scalerDenominator != o->tubes.at(i)->scalerDenominator)
+			return false;
+
 	}
 
 	return true;

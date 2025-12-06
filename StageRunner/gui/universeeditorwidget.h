@@ -28,7 +28,7 @@ private:
 	QString m_lastFixturePath;
 
 	int m_universe = 0;
-	int m_currentTargetDmxAddr[MAX_DMX_UNIVERSE] = {};
+	int m_currentTargetDmxAddr[MAX_DMX_UNIVERSE] = {};		///< current selected DMX address. This begins with 1
 
 public:
 	explicit UniverseEditorWidget(QWidget *parent = nullptr);

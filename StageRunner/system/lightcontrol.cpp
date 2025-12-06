@@ -209,6 +209,10 @@ bool LightControl::startFxSceneSimple(FxSceneItem *scene)
 					 QtStaticTools::msToTimeString(scene->fadeOutTime())));
 	}
 
+	// qDebug() << "scene" << scene->name() << "after simple start: eval onstage" << scene->isOnStageIntern();  //<< "extern" << scene->isOnStageExtern();
+	qDebug() << "scene" << scene->name() << "after simple start: onstage intern" << (scene->status() & SCENE_STAGE_INTERN);
+
+
 	return active;
 }
 

@@ -18,6 +18,7 @@ private:
 	DmxChannelType m_iType;
 	int m_iNum = 0;		// modification detection
 	int m_iDen = 0;		// modification detection
+	bool m_buttonClicked = false;
 
 public:
 	explicit DmxTypeSelectorWidget(DmxChannelType type = DmxChannelType::DMX_GENERIC, QWidget *parent = nullptr);
@@ -29,6 +30,7 @@ public:
 
 private:
 	void guiInitTypes();
+	void keyPressEvent(QKeyEvent *ev);
 
 private slots:
 	void onButtonClicked();

@@ -681,6 +681,7 @@ void FxList::cloneSelectedSceneItem()
 	if (m_fxNext && m_fxNext->fxType() == FX_SCENE) {
 		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(m_fxNext);
 		FxSceneItem *new_scene = new FxSceneItem(*scene);
+		new_scene->setKeyCode(0);
 		new_scene->refCount.ref();
 		int idx = m_fxList.indexOf(scene);
 		if (idx >= 0) {
@@ -690,6 +691,7 @@ void FxList::cloneSelectedSceneItem()
 		}
 		m_isModified = true;
 		FxItemTool::setClonedFxName(scene,new_scene,this);
+
 	}
 }
 

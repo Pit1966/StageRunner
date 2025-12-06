@@ -12,6 +12,10 @@ QString DMXHelp::dmxTypeToString(DmxChannelType type)
 	case DMX_GENERIC:
 		return "DMX Generic";
 
+	case DMX_INTENSITY_MASTER_DIMMER:
+		return "DMX Intensity Master Dimmer";
+	case DMX_INTENSITY_MASTER_DIMMER_FINE:
+		return "DMX Intensity Master Dimmer Fine";
 	case DMX_INTENSITY_DIMMER:
 		return "DMX Intensity Dimmer";
 	case DMX_INTENSITY_DIMMER_FINE:
@@ -91,9 +95,19 @@ QString DMXHelp::dmxTypeToString(DmxChannelType type)
 	case DMX_COLOR_WHEEL_FINE:
 		return "DMX Color Wheel Fine";
 
-
 	case DMX_COLOR_CTB_MIXER:
 		return "DMX Color CTB Mixer";
+	case DMX_GOBO_WHEEL:
+		return "DMX Gobo Wheel";
+	case DMX_GOBO_WHEEL_FINE:
+		return "DMX Gobo Wheel Fine";
+	case DMX_GOBO_INDEX:
+		return "DMX Gobo Index";
+	case DMX_GOBO_INDEX_FINE:
+		return "DMX Gobo Index Fine";
+	case DMX_SHUTTER_STROBE_SLOW_FAST:
+		return "DMX Shutter Strobe slow fast";
+
 
 	default:
 		return QString("DMX TYPE #%1").arg(type);
@@ -106,6 +120,10 @@ QString DMXHelp::dmxTypeToShortString(DmxChannelType type)
 	case DMX_GENERIC:
 		return "I";
 
+	case DMX_INTENSITY_MASTER_DIMMER:
+		return "DimM";
+	case DMX_INTENSITY_MASTER_DIMMER_FINE:
+		return "DimMF";
 	case DMX_INTENSITY_DIMMER:
 		return "Dim";
 	case DMX_INTENSITY_DIMMER_FINE:
@@ -189,6 +207,16 @@ QString DMXHelp::dmxTypeToShortString(DmxChannelType type)
 
 	case DMX_COLOR_CTB_MIXER:
 		return "CTBcol";
+	case DMX_GOBO_WHEEL:
+		return "Gobo";
+	case DMX_GOBO_WHEEL_FINE:
+		return "GoboF";
+	case DMX_GOBO_INDEX:
+		return "GoboIdx";
+	case DMX_GOBO_INDEX_FINE:
+		return "GoboIdxF";
+	case DMX_SHUTTER_STROBE_SLOW_FAST:
+		return "Strobe";
 
 	default:
 		return QString("#%1").arg(type);

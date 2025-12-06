@@ -670,7 +670,8 @@ bool SR_FixtureList::removeFixtureAt(int dmxAddr)
 	int i = -1;
 	while (++i < m_list.size()) {
 		SR_Fixture *fix = m_list.at(i);
-		if (dmxAddr >= fix->dmxAdr() && dmxAddr <= fix->dmxAdr() + fix->usedChannelCount()) {
+		qDebug() << "dmx offset" << fix->dmxAdr();
+		if (dmxAddr >= fix->dmxAdr() && dmxAddr < fix->dmxAdr() + fix->usedChannelCount()) {
 			m_list.removeAt(i);
 			delete fix;
 			return true;

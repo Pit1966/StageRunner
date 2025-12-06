@@ -7,6 +7,7 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QKeyEvent>
 
 DmxTypeSelectorWidget::DmxTypeSelectorWidget(DmxChannelType type, QWidget *parent) :
 	QDialog(parent),
@@ -74,10 +75,22 @@ void DmxTypeSelectorWidget::guiInitTypes()
 	}
 }
 
+void DmxTypeSelectorWidget::keyPressEvent(QKeyEvent *ev)
+{
+	if (ev->key() == Qt::Key_Return || ev->key() == Qt::Key_Enter) {
+		ev->accept();
+		m_type = m_iType;
+		accept();
+	} else {
+		QDialog::keyPressEvent(ev);
+	}
+}
+
 void DmxTypeSelectorWidget::onButtonClicked()
 {
 	QPushButton *but = qobject_cast<QPushButton*>(sender());
 	if (but) {
+		m_buttonClicked = true;
 		m_type = DmxChannelType(but->property("type").toInt());
 	}
 

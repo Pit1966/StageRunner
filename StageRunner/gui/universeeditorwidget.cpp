@@ -165,7 +165,7 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 			}
 			DmxChannel *tube = sc->tube(dmx);
 			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
-			// qDebug() << "type" << chan->preset() << type;
+			qDebug() << "target dmx" << dmx << "type" << chan->preset() << type;
 			if (type >= SR_Channel::Custom /*DMX_GENERIC*/)
 				tube->dmxType = int(type);
 
@@ -245,7 +245,7 @@ void UniverseEditorWidget::on_selectDeviceButton_clicked()
 		m_lastFixturePath = path;
 
 	QSettings set(QSETFORMAT,APPNAME);
-	set.beginGroup("UserSettings");
+	set.beginGroup("UniverseEditor");
 	set.setValue("LastFixturePath", m_lastFixturePath);
 	set.endGroup();
 }
@@ -264,6 +264,8 @@ void UniverseEditorWidget::on_removeDeviceButton_clicked()
 {
 	if (m_currentTargetDmxAddr[m_universe] <= 0)
 		return;
+
+	qDebug() << "dmx addr" << m_currentTargetDmxAddr[m_universe];
 
 	m_fixtureList->removeFixtureAt(m_currentTargetDmxAddr[m_universe]);
 	copyFixturesToGui(m_fixtureList);
