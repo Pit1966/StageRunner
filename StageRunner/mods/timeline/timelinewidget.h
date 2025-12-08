@@ -11,6 +11,7 @@
 
 #include "timeline_defines.h"
 #include "timelinetrack.h"
+// #include "timelinebox.h"
 
 namespace PS_TL {
 
@@ -148,6 +149,7 @@ public:
 	int findOverlayIdForTrackId(int trackId);
 
 	void checkMousePos(qreal x, qreal y);
+	void propagateTimeLineBoxDoubleClicked(PS_TL::TimeLineBox *item);
 
 public slots:
 	void setTimeLineDuration(int ms);
@@ -181,6 +183,7 @@ signals:
 	void cursorActivated(int ms);
 	void mousePosMsChanged(int ms);
 	void timeLineDurationChanged(int ms);
+	void timeLineBoxDoubleClicked(TimeLineBox *item);
 
 	friend class TimeLineGfxScene;
 };

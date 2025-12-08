@@ -554,6 +554,27 @@ bool FxSceneItem::evaluateOnStageIntern() const
 	return false;
 }
 
+/**
+ * @brief Check if scene has no active dimmers, but only PAN/TILT/MACRO channels
+ * @return
+ *
+ * if a scene has no dimmers, it is most likely a scanner position scene.
+ */
+bool FxSceneItem::evaluateHasNoDimmers() const
+{
+	for (int t=0; t<tubeCount(); t++) {
+		DmxChannel *tube = tubes.at(t);
+		// this gets local dmxType in tube, if set, otherwise the global DMX type
+		// from universe layout. May result in DMX_GENERIC(0)
+		DmxChannelType type = tube->dmxChannelType();
+		if (type < DMX_POSITION_PAN && 0 < tube->targetValue) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 
 /**
  * @brief Check if SceneStatus has changed

@@ -15,7 +15,6 @@ ExtTimeLineItem::ExtTimeLineItem(TimeLineWidget *timeline, int trackId)
 	: TimeLineBox(timeline, trackId)
 	, TimeLineItemData()
 {
-
 }
 
 FxItem *ExtTimeLineItem::linkToFxWithId(int fxId)
@@ -88,9 +87,18 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 	return false;
 }
 
-// void ExtTimeLineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent */*event*/)
+// void ExtTimeLineItem::doubleClicked(QGraphicsSceneMouseEvent *event)
 // {
+// 	qDebug() << "double click";
+// 	if (m_fxID <= 0)
+// 		return;
+
+// 	FxItem *fx = FxItem::findFxById(m_fxID);
+// 	if (fx->fxType() == FX_SCENE) {
+
+// 	}
 // }
+
 
 void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {

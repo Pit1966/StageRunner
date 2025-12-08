@@ -95,6 +95,11 @@ private slots:
 	void on_runButton_clicked();
 	void onCursorPositionChanged(int ms);
 	void onMousePositionChanged(int ms);
+	void onTimeLineItemBoxDoubleClicked(TimeLineBox *item);
+
+
+signals:
+	void fxItemDoubleClicked(FxItem *fx);
 };
 
 #endif // FXTIMELINEEDITWIDGET_H

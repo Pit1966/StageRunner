@@ -15,7 +15,6 @@ TimeLineBox::TimeLineBox(TimeLineWidget *timeline, int trackId)
 
 	m_colorBG		= 0x225522;
 	m_colorBorder   = 0x225522;		// 0xeeeeee;
-
 }
 
 void TimeLineBox::moveToEndPosition(int ms)
@@ -94,6 +93,13 @@ void TimeLineBox::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	else {
 		m_isClicked = false;
 	}
+}
+
+void TimeLineBox::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+	// qDebug() << "double clicked item" << m_label;
+	doubleClicked(event);
+	m_timeline->propagateTimeLineBoxDoubleClicked(this);
 }
 
 void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)

@@ -849,6 +849,7 @@ void StageRunnerMainWin::openFxTimeLinePanel(FxTimeLineItem *fx)
 {
 	FxTimeLineEditWidget *timelineWid = FxTimeLineEditWidget::openTimeLinePanel(fx);
 	if (timelineWid) {
+		connect(timelineWid, SIGNAL(fxItemDoubleClicked(FxItem*)), this, SLOT(openFxItemPanel(FxItem*)));
 		timelineWid->resize(1000, 270);
 		timelineWid->show();
 	}

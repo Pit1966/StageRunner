@@ -20,7 +20,7 @@ public:
 
 protected:
 	// reimplementations from base class
-	// void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+	// void doubleClicked(QGraphicsSceneMouseEvent *event) override;
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

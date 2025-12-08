@@ -59,6 +59,7 @@ protected:
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -72,7 +73,7 @@ protected:
 	// propagade some mouse events to derived classes
 	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
-
+	virtual void doubleClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 
 };
 

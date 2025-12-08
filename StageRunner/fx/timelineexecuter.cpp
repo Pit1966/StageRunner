@@ -412,6 +412,12 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		return false;
 	}
 
+	FxTimeLineObj *obj = ev.obj;
+	if (!obj) {	// should never happen
+		LOGERROR(tr("No timeline event object in timeline executer"));
+		return false;
+	}
+
 	bool ok = false;
 
 	int fxtype = fx->fxType();
@@ -451,6 +457,10 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		/// Further the executer is not handed over to scene
 		FxSceneItem *fxs = getScene(fxID);
 		if (fxs) {
+			if (fxs->moveTime() > 0 || fxs->evaluateHasNoDimmers()) {
+				fxs->setMoveTime(obj->lenMs);
+				qDebug() << "set scene move time to" << obj->lenMs << "ms";
+			}
 			fxs->setFadeInTime(ev.obj->fadeInDurationMs());
 			fxs->setFadeOutTime(ev.obj->fadeOutDurationMs());
 			ok = myApp.unitLight->startFxScene(fxs);

@@ -101,6 +101,7 @@ public:
 	bool isOnStageIntern() const;
 	inline bool isOnStageExtern() const {return myStatus & SCENE_STAGE_EXTERN;}
 	bool evaluateOnStageIntern() const;
+	bool evaluateHasNoDimmers() const;
 	inline bool isVisible() const {return myStatus & (SCENE_STAGE_INTERN | SCENE_STAGE_EXTERN | SCENE_ACTIVE_INTERN | SCENE_ACTIVE_EXTERN | SCENE_STAGE_LIVE);}
 	inline void setDeleteOnFinished() {m_deleteMeOnFinished = true;}
 	inline bool deleteOnFinished() const {return m_deleteMeOnFinished;}

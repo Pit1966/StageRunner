@@ -343,6 +343,8 @@ FxTimeLineEditWidget::FxTimeLineEditWidget(AppCentral *app_central, QWidget *par
 	connect(m_timeline, SIGNAL(cursorPosChanged(int)), this, SLOT(onCursorPositionChanged(int)));
 	connect(m_timeline, SIGNAL(mousePosMsChanged(int)), this, SLOT(onMousePositionChanged(int)));
 
+	qDebug() << "connected" << connect(m_timeline, SIGNAL(timeLineBoxDoubleClicked(TimeLineBox*)), this, SLOT(onTimeLineItemBoxDoubleClicked(TimeLineBox*)));
+
 	setWindowFlag(Qt::WindowStaysOnTopHint);
 }
 
@@ -518,6 +520,20 @@ void FxTimeLineEditWidget::onMousePositionChanged(int ms)
 
 	QString str = QString("    ") + tcStr;
 	timeCodeMouseLabel->setText(str);
+}
+
+void FxTimeLineEditWidget::onTimeLineItemBoxDoubleClicked(TimeLineBox *item)
+{
+	qDebug() << "timelinebox item double clicked";
+	ExtTimeLineItem *eItem = qobject_cast<ExtTimeLineItem*>(item);
+	if (!eItem) return;
+
+	if (eItem->m_fxID <= 0)
+		return;
+
+	FxItem *fx = FxItem::findFxById(eItem->m_fxID);
+	if (fx)
+		emit fxItemDoubleClicked(fx);
 }
 
 
