@@ -129,6 +129,8 @@ private slots:
 	void on_actionSave_Project_as_triggered();
 	void on_actionConsolidate_Project_triggered();
 	void on_actionExit_StageRunner_triggered();
+	void on_actionLight_InitDefaultUniverses_triggered();
+
 	void on_addFxSceneButton_clicked();
 	void on_debugLevelSpin_valueChanged(int arg1);
 	void on_stopMainLoopButton_clicked();
@@ -162,6 +164,7 @@ private slots:
 	void on_actionDelete_FX_Item_triggered();
 	void on_actionClose_video_window_triggered();
 	void on_showFontsButton_clicked();
+
 
 
 private:

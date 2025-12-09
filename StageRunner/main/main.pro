@@ -138,6 +138,7 @@ SOURCES += \
 	../gui/customwidget/psspinbox.cpp \
 	../gui/customwidget/psvumeter.cpp \
 	../gui/deviceinfowidget.cpp \
+	../gui/dmxrangewidget.cpp \
 	../gui/fxitempropertywidget.cpp \
 	../gui/fxlistwidget.cpp \
 	../gui/fxlistwidgetitem.cpp \
@@ -304,6 +305,7 @@ HEADERS  += \
 	../system/commandsystem.h \
 	../system/convtools.h \
 	../system/dmx/dmxhelp.h \
+	../system/dmx/dmxrangewidget.h \
 	../system/dmx/dmxtypeselectorwidget.h \
 	../system/dmx/fixture.h \
 	../system/dmxchannel.h \
@@ -376,6 +378,7 @@ FORMS    += \
 	../gui/consolidatedialog.ui \
 	../gui/customwidget/psinfodialog.ui \
 	../gui/deviceinfowidget.ui \
+	../gui/dmxrangewidget.ui \
 	../gui/fxitempropertywidget.ui \
 	../gui/fxlistwidget.ui \
 	../gui/fxlistwidgetitem.ui \

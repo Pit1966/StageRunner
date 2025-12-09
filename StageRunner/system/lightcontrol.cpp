@@ -87,6 +87,9 @@ bool LightControl::setLightLoopEnabled(bool state)
 					,this,SLOT(onSceneCueReady(FxSceneItem*)));
 		}
 
+		if (myApp.userSettings->pInitDefaultUniverseOnStart)
+			applyUniverseLayoutScenes();
+
 	} else {
 		lightLoopInterface->getLightLoopInstance()->disconnect();
 		ok = lightLoopInterface->stopThread();
@@ -368,6 +371,19 @@ int LightControl::populateUniverseLayoutScenes()
 		}
 	}
 	return universeFoundCount;
+}
+
+bool LightControl::applyUniverseLayoutScenes()
+{
+	for (int i=0; i<MAX_DMX_UNIVERSE; i++) {
+		FxSceneItem *fxs = qobject_cast<FxSceneItem*>(universeLayoutScenes[i]);
+		if (!fxs)
+			continue;
+
+		fxs->initSceneCommand(MIX_INTERN, CMD_SCENE_FADEIN, 200);
+	}
+
+	return true;
 }
 
 /**

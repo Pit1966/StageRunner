@@ -33,6 +33,11 @@ void TimeLineTrack::appendTimeLineItem(TimeLineItem *item)
 	m_itemList.append(item);
 }
 
+bool TimeLineTrack::removeTimeLineItem(TimeLineItem *item)
+{
+	return m_itemList.removeOne(item);
+}
+
 TimeLineItem *TimeLineTrack::itemAt(int idx) const
 {
 	if (idx >= 0 && idx < m_itemList.size())

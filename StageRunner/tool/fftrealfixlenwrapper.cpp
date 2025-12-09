@@ -77,6 +77,8 @@ void FFTRealFixLenWrapper::calculateFFT()
 
 	// Calculate FFT
 	m_priv->m_fft.do_fft(m_fftComplexArray.data(),m_fftRealArray.data());
+
+	// fprintf(stdout, "calc fft m_inBuffer size: %d\n",m_inBuffer.size());
 }
 
 void FFTRealFixLenWrapper::calcutateReverseFFT()

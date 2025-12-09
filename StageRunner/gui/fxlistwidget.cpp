@@ -1474,6 +1474,10 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			act = menu.addAction(tr("Clone Fx Sequence"));
 			act->setObjectName("10");
 		}
+		if (fxtype == FX_TIMELINE) {
+			act = menu.addAction(tr("Clone Fx Timeline"));
+			act->setObjectName("14");
+		}
 		if (fxtype == FX_SCRIPT) {
 			act = menu.addAction(tr("Clone Fx script"));
 			act->setObjectName("12");
@@ -1566,6 +1570,11 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 		case 13:
 			fxList()->addFxScript();
+			refreshList(curScrollPos);
+			break;
+
+		case 14:
+			fxList()->cloneSelectedTimelineItem();
 			refreshList(curScrollPos);
 			break;
 

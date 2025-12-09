@@ -63,6 +63,7 @@ public:
 	inline const QList<TimeLineItem*> & itemList() const {return m_itemList;}
 	inline QList<TimeLineItem*> & itemList() {return m_itemList;}
 	void appendTimeLineItem(TimeLineItem *item);
+	bool removeTimeLineItem(TimeLineItem *item);
 	int itemCount() const {return m_itemList.size();}
 	TimeLineItem * itemAt(int idx) const;
 	void deleteAllItems();

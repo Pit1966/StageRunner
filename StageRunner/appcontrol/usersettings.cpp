@@ -72,6 +72,7 @@ void UserSettings::init()
 	addExistingVar(pLogarithmicVolDials,"LogarithmicVolDials",true);
 	addExistingVar(pIsAudioInThread,"IsAudioInThread",true);
 	addExistingVar(pIsSmallAudioBufferFix,"IsSmallAudioBufferFix",false);
+	addExistingVar(pInitDefaultUniverseOnStart,"pInitDefaultUniverseOnStart",false);
 	addExistingVar(pAudioAllowReactivateTime,"AudioAllowReactivationTime",0,10000,800);
 	addExistingVar(debug,"DebugLevel");
 	addExistingVar(pNoInterfaceDmxFeedback,"EnableNoInterfaceDmxFeedback");

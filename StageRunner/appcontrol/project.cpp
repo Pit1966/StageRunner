@@ -125,7 +125,7 @@ void Project::clear()
 	m_isValid = false;
 
 	pProjectName = "Default Project";
-	pProjectId = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+	pProjectId = QDateTime::currentSecsSinceEpoch();
 	pProjectFormat = 0;
 	pProjectBaseDir = QString();
 	pComment = QString();
@@ -171,6 +171,11 @@ bool Project::loadFromFile(const QString &path)
 
 	// not used in old project versions. So set it to false manually at default.
 	pLogarithmicVol = false;
+
+	if (!QFile::exists(path)) {
+		loadErrorLineString = tr("Project file does not exist!");
+		return false;
+	}
 
 	int line_number = 0;
 	QString line_copy;
@@ -336,7 +341,7 @@ bool Project::consolidateToDir(const QString &exportProName, const QString &dirn
 
 	tpro.pComment = QString("Consolidated from: %1, at: %2")
 			.arg(curProjectFilePath, QDateTime::currentDateTime().toString());
-	tpro.pProjectId = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+	tpro.pProjectId = QDateTime::currentSecsSinceEpoch();
 	tpro.pProjectName = proname;
 
 
@@ -414,10 +419,9 @@ bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, 
 			int suffix_num = 0;
 			while (!done) {
 				destpath = QString("%1/%2%3.%4")
-						.arg(destDir)
-						.arg(basename)
-						.arg(suffix_num>0 ? QString::number(suffix_num) : QString())
-						.arg(suffix.toLower());
+						.arg(destDir, basename,
+							 suffix_num>0 ? QString::number(suffix_num) : QString(),
+							 suffix.toLower());
 
 				if (QFile::exists(destpath)) {
 					if (QFileInfo(destpath).size() == QFileInfo(srcpath).size()) {
@@ -455,8 +459,7 @@ bool Project::copyAllAudioItemFiles(FxList * srcFxList, const QString &destDir, 
 				if (!file.copy(destpath)) {
 					ok = false;
 					result.errorMessageList.append(tr("Could not create audio file %1 (%2)")
-												   .arg(destpath)
-												   .arg(file.errorString()));
+												   .arg(destpath, file.errorString()));
 				} else {
 					result.audioFileCopyCount++;
 				}
@@ -492,6 +495,19 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 	bool ok = true;
 	bool always_open_find_file_dialog = false;
 	bool never_open_find_file_dialog = false;
+
+	// add some default paths to temporary media file dirs, just for the case
+	// the media file is not found in specified path
+
+	if (!curProjectFilePath.isEmpty()) {
+		QString projectFileDir = QFileInfo(curProjectFilePath).dir().absolutePath();
+		QString newdir = QString("%1/Ton").arg(projectFileDir);
+		if (!m_mediaFileSearchDirs.contains(newdir))
+			m_mediaFileSearchDirs.append(newdir);
+		newdir = QString("%1/audio").arg(projectFileDir);
+		if (!m_mediaFileSearchDirs.contains(newdir))
+			m_mediaFileSearchDirs.append(newdir);
+	}
 
 	for (int t=0; t<srcFxList->size(); t++) {
 		FxItem *fx = srcFxList->at(t);
@@ -545,8 +561,7 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 				if (!foundfile) {
 					ok = false;
 					result.errorMessageList.append(tr("%1: Could not found media file '%2' ")
-												   .arg(fx->fxNamePath())
-												   .arg(filepath));
+												   .arg(fx->fxNamePath(), filepath));
 				} else {
 					result.setModified = true;
 				}

@@ -152,6 +152,28 @@ qint32 FxSceneItem::guessUniverse() const
 	return tubes.size() ? tubes.last()->dmxUniverse : 0;
 }
 
+qint32 FxSceneItem::firstUsedDmxChannel() const
+{
+	int chan = 511;
+	for (int t=0; t<tubes.size(); t++) {
+		if (tubes.at(t)->dmxChannel < chan)
+			chan = tubes.at(t)->dmxChannel;
+	}
+
+	return chan;
+}
+
+qint32 FxSceneItem::lastUsedDmxChannel() const
+{
+	int chan = 0;
+	for (int t=0; t<tubes.size(); t++) {
+		if (tubes.at(t)->dmxChannel > chan)
+			chan = tubes.at(t)->dmxChannel;
+	}
+
+	return chan;
+}
+
 void FxSceneItem::createDefaultTubes(int tubecount, uint universe)
 {
 	if (universe >= MAX_DMX_UNIVERSE)
@@ -186,6 +208,52 @@ void FxSceneItem::setTubeCount(int tubecount, int defaultUniverse)
 	}
 
 	setModified();
+}
+
+/**
+ * @brief Set tubes for scene to given dmx channel range.
+ * @param firstDmxChan
+ * @param lastDmxChan
+ * @param defaultUniverse
+ */
+bool FxSceneItem::setTubeChannelRange(int firstDmxChan, int lastDmxChan, int defaultUniverse)
+{
+	if (firstDmxChan > lastDmxChan)
+		qSwap(firstDmxChan, lastDmxChan);
+
+	int tubes_wanted = lastDmxChan - firstDmxChan + 1;
+	if (tubes_wanted <= 0 || firstDmxChan < 1)
+		return false;
+
+	// Do we have more tubes as wanted in scene, than remove
+	while (tubes.size() > tubes_wanted) {
+		delete tubes.takeAt(tubes.size()-1);
+	}
+
+	// Do we have now enough tubes, than add new tubes
+	while (tubes.size() < tubes_wanted) {
+		DmxChannel *dmx = new DmxChannel;
+		dmx->tubeId = getNewTubeId();
+		dmx->dmxUniverse = defaultUniverse;
+		tubes.append(dmx);
+	}
+
+	// renumber all tubes
+	// not clear, if tubeID must match the dmxChannel number - 1
+	int dmxchan = firstDmxChan;
+	for (int i=0; i<tubes.size(); i++) {
+		DmxChannel *dmx = tubes.at(i);
+		dmx->dmxUniverse = defaultUniverse;
+		dmx->dmxChannel = dmxchan - 1;
+		dmx->deskPositionIndex = -1;
+		dmx->tubeId = i;
+
+		dmxchan++;
+	}
+
+	setModified();
+
+	return true;
 }
 
 void FxSceneItem::addTube()

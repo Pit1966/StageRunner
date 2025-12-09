@@ -107,7 +107,7 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	if (m_isClicked) {
 		QPointF curPos = event->scenePos();
 		qreal xdif = curPos.x() - m_clickPos.x();
-		// qreal ydif = curPos.y() - m_clickPos.y();
+		qreal ydif = curPos.y() - m_clickPos.y();
 
 		if (m_grabMode == GRAB_RIGHT) {
 			m_xSize = m_clickXSize + xdif;
@@ -169,11 +169,20 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		}
 		else {
 			qreal newX = m_itemPos.x() + xdif;
+			qreal maybeY = m_itemPos.y() + ydif;
 			qreal newY = m_itemPos.y() /*+ ydif*/;
 			if (newX < 0)
 				newX = 0;
 			if (newY < 0)
 				newY = 0;
+
+			TimeLineTrack *track = m_timeline->yPosToTrack(maybeY);
+			if (track && track->trackId() != 0 && track->trackId() != m_trackId) {
+				newY = track->yPos();
+				m_moveToTrackId = track->trackId();
+			} else {
+				m_moveToTrackId = 0;
+			}
 
 			// calc new time position
 			setPosition(m_timeline->msPerPixel() * newX);
@@ -189,6 +198,17 @@ void TimeLineBox::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 {
 	m_isClicked = false;
 	m_grabMode = GRAB_NONE;
+	if (m_moveToTrackId > 0) {
+		TimeLineTrack *curTrack = m_timeline->findTrackWithId(m_trackId);
+		TimeLineTrack *newTrack = m_timeline->findTrackWithId(m_moveToTrackId);
+		if (curTrack && newTrack) {
+			curTrack->removeTimeLineItem(this);
+			newTrack->appendTimeLineItem(this);
+			m_trackId = m_moveToTrackId;
+		}
+		m_moveToTrackId = 0;
+	}
+
 	m_timeline->checkForRightMostItem(this);
 }
 

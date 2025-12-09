@@ -570,10 +570,15 @@ void TimeLineExecuter::onAudioStatusChanged(AudioCtrlMsg msg)
 		return;
 
 	if (msg.currentAudioStatus == AUDIO_IDLE) {
-		int fxid = msg.fxAudio->id();
-		if (m_activeFxAudioList.contains(fxid)) {
-			qDebug() << this << "remove audio with id" << fxid << "from active list";
-			m_activeFxAudioList.removeOne(fxid);
+		if (msg.fxAudio) {
+			int fxid = msg.fxAudio->id();
+			if (m_activeFxAudioList.contains(fxid)) {
+				qDebug() << this << "remove audio with id" << fxid << "from active list";
+				m_activeFxAudioList.removeOne(fxid);
+			}
+		} else {
+			// this happens, if audio control curve is longer than audio effect.
+			// qWarning() << "Audio control message without audio data received in timeline executor";
 		}
 	}
 }

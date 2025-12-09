@@ -362,7 +362,14 @@
     <addaction name="actionShow_Scene_Status"/>
     <addaction name="actionShow_Sequence_Status"/>
    </widget>
+   <widget class="QMenu" name="menuLight">
+    <property name="title">
+     <string>Light</string>
+    </property>
+    <addaction name="actionLight_InitDefaultUniverses"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuLight"/>
    <addaction name="menuEdit"/>
    <addaction name="menuConfiguration"/>
    <addaction name="menuMonitor"/>
@@ -578,6 +585,11 @@
    </property>
    <property name="text">
     <string>Default Audio output mode</string>
+   </property>
+  </action>
+  <action name="actionLight_InitDefaultUniverses">
+   <property name="text">
+    <string>Init default universe(s)</string>
    </property>
   </action>
  </widget>

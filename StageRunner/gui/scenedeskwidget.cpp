@@ -30,7 +30,8 @@
 #include "qtstatictools.h"
 #include "customwidget/mixergroup.h"
 #include "customwidget/mixerchannel.h"
-#include "dmx/dmxtypeselectorwidget.h"
+#include "system/dmx/dmxtypeselectorwidget.h"
+#include "system/dmx/dmxrangewidget.h"
 
 #include <QContextMenuEvent>
 #include <QKeyEvent>
@@ -982,5 +983,20 @@ void SceneDeskWidget::on_closeButton_clicked()
 {
 	m_closeClicked = true;
 	this->close();
+}
+
+void SceneDeskWidget::on_rangeButton_clicked()
+{
+	if (!m_originFxScene) return;
+	int lo = m_originFxScene->firstUsedDmxChannel();
+	int hi = m_originFxScene->lastUsedDmxChannel();
+	DmxRangeWidget dialog(lo, hi, m_originFxScene->guessUniverse(), this);
+	if (dialog.exec()) {
+		lo = dialog.first();
+		hi = dialog.last();
+		int uni = dialog.universe();
+		m_originFxScene->setTubeChannelRange(lo, hi, uni);
+		setFxScene(m_originFxScene);
+	}
 }
 

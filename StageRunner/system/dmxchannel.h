@@ -50,7 +50,7 @@ public:
 	 */
 	qint32 dmxType;						///< @see DmxChannelType
 	qint32 dmxUniverse;					///< DMX universe number
-	qint32 dmxChannel;					///< DMX channel the function uses
+	qint32 dmxChannel;					///< DMX channel the function uses (This is 0 based !!)
 	qint32 dmxValue;					///< current output value of this dmx channel (0-255)
 	qint32 curValue[MIX_LINES];			///< current output value (0 - targetFullRange) HTP with directValue
 	qint32 targetFullValue;				///< The maximum value this channel can be set to (default 10000)

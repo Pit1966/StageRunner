@@ -730,6 +730,25 @@ void FxList::cloneSelectedScriptItem()
 	}
 }
 
+void FxList::cloneSelectedTimelineItem()
+{
+	if (!m_fxNext || m_fxNext->fxType() != FX_TIMELINE)
+		return;
+
+	FxTimeLineItem *fxt = static_cast<FxTimeLineItem*>(m_fxNext);
+	FxTimeLineItem *new_fxt = new FxTimeLineItem(*fxt);
+	new_fxt->refCount.ref();
+	new_fxt->setKeyCode(0);
+	int idx = m_fxList.indexOf(fxt);
+	if (idx >= 0) {
+		m_fxList.insert(idx + 1, new_fxt);
+	} else {
+		m_fxList.append(new_fxt);
+	}
+	m_isModified = true;
+	FxItemTool::setClonedFxName(fxt,new_fxt,this);
+}
+
 
 /**
  * @brief Reset the members of the list for (sequence) start

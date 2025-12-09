@@ -78,8 +78,11 @@ public:
 	qint32 getNewTubeId() const;
 	qint32 getNextUnusedDmxChannel(int universe) const;
 	qint32 guessUniverse() const;
+	qint32 firstUsedDmxChannel() const;
+	qint32 lastUsedDmxChannel() const;
 	void createDefaultTubes(int tubecount, uint universe = 0);
 	void setTubeCount(int tubecount, int defaultUniverse);
+	bool setTubeChannelRange(int firstDmxChan, int lastDmxChan, int defaultUniverse);
 	void addTube();
 	inline int tubeCount() const {return tubes.size();}
 	DmxChannel *tube(int idx) const;

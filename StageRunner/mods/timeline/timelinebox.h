@@ -42,6 +42,9 @@ protected:
 	int m_clickFadeInMs			= 0;		///< fadein time when item is clicked
 	int m_clickFadeOutMs		= 0;		///< fadeout time when item is clicked
 
+	// move to other track
+	int m_moveToTrackId = 0;
+
 
 public:
 	TimeLineBox(TimeLineWidget *timeline, int trackId = 1);

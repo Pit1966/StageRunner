@@ -485,7 +485,7 @@ void StageRunnerMainWin::initAppDefaults()
 			setProjectName(propath);
 		} else {
 			QMessageBox::critical(this,tr("Load error")
-								  ,tr("An error occured while loading file:\n\n%1\nLine %2:'%3'")
+								  ,tr("An error occured while loading last used project file:\n\n%1\nLine %2:'%3'")
 								  .arg(appCentral->userSettings->pLastProjectLoadPath)
 								  .arg(pro->loadErrorLineNumber).arg(pro->loadErrorLineString));
 			setProjectName("");
@@ -1301,6 +1301,12 @@ void StageRunnerMainWin::on_actionSetup_triggered()
 void StageRunnerMainWin::on_actionExit_StageRunner_triggered()
 {
 	close();
+}
+
+
+void StageRunnerMainWin::on_actionLight_InitDefaultUniverses_triggered()
+{
+	appCentral->unitLight->applyUniverseLayoutScenes();
 }
 
 void StageRunnerMainWin::on_addFxSceneButton_clicked()

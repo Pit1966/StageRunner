@@ -219,6 +219,9 @@ void SetupWidget::copy_settings_to_gui()
 	videoXSizeEdit->setText(QString::number(set->pVideoOutXSize));
 	videoYSizeEdit->setText(QString::number(set->pVideoOutYSize));
 	videoForceSecondCheck->setChecked(set->pVideoForceSecondDesktop);
+
+	// DMX options
+	initDefaultUniverseCheck->setChecked(set->pInitDefaultUniverseOnStart);
 }
 
 void SetupWidget::copy_gui_to_settings()
@@ -298,6 +301,9 @@ void SetupWidget::copy_gui_to_settings()
 
 	// Set options in order to avoid necessary restart of application
 	AppCentral::ref().unitAudio->setSmallAudioBufFix(set->pIsSmallAudioBufferFix);
+
+	// DMX options
+	set->pInitDefaultUniverseOnStart = initDefaultUniverseCheck->isChecked();
 }
 
 void SetupWidget::on_okButton_clicked()

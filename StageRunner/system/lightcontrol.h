@@ -80,6 +80,7 @@ public:
 
 	bool fillSceneFromInputUniverses(FxSceneItem *scene, int *feedbackActiveChannels = nullptr);
 	int populateUniverseLayoutScenes();
+	bool applyUniverseLayoutScenes();
 
 	bool setYadiInOutMergeMode(quint32 input, quint32 mode);
 	bool setYadiInOutMergeMode(quint32 mode);
@@ -92,6 +93,7 @@ public:
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerNumerator(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerDenominator(quint32 universe, qint32 dmxChan);
+
 
 private:
 	void init();

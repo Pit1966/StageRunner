@@ -110,6 +110,7 @@ private slots:
 	void on_universeSpin_valueChanged(int arg1);
 
 	void on_closeButton_clicked();
+	void on_rangeButton_clicked();
 
 signals:
 	// void dmxValueWantsUpdate(int universe, int dmxchannel, int dmxval);

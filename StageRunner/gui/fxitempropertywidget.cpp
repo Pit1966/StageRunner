@@ -327,11 +327,28 @@ void FxItemPropertyWidget::on_faderCountEdit_textEdited(const QString &arg1)
 {
 	if (FxItem::exists(cur_fxs)) {
 		bool ok;
-		int num = arg1.toInt(&ok);
-		if (ok && num != cur_fxs->tubeCount()) {
-			cur_fxs->setTubeCount(num, cur_fxs->guessUniverse());
-			cur_fxs->setModified(true);
-			emit modified(cur_fxs);
+		if (arg1.contains('-')) {
+			const QStringList nums = arg1.split('-');
+			if (nums.size() != 2) {
+				faderCountEdit->clear();
+				return;
+			}
+			int n1 = nums.at(0).toInt(&ok);
+			if (!ok)
+				return;
+			int n2 = nums.at(1).toInt(&ok);
+			if (!ok)
+				return;
+
+			cur_fxs->setTubeChannelRange(n1, n2, cur_fxs->guessUniverse());
+		}
+		else {
+			int num = arg1.toInt(&ok);
+			if (ok && num != cur_fxs->tubeCount()) {
+				cur_fxs->setTubeCount(num, cur_fxs->guessUniverse());
+				cur_fxs->setModified(true);
+				emit modified(cur_fxs);
+			}
 		}
 	}
 }

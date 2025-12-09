@@ -44,6 +44,7 @@ public:
 	pbool pLogarithmicVolDials;
 	pbool pIsAudioInThread;
 	pbool pIsSmallAudioBufferFix;
+	pbool pInitDefaultUniverseOnStart;
 	pint32 pAudioAllowReactivateTime;
 	pbool pNoInterfaceDmxFeedback;
 	qint32 mapAudioToDmxUniv[MAX_AUDIO_SLOTS];

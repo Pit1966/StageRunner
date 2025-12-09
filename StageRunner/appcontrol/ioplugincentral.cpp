@@ -145,7 +145,8 @@ void IOPluginCentral::unloadPlugins()
 	//	}
 	//  qlc_plugins.clear();
 
-	if (debug) qDebug() << "unload plugins";
+	if (debug)
+		qDebug() << "unload plugins";
 
 	while (!qlc_plugins.isEmpty())
 		delete qlc_plugins.takeFirst();

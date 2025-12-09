@@ -132,6 +132,7 @@ public:
 	void cloneSelectedSceneItem();
 	void cloneSelectedSeqItem();
 	void cloneSelectedScriptItem();
+	void cloneSelectedTimelineItem();
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
 
