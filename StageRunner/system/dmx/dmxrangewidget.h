@@ -21,6 +21,10 @@ public:
 	int last() const;
 	int universe() const;
 
+private slots:
+	void on_firstDmxChanSpin_valueChanged(int arg1);
+	void on_lastDmxChanSpin_valueChanged(int arg1);
+	void on_channelsSpin_valueChanged(int arg1);
 };
 
 #endif // DMXRANGEWIDGET_H

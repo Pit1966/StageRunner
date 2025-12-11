@@ -244,7 +244,7 @@ bool FxSceneItem::setTubeChannelRange(int firstDmxChan, int lastDmxChan, int def
 	for (int i=0; i<tubes.size(); i++) {
 		DmxChannel *dmx = tubes.at(i);
 		dmx->dmxUniverse = defaultUniverse;
-		dmx->dmxChannel = dmxchan - 1;
+		dmx->dmxChannel = dmxchan;
 		dmx->deskPositionIndex = -1;
 		dmx->tubeId = i;
 
