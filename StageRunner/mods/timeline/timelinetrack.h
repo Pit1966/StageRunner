@@ -55,7 +55,7 @@ public:
 	void setOverlay(bool state);
 	inline int yPos() const {return m_yPos;}
 	inline void setYPos(int y) {m_yPos = y;}
-	inline int yEndPos() const {return m_yPos + m_ySize;}
+	inline int  yEndPos() const {return m_yPos + m_ySize;}
 	inline int ySize() const {return m_ySize;}
 	inline void setYSize(int ySize) {m_ySize = ySize;}
 	bool isInYRange(int y) const {return y >= m_yPos && y < yEndPos();}

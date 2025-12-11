@@ -404,6 +404,19 @@ bool TimeLineExecuter::processEnvelopes(int estTimeMs)
 	return true;
 }
 
+bool TimeLineExecuter::removeAudioSlotFromEnvelopeActive(int audioSlot)
+{
+	for (int i=0; i<m_curveTracks.size(); i++) {
+		Envelope *enve = m_curveTracks.at(i);
+		if (enve->usedAudioSlots.removeOne(audioSlot)) {
+			if (debug)
+				qDebug() << "Removed audio slot" << audioSlot+1 << "from envelope track" << enve->trackID;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 {
 	FxItem *fx = FxItem::findFxById(fxID);
@@ -575,6 +588,7 @@ void TimeLineExecuter::onAudioStatusChanged(AudioCtrlMsg msg)
 			if (m_activeFxAudioList.contains(fxid)) {
 				qDebug() << this << "remove audio with id" << fxid << "from active list";
 				m_activeFxAudioList.removeOne(fxid);
+				removeAudioSlotFromEnvelopeActive(msg.slotNumber);
 			}
 		} else {
 			// this happens, if audio control curve is longer than audio effect.

@@ -142,6 +142,7 @@ public:
 
 	int cursorPos() const;
 
+	int isYPosOutsideTracks(int y);
 	int yPosToTrackId(int y);
 	TimeLineTrack *yPosToTrack(int y);
 	QList<TimeLineTrack*> yPosToTrackList(int y);

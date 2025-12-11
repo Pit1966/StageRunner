@@ -89,6 +89,7 @@ protected:
 	bool getTimeLineObjs(FxTimeLineItem *fx);
 
 	bool processEnvelopes(int estTimeMs);
+	bool removeAudioSlotFromEnvelopeActive(int audioSlot);
 
 	bool execObjBeginPosForFx(int fxID, Event &ev);
 	bool execObjEndPosForFx(int fxID, Event &ev);

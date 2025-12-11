@@ -542,6 +542,25 @@ int TimeLineWidget::cursorPos() const
 	return m_cursor->position();
 }
 
+/**
+ * @brief Check if yPos is over a regular (not timeline ruler) track
+ * @param y
+ * @return 0: is over track; -1: is above the tracks; 1: is below the tracks
+ */
+int TimeLineWidget::isYPosOutsideTracks(int y)
+{
+	if (m_tracks.size() < 2)
+		return 1;
+
+	if (y < m_tracks.at(1)->yPos())
+		return -1;
+
+	if (y >= m_tracks.last()->yEndPos())
+		return 1;
+
+	return 0;
+}
+
 
 /**
  * @brief Returns trackID for given y position

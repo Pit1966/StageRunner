@@ -84,6 +84,7 @@ void TimeLineBox::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		m_clickXSize = m_xSize;
 		m_clickFadeInMs = fadeInTime();
 		m_clickFadeOutMs = fadeOutTime();
+
 		qDebug() << "clicked item" << m_label << "at pos" << m_itemPos << "duration [ms]" << duration();
 		leftClicked(event);
 	}
@@ -170,44 +171,33 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		else {
 			qreal newX = m_itemPos.x() + xdif;
 			qreal newY = m_itemPos.y();
-			qreal maybeY = m_itemPos.y() + ySize()/2 + ydif;
-			maybeY = curPos.y();
+			qreal newYSize = m_ySize;
 			if (newX < 0)
 				newX = 0;
 			if (newY < 0)
 				newY = 0;
 
-			if (qAbs(ydif) > m_timeline->defaultTrackHeight()) {
-				TimeLineTrack *track = m_timeline->yPosToTrack(maybeY);
-				if (track) {
-					int targetID = track->trackId();
-					if (targetID == 0)	// This is the ruler track
-						targetID = 1;
+			if (qAbs(ydif) > m_timeline->defaultTrackHeight() || m_moveToTrackId > 0) {
+				qreal maybeY = curPos.y();		//m_itemPos.y() + ySize()/2 + ydif;
+				if (m_timeline->isYPosOutsideTracks(maybeY) == 0) {
+					TimeLineTrack *track = m_timeline->yPosToTrack(maybeY);
+					if (track->trackId() != m_moveToTrackId && track->trackType() == TRACK_ITEMS) {
+						m_moveToTrackId = track->trackId();
+					}
+				}
 
-					if (track->trackId() > 0) {
-						qDebug() << "trackID" << targetID;
-						newY = track->yPos();
-						setYSize(track->ySize());
-						m_moveToTrackId = targetID;
-					}
+				if (m_moveToTrackId > 0) {
+					TimeLineTrack *track = m_timeline->findTrackWithId(m_moveToTrackId);
+					newY = track->yPos();
+					newYSize = track->ySize() - 1;
 				}
-				else {
-					qDebug() << "no track";
-					if (m_moveToTrackId > 0) {
-						TimeLineTrack *oldtrack = m_timeline->findTrackWithId(m_moveToTrackId);
-						newY = oldtrack->yPos();
-						setYSize(oldtrack->ySize());
-					}
-				}
-			}
-			else {
-				m_moveToTrackId = 0;
 			}
 
 			// calc new time position
 			setPosition(m_timeline->msPerPixel() * newX);
-			// set new item pos
+			// set new item pos and size
 			setPos(newX, newY);
+			setYSize(newYSize);
 
 			qDebug() << m_label << "current timepos" << position() << "size" << duration();
 		}
@@ -219,12 +209,14 @@ void TimeLineBox::mouseReleaseEvent(QGraphicsSceneMouseEvent */*event*/)
 	m_isClicked = false;
 	m_grabMode = GRAB_NONE;
 	if (m_moveToTrackId > 0) {
-		TimeLineTrack *curTrack = m_timeline->findTrackWithId(m_trackId);
-		TimeLineTrack *newTrack = m_timeline->findTrackWithId(m_moveToTrackId);
-		if (curTrack && newTrack) {
-			curTrack->removeTimeLineItem(this);
-			newTrack->appendTimeLineItem(this);
-			m_trackId = m_moveToTrackId;
+		if (m_moveToTrackId != m_trackId) {
+			TimeLineTrack *curTrack = m_timeline->findTrackWithId(m_trackId);
+			TimeLineTrack *newTrack = m_timeline->findTrackWithId(m_moveToTrackId);
+			if (curTrack && newTrack) {
+				curTrack->removeTimeLineItem(this);
+				newTrack->appendTimeLineItem(this);
+				m_trackId = m_moveToTrackId;
+			}
 		}
 		m_moveToTrackId = 0;
 	}
