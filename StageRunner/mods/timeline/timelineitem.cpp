@@ -72,6 +72,11 @@ void TimeLineItem::setYPos(qreal yPixelPos)
 	setY(yPixelPos);
 }
 
+qreal TimeLineItem::ySize() const
+{
+	return m_ySize;
+}
+
 void TimeLineItem::setYSize(qreal ySize)
 {
 	if (m_ySize != ySize) {

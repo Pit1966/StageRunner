@@ -45,7 +45,6 @@ protected:
 	// move to other track
 	int m_moveToTrackId = 0;
 
-
 public:
 	TimeLineBox(TimeLineWidget *timeline, int trackId = 1);
 

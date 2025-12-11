@@ -578,7 +578,8 @@ void TimeLineExecuter::onAudioStatusChanged(AudioCtrlMsg msg)
 			}
 		} else {
 			// this happens, if audio control curve is longer than audio effect.
-			// qWarning() << "Audio control message without audio data received in timeline executor";
+			if (m_warningCnt++ < 5)
+				qWarning() << "Audio control message without audio data received in timeline executor";
 		}
 	}
 }

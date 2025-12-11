@@ -65,6 +65,7 @@ public:
 
 	qreal yPos() const;
 	void setYPos(qreal yPixelPos);
+	qreal ySize() const;
 	void setYSize(qreal ySize);
 
 	bool isInsideScenePos(qreal sceneX, qreal sceneY);

@@ -138,7 +138,6 @@ SOURCES += \
 	../gui/customwidget/psspinbox.cpp \
 	../gui/customwidget/psvumeter.cpp \
 	../gui/deviceinfowidget.cpp \
-	../gui/dmxrangewidget.cpp \
 	../gui/fxitempropertywidget.cpp \
 	../gui/fxlistwidget.cpp \
 	../gui/fxlistwidgetitem.cpp \
@@ -173,6 +172,7 @@ SOURCES += \
 	../system/audioworker.cpp \
 	../system/convtools.cpp \
 	../system/dmx/dmxhelp.cpp \
+	../system/dmx/dmxrangewidget.cpp \
 	../system/dmx/dmxtypeselectorwidget.cpp \
 	../system/dmx/fixture.cpp \
 	../system/dmxchannel.cpp \
@@ -378,7 +378,6 @@ FORMS    += \
 	../gui/consolidatedialog.ui \
 	../gui/customwidget/psinfodialog.ui \
 	../gui/deviceinfowidget.ui \
-	../gui/dmxrangewidget.ui \
 	../gui/fxitempropertywidget.ui \
 	../gui/fxlistwidget.ui \
 	../gui/fxlistwidgetitem.ui \
@@ -393,6 +392,7 @@ FORMS    += \
 	../gui/stagerunnermainwin.ui \
 	../gui/universeeditorwidget.ui \
 	../gui/videostatuswidget.ui \
+	../system/dmx/dmxrangewidget.ui \
 	../system/dmx/dmxtypeselectorwidget.ui \
 	../system/messagedialog.ui \
 	../widgets/fxtimelineeditwidget.ui

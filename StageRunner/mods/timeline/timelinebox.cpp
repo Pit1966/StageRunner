@@ -169,18 +169,38 @@ void TimeLineBox::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		}
 		else {
 			qreal newX = m_itemPos.x() + xdif;
-			qreal maybeY = m_itemPos.y() + ydif;
-			qreal newY = m_itemPos.y() /*+ ydif*/;
+			qreal newY = m_itemPos.y();
+			qreal maybeY = m_itemPos.y() + ySize()/2 + ydif;
+			maybeY = curPos.y();
 			if (newX < 0)
 				newX = 0;
 			if (newY < 0)
 				newY = 0;
 
-			TimeLineTrack *track = m_timeline->yPosToTrack(maybeY);
-			if (track && track->trackId() != 0 && track->trackId() != m_trackId) {
-				newY = track->yPos();
-				m_moveToTrackId = track->trackId();
-			} else {
+			if (qAbs(ydif) > m_timeline->defaultTrackHeight()) {
+				TimeLineTrack *track = m_timeline->yPosToTrack(maybeY);
+				if (track) {
+					int targetID = track->trackId();
+					if (targetID == 0)	// This is the ruler track
+						targetID = 1;
+
+					if (track->trackId() > 0) {
+						qDebug() << "trackID" << targetID;
+						newY = track->yPos();
+						setYSize(track->ySize());
+						m_moveToTrackId = targetID;
+					}
+				}
+				else {
+					qDebug() << "no track";
+					if (m_moveToTrackId > 0) {
+						TimeLineTrack *oldtrack = m_timeline->findTrackWithId(m_moveToTrackId);
+						newY = oldtrack->yPos();
+						setYSize(oldtrack->ySize());
+					}
+				}
+			}
+			else {
 				m_moveToTrackId = 0;
 			}
 

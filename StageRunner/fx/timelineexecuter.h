@@ -64,6 +64,7 @@ protected:
 
 	// temp
 	int m_nextCurveTrackEventAtMs	= -1;
+	int m_warningCnt				= 0;
 	bool m_triggerCurveEvent		= false;		///< override next timeline ITEMS event with a regulary called envelope/curve event
 	bool m_stopAllFxAtFinish		= false;		///< if set, all Fx started by this timeline are stopped when timeline has finished (stop audio, script, scene)
 
