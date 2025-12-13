@@ -683,9 +683,11 @@ bool SceneDeskWidget::renumberDmxAddrForSelectedTubes()
 		return false;
 
 
+	QList<int> tubeids = m_selectedTubeIds;
+
 	bool ok = true;
-	for (int i=0; i<m_selectedTubeIds.size(); i++) {
-		int tubeId = m_selectedTubeIds.at(i);
+	for (int i=0; i<tubeids.size(); i++) {
+		int tubeId = tubeids.at(i);
 		MixerChannel *mix = faderAreaWidget->getMixerById(tubeId);
 		if (!mix) {
 			qWarning() << "Could not find Mixer with tubeID" << tubeId;
@@ -697,13 +699,17 @@ bool SceneDeskWidget::renumberDmxAddrForSelectedTubes()
 		dmx = dmx + dmxdif;
 		if (dmx < 0 || dmx > 511) {
 			qWarning() << "Transponated DMX channel" << dmx << " for tubeID" << tubeId << "is out of range";
+			POPUPERRORMSG("SceneDeskWidget", tr("Remaped DMX addr for tube ID %1 is out of range %2").arg(tubeId).arg(dmx+1));
 			ok = false;
+			break;
 		}
 		else {
 			DmxChannel *tube = getTubeFromMixer(mix);
 			tube->dmxChannel = dmx;
 			mix->setDmxAddr(dmx);
 			mix->update();
+			setTubeSelected(false, tubeId);
+			mix->setSelected(false);
 		}
 	}
 
