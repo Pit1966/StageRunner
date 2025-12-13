@@ -444,7 +444,7 @@ void MixerGroup::notifyChangedDmxUniverse(int universe, const QByteArray &dmxVal
 	for (int t=0;t<mixerlist.size(); t++) {
 		MixerChannel *mixer = mixerlist.at(t);
 		if (mixer->dmxUniverse() == universe) {
-			int target_value = quint8(dmxValues[mixer->dmxChannel()]) * mixer->maximum() / 255;
+			int target_value = quint8(dmxValues[mixer->dmxAddr()]) * mixer->maximum() / 255;
 			if (mixer->refValue() != target_value) {
 				mixer->setRefValue(target_value);
 				mixer->update();

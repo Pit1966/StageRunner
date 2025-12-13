@@ -224,7 +224,7 @@ DmxChannel *SceneDeskWidget::getTubeFromMixer(const MixerChannel *mixer) const
 {
 	if (!m_originFxScene) return nullptr;
 
-	return m_originFxScene->findTube(mixer->dmxUniverse(), mixer->dmxChannel());
+	return m_originFxScene->findTube(mixer->dmxUniverse(), mixer->dmxAddr());
 }
 
 /**
@@ -630,7 +630,7 @@ bool SceneDeskWidget::deleteSelectedTubes()
 		int id = ids.takeFirst();
 		MixerChannel *mix = faderAreaWidget->getMixerById(id);
 		if (mix) {
-			qDebug() << "---> mix id" << id << "dmx" << mix->dmxChannel()+1;
+			qDebug() << "---> mix id" << id << "dmx" << mix->dmxAddr()+1;
 			DmxChannel *tube1 = getTubeFromMixer(mix);
 			DmxChannel *tube2 = m_originFxScene->findTube(id);
 			if (tube1)
@@ -655,6 +655,59 @@ bool SceneDeskWidget::deleteSelectedTubes()
 
 
 	return setFxScene(m_originFxScene);
+}
+
+bool SceneDeskWidget::renumberDmxAddrForSelectedTubes()
+{
+	if (m_selectedTubeIds.isEmpty())
+		return false;
+
+	std::sort(m_selectedTubeIds.begin(), m_selectedTubeIds.end());
+
+	// get first tube with dmx address
+	MixerChannel *firstmix = faderAreaWidget->getMixerById(m_selectedTubeIds.first());
+	if (!firstmix)
+		return false;
+
+	int baseaddr = firstmix->dmxAddr();
+
+	int newbaseaddr = QInputDialog::getInt(this, tr("DMX address changer"),
+										tr("Enter new start DMX address"),
+										baseaddr + 1, 1, 512);
+	newbaseaddr--;
+	if (newbaseaddr < 0)
+		return false;
+
+	int dmxdif = newbaseaddr - baseaddr;
+	if (dmxdif == 0)
+		return false;
+
+
+	bool ok = true;
+	for (int i=0; i<m_selectedTubeIds.size(); i++) {
+		int tubeId = m_selectedTubeIds.at(i);
+		MixerChannel *mix = faderAreaWidget->getMixerById(tubeId);
+		if (!mix) {
+			qWarning() << "Could not find Mixer with tubeID" << tubeId;
+			ok = false;
+			continue;
+		}
+
+		int dmx = mix->dmxAddr();
+		dmx = dmx + dmxdif;
+		if (dmx < 0 || dmx > 511) {
+			qWarning() << "Transponated DMX channel" << dmx << " for tubeID" << tubeId << "is out of range";
+			ok = false;
+		}
+		else {
+			DmxChannel *tube = getTubeFromMixer(mix);
+			tube->dmxChannel = dmx;
+			mix->setDmxAddr(dmx);
+			mix->update();
+		}
+	}
+
+	return ok;
 }
 
 bool SceneDeskWidget::unhideAllTubes()
@@ -751,12 +804,14 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 	else {
 		act = menu.addAction(tr("Unselect all"));
 		act->setObjectName("6");
-		act = menu.addAction(tr("Hide selected Channel(s)"));
+		act = menu.addAction(tr("Hide selected channel(s)"));
 		act->setObjectName("1");
 		act = menu.addAction(tr("Delete selected channel(s)"));
 		act->setObjectName("9");
 		act = menu.addAction(tr("Set channel DMX type to default"));
 		act->setObjectName("8");
+		act = menu.addAction(tr("Remap DMX address for selected channels"));
+		act->setObjectName("10");
 	}
 	act = menu.addAction(tr("Add Channel"));
 	act->setObjectName("2");
@@ -865,6 +920,10 @@ void SceneDeskWidget::contextMenuEvent(QContextMenuEvent *event)
 
 	case 9:
 		deleteSelectedTubes();
+		break;
+
+	case 10:
+		renumberDmxAddrForSelectedTubes();
 		break;
 	}
 }

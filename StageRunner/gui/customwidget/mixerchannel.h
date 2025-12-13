@@ -96,7 +96,8 @@ public:
 	void setDmxId(int universe, int dmx_channel, DmxChannel *dmxChP);
 	void setUniverse(int universe);
 	inline int dmxUniverse() const {return my_universe;}
-	inline int dmxChannel() const {return my_dmx_channel;}
+	inline int dmxAddr() const {return my_dmx_channel;}
+	inline void setDmxAddr(int addr) {my_dmx_channel = addr;}
 
 	void setRange(int min, int max);
 	void setMinimum(int min);

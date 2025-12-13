@@ -70,6 +70,7 @@ protected:
 	bool hideSelectedTubes();
 	bool setTypeOfSelectedTubes(DmxChannelType type);
 	bool deleteSelectedTubes();
+	bool renumberDmxAddrForSelectedTubes();
 	bool unhideAllTubes();
 	int setLabelInSelectedTubes(const QString &text);
 	int setUniverseInTubes(int universe);
