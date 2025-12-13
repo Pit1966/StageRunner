@@ -242,11 +242,21 @@ DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **mixerChanne
 		*mixerChannel = mixer;
 	}
 
-	if (!mixer || !m_originFxScene) return tube;
+	if (!mixer || !m_originFxScene)
+		return tube;
 
 	// Now get tube for MixerChannel Id in scene Tube list
-	if (mixer->id() >= 0 && mixer->id() < m_originFxScene->tubes.size()) {
-		tube = m_originFxScene->tubes.at(mixer->id());
+	if (mixer->id() >= 0) {
+		int idxcnt = 0;
+		for (int i=0; i<m_originFxScene->tubes.size(); i++) {
+			if (m_originFxScene->tubes.at(i)->tubeId == mixer->id()) {
+				tube = m_originFxScene->tubes.at(i);
+				idxcnt++;
+			}
+		}
+
+		if (idxcnt > 1)
+			POPUPERRORMSG("SceneDiskWidget", QString("Found more than one matching tube in mixer list with tubeID: %1").arg(mixer->id()));
 	}
 	return tube;
 }
@@ -562,6 +572,11 @@ bool SceneDeskWidget::hideTube(DmxChannel *tube, MixerChannel *mixer)
 
 bool SceneDeskWidget::setDmxTypeForTube(DmxChannel *tube, MixerChannel *mixer)
 {
+	if (!tube) {
+		qWarning() << "No tube selected!";
+		return false;
+	}
+
 	DmxTypeSelectorWidget wid(DmxChannelType(tube->dmxType));
 	wid.setScaler(tube->scalerNumerator, tube->scalerDenominator);
 	wid.show();

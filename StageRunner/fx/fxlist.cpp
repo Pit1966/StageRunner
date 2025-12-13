@@ -737,6 +737,7 @@ void FxList::cloneSelectedTimelineItem()
 
 	FxTimeLineItem *fxt = static_cast<FxTimeLineItem*>(m_fxNext);
 	FxTimeLineItem *new_fxt = new FxTimeLineItem(*fxt);
+	new_fxt->generateNewID(fxt->id());
 	new_fxt->refCount.ref();
 	new_fxt->setKeyCode(0);
 	int idx = m_fxList.indexOf(fxt);

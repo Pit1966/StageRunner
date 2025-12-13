@@ -33,22 +33,16 @@ int DmxRangeWidget::universe() const
 
 void DmxRangeWidget::on_firstDmxChanSpin_valueChanged(int arg1)
 {
-	int to = ui->lastDmxChanSpin->value();
-	if (arg1 > to) {
-		ui->lastDmxChanSpin->setValue(arg1);
-		return;
-	}
-
-	ui->channelsSpin->setValue(to - arg1 + 1);
+	int cnt = ui->channelsSpin->value();
+	ui->lastDmxChanSpin->setValue(arg1 + cnt - 1);
 }
 
 void DmxRangeWidget::on_lastDmxChanSpin_valueChanged(int arg1)
 {
 	int from = ui->firstDmxChanSpin->value();
-	if (arg1 < from) {
-		ui->lastDmxChanSpin->setValue(from);
+	if (arg1 < from)
 		return;
-	}
+
 	ui->channelsSpin->setValue(arg1 - from + 1);
 }
 
@@ -59,6 +53,15 @@ void DmxRangeWidget::on_channelsSpin_valueChanged(int arg1)
 }
 
 
+void DmxRangeWidget::on_lastDmxChanSpin_editingFinished()
+{
+	fprintf(stderr, "editing finished\n");
 
-
+	int to = ui->lastDmxChanSpin->value();
+	int from = ui->firstDmxChanSpin->value();
+	if (to < from) {
+		ui->lastDmxChanSpin->setValue(from);
+	}
+	ui->channelsSpin->setValue(to - from + 1);
+}
 

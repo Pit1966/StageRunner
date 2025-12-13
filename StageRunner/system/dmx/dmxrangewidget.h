@@ -25,6 +25,7 @@ private slots:
 	void on_firstDmxChanSpin_valueChanged(int arg1);
 	void on_lastDmxChanSpin_valueChanged(int arg1);
 	void on_channelsSpin_valueChanged(int arg1);
+	void on_lastDmxChanSpin_editingFinished();
 };
 
 #endif // DMXRANGEWIDGET_H

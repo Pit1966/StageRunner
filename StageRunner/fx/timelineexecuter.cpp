@@ -586,7 +586,8 @@ void TimeLineExecuter::onAudioStatusChanged(AudioCtrlMsg msg)
 		if (msg.fxAudio) {
 			int fxid = msg.fxAudio->id();
 			if (m_activeFxAudioList.contains(fxid)) {
-				qDebug() << this << "remove audio with id" << fxid << "from active list";
+				if (debug)
+					qDebug() << this << "remove audio with id" << fxid << "from active list";
 				m_activeFxAudioList.removeOne(fxid);
 				removeAudioSlotFromEnvelopeActive(msg.slotNumber);
 			}
