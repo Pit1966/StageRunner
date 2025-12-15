@@ -44,6 +44,8 @@ public:
 private:
 	void init();
 
+protected:
+
 public slots:
 	void setNextFx(FxItem *fx);
 	void setMasterVolume(int val);
@@ -54,6 +56,8 @@ private slots:
 	void on_masterVolDial_sliderMoved(int position);
 	void on_moveToNextButton_clicked();
 	void on_moveToPrevButton_clicked();
+
+	void selectedToggled(bool state);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd);

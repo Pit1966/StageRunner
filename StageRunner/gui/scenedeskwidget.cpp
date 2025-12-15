@@ -697,7 +697,7 @@ bool SceneDeskWidget::renumberDmxAddrForSelectedTubes()
 
 		int dmx = mix->dmxAddr();
 		dmx = dmx + dmxdif;
-		if (dmx < 0 || dmx > 511) {
+		if ((dmx < 0) || (dmx > 511)) {
 			qWarning() << "Transponated DMX channel" << dmx << " for tubeID" << tubeId << "is out of range";
 			POPUPERRORMSG("SceneDeskWidget", tr("Remaped DMX addr for tube ID %1 is out of range %2").arg(tubeId).arg(dmx+1));
 			ok = false;

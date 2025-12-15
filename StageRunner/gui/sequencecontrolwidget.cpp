@@ -34,8 +34,8 @@
 SequenceControlWidget::SequenceControlWidget(QWidget *parent) :
 	QGroupBox(parent)
 {
-	init();
 	setupUi(this);
+	init();
 	masterVolDial->setRange(0,MAX_VOLUME);
 	masterVolDial->setValue(MAX_VOLUME);
 	nextSequenceGroup->setAutoFillBackground(true);
@@ -64,6 +64,7 @@ void SequenceControlWidget::setMasterVolume(int val)
 
 void SequenceControlWidget::init()
 {
+	connect(this, SIGNAL(toggled(bool)), this, SLOT(selectedToggled(bool)));
 }
 
 void SequenceControlWidget::on_ctrlPlayButton_clicked()
@@ -95,4 +96,12 @@ void SequenceControlWidget::on_moveToNextButton_clicked()
 void SequenceControlWidget::on_moveToPrevButton_clicked()
 {
 	appcentral->moveToForeRunnerFx(1);
+}
+
+void SequenceControlWidget::selectedToggled(bool state)
+{
+	const QList<QWidget*> wids = findChildren<QWidget*>();
+	for (QWidget *w : wids) {
+		w->setVisible(state);
+	}
 }

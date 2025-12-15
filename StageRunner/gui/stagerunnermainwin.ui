@@ -59,6 +59,9 @@
            <property name="title">
             <string>Sequence Control</string>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>

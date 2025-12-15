@@ -294,6 +294,8 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 				QFontMetrics fm(group->font());
 				QRect frect = fm.boundingRect(group->title());
 				textLength = frect.width() + 10;
+				if (group->isCheckable())
+					textLength += 15;
 			}
 
 			QPainterPath roundRect = drawRoundBox(option->rect,false,textLength);
@@ -336,7 +338,6 @@ void LightDeskStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyl
 			// painter->setPen(option->palette.foreground().color());
 			// painter->setClipping(false);
 			// painter->drawPath(roundRect);
-
 
 			painter->restore();
 		}

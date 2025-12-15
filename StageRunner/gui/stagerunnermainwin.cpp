@@ -196,6 +196,8 @@ void StageRunnerMainWin::initModules()
 
 	// TimeLineItem *item = fxTimeLineWid->timeLineWidget()->addTimeLineItem(50000, 10000, "item 2", 2);
 	// item->setBackgroundColor(0x552222);
+
+	// audioCtrlGroup->setVisible(false);
 }
 
 void StageRunnerMainWin::initConnects()

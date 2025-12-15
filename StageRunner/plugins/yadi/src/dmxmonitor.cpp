@@ -49,6 +49,8 @@ void DmxMonitor::init()
 	m_barsColor = Qt::darkGreen;
 	m_barsSecColor = 0x7070d0;
 	m_valueColor = Qt::yellow;
+
+	setMinimumHeight(20);
 }
 
 void DmxMonitor::paintEvent(QPaintEvent *)
