@@ -11,6 +11,11 @@
 - IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht
 
 Fixme:
+
+- Wenn in einer Timeline einer FxAudioItem nicht gestartet werden kann (File not found), Dann ist danach der
+    Audio Slot blockiert
+
+
 done: Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
 einfadens drücken
 

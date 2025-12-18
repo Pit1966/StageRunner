@@ -505,8 +505,6 @@ void StageRunnerMainWin::initAppDefaults()
 
 	// Copy User Settings to GUI
 	applyUserSettingsToGui(appCentral->userSettings);
-
-
 }
 
 /**

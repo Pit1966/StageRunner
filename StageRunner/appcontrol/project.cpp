@@ -34,6 +34,7 @@
 #include "../fx/fxsceneitem.h"
 #include "../fx/fxaudioitem.h"
 #include "../fx/fxplaylistitem.h"
+#include "../fx/fxseqitem.h"
 
 
 #include <QDateTime>
@@ -586,6 +587,15 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 				}
 				ok &= fxs->updateSceneFromOlderProjectVersion(pProjectFormat);
 			}
+		}
+		else if (fx->fxType() == FX_SEQUENCE) {
+			FxSeqItem *fxseq = dynamic_cast<FxSeqItem *>(fx);
+			if (!fxseq) {
+				ok = false;
+				continue;
+			}
+			// call check function recursively for list in FxSeqItem
+			ok &= checkFxItemList(fxseq->seqList, result);
 		}
 	}
 
