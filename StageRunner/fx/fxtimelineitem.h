@@ -18,7 +18,7 @@ class FxTimeLineItem : public FxItem
 
 private:
 	VarSetList<FxTimeLineTrack*>m_tracks;
-	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];		// m_timelines indes must be trackID
+	VarSetList<FxTimeLineObj*>m_timelines[TIMELINE_MAX_TRACKS];		// m_timelines index must be trackID
 	qint32 m_timeLineDurationMs;
 
 public:

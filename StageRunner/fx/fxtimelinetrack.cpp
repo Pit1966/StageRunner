@@ -14,6 +14,13 @@ FxTimeLineTrack::FxTimeLineTrack(TimeLineWidget *timeline, TRACK_TYPE type, int 
 	m_ySize = size;
 }
 
+FxTimeLineTrack::FxTimeLineTrack(const FxTimeLineTrack &o)
+	: TimeLineTrack(o.m_timeline, o.m_type, o.m_trackID)
+{
+	init();
+	VarSet::cloneFrom(o);
+}
+
 bool FxTimeLineTrack::isEqual(TimeLineTrack *o) const
 {
 	return trackBgColor == o->trackBgColor

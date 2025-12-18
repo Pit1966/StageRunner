@@ -26,6 +26,7 @@ protected:
 
 public:
 	FxTimeLineObj(int posMs = 0, int durationMs = 0, const QString &label = {}, int trackID = 1);
+	FxTimeLineObj(const FxTimeLineObj &o);
 	void clear();
 	bool operator ==(const FxTimeLineObj &o);
 	bool isEqual(const FxTimeLineObj *o);

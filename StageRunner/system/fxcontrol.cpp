@@ -418,8 +418,10 @@ TimeLineExecuter *FxControl::startFxTimeLine(FxTimeLineItem *fxtimeline, int atM
 	}
 
 	// Give control for executer to FxControl loop
-	if (!exec->activateProcessing(isContinue))
+	if (!exec->activateProcessing(isContinue)) {
 		LOGERROR(tr("Could not activate timeline: %1").arg(fxtimeline->name()));
+		exec->deleteMe(exec);
+	}
 
 	return exec;
 }

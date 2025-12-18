@@ -27,10 +27,11 @@ FxTimeLineItem::FxTimeLineItem(const FxTimeLineItem &o)
 			FxTimeLineObj *obj = new FxTimeLineObj(*o.m_timelines[t].at(i));
 			m_timelines[t].append(obj);
 		}
-		for (int i=0; i<o.m_tracks.size(); i++) {
-			FxTimeLineTrack *track = new FxTimeLineTrack(*o.m_tracks.at(i));
-			m_tracks.append(track);
-		}
+	}
+
+	for (int i=0; i<o.m_tracks.size(); i++) {
+		FxTimeLineTrack *track = new FxTimeLineTrack(*o.m_tracks.at(i));
+		m_tracks.append(track);
 	}
 }
 

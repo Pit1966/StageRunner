@@ -14,6 +14,12 @@ FxTimeLineObj::FxTimeLineObj(int posMs, int durationMs, const QString &label, in
 	this->label = label;
 }
 
+FxTimeLineObj::FxTimeLineObj(const FxTimeLineObj &o)
+{
+	init();
+	VarSet::cloneFrom(o);
+}
+
 void FxTimeLineObj::clear()
 {
 	// implement me
