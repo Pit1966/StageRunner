@@ -627,10 +627,12 @@ void Log::errorPopupMsg(const QString & where, const QString & text, QWidget *pa
 			mb.setStyleSheet("background: #444444");
 		mb.exec();
 	} else {
+		QString whereRed = QString("<b><font color=red>Failed: %1</font></b>").arg(where);
+
 		// Für Log eine Kopie der Meldung machen, die keine Zeilensprünge enthält
 		QString logtext = text;
 		logtext.replace("\n"," > ");
-		LOGERROR(QString("%1: %2").arg(where,logtext));
+		LOGERROR(QString("%1: %2").arg(whereRed,logtext));
 		emit errorMsgReceived(where, text);
 	}
 }

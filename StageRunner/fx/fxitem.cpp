@@ -293,7 +293,7 @@ QString FxItem::fxNamePath() const
 	else if (parentFxList()) {
 		int pos = parentFxList()->indexOf(this) + 1;
 		if (pos > 0)
-			pname.prepend(QString("<b>%1</b> : ").arg(pos,3,10,QLatin1Char('0')));
+			pname.prepend(QString("<b>Line:%1</b>: ").arg(pos,3,10,QLatin1Char('0')));
 	}
 
 	return pname;

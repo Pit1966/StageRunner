@@ -465,6 +465,10 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 					enve->usedAudioSlots.append(slot);
 			}
 		}
+		else {
+			LOGERROR(tr("Could not audio or clip (FX: %1, ID %2) from timeline")
+					 .arg(fxa->name()).arg(fxa->id()));
+		}
 	}
 	else if (fxtype == FX_SCENE) {
 		/// Further the executer is not handed over to scene

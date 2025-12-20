@@ -211,9 +211,14 @@ bool AudioSlot::startFxAudio(FxAudioItem *fxa, Executer *exec, qint64 startPosMs
 
 	// Set Filename of audio file
 	if (!m_audioPlayer->setSourceFilename(fxa->filePath(), fxa->name())) {
-		QString msg = tr("FX '%1': Could not start FX audio with file '%2'")
+		QString msg;
+		if (exec)
+			msg += exec->getParentNameString();
+		msg += tr("FX '%1': Could not start FX audio with file '%2'")
 				.arg(fxa->fxNamePath(), fxa->filePath());
 		POPUPERRORMSG(__func__, msg);
+
+		m_runStatus = AUDIO_ERROR;
 		return false;
 	}
 

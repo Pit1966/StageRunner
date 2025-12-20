@@ -71,7 +71,7 @@ protected:
 
 	FxItem *originFxItem;						///< This should be the FxItem that has initiated the executer or NULL
 	FxItem *parentFxItem;						///< This is the parent FxItem, that contains the originFxItem or NULL
-	QString idString;
+	QString m_idString;							///< @todo not realy used for now
 	ExtElapsedTimer runTime;					///< This timer holds the overall running time of the executer
 	ExtElapsedTimer runTimeOne;					///< Timer holds runtime for current loop (only used for progress!!)
 	qint64 eventTargetTimeMs	= 0;			///< This is the target time for the next event that has to be executed by the executer (if runTime < targetTimeMs nothing is todo)
@@ -92,6 +92,7 @@ protected:
 public:
 	inline int useCount() const {return use_cnt;}
 	void setIdString(const QString & str);
+	const QString & idString() const {return m_idString;}
 	inline virtual TYPE type() const {return EXEC_BASE;}
 	inline STATE state() const {return myState;}
 	virtual bool processExecuter();
@@ -112,6 +113,7 @@ public:
 	inline void setEventTargetTimeRelative(qint64 ms) {eventTargetTimeMs = runTime.elapsed() + ms;}
 	inline void setEventTargetTimeAbsolute(qint64 ms) {eventTargetTimeMs = ms;}
 	QString getIdString() const;
+	QString getParentNameString() const;
 	inline void setOriginFx(FxItem *fx) {originFxItem = fx;}
 	inline FxItem * originFx() const {return originFxItem;}
 	inline FxItem * parentFx() const {return parentFxItem;}

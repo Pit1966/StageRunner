@@ -55,7 +55,7 @@ Executer::~Executer()
 
 void Executer::setIdString(const QString &str)
 {
-	idString = str;
+	m_idString = str;
 }
 
 /**
@@ -83,11 +83,24 @@ void Executer::onPauseEvent(bool active)
 
 QString Executer::getIdString() const
 {
-	if (idString.isEmpty()) {
+	if (m_idString.isEmpty()) {
 		return QString("0x%1").arg(quint64(this));
 	} else {
-		return idString;
+		return m_idString;
 	}
+}
+
+QString Executer::getParentNameString() const
+{
+	QString label;
+	if (!m_idString.isEmpty())
+		label += QString("IdString(%1)::").arg(m_idString);
+	if (parentFxItem && FxItem::exists(parentFxItem))
+		label += "Executer: <b>" + parentFxItem->name() + "</b> ";
+	if (originFxItem && FxItem::exists(originFxItem))
+		label += originFxItem->name() + "::";
+
+	return label;
 }
 
 /**
