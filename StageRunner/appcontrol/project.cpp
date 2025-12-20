@@ -502,12 +502,22 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 
 	if (!curProjectFilePath.isEmpty()) {
 		QString projectFileDir = QFileInfo(curProjectFilePath).dir().absolutePath();
-		QString newdir = QString("%1/Ton").arg(projectFileDir);
-		if (!m_mediaFileSearchDirs.contains(newdir))
-			m_mediaFileSearchDirs.append(newdir);
-		newdir = QString("%1/audio").arg(projectFileDir);
-		if (!m_mediaFileSearchDirs.contains(newdir))
-			m_mediaFileSearchDirs.append(newdir);
+		QStringList relativeSearchDirs;
+		relativeSearchDirs << "%1/Ton" << "%1/ton"
+						   << "%1/Audio" << "%1/audio"
+						   << "%1/Musik" << "%1/musik"
+						   << "%1/../Musik" << "%1/../musik"
+						   << "%1/Sound" << "%1/sound"
+						   << "%1/../Sound" << "%1/../sound";
+
+		for (int i=0; i<relativeSearchDirs.size(); i++) {
+			QString newdir = relativeSearchDirs.at(i).arg(projectFileDir);
+			if (QFile::exists(newdir)) {
+				newdir = QDir(newdir).canonicalPath();
+				if (!m_mediaFileSearchDirs.contains(newdir))
+					m_mediaFileSearchDirs.append(newdir);
+			}
+		}
 	}
 
 	for (int t=0; t<srcFxList->size(); t++) {
