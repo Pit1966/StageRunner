@@ -561,6 +561,7 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 
 				if (!foundfile) {
 					ok = false;
+					fx->setWarn(true);
 					result.errorMessageList.append(tr("%1: Could not found media file '%2' ")
 												   .arg(fx->fxNamePath(), filepath));
 				} else {
@@ -576,7 +577,9 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 			}
 
 			// call check function recursively for list in FxPlayListItem
-			ok &= checkFxItemList(fxp->fxPlayList, result);
+			bool fxok = checkFxItemList(fxp->fxPlayList, result);
+			fxp->setWarn(!fxok);
+			ok &= fxok;
 		}
 		else if (fx->fxType() == FX_SCENE) {
 			if (pProjectFormat < PROJECT_FORMAT) {
@@ -595,7 +598,9 @@ bool Project::checkFxItemList(FxList *srcFxList, Project::EXPORT_RESULT &result)
 				continue;
 			}
 			// call check function recursively for list in FxSeqItem
-			ok &= checkFxItemList(fxseq->seqList, result);
+			bool fxok = checkFxItemList(fxseq->seqList, result);
+			fxseq->setWarn(!fxok);
+			ok &= fxok;
 		}
 	}
 

@@ -448,17 +448,17 @@ FxItem *FxList::findSequenceRandomFxItem()
         int rnd = qrand() % cnt;
 #endif
         // int rnd = double(qrand()) * cnt / RAND_MAX;
-		if (!m_fxList.at(rnd)->playedInRandomList) {
+		if (!m_fxList.at(rnd)->m_playedInRandomList) {
 			fx = m_fxList.at(rnd);
-			fx->playedInRandomList = true;
+			fx->m_playedInRandomList = true;
 		}
 	}
 
 	int i = 0;
 	while (!fx && i<cnt) {
-		if (!m_fxList.at(i)->playedInRandomList) {
+		if (!m_fxList.at(i)->m_playedInRandomList) {
 			fx = m_fxList.at(i);
-			fx->playedInRandomList = true;
+			fx->m_playedInRandomList = true;
 		}
 		i++;
 	}
@@ -500,7 +500,7 @@ int FxList::countRandomPlayedItemInList() const
 	// count random played fxitems;
 	int played = 0;
 	for (int i=0; i<m_fxList.size(); i++) {
-		if (m_fxList.at(i)->playedInRandomList)
+		if (m_fxList.at(i)->m_playedInRandomList)
 			played++;
 	}
 	return played;
@@ -768,7 +768,7 @@ void FxList::resetFxItemsForNewExecuter()
 {
 	for (int t=0; t<m_fxList.size(); t++) {
 		FxItem *fx = m_fxList.at(t);
-		fx->playedInRandomList = false;
+		fx->m_playedInRandomList = false;
 	}
 }
 

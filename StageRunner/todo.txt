@@ -35,6 +35,7 @@ Features:
 - done: Audio in eigenen Thread?
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
+- hide all columns in FxListWidget
 
 (ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten
 als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewartet und dann ausgefadet

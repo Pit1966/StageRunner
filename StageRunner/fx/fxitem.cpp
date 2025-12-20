@@ -33,7 +33,8 @@ qint32 FxItem::m_lowestIdForGenerator = 1;
 FxItem::FxItem()
 	: VarSet()
 	, myParentFxList(nullptr)
-	, playedInRandomList(false)
+	, m_playedInRandomList(false)
+	, m_isWarn(false)
 {
 	init();
 	myId = init_generate_id();
@@ -43,7 +44,8 @@ FxItem::FxItem()
 FxItem::FxItem(FxList *fxList)
 	: VarSet()
 	, myParentFxList(fxList)
-	, playedInRandomList(false)
+	, m_playedInRandomList(false)
+	, m_isWarn(false)
 {
 	init();
 	myId = init_generate_id();
@@ -53,7 +55,8 @@ FxItem::FxItem(FxList *fxList)
 FxItem::FxItem(const FxItem &o)
 	: VarSet()
 	, myParentFxList(nullptr)
-	, playedInRandomList(false)
+	, m_playedInRandomList(false)
+	, m_isWarn(false)
 {
 	init();
 

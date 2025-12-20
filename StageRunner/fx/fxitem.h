@@ -94,7 +94,8 @@ protected:
 	qint32 hookedToInputDmxChannel;				// default -1 (not hooked to any channel)
 
 	FxList *myParentFxList;
-	bool playedInRandomList;			///< true, if item is in a FxList and was played in random mode (e.g. FxAudioList)
+	bool m_playedInRandomList;			///< true, if item is in a FxList and was played in random mode (e.g. FxAudioList)
+	bool m_isWarn;						///< FxItem has warning. e.g. file not found for FxAudio after load
 
     FxItem *m_isTempCopyOf;				///< FX is temporary copy (maybe a work copy);
 
@@ -147,7 +148,9 @@ public:
 	void hookToInput(qint32 universe, qint32 channel);
 	inline void hookToUniverse(qint32 universe) {hookedToInputUniverse = universe;}
 	inline void hookToChannel(qint32 channel) {hookedToInputDmxChannel = channel;}
-	inline bool playedRandom() const {return playedInRandomList;}
+	inline bool playedRandom() const {return m_playedInRandomList;}
+	inline bool isWarn() const {return m_isWarn;}
+	inline void setWarn(bool state = true) {m_isWarn = state;}
 
 	virtual void initForSequence() {;}
 	virtual qint32 fadeInTime() const {return defaultFadeInTime;}

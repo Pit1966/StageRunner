@@ -774,6 +774,7 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 		item = findFxListWidgetItem(row, FxListWidgetItem::CT_KEY);
 		if (item) {
 			item->setText(key);
+			item->setWarn(fx->isWarn());
 		}
 	}
 
@@ -781,6 +782,8 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	item = findFxListWidgetItem(row, FxListWidgetItem::CT_NAME);
 	if (item) {
 		item->setText(fx->name());
+		item->setWarn(fx->isWarn());
+
 		if (fx->loopValue() > 1) {
 			item->itemExtra->setPixmap(QPixmap(":/gfx/icons/audio_repeat_22.png"));
 			item->itemExtra->show();

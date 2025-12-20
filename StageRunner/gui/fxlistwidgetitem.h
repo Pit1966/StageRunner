@@ -60,6 +60,7 @@ private:
 	bool m_isNeverEditable;
 	bool m_isSelected;
 	bool m_isMarked;
+	bool m_isWarn;					///< FxItem has warning (like file not found for audio ..)
 	bool m_isSeeked;
 	bool m_isStatusBlinking;
 	bool m_blinkState;
@@ -90,6 +91,7 @@ public:
 	QSize minimumSizeHint() const override;
 	void setTextColor(const QString &col);
 	void setTextCentered(bool state);
+	void setWarn(bool state);
 
 private:
 	void init();
@@ -100,7 +102,6 @@ protected:
 	void mouseMoveEvent(QMouseEvent *qevent) override;
 	void paintEvent(QPaintEvent *event) override;
 	void keyPressEvent(QKeyEvent *event) override;
-
 
 public slots:
 	void setEditable(bool state);

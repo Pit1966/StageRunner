@@ -22,8 +22,8 @@
 //=======================================================================
 
 #include "fxlistwidgetitem.h"
-#include "customwidget/pslineedit.h"
-#include "fxitem.h"
+#include "gui/customwidget/pslineedit.h"
+#include "fx/fxitem.h"
 
 #include <QtWidgets>
 
@@ -38,6 +38,7 @@ FxListWidgetItem::FxListWidgetItem(FxItem *fx, const QString &text, ColumnType c
 	, m_isNeverEditable(false)
 	, m_isSelected(false)
 	, m_isMarked(false)
+	, m_isWarn(false)
 	, m_isSeeked(false)
 	, m_isStatusBlinking(false)
 	, m_blinkState(false)
@@ -108,6 +109,14 @@ void FxListWidgetItem::setTextCentered(bool state)
 		// itemExtra->show();
 	} else {
 		itemLabel->hide();
+	}
+}
+
+void FxListWidgetItem::setWarn(bool state)
+{
+	if (state != m_isWarn) {
+		m_isWarn = state;
+		update();
 	}
 }
 
@@ -200,9 +209,15 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 {
 	QPainter p(this);
 	p.setRenderHints(QPainter::Antialiasing);
+	// background
 	if (m_isMarked) {
 		p.setPen(Qt::NoPen);
 		p.setBrush(m_colorMarked);
+		p.drawRect(event->rect());
+	}
+	else if (m_isWarn) {
+		p.setPen(Qt::NoPen);
+		p.setBrush(QColor(0xf00000));
 		p.drawRect(event->rect());
 	}
 	else if (linkedFxItem->playedRandom()) {
@@ -211,6 +226,8 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 		p.setBrush(m_colorMarked);
 		p.drawRect(event->rect());
 	}
+
+	// progress indicators
 	if (m_activationIndicatorA) {
 		// QPainter p(this);
 		p.setPen(m_colorIndicatorA);
