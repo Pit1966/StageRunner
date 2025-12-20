@@ -394,9 +394,16 @@ bool TimeLineExecuter::processEnvelopes(int estTimeMs)
 	for (int i=0; i<m_curveTracks.size(); i++) {
 		Envelope *enve = m_curveTracks.at(i);
 		TimeLineCurveData *dat = enve->curveDat;
-		int vol = dat->valAtMs(estTimeMs) / 10;
+		// max curve data value = 1000 -> max vol = 100
+		int val = dat->valAtMs(estTimeMs) / 10;
 		for (int slot : std::as_const(enve->usedAudioSlots)) {
-			myApp.unitAudio->setVolumeFromTimeLine(slot, vol);
+			if (dat->curveType() == 0) {
+				myApp.unitAudio->setVolumeFromTimeLine(slot, val);
+			}
+			else if (dat->curveType() == 1) {
+				//  MAX_PAN = 200;
+				myApp.unitAudio->setPanning(slot, val * 2);
+			}
 		}
 		// qDebug() << "yMP at" << estTimeMs << "=" << vol;
 	}

@@ -240,7 +240,7 @@ void AudioIODevice::setPanning(int pan, int maxPan)
 	// m_panVolLeft = qreal(maxPan - pan) / maxPan;
 	// m_panVolRight = qreal(pan) / maxPan;
 
-	qDebug() << "pan values" << m_panVolLeft << m_panVolRight;
+	// qDebug() << "pan values" << m_panVolLeft << m_panVolRight;
 
 }
 

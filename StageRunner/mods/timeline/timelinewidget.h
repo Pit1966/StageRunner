@@ -115,7 +115,9 @@ public:
 
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
-	bool addAudioEnvelopeTrack();
+	bool addAudioEnvelopeTrack(int type);
+	bool addAudioVolEnvelopeTrack();
+	bool addAudioPanEnvelopeTrack();
 	bool deleteTimeLineTrack(int trackID);
 	TimeLineBox * addTimeLineBox(int posMs, int durationMs, const QString &label, int trackID = 1);
 	TimeLineItem * at(int trackID, int idx);

@@ -246,7 +246,7 @@ bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
 
 }
 
-bool TimeLineWidget::addAudioEnvelopeTrack()
+bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 {
 	int newTrackId = m_tracks.size();
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
@@ -259,7 +259,17 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	// add TimeLineCurve to scene on timeline
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
 	curve->setYPos(track->yPos());
-	curve->setLabel("Audio Envelope");
+	if (type == 1) {
+		curve->setLabel("Audio Pan Envelope");
+		curve->setCurveType(1);
+		curve->clearNodes();
+		curve->appendNode(Node(track, 0, 500));
+		curve->appendNode(Node(track, 60000, 500));
+	}
+	else {
+		curve->setLabel("Audio Vol Envelope");
+		curve->setCurveType(0);
+	}
 	curve->setTimeLineDuration(m_timeLineLenMs);
 
 	track->appendTimeLineItem(curve);
@@ -270,6 +280,16 @@ bool TimeLineWidget::addAudioEnvelopeTrack()
 	m_scene->update();
 
 	return true;
+}
+
+bool TimeLineWidget::addAudioVolEnvelopeTrack()
+{
+	return addAudioEnvelopeTrack(0);
+}
+
+bool TimeLineWidget::addAudioPanEnvelopeTrack()
+{
+	return addAudioEnvelopeTrack(1);
 }
 
 bool TimeLineWidget::deleteTimeLineTrack(int trackID)
@@ -946,8 +966,11 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 		act = menu.addAction(tr("Add new timeline track"));
 		act->setObjectName("newTrack");
 
-		act = menu.addAction(tr("Add audio envelope track"));
-		act->setObjectName("newAudioEnvelope");
+		act = menu.addAction(tr("Add audio vol envelope track"));
+		act->setObjectName("newVolEnvelope");
+
+		act = menu.addAction(tr("Add audio pan envelope track"));
+		act->setObjectName("newPanEnvelope");
 	}
 
 	act = menu.exec(event->globalPos());
@@ -965,8 +988,11 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	else if (cmd == "newTrack") {
 		/*bool ok = */addTimeLineTrack();
 	}
-	else if (cmd == "newAudioEnvelope") {
-		addAudioEnvelopeTrack();
+	else if (cmd == "newVolEnvelope") {
+		addAudioVolEnvelopeTrack();
+	}
+	else if (cmd == "newPanEnvelope") {
+		addAudioPanEnvelopeTrack();
 	}
 	else if (cmd == "expandTrack") {
 		setTrackHeight(clickedTrackID, 80);

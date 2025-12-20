@@ -54,12 +54,15 @@ public:
 class TimeLineCurveData
 {
 protected:
+	int m_curveType		= 0;
 	QVector<Node> m_nodes;				// node list. Has at least 2 elements: a start node and an end node
-
 
 public:
 	void insertNode(const Node &n);
 	qreal valAtMs(int ms);
+
+	void setCurveType(int type) {m_curveType = type;}
+	int curveType() const {return m_curveType;}
 
 	QString getCurveData() const;
 	bool setCurveData(const QString &dat, TimeLineTrack *track);
@@ -77,7 +80,7 @@ public:
 	static TimeLineCurve * staticTmpContextObj;
 
 private:
-	uint m_colorNode = 0xaa9900;
+	uint m_colorNode	= 0xaa9900;
 	uint m_colorNodeHov = 0x00ff00;
 
 	// temp
@@ -99,6 +102,9 @@ public:
 	// reimplemented functions from TimeLineItem
 	QString getConfigDat() const override;
 	bool setConfigDat(const QString &dat) override;
+
+	void clearNodes();
+	void appendNode(const Node &node);
 
 	void addNodeAtXpos(qreal xpix);
 

@@ -121,6 +121,9 @@ QString TimeLineCurveData::getCurveData() const
 {
 	QString dat;
 
+	if (m_curveType > 0)
+		dat += QString("curvetype:%1_$_").arg(m_curveType);
+
 	// endcode all nodes as string and return it
 	if (m_nodes.size()) {
 		dat += "nodes:";
@@ -153,6 +156,7 @@ bool TimeLineCurveData::setCurveData(const QString &dat, TimeLineTrack *track)
 	bool newnodeformat = false;
 
 	m_nodes.clear();
+	m_curveType = 0;
 
 	// first split the groups, seperated by _$_
 	const QStringList groups = dat.split("_$_");
@@ -192,6 +196,15 @@ bool TimeLineCurveData::setCurveData(const QString &dat, TimeLineTrack *track)
 				else { // missing data (from old stagerunner version or invalid)
 				}
 
+			}
+		}
+		else if (gkey == "curvetype") {
+			int type = gdat.toInt();
+			if ((type < 0) || (type > 1)) {
+				qWarning () << gkey << "TimeLineCurve: unknown curve type in timeline curve config";
+			}
+			else {
+				m_curveType = type;
 			}
 		}
 		else { // unknown group
@@ -289,6 +302,16 @@ QString TimeLineCurve::getConfigDat() const
 bool TimeLineCurve::setConfigDat(const QString &dat)
 {
 	return setCurveData(dat, m_myTrack);
+}
+
+void TimeLineCurve::clearNodes()
+{
+	m_nodes.clear();
+}
+
+void TimeLineCurve::appendNode(const Node &node)
+{
+	m_nodes.append(node);
 }
 
 void TimeLineCurve::addNodeAtXpos(qreal xpix)
