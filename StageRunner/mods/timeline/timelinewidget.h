@@ -129,6 +129,8 @@ public:
 	bool setTrackHeight(int trackID, int h);
 	int trackHeight(int trackID);
 
+	bool changeTrackBgColor(int trackID);
+
 	void setTrackOverlay(int trackID, bool enable);
 	bool isTrackOverlay(int trackID) const;
 

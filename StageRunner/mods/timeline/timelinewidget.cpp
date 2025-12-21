@@ -14,6 +14,7 @@
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QTimer>
+#include <QColorDialog>
 
 namespace PS_TL {
 
@@ -263,6 +264,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 		curve->setLabel("Audio Pan Envelope");
 		curve->setCurveType(1);
 		curve->clearNodes();
+		curve->setAltNodeColor();		// does something like this 		curve->setNodeColor(0x449955);
 		curve->appendNode(Node(track, 0, 500));
 		curve->appendNode(Node(track, 60000, 500));
 	}
@@ -434,6 +436,24 @@ int TimeLineWidget::trackHeight(int trackID)
 		return 0;
 
 	return track->ySize();
+}
+
+bool TimeLineWidget::changeTrackBgColor(int trackID)
+{
+	TimeLineTrack *track = findTrackWithId(trackID);
+	if (!track)
+		return 0;
+
+	QColor newcolor = QColorDialog::getColor(QColor(track->trackBgColor), this, tr("Change background color"), QColorDialog::ShowAlphaChannel);
+
+	if (newcolor.isValid()) {
+		track->trackBgColor = newcolor.rgba();
+		updateScene();
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void TimeLineWidget::setTrackOverlay(int trackID, bool enable)
@@ -956,6 +976,9 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 			act->setObjectName("shrinkTrack");
 		}
 
+		act = menu.addAction(tr("Change background color"));
+		act->setObjectName("changeBgColor");
+
 		overlayID = findOverlayIdForTrackId(clickedTrackID);
 		if (overlayID > 0) {
 			act = menu.addAction(tr("Detach overlay curve"));
@@ -1000,6 +1023,9 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	}
 	else if (cmd == "shrinkTrack") {
 		setTrackHeight(clickedTrackID, m_defaultTrackHeight);
+	}
+	else if (cmd == "changeBgColor") {
+		changeTrackBgColor(clickedTrackID);
 	}
 	else if (cmd == "detachOverlay") {
 		TimeLineTrack *track = findTrackWithId(overlayID);

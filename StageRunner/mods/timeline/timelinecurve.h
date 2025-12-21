@@ -83,6 +83,8 @@ private:
 	uint m_colorNode	= 0xaa9900;
 	uint m_colorNodeHov = 0x00ff00;
 
+	uint m_altNodeColor = 0x449955;
+
 	// temp
 	int m_curHoveredNode	= -1;
 	bool m_nodeClicked		= false;
@@ -103,8 +105,11 @@ public:
 	QString getConfigDat() const override;
 	bool setConfigDat(const QString &dat) override;
 
+	// node functions
 	void clearNodes();
 	void appendNode(const Node &node);
+	void setNodeColor(uint colorval) {m_colorNode = colorval;}
+	void setAltNodeColor();
 
 	void addNodeAtXpos(qreal xpix);
 

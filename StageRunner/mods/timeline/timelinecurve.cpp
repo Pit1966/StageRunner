@@ -301,7 +301,11 @@ QString TimeLineCurve::getConfigDat() const
 
 bool TimeLineCurve::setConfigDat(const QString &dat)
 {
-	return setCurveData(dat, m_myTrack);
+	bool ok = setCurveData(dat, m_myTrack);
+	if (curveType() == 1)
+		setAltNodeColor();
+
+	return ok;
 }
 
 void TimeLineCurve::clearNodes()
@@ -312,6 +316,11 @@ void TimeLineCurve::clearNodes()
 void TimeLineCurve::appendNode(const Node &node)
 {
 	m_nodes.append(node);
+}
+
+void TimeLineCurve::setAltNodeColor()
+{
+	setNodeColor(m_altNodeColor);
 }
 
 void TimeLineCurve::addNodeAtXpos(qreal xpix)
@@ -438,7 +447,11 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 			act->setObjectName("makeOver");
 		}
 
+
 		menu.addAction(tr("------------"));
+
+		act = menu.addAction(tr("Change background color"));
+		act->setObjectName("changeBgColor");
 
 		act = menu.addAction(tr("Delete track"));
 		act->setObjectName("delTrack");
@@ -474,6 +487,9 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	}
 	else if (cmd == "clearOver") {
 		m_timeline->setTrackOverlay(m_trackId, false);
+	}
+	else if (cmd == "changeBgColor") {
+		m_timeline->changeTrackBgColor(m_trackId);
 	}
 }
 
