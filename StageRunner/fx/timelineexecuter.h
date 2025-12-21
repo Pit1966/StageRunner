@@ -44,6 +44,8 @@ public:
 		/// Attention! this is only a temporary storage for the pointer.
 		/// the TimeLineCurveData object will not be deleted
 		PS_TL::TimeLineCurveData *curveDat = nullptr;
+
+		int envelopeType() const;
 	};
 
 protected:
@@ -83,10 +85,11 @@ protected:
 	virtual ~TimeLineExecuter();
 
 	FxSceneItem *getScene(int fxID);
-	Envelope *getEnvelopeForTrackId(int trackID);
+	QList<Envelope *> getEnvelopesForTrackId(int trackID, int envelopeType = 0xff);
 
 	Event findNextObj();
 	bool getTimeLineObjs(FxTimeLineItem *fx);
+	int findTargetTrackForCurve(FxTimeLineItem *fx, int curveTrackId);
 
 	bool processEnvelopes(int estTimeMs);
 	bool removeAudioSlotFromEnvelopeActive(int audioSlot);
@@ -96,6 +99,7 @@ protected:
 
 	void addFxToActiveAudioList(FxItem *fx);
 	void addFxToActiveScriptList(FxItem *fx);
+
 
 private:
 	void _finishMe();

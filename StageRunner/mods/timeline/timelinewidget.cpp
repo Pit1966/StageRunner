@@ -253,13 +253,13 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 		return false;
 
 	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_VOL, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
-	track->trackBgColor = 0x3333555;
 	appendTrack(track);
 
 	// add TimeLineCurve to scene on timeline
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
 	curve->setYPos(track->yPos());
 	if (type == 1) {
+		track->trackBgColor = 0x224455;
 		curve->setLabel("Audio Pan Envelope");
 		curve->setCurveType(1);
 		curve->clearNodes();
@@ -267,6 +267,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 		curve->appendNode(Node(track, 60000, 500));
 	}
 	else {
+		track->trackBgColor = 0x333355;
 		curve->setLabel("Audio Vol Envelope");
 		curve->setCurveType(0);
 	}

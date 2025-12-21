@@ -24,6 +24,19 @@ using namespace AUDIO;
 
 // -------------------------------------------------------------------------------------
 
+int TimeLineExecuter::Envelope::envelopeType() const
+{
+	if (curveDat) {
+		return curveDat->curveType();
+	} else {
+		return -1;
+	}
+}
+
+// -------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------
+
 void TimeLineExecuter::onPauseEvent(bool active)
 {
 	if (!active) {
@@ -275,13 +288,17 @@ FxSceneItem *TimeLineExecuter::getScene(int fxID)
 	return cfx;
 }
 
-TimeLineExecuter::Envelope *TimeLineExecuter::getEnvelopeForTrackId(int trackID)
+QList<TimeLineExecuter::Envelope *> TimeLineExecuter::getEnvelopesForTrackId(int trackID, int envelopeType)
 {
+	QList<TimeLineExecuter::Envelope *> envelopes;
+
 	for (int i=0; i<m_curveTracks.size(); i++) {
-		if (m_curveTracks.at(i)->targetTrack == trackID)
-			return m_curveTracks.at(i);
+		if (m_curveTracks.at(i)->targetTrack == trackID) {
+			if (envelopeType = 0xff || m_curveTracks.at(i)->envelopeType() == envelopeType)
+				envelopes.append(m_curveTracks.at(i));
+		}
 	}
-	return nullptr;
+	return envelopes;
 }
 
 TimeLineExecuter::Event TimeLineExecuter::findNextObj()
@@ -341,7 +358,15 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 			// get first Item in TimeLineCurve
 			FxTimeLineObj *o = fx->timeLineObjAt(trackid, 0);
 			if (!o) {
-				LOGERROR(tr("Missing Curve item in timeline track %1").arg(t+1));
+				LOGERROR(tr("%1: Missing Curve item in timeline track %2")
+						 .arg(m_fxTimeLine->name()).arg(t+1));
+				continue;
+			}
+
+			int targetTrack = findTargetTrackForCurve(fx, t);
+			if (targetTrack < 0) {
+				LOGERROR(tr("%1: Could not find target track for timeline curve track %1")
+						 .arg(m_fxTimeLine->name()).arg(t+1));
 				continue;
 			}
 
@@ -349,11 +374,12 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 			TimeLineCurveData *cd = new TimeLineCurveData();
 			cd->setCurveData(o->configDat, fxtrack);
 
-			// Audio envelope is always attached to the track directly above
+			// Audio envelope is always attached to the next track above, which is not
+			// an envelope track
 			Envelope *envel = new Envelope();
 			envel->trackID = trackid;
 			envel->curveTrack = t;
-			envel->targetTrack = t-1;
+			envel->targetTrack = targetTrack;
 			envel->curveDat = cd;			// remember, we have to delete this later
 			m_curveTracks.append(envel);
 
@@ -387,6 +413,26 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 	m_finalEventAtMs = m_sortedObjEventList.last().timeMs;
 
 	return true;	// at least one timeline obj in list
+}
+
+/**
+ * @brief Find target trackID for a given TimeLine Track of type TRACK_AUDIO_VOL
+ * @param fx
+ * @param curveTrackId
+ * @return trackID or -1, if not found
+ *
+ * The target track is always above the curve track
+ */
+int TimeLineExecuter::findTargetTrackForCurve(FxTimeLineItem *fx, int curveTrackId)
+{
+	int trackId = curveTrackId;	// target track is above current track
+	while (--trackId >= 0) {
+		FxTimeLineTrack *fxtrack = fx->trackAt(trackId);
+		if (fxtrack->trackType() == TRACK_ITEMS)
+			return trackId;
+
+	}
+	return -1;
 }
 
 bool TimeLineExecuter::processEnvelopes(int estTimeMs)
@@ -449,8 +495,9 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 			fadeinms = ev.obj->fadeInDurationMs();
 
 		// check if timeline of audio is target of an audio envelope
-		Envelope *enve = getEnvelopeForTrackId(ev.trackID);
-		if (enve) {
+		QList<Envelope *> envelopes = getEnvelopesForTrackId(ev.trackID);
+		for (int i=0; i<envelopes.size(); i++) {
+			Envelope *enve = envelopes.at(i);
 			initVol = enve->curveDat->valAtMs(ev.timeMs) / 10;	// start audio with current envelope volum
 			fadeinms = -1;										// start audio without fadein time
 		}
@@ -466,7 +513,8 @@ bool TimeLineExecuter::execObjBeginPosForFx(int fxID, Event &ev)
 		if (ok) {
 			addFxToActiveAudioList(fx);
 
-			if (enve) {
+			for (int i=0; i<envelopes.size(); i++) {
+				Envelope *enve = envelopes.at(i);
 				int slot = fxa->startSlot;
 				if (!enve->usedAudioSlots.contains(slot))
 					enve->usedAudioSlots.append(slot);
@@ -519,10 +567,12 @@ bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 	if (fxtype == FX_AUDIO)	{
 		int fade_ms = ev.obj->fadeOutDurationMs();
 
-		// check if timeline of audio is target of an audio envelope
-		Envelope *enve = getEnvelopeForTrackId(ev.trackID);
-		if (enve) {
-			fade_ms = 0;
+		// check if timeline of audio is target of an audio volume envelope (not pan)
+		QList<Envelope *> envelopes = getEnvelopesForTrackId(ev.trackID);
+		for (int i=0; i<envelopes.size(); i++) {
+			Envelope *enve = envelopes.at(i);
+			if (enve->envelopeType() == 0)
+				fade_ms = 0;
 		}
 
 		FxAudioItem *fxa = static_cast<FxAudioItem*>(fx);
@@ -536,7 +586,8 @@ bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 			myApp.unitAudio->stopFxAudio(fxa);
 		}
 
-		if (enve) {
+		for (int i=0; i<envelopes.size(); i++) {
+			Envelope *enve = envelopes.at(i);
 			if (enve->usedAudioSlots.contains(fxa->startSlot))
 				enve->usedAudioSlots.removeOne(fxa->startSlot);
 			if (!myApp.unitAudio->isAnyFxAudioActive())
