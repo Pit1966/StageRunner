@@ -58,14 +58,14 @@ private:
 	FxItem * m_fxParent;				///< If the list resides in a FxSequence or FxAudioPlaylist: here is the pointer
 
 public:
-	bool showColumnFadeinFlag;
-	bool showColumnFadeoutFlag;
-	bool showColumnIdFlag;
-	bool showColumnHoldFlag;
-	bool showColumnPredelayFlag;
-	bool showColumnPostdelayFlag;
 	bool showColumnKeyFlag;
+	bool showColumnIdFlag;
+	bool showColumnPredelayFlag;
+	bool showColumnFadeinFlag;
 	bool showColumnMoveFlag;
+	bool showColumnHoldFlag;
+	bool showColumnFadeoutFlag;
+	bool showColumnPostdelayFlag;
 
 protected:
 	int myLoopTimes;
@@ -153,6 +153,8 @@ public:
 	bool postLoadResetScenes();
 
 	bool recreateFxIDs(int from);
+
+	void setColumnFlag(int mask, bool state);
 
 private:
 	void init();

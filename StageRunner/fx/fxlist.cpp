@@ -77,14 +77,14 @@ void FxList::init()
 	myLoopFlag = false;
 	m_isProtected = false;
 
-	showColumnFadeinFlag = false;
-	showColumnFadeoutFlag = false;
-	showColumnIdFlag = false;
-	showColumnHoldFlag = false;
-	showColumnPredelayFlag = false;
-	showColumnPostdelayFlag = false;
 	showColumnKeyFlag = false;
+	showColumnIdFlag = false;
+	showColumnPredelayFlag = false;
+	showColumnFadeinFlag = false;
 	showColumnMoveFlag = false;
+	showColumnHoldFlag = false;
+	showColumnFadeoutFlag = false;
+	showColumnPostdelayFlag = false;
 }
 
 /**
@@ -112,14 +112,14 @@ bool FxList::copyFrom(const FxList &o, int exactClone, FxIdMap *oldNewIdMap)
 	myLoopFlag = o.myLoopFlag;
 	m_isProtected = o.m_isProtected;
 
-	showColumnFadeinFlag = o.showColumnFadeinFlag;
-	showColumnFadeoutFlag = o.showColumnFadeoutFlag;
-	showColumnIdFlag = o.showColumnIdFlag;
-	showColumnHoldFlag = o.showColumnHoldFlag;
-	showColumnPredelayFlag = o.showColumnPredelayFlag;
-	showColumnPostdelayFlag = o.showColumnPostdelayFlag;
 	showColumnKeyFlag = o.showColumnKeyFlag;
+	showColumnIdFlag = o.showColumnIdFlag;
+	showColumnPredelayFlag = o.showColumnPredelayFlag;
+	showColumnFadeinFlag = o.showColumnFadeinFlag;
+	showColumnHoldFlag = o.showColumnHoldFlag;
 	showColumnMoveFlag = o.showColumnMoveFlag;
+	showColumnFadeoutFlag = o.showColumnFadeoutFlag;
+	showColumnPostdelayFlag = o.showColumnPostdelayFlag;
 
 	// Copy Sequence FX items
 	for (int t=0; t<o.m_fxList.size(); t++) {
@@ -372,6 +372,26 @@ bool FxList::recreateFxIDs(int from)
 	}
 
 	return ok;
+}
+
+void FxList::setColumnFlag(int mask, bool state)
+{
+	if (mask & 1<<0)
+		showColumnKeyFlag = state;
+	if (mask & 1<<1)
+		showColumnIdFlag = state;
+	if (mask & 1<<2)
+		showColumnPredelayFlag = state;
+	if (mask & 1<<3)
+		showColumnFadeinFlag = state;
+	if (mask & 1<<4)
+		showColumnMoveFlag = state;
+	if (mask & 1<<5)
+		showColumnHoldFlag = state;
+	if (mask & 1<<6)
+		showColumnFadeoutFlag = state;
+	if (mask & 1<<7)
+		showColumnPostdelayFlag = state;
 }
 
 

@@ -456,6 +456,16 @@ bool TimeLineWidget::changeTrackBgColor(int trackID)
 	}
 }
 
+bool TimeLineWidget::trimTimelineLengthToCursorPos()
+{
+	int ms = cursorPos();
+	if (ms < 1000)
+		return false;
+
+	setTimeLineDuration(ms);
+	return true;
+}
+
 void TimeLineWidget::setTrackOverlay(int trackID, bool enable)
 {
 	TimeLineTrack *track = findTrackWithId(trackID);
@@ -979,6 +989,9 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 		act = menu.addAction(tr("Change background color"));
 		act->setObjectName("changeBgColor");
 
+		act = menu.addAction(tr("Trim timeline length to cursor pos"));
+		act->setObjectName("trimLength");
+
 		overlayID = findOverlayIdForTrackId(clickedTrackID);
 		if (overlayID > 0) {
 			act = menu.addAction(tr("Detach overlay curve"));
@@ -1026,6 +1039,9 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	}
 	else if (cmd == "changeBgColor") {
 		changeTrackBgColor(clickedTrackID);
+	}
+	else if (cmd == "trimLength") {
+		trimTimelineLengthToCursorPos();
 	}
 	else if (cmd == "detachOverlay") {
 		TimeLineTrack *track = findTrackWithId(overlayID);

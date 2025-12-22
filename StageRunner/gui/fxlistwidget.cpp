@@ -1331,48 +1331,66 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 		}
 
 		if (y < upper_context_menu_split) {
+			int visibleCnt = 0;
 			if (fxList()->showColumnIdFlag) {
 				act = menu.addAction(tr("Hide ID Column"));
+				visibleCnt++;
 			} else {
 				act = menu.addAction(tr("Show ID Column"));
 			}
 			act->setObjectName("3");
 			if (fxList()->showColumnPredelayFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide PreDelay Column"));
 			} else {
 				act = menu.addAction(tr("Show PreDelay Column"));
 			}
 			act->setObjectName("4");
 			if (fxList()->showColumnFadeinFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide FadeIN time column"));
 			} else {
 				act = menu.addAction(tr("Show FadeIN time column"));
 			}
 			act->setObjectName("5");
 			if (fxList()->showColumnMoveFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide Move time column"));
 			} else {
 				act = menu.addAction(tr("Show Move time column"));
 			}
 			act->setObjectName("9");
 			if (fxList()->showColumnHoldFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide Hold time Column"));
 			} else {
 				act = menu.addAction(tr("Show Hold time Column"));
 			}
 			act->setObjectName("6");
 			if (fxList()->showColumnFadeoutFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide FadeOut time column"));
 			} else {
 				act = menu.addAction(tr("Show FadeOut time column"));
 			}
 			act->setObjectName("7");
 			if (fxList()->showColumnPostdelayFlag) {
+				visibleCnt++;
 				act = menu.addAction(tr("Hide PostDelay column"));
 			} else {
 				act = menu.addAction(tr("Show PostDelay column"));
 			}
 			act->setObjectName("8");
+
+			if (visibleCnt < 7) {
+				act = menu.addAction(tr("Show all columns"));
+				act->setObjectName("12");
+			}
+			if (visibleCnt > 0) {
+				act = menu.addAction(tr("Hide all columns"));
+				act->setObjectName("13");
+			}
+
 		}
 
 
@@ -1437,6 +1455,14 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 			break;
 		case 9:
 			fxl->showColumnMoveFlag = !fxl->showColumnMoveFlag;
+			refreshList();
+			break;
+		case 12:
+			fxl->setColumnFlag(0xfe, true);
+			refreshList();
+			break;
+		case 13:
+			fxl->setColumnFlag(0xfe, false);
 			refreshList();
 			break;
 

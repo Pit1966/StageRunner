@@ -130,6 +130,7 @@ public:
 	int trackHeight(int trackID);
 
 	bool changeTrackBgColor(int trackID);
+	bool trimTimelineLengthToCursorPos();
 
 	void setTrackOverlay(int trackID, bool enable);
 	bool isTrackOverlay(int trackID) const;
