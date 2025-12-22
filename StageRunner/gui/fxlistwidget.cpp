@@ -920,6 +920,40 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	}
 }
 
+void FxListWidget::moveItemToBin(FxListWidgetItem *item)
+{
+	if (!item || !fxList())
+		return;
+
+	int row = item->myRow;
+	if (row < 0 || row >= fxTable->rowCount())
+		return;
+
+	FxItem *fx = item->linkedFxItem;
+	if (!fx)
+		return;
+
+	// get or create BIN FxSeqItem which is the container
+	FxSeqItem *fxseq = fxList()->findBinSeqItem();
+	if (!fxseq) {
+		fxseq = fxList()->addFxSequence();
+		fxseq->setName("BIN");
+		fxseq->setDescription("This is a container for Fx storage");
+	}
+
+	if (!fxseq) {
+		LOGERROR("BIN Fx Sequence not available!");
+		return;
+	}
+
+	// remove FxItem from this list
+	fxList()->removeOne(fx);
+	// and append it in the FxSeqItem beyond the list
+	fxseq->fxList()->append(fx);
+
+	refreshList();
+}
+
 void FxListWidget::refreshList(int sliderpos)
 {
 	// qDebug("FxListWidget refresh");
@@ -1431,6 +1465,11 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 	menu.addAction(tr("Execute default action"), this, [=](void) {
 		column_name_double_clicked(item->linkedFxItem);
 	});
+
+	menu.addAction(tr("Move to BIN"), this, [=](void) {
+		moveItemToBin(item);
+	});
+
 
 	menu.addAction(tr("------------"));
 	menu.addAction(tr("Delete Fx"), this, [=](void) {

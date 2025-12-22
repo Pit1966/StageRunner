@@ -526,6 +526,17 @@ int FxList::countRandomPlayedItemInList() const
 	return played;
 }
 
+FxSeqItem *FxList::findBinSeqItem()
+{
+	for (int i=0; i<m_fxList.size(); i++) {
+		FxItem *fx = m_fxList.at(i);
+		if (fx->fxType() == FX_SEQUENCE && fx->name().toLower() == "bin")
+			return static_cast<FxSeqItem*>(fx);
+	}
+
+	return nullptr;
+}
+
 FxAudioItem *FxList::addFxAudioSimple(const QString &path, int pos)
 {
 	FxAudioItem *fx = new FxAudioItem(path,this);
@@ -571,16 +582,16 @@ bool FxList::addFxAudioPlayList(int pos)
 	return false;
 }
 
-bool FxList::addFxSequence(int pos)
+FxSeqItem *FxList::addFxSequence(int pos)
 {
-	FxItem *fx = addFx(FX_SEQUENCE, -1, pos);
+	FxSeqItem *fx = static_cast<FxSeqItem *>(addFx(FX_SEQUENCE, -1, pos));
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("FX Sequence");
 		m_isModified = true;
-		return true;
+		return fx;
 	}
-	return false;
+	return nullptr;
 }
 
 bool FxList::addFxScript(int pos)

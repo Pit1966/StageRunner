@@ -87,6 +87,8 @@ public:
 	FxListWidgetItem *findFxListWidgetItem(int row, int columnType);
 	void updateFxListRow(FxItem *fx, FxList *fxlist, int row);
 
+	void moveItemToBin(FxListWidgetItem *item);
+
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
 	static FxListWidget * getCreateFxListWidget(FxList *fxList, FxItem *fxItem, bool *created = 0);

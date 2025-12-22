@@ -31,6 +31,7 @@
 
 
 class FxItem;
+class FxSeqItem;
 class FxAudioItem;
 class FxIdMap;
 
@@ -120,7 +121,7 @@ public:
 	FxAudioItem * addFxAudioSimple(const QString & path, int pos = -1);
 	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0, int pos = -1);
 	bool addFxAudioPlayList(int pos = -1);
-	bool addFxSequence(int pos = -1);
+	FxSeqItem * addFxSequence(int pos = -1);
 	bool addFxScript(int pos = -1);
 	bool addFxCue();
 	bool addFxTimeLine(int pos = -1);
@@ -147,6 +148,8 @@ public:
 	FxItem * findFxItemById(qint32 id);
 	FxItem * findFxItemBySubId(qint32 subId);
 	int countRandomPlayedItemInList() const;
+
+	FxSeqItem * findBinSeqItem();
 
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();
