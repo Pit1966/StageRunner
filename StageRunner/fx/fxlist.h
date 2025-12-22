@@ -118,12 +118,12 @@ public:
 	void emitListChangedSignal();
 
 	FxAudioItem * addFxAudioSimple(const QString & path, int pos = -1);
-	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0);
-	bool addFxAudioPlayList();
-	bool addFxSequence();
-	bool addFxScript();
+	bool addFxScene(int tubes = 1, FxItem **addedFxPointer = 0, int pos = -1);
+	bool addFxAudioPlayList(int pos = -1);
+	bool addFxSequence(int pos = -1);
+	bool addFxScript(int pos = -1);
 	bool addFxCue();
-	bool addFxTimeLine();
+	bool addFxTimeLine(int pos = -1);
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);
@@ -136,7 +136,7 @@ public:
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
 
-	FxItem * addFx(int fxtype, int option = -1);
+	FxItem * addFx(int fxtype, int option = -1, int pos = -1);
 	void addFx(FxItem *newfx);
 	bool removeFx(FxItem *fx);
 	void refAllMembers();

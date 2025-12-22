@@ -168,7 +168,7 @@ public:
 	void assignInputToSelectedFxItem(qint32 universe, qint32 channel, int value);
 	bool addFxAudioDialog(FxList *fxlist, QWidget *widget = nullptr, int row = -1);
 	FxItem *globalSelectedFx() {return last_global_selected_fxitem;}
-	FxItem *addDefaultSceneToFxList(FxList *fxlist);
+	FxItem *addDefaultSceneToFxList(FxList *fxlist, int row = -1);
 
 	// Modes
 	inline bool isFadeToMode() const {return m_isFadeToMode;}

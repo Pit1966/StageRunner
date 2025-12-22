@@ -451,7 +451,7 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 	return false;
 }
 
-FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
+FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist, int row)
 {
 	if (!fxlist)
 		return nullptr;
@@ -470,7 +470,7 @@ FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist)
 			addfx = newscene;
 		}
 	} else {
-		fxlist->addFxScene(28,&addfx);
+		fxlist->addFxScene(28, &addfx, row);
 	}
 
 	return addfx;

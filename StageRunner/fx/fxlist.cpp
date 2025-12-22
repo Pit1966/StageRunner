@@ -542,9 +542,9 @@ FxAudioItem *FxList::addFxAudioSimple(const QString &path, int pos)
 	return fx;
 }
 
-bool FxList::addFxScene(int tubes, FxItem **addedFxPointer)
+bool FxList::addFxScene(int tubes, FxItem **addedFxPointer, int pos)
 {
-	FxItem *fx = addFx(FX_SCENE,tubes);
+	FxItem *fx = addFx(FX_SCENE, tubes, pos);
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("New Scene");
@@ -559,9 +559,9 @@ bool FxList::addFxScene(int tubes, FxItem **addedFxPointer)
 	return false;
 }
 
-bool FxList::addFxAudioPlayList()
+bool FxList::addFxAudioPlayList(int pos)
 {
-	FxItem *fx = addFx(FX_AUDIO_PLAYLIST);
+	FxItem *fx = addFx(FX_AUDIO_PLAYLIST, -1, pos);
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("Audio play list");
@@ -571,9 +571,9 @@ bool FxList::addFxAudioPlayList()
 	return false;
 }
 
-bool FxList::addFxSequence()
+bool FxList::addFxSequence(int pos)
 {
-	FxItem *fx = addFx(FX_SEQUENCE);
+	FxItem *fx = addFx(FX_SEQUENCE, -1, pos);
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("FX Sequence");
@@ -583,9 +583,9 @@ bool FxList::addFxSequence()
 	return false;
 }
 
-bool FxList::addFxScript()
+bool FxList::addFxScript(int pos)
 {
-	FxItem *fx = addFx(FX_SCRIPT);
+	FxItem *fx = addFx(FX_SCRIPT, -1, pos);
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("FX Script");
@@ -608,9 +608,9 @@ bool FxList::addFxCue()
 	return false;
 }
 
-bool FxList::addFxTimeLine()
+bool FxList::addFxTimeLine(int pos)
 {
-	FxItem *fx = addFx(FX_TIMELINE);
+	FxItem *fx = addFx(FX_TIMELINE, -1, pos);
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("FX TimeLine");
@@ -792,26 +792,20 @@ void FxList::resetFxItemsForNewExecuter()
 	}
 }
 
-FxItem *FxList::addFx(int fxtype, int option)
+FxItem *FxList::addFx(int fxtype, int option, int pos)
 {
-	FxItem *retfx = 0;
+	FxItem *retfx = nullptr;
 
 	switch (fxtype) {
 	case FX_AUDIO:
 		{
 			FxAudioItem *fx = new FxAudioItem(this);
-			fx->refCount.ref();
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 		break;
 	case FX_SCENE:
 		{
 			FxSceneItem *fx = new FxSceneItem(this);
-			fx->refCount.ref();
-			m_fxList.append(fx);
-			m_isModified = true;
 			if (option >= 0) {
 				fx->createDefaultTubes(option);
 			}
@@ -821,51 +815,45 @@ FxItem *FxList::addFx(int fxtype, int option)
 	case FX_AUDIO_PLAYLIST:
 		{
 			FxPlayListItem *fx = new FxPlayListItem(this);
-			fx->refCount.ref();
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 		break;
 	case FX_SEQUENCE:
 		{
 			FxSeqItem *fx = new FxSeqItem(this);
-			fx->refCount.ref();
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 		break;
 	case FX_SCRIPT:
 		{
 			FxScriptItem *fx = new FxScriptItem(this);
-			fx->refCount.ref();
 			fx->setRawScript("mode BreakOnCancel,DisableMultiStart\n");
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 		break;
 	case Fx_CUE:
 		{
 			FxCueItem *fx = new FxCueItem(this);
-			fx->refCount.ref();
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 		break;
 	case FX_TIMELINE:
 		{
 			FxTimeLineItem *fx = new FxTimeLineItem(this);
-			fx->refCount.ref();
-			// init FxTimeLine here
-			m_fxList.append(fx);
-			m_isModified = true;
 			retfx = fx;
 		}
 	default:
 		break;
+	}
+
+	if (retfx) {
+		retfx->refCount.ref();
+		m_isModified = true;
+		if (pos < 0 || pos >= m_fxList.size()) {
+			m_fxList.append(retfx);
+		} else {
+			m_fxList.insert(pos, retfx);
+		}
 	}
 
 //	if (retfx)

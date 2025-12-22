@@ -35,6 +35,7 @@ Features:
 - done: Audio in eigenen Thread?
 - done: show/hide all columns in FxListWidget
 
+- FxTimeline add script command TimelineItem
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
 - Automatic generate a Timeline with Volume curves for a given FxAudio Item

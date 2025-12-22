@@ -307,7 +307,20 @@ FxListWidgetItem *FxListWidget::getFxListWidgetItemFor(FxItem *fx)
 			return item;
 		}
 	}
-	return 0;
+	return nullptr;
+}
+
+int FxListWidget::getFxListRowFor(FxItem *fx)
+{
+	if (!fx)
+		return -1;
+
+	FxListWidgetItem *item = getFxListWidgetItemFor(fx);
+	if (item) {
+		return item->myRow;
+	} else {
+		return -1;
+	}
 }
 
 void FxListWidget::setStandAlone(bool state)
@@ -990,23 +1003,23 @@ void FxListWidget::unselectRows()
 void FxListWidget::propagateSceneStatus(FxSceneItem *scene)
 {
 	Q_UNUSED(scene);
-//	int row = getRowThatContainsFxItem(scene);
-//	WidItemList widlist = getItemListForRow(row);
-//	if (widlist.size()) {
-//		FxListWidgetItem *item = widlist.at(1);
-//		if (scene->isActive()) {
-//			item->setActivationProgress(1,1);
-//		}
-//		else if (scene->isVisible()) {
-//			if (scene->isOnStageIntern())
-//				item->setActivationProgressA(1000);
-//			if (scene->isOnStageExtern())
-//				item->setActivationProgressB(1000);
-//		}
-//		else {
-//			item->setActivationProgress(0,0);
-//		}
-//	}
+	//	int row = getRowThatContainsFxItem(scene);
+	//	WidItemList widlist = getItemListForRow(row);
+	//	if (widlist.size()) {
+	//		FxListWidgetItem *item = widlist.at(1);
+	//		if (scene->isActive()) {
+	//			item->setActivationProgress(1,1);
+	//		}
+	//		else if (scene->isVisible()) {
+	//			if (scene->isOnStageIntern())
+	//				item->setActivationProgressA(1000);
+	//			if (scene->isOnStageExtern())
+	//				item->setActivationProgressB(1000);
+	//		}
+	//		else {
+	//			item->setActivationProgress(0,0);
+	//		}
+	//	}
 
 }
 
@@ -1075,7 +1088,7 @@ void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int d
 		if (!isFxItemPossibleHere(srcFx)) {
 			MessageDialog *dialog = new MessageDialog(this);
 			dialog->showInformation(tr("Destination not suitable for this FX")
-								,tr("Copying or moving this FX is not allowed"));
+									,tr("Copying or moving this FX is not allowed"));
 			return;
 		}
 
@@ -1252,6 +1265,9 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 
 void FxListWidget::column_name_double_clicked(FxItem *fx)
 {
+	if (!fx)
+		return;
+
 	switch (fx->fxType()) {
 	case FX_SCENE:
 		selectFx(fx);
@@ -1287,329 +1303,308 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 
 void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 {
+
 	FxListWidgetItem *item = getFxListItemAtPos(event->pos());
+	if (item)
+		return contextItemClicked(event, item);
+
 	// int x = event->x();
 	int y = event->y();
+	if (y < upper_context_menu_split)
+		return contextFxListClicked(event);
 
-	if (!item) {
-		FxList *fxl = fxList();
-		if (!fxl) return;
+	FxList *fxl = fxList();
+	if (!fxl) return;
 
-		QMenu menu(this);
-		QAction *act;
+	// No item is directly selected, but maybe it is marked (green) in list
+	int curSelectedRow = getFxListRowFor(cur_selected_item);
 
-		if (y > upper_context_menu_split) {
-			act = menu.addAction(tr("Add Audio Fx"));
-			act->setObjectName("20");
+	QMenu menu(this);
 
-			act = menu.addAction(tr("New Audio Playlist"));
-			act->setObjectName("21");
-
-			act = menu.addAction(tr("New Scene"));
-			act->setObjectName("22");
-
-			act = menu.addAction(tr("New Sequence"));
-			act->setObjectName("23");
-
-			act = menu.addAction(tr("New Script"));
-			act->setObjectName("24");
-
-//			act = menu.addAction(tr("New Cue List"));
-//			act->setObjectName("25");
-
-			act = menu.addAction(tr("New Timeline"));
-			act->setObjectName("26");
+	// menu.addAction(tr("Sync / Create Partnumber"), this, [=](void) {
+	// 	// lambda function here
+	// });
 
 
-			menu.addAction("--------------------");
-			if (isEditable()) {
-				act = menu.addAction(tr("Deactivate Edit Mode"));
-			} else {
-				act = menu.addAction(tr("Activate Edit Mode"));
-			}
-			act->setObjectName("2");
-		}
+	QAction *act;
+	act = menu.addAction(tr("Add Audio Fx"));
+	act->setObjectName("1");
 
-		if (y < upper_context_menu_split) {
-			int visibleCnt = 0;
-			if (fxList()->showColumnIdFlag) {
-				act = menu.addAction(tr("Hide ID Column"));
-				visibleCnt++;
-			} else {
-				act = menu.addAction(tr("Show ID Column"));
-			}
-			act->setObjectName("3");
-			if (fxList()->showColumnPredelayFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide PreDelay Column"));
-			} else {
-				act = menu.addAction(tr("Show PreDelay Column"));
-			}
-			act->setObjectName("4");
-			if (fxList()->showColumnFadeinFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide FadeIN time column"));
-			} else {
-				act = menu.addAction(tr("Show FadeIN time column"));
-			}
-			act->setObjectName("5");
-			if (fxList()->showColumnMoveFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide Move time column"));
-			} else {
-				act = menu.addAction(tr("Show Move time column"));
-			}
-			act->setObjectName("9");
-			if (fxList()->showColumnHoldFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide Hold time Column"));
-			} else {
-				act = menu.addAction(tr("Show Hold time Column"));
-			}
-			act->setObjectName("6");
-			if (fxList()->showColumnFadeoutFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide FadeOut time column"));
-			} else {
-				act = menu.addAction(tr("Show FadeOut time column"));
-			}
-			act->setObjectName("7");
-			if (fxList()->showColumnPostdelayFlag) {
-				visibleCnt++;
-				act = menu.addAction(tr("Hide PostDelay column"));
-			} else {
-				act = menu.addAction(tr("Show PostDelay column"));
-			}
-			act->setObjectName("8");
+	act = menu.addAction(tr("New Audio Playlist"));
+	act->setObjectName("2");
 
-			if (visibleCnt < 7) {
-				act = menu.addAction(tr("Show all columns"));
-				act->setObjectName("12");
-			}
-			if (visibleCnt > 0) {
-				act = menu.addAction(tr("Hide all columns"));
-				act->setObjectName("13");
-			}
+	act = menu.addAction(tr("New Scene"));
+	act->setObjectName("3");
 
-		}
+	act = menu.addAction(tr("New Sequence"));
+	act->setObjectName("4");
 
+	act = menu.addAction(tr("New Script"));
+	act->setObjectName("5");
 
-		act = menu.exec(event->globalPos());
-		if (!act) return;
+	act = menu.addAction(tr("New Timeline"));
+	act->setObjectName("6");
 
-		switch (act->objectName().toInt()) {
-		case 20:
-			AppCentral::instance()->addFxAudioDialog(fxList(),this);
-			refreshList();
-			break;
-		case 21:
-			fxList()->addFxAudioPlayList();
-			refreshList();
-			break;
-		case 22:
-			AppCentral::instance()->addDefaultSceneToFxList(fxList());
-			refreshList();
-			break;
-		case 23:
-			fxList()->addFxSequence();
-			refreshList();
-			break;
-		case 24:
-			fxList()->addFxScript();
-			refreshList();
-			break;
-		case 25:
-			fxList()->addFxCue();
-			refreshList();
-			break;
-		case 26:
-			fxList()->addFxTimeLine();
-			refreshList();
-			break;
-		case 2:
-			setEditable(!isEditable());
-			break;
-		case 3:
-			fxl->showColumnIdFlag = !fxl->showColumnIdFlag;
-			refreshList();
-			break;
-		case 4:
-			fxl->showColumnPredelayFlag = !fxl->showColumnPredelayFlag;
-			refreshList();
-			break;
-		case 5:
-			fxl->showColumnFadeinFlag = !fxl->showColumnFadeinFlag;
-			refreshList();
-			break;
-		case 6:
-			fxl->showColumnHoldFlag = !fxl->showColumnHoldFlag;
-			refreshList();
-			break;
-		case 7:
-			fxl->showColumnFadeoutFlag = !fxl->showColumnFadeoutFlag;
-			refreshList();
-			break;
-		case 8:
-			fxl->showColumnPostdelayFlag = !fxl->showColumnPostdelayFlag;
-			refreshList();
-			break;
-		case 9:
-			fxl->showColumnMoveFlag = !fxl->showColumnMoveFlag;
-			refreshList();
-			break;
-		case 12:
-			fxl->setColumnFlag(0xfe, true);
-			refreshList();
-			break;
-		case 13:
-			fxl->setColumnFlag(0xfe, false);
-			refreshList();
-			break;
-
-		default:
-			break;
-		}
-
+	menu.addAction("--------------------");
+	if (isEditable()) {
+		act = menu.addAction(tr("Deactivate Edit Mode"));
+	} else {
+		act = menu.addAction(tr("Activate Edit Mode"));
 	}
-	else {
-		// item is is selected
-		if (!FxItem::exists(item->linkedFxItem))
-			return;
-		FxItem *fx = item->linkedFxItem;
-		FxType fxtype = FxType(fx->fxType());
+	act->setObjectName("10");
 
-		QMenu menu(this);
-		QAction *act;
-		act = menu.addAction(tr("Unselect"));
-		act->setObjectName("2");
-		act = menu.addAction(tr("Edit Fx name"));
-		act->setObjectName("9");
-		act = menu.addAction(tr("Open Fx properties"));
-		act->setObjectName("4");
-		if (fxtype == FX_SCENE || fxtype == FX_AUDIO_PLAYLIST || fxtype == FX_SEQUENCE) {
-			act = menu.addAction(tr("Open Fx panel"));
-			act->setObjectName("5");
-		}
-		act = menu.addAction(tr("Add Audio Fx"));
-		act->setObjectName("3");
-		act = menu.addAction(tr("------------"));
-		act = menu.addAction(tr("Delete Fx"));
-		act->setObjectName("1");
-		if (fxtype == FX_SCENE) {
-			act = menu.addAction(tr("Clone Fx Scene"));
-			act->setObjectName("6");
-		}
-		if (fxtype == FX_SEQUENCE) {
-			act = menu.addAction(tr("Clone Fx Sequence"));
-			act->setObjectName("10");
-		}
-		if (fxtype == FX_TIMELINE) {
-			act = menu.addAction(tr("Clone Fx Timeline"));
-			act->setObjectName("14");
-		}
-		if (fxtype == FX_SCRIPT) {
-			act = menu.addAction(tr("Clone Fx script"));
-			act->setObjectName("12");
-		} else {
-			act = menu.addAction(tr("Add Fx script"));
-			act->setObjectName("13");
-		}
+	act = menu.exec(event->globalPos());
+	if (!act) return;
 
-		if (fxtype == FX_AUDIO) {
-			act = menu.addAction(tr("Start in external video player"));
-			act->setObjectName("11");
+	switch (act->objectName().toInt()) {
+	case 1:
+		AppCentral::instance()->addFxAudioDialog(fxList(), this, curSelectedRow+1);
+		refreshList();
+		break;
+	case 2:
+		fxList()->addFxAudioPlayList(curSelectedRow);
+		refreshList();
+		break;
+	case 3:
+		AppCentral::instance()->addDefaultSceneToFxList(fxList(), curSelectedRow+1);
+		refreshList();
+		break;
+	case 4:
+		fxList()->addFxSequence(curSelectedRow+1);
+		refreshList();
+		break;
+	case 5:
+		fxList()->addFxScript(curSelectedRow+1);
+		refreshList();
+		break;
+	case 6:
+		fxList()->addFxTimeLine(curSelectedRow+1);
+		refreshList();
+		break;
+	case 10:
+		setEditable(!isEditable());
+		break;
+
+	default:
+		break;
+	}
+}
+
+void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem *item)
+{
+	if (!FxItem::exists(item->linkedFxItem))
+		return;
+	FxItem *fx = item->linkedFxItem;
+	FxType fxtype = FxType(fx->fxType());
+
+	int curScrollPos = fxTable->verticalScrollBar()->sliderPosition();
+
+	QMenu menu(this);
+
+	menu.addAction(tr("Unselect"), this, [=](void) {
+		setRowSelected(item->myRow,false);
+		cur_clicked_item = nullptr;
+		cur_selected_item = nullptr;
+	});
+
+	menu.addAction(tr("Edit Fx name"), this, [=](void) {
+		QString newname = QInputDialog::getText(this, tr("Edit"), tr("Enter name label for Fx"),
+												QLineEdit::Normal, fx->name());
+		if (newname.size()) {
+			fx->setName(newname);
+			refreshList(curScrollPos);
 		}
+	});
 
-		menu.addAction(tr("------------"));
-		if (fxtype == FX_SEQUENCE) {
-			if (AppCentral::instance()->execCenter->findExecuter(fx)) {
-				act = menu.addAction(tr("Stop Sequence"));
-				act->setObjectName("7");
-				act = menu.addAction(tr("Stop and BLACK Sequence"));
-				act->setObjectName("8");
-			}
-		}
+	menu.addAction(tr("Open Fx properties"), this, [=](void) {
+		FxItemPropertyWidget *editor = FxItemPropertyWidget::openFxPropertyEditor(item->linkedFxItem);
+		if (editor)
+			connect(editor,SIGNAL(modified(FxItem*)),this,SLOT(refreshFxItem(FxItem*)));
+	});
 
-
-		act = menu.exec(event->globalPos());
-		if (!act) return;
-
-		int curScrollPos = fxTable->verticalScrollBar()->sliderPosition();
-
-		switch (act->objectName().toInt()) {
-		case 1:
-			if (item->linkedFxItem->isUsed()) {
-				POPUPERRORMSG(tr("Cancel message"), tr("FX item is used!\nIt's not allowed to delete an active FX."), this);
-				return;
-			} else {
-				fxList()->deleteFx(item->linkedFxItem);
-			}
-			break;
-		case 2:
-			setRowSelected(item->myRow,false);
-			cur_clicked_item = 0;
-			break;
-		case 3:
-			AppCentral::instance()->addFxAudioDialog(fxList(),this,item->myRow);
-			refreshList();
-			break;
-		case 4:
-			{
-				FxItemPropertyWidget *editor = FxItemPropertyWidget::openFxPropertyEditor(item->linkedFxItem);
-				if (editor) connect(editor,SIGNAL(modified(FxItem*)),this,SLOT(refreshFxItem(FxItem*)));
-			}
-			break;
-		case 5:
+	if (fxtype == FX_SCENE || fxtype == FX_AUDIO_PLAYLIST || fxtype == FX_SEQUENCE || fxtype == FX_TIMELINE) {
+		menu.addAction(tr("Open Fx panel"), this, [=](void) {
 			emit fxTypeColumnDoubleClicked(item->linkedFxItem);
-			break;
-		case 6:
+		});
+	}
+
+	menu.addAction(tr("Execute default action"), this, [=](void) {
+		column_name_double_clicked(item->linkedFxItem);
+	});
+
+	menu.addAction(tr("------------"));
+	menu.addAction(tr("Delete Fx"), this, [=](void) {
+		if (item->linkedFxItem->isUsed()) {
+			POPUPERRORMSG(tr("Cancel message"),
+						  tr("FX item is used!\nIt's not allowed to delete an active FX."), this);
+			return;
+		} else {
+			fxList()->deleteFx(item->linkedFxItem);
+		}
+	});
+
+	if (fxtype == FX_SCENE) {
+		menu.addAction(tr("Clone Fx Scene"), this, [=](void){
 			fxList()->cloneSelectedSceneItem();
 			refreshList(curScrollPos);
-			break;
-		case 7:
-			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
-			break;
-		case 8:
-			AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
-			AppCentral::instance()->unitLight->blackFxItem(fx,200);
-			break;
-		case 9: {
-				QString newname = QInputDialog::getText(this
-														,tr("Edit")
-														,tr("Enter name label for Fx")
-														,QLineEdit::Normal
-														,fx->name());
-				if (newname.size()) {
-					fx->setName(newname);
-					refreshList(curScrollPos);
-				}
-			}
-			break;
-		case 10:
+		});
+	}
+
+	if (fxtype == FX_SEQUENCE) {
+		menu.addAction(tr("Clone Fx Sequence"), this, [=]{
 			fxList()->cloneSelectedSeqItem();
 			refreshList(curScrollPos);
-			break;
-		case 11:
-			AppCentral::instance()->unitVideo->startFxClip(reinterpret_cast<FxClipItem*>(fx));
-			break;
-		case 12:
-			fxList()->cloneSelectedScriptItem();
-			refreshList(curScrollPos);
-			break;
-
-		case 13:
-			fxList()->addFxScript();
-			refreshList(curScrollPos);
-			break;
-
-		case 14:
+		});
+		if (AppCentral::instance()->execCenter->findExecuter(fx)) {
+			menu.addAction(tr("Stop Sequence"), this, [=]{
+				AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
+			});
+			menu.addAction(tr("Stop and BLACK Sequence"), this, [=]{
+				AppCentral::instance()->unitFx->stopFxSequence(reinterpret_cast<FxSeqItem*>(fx));
+				AppCentral::instance()->unitLight->blackFxItem(fx,200);
+			});
+		}
+	}
+	if (fxtype == FX_TIMELINE) {
+		menu.addAction(tr("Clone Fx Timeline"), this, [=](void){
 			fxList()->cloneSelectedTimelineItem();
 			refreshList(curScrollPos);
-			break;
+		});
+	}
+	if (fxtype == FX_SCRIPT) {
+		menu.addAction(tr("Clone Fx Script"), this, [=](void){
+			fxList()->cloneSelectedScriptItem();
+			refreshList(curScrollPos);
+		});
+		menu.addAction(tr("Add Fx Script here"), this, [=](void) {
+			fxList()->addFxScript(item->myRow + 1);
+			refreshList(curScrollPos);
+		});
+	}
+	if (fxtype == FX_AUDIO) {
+		menu.addAction(tr("Start in external video player"), this, [=](void){
+			AppCentral::instance()->unitVideo->startFxClip(reinterpret_cast<FxClipItem*>(fx));
+		});
 
-		default:
-			break;
-		}
+		menu.addAction(tr("Add Fx Audio here"), this, [=](void) {
+			AppCentral::instance()->addFxAudioDialog(fxList(), this, item->myRow + 1);
+			refreshList(curScrollPos);
+		});
+	}
+
+	menu.exec(event->globalPos());
+}
+
+void FxListWidget::contextFxListClicked(QContextMenuEvent *event)
+{
+	FxList *fxl = fxList();
+	if (!fxl) return;
+
+	QMenu menu(this);
+	QAction *act;
+
+	int visibleCnt = 0;
+	if (fxList()->showColumnIdFlag) {
+		act = menu.addAction(tr("Hide ID Column"));
+		visibleCnt++;
+	} else {
+		act = menu.addAction(tr("Show ID Column"));
+	}
+	act->setObjectName("1");
+	if (fxList()->showColumnPredelayFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide PreDelay Column"));
+	} else {
+		act = menu.addAction(tr("Show PreDelay Column"));
+	}
+	act->setObjectName("2");
+	if (fxList()->showColumnFadeinFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide FadeIN time column"));
+	} else {
+		act = menu.addAction(tr("Show FadeIN time column"));
+	}
+	act->setObjectName("3");
+	if (fxList()->showColumnMoveFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide Move time column"));
+	} else {
+		act = menu.addAction(tr("Show Move time column"));
+	}
+	act->setObjectName("4");
+	if (fxList()->showColumnHoldFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide Hold time Column"));
+	} else {
+		act = menu.addAction(tr("Show Hold time Column"));
+	}
+	act->setObjectName("5");
+	if (fxList()->showColumnFadeoutFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide FadeOut time column"));
+	} else {
+		act = menu.addAction(tr("Show FadeOut time column"));
+	}
+	act->setObjectName("6");
+	if (fxList()->showColumnPostdelayFlag) {
+		visibleCnt++;
+		act = menu.addAction(tr("Hide PostDelay column"));
+	} else {
+		act = menu.addAction(tr("Show PostDelay column"));
+	}
+	act->setObjectName("7");
+
+	menu.addAction(tr("------------"));
+	if (visibleCnt < 7) {
+		act = menu.addAction(tr("Show all columns"));
+		act->setObjectName("10");
+	}
+	if (visibleCnt > 0) {
+		act = menu.addAction(tr("Hide all columns"));
+		act->setObjectName("11");
+	}
+
+	act = menu.exec(event->globalPos());
+	if (!act) return;
+
+	switch (act->objectName().toInt()) {
+	case 1:
+		fxl->showColumnIdFlag = !fxl->showColumnIdFlag;
+		refreshList();
+		break;
+	case 2:
+		fxl->showColumnPredelayFlag = !fxl->showColumnPredelayFlag;
+		refreshList();
+		break;
+	case 3:
+		fxl->showColumnFadeinFlag = !fxl->showColumnFadeinFlag;
+		refreshList();
+		break;
+	case 4:
+		fxl->showColumnHoldFlag = !fxl->showColumnHoldFlag;
+		refreshList();
+		break;
+	case 5:
+		fxl->showColumnFadeoutFlag = !fxl->showColumnFadeoutFlag;
+		refreshList();
+		break;
+	case 6:
+		fxl->showColumnPostdelayFlag = !fxl->showColumnPostdelayFlag;
+		refreshList();
+		break;
+	case 7:
+		fxl->showColumnMoveFlag = !fxl->showColumnMoveFlag;
+		refreshList();
+		break;
+	case 10:
+		fxl->setColumnFlag(0xfe, true);
+		refreshList();
+		break;
+	case 11:
+		fxl->setColumnFlag(0xfe, false);
+		refreshList();
+		break;
+
 	}
 }
 
@@ -1785,4 +1780,3 @@ void FxListWidget::on_fadeToButton_clicked(bool checked)
 {
 	emit fadeToModeChanged(checked);
 }
-

@@ -78,6 +78,7 @@ public:
 	void setOriginFx(FxItem *fx);
 	FxListWidgetItem * getFxListItemAtPos(QPoint pos);
 	FxListWidgetItem * getFxListWidgetItemFor(FxItem *fx);
+	int getFxListRowFor(FxItem *fx);
 	void setStandAlone(bool state);
 	inline bool isStandAlone() const {return is_standalone_f;}
 	bool isFxItemPossibleHere(FxItem *fx);
@@ -101,7 +102,8 @@ private:
 	void column_name_double_clicked(FxItem *fx);
 	void column_type_double_clicked(FxItem *fx);
 	void contextMenuEvent(QContextMenuEvent *event);
-
+	void contextItemClicked(QContextMenuEvent *event, FxListWidgetItem *item);
+	void contextFxListClicked(QContextMenuEvent *event);
 
 public slots:
 	void selectFx(FxItem *fx);
