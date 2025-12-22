@@ -42,6 +42,9 @@ public:
 	int fxID() const {return m_fxID;}
 	LINKED_OBJ_TYPE type() const {return LINKED_OBJ_TYPE(m_linkedObjType);}
 
+	// setter: useful, if FxTimeLineObj is manipulated externaly, but not in TimeLine edit widget
+	bool linkObjToFxItem(FxItem *fx);
+
 private:
 	void init();
 

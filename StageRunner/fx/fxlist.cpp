@@ -584,14 +584,13 @@ bool FxList::addFxAudioPlayList(int pos)
 
 FxSeqItem *FxList::addFxSequence(int pos)
 {
-	FxSeqItem *fx = static_cast<FxSeqItem *>(addFx(FX_SEQUENCE, -1, pos));
+	FxSeqItem *fx = dynamic_cast<FxSeqItem *>(addFx(FX_SEQUENCE, -1, pos));
 	if (fx) {
 		fx->refCount.ref();
 		fx->setName("FX Sequence");
 		m_isModified = true;
-		return fx;
 	}
-	return nullptr;
+	return fx;
 }
 
 bool FxList::addFxScript(int pos)
@@ -619,16 +618,15 @@ bool FxList::addFxCue()
 	return false;
 }
 
-bool FxList::addFxTimeLine(int pos)
+FxTimeLineItem *FxList::addFxTimeLine(int pos)
 {
-	FxItem *fx = addFx(FX_TIMELINE, -1, pos);
-	if (fx) {
-		fx->refCount.ref();
-		fx->setName("FX TimeLine");
+	FxTimeLineItem *fxtl = dynamic_cast<FxTimeLineItem *>(addFx(FX_TIMELINE, -1, pos));
+	if (fxtl) {
+		fxtl->refCount.ref();
+		fxtl->setName("FX TimeLine");
 		m_isModified = true;
-		return true;
 	}
-	return false;
+	return fxtl;
 }
 
 void FxList::moveFromTo(int srcidx, int destidx)

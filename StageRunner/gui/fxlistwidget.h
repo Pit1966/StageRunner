@@ -87,7 +87,9 @@ public:
 	FxListWidgetItem *findFxListWidgetItem(int row, int columnType);
 	void updateFxListRow(FxItem *fx, FxList *fxlist, int row);
 
+	// special editing functions
 	void moveItemToBin(FxListWidgetItem *item);
+	void convertFxAudioToTimeline(FxListWidgetItem *item);
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
 	static FxListWidget * findFxListWidget(FxList *fxList);
@@ -113,6 +115,7 @@ public slots:
 	void setCurrentFx(FxItem *newfx, FxItem *oldfx);
 	void initRowDrag(FxListWidgetItem *item);
 	void refreshList(int sliderpos = -1);
+	void updateList();
 	void refreshFxItem(FxItem *fx);
 	void setEditable(bool state);
 	void setRowSelected(int row, bool state);

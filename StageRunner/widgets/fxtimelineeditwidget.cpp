@@ -198,7 +198,7 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 	// clear all tracks (and FxTimeLineObjs) in the FxTimeLineItem
 	// fxt->clear();
 
-	// Each track has a its own list with item/objs
+	// Each track has its own list with item/objs
 	// t is also the trackID !!
 	for (int t=0; t<m_tracks.size(); t++) {
 		int trackID = t;

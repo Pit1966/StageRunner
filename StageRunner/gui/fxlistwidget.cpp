@@ -35,6 +35,7 @@
 #include "fxaudioitem.h"
 #include "fxseqitem.h"
 #include "fxclipitem.h"
+#include "fxtimelineitem.h"
 #include "fxitemobj.h"
 #include "appcentral.h"
 #include "usersettings.h"
@@ -350,7 +351,7 @@ bool FxListWidget::isFxItemPossibleHere(FxItem *fx)
 
 	switch (origin_fxitem->fxType()) {
 	case FX_SEQUENCE:
-		if (fxtype == FX_AUDIO || fxtype == FX_SCENE )
+		if (fxtype == FX_AUDIO || fxtype == FX_SCENE || fxtype == FX_SCRIPT || fxtype == FX_TIMELINE)
 			return true;
 		break;
 	case FX_AUDIO_PLAYLIST:
@@ -922,16 +923,10 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 
 void FxListWidget::moveItemToBin(FxListWidgetItem *item)
 {
-	if (!item || !fxList())
-		return;
-
-	int row = item->myRow;
-	if (row < 0 || row >= fxTable->rowCount())
+	if (!item || !fxList() || !item->linkedFxItem)
 		return;
 
 	FxItem *fx = item->linkedFxItem;
-	if (!fx)
-		return;
 
 	// get or create BIN FxSeqItem which is the container
 	FxSeqItem *fxseq = fxList()->findBinSeqItem();
@@ -954,6 +949,29 @@ void FxListWidget::moveItemToBin(FxListWidgetItem *item)
 	refreshList();
 }
 
+void FxListWidget::convertFxAudioToTimeline(FxListWidgetItem *item)
+{
+	if (!item || !fxList() || !item->linkedFxItem)
+		return;
+
+	FxAudioItem *fxa = dynamic_cast<FxAudioItem*>(item->linkedFxItem);
+	if (!fxa || fxa->fxType() != FX_AUDIO)
+		return;
+
+	FxTimeLineItem *fxtl = fxList()->addFxTimeLine(item->myRow+1);
+	if (fxtl->addFxAudioAndEnvelope(fxa, 0)) {
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("Timeline FX successfully created.\n"
+											"Do you want to move the audio FX to BIN now?")
+										,QMessageBox::Yes | QMessageBox::No);
+
+		if (ret == QMessageBox::Yes)
+			moveItemToBin(item);
+	}
+
+	updateList();
+}
+
 void FxListWidget::refreshList(int sliderpos)
 {
 	// qDebug("FxListWidget refresh");
@@ -962,6 +980,12 @@ void FxListWidget::refreshList(int sliderpos)
 		if (sliderpos >= 0)
 			fxTable->verticalScrollBar()->setSliderPosition(sliderpos);
 	}
+}
+
+void FxListWidget::updateList()
+{
+	int curScrollPos = fxTable->verticalScrollBar()->sliderPosition();
+	refreshList(curScrollPos);
 }
 
 void FxListWidget::refreshFxItem(FxItem *fx)
@@ -1525,6 +1549,9 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 			AppCentral::instance()->unitVideo->startFxClip(reinterpret_cast<FxClipItem*>(fx));
 		});
 
+		menu.addAction(tr("Convert into Fx Timeline with Volume envelope"), this, [=](void){
+			convertFxAudioToTimeline(item);
+		});
 		menu.addAction(tr("Add Fx Audio here"), this, [=](void) {
 			AppCentral::instance()->addFxAudioDialog(fxList(), this, item->myRow + 1);
 			refreshList(curScrollPos);
@@ -1807,6 +1834,11 @@ void FxListWidget::on_closeButton_clicked()
 void FxListWidget::on_editButton_clicked(bool checked)
 {
 	setEditable(checked);
+
+	if (parentWidget() == nullptr) {
+		setWindowFlag(Qt::WindowStaysOnTopHint);
+		show();
+	}
 }
 
 

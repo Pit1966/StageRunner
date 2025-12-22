@@ -148,6 +148,47 @@ int FxTimeLineObj::stopAtMs() const
 	return 0;
 }
 
+bool FxTimeLineObj::linkObjToFxItem(FxItem *fx)
+{
+	if (!fx)
+		return false;
+
+	m_fxID = fx->id();
+
+	int minLenMs = -1;
+	// preset of base time values, such as minimal execution duration of item
+	switch (fx->fxType()) {
+	case FX_SCENE:
+		m_linkedObjType = LINKED_FX_SCENE;
+		minLenMs = fx->durationHint();
+		if (minLenMs <= 0)	// set default duration to 2 seconds, if there is no other value given.
+			minLenMs = 2000;
+		m_maxDurationMs = minLenMs;
+		// m_colorBG = 0x923d0c;
+		// m_colorBorder = 0x923d0c;
+		break;
+	case FX_AUDIO:
+		m_linkedObjType = LINKED_FX_AUDIO;
+		minLenMs = fx->durationHint();
+		if (minLenMs <= 0)
+			minLenMs = 30000;
+		m_maxDurationMs = minLenMs;
+		break;
+	case FX_SCRIPT:
+		m_linkedObjType = LINKED_FX_SCRIPT;
+		minLenMs = fx->durationHint();
+		m_maxDurationMs = minLenMs;
+		// m_colorBG = 0x413f32;
+		// m_colorBorder = 0x413f32;
+		break;
+
+	default:
+		return false;
+	}
+
+	return true;
+}
+
 void FxTimeLineObj::init()
 {
 	setClass(PrefVarCore::TIMELINE_OBJ,"TLObj");

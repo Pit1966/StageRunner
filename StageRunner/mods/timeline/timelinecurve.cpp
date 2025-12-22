@@ -552,7 +552,7 @@ void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 	painter->setRenderHint(QPainter::Antialiasing);
 
 	QPen pen;
-	pen.setColor(m_colorBorder);
+	pen.setColor(m_colorText);			// was m_colorBorder
 	painter->setPen(pen);
 
 	if (!m_myTrack)
@@ -561,11 +561,12 @@ void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 		return;
 
 	if (!m_myTrack->isOverlay()) {
+		QFont font("Monospace",8);
+		painter->setFont(font);
 		QRectF textRect = boundingRect();
-		textRect.adjust(5,-2,-5,-10);
+		textRect.adjust(5,+2,-5,-10);
 		painter->drawText(textRect, m_label);
 	}
-
 
 	// draw nodes
 	qreal mps = m_timeline->msPerPixel();
@@ -589,7 +590,7 @@ void TimeLineCurve::paint(QPainter *painter, const QStyleOptionGraphicsItem */*o
 
 		const Node &n = m_nodes.at(t);
 		QPointF p = n.nodePixel(mps);
-		painter->drawEllipse(p, 3, 3);
+		painter->drawEllipse(p, m_nodeDiameter, m_nodeDiameter);
 	}
 }
 

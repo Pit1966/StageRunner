@@ -818,8 +818,8 @@ void StageRunnerMainWin::openFxSeqItemPanel(FxSeqItem *fx)
 		}
 
 		// This connect is for starting / forwarding the sequence by double click on an item in the sequence list
-//		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
-//				,fx->connector(),SLOT(playFxPlayList(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
+		connect(sequencewid,SIGNAL(fxCmdActivated(FxItem*,CtrlCmd,Executer*))
+				,appCentral,SLOT(executeFxCmd(FxItem*,CtrlCmd,Executer*)),Qt::QueuedConnection);
 	} else {
 		sequencewid->refreshList();
 	}

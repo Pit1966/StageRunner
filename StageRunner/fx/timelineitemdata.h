@@ -15,7 +15,6 @@ protected:
 	int m_fadeInDurationMs			= 0;			// this is the time from start to full fade in [ms]
 	int m_fadeOutDurationMs			= 0;			// this is the time from fadeout begin positon up to the end [ms]
 
-
 	// temp
 	mutable FxItem *m_fxItemP	= nullptr;
 

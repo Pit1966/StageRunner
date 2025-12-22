@@ -84,6 +84,7 @@ private:
 	uint m_colorNodeHov = 0x00ff00;
 
 	uint m_altNodeColor = 0x449955;
+	uint m_nodeDiameter	= 4;					///< how big is a node point
 
 	// temp
 	int m_curHoveredNode	= -1;

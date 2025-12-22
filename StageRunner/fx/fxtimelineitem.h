@@ -11,6 +11,7 @@
 
 class FxTimeLineObj;
 class FxTimeLineTrack;
+class FxAudioItem;
 
 class FxTimeLineItem : public FxItem
 {
@@ -28,7 +29,10 @@ public:
 
 	void clear();
 	inline int trackCount() const {return m_tracks.size();}
-	FxTimeLineTrack *trackAt(int t) const {return m_tracks.at(t);}
+	FxTimeLineTrack *trackAt(int t) const;
+
+	void setTimeLineDuration(int ms);
+	int timeLineDurationMs() const {return m_timeLineDurationMs;}
 
 	int timeLineObjCount(uint trackID) const;
 	FxTimeLineObj *timeLineObjAt(uint trackID, int idx) const;
@@ -36,6 +40,9 @@ public:
 	qint32 loopValue() const override;
 	void setLoopValue(qint32 val) override;
 	void resetFx() override;
+
+	// Convenience editing functions
+	bool addFxAudioAndEnvelope(FxAudioItem *fxa, int atMs);
 
 private:
 	void init();

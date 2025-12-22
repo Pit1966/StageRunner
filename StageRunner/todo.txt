@@ -5,19 +5,11 @@
 
 - static global_fx_list sollte auch ein Hash sein für schnelle Suche ID->Fx
 
-
 - Setup-Dialog für DMX Konfiguration könnte intuitiver werden. Es ist z.B. nicht klar, dass
     man SAVE DMX CONFIG drücken muss, nachdem man das Universe für ein Plugin eingestellt hat
 - IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht
 
 Fixme:
-
-- Wenn in einer Timeline einer FxAudioItem nicht gestartet werden kann (File not found), Dann ist danach der
-    Audio Slot blockiert
-
-
-done: Crash, falls mit "DEL" Scene gelöscht wird, die gerade aktiv ist. Reproduzierbar mit: Taste "DEL" während des
-einfadens drücken
 
 Projekt Kopie (durch Verwendung des CopyConstructors):
 Falls nicht die Option "keep FxItemIds" angewählt ist, müssen in den FxScriptItems,
@@ -34,12 +26,13 @@ Features:
 - done: Position des Splitters zwischen Liste und Kontrollen speichern
 - done: Audio in eigenen Thread?
 - done: show/hide all columns in FxListWidget
+- done: Automatic generate a Timeline with Volume curves for a given FxAudio Item
+- done: Move to bin funtion in order to remove FxItems from main fxlist to an automatic created bin FxSeqItem
+- Add multiple audio files, when Filerequester is called by addFxAudio in context menu of FxListWidget
 
 - FxTimeline add script command TimelineItem
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
-- Automatic generate a Timeline with Volume curves for a given FxAudio Item
-- Move to bin funtion in order to remove FxItems from main fxlist to an automatic created bin FxSeqItem
 - Play FxItems in FxSeqItem lists. (should be done with double click)
 
 (ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten

@@ -33,6 +33,7 @@
 class FxItem;
 class FxSeqItem;
 class FxAudioItem;
+class FxTimeLineItem;
 class FxIdMap;
 
 class FxList : public QObject
@@ -124,7 +125,7 @@ public:
 	FxSeqItem * addFxSequence(int pos = -1);
 	bool addFxScript(int pos = -1);
 	bool addFxCue();
-	bool addFxTimeLine(int pos = -1);
+	FxTimeLineItem * addFxTimeLine(int pos = -1);
 	void moveFromTo(int srcidx, int destidx);
 	bool deleteFx(FxItem *fx);
 	bool contains(FxItem *fx);
