@@ -439,16 +439,17 @@ bool AppCentral::addFxAudioDialog(FxList *fxlist, QWidget *widget, int row)
 {
 	if (!fxlist) return false;
 
-	QString path = QFileDialog::getOpenFileName(widget,tr("Choose Audio File")
-												,userSettings->pLastAudioFxImportPath);
+	const QStringList files = QFileDialog::getOpenFileNames(widget,tr("Choose Audio File(s)")
+															,userSettings->pLastAudioFxImportPath);
+	if (files.isEmpty())
+		return false;
 
-
-	if (path.size()) {
-		userSettings->pLastAudioFxImportPath = path;
-		fxlist->addFxAudioSimple(path,row);
-		return true;
+	userSettings->pLastAudioFxImportPath = files.first();
+	for (int i=0; i<files.size(); i++) {
+		const QString &path = files.at(i);
+		fxlist->addFxAudioSimple(path, row < 0 ? -1 : row + i);
 	}
-	return false;
+	return true;
 }
 
 FxItem *AppCentral::addDefaultSceneToFxList(FxList *fxlist, int row)

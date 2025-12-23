@@ -28,12 +28,12 @@ Features:
 - done: show/hide all columns in FxListWidget
 - done: Automatic generate a Timeline with Volume curves for a given FxAudio Item
 - done: Move to bin funtion in order to remove FxItems from main fxlist to an automatic created bin FxSeqItem
-- Add multiple audio files, when Filerequester is called by addFxAudio in context menu of FxListWidget
+- done: Add multiple audio files, when Filerequester is called by addFxAudio in context menu of FxListWidget
+- Play FxItems in FxSeqItem lists. (should be done with double click)
 
 - FxTimeline add script command TimelineItem
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.
 - pComment in project wird nicht angezeigt und kann nicht editiert werden.
-- Play FxItems in FxSeqItem lists. (should be done with double click)
 
 (ready !?) Falls in Scene fadein, hold und fadeout Zeit gesetzt sind, dann die Scene beim Starten
 als Minisequence gehandhabt. Es wird dann erst eingefadet, die Holdzeit abgewartet und dann ausgefadet

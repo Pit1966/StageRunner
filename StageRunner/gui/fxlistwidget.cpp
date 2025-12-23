@@ -311,16 +311,22 @@ FxListWidgetItem *FxListWidget::getFxListWidgetItemFor(FxItem *fx)
 	return nullptr;
 }
 
+
+/**
+ * @brief Get row number for FxItem
+ * @param fx FxItem address to search for
+ * @return number of row in table; if given FxItem does not exist: -2
+ */
 int FxListWidget::getFxListRowFor(FxItem *fx)
 {
 	if (!fx)
-		return -1;
+		return -2;
 
 	FxListWidgetItem *item = getFxListWidgetItemFor(fx);
 	if (item) {
 		return item->myRow;
 	} else {
-		return -1;
+		return -2;
 	}
 }
 
@@ -1375,7 +1381,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 	if (!fxl) return;
 
 	// No item is directly selected, but maybe it is marked (green) in list
-	int curSelectedRow = getFxListRowFor(cur_selected_item);
+	int curSelectedRow = getFxListRowFor(cur_selected_item);		// returns -2, if nothing is selected
 
 	QMenu menu(this);
 
@@ -1385,7 +1391,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 
 	QAction *act;
-	act = menu.addAction(tr("Add Audio Fx"));
+	act = menu.addAction(tr("Add Audio Fx from disk"));
 	act->setObjectName("1");
 
 	act = menu.addAction(tr("New Audio Playlist"));
