@@ -62,8 +62,6 @@ MutexQList<FxListWidget*>FxListWidget::globalFxListWidgetList;
 FxListWidget::FxListWidget(QWidget *parent) :
 	QWidget(parent)
 {
-	init();
-
 	setupUi(this);
 	setStandAlone(false);
 	fadeToButton->setVisible(false);
@@ -92,6 +90,7 @@ FxListWidget::FxListWidget(QWidget *parent) :
 	connect(fxTable,SIGNAL(rowMovedFromTo(int,int)),this,SLOT(moveRowFromTo(int,int)),Qt::QueuedConnection);
 	connect(fxTable,SIGNAL(rowClonedFrom(PTableWidget*,int,int,bool)),this,SLOT(cloneRowFromPTable(PTableWidget*,int,int,bool)),Qt::QueuedConnection);
 
+	connect (AppCentral::instance(), SIGNAL(keyPressModifiersChanged(uint)), this, SLOT(setActiveKeyModifiers(uint)));
 }
 
 FxListWidget::~FxListWidget()
@@ -104,17 +103,17 @@ FxListWidget::~FxListWidget()
 
 void FxListWidget::setFxList(FxList *fxlist)
 {
-	cur_selected_item = 0;
-	selected_rows.clear();
+	m_curSelectedFxItem = 0;
+	m_selectedRows.clear();
 	fxTable->clear();
 
-	is_modified_f = true;
+	m_isModified = true;
 	if (!fxlist) {
-		myfxlist = 0;
+		m_fxList = 0;
 		return;
 	}
-	if (myfxlist != fxlist) {
-		myfxlist = fxlist;
+	if (m_fxList != fxlist) {
+		m_fxList = fxlist;
 		disconnect(this,SLOT(refreshList()));
 		connect(fxlist,SIGNAL(fxListChanged()),this,SLOT(refreshList()));
 	}
@@ -205,9 +204,9 @@ void FxListWidget::resizeTableElements()
 
 void FxListWidget::setAutoProceedSequence(bool state)
 {
-	if (myfxlist) {
+	if (m_fxList) {
 		autoProceedCheck->setChecked(state);
-		myfxlist->setAutoProceedSequence(state);
+		m_fxList->setAutoProceedSequence(state);
 	}
 }
 
@@ -218,15 +217,15 @@ void FxListWidget::setFadeToButtonVisible(bool state)
 
 void FxListWidget::setLoop(int loops)
 {
-	if (myfxlist) {
+	if (m_fxList) {
 		if (loops > 0) {
 			loopCheck->setChecked(true);
 		} else {
 			loopCheck->setChecked(false);
 		}
 	}
-	if (origin_fxitem) {
-		origin_fxitem->setLoopValue(loops);
+	if (m_originFxItem) {
+		m_originFxItem->setLoopValue(loops);
 	}
 }
 
@@ -259,13 +258,15 @@ FxItem *FxListWidget::getFxItemAtRow(int row) const
 {
 	if (row < 0 || row >= fxTable->rowCount()) return 0;
 	FxListWidgetItem *item = qobject_cast<FxListWidgetItem*>(fxTable->cellWidget(row,0));
+	if (!item)
+		return nullptr;
 
 	return item->linkedFxItem;
 }
 
 void FxListWidget::setOriginFx(FxItem *fx)
 {
-	origin_fxitem = fx;
+	m_originFxItem = fx;
 
 	QRect rect = QtStaticTools::stringToQRect(fx->widgetPosition());
 	if (!rect.isNull()) {
@@ -337,7 +338,7 @@ void FxListWidget::setStandAlone(bool state)
 	loopCheck->setHidden(!state);
 	autoProceedCheck->setHidden(state);
 	randomCheckBox->setHidden(!state);
-	is_standalone_f = state;
+	m_isStandAlone = state;
 }
 
 /**
@@ -350,12 +351,12 @@ bool FxListWidget::isFxItemPossibleHere(FxItem *fx)
 	if (!FxItem::exists(fx))
 		return false;
 
-	if (!origin_fxitem)
+	if (!m_originFxItem)
 		return true;
 
 	int fxtype = fx->fxType();
 
-	switch (origin_fxitem->fxType()) {
+	switch (m_originFxItem->fxType()) {
 	case FX_SEQUENCE:
 		if (fxtype == FX_AUDIO || fxtype == FX_SCENE || fxtype == FX_SCRIPT || fxtype == FX_TIMELINE)
 			return true;
@@ -431,7 +432,7 @@ FxListWidget *FxListWidget::findFxListWidget(FxList *fxList)
 	QListIterator<FxListWidget*>it(globalFxListWidgetList);
 	while (it.hasNext() && !wid) {
 		FxListWidget *cur = it.next();
-		if (cur->myfxlist == fxList)
+		if (cur->m_fxList == fxList)
 			wid = cur;
 	}
 
@@ -455,7 +456,7 @@ FxListWidget *FxListWidget::getCreateFxListWidget(FxList *fxList, FxItem *fxItem
 	QListIterator<FxListWidget*>it(globalFxListWidgetList);
 	while (it.hasNext() && !wid) {
 		FxListWidget *cur = it.next();
-		if (cur->myfxlist == fxList)
+		if (cur->m_fxList == fxList)
 			wid = cur;
 	}
 	globalFxListWidgetList.unlock();
@@ -532,8 +533,8 @@ void FxListWidget::selectFx(FxItem *fx)
 		FxListWidgetItem * item = (FxListWidgetItem*)fxTable->cellWidget(row,0);
 		if (item->linkedFxItem == fx) {
 			found = true;
-			if (cur_selected_item != fx) {
-				cur_selected_item = fx;
+			if (m_curSelectedFxItem != fx) {
+				m_curSelectedFxItem = fx;
 				setSingleRowSelected(item->myRow);
 				emit fxItemSelected(fx);
 			}
@@ -627,24 +628,11 @@ void FxListWidget::initRowDrag(FxListWidgetItem *item)
 	}
 }
 
-void FxListWidget::init()
-{
-	is_modified_f = false;
-	is_editable_f = false;
-	is_standalone_f = false;
-
-	myfxlist = 0;
-	cur_selected_item = 0;
-	cur_clicked_item = 0;
-	origin_fxitem = 0;
-	upper_context_menu_split = 60;
-}
-
 void FxListWidget::closeEvent(QCloseEvent *)
 {
-	if (origin_fxitem) {
-		if (FxItem::exists(origin_fxitem)) {
-			origin_fxitem->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
+	if (m_originFxItem) {
+		if (FxItem::exists(m_originFxItem)) {
+			m_originFxItem->setWidgetPosition(QtStaticTools::qRectToString(geometry()));
 		} else {
 			qWarning() << Q_FUNC_INFO << "origin fxitem not existing, but pointer is not NULL";
 		}
@@ -664,7 +652,7 @@ FxListWidgetItem *FxListWidget::new_fxlistwidgetitem(FxItem *fx, const QString &
 	connect(item,SIGNAL(tabPressedInEdit(FxListWidgetItem*)),this,SLOT(if_fxitemwidget_tab_pressed(FxListWidgetItem*)));
 	connect(item,SIGNAL(enterPressedInEdit(FxListWidgetItem*)),this,SLOT(if_fxitemwidget_enter_pressed(FxListWidgetItem*)));
 
-	item->setEditable(is_editable_f);
+	item->setEditable(m_isEditable);
 	return item;
 }
 
@@ -927,7 +915,7 @@ void FxListWidget::updateFxListRow(FxItem *fx, FxList *fxlist, int row)
 	}
 }
 
-void FxListWidget::moveItemToBin(FxListWidgetItem *item)
+void FxListWidget::moveItemToBin(FxListWidgetItem *item, bool noTableRefresh)
 {
 	if (!item || !fxList() || !item->linkedFxItem)
 		return;
@@ -952,7 +940,8 @@ void FxListWidget::moveItemToBin(FxListWidgetItem *item)
 	// and append it in the FxSeqItem beyond the list
 	fxseq->fxList()->append(fx);
 
-	refreshList();
+	if (!noTableRefresh)
+		refreshList();
 }
 
 void FxListWidget::convertFxAudioToTimeline(FxListWidgetItem *item)
@@ -981,8 +970,8 @@ void FxListWidget::convertFxAudioToTimeline(FxListWidgetItem *item)
 void FxListWidget::refreshList(int sliderpos)
 {
 	// qDebug("FxListWidget refresh");
-	if (myfxlist) {
-		setFxList(myfxlist);
+	if (m_fxList) {
+		setFxList(m_fxList);
 		if (sliderpos >= 0)
 			fxTable->verticalScrollBar()->setSliderPosition(sliderpos);
 	}
@@ -1006,9 +995,9 @@ void FxListWidget::refreshFxItem(FxItem *fx)
 
 void FxListWidget::setEditable(bool state)
 {
-	if (state != is_editable_f) {
+	if (state != m_isEditable) {
 		unselectRows();
-		is_editable_f = state;
+		m_isEditable = state;
 		emit editableChanged(state);
 	}
 	if (state != editButton->isChecked()) {
@@ -1024,13 +1013,13 @@ void FxListWidget::setEditable(bool state)
 void FxListWidget::setRowSelected(int row, bool state)
 {
 	if (state) {
-		if (!selected_rows.contains(row)) {
-			selected_rows.append(row);
+		if (!m_selectedRows.contains(row)) {
+			m_selectedRows.append(row);
 			fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),true);
 		}
 	} else {
 		fxTable->setRangeSelected(QTableWidgetSelectionRange(row,0,row,1),false);
-		selected_rows.removeAll(row);
+		m_selectedRows.removeAll(row);
 	}
 
 	foreach(FxListWidgetItem* item, getItemListForRow(row)) {
@@ -1042,7 +1031,7 @@ void FxListWidget::setSingleRowSelected(int row)
 {
 	bool not_selected_yet = true;
 
-	foreach(int selrow, selected_rows) {
+	for(int selrow : m_selectedRows) {
 		if (selrow != row) {
 			setRowSelected(selrow,false);
 		} else {
@@ -1050,7 +1039,8 @@ void FxListWidget::setSingleRowSelected(int row)
 		}
 	}
 
-	if (not_selected_yet) setRowSelected(row,true);
+	if (not_selected_yet)
+		setRowSelected(row,true);
 }
 
 /**
@@ -1058,10 +1048,10 @@ void FxListWidget::setSingleRowSelected(int row)
  */
 void FxListWidget::unselectRows()
 {
-	while (selected_rows.size()) {
-		setRowSelected(selected_rows.takeFirst(),false);
+	while (m_selectedRows.size()) {
+		setRowSelected(m_selectedRows.takeFirst(),false);
 	}
-	cur_selected_item = 0;
+	m_curSelectedFxItem = 0;
 }
 
 void FxListWidget::propagateSceneStatus(FxSceneItem *scene)
@@ -1182,7 +1172,8 @@ void FxListWidget::cloneRowFromPTable(PTableWidget *srcPtable, int srcRow, int d
 
 void FxListWidget::onFxItemSelectedInChildWidget(FxItem *fx)
 {
-	if (debug) qDebug("Selected FxItem in Child: %s",fx?fx->name().toLocal8Bit().data():"NULL");
+	if (debug)
+		qDebug("Selected FxItem in Child: %s",fx?fx->name().toLocal8Bit().data():"NULL");
 	emit fxItemSelectedInChildFxListWidget(fx);
 }
 
@@ -1204,8 +1195,13 @@ void FxListWidget::propagateStatusMsg(FxItem *fx, const QString &msg)
 	}
 }
 
+/**
+ * @brief FxListWidget::on_fxTable_itemClicked
+ * @param item
+ */
 void FxListWidget::on_fxTable_itemClicked(QTableWidgetItem *item)
 {
+	qDebug() << Q_FUNC_INFO << item << item->text();
 	FxListWidgetItem *myitem = reinterpret_cast<FxListWidgetItem*>(item);
 	if_fxitemwidget_clicked(myitem);
 }
@@ -1218,15 +1214,17 @@ void FxListWidget::on_fxTable_itemDoubleClicked(QTableWidgetItem *item)
 
 void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 {
-	if (debug > 1) qDebug("FxListWidget::moveRowFromTo: %d to %d",srcrow,destrow);
-	if (myfxlist) {
+	if (debug > 1)
+		qDebug("FxListWidget::moveRowFromTo: %d to %d",srcrow,destrow);
+
+	if (m_fxList) {
 		FxItem *cur = 0;
-		if (srcrow >= 0 && srcrow < myfxlist->size()) cur = myfxlist->at(srcrow);
-		myfxlist->moveFromTo(srcrow,destrow);
+		if (srcrow >= 0 && srcrow < m_fxList->size()) cur = m_fxList->at(srcrow);
+		m_fxList->moveFromTo(srcrow,destrow);
 		// setFxList(myfxlist);
 		if (cur) {
 			qDebug() << "select current:" << cur->name();
-			cur_selected_item = cur;
+			m_curSelectedFxItem = cur;
 			selectFx(cur);
 		}
 		emit listModified();
@@ -1236,38 +1234,38 @@ void FxListWidget::moveRowFromTo(int srcrow, int destrow)
 
 void FxListWidget::on_autoProceedCheck_clicked(bool checked)
 {
-	if (myfxlist) {
-		myfxlist->setAutoProceedSequence(checked);
+	if (m_fxList) {
+		m_fxList->setAutoProceedSequence(checked);
 	}
 }
 
 void FxListWidget::on_loopCheck_clicked(bool checked)
 {
-	if (myfxlist) {
-		FxItem *parentfx = myfxlist->parentFx();
-		myfxlist->setLoopList(checked);
+	if (m_fxList) {
+		FxItem *parentfx = m_fxList->parentFx();
+		m_fxList->setLoopList(checked);
 		if (checked) {
 			if (parentfx) {
 				parentfx->setLoopValue(10000);
 			} else {
-				myfxlist->setLoopTimes(100000);
+				m_fxList->setLoopTimes(100000);
 			}
-			myfxlist->setLoopList(true);
+			m_fxList->setLoopList(true);
 		} else {
 			if (parentfx) {
 				parentfx->setLoopValue(1);
 			} else {
-				myfxlist->setLoopTimes(1);
+				m_fxList->setLoopTimes(1);
 			}
-			myfxlist->setLoopList(false);
+			m_fxList->setLoopList(false);
 		}
 	}
 }
 
 void FxListWidget::on_randomCheckBox_clicked(bool checked)
 {
-	if (myfxlist) {
-		myfxlist->setRandomized(checked);
+	if (m_fxList) {
+		m_fxList->setRandomized(checked);
 	}
 }
 
@@ -1303,6 +1301,9 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 {
 	if (!listitem) return;
+	if (m_selectedRows.size() > 1 && QApplication::mouseButtons() & Qt::RightButton)
+		return;
+
 	// qDebug("FxListWidget -> clicked -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
 	FxItem *fx = listitem->linkedFxItem;
 	if (!FxItem::exists(fx)) return;
@@ -1310,21 +1311,23 @@ void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 	switch (listitem->columnType) {
 	case FxListWidgetItem::CT_KEY:
 	case FxListWidgetItem::CT_NAME:
-		myfxlist->setNextFx(fx);
-		myfxlist->setPrevFx(myfxlist->findSequenceForerunner(fx));
-		if (cur_selected_item != fx) {
-			cur_selected_item = fx;
-			emit fxItemSelected(fx);
+		if (m_selectedRows.isEmpty() || m_activeKeyModifiers == 0) {
+			m_fxList->setNextFx(fx);
+			m_fxList->setPrevFx(m_fxList->findSequenceForerunner(fx));
+			if (m_curSelectedFxItem != fx) {
+				m_curSelectedFxItem = fx;
+				emit fxItemSelected(fx);
+			}
+			unselectRows();
 		}
-		unselectRows();
 		setRowSelected(listitem->myRow,true);
-		cur_selected_item = listitem->linkedFxItem;
+		m_curSelectedFxItem = listitem->linkedFxItem;
 		break;
 	default:
 		qDebug("Click on this column not implemented yet");
 
 	}
-	cur_clicked_item = listitem;
+	m_curClickedFxListWidgetItem = listitem;
 }
 
 void FxListWidget::column_name_double_clicked(FxItem *fx)
@@ -1367,6 +1370,8 @@ void FxListWidget::column_type_double_clicked(FxItem *fx)
 
 void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 {
+	if (m_selectedRows.size() > 1)
+		return contextMultiItemClicked(event);
 
 	FxListWidgetItem *item = getFxListItemAtPos(event->pos());
 	if (item)
@@ -1381,7 +1386,7 @@ void FxListWidget::contextMenuEvent(QContextMenuEvent *event)
 	if (!fxl) return;
 
 	// No item is directly selected, but maybe it is marked (green) in list
-	int curSelectedRow = getFxListRowFor(cur_selected_item);		// returns -2, if nothing is selected
+	int curSelectedRow = getFxListRowFor(m_curSelectedFxItem);		// returns -2, if nothing is selected
 
 	QMenu menu(this);
 
@@ -1467,8 +1472,8 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 
 	menu.addAction(tr("Unselect"), this, [=](void) {
 		setRowSelected(item->myRow,false);
-		cur_clicked_item = nullptr;
-		cur_selected_item = nullptr;
+		m_curClickedFxListWidgetItem = nullptr;
+		m_curSelectedFxItem = nullptr;
 	});
 
 	menu.addAction(tr("Edit Fx name"), this, [=](void) {
@@ -1499,7 +1504,6 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 	menu.addAction(tr("Move to BIN"), this, [=](void) {
 		moveItemToBin(item);
 	});
-
 
 	menu.addAction(tr("------------"));
 	menu.addAction(tr("Delete Fx"), this, [=](void) {
@@ -1563,6 +1567,60 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 			refreshList(curScrollPos);
 		});
 	}
+
+	menu.exec(event->globalPos());
+}
+
+void FxListWidget::contextMultiItemClicked(QContextMenuEvent *event)
+{
+	QMenu menu(this);
+
+	menu.addAction(tr("Unselect all"), this, [=](void) {
+		while (!m_selectedRows.isEmpty())
+			setRowSelected(m_selectedRows.takeFirst(), false);
+		m_curClickedFxListWidgetItem = nullptr;
+		m_curSelectedFxItem = nullptr;
+	});
+
+	menu.addAction(tr("Move selected to BIN"), this, [=](void) {
+		while (!m_selectedRows.isEmpty()) {
+			int row = m_selectedRows.takeFirst();
+			FxListWidgetItem *it = findFxListWidgetItem(row, FxListWidgetItem::CT_NAME);
+			moveItemToBin(it, true);
+		}
+		refreshList();
+	});
+
+	menu.addAction(tr("------------"));
+	menu.addAction(tr("Delete all selected FX items"), this, [=](void) {
+		int cnt = m_selectedRows.size();
+		int ret = QMessageBox::question(this,tr("Attention")
+										,tr("This will delete %1 FX items from list!\n"
+											"Do you want to continue?").arg(cnt)
+										,QMessageBox::Yes | QMessageBox::No);
+		if (ret != QMessageBox::Yes)
+			return;
+
+		// create a list with FxItems.
+		QList<FxItem *>fxlist;
+		for (int row : m_selectedRows) {
+			FxItem *fx = getFxItemAtRow(row);
+			if (fx) {
+				if (fx->isUsed()) {
+					POPUPERRORMSG(tr("Cancel message"),
+								  tr("FX item '%1' is used!\n"
+									 "It's not allowed to delete an active FX.").arg(fx->name()),this);
+					return;
+				} else {
+					fxlist.append(fx);
+				}
+			}
+		}
+
+		// now delete FxItems
+		for (FxItem *fx : fxlist)
+			fxList()->deleteFx(fx);
+	});
 
 	menu.exec(event->globalPos());
 }
@@ -1856,4 +1914,9 @@ void FxListWidget::on_showRowNumCheck_clicked(bool checked)
 void FxListWidget::on_fadeToButton_clicked(bool checked)
 {
 	emit fadeToModeChanged(checked);
+}
+
+void FxListWidget::setActiveKeyModifiers(uint mods)
+{
+	m_activeKeyModifiers = mods;
 }

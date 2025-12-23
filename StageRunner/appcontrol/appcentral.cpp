@@ -572,6 +572,14 @@ bool AppCentral::isVideoWidgetVisible(QWidget **videoWid) const
 	return unitAudio->isVideoWidgetVisible(videoWid);
 }
 
+void AppCentral::setCurrentKeyModifiers(uint val)
+{
+	if (val != m_activeKeyModifiers) {
+		m_activeKeyModifiers = val;
+		emit keyPressModifiersChanged(val);
+	}
+}
+
 DmxChannel *AppCentral::globalDmxChannel(quint32 universe, qint32 dmxChan)
 {
 	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {

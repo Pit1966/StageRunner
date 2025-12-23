@@ -438,17 +438,7 @@ void StageRunnerMainWin::clearProject()
 
 void StageRunnerMainWin::init()
 {
-	activeKeyModifiers = 0;
-	dialWidgetStyle = nullptr;
-
 	msg_dialog = new QErrorMessage(this);
-	fxitem_editor_dock = nullptr;
-	fxItemEditor = nullptr;
-	scene_status_dock = nullptr;
-	sceneStatusDisplay = nullptr;
-	sequence_status_dock = nullptr;
-	m_universeEditor = nullptr;
-	seqStatusDisplay = nullptr;
 }
 
 
@@ -1017,6 +1007,7 @@ void StageRunnerMainWin::on_actionNew_Project_triggered()
 
 bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 {
+	//return qApp->eventFilter(obj, event);
 
 	if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease ) {
 		// qDebug("KeyEvent %s",obj->objectName().toLocal8Bit().data());
@@ -1167,6 +1158,8 @@ bool StageRunnerMainWin::eventFilter(QObject *obj, QEvent *event)
 		default:
 			break;
 		}
+
+		appCentral->setCurrentKeyModifiers(activeKeyModifiers);
 	}
 
 	return qApp->eventFilter(obj, event);

@@ -53,28 +53,27 @@ class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 	Q_OBJECT
 private:
 	AppCentral *appCentral;
-	QErrorMessage *msg_dialog;
-	PsDockWidget *fxitem_editor_dock;
-	PsDockWidget *scene_status_dock;
-	PsDockWidget *sequence_status_dock;
-	PsDockWidget *template_dock;
-	UniverseEditorWidget *m_universeEditor;
+	QErrorMessage *msg_dialog			= nullptr;
+	PsDockWidget *fxitem_editor_dock	= nullptr;
+	PsDockWidget *scene_status_dock		= nullptr;
+	PsDockWidget *sequence_status_dock	= nullptr;
+	PsDockWidget *template_dock			= nullptr;
+	UniverseEditorWidget *m_universeEditor = nullptr;
 
-	QLabel *m_timeLabel;
+	QLabel *m_timeLabel		= nullptr;
 	QTimer m_statusTimer;							///< feeds time label
-
 
 	QStringList m_recentProjectPaths;				///< This list holds the pathnames of last used projects (max. 10)
 
 public:
-	QStyle *dialWidgetStyle;
-	QTextEdit *logWidget;
-	FxItemPropertyWidget *fxItemEditor;
-	SceneStatusWidget *sceneStatusDisplay;
-	SequenceStatusWidget *seqStatusDisplay;
-	FxListWidget *templateWidget;
+	QStyle *dialWidgetStyle					= nullptr;
+	QTextEdit *logWidget					= nullptr;
+	FxItemPropertyWidget *fxItemEditor		= nullptr;
+	SceneStatusWidget *sceneStatusDisplay	= nullptr;
+	SequenceStatusWidget *seqStatusDisplay	= nullptr;
+	FxListWidget *templateWidget			= nullptr;
 
-	int activeKeyModifiers;
+	int activeKeyModifiers			= 0;
 
 public:
 	StageRunnerMainWin(AppCentral * myapp);
@@ -164,8 +163,6 @@ private slots:
 	void on_actionDelete_FX_Item_triggered();
 	void on_actionClose_video_window_triggered();
 	void on_showFontsButton_clicked();
-
-
 
 private:
 	void init();

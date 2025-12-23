@@ -48,16 +48,17 @@ class FxListWidget : public QWidget, private Ui::FxListWidget
 	Q_OBJECT
 
 private:
-	bool is_modified_f;
-	bool is_editable_f;
-	bool is_standalone_f;
+	bool m_isModified		= false;
+	bool m_isEditable		= false;
+	bool m_isStandAlone		= false;
 
-	FxList * myfxlist;
-	FxItem * cur_selected_item;
-	FxListWidgetItem* cur_clicked_item;
-	FxItem * origin_fxitem;					///< todo shared pointer?
-	QList<int>selected_rows;
-	int upper_context_menu_split;
+	FxList * m_fxList				= nullptr;
+	FxItem * m_curSelectedFxItem	= nullptr;
+	FxListWidgetItem* m_curClickedFxListWidgetItem	= nullptr;
+	FxItem * m_originFxItem			= nullptr;					///< todo shared pointer?
+	QList<int>m_selectedRows;
+	int upper_context_menu_split	= 60;
+	uint m_activeKeyModifiers		= 0;
 
 	static MutexQList<FxListWidget*>globalFxListWidgetList;
 
@@ -66,21 +67,21 @@ public:
 	~FxListWidget();
 	void setFxList(FxList *fxlist);
 	void resizeTableElements();
-	inline FxList * fxList() const {return myfxlist;}
+	inline FxList * fxList() const {return m_fxList;}
 	void setAutoProceedSequence(bool state);
 	void setFadeToButtonVisible(bool state);
 	void setLoop(int loops);
-	inline bool isEditable() {return is_editable_f;}
+	inline bool isEditable() {return m_isEditable;}
 	QList<FxListWidgetItem*> getItemListForRow(int row);
 	int getRowThatContainsFxItem(FxItem *fx);
-	FxItem *currentSelectedFxItem() const {return cur_selected_item;}
+	FxItem *currentSelectedFxItem() const {return m_curSelectedFxItem;}
 	FxItem *getFxItemAtRow(int row) const;
 	void setOriginFx(FxItem *fx);
 	FxListWidgetItem * getFxListItemAtPos(QPoint pos);
 	FxListWidgetItem * getFxListWidgetItemFor(FxItem *fx);
 	int getFxListRowFor(FxItem *fx);
 	void setStandAlone(bool state);
-	inline bool isStandAlone() const {return is_standalone_f;}
+	inline bool isStandAlone() const {return m_isStandAlone;}
 	bool isFxItemPossibleHere(FxItem *fx);
 	void generateDropAllowedFxTypeList(FxItem *fx);
 	inline void setAutoProceedCheckVisible(bool state) {autoProceedCheck->setVisible(state);}
@@ -88,7 +89,7 @@ public:
 	void updateFxListRow(FxItem *fx, FxList *fxlist, int row);
 
 	// special editing functions
-	void moveItemToBin(FxListWidgetItem *item);
+	void moveItemToBin(FxListWidgetItem *item, bool noTableRefresh = false);
 	void convertFxAudioToTimeline(FxListWidgetItem *item);
 
 	static FxListWidget * findFxListWidget(PTableWidget *tableWidget);
@@ -99,7 +100,6 @@ public:
 	static void destroyAllFxListWidgets();
 
 private:
-	void init();
 	void closeEvent(QCloseEvent *);
 	FxListWidgetItem *new_fxlistwidgetitem(FxItem *fx, const QString & text, int coltype);
 	void create_fxlist_row(FxItem *fx, FxList *fxlist, int row);
@@ -107,6 +107,7 @@ private:
 	void column_type_double_clicked(FxItem *fx);
 	void contextMenuEvent(QContextMenuEvent *event);
 	void contextItemClicked(QContextMenuEvent *event, FxListWidgetItem *item);
+	void contextMultiItemClicked(QContextMenuEvent *event);
 	void contextFxListClicked(QContextMenuEvent *event);
 
 public slots:
@@ -150,6 +151,8 @@ private slots:
 
 	void on_showRowNumCheck_clicked(bool checked);
 	void on_fadeToButton_clicked(bool checked);
+
+	void setActiveKeyModifiers(uint mods);
 
 signals:
 	void fxCmdActivated(FxItem *, CtrlCmd, Executer *);

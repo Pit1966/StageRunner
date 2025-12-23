@@ -272,6 +272,7 @@ void FxListWidgetItem::paintEvent(QPaintEvent *event)
 void FxListWidgetItem::keyPressEvent(QKeyEvent *event)
 {
 	int key = event->key();
+	qDebug() << "fxlistwidgetitem keypressevent" << key;
 
 	if (key == Qt::Key_F2) {
 		linkedFxItem->setName(QInputDialog::getText(this

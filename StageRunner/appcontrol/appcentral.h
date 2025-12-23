@@ -193,8 +193,11 @@ public:
 	qint64 uptimeMs() const {return m_uptime.elapsed();}
 	void closeVideoWidget();
 	bool isVideoWidgetVisible(QWidget **videoWid = nullptr) const;
-	void setCurrentKeyModifiers(uint val) {m_activeKeyModifiers = val;}
+	void setCurrentKeyModifiers(uint val);
 	uint currentKeyModifiers() const {return m_activeKeyModifiers;}
+	bool isShiftPressed() const {return m_activeKeyModifiers & Qt::SHIFT;}
+	bool isCtrlPressed() const {return m_activeKeyModifiers & Qt::CTRL;}
+	bool isModifierPressed() const {return m_activeKeyModifiers & (Qt::SHIFT | Qt::CTRL);}
 
 	// query functions for universe layout scenes
 	DmxChannel *globalDmxChannel(quint32 universe, qint32 dmxChan);
@@ -246,6 +249,8 @@ signals:
 	void inputAssigned(FxItem *);
 
 	void fxSceneDeleted(FxSceneItem *scene);
+
+	void keyPressModifiersChanged(uint keyModifiers);
 };
 
 
