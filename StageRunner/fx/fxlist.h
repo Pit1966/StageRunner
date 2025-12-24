@@ -135,6 +135,7 @@ public:
 	void cloneSelectedSeqItem();
 	void cloneSelectedScriptItem();
 	void cloneSelectedTimelineItem();
+	void cloneSelectedRows(QList<int> rows);
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
 
@@ -155,9 +156,7 @@ public:
 	QList<FxItem *> getFxListByKeyCode(int keycode) const;
 	void postLoadProcess();
 	bool postLoadResetScenes();
-
 	bool recreateFxIDs(int from);
-
 	void setColumnFlag(int mask, bool state);
 
 private:

@@ -1301,8 +1301,10 @@ void FxListWidget::on_fxTable_itemChanged(QTableWidgetItem *item)
 void FxListWidget::if_fxitemwidget_clicked(FxListWidgetItem *listitem)
 {
 	if (!listitem) return;
-	if (m_selectedRows.size() > 1 && QApplication::mouseButtons() & Qt::RightButton)
+	if (/*m_selectedRows.size() > 1 && */QApplication::mouseButtons() & Qt::RightButton) {
+		m_curClickedFxListWidgetItem = listitem;
 		return;
+	}
 
 	// qDebug("FxListWidget -> clicked -> coltype %d -> %s",listitem->columnType,listitem->text().toLocal8Bit().data());
 	FxItem *fx = listitem->linkedFxItem;
@@ -1470,11 +1472,13 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 
 	QMenu menu(this);
 
-	menu.addAction(tr("Unselect"), this, [=](void) {
-		setRowSelected(item->myRow,false);
-		m_curClickedFxListWidgetItem = nullptr;
-		m_curSelectedFxItem = nullptr;
-	});
+	if (m_selectedRows.contains(item->myRow)) {
+		menu.addAction(tr("Unselect"), this, [=](void) {
+			setRowSelected(item->myRow,false);
+			m_curClickedFxListWidgetItem = nullptr;
+			m_curSelectedFxItem = nullptr;
+		});
+	}
 
 	menu.addAction(tr("Edit Fx name"), this, [=](void) {
 		QString newname = QInputDialog::getText(this, tr("Edit"), tr("Enter name label for Fx"),
@@ -1588,6 +1592,11 @@ void FxListWidget::contextMultiItemClicked(QContextMenuEvent *event)
 			FxListWidgetItem *it = findFxListWidgetItem(row, FxListWidgetItem::CT_NAME);
 			moveItemToBin(it, true);
 		}
+		refreshList();
+	});
+
+	menu.addAction(tr("Clone selected items"), this, [=](void) {
+		fxList()->cloneSelectedRows(m_selectedRows);
 		refreshList();
 	});
 

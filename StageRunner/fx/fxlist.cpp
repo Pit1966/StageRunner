@@ -90,7 +90,7 @@ void FxList::init()
 /**
  * @brief FxList::copyFrom
  * @param o
- * @param exactClone 1: clone keyCodes in FxItems too!, 2: Additionally keep all FxItem IDs
+ * @param exactClone 1: clone keyCodes in FxItems tool, 2: Additionally keep all FxItem IDs
  * @return
  *
  * @note By default keyCodes and fxIDs are not cloned
@@ -720,7 +720,6 @@ void FxList::cloneSelectedSceneItem()
 		}
 		m_isModified = true;
 		FxItemTool::setClonedFxName(scene,new_scene,this);
-
 	}
 }
 
@@ -779,6 +778,32 @@ void FxList::cloneSelectedTimelineItem()
 	FxItemTool::setClonedFxName(fxt,new_fxt,this);
 }
 
+void FxList::cloneSelectedRows(QList<int> rows)
+{
+	if (rows.isEmpty())
+		return;
+	// sort rows
+	std::sort(rows.begin(), rows.end());
+
+	int target_row = rows.last() + 1;
+	QList<FxItem*> newFxList;
+
+	// find all FxItems and clone each
+	for (int r : rows) {
+		if (r >= m_fxList.size())
+			break;
+		FxItem *srcFx = m_fxList.at(r);
+		FxItem *newFx = FxItemTool::cloneFxItem(srcFx);
+		if (newFx)
+			newFxList.append(newFx);
+	}
+
+	// append cloned fx items to list.
+	for (int i=0; i<newFxList.size(); i++) {
+		m_fxList.insert(target_row + i, newFxList.at(i));
+	}
+}
+
 
 /**
  * @brief Reset the members of the list for (sequence) start
@@ -800,6 +825,7 @@ void FxList::resetFxItemsForNewExecuter()
 		fx->m_playedInRandomList = false;
 	}
 }
+
 
 FxItem *FxList::addFx(int fxtype, int option, int pos)
 {
