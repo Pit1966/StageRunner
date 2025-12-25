@@ -281,7 +281,7 @@ SR_Fixture::SR_Fixture()
 	: m_fixtureType(FT_OTHER)
 	, m_curMode(-1)
 	, m_universe(0)
-	, m_dmxAdr(0)
+	, m_dmxAddr(0)
 {
 }
 
@@ -306,7 +306,7 @@ void SR_Fixture::cloneFrom(const SR_Fixture &o)
 	m_fixtureType = o.m_fixtureType;
 	m_curMode = o.m_curMode;
 	m_universe = o.m_universe;
-	m_dmxAdr = o.m_dmxAdr;
+	m_dmxAddr = o.m_dmxAddr;
 
 	while (!m_channels.isEmpty())
 		delete m_channels.takeFirst();
@@ -365,6 +365,23 @@ QString SR_Fixture::typeToString(SR_Fixture::Type type)
 	}
 }
 
+int SR_Fixture::dmxStartAddr() const
+{
+	return m_dmxAddr;
+}
+
+int SR_Fixture::dmxEndAddr() const
+{
+	if (m_curMode < 0 || m_curMode >= m_modes.size())
+		return m_dmxAddr;
+
+	int chancnt = m_modes.at(m_curMode)->channelCount();
+	if (chancnt <= 0)
+		return m_dmxAddr;
+
+	return m_dmxAddr + chancnt - 1;
+}
+
 /**
  * @brief Convert SR_Fixture object to a JSON object
  * @return
@@ -373,9 +390,10 @@ QJsonObject SR_Fixture::toJson() const
 {
 	QJsonObject json;
 	json["universe"] = m_universe;
-	json["dmxadr"] = m_dmxAdr;
+	json["dmxadr"] = m_dmxAddr;
 	json["manufacturer"] = m_manufacturer;
 	json["modelname"] = m_modelName;
+	json["shortident"] = m_shortIdent;
 	json["fixturetype"] = int(m_fixtureType);
 	json["curmode"] = m_curMode;
 
@@ -402,9 +420,10 @@ QJsonObject SR_Fixture::toJson() const
 bool SR_Fixture::setFromJson(const QJsonObject &json)
 {
 	m_universe = json["universe"].toInt();
-	m_dmxAdr = json["dmxadr"].toInt();
+	m_dmxAddr = json["dmxadr"].toInt();
 	m_manufacturer = json["manufacturer"].toString();
 	m_modelName = json["modelname"].toString();
+	m_shortIdent = json["shortident"].toString();
 	m_fixtureType = Type(json["fixturetype"].toInt());
 	m_curMode = json["curmode"].toInt();
 
@@ -512,6 +531,18 @@ void SR_Fixture::setCurrentMode(int num)
 {
 	if (num < m_modes.size())
 		m_curMode = num;
+}
+
+/**
+ * @brief Return amount of currentChannelCount in currently used mode
+ * @return 0, if current mode is invalid or there are no channles defined
+ */
+int SR_Fixture::currentChannelCount() const
+{
+	if (m_curMode < 0 || m_curMode >= m_modes.size())
+		return 0;
+
+	return m_modes.at(m_curMode)->channelCount();
 }
 
 int SR_Fixture::usedChannelCount() const
@@ -691,6 +722,24 @@ bool SR_FixtureList::addQLCFixture(const QString &path, int dmxAddr)
 		delete fix;
 		return false;
 	}
+}
+
+/**
+ * @brief SR_FixtureList::findFixtureByDmxAddr
+ * @param dmxAddr [1:512]
+ * @return Pointer to SR_Fixture
+ */
+SR_Fixture *SR_FixtureList::findFixtureByDmxAddr(int dmxAddr)
+{
+	int idx = -1;
+	while (++idx < m_list.size()) {
+		SR_Fixture *fix = m_list.at(idx);
+		qDebug() << fix->dmxStartAddr() << fix->dmxEndAddr();
+		if (dmxAddr >= fix->dmxStartAddr() && dmxAddr <= fix->dmxEndAddr())
+			return fix;
+	}
+
+	return nullptr;
 }
 
 QJsonObject SR_FixtureList::toJson() const

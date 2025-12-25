@@ -228,14 +228,18 @@ public:
 	};
 
 private:
+	// from official branding
 	QString m_manufacturer;
 	QString m_modelName;
 	Type m_fixtureType;
 	int m_curMode;						///< current active mode.
 
+	// personal user description
+	QString m_shortIdent;				///< Should be an ident string in order to describe the device. (like 1000W Stufe ganz links)
+
 	// for universe layout
-	int m_universe = 0;
-	int m_dmxAdr = 0;
+	int m_universe = 0;					///< universe number (0 based)
+	int m_dmxAddr = 0;					///< real DMX address (beginning with 1, 0 is undefined)
 
 	QList<SR_Channel*>m_channels;
 	QList<SR_Mode*>m_modes;
@@ -261,6 +265,8 @@ public:
 	void setCurrentMode(int num);
 	inline int currentMode() const {return m_curMode;}
 
+	int currentChannelCount() const;
+
 	int usedChannelCount() const;
 	QStringList getChannelTexts(int mode = 0) const;
 	QStringList getChannelAndPresetTexts(int mode = 0) const;
@@ -269,8 +275,13 @@ public:
 	SR_Fixture::Type stringToType(const QString &type);
 	QString typeToString(SR_Fixture::Type type);
 
-	inline int dmxAdr() const {return m_dmxAdr;}
-	void setDmxAdr(int dmxAdr) {m_dmxAdr = dmxAdr;}
+	const QString & shortIdent() const {return m_shortIdent;}
+	void setShortIdent(const QString &shortId) {m_shortIdent = shortId;}
+
+	inline int dmxAdr() const {return m_dmxAddr;}
+	int dmxStartAddr() const;
+	int dmxEndAddr() const;
+	void setDmxAdr(int dmxAdr) {m_dmxAddr = dmxAdr;}
 
 	QJsonObject toJson() const;
 	bool setFromJson(const QJsonObject &json);
@@ -300,6 +311,8 @@ public:
 	void addFixture(SR_Fixture *fix, int dmxAddr = 0);
 	bool removeFixtureAt(int dmxAddr);
 	bool addQLCFixture(const QString &path, int dmxAddr = 0);
+
+	SR_Fixture * findFixtureByDmxAddr(int dmxAddr);
 
 	QJsonObject toJson() const;
 	int setFromJson(const QJsonObject &json);

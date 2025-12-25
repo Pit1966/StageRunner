@@ -149,6 +149,11 @@ Scene</string>
          </column>
          <column>
           <property name="text">
+           <string>Short Ident</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
            <string>DMX</string>
           </property>
          </column>
@@ -162,6 +167,13 @@ Scene</string>
            <string>Description</string>
           </property>
          </column>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_close">
+         <property name="text">
+          <string>Close</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -196,13 +208,6 @@ Scene</string>
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_close">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

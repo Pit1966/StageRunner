@@ -20,23 +20,27 @@
 #include <QMessageBox>
 
 #define COL_DEVICE 0
-#define COL_DMX 1
-#define COL_CHANNEL_MODE 2
-#define COL_CHANNEL_DESC 3
+#define COL_SHORT_IDENT 1
+#define COL_DMX 2
+#define COL_CHANNEL_MODE 3
+#define COL_CHANNEL_DESC 4
 
+// -------------------------------------------------------------------------------------------------
+//
+// -------------------------------------------------------------------------------------------------
 
-DMXTableWidgetItem::DMXTableWidgetItem(int type)
-	: QTableWidgetItem(type)
-{
-
-}
-
-DMXTableWidgetItem::DMXTableWidgetItem(int dmxChan, const QString &text, int type)
+DMXTableWidgetItem::DMXTableWidgetItem(int devIdx, int dmxChan, const QString &text, int type)
 	: QTableWidgetItem(text, type)
+	, devIdx(devIdx)
 	, dmxChan(dmxChan)
 {
-
+	setData(Qt::UserRole + 1, devIdx);
+	setData(Qt::UserRole + 2, dmxChan);
 }
+
+// -------------------------------------------------------------------------------------------------
+//
+// -------------------------------------------------------------------------------------------------
 
 
 UniverseEditorWidget::UniverseEditorWidget(QWidget *parent)
@@ -52,6 +56,7 @@ UniverseEditorWidget::UniverseEditorWidget(QWidget *parent)
 
 	universeTable->setRowCount(512);
 	universeTable->setSelectionBehavior(QTableWidget::SelectRows);
+	universeTable->setItemDelegate(new DmxItemBgDelegate(universeTable));
 	copyFixturesToGui(m_fixtureList);
 
 	QSettings set(QSETFORMAT,APPNAME);
@@ -178,46 +183,70 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 
 bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 {
+	universeTable->blockSignals(true);
 	universeTable->clearContents();
 
-	int dmx = 0;
+	int dmx = 1;			// this is real DMX address base 1
 	for (int t=0; t<fixlist->size(); t++) {
 		SR_Fixture *fix = fixlist->at(t);
 		SR_Mode *mode = fix->mode(fix->currentMode());
+		if (!mode)
+			continue;
+
+		// QColor bg;
+		// if (t % 2) {
+		// 	bg = palette().alternateBase().color();
+		// } else {
+		// 	bg = palette().base().color();
+		// }
+
 		int c = 0;
 		for (auto chan : mode->channels()) {
 			if (c++ == 0) {
-				if (fix->dmxAdr()-1 > dmx)
-					dmx = fix->dmxAdr()-1;
+				if (fix->dmxAdr() > dmx)
+					dmx = fix->dmxAdr();
 
 				QString device = QString("%1: %2").arg(fix->manufacturer(), fix->modelName());
-				DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, device);
-				universeTable->setItem(dmx, COL_DEVICE, item);
+				DMXTableWidgetItem *item = new DMXTableWidgetItem(t, dmx, device);
+				universeTable->setItem(dmx - 1, COL_DEVICE, item);
+			}
+			else {
+				DMXTableWidgetItem *item = new DMXTableWidgetItem(t, dmx, QString());
+				universeTable->setItem(dmx - 1, COL_DEVICE, item);
 			}
 
-
-//			DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(dmx+1,3,10,QLatin1Char('0')));
-//			item->setTextAlignment(Qt::AlignCenter);
-//			universeTable->setItem(dmx, COL_DMX, item);
-
-			DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(chan->name()));
+			// short ident
+			DMXTableWidgetItem *item = new DMXTableWidgetItem(t, dmx, QString("%1").arg(fix->shortIdent()));
 			// item->setTextAlignment(Qt::AlignCenter);
-			universeTable->setItem(dmx, COL_CHANNEL_MODE, item);
+			universeTable->setItem(dmx - 1, COL_SHORT_IDENT, item);
 
-			item = new DMXTableWidgetItem(dmx, QString("%1").arg(chan->preset()));
+			// dmx channel
+			item = new DMXTableWidgetItem(t, dmx, QString("%1").arg(dmx,3,10,QLatin1Char('0')));
+			item->setTextAlignment(Qt::AlignCenter);
+			universeTable->setItem(dmx - 1, COL_DMX, item);
+
+			// channel type
+			item = new DMXTableWidgetItem(t, dmx, QString("%1").arg(chan->name()));
 			// item->setTextAlignment(Qt::AlignCenter);
-			universeTable->setItem(dmx, COL_CHANNEL_DESC, item);
+			universeTable->setItem(dmx - 1, COL_CHANNEL_MODE, item);
+
+			// description
+			item = new DMXTableWidgetItem(t, dmx, QString("%1").arg(chan->preset()));
+			// item->setTextAlignment(Qt::AlignCenter);
+			universeTable->setItem(dmx - 1, COL_CHANNEL_DESC, item);
 
 			dmx++;
 		}
 	}
 
 	// fill channels
-	dmx = 0;
-	while (dmx < 512) {
-		DMXTableWidgetItem *item = new DMXTableWidgetItem(dmx, QString("%1").arg(dmx+1,3,10,QLatin1Char('0')));
-		item->setTextAlignment(Qt::AlignCenter);
-		universeTable->setItem(dmx, COL_DMX, item);
+	dmx = 1;
+	while (dmx <= 512) {
+		if (!universeTable->item(dmx - 1, COL_DMX)) {
+			DMXTableWidgetItem *item = new DMXTableWidgetItem(-1, dmx, QString("%1").arg(dmx,3,10,QLatin1Char('0')));
+			item->setTextAlignment(Qt::AlignCenter);
+			universeTable->setItem(dmx - 1, COL_DMX, item);
+		}
 		dmx++;
 	}
 
@@ -225,6 +254,7 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 	universeTable->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
 	m_currentTargetDmxAddr[m_universe] = 0;
 
+	universeTable->blockSignals(false);
 	return true;
 }
 
@@ -316,16 +346,32 @@ void UniverseEditorWidget::on_universeTable_cellChanged(int row, int column)
 {
 	Q_UNUSED(row)
 	Q_UNUSED(column)
+
+	// qDebug() << "cell changed" << row << column;
+
+	SR_Fixture *fix = m_fixtureList->findFixtureByDmxAddr(row+1);
+	if (!fix) return;
+
+	DMXTableWidgetItem *item = static_cast<DMXTableWidgetItem*>(universeTable->item(row, column));
+
+	qDebug() << "found fixture dmx offset" << fix->dmxStartAddr() << "short ident" << fix->shortIdent();
+
+	if (column == COL_SHORT_IDENT) {
+		// set short ident in fixture
+		QString shortid = item->text();
+		fix->setShortIdent(shortid);
+
+		// set short ident in Table for every channel of the fixture
+		universeTable->blockSignals(true);
+		int dmx = fix->dmxStartAddr();
+		while (dmx <= fix->dmxEndAddr()) {
+			universeTable->item(dmx-1, COL_SHORT_IDENT)->setText(shortid);
+			dmx++;
+		}
+
+		universeTable->blockSignals(false);
+	}
 }
-
-void UniverseEditorWidget::on_universeTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
-{
-	Q_UNUSED(previousRow)
-	Q_UNUSED(previousColumn)
-
-	qDebug() << Q_FUNC_INFO << currentRow << currentColumn;
-}
-
 
 void UniverseEditorWidget::on_universeSpin_valueChanged(int arg1)
 {
@@ -383,4 +429,6 @@ void UniverseEditorWidget::on_loadButton_clicked()
 		copyFixturesToGui(m_fixtureList);
 	}
 }
+
+
 
