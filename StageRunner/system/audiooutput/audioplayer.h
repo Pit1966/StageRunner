@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -42,42 +42,43 @@ class AudioPlayer : public QObject
 
 protected:
 	AudioSlot & m_parentAudioSlot;
-	int m_loopTarget;
-	int m_loopCnt;
-	int m_currentVolume;
-	int m_currentPan;						///< value of 0 means, disabled
+	int m_loopTarget		= 1;
+	int m_loopCnt			= 1;
+	int m_currentVolume		= 100;
+	int m_currentPan		= 0;			///< value of 0 means, disabled
 
-	int m_maxPan;							// usualy 200
-	qreal m_panVolLeft;						// for panning volume left channel (0-1)
-	qreal m_panVolRight;					// for panning volume right channel (0-1)
+	int m_maxPan			= 200;			// usualy 200
+	qreal m_panVolLeft		= 1;			// for panning volume left channel (0-1)
+	qreal m_panVolRight		= 1;			// for panning volume right channel (0-1)
 
-	CtrlCmd m_currentCtrlCmd;
-	AUDIO::AudioErrorType m_audioError;
+	CtrlCmd m_currentCtrlCmd			=  CMD_NONE;
+	AUDIO::AudioErrorType m_audioError	= AUDIO::AUDIO_ERR_NONE;
 	QString m_audioErrorString;
 	QString m_mediaPath;
 	QString m_fxName;						///< name of FxAudioItem (this is not the filename of audio, but may be)
 
 	// run time
-	int m_currentPlaybackSamplerate;
+	int m_currentPlaybackSamplerate	= 0;
+	int m_errorMask					= 0;	///< bit 0: audio sample format error
 
 	// debug and help
-	int m_audioIdleEventCount;							///< amount of QAudioDevice::Idle events. Used to check if audio buffer ist to small
+	int m_audioIdleEventCount		= 0;	///< amount of QAudioDevice::Idle events. Used to check if audio buffer ist to small
 
 	// VU meter
-	double frame_energy_peak;
-	double sample_peak;
+	double frame_energy_peak		= 0;
+	double sample_peak				= 0;
 
 	// FFT
-	PsMovingAverage<qreal> *m_leftAvg;
-	PsMovingAverage<qreal> *m_rightAvg;
+	PsMovingAverage<qreal> *m_leftAvg = nullptr;
+	PsMovingAverage<qreal> *m_rightAvg = nullptr;
 	FFTRealFixLenWrapper m_leftFFT;
 	FFTRealFixLenWrapper m_rightFFT;
 	FrqSpectrum m_leftSpectrum;
 	FrqSpectrum m_rightSpectrum;
-	bool m_fftEnabled;
+	bool m_fftEnabled			= false;
 
 	// delayed start of audio fx
-	int m_startDelayedTimerId;
+	int m_startDelayedTimerId	= 0;
 
 	// special
 	bool m_activateSmallBufferWorkAround = false;

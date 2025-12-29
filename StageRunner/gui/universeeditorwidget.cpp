@@ -170,9 +170,14 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 			}
 			DmxChannel *tube = sc->tube(dmx);
 			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
-			qDebug() << "target dmx" << dmx << "type" << chan->preset() << type;
 			if (type >= SR_Channel::Custom /*DMX_GENERIC*/)
 				tube->dmxType = int(type);
+
+			// device info
+			tube->deviceUniverseIndex = (universe<<16) + (t+1);
+			tube->deviceShortId = fix->shortIdent();
+
+			// qDebug() << "target dmx" << dmx << "type" << chan->preset() << type << "deviveUniverseIdx" << tube->deviceUniverseIndex << tube->deviceShortId;
 
 			dmx++;
 		}
@@ -245,6 +250,7 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 		if (!universeTable->item(dmx - 1, COL_DMX)) {
 			DMXTableWidgetItem *item = new DMXTableWidgetItem(-1, dmx, QString("%1").arg(dmx,3,10,QLatin1Char('0')));
 			item->setTextAlignment(Qt::AlignCenter);
+			item->setForeground(Qt::green);
 			universeTable->setItem(dmx - 1, COL_DMX, item);
 		}
 		dmx++;
@@ -334,6 +340,11 @@ void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
 
 	templateList->addFx(sc);
 	templateList->emitListChangedSignal();
+
+	POPUPINFOMSG("Create default universe",
+				 tr("Layout template: %1 successfully created.\n"
+					"You have to save the template scenes in order to make this persistant")
+				 .arg(sc->name()));
 }
 
 void UniverseEditorWidget::on_universeTable_cellClicked(int row, int column)

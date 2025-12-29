@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -151,7 +151,7 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 
 		// We create a new Mixer in the MixerGroup if this tube is visible
 		if (dmx->deskVisibleFlag) {
-			// Create a new Mixer an fill in relevant data. The tubeId is the identifier
+			// Create a new Mixer and fill in relevant data. The tubeId is the identifier
 			MixerChannel *fader = faderAreaWidget->appendMixer(dmx->tubeId);
 			if (!fader) {
 				QMessageBox::critical(this, "error", QString("Could not add mixer channel for id: %1").arg(dmx->tubeId));
@@ -167,6 +167,8 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setLabelText(dmx->labelText);
 			fader->setDmxType(dmx->localDmxType(), dmx->globalDmxType());
 
+			if (dmx->deviceUniverseIndex >= 0)
+				fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
 			ref_val = ref_val * dmx->targetFullValue / 255;

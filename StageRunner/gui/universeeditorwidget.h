@@ -7,6 +7,7 @@
 #include <QTableWidgetItem>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QDebug>
 
 class SR_FixtureList;
 class FxSceneItem;
@@ -32,10 +33,18 @@ public:
 	{
 		if (parent) {
 			m_baseColor = m_parentWid->palette().base().color();
-			m_alt1Color = m_baseColor;
-			m_alt2Color = m_parentWid->palette().alternateBase().color();
+			if (m_baseColor.redF() + m_baseColor.greenF() + m_baseColor.blueF() > 2) {
+				m_alt1Color = m_baseColor.darker(120);
+				m_alt2Color = m_baseColor.darker(130);		//m_parentWid->palette().alternateBase().color();
+			} else {
+				m_alt1Color = m_baseColor.lighter(150);
+				m_alt2Color = m_baseColor.lighter(200);		//m_parentWid->palette().alternateBase().color();
+			}
 			// m_alt1Color = m_baseColor.darker(150);
 			// m_alt2Color = m_baseColor.darker(200);
+
+			qDebug() << "colors" << m_alt1Color << m_alt2Color;
+
 		}
 	}
 
@@ -50,7 +59,7 @@ public:
 		QColor bg = (devIdx % 2) ? m_alt1Color : m_alt2Color;
 
 		if (devIdx < 0) {
-			bg = QColor(0x006600);
+			bg = m_baseColor; // QColor(0x006600);
 		}
 
 		p->fillRect(o.rect, bg);

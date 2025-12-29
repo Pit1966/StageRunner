@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -73,6 +73,7 @@ private:
 	float knob_scaled_ysize	= 0;	///< Height of scaled knob including shadow border
 	int knob_xoffset		= 0;
 	int knob_yoffset		= 0;
+	int m_deviceIndex		= -1;	///< device index from template universe
 
 	float lo_pos_percent	= 0;
 	float hi_pos_percent	= 0;
@@ -98,6 +99,7 @@ public:
 	inline int dmxUniverse() const {return my_universe;}
 	inline int dmxAddr() const {return my_dmx_channel;}
 	inline void setDmxAddr(int addr) {my_dmx_channel = addr;}
+	inline void setDeviceIdx(int idx) {m_deviceIndex = idx;}
 
 	void setRange(int min, int max);
 	void setMinimum(int min);

@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -89,7 +89,9 @@ void DmxChannel::init()
 	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
 	addExistingVar(scalerNumerator,"ScalerNum",1,0xfffffff,1);
 	addExistingVar(scalerDenominator,"ScalerDen",1,0xfffffff,1);
+	addExistingVar(deviceUniverseIndex,"DeviceUniIdx",-1,0xffffff,-1);
 	addExistingVar(labelText,"LabelText");
+	addExistingVar(deviceShortId,"ShortID");
 }
 
 DmxChannel::~DmxChannel()

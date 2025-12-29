@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -36,23 +36,8 @@ using namespace AUDIO;
 AudioPlayer::AudioPlayer(AudioSlot &audioChannel)
 	: QObject()
 	, m_parentAudioSlot(audioChannel)
-	, m_loopTarget(1)
-	, m_loopCnt(1)
-	, m_currentVolume(100)
-	, m_currentPan(0)
-	, m_maxPan(200)
-	, m_panVolLeft(1)
-	, m_panVolRight(1)
-	, m_currentCtrlCmd(CMD_NONE)
-	, m_audioError(AUDIO_ERR_NONE)
-	, m_currentPlaybackSamplerate(0)
-	, m_audioIdleEventCount(0)
-	, frame_energy_peak(0)
-	, sample_peak(0)
 	, m_leftAvg(new PsMovingAverage<qreal>(4))
 	, m_rightAvg(new PsMovingAverage<qreal>(4))
-	, m_fftEnabled(false)
-	, m_startDelayedTimerId(0)
 {
 }
 
@@ -80,8 +65,18 @@ bool AudioPlayer::setStartDelay(int ms)
 	return (m_startDelayedTimerId > 0);
 }
 
+/**
+ * @brief AudioPlayer::setSourceFilename
+ * @param path
+ * @param fxName
+ * @return
+ *
+ * @note also resets error message flags (m_errorMask = 0)
+ */
 bool AudioPlayer::setSourceFilename(const QString &path, const QString &fxName)
 {
+	m_errorMask = 0;
+
 	if (path != m_mediaPath)
 		m_mediaPath = path;
 
@@ -119,6 +114,12 @@ void AudioPlayer::calcPanning(char *data, int size, const AudioFormat &audioForm
 
 		}
 		break;
+	default:
+		if (!(m_errorMask & 1)) {
+			m_errorMask |= 1;
+			LOGERROR(QString("Could not apply panning for audio sample format %1").arg(audioFormat.sampleFormat()));
+		}
+
 	}
 }
 

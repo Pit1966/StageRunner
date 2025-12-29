@@ -3,7 +3,7 @@
 //  Multi platform software that controls sound effects, sound recordings
 //  and lighting systems on small to medium-sized stages
 //
-//  Copyright (C) 2013-2019 by Peter Steinmeyer (Pit1966 on github)
+//  Copyright (C) 2013-2026 by Peter Steinmeyer (Pit1966 on github)
 //  (C) Copyright 2019 stonechip entertainment
 //
 //  This program is free software; you can redistribute it and/or
@@ -332,7 +332,18 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	// If Selected draw a box if selected
 	if (prop_selected_f) {
 		QBrush brush(Qt::SolidPattern);
-		brush.setColor(QColor(0,50,0,40));
+		brush.setColor(QColor(0,60,0,100));
+		p.setPen(Qt::NoPen);
+		p.setBrush(brush);
+		p.drawRect(0,0,width(),height());
+	}
+	else if (m_deviceIndex >= 0) {
+		QBrush brush(Qt::SolidPattern);
+		if (m_deviceIndex % 2) {
+			brush.setColor(QColor(0,0,60,50));
+		} else {
+			brush.setColor(QColor(0,40,60,50));
+		}
 		p.setPen(Qt::NoPen);
 		p.setBrush(brush);
 		p.drawRect(0,0,width(),height());
