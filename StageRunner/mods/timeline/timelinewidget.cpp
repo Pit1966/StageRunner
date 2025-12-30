@@ -253,7 +253,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_VOL, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_CURVE, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	appendTrack(track);
 
 	// add TimeLineCurve to scene on timeline
@@ -309,7 +309,7 @@ bool TimeLineWidget::deleteTimeLineTrack(int trackID)
 	// find all curve  tracks below.
 	while (track) {
 		track = findTrackBelowId(track->trackId());
-		if (track && track->trackType() == TRACK_AUDIO_VOL) {
+		if (track && track->trackType() == TRACK_AUDIO_CURVE) {
 			deltracks.append(track);
 		} else {
 			track = nullptr;
@@ -961,6 +961,13 @@ void TimeLineWidget::recalcPixelPosInAllItems()
 	m_scene->update();
 }
 
+/**
+ * @brief TimeLineWidget::contextMenuEvent
+ * @param event
+ *
+ * This is called when clicked into a track, but NOT into a TimeLineItem.
+ * In other words, only when clicked into the background of a track
+ */
 void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 {
 	QPointF pos1 = m_view->mapFromGlobal(event->globalPos());
@@ -968,6 +975,8 @@ void TimeLineWidget::contextMenuEvent(QContextMenuEvent *event)
 	int overlayID = -1;
 	int ms = pixelToMs(pos1.x());
 	// qDebug() << "ms" << ms << "pixel" << pos1.x();
+
+	qDebug() << "clicked track ID" << clickedTrackID;
 
 	QMenu menu(this);
 	QAction *act;

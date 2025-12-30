@@ -342,7 +342,7 @@ void UniverseEditorWidget::on_pushButton_createTemplate_clicked()
 	templateList->emitListChangedSignal();
 
 	POPUPINFOMSG("Create default universe",
-				 tr("Layout template: %1 successfully created.\n"
+				 tr("Layout template: %1 <font color=green>successfully created.</font>\n"
 					"You have to save the template scenes in order to make this persistant")
 				 .arg(sc->name()));
 }

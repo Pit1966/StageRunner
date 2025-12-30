@@ -388,6 +388,16 @@ DmxChannelType DmxChannel::globalDmxType() const
 	return AppCentral::ref().globalDmxType(dmxUniverse, dmxChannel);
 }
 
+int DmxChannel::globalDeviceIndex() const
+{
+	return AppCentral::ref().globalDeviceIndex(dmxUniverse, dmxChannel);
+}
+
+QString DmxChannel::globalDeviceShortId() const
+{
+	return AppCentral::ref().globalDeviceShortId(dmxUniverse, dmxChannel);
+}
+
 int DmxChannel::dmxTargetValue() const
 {
 	int dmx = targetValue * 255 * scalerNumerator / ( targetFullValue * scalerDenominator);

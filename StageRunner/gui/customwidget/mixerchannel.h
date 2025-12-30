@@ -46,7 +46,7 @@ public:
 private:
 	qint32 my_id			= -1;	///< Id of MixerChannel instance (usualy the tube number) or -1 if not used
 	qint32 my_universe		= -1;	///< This is the universe that corresponds with the channel of this mixer (-1 if not used)
-	qint32 my_dmx_channel	= -1;	///< This is the dmx channel that is actually the target of the mixer value (-1 if not used)
+	qint32 my_dmx_channel	= -1;	///< This is the dmx channel (dmx addr) that is actually the target of the mixer value (-1 if not used)
 	QString label;
 	DmxChannelType m_myDmxType		= DmxChannelType::DMX_GENERIC;	///< The type of the dmx channel
 	DmxChannelType m_globalDmxType	= DmxChannelType::DMX_GENERIC;	///< type from global universe layout

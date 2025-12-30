@@ -204,6 +204,8 @@ public:
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
 	qint32 globalScalerNumerator(quint32 universe, qint32 dmxChan);
 	qint32 globalScalerDenominator(quint32 universe, qint32 dmxChan);
+	QString globalDeviceShortId(quint32 universe, qint32 dmxChan);
+	qint32 globalDeviceIndex(quint32 universe, qint32 dmxChan);
 
 
 	// Gui

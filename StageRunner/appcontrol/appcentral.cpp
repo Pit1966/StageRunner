@@ -622,6 +622,46 @@ qint32 AppCentral::globalScalerDenominator(quint32 universe, qint32 dmxChan)
 	return 1;
 }
 
+/**
+ * @brief Get Device short ident string for a given dmx channel
+ * @param universe
+ * @param dmxChan
+ * @return device short id string, if set for the given dmx addr. An empty string otherwise
+ */
+QString AppCentral::globalDeviceShortId(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube)
+			return tube->deviceShortId;
+	}
+
+	return QString();
+}
+
+/**
+ * @brief Get device index for parent device of a dmx channel in a given universe
+ * @param universe
+ * @param dmxChan
+ * @return device number in given universe; -1, if there is no device defined for given channel or channel is invalid
+ */
+qint32 AppCentral::globalDeviceIndex(quint32 universe, qint32 dmxChan)
+{
+	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+		if (tube) {
+			if (tube->deviceUniverseIndex >= 0) {
+				return tube->deviceUniverseIndex & 0xffff;
+			}
+			else {
+				return tube->deviceUniverseIndex;
+			}
+		}
+	}
+
+	return -1;
+}
+
 QSize AppCentral::secondScreenSize() const
 {
 	if (m_hasSecondScreen)

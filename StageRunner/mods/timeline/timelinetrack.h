@@ -12,8 +12,7 @@ enum TRACK_TYPE {
 	TRACK_UNDEF,
 	TRACK_ITEMS,
 	TRACK_RULER,
-	TRACK_AUDIO_VOL,
-	TRACK_AUDIO_PAN
+	TRACK_AUDIO_CURVE
 };
 
 
@@ -49,6 +48,7 @@ public:
 	~TimeLineTrack();
 	inline TRACK_TYPE trackType() const {return m_type;}
 	inline void setTrackType(TRACK_TYPE type) {m_type = type;}
+	inline QString trackTypeString() const {return trackTypeToString(m_type);}
 	inline int trackId() const {return m_trackID;}
 	inline void setTrackId(int id) {m_trackID = id;}
 	inline bool isOverlay() const {return m_isOverlay;}
@@ -75,6 +75,10 @@ public:
 	bool hasOverlayContextMenu() const;
 	QList<TimeLineContextMenuEntry> getOverlayContextMenu(const QPointF &scenePos);
 	// bool execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry);
+
+	TimeLineTrack * trackAbove();
+
+	static QString trackTypeToString(TRACK_TYPE type);
 
 	friend class TimeLineWidget;
 };

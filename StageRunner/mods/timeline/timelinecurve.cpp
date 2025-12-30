@@ -423,9 +423,25 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		act->setObjectName("remClickedNode");
 	}
 	else if (m_myTrack->isOverlay()) {
-		qDebug() << "last context menu pos" << pos;
-		event->ignore();
-		return;
+		TimeLineTrack *trackAbove = m_myTrack->trackAbove();
+		qDebug() << "clicked overlay TimeLineCurve" << m_myTrack->trackId() << m_myTrack->trackTypeString();
+		if (trackAbove)
+			qDebug() << "  -> track above" << trackAbove->trackId() << trackAbove->trackTypeString();
+
+		// qDebug() << "last context menu pos" << pos;
+		if (0 && trackAbove && trackAbove->trackType() >= TRACK_AUDIO_CURVE) {
+			qDebug() << "two overlay";
+			// this is a special case. 2 Overlay tracks in one
+
+			act = menu.addAction(tr("Separate curve tracks"));
+			act->setObjectName("clearOver");
+
+			// act = menu.addAction(tr("Make overlay"));
+			// act->setObjectName("makeOver");
+		} else {
+			event->ignore();
+			return;
+		}
 	}
 	else {
 		act = menu.addAction(tr("Add node"));

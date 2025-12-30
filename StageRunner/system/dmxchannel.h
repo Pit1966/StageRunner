@@ -89,7 +89,10 @@ public:
 	bool loopFunction(int mixline);
 	DmxChannelType dmxChannelType() const;
 	DmxChannelType localDmxType() const;
+
 	DmxChannelType globalDmxType() const;
+	int globalDeviceIndex() const;
+	QString globalDeviceShortId() const;
 
 	int dmxTargetValue() const;
 	int scaledTargetValue() const;

@@ -167,8 +167,14 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setLabelText(dmx->labelText);
 			fader->setDmxType(dmx->localDmxType(), dmx->globalDmxType());
 
-			if (dmx->deviceUniverseIndex >= 0)
+
+			if (dmx->deviceUniverseIndex >= 0) {
 				fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
+			}
+			else if (dmx->globalDeviceIndex() >= 0) {
+				fader->setDeviceIdx(dmx->globalDeviceIndex());
+				fader->setToolTip(QString("%1\n%2").arg(dmx->globalDeviceShortId(), fader->toolTip()));
+			}
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);
 			ref_val = ref_val * dmx->targetFullValue / 255;

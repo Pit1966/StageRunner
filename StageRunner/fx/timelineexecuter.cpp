@@ -294,7 +294,7 @@ QList<TimeLineExecuter::Envelope *> TimeLineExecuter::getEnvelopesForTrackId(int
 
 	for (int i=0; i<m_curveTracks.size(); i++) {
 		if (m_curveTracks.at(i)->targetTrack == trackID) {
-			if (envelopeType = 0xff || m_curveTracks.at(i)->envelopeType() == envelopeType)
+			if (envelopeType == 0xff || m_curveTracks.at(i)->envelopeType() == envelopeType)
 				envelopes.append(m_curveTracks.at(i));
 		}
 	}
@@ -354,7 +354,7 @@ bool TimeLineExecuter::getTimeLineObjs(FxTimeLineItem *fx)
 					lastEventMs = o->endMs();
 			}
 		}
-		else if (fxtrack->trackType() == TRACK_AUDIO_VOL) {
+		else if (fxtrack->trackType() == TRACK_AUDIO_CURVE) {
 			// get first Item in TimeLineCurve
 			FxTimeLineObj *o = fx->timeLineObjAt(trackid, 0);
 			if (!o) {

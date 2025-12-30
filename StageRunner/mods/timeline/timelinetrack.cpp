@@ -80,7 +80,7 @@ bool TimeLineTrack::hasOverlayContextMenu() const
 {
 	// joined track is the track below
 	if (m_next) {
-		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_VOL) {
+		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_CURVE) {
 			return true;
 		}
 	}
@@ -91,11 +91,33 @@ QList<TimeLineContextMenuEntry> TimeLineTrack::getOverlayContextMenu(const QPoin
 {
 	// linked track or overlay is the track below
 	if (m_next) {
-		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_VOL) {
+		if (m_next->isOverlay() && m_next->trackType() == TRACK_AUDIO_CURVE) {
 			return m_next->m_itemList.first()->getOverlayContextMenu(scenePos);
 		}
 	}
 	return {};
+}
+
+TimeLineTrack *TimeLineTrack::trackAbove()
+{
+	if (m_trackID > 2)
+		return m_timeline->findTrackAboveId(m_trackID);
+
+	return nullptr;
+}
+
+QString TimeLineTrack::trackTypeToString(TRACK_TYPE type)
+{
+	switch (type) {
+	case TRACK_ITEMS:
+		return "ITEMS";
+	case TRACK_AUDIO_CURVE:
+		return "AUDIO_CURVE";
+	case TRACK_RULER:
+		return "RULER";
+	default:
+		return "UNKNOWN";
+	}
 }
 
 }

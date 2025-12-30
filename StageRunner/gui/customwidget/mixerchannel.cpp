@@ -361,9 +361,10 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		p.drawLine(width()-linelen,y,width(),y);
 	}
 
-	int y1 = lo_pos_percent * height();
+	int ySlideBot = lo_pos_percent * height();
+	int ySlideTop = hi_pos_percent * height();
 
-	// Draw the reference value;
+	// Draw the reference value bar;
 	if (refSlider.value()) {
 		QPen pen;
 		pen.setColor(Qt::darkGreen);
@@ -377,17 +378,17 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 			pen.setWidth(3);
 		}
 		p.setPen(pen);
-		int y2 = y1 - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
-		p.drawLine(width()/2, y1, width()/2, y2);
+		int y2 = ySlideBot - float(refSlider.value()) / float(maximum()) * pos_range_percent * height();
+		p.drawLine(width()/2, ySlideBot, width()/2, y2);
 
 		if (refSliderColorIndex == 1) {
 			pen.setColor(Qt::red);
 			p.setPen(pen);
-			y2 = y1 - float(value()) / float(maximum()) * pos_range_percent * height();
-			p.drawLine(width()/2, y1, width()/2, y2);
+			y2 = ySlideBot - float(value()) / float(maximum()) * pos_range_percent * height();
+			p.drawLine(width()/2, ySlideBot, width()/2, y2);
 		}
 	}
-	// Draw Channelinfo if desired
+	// Draw Channelinfo (DMX addr) if desired
 	if (prop_channel_shown_f) {
 		QFont font(p.font());
 		font.setFixedPitch(true);
@@ -395,8 +396,8 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		font.setBold(true);
 		p.setFont(font);
 		p.setPen(Qt::white);
-		QRect bound(QPoint(0,y1),QPoint(width(),height()));
-		p.drawText(bound,QString::number(my_dmx_channel+1),QTextOption(Qt::AlignHCenter | Qt::AlignVCenter));
+		QRect bound(QPoint(0,ySlideBot), QPoint(width(), height()));
+		p.drawText(bound, QString("%1").arg(my_dmx_channel+1), QTextOption(Qt::AlignHCenter | Qt::AlignVCenter));
 
 	}
 	if (label.size()) {
@@ -406,7 +407,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 		font.setBold(false);
 		p.setFont(font);
 		p.setPen(Qt::gray);
-		QRect bound(QPoint(0,y1),QPoint(width(),height()));
+		QRect bound(QPoint(0,ySlideBot),QPoint(width(),height()));
 		p.drawText(bound,label,QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 	}
 
@@ -458,9 +459,14 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	// current value
 	if (knob_over_f) {
+		int yTop = (hi_pos_percent - 0.02) * height();
+		int yBot = (lo_pos_percent + 0.015) * height();
 		p.setPen(QColor(AppCentral::ref().colorSettings->pKeyColumn));
 		QString val = QString("%1").arg(value() * 255 / maximum(), 3, 10, QLatin1Char('0'));
-		QRect bound(QPoint(0,50),QPoint(width(), height() - 50));
+		QRect bound(QPoint(0,yTop - 20),QPoint(width(),yBot + 20));
+		// p.drawLine(0, yTop, width(), yTop);
+		// p.drawLine(0, yBot, width(), yBot);
+
 		if (value() < maximum() / 2) {
 			p.drawText(bound, val, QTextOption(Qt::AlignHCenter | Qt::AlignTop));
 		} else {
