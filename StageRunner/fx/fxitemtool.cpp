@@ -29,6 +29,7 @@
 #include "fxplaylistitem.h"
 #include "fxscriptitem.h"
 #include "fxtimelineitem.h"
+#include "fxlist.h"
 
 
 FxItemTool::FxItemTool()
@@ -128,14 +129,37 @@ void FxItemTool::setClonedFxName(FxItem *srcItem, FxItem *destItem, FxList *fxLi
 {
 	Q_UNUSED(fxList);
 
+	QString destName;
+
+	int num = 0;
 	int pos = srcItem->name().indexOf("_cp");
 	if (pos > 0) {
-		int num = srcItem->name().mid(pos + 3).toInt();
-		QString destname = srcItem->name().left(pos) + "_cp" + QString::number(num+1);
-		destItem->setName(destname);
+		num = srcItem->name().mid(pos + 3).toInt();
+		destName = srcItem->name().left(pos) + "_cp" + QString::number(num+1);
 	}
 	else {
-		destItem->setName(srcItem->name() + "_cp");
+		destName = srcItem->name() + "_cp";
 	}
+
+	// check if destname already exists and increment index, if so
+	bool found;
+	do {
+		found = false;
+		for (int i=0; i<fxList->size(); i++) {
+			FxItem *fx = fxList->at(i);
+			if (fx->name() == destName) {
+				found = true;
+				QString curnumstr = QString::number(num);
+				// Cut of current number idx
+				if (destName.endsWith(curnumstr))
+					destName.chop(curnumstr.size());
+				// add incremented number idx
+				destName += QString::number(++num);
+			}
+		}
+
+	} while (found);
+
+	destItem->setName(destName);
 }
 

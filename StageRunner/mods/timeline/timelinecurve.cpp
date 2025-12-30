@@ -42,20 +42,20 @@ int Node::unScaleY(qreal y) const
 // -------------------------------------------------------------------------------------
 /// Static callback functions for context menus
 
-TimeLineCurve * TimeLineCurve::staticTmpContextObj = nullptr;
-
-void staticAddNode()
+void staticAddNodePara(void *paraPtr)
 {
-	if (TimeLineCurve::staticTmpContextObj) {
-		TimeLineCurve::staticTmpContextObj->addNodeAtXpos(TimeLineCurve::staticTmpContextObj->lastContextMenuClickPos().x());
-	}
+	TimeLineCurve *tlItem = reinterpret_cast<TimeLineCurve *>(paraPtr);
+	if (!tlItem) return;
+
+	tlItem->addNodeAtXpos(tlItem->lastContextMenuClickPos().x());
 }
 
-void staticDetachOverlay()
+void staticDetachOverlayPara(void *paraPtr)
 {
-	if (TimeLineCurve::staticTmpContextObj) {
-		TimeLineCurve::staticTmpContextObj->myTimeLine()->setTrackOverlay(TimeLineCurve::staticTmpContextObj->trackID(), false);
-	}
+	TimeLineCurve *tlItem = reinterpret_cast<TimeLineCurve *>(paraPtr);
+	if (!tlItem) return;
+
+	tlItem->myTimeLine()->setTrackOverlay(tlItem->trackID(), false);
 }
 
 
@@ -111,6 +111,16 @@ qreal TimeLineCurveData::valAtMs(int ms)
 
 	qreal yp = xp * yd / xd;
 	return (yp + n1.yPM);
+}
+
+QString TimeLineCurveData::curveTypeString() const
+{
+	if (m_curveType == 1) {
+		return "PAN";
+	}
+	else {
+		return "VOLUME";
+	}
 }
 
 /**
@@ -264,13 +274,14 @@ QList<TimeLineContextMenuEntry> TimeLineCurve::getOverlayContextMenu(const QPoin
 {
 	QList<TimeLineContextMenuEntry> list;
 
-	list.append(TimeLineContextMenuEntry(tr("---------------")));
+	list.append(TimeLineContextMenuEntry(QString("------ %1 Envelope ------").arg(curveTypeString())));
 	list.append(TimeLineContextMenuEntry(tr("Add node"), "addNode"));
-	list.last().staticCmdFunc = &staticAddNode;
+	list.last().staticCmdFuncPara = &staticAddNodePara;
+	list.last().paraPointer = this;
 	list.append(TimeLineContextMenuEntry(tr("Show overlay in own track"), "clearOver"));
-	list.last().staticCmdFunc = &staticDetachOverlay;
+	list.last().staticCmdFuncPara = &staticDetachOverlayPara;
+	list.last().paraPointer = this;
 
-	staticTmpContextObj = this;
 	return list;
 }
 
@@ -429,7 +440,7 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 			qDebug() << "  -> track above" << trackAbove->trackId() << trackAbove->trackTypeString();
 
 		// qDebug() << "last context menu pos" << pos;
-		if (0 && trackAbove && trackAbove->trackType() >= TRACK_AUDIO_CURVE) {
+		if (0 && trackAbove && trackAbove->trackType() >= TRACK_CURVES) {
 			qDebug() << "two overlay";
 			// this is a special case. 2 Overlay tracks in one
 
@@ -444,7 +455,7 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		}
 	}
 	else {
-		act = menu.addAction(tr("Add node"));
+		act = menu.addAction(tr("Add %1 node").arg(m_myTrack->trackTypeString()));
 		act->setObjectName("addNode");
 
 		if (m_myTrack->ySize() < 70) {
@@ -456,13 +467,21 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 		}
 
 		if (m_myTrack->isOverlay()) {
-			act = menu.addAction(tr("Show overlay in own track"));
+			act = menu.addAction(tr("Show %1 overlay in own track").arg(m_myTrack->trackTypeString()));
 			act->setObjectName("clearOver");
 		} else {
 			act = menu.addAction(tr("Make overlay"));
 			act->setObjectName("makeOver");
 		}
 
+		TimeLineTrack *nt = m_myTrack->nextTrack();
+		if (nt && nt->isOverlay()) {
+			act = menu.addAction(tr("Add %1 node").arg(nt->trackTypeString()));
+			act->setObjectName("addNextTrackNode");
+
+			act = menu.addAction(tr("Detach %1 overlay").arg(nt->trackTypeString()));
+			act->setObjectName("detachNextTrackOverlay");
+		}
 
 		menu.addAction(tr("------------"));
 
@@ -506,6 +525,16 @@ void TimeLineCurve::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	}
 	else if (cmd == "changeBgColor") {
 		m_timeline->changeTrackBgColor(m_trackId);
+	}
+	// from here special overlay track features
+	else if (cmd == "addNextTrackNode") {
+		TimeLineTrack *nt = m_myTrack->nextTrack();
+		TimeLineCurve *tlItem = qobject_cast<TimeLineCurve*>(nt->itemAt(0));
+		if (tlItem)
+			tlItem->addNodeAtXpos(pos.x());
+	}
+	else if (cmd == "detachNextTrackOverlay") {
+		m_timeline->setTrackOverlay(m_myTrack->nextTrack()->trackId(), false);
 	}
 }
 

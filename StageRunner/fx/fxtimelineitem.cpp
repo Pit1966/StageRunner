@@ -133,7 +133,7 @@ bool FxTimeLineItem::addFxAudioAndEnvelope(FxAudioItem *fxa, int atMs)
 
 	// Add envelope track
 	int envTrackId = m_tracks.size();
-	FxTimeLineTrack *envTrack = new FxTimeLineTrack(nullptr, PS_TL::TRACK_AUDIO_CURVE, envTrackId, m_tracks.last()->yEndPos(), 42);
+	FxTimeLineTrack *envTrack = new FxTimeLineTrack(nullptr, PS_TL::TRACK_AUDIO_VOL_CURVE, envTrackId, m_tracks.last()->yEndPos(), 42);
 	envTrack->trackBgColor = 0x333355;		//QColor(0x232424).rgba();
 	m_tracks.append(envTrack);
 	// Create Envelope/Curve item

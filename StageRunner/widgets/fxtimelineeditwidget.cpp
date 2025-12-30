@@ -126,9 +126,10 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 		// get references to the source list in the FxItem for this track
 		const VarSetList<FxTimeLineObj*> &varset = fxt->m_timelines[t];
 
-		if (fxtrack && fxtrack->trackType() == TRACK_AUDIO_CURVE) {
+		if (fxtrack && fxtrack->trackType() >= TRACK_CURVES) {
+			// This is an Curve/Envelope track
 			if (!track) {
-				qWarning() << Q_FUNC_INFO << "missing track_audio_env";
+				qWarning() << Q_FUNC_INFO << "missing track";
 				continue;
 			}
 
@@ -222,11 +223,6 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 				fxt->m_tracks.at(t)->copyDataFrom(track);
 				fxt->setModified(true);
 			}
-		}
-
-		// Check kind of track first
-		if (track->trackType() == TRACK_AUDIO_CURVE) {
-
 		}
 
 		// get references to the source and destination list for this track

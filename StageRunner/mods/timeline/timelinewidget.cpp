@@ -180,6 +180,13 @@ TimeLineTrack *TimeLineWidget::findTrackWithId(int trackId) const
 	return nullptr;
 }
 
+/**
+ * @brief TimeLineWidget::findTrackAboveId
+ * @param trackId
+ * @return
+ *
+ * This function may return the ruler track, if given trackId is 1
+ */
 TimeLineTrack *TimeLineWidget::findTrackAboveId(int trackId) const
 {
 	for (int t=1; t<m_tracks.size(); t++) {
@@ -247,19 +254,19 @@ bool TimeLineWidget::addTimeLineTrack(TimeLineTrack *track)
 
 }
 
-bool TimeLineWidget::addAudioEnvelopeTrack(int type)
+bool TimeLineWidget::addAudioEnvelopeTrack(TRACK_TYPE trackType)
 {
 	int newTrackId = m_tracks.size();
 	if (newTrackId >= TIMELINE_MAX_TRACKS)
 		return false;
 
-	TimeLineTrack *track = new TimeLineTrack(this, TRACK_AUDIO_CURVE, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
+	TimeLineTrack *track = new TimeLineTrack(this, trackType, newTrackId, m_tracks.last()->yEndPos(), m_defaultTrackHeight);
 	appendTrack(track);
 
 	// add TimeLineCurve to scene on timeline
 	TimeLineCurve *curve = new TimeLineCurve(this, newTrackId);
 	curve->setYPos(track->yPos());
-	if (type == 1) {
+	if (trackType == TRACK_AUDIO_PAN_CURVE) {
 		track->trackBgColor = 0x224455;
 		curve->setLabel("Audio Pan Envelope");
 		curve->setCurveType(1);
@@ -268,7 +275,7 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 		curve->appendNode(Node(track, 0, 500));
 		curve->appendNode(Node(track, 60000, 500));
 	}
-	else {
+	else /*if (trackType == TRACK_AUDIO_VOL_CURVE)*/ {
 		track->trackBgColor = 0x333355;
 		curve->setLabel("Audio Vol Envelope");
 		curve->setCurveType(0);
@@ -287,12 +294,12 @@ bool TimeLineWidget::addAudioEnvelopeTrack(int type)
 
 bool TimeLineWidget::addAudioVolEnvelopeTrack()
 {
-	return addAudioEnvelopeTrack(0);
+	return addAudioEnvelopeTrack(TRACK_AUDIO_VOL_CURVE);
 }
 
 bool TimeLineWidget::addAudioPanEnvelopeTrack()
 {
-	return addAudioEnvelopeTrack(1);
+	return addAudioEnvelopeTrack(TRACK_AUDIO_PAN_CURVE);
 }
 
 bool TimeLineWidget::deleteTimeLineTrack(int trackID)
@@ -306,10 +313,10 @@ bool TimeLineWidget::deleteTimeLineTrack(int trackID)
 	QList<TimeLineTrack*>deltracks;
 	deltracks.append(track);
 
-	// find all curve  tracks below.
+	// find all curve tracks below.
 	while (track) {
 		track = findTrackBelowId(track->trackId());
-		if (track && track->trackType() == TRACK_AUDIO_CURVE) {
+		if (track && track->trackType() >= TRACK_CURVES) {
 			deltracks.append(track);
 		} else {
 			track = nullptr;

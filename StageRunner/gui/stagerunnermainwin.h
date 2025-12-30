@@ -136,7 +136,6 @@ private slots:
 	void on_actionDMX_Input_triggered();
 	void on_actionDMX_Output_triggered();
 	void on_actionInput_Assign_Mode_triggered(bool checked);
-	void on_cloneSelectedSceneButton_clicked();
 	void on_addAudioPlayListButton_clicked();
 	void on_addAudioTrackButton_clicked();
 	void on_actionInitialize_plugins_DMX_triggered();

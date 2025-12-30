@@ -12,7 +12,10 @@ enum TRACK_TYPE {
 	TRACK_UNDEF,
 	TRACK_ITEMS,
 	TRACK_RULER,
-	TRACK_AUDIO_CURVE
+	TRACK_AUDIO_VOL_CURVE,
+	TRACK_AUDIO_PAN_CURVE,
+
+	TRACK_CURVES = TRACK_AUDIO_VOL_CURVE
 };
 
 
@@ -77,6 +80,8 @@ public:
 	// bool execContextMenuCmd(const TimeLineContextMenuEntry *menuEntry);
 
 	TimeLineTrack * trackAbove();
+	TimeLineTrack * nextTrack();
+	TimeLineTrack * prevTrack();
 
 	static QString trackTypeToString(TRACK_TYPE type);
 

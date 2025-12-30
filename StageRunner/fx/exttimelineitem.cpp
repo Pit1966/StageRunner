@@ -120,9 +120,15 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	if (track) {
 		QList<TimeLineContextMenuEntry> entries = track->getOverlayContextMenu(event->scenePos());
 		for (const TimeLineContextMenuEntry &e : std::as_const(entries)) {
-			if (e.staticCmdFunc) {
+			if (e.staticCmdFuncPara) {
+				menu.addAction(e.menuLabel, this, [=](void) {
+					(e.staticCmdFuncPara)(e.paraPointer);
+				});
+			}
+			else if (e.staticCmdFunc) {
 				menu.addAction(e.menuLabel, this, e.staticCmdFunc);
-			} else {
+			}
+			else {
 				menu.addAction(e.menuLabel);
 			}
 		}

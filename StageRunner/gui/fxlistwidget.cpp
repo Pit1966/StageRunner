@@ -1522,14 +1522,14 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 
 	if (fxtype == FX_SCENE) {
 		menu.addAction(tr("Clone Fx Scene"), this, [=](void){
-			fxList()->cloneSelectedSceneItem();
+			fxList()->cloneSceneItem(fx);
 			refreshList(curScrollPos);
 		});
 	}
 
 	if (fxtype == FX_SEQUENCE) {
 		menu.addAction(tr("Clone Fx Sequence"), this, [=]{
-			fxList()->cloneSelectedSeqItem();
+			fxList()->cloneSeqItem(fx);
 			refreshList(curScrollPos);
 		});
 		if (AppCentral::instance()->execCenter->findExecuter(fx)) {
@@ -1544,13 +1544,13 @@ void FxListWidget::contextItemClicked(QContextMenuEvent *event, FxListWidgetItem
 	}
 	if (fxtype == FX_TIMELINE) {
 		menu.addAction(tr("Clone Fx Timeline"), this, [=](void){
-			fxList()->cloneSelectedTimelineItem();
+			fxList()->cloneTimelineItem(fx);
 			refreshList(curScrollPos);
 		});
 	}
 	if (fxtype == FX_SCRIPT) {
 		menu.addAction(tr("Clone Fx Script"), this, [=](void){
-			fxList()->cloneSelectedScriptItem();
+			fxList()->cloneScriptItem(fx);
 			refreshList(curScrollPos);
 		});
 		menu.addAction(tr("Add Fx Script here"), this, [=](void) {

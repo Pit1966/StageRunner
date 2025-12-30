@@ -63,6 +63,7 @@ public:
 
 	void setCurveType(int type) {m_curveType = type;}
 	int curveType() const {return m_curveType;}
+	QString curveTypeString() const;
 
 	QString getCurveData() const;
 	bool setCurveData(const QString &dat, TimeLineTrack *track);

@@ -3,9 +3,9 @@
 #############################################################################
 
 APPNAME    = StageRunner
-APPVERSION = V1.00.09.00
+APPVERSION = V1.00.10.00
 APP_MILESTONE = Gerüchte
-APP_PRODUCER = 2025 Stonechip Entertainment
+APP_PRODUCER = 2026 Stonechip Entertainment
 APP_ORG_STRING = Stonechip
 APP_ORG_DOMAIN = stonechip.de
 

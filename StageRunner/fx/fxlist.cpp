@@ -705,10 +705,10 @@ void FxList::setModified(bool state)
 	m_isModified = state;
 }
 
-void FxList::cloneSelectedSceneItem()
+void FxList::cloneSceneItem(FxItem *srcFx)
 {
-	if (m_fxNext && m_fxNext->fxType() == FX_SCENE) {
-		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(m_fxNext);
+	if (srcFx && srcFx->fxType() == FX_SCENE) {
+		FxSceneItem *scene = reinterpret_cast<FxSceneItem*>(srcFx);
 		FxSceneItem *new_scene = new FxSceneItem(*scene);
 		new_scene->setKeyCode(0);
 		new_scene->refCount.ref();
@@ -723,10 +723,10 @@ void FxList::cloneSelectedSceneItem()
 	}
 }
 
-void FxList::cloneSelectedSeqItem()
+void FxList::cloneSeqItem(FxItem *srcFx)
 {
-	if (m_fxNext && m_fxNext->fxType() == FX_SEQUENCE) {
-		FxSeqItem *seq = reinterpret_cast<FxSeqItem*>(m_fxNext);
+	if (srcFx && srcFx->fxType() == FX_SEQUENCE) {
+		FxSeqItem *seq = reinterpret_cast<FxSeqItem*>(srcFx);
 		FxSeqItem *new_seq = new FxSeqItem(*seq);
 		new_seq->refCount.ref();
 		int idx = m_fxList.indexOf(seq);
@@ -740,10 +740,10 @@ void FxList::cloneSelectedSeqItem()
 	}
 }
 
-void FxList::cloneSelectedScriptItem()
+void FxList::cloneScriptItem(FxItem *srcFx)
 {
-	if (m_fxNext && m_fxNext->fxType() == FX_SCRIPT) {
-		FxScriptItem *script = reinterpret_cast<FxScriptItem*>(m_fxNext);
+	if (srcFx && srcFx->fxType() == FX_SCRIPT) {
+		FxScriptItem *script = reinterpret_cast<FxScriptItem*>(srcFx);
 		FxScriptItem *new_script = new FxScriptItem(*script);
 		new_script->refCount.ref();
 		new_script->setKeyCode(0);
@@ -758,12 +758,12 @@ void FxList::cloneSelectedScriptItem()
 	}
 }
 
-void FxList::cloneSelectedTimelineItem()
+void FxList::cloneTimelineItem(FxItem *srcFx)
 {
-	if (!m_fxNext || m_fxNext->fxType() != FX_TIMELINE)
+	if (!srcFx || srcFx->fxType() != FX_TIMELINE)
 		return;
 
-	FxTimeLineItem *fxt = static_cast<FxTimeLineItem*>(m_fxNext);
+	FxTimeLineItem *fxt = static_cast<FxTimeLineItem*>(srcFx);
 	FxTimeLineItem *new_fxt = new FxTimeLineItem(*fxt);
 	new_fxt->generateNewID(fxt->id());
 	new_fxt->refCount.ref();

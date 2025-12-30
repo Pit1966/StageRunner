@@ -115,7 +115,7 @@ public:
 
 	bool addTimeLineTrack();
 	bool addTimeLineTrack(TimeLineTrack *track);
-	bool addAudioEnvelopeTrack(int type);
+	bool addAudioEnvelopeTrack(TRACK_TYPE trackType);
 	bool addAudioVolEnvelopeTrack();
 	bool addAudioPanEnvelopeTrack();
 	bool deleteTimeLineTrack(int trackID);

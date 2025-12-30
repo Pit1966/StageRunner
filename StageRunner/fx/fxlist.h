@@ -131,10 +131,10 @@ public:
 	bool contains(FxItem *fx);
 	bool isModified() const;
 	void setModified(bool state);
-	void cloneSelectedSceneItem();
-	void cloneSelectedSeqItem();
-	void cloneSelectedScriptItem();
-	void cloneSelectedTimelineItem();
+	void cloneSceneItem(FxItem *srcFx);
+	void cloneSeqItem(FxItem *srcFx);
+	void cloneScriptItem(FxItem *srcFx);
+	void cloneTimelineItem(FxItem *srcFx);
 	void cloneSelectedRows(QList<int> rows);
 	void resetFxItems(FxItem *skipFx = 0);
 	void resetFxItemsForNewExecuter();
