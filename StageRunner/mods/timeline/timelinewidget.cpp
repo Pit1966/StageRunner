@@ -398,7 +398,9 @@ bool TimeLineWidget::removeTimeLineItem(TimeLineItem *item, bool deleteLater)
 		TimeLineTrack *track = m_tracks.at(t);
 		if (track->itemList().contains(item)) {
 			// remove item from scene
-			m_scene->removeItem(item);
+			// outcommented this, cause items seems to be automatically removed from scene
+			// and a crash occured sometimes when doing it like this
+			// m_scene->removeItem(item);
 			// remove item from internal list
 			track->itemList().removeOne(item);
 			// delete instance later, if requested

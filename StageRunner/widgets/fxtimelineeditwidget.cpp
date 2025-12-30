@@ -185,7 +185,7 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 	}
 
 	// Add a track, if there are no items and therefor no tracks so far
-	if (!hasItems)
+	if (!hasItems && m_tracks.size() < 2)
 		addTimeLineTrack();
 
 	return true;

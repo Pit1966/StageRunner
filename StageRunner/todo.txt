@@ -11,10 +11,6 @@
 
 Fixme:
 
-- clone selected Item aus dem Context Menu, funktioniert nur, wenn Item selected ist, aber nicht
-  einfach nach Rechtsklick. Dann wird unter umständen auch das falsche Item geclont, weil die Selection
-  Information aus FxList::m_fxNext genommen wird.
-
 Projekt Kopie (durch Verwendung des CopyConstructors):
 Falls nicht die Option "keep FxItemIds" angewählt ist, müssen in den FxScriptItems,
 die Kommandos wie "start id 7" verwenden, die IDs umgerechnet werden.

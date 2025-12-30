@@ -154,8 +154,10 @@ void TimeLineExecuter::processProgress()
 		}
 		int ranMs = runTimeOne.elapsed();
 		emit playPosChanged(ranMs);
-		int perMille = ranMs * 1000 / m_finalEventAtMs;
-		emit listProgressChanged(perMille, 0);
+		if (m_finalEventAtMs > 0) {
+			int perMille = ranMs * 1000 / m_finalEventAtMs;
+			emit listProgressChanged(perMille, 0);
+		}
 	}
 	else if (myState == EXEC_PAUSED) {
 		if (m_lastState != EXEC_PAUSED) {
