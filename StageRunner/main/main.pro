@@ -175,6 +175,7 @@ SOURCES += \
 	../system/dmx/dmxrangewidget.cpp \
 	../system/dmx/dmxtypeselectorwidget.cpp \
 	../system/dmx/fixture.cpp \
+	../system/dmx/fixturelayout.cpp \
 	../system/dmxchannel.cpp \
 	../system/dmxchanproperty.cpp \
 	../system/dmxuniverseproperty.cpp \
@@ -308,6 +309,7 @@ HEADERS  += \
 	../system/dmx/dmxrangewidget.h \
 	../system/dmx/dmxtypeselectorwidget.h \
 	../system/dmx/fixture.h \
+	../system/dmx/fixturelayout.h \
 	../system/dmxchannel.h \
 	../system/dmxchanproperty.h \
 	../system/dmxtypes.h \

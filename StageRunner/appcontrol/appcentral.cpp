@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "appcentral.h"
+#include "configrev.h"
 #include "appcontrol/audiocontrol.h"
 #include "system/audioworker.h"
 #include "fxcontrol.h"
@@ -49,8 +50,8 @@
 #include "system/dmxuniverseproperty.h"
 #include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
-
 #include "system/dmxchannel.h"
+#include "system/dmx/fixturelayout.h"
 
 // #include "audioformat.h"
 
@@ -92,6 +93,16 @@ bool AppCentral::destroyInstance()
 	} else {
 		return false;
 	}
+}
+
+QString AppCentral::defaultFixtureConfigPath()
+{
+	QString defaultpath = QString("%1/.config/%2/%3.dmx.default")
+			.arg(QDir::homePath(),
+				 APP_CONFIG_PATH,
+				 APPNAME);
+
+	return defaultpath;
 }
 
 void AppCentral::startupReady()
@@ -662,6 +673,21 @@ qint32 AppCentral::globalDeviceIndex(quint32 universe, qint32 dmxChan)
 	return -1;
 }
 
+qint32 AppCentral::globalFindDmxAddrForShortId(const QString &shortId, int universe)
+{
+	if (universe >= 0 && universe < MAX_DMX_UNIVERSE) {
+		return unitLight->findDmxAddrForShortId(universe, shortId);
+	}
+	else {
+		for (int u=0; u<MAX_DMX_UNIVERSE; u++) {
+			int dmxaddr = unitLight->findDmxAddrForShortId(u, shortId);
+			if (dmxaddr > 0)
+				return dmxaddr;
+		}
+	}
+	return 0;
+}
+
 QSize AppCentral::secondScreenSize() const
 {
 	if (m_hasSecondScreen)
@@ -1028,6 +1054,7 @@ AppCentral::~AppCentral()
 #endif
 
 	delete templateFxList;
+	delete fixLayout;
 	delete tcpServer;
 	delete unitVideo;
 	delete unitFx;
@@ -1082,6 +1109,7 @@ void AppCentral::init()
 
 	execCenter = new ExecCenter(*this);
 	unitFx = new FxControl(*this, *execCenter);
+	fixLayout = new FixtureLayout(*this, *unitLight);
 	templateFxList = new FxListVarSet;
 	templateFxList->fxList()->setProtected(true);
 

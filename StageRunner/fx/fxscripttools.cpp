@@ -42,6 +42,7 @@ ScriptKeyWord::ScriptKeyWord()
 	m_keywordHash.insert("mode",KW_MODE);
 	m_keywordHash.insert("pause",KW_PAUSE);
 	m_keywordHash.insert("dmx",KW_DMX);
+	m_keywordHash.insert("fix",KW_FIX);
 	m_keywordHash.insert("default",KW_DEFAULT);
 }
 

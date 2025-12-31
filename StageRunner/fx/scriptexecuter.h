@@ -17,6 +17,7 @@ protected:
 
 	QList<FxSceneItem*> m_clonedSceneList;
 	QString m_lastScriptError;
+	QString m_defFixShortId;				///< default shortID string for FIX command
 
 	bool m_breakOnCancel;					///< should executer immediately break, if canceled
 	bool m_disableMultiStart;
@@ -59,6 +60,7 @@ protected:
 	bool executePause(FxScriptLine *line);
 	bool executeDMX(FxScriptLine *line);
 	bool executeDefault(FxScriptLine *line);
+	bool executeFix(FxScriptLine *line);
 
 
 	static bool executeSingleCmd(const QString &linestr);

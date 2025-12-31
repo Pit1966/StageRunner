@@ -286,7 +286,7 @@ void ExtTimeLineItem::contextLinkToPause()
 {
 	m_linkedObjType = CMD_PAUSE;
 	m_colorBG = 0xb02127;
-	setDuration(1000);
+	setDuration(2000);
 	m_maxDurationMs = 5000;
 }
 

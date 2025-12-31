@@ -138,16 +138,6 @@ bool UniverseEditorWidget::loadFromFilesystem(const QString &path)
 	return true;
 }
 
-QString UniverseEditorWidget::defaultFilepath()
-{
-	QString defaultpath = QString("%1/.config/%2/%3.dmx.default")
-			.arg(QDir::homePath(),
-				 APP_CONFIG_PATH,
-				 APPNAME);
-
-	return defaultpath;
-}
-
 FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fixList, uint universe)
 {
 	int tubes = fixList->lastUsedDmxAddr();
@@ -310,14 +300,16 @@ void UniverseEditorWidget::on_removeDeviceButton_clicked()
 
 void UniverseEditorWidget::on_pushButton_saveLayout_clicked()
 {
-	bool ok = saveToFilesystem(defaultFilepath());
+	QString defPath = AppCentral::ref().defaultFixtureConfigPath();
+	bool ok = saveToFilesystem(defPath);
 	if (ok)
 		POPUPINFOMSG(Q_FUNC_INFO, "Default DMX layout saved!");
 }
 
 void UniverseEditorWidget::on_pushButton_loadLayout_clicked()
 {
-	bool ok = loadFromFilesystem(defaultFilepath());
+	QString defPath = AppCentral::ref().defaultFixtureConfigPath();
+	bool ok = loadFromFilesystem(defPath);
 	Q_UNUSED(ok)
 
 	copyFixturesToGui(m_fixtureList);

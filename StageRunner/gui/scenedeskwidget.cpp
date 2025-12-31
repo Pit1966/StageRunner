@@ -132,6 +132,7 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 		}
 	}
 
+	bool isGlobalUniverseLayout = scene->id() >= 11000 && scene->subId() >= 1 && scene->subId() <= 10;
 	int comUniverse = -1;
 
 	for (int t=0; t<sort.size(); t++) {
@@ -167,13 +168,23 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setLabelText(dmx->labelText);
 			fader->setDmxType(dmx->localDmxType(), dmx->globalDmxType());
 
+			// qDebug() << "scene l" << scene;
+			// qDebug() << "scene g" << AppCentral::ref().unitLight->universeLayoutScenes[0];
 
-			if (dmx->deviceUniverseIndex >= 0) {
-				fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
+			if (isGlobalUniverseLayout) {
+				if (dmx->deviceUniverseIndex >= 0) {
+					fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
+					fader->setToolTip(QString("%1\n%2").arg(dmx->deviceShortId, fader->toolTip()));
+				}
 			}
-			else if (dmx->globalDeviceIndex() >= 0) {
-				fader->setDeviceIdx(dmx->globalDeviceIndex());
-				fader->setToolTip(QString("%1\n%2").arg(dmx->globalDeviceShortId(), fader->toolTip()));
+			else {
+				if (dmx->deviceUniverseIndex >= 0) {
+					fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
+				}
+				else if (dmx->globalDeviceIndex() >= 0) {
+					fader->setDeviceIdx(dmx->globalDeviceIndex());
+					fader->setToolTip(QString("%1\n%2").arg(dmx->globalDeviceShortId(), fader->toolTip()));
+				}
 			}
 
 			int ref_val = quint8(dmxout[dmx->dmxUniverse][dmx->dmxChannel]);

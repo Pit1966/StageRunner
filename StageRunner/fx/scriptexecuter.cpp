@@ -414,6 +414,10 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 		ok = executeDefault(line);
 		break;
 
+	case KW_FIX:
+		ok = executeFix(line);
+		break;
+
 	default:
 		ok = false;
 		LOGERROR(tr("<font color=darkOrange>Command '%1' not supported by scripts</font>").arg(cmd));
@@ -1034,6 +1038,42 @@ bool ScriptExecuter::executeDefault(FxScriptLine *line)
 	}
 
 	return ok;
+}
+
+bool ScriptExecuter::executeFix(FxScriptLine *line)
+{
+	QString parastr = line->parameters();
+
+	// get fixture name
+	QString shortId = getFirstParaOfString(parastr);
+	if (shortId == ':')
+		shortId = m_defFixShortId;
+
+	if (shortId.isEmpty()) {
+		m_lastScriptError += tr("Fixture short ident missing\n");
+		return false;
+	}
+
+	int universe = -1;
+	if (shortId.contains(':')) {
+		universe = shortId.section(':',0,0).toInt()-1;
+		shortId = shortId.section(':',1);
+	}
+	else {
+		universe = m_defUniverse;
+	}
+
+	qint32 dmxaddr = myApp.globalFindDmxAddrForShortId(shortId, universe);
+	if (dmxaddr <= 0) {
+		m_lastScriptError += tr("DMX address for short id %1 not found in universe %2")
+				.arg(shortId, universe < 0 ? "all" : QString::number(universe + 1));
+		return false;
+	}
+	qDebug() << "fix" << shortId << "dmx" << dmxaddr;
+
+	// get sub command
+
+	return true;
 }
 
 bool ScriptExecuter::executeSingleCmd(const QString &linestr)

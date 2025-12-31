@@ -62,6 +62,7 @@ class FxSceneItem;
 class QThread;
 class NetServer;
 class DmxChannel;
+class FixtureLayout;
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -124,6 +125,7 @@ public:
 	ColorSettings *colorSettings		= nullptr;
 	IOPluginCentral *pluginCentral		= nullptr;
 	ExecCenter *execCenter				= nullptr;
+	FixtureLayout *fixLayout			= nullptr;
 	FxListVarSet *templateFxList		= nullptr;
 
 public:
@@ -131,6 +133,7 @@ public:
 	static AppCentral & ref();
 	static bool isReady() {return myinstance != nullptr;}
 	static bool destroyInstance();
+	static QString defaultFixtureConfigPath();
 
 	bool isApplicationStart() const {return m_isApplicationStart;}
 	void startupReady();
@@ -206,7 +209,7 @@ public:
 	qint32 globalScalerDenominator(quint32 universe, qint32 dmxChan);
 	QString globalDeviceShortId(quint32 universe, qint32 dmxChan);
 	qint32 globalDeviceIndex(quint32 universe, qint32 dmxChan);
-
+	qint32 globalFindDmxAddrForShortId(const QString &shortId, int universe = -1);
 
 	// Gui
 	bool hasSecondScreen() const {return m_hasSecondScreen;}

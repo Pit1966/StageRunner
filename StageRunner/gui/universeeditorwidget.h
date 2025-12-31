@@ -90,7 +90,7 @@ class UniverseEditorWidget : public QWidget, private Ui::UniverseEditorWidget
 {
 	Q_OBJECT
 private:
-	SR_FixtureList *m_fixtureList = nullptr;			///< current selected universe
+	SR_FixtureList *m_fixtureList = nullptr;					///< current selected universe
 	SR_FixtureList *m_universeLayouts[MAX_DMX_UNIVERSE];		///< fixture lists for universes
 	QString m_lastFixturePath;
 
@@ -104,7 +104,6 @@ public:
 	bool saveToFilesystem(const QString &path, bool saveCurrent = false);
 	bool loadFromFilesystem(const QString &path);
 
-	static QString defaultFilepath();
 	static FxSceneItem * createSceneFromFixtureList(SR_FixtureList *fixList, uint universe);
 
 private:

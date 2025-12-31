@@ -494,6 +494,35 @@ qint32 LightControl::globalDmxScalerDenominator(quint32 universe, qint32 dmxChan
 	return 1;
 }
 
+/**
+ * @brief Returns the base addr for a fixture in a universe. Search by shortIdent string
+ * @param universe
+ * @param shortId the shortIdent string that must match
+ * @return dmxAddr [1:512] or 0, if not found
+ */
+qint32 LightControl::findDmxAddrForShortId(quint32 universe, const QString &shortId)
+{
+	if (universe < MAX_DMX_UNIVERSE && universeLayoutScenes[universe]) {
+		QString similar;
+		if (shortId.startsWith('~'))
+			similar = shortId.mid(1);
+		FxSceneItem *uniScene = universeLayoutScenes[universe];
+		int maxtubes = uniScene->tubeCount();
+		for (int i=0; i<maxtubes; i++) {
+			if (similar.size()) {
+				if (uniScene->tubes.at(i)->deviceShortId.contains(similar, Qt::CaseInsensitive))
+					return uniScene->tubes.at(i)->dmxChannel + 1;
+			}
+			else {
+				if (uniScene->tubes.at(i)->deviceShortId == shortId)
+					return uniScene->tubes.at(i)->dmxChannel + 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
 void LightControl::init()
 {
 	for (int t=0; t<MAX_DMX_UNIVERSE; t++) {

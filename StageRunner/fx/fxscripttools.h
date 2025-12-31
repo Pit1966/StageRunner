@@ -48,7 +48,8 @@ enum KEY_WORD {
 	KW_MODE,
 	KW_PAUSE,
 	KW_DMX,
-	KW_DEFAULT
+	KW_DEFAULT,
+	KW_FIX
 };
 
 }

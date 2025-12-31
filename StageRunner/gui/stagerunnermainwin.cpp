@@ -71,6 +71,7 @@
 #include "gui/universeeditorwidget.h"
 #include "mods/timeline/timelinebox.h"
 #include "widgets/fxtimelineeditwidget.h"
+#include "system/dmx/fixturelayout.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -464,6 +465,10 @@ void StageRunnerMainWin::initAppDefaults()
 	// and also the default universe DMX layout, which is part of the template scenes
 	if (QFile::exists(appCentral->userSettings->pFxTemplatePath))
 		on_loadTemplatesButton_clicked();
+
+	// Load fixture layouts (universe dmx layouts). This may substitute the default universe
+	// template scenes from appCentral->userSettings->pFxTemplatePath
+	appCentral->fixLayout->loadFixtureLayouts();
 
 	if (appCentral->userSettings->pLastProjectLoadPath.size()) {
 		Project *pro = appCentral->project;

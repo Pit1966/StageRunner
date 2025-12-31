@@ -52,14 +52,15 @@ public:
 	AppCentral &myApp;
 	LightLoopThreadInterface *lightLoopInterface;
 	MutexQList<const FxList*>lightFxLists;
-	mutable MutexQHash<int,QPointer<FxSceneItem>>activeScenes;			///< hash with active light scenes FXid -> FxSceneItem*
+	mutable MutexQHash<int,QPointer<FxSceneItem>>activeScenes;		///< hash with active light scenes FXid -> FxSceneItem*
 	QByteArray dmxOutputValues[MAX_DMX_UNIVERSE];
 	QByteArray dmxInputValues[MAX_DMX_UNIVERSE];
 	bool dmxOutputChanged[MAX_DMX_UNIVERSE];
 	bool dmxInputChanged[MAX_DMX_UNIVERSE];
 	FxSceneItem *hiddenScannerScenes[MAX_DMX_UNIVERSE];
 	FxSceneItem *staticScenes[MAX_DMX_UNIVERSE][MAX_STATIC_SCENES];
-	QPointer<FxSceneItem> universeLayoutScenes[MAX_DMX_UNIVERSE];				///< these scenes are not used as stage scenes, but only for dmx channel type evalutation
+	QPointer<FxSceneItem> universeLayoutScenes[MAX_DMX_UNIVERSE];	///< these scenes are not used as stage scenes, but only for dmx channel type evalutation
+
 
 public:
 	LightControl(AppCentral &app_central);
@@ -93,6 +94,7 @@ public:
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerNumerator(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerDenominator(quint32 universe, qint32 dmxChan);
+	qint32 findDmxAddrForShortId(quint32 universe, const QString &shortId);
 
 
 private:
