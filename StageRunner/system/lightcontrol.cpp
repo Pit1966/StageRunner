@@ -499,6 +499,8 @@ qint32 LightControl::globalDmxScalerDenominator(quint32 universe, qint32 dmxChan
  * @param universe
  * @param shortId the shortIdent string that must match
  * @return dmxAddr [1:512] or 0, if not found
+ *
+ * @todo fix
  */
 qint32 LightControl::findDmxAddrForShortId(quint32 universe, const QString &shortId)
 {
@@ -509,14 +511,14 @@ qint32 LightControl::findDmxAddrForShortId(quint32 universe, const QString &shor
 		FxSceneItem *uniScene = universeLayoutScenes[universe];
 		int maxtubes = uniScene->tubeCount();
 		for (int i=0; i<maxtubes; i++) {
-			if (similar.size()) {
-				if (uniScene->tubes.at(i)->deviceShortId.contains(similar, Qt::CaseInsensitive))
-					return uniScene->tubes.at(i)->dmxChannel + 1;
-			}
-			else {
-				if (uniScene->tubes.at(i)->deviceShortId == shortId)
-					return uniScene->tubes.at(i)->dmxChannel + 1;
-			}
+			// if (similar.size()) {
+			// 	if (uniScene->tubes.at(i)->deviceShortId.contains(similar, Qt::CaseInsensitive))
+			// 		return uniScene->tubes.at(i)->dmxChannel + 1;
+			// }
+			// else {
+			// 	if (uniScene->tubes.at(i)->deviceShortId == shortId)
+			// 		return uniScene->tubes.at(i)->dmxChannel + 1;
+			// }
 		}
 	}
 

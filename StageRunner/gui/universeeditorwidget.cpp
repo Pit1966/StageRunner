@@ -164,8 +164,7 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 				tube->dmxType = int(type);
 
 			// device info
-			tube->deviceUniverseIndex = (universe<<16) + (t+1);
-			tube->deviceShortId = fix->shortIdent();
+			tube->deviceID = t+1;
 
 			// qDebug() << "target dmx" << dmx << "type" << chan->preset() << type << "deviveUniverseIdx" << tube->deviceUniverseIndex << tube->deviceShortId;
 

@@ -61,3 +61,27 @@ bool FixtureLayout::loadFixtureLayouts(const QString &filePath)
 
 	return true;
 }
+
+/**
+ * @brief FixtureLayout::getDeviceShortId
+ * @param universe [1:MAX_DMX_UNIVERSE]
+ * @param dmxAddr [1:512]
+ * @return short ident string for device, if assigned. Also empty string, if universe/dmxAddr not valid
+ *
+ */
+QString FixtureLayout::getDeviceShortId(uint universe, uint dmxAddr)
+{
+	universe--;
+	if (universe >= MAX_DMX_UNIVERSE || dmxAddr == 0 || dmxAddr > 512)
+		return {};
+
+	SR_FixtureList *fixlist = m_layouts[universe];
+
+	for (int i=0; i<fixlist->size(); i++) {
+		SR_Fixture *fix = fixlist->at(i);
+		if (fix->containsDmxAddr(dmxAddr))
+			return fix->shortIdent();
+	}
+
+	return {};
+}

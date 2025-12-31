@@ -89,9 +89,8 @@ void DmxChannel::init()
 	addExistingVar(deskPositionIndex,"DeskPosIndex",-1,511,-1);
 	addExistingVar(scalerNumerator,"ScalerNum",1,0xfffffff,1);
 	addExistingVar(scalerDenominator,"ScalerDen",1,0xfffffff,1);
-	addExistingVar(deviceUniverseIndex,"DeviceUniIdx",-1,0xffffff,-1);
+	addExistingVar(deviceID,"DeviceID",-1,0xffffff,-1);
 	addExistingVar(labelText,"LabelText");
-	addExistingVar(deviceShortId,"ShortID");
 }
 
 DmxChannel::~DmxChannel()
@@ -388,14 +387,23 @@ DmxChannelType DmxChannel::globalDmxType() const
 	return AppCentral::ref().globalDmxType(dmxUniverse, dmxChannel);
 }
 
+/**
+ * @brief DmxChannel::globalDeviceIndex
+ * @return
+ * @todo fix check this function
+ */
 int DmxChannel::globalDeviceIndex() const
 {
 	return AppCentral::ref().globalDeviceIndex(dmxUniverse, dmxChannel);
 }
 
+/**
+ * @brief Get device short ident string for this device containing this channel.
+ * @return empty string, if not found
+ */
 QString DmxChannel::globalDeviceShortId() const
 {
-	return AppCentral::ref().globalDeviceShortId(dmxUniverse, dmxChannel);
+	return AppCentral::ref().globalDeviceShortId(dmxUniverse + 1, dmxChannel + 1);
 }
 
 int DmxChannel::dmxTargetValue() const

@@ -281,7 +281,8 @@ public:
 	inline int dmxAdr() const {return m_dmxAddr;}
 	int dmxStartAddr() const;
 	int dmxEndAddr() const;
-	void setDmxAdr(int dmxAdr) {m_dmxAddr = dmxAdr;}
+	void setDmxAddr(int dmxAdr) {m_dmxAddr = dmxAdr;}
+	bool containsDmxAddr(int dmxAddr) const;
 
 	QJsonObject toJson() const;
 	bool setFromJson(const QJsonObject &json);

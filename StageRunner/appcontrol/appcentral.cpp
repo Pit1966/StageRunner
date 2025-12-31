@@ -635,19 +635,14 @@ qint32 AppCentral::globalScalerDenominator(quint32 universe, qint32 dmxChan)
 
 /**
  * @brief Get Device short ident string for a given dmx channel
- * @param universe
- * @param dmxChan
+ * @param universe [1:MAX]
+ * @param dmxChan [1:512]
  * @return device short id string, if set for the given dmx addr. An empty string otherwise
+ *
  */
 QString AppCentral::globalDeviceShortId(quint32 universe, qint32 dmxChan)
 {
-	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
-		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
-		if (tube)
-			return tube->deviceShortId;
-	}
-
-	return QString();
+	return fixLayout->getDeviceShortId(universe, dmxChan);
 }
 
 /**
@@ -655,17 +650,19 @@ QString AppCentral::globalDeviceShortId(quint32 universe, qint32 dmxChan)
  * @param universe
  * @param dmxChan
  * @return device number in given universe; -1, if there is no device defined for given channel or channel is invalid
+ *
+ * @todo fix check this function do we need it, or can we do it with fixLayout??
  */
 qint32 AppCentral::globalDeviceIndex(quint32 universe, qint32 dmxChan)
 {
 	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
 		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
 		if (tube) {
-			if (tube->deviceUniverseIndex >= 0) {
-				return tube->deviceUniverseIndex & 0xffff;
+			if (tube->deviceID >= 0) {
+				return tube->deviceID & 0xffff;
 			}
 			else {
-				return tube->deviceUniverseIndex;
+				return tube->deviceID;
 			}
 		}
 	}

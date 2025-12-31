@@ -58,10 +58,9 @@ public:
 	qint32 deskPositionIndex;			///< The Index the Channel will be positioned in the DeskSceneWidget
 	qint32 scalerNumerator;				///< for range scaling e.g. Pan fine
 	qint32 scalerDenominator;			///< for range scaling e.g. Pan fine
-	qint32 deviceUniverseIndex;			///< the Device index in device list (global template universe). universe is coded in bit [16:23], device index number is codied in bit [0:15] device index number is 1 based
+	qint32 deviceID;					///< the Device index in device list (global template universe). universe is coded in bit [16:23], device index number is codied in bit [0:15] device index number is 1 based
 	int tempTubeListIdx;				///< index in tubeList of scene, which is the parent for this DmxChannel
 	QString labelText;					///< Spezielle Beschriftung des Kanals
-	QString deviceShortId;				///< Short ID string of the device, the channel belongs to.
 
 	bool deskVisibleFlag;				///< Show this channel in GUI (scene)
 	bool curValueChanged[MIX_LINES];

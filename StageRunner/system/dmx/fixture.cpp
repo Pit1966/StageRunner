@@ -382,6 +382,11 @@ int SR_Fixture::dmxEndAddr() const
 	return m_dmxAddr + chancnt - 1;
 }
 
+bool SR_Fixture::containsDmxAddr(int dmxAddr) const
+{
+	return (dmxAddr >= m_dmxAddr && dmxAddr <= dmxEndAddr());
+}
+
 /**
  * @brief Convert SR_Fixture object to a JSON object
  * @return
@@ -684,14 +689,14 @@ void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
 		}
 
 		if (found) {
-			fix->setDmxAdr(dmxAddr);
+			fix->setDmxAddr(dmxAddr);
 			m_list.insert(i, fix);
 		}
 
 		return;
 	}
 	else {
-		fix->setDmxAdr(dmxAddr);
+		fix->setDmxAddr(dmxAddr);
 		m_list.append(fix);
 	}
 }

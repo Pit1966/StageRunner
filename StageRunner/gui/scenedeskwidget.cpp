@@ -171,15 +171,16 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			// qDebug() << "scene l" << scene;
 			// qDebug() << "scene g" << AppCentral::ref().unitLight->universeLayoutScenes[0];
 
+			/// @todo fix  check global and local usage. Do we need dmx->deviceID
 			if (isGlobalUniverseLayout) {
-				if (dmx->deviceUniverseIndex >= 0) {
-					fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
-					fader->setToolTip(QString("%1\n%2").arg(dmx->deviceShortId, fader->toolTip()));
+				if (dmx->deviceID >= 0) {
+					fader->setDeviceIdx(dmx->deviceID & 0xffff);
+					fader->setToolTip(QString("%1\n%2").arg(dmx->globalDeviceShortId(), fader->toolTip()));
 				}
 			}
 			else {
-				if (dmx->deviceUniverseIndex >= 0) {
-					fader->setDeviceIdx(dmx->deviceUniverseIndex & 0xffff);
+				if (dmx->deviceID >= 0) {
+					fader->setDeviceIdx(dmx->deviceID & 0xffff);
 				}
 				else if (dmx->globalDeviceIndex() >= 0) {
 					fader->setDeviceIdx(dmx->globalDeviceIndex());
