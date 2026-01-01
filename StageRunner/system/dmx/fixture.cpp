@@ -278,10 +278,6 @@ SR_Mode *SR_Mode::createLoadQLCMode(SR_Fixture *parent, QXmlStreamReader &xml)
 //
 // ------------------------------------------------------------------------------------------
 SR_Fixture::SR_Fixture()
-	: m_fixtureType(FT_OTHER)
-	, m_curMode(-1)
-	, m_universe(0)
-	, m_dmxAddr(0)
 {
 }
 
@@ -391,14 +387,18 @@ bool SR_Fixture::containsDmxAddr(int dmxAddr) const
  * @brief Convert SR_Fixture object to a JSON object
  * @return
  */
-QJsonObject SR_Fixture::toJson() const
+QJsonObject SR_Fixture::toJson(int deviceId) const
 {
+	if (deviceId >= 0 && m_deviceID < 10000)
+		m_deviceID = deviceId;
+
 	QJsonObject json;
 	json["universe"] = m_universe;
 	json["dmxadr"] = m_dmxAddr;
 	json["manufacturer"] = m_manufacturer;
 	json["modelname"] = m_modelName;
 	json["shortident"] = m_shortIdent;
+	json["deviceid"] = m_deviceID;
 	json["fixturetype"] = int(m_fixtureType);
 	json["curmode"] = m_curMode;
 
@@ -429,6 +429,8 @@ bool SR_Fixture::setFromJson(const QJsonObject &json)
 	m_manufacturer = json["manufacturer"].toString();
 	m_modelName = json["modelname"].toString();
 	m_shortIdent = json["shortident"].toString();
+	if (json.contains("deviceid"))
+		m_deviceID = json["deviceid"].toInt();
 	m_fixtureType = Type(json["fixturetype"].toInt());
 	m_curMode = json["curmode"].toInt();
 
@@ -663,14 +665,14 @@ int SR_FixtureList::lastUsedDmxAddr() const
 	if (m_list.isEmpty())
 		return 0;
 
-	return m_list.last()->dmxAdr() + m_list.last()->usedChannelCount() -1;
+	return m_list.last()->dmxAddr() + m_list.last()->usedChannelCount() -1;
 }
 
 void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
 {
 	int nextFreeDmxAddr = 1;
 	if (m_list.size())
-		nextFreeDmxAddr = m_list.last()->dmxAdr() + m_list.last()->usedChannelCount();
+		nextFreeDmxAddr = m_list.last()->dmxAddr() + m_list.last()->usedChannelCount();
 
 	if (dmxAddr == 0)
 		dmxAddr = nextFreeDmxAddr;
@@ -679,7 +681,7 @@ void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
 		int i = 0;
 		bool found = false;
 		while (i < m_list.size()) {
-			if (m_list.at(i)->dmxAdr() > dmxAddr) {
+			if (m_list.at(i)->dmxAddr() > dmxAddr) {
 				found = true;
 				break;
 			}
@@ -706,8 +708,8 @@ bool SR_FixtureList::removeFixtureAt(int dmxAddr)
 	int i = -1;
 	while (++i < m_list.size()) {
 		SR_Fixture *fix = m_list.at(i);
-		qDebug() << "dmx offset" << fix->dmxAdr();
-		if (dmxAddr >= fix->dmxAdr() && dmxAddr < fix->dmxAdr() + fix->usedChannelCount()) {
+		qDebug() << "dmx offset" << fix->dmxAddr();
+		if (dmxAddr >= fix->dmxAddr() && dmxAddr < fix->dmxAddr() + fix->usedChannelCount()) {
 			m_list.removeAt(i);
 			delete fix;
 			return true;
@@ -751,8 +753,9 @@ QJsonObject SR_FixtureList::toJson() const
 {
 	QJsonObject json;
 	QJsonArray jsonfixturearray;
-	for (SR_Fixture *fix : m_list) {
-		QJsonObject jsonfixture = fix->toJson();
+	for (int i=0; i<m_list.size(); i++) {
+		SR_Fixture *fix = m_list.at(i);
+		QJsonObject jsonfixture = fix->toJson(i);
 		jsonfixturearray.append(jsonfixture);
 	}
 	json["fixtures"] = jsonfixturearray;
@@ -773,7 +776,7 @@ int SR_FixtureList::setFromJson(const QJsonObject &json)
 		qDebug() << "element:" << jsonfixture["modelname"].toString();
 		SR_Fixture *fixture = new SR_Fixture();
 		if (fixture->setFromJson(jsonfixture)) {
-			addFixture(fixture, fixture->dmxAdr());
+			addFixture(fixture, fixture->dmxAddr());
 			cnt++;
 		} else {
 			delete fixture;

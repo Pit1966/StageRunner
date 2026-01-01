@@ -302,7 +302,9 @@ void AppCentral::loadPlugins()
 		loadcnt += pluginCentral->loadQLCPlugins(IOPluginCentral::sysPluginDir());
 	}
 
-	qDebug() << "load plugins" << IOPluginCentral::sysPluginDir();
+	Q_UNUSED(loadcnt)
+
+	// qDebug() << "load plugins" << IOPluginCentral::sysPluginDir();
 	pluginCentral->updatePluginMappingInformation();
 }
 
@@ -640,44 +642,57 @@ qint32 AppCentral::globalScalerDenominator(quint32 universe, qint32 dmxChan)
  * @return device short id string, if set for the given dmx addr. An empty string otherwise
  *
  */
-QString AppCentral::globalDeviceShortId(quint32 universe, qint32 dmxChan)
+QString AppCentral::fixtureDeviceShortId(quint32 universe, qint32 dmxChan)
 {
-	return fixLayout->getDeviceShortId(universe, dmxChan);
+	return fixLayout->getDeviceShortIdent(universe, dmxChan);
 }
 
 /**
- * @brief Get device index for parent device of a dmx channel in a given universe
- * @param universe
- * @param dmxChan
+ * @brief Get deviceID for parent device of a dmx channel in a given universe
+ * @param universe [1:MAX]
+ * @param dmxChan [1:512]
  * @return device number in given universe; -1, if there is no device defined for given channel or channel is invalid
  *
- * @todo fix check this function do we need it, or can we do it with fixLayout??
+ * remember: the deviceID for now is the position of the device in the fixture list of given universe
  */
-qint32 AppCentral::globalDeviceIndex(quint32 universe, qint32 dmxChan)
+qint32 AppCentral::fixtureDeviceID(quint32 universe, qint32 dmxChan)
 {
-	if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
-		DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
-		if (tube) {
-			if (tube->deviceID >= 0) {
-				return tube->deviceID & 0xffff;
-			}
-			else {
-				return tube->deviceID;
-			}
-		}
-	}
+	return fixLayout->getDeviceID(universe, dmxChan);
 
-	return -1;
+	// deviceID is also stored in each DMXChannel of Scene.
+	// Remember the deviceID for now is the position in the fixture list of universe fixtures (devices)
+	// This is code to access the default universe scene layouts for the deviceID, but it was never used
+
+	// if (universe < MAX_DMX_UNIVERSE && unitLight->universeLayoutScenes[universe]) {
+	// 	DmxChannel *tube = unitLight->universeLayoutScenes[universe]->tube(dmxChan);
+	// 	if (tube) {
+	// 		if (tube->deviceID >= 0) {
+	// 			return tube->deviceID & 0xffff;
+	// 		}
+	// 		else {
+	// 			return tube->deviceID;
+	// 		}
+	// 	}
+	// }
+	// return -1;
 }
 
-qint32 AppCentral::globalFindDmxAddrForShortId(const QString &shortId, int universe)
+/**
+ * @brief Get DMX start address of fixture (device) with given short ident string.
+ * @param universe [1:MAX_DMX_UNIVERSE] or use -1 in order to check all universes available
+ * @param shortIdentString IdentStr
+ * @return dmx start address [1:512] or 0, if not found
+ *
+ * @note if shortIdentString starts with a '~' than a case insensitive matching is done
+ */
+qint32 AppCentral::fixtureDmxAddrForShortIdent(const QString &shortIdentString, int universe)
 {
-	if (universe >= 0 && universe < MAX_DMX_UNIVERSE) {
-		return unitLight->findDmxAddrForShortId(universe, shortId);
+	if (universe > 0 && universe <= MAX_DMX_UNIVERSE) {
+		return fixLayout->getDmxAddrForShortIdent(universe, shortIdentString);
 	}
 	else {
-		for (int u=0; u<MAX_DMX_UNIVERSE; u++) {
-			int dmxaddr = unitLight->findDmxAddrForShortId(u, shortId);
+		for (int u=1; u<=MAX_DMX_UNIVERSE; u++) {
+			int dmxaddr = fixLayout->getDmxAddrForShortIdent(u, shortIdentString);
 			if (dmxaddr > 0)
 				return dmxaddr;
 		}

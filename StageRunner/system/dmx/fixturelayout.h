@@ -23,7 +23,9 @@ public:
 	~FixtureLayout();
 
 	bool loadFixtureLayouts(const QString &filePath = {});
-	QString getDeviceShortId(uint universe, uint dmxAddr);
+	QString getDeviceShortIdent(uint universe, uint dmxAddr);
+	int getDeviceID(uint universe, uint dmxAddr);
+	int getDmxAddrForShortIdent(uint universe, const QString &shortIdentString);
 
 signals:
 

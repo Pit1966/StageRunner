@@ -155,8 +155,8 @@ FxSceneItem *UniverseEditorWidget::createSceneFromFixtureList(SR_FixtureList *fi
 		int c = 0;
 		for (SR_Channel *chan : std::as_const(mode->channels())) {
 			if (c++ == 0) {
-				if (fix->dmxAdr()-1 > dmx)
-					dmx = fix->dmxAdr()-1;
+				if (fix->dmxAddr()-1 > dmx)
+					dmx = fix->dmxAddr()-1;
 			}
 			DmxChannel *tube = sc->tube(dmx);
 			SR_Channel::Preset type = SR_Channel::stringToPreset(chan->preset());
@@ -197,8 +197,8 @@ bool UniverseEditorWidget::copyFixturesToGui(SR_FixtureList *fixlist)
 		int c = 0;
 		for (auto chan : mode->channels()) {
 			if (c++ == 0) {
-				if (fix->dmxAdr() > dmx)
-					dmx = fix->dmxAdr();
+				if (fix->dmxAddr() > dmx)
+					dmx = fix->dmxAddr();
 
 				QString device = QString("%1: %2").arg(fix->manufacturer(), fix->modelName());
 				DMXTableWidgetItem *item = new DMXTableWidgetItem(t, dmx, device);
@@ -301,8 +301,9 @@ void UniverseEditorWidget::on_pushButton_saveLayout_clicked()
 {
 	QString defPath = AppCentral::ref().defaultFixtureConfigPath();
 	bool ok = saveToFilesystem(defPath);
-	if (ok)
-		POPUPINFOMSG(Q_FUNC_INFO, "Default DMX layout saved!");
+	if (ok) {
+		POPUPINFOMSG(tr("DMX universe editor"), "Default DMX layout saved!", this);
+	}
 }
 
 void UniverseEditorWidget::on_pushButton_loadLayout_clicked()

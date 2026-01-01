@@ -49,8 +49,8 @@ public:
 	 * Type or Function this channel is used for
 	 */
 	qint32 dmxType;						///< @see DmxChannelType
-	qint32 dmxUniverse;					///< DMX universe number
-	qint32 dmxChannel;					///< DMX channel the function uses (This is 0 based !!)
+	qint32 dmxUniverse;					///< DMX universe number [0: MAX] (This is 0 based !!)
+	qint32 dmxChannel;					///< DMX channel the function uses [0: 511] (This is 0 based !!)
 	qint32 dmxValue;					///< current output value of this dmx channel (0-255)
 	qint32 curValue[MIX_LINES];			///< current output value (0 - targetFullRange) HTP with directValue
 	qint32 targetFullValue;				///< The maximum value this channel can be set to (default 10000)
@@ -90,7 +90,7 @@ public:
 	DmxChannelType localDmxType() const;
 
 	DmxChannelType globalDmxType() const;
-	int globalDeviceIndex() const;
+	int globalDeviceID() const;
 	QString globalDeviceShortId() const;
 
 	int dmxTargetValue() const;

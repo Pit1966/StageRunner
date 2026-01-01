@@ -207,10 +207,11 @@ public:
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
 	qint32 globalScalerNumerator(quint32 universe, qint32 dmxChan);
 	qint32 globalScalerDenominator(quint32 universe, qint32 dmxChan);
-	/// @todo fix - add new fixture functions for FixtureManager
-	QString globalDeviceShortId(quint32 universe, qint32 dmxChan);
-	qint32 globalDeviceIndex(quint32 universe, qint32 dmxChan);
-	qint32 globalFindDmxAddrForShortId(const QString &shortId, int universe = -1);
+
+	// Fixture Manager
+	QString fixtureDeviceShortId(quint32 universe, qint32 dmxChan);
+	qint32 fixtureDeviceID(quint32 universe, qint32 dmxChan);
+	qint32 fixtureDmxAddrForShortIdent(const QString &shortIdentString, int universe = -1);
 
 	// Gui
 	bool hasSecondScreen() const {return m_hasSecondScreen;}
@@ -254,6 +255,12 @@ signals:
 	void inputAssignModeChanged(bool state);
 	void inputAssigned(FxItem *);
 
+	/**
+	 * @brief signal is sent after scene was deleted
+	 * @param scene
+	 *
+	 * @attention Do not use the pointer for FxSceneItem object access, cause it is most likely not valid anymore
+	 */
 	void fxSceneDeleted(FxSceneItem *scene);
 
 	void keyPressModifiersChanged(uint keyModifiers);

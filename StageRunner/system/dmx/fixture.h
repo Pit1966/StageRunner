@@ -231,15 +231,18 @@ private:
 	// from official branding
 	QString m_manufacturer;
 	QString m_modelName;
-	Type m_fixtureType;
-	int m_curMode;						///< current active mode.
+	Type m_fixtureType	= FT_OTHER;
+	int m_curMode		= -1;			///< current active mode.
 
 	// personal user description
 	QString m_shortIdent;				///< Should be an ident string in order to describe the device. (like 1000W Stufe ganz links)
 
+	// deviceID = position in device list for a universe
+	mutable int m_deviceID	= -1;
+
 	// for universe layout
-	int m_universe = 0;					///< universe number (0 based)
-	int m_dmxAddr = 0;					///< real DMX address (beginning with 1, 0 is undefined)
+	int m_universe	= 0;				///< universe number (0 based)
+	int m_dmxAddr	= 0;				///< real DMX address (beginning with 1, 0 is undefined)
 
 	QList<SR_Channel*>m_channels;
 	QList<SR_Mode*>m_modes;
@@ -278,13 +281,15 @@ public:
 	const QString & shortIdent() const {return m_shortIdent;}
 	void setShortIdent(const QString &shortId) {m_shortIdent = shortId;}
 
-	inline int dmxAdr() const {return m_dmxAddr;}
+	inline int dmxAddr() const {return m_dmxAddr;}
 	int dmxStartAddr() const;
 	int dmxEndAddr() const;
 	void setDmxAddr(int dmxAdr) {m_dmxAddr = dmxAdr;}
 	bool containsDmxAddr(int dmxAddr) const;
 
-	QJsonObject toJson() const;
+	int deviceId() const {return m_deviceID;}
+
+	QJsonObject toJson(int deviceId) const;
 	bool setFromJson(const QJsonObject &json);
 
 private:

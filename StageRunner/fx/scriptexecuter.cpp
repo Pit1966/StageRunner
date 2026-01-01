@@ -1063,7 +1063,7 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 		universe = m_defUniverse;
 	}
 
-	qint32 dmxaddr = myApp.globalFindDmxAddrForShortId(shortId, universe);
+	qint32 dmxaddr = myApp.fixtureDmxAddrForShortIdent(shortId, universe);
 	if (dmxaddr <= 0) {
 		m_lastScriptError += tr("DMX address for short id %1 not found in universe %2")
 				.arg(shortId, universe < 0 ? "all" : QString::number(universe + 1));

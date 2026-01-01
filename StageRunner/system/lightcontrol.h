@@ -94,8 +94,6 @@ public:
 	DmxChannelType globalDmxType(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerNumerator(quint32 universe, qint32 dmxChan);
 	qint32 globalDmxScalerDenominator(quint32 universe, qint32 dmxChan);
-	qint32 findDmxAddrForShortId(quint32 universe, const QString &shortId);
-
 
 private:
 	void init();

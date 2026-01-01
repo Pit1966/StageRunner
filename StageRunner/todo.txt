@@ -10,7 +10,6 @@
 - IoPluginContral::getInputUniverseForPlugin() überarbeiten. Behandelt universe nicht
 
 Fixme:
-- MixerChannel::paintEvent:  Schrifttyp für aktuellen Level ändert sich in der Anzeige, je nach Mixer Eigenschaften (z.B Generic channel <-> fixture channel)
 Projekt Kopie (durch Verwendung des CopyConstructors):
 Falls nicht die Option "keep FxItemIds" angewählt ist, müssen in den FxScriptItems,
 die Kommandos wie "start id 7" verwenden, die IDs umgerechnet werden.

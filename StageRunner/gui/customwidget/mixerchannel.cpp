@@ -319,6 +319,8 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 
 	QPainter p(this);
 	QFont unifont(p.font());
+	unifont.setFixedPitch(true);
+	unifont.setPointSize(width() < 48 ? 8 : 9);
 
 	if (knob_over_f) {
 		p.drawPixmap(event->rect(),org_pix_back_active);
@@ -439,12 +441,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	if (dmxType() > DMX_GENERIC) {
 		QString tstr = DMXHelp::dmxTypeToShortString(dmxType());
 
-		QFont font(p.font());
-		font.setFixedPitch(true);
-		font.setPointSize(width() < 48 ? 8 : 9);
-		font.setItalic(false);
-		font.setBold(false);
-		p.setFont(font);
+		p.setFont(unifont);
 		if (m_myDmxType == DmxChannelType::DMX_GENERIC) {
 			p.setPen(Qt::gray);
 		} else {
@@ -461,6 +458,7 @@ void MixerChannel::paintEvent(QPaintEvent *event)
 	if (knob_over_f) {
 		int yTop = (hi_pos_percent - 0.02) * height();
 		int yBot = (lo_pos_percent + 0.015) * height();
+		p.setFont(unifont);
 		p.setPen(QColor(AppCentral::ref().colorSettings->pKeyColumn));
 		QString val = QString("%1").arg(value() * 255 / maximum(), 3, 10, QLatin1Char('0'));
 		QRect bound(QPoint(0,yTop - 20),QPoint(width(),yBot + 20));

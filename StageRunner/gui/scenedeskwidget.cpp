@@ -182,8 +182,8 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 				if (dmx->deviceID >= 0) {
 					fader->setDeviceIdx(dmx->deviceID & 0xffff);
 				}
-				else if (dmx->globalDeviceIndex() >= 0) {
-					fader->setDeviceIdx(dmx->globalDeviceIndex());
+				else if (dmx->globalDeviceID() >= 0) {
+					fader->setDeviceIdx(dmx->globalDeviceID());
 					fader->setToolTip(QString("%1\n%2").arg(dmx->globalDeviceShortId(), fader->toolTip()));
 				}
 			}

@@ -388,13 +388,14 @@ DmxChannelType DmxChannel::globalDmxType() const
 }
 
 /**
- * @brief DmxChannel::globalDeviceIndex
- * @return
- * @todo fix check this function
+ * @brief DmxChannel::fixtureDeviceID
+ * @return The deviceID belonging to the device that contains this channel or -1, if channel has no parent fixture (device)
+ *
+ * remember: the deviceID for now is the position of the device in the fixture list of given universe
  */
-int DmxChannel::globalDeviceIndex() const
+int DmxChannel::globalDeviceID() const
 {
-	return AppCentral::ref().globalDeviceIndex(dmxUniverse, dmxChannel);
+	return AppCentral::ref().fixtureDeviceID(dmxUniverse + 1, dmxChannel + 1);
 }
 
 /**
@@ -403,7 +404,7 @@ int DmxChannel::globalDeviceIndex() const
  */
 QString DmxChannel::globalDeviceShortId() const
 {
-	return AppCentral::ref().globalDeviceShortId(dmxUniverse + 1, dmxChannel + 1);
+	return AppCentral::ref().fixtureDeviceShortId(dmxUniverse + 1, dmxChannel + 1);
 }
 
 int DmxChannel::dmxTargetValue() const
