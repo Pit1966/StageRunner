@@ -21,19 +21,19 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "executer.h"
-#include "execcenter.h"
-#include "log.h"
-#include "fxlist.h"
-#include "appcentral.h"
-#include "audiocontrol.h"
-#include "lightcontrol.h"
-#include "videocontrol.h"
+#include "fx/executer.h"
+#include "fx/execcenter.h"
+#include "fx/fxlist.h"
 #include "fx/fxitem_includes.h"
-#include "usersettings.h"
-#include "qtstatictools.h"
-#include "dmxchannel.h"
+#include "system/log.h"
+#include "system/lightcontrol.h"
+#include "system/videocontrol.h"
+#include "system/dmxchannel.h"
 #include "system/qt_versions.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "appcontrol/usersettings.h"
+#include "tool/qtstatictools.h"
 
 #include <QStringList>
 

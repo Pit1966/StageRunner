@@ -1,15 +1,14 @@
 #include "universeeditorwidget.h"
 #include "configrev.h"
-#include "log.h"
+#include "system/log.h"
 #include "system/dmx/fixture.h"
-#include "deviceinfowidget.h"
 #include "fx/fxitem.h"
 #include "fx/fxsceneitem.h"
-#include "dmxchannel.h"
-
-#include "appcentral.h"
-#include "fxlist.h"
-#include "fxlistvarset.h"
+#include "fx/fxlist.h"
+#include "system/dmxchannel.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/fxlistvarset.h"
+#include "gui/deviceinfowidget.h"
 
 #include <QSettings>
 #include <QFileDialog>

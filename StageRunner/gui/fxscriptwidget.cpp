@@ -22,8 +22,8 @@
 //=======================================================================
 
 #include "fxscriptwidget.h"
-#include "log.h"
-#include "fxscriptitem.h"
+#include "system/log.h"
+#include "fx/fxscriptitem.h"
 
 
 QList<FxScriptWidget*>FxScriptWidget::m_scriptWidgetList;

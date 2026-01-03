@@ -26,9 +26,9 @@
 
 #include <QObject>
 
-#include "commandsystem.h"
-#include "fftrealfixlenwrapper.h"
-#include "frqspectrum.h"
+#include "system/commandsystem.h"
+#include "tool/fftrealfixlenwrapper.h"
+#include "tool/frqspectrum.h"
 
 
 class AudioSlot;

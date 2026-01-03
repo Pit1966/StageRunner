@@ -29,11 +29,10 @@
 #include <QGraphicsOpacityEffect>
 #include <QMenu>
 
-#include "psvideowidget6.h"
-#include "videoplayer6.h"
-
-#include "psoverlaylabel.h"
 #include "configrev.h"
+#include "system/videoplayer6.h"
+#include "psvideowidget6.h"
+#include "psoverlaylabel.h"
 
 PsVideoWidget::PsVideoWidget(QWidget *parent)
 	: QVideoWidget(parent)

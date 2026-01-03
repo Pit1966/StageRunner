@@ -23,8 +23,8 @@
 
 #include "mixerchannel.h"
 #include "customwidget/extmimedata.h"
-#include "dmxchannel.h"
-#include "dmx/dmxhelp.h"
+#include "system/dmxchannel.h"
+#include "system/dmx/dmxhelp.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/colorsettings.h"
 

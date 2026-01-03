@@ -21,10 +21,10 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "audioformat.h"
-#include "mediaplayeraudiobackend.h"
-#include "log.h"
-#include "audioslot.h"
+#include "system/audiooutput/audioformat.h"
+#include "system/audiooutput/mediaplayeraudiobackend.h"
+#include "system/log.h"
+#include "system/audioslot.h"
 
 #include "appcontrol/appcentral.h"
 #include "appcontrol/audiocontrol.h"

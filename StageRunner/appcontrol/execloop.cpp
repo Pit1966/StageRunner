@@ -22,10 +22,10 @@
 //=======================================================================
 
 #include "execloop.h"
-#include "log.h"
+#include "system/log.h"
+#include "system/fxcontrol.h"
 #include "toolclasses.h"
 #include "execcenter.h"
-#include "fxcontrol.h"
 #include "executer.h"
 
 #include <QObject>

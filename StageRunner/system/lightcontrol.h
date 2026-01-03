@@ -27,7 +27,7 @@
 #include "config.h"
 #include "toolclasses.h"
 #include "tubedata.h"
-#include "dmxtypes.h"
+#include "dmx/dmxtypes.h"
 
 #include <QObject>
 #include <QByteArray>

@@ -25,8 +25,8 @@
 #define AUDIOSLOTWIDGET_H
 
 #include "ui_audioslotwidget.h"
-#include "commandsystem.h"
-#include "frqspectrum.h"
+#include "system/commandsystem.h"
+#include "tool/frqspectrum.h"
 
 //using namespace AUDIO;
 

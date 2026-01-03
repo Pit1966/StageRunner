@@ -26,8 +26,8 @@
 
 #include "ui_scenedeskwidget.h"
 
-#include "dmxtypes.h"
-#include "tubedata.h"
+#include "system/dmx/dmxtypes.h"
+#include "system/tubedata.h"
 
 class FxSceneItem;
 class FxItem;

@@ -41,6 +41,7 @@ protected:
 	QString getFirstParaOfString(QString &parastr, bool allowCommaSep = false);
 	int getFrontIntOfString(QString &parastr, bool *ok = nullptr, const QString &errHint = {});
 	int getPos(QString &restPara);
+	int convertToDmxVal(const QString &valstr);
 
 	FxItemList getExecuterTempCopiesOfFx(FxItem *fx) const;
 

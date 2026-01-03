@@ -26,7 +26,7 @@
 
 #include "varset.h"
 #include "commandsystem.h"
-#include "dmxtypes.h"
+#include "dmx/dmxtypes.h"
 #include <QPointer>
 
 #ifndef MIX_LINES

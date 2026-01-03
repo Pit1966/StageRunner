@@ -21,12 +21,10 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "log.h"
+#include "system/log.h"
 #include "appcentral.h"
 #include "configrev.h"
 #include "appcontrol/audiocontrol.h"
-#include "system/audioworker.h"
-#include "fxcontrol.h"
 #include "fx/fxlist.h"
 #include "fx/fxitem.h"
 #include "fx/fxaudioitem.h"
@@ -39,6 +37,8 @@
 #include "appcontrol/colorsettings.h"
 #include "ioplugincentral.h"
 #include "qlcioplugin.h"
+#include "system/audioworker.h"
+#include "system/fxcontrol.h"
 #include "system/lightcontrol.h"
 #include "system/messagehub.h"
 #include "appcontrol/pluginmapping.h"

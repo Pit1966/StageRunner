@@ -22,9 +22,9 @@
 //=======================================================================
 
 #include "execloopthreadinterface.h"
-#include "execcenter.h"
-#include "execloop.h"
-#include "log.h"
+#include "fx/execcenter.h"
+#include "appcontrol/execloop.h"
+#include "system/log.h"
 
 ExecLoopThreadInterface::ExecLoopThreadInterface(FxControl &unit_fx)
 	: QThread()

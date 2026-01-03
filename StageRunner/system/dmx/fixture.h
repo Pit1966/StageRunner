@@ -1,7 +1,7 @@
 #ifndef FIXTURE_H
 #define FIXTURE_H
 
-class QXmlStreamReader;
+#include "system/dmx/dmxtypes.h"
 
 #include <QObject>
 #include <QString>
@@ -50,6 +50,7 @@ class QXmlStreamReader;
 #define SR_FIXTURE_HEAD_CHANNEL		QStringLiteral("Channel")
 
 
+class QXmlStreamReader;
 class SR_Fixture;
 
 class SR_Channel : public QObject
@@ -62,6 +63,9 @@ public:
 	 * please see
 	 * https://github.com/mcallegari/qlcplus/wiki/Fixture-definition-presets
 	 * when changing this list
+	 *
+	 * There is another enum type: DmxChannelType
+	 * The enum values in DmxChannelType should be identical to these in Preset
 	 *********************************************************************/
 	enum Preset
 	{
@@ -274,7 +278,6 @@ public:
 	QStringList getChannelTexts(int mode = 0) const;
 	QStringList getChannelAndPresetTexts(int mode = 0) const;
 
-
 	SR_Fixture::Type stringToType(const QString &type);
 	QString typeToString(SR_Fixture::Type type);
 
@@ -291,6 +294,9 @@ public:
 
 	QJsonObject toJson(int deviceId) const;
 	bool setFromJson(const QJsonObject &json);
+
+	int dmxAddrForDmxChannelType(DmxChannelType dmxType);
+
 
 private:
 	bool loadQLCFixture(QXmlStreamReader &xml);

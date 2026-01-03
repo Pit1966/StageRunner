@@ -23,11 +23,11 @@
 
 #include "sequencecontrolwidget.h"
 
-#include "appcentral.h"
-#include "fxitem.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "fx/fxitem.h"
 #include "config.h"
-#include "fxcontrol.h"
-#include "audiocontrol.h"
+#include "system/fxcontrol.h"
 
 #include <QKeyEvent>
 

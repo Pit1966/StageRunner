@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "system/dmxtypes.h"
+#include "dmxtypes.h"
 
 namespace Ui {
 class DmxTypeSelectorWidget;

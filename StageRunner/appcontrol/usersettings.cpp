@@ -22,7 +22,7 @@
 //=======================================================================
 
 #include "usersettings.h"
-#include "log.h"
+#include "system/log.h"
 #include "config.h"
 #include "configrev.h"
 

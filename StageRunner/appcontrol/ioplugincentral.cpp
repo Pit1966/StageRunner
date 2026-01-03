@@ -22,13 +22,13 @@
 //=======================================================================
 
 #include "ioplugincentral.h"
-#include "log.h"
-#include "qlcioplugin.h"
 #include "config.h"
 #include "configrev.h"
+#include "system/log.h"
+#include "system/messagedialog.h"
+#include "system/variantmapserializer.h"
+#include "qlcioplugin.h"
 #include "pluginmapping.h"
-#include "messagedialog.h"
-#include "variantmapserializer.h"
 
 #include <QDir>
 #include <QPluginLoader>

@@ -26,13 +26,13 @@
 
 #include "configrev.h"
 #include "config.h"
-#include "appcentral.h"
-#include "stagerunnermainwin.h"
-#include "usersettings.h"
-#include "log.h"
-#include "scapplication.h"
-#include "runguard.h"
-#include "ioplugincentral.h"
+#include "system/log.h"
+#include "system/runguard.h"
+#include "appcontrol/scapplication.h"
+#include "appcontrol/ioplugincentral.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/usersettings.h"
+#include "gui/stagerunnermainwin.h"
 
 #ifdef __unix__
 #include <signal.h>

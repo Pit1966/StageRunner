@@ -31,9 +31,9 @@
 
 #include "psvideowidget.h"
 #ifdef IS_QT6
-#	include "videoplayer6.h"
+#	include "system/videoplayer6.h"
 #else
-#	include "videoplayer.h"
+#	include "system/videoplayer.h"
 #endif
 #include "psoverlaylabel.h"
 #include "configrev.h"

@@ -29,7 +29,7 @@
 #include <QPixmap>
 #include <QSize>
 
-#include "dmxtypes.h"
+#include "system/dmx/dmxtypes.h"
 
 class DmxChannel;
 

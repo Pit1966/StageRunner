@@ -25,7 +25,7 @@
 #define FXITEMOBJ_H
 
 #include <QObject>
-#include "commandsystem.h"
+#include "system/commandsystem.h"
 
 class FxItem;
 class Executer;

@@ -24,11 +24,11 @@
 #ifndef AUDIOIODEVICE_H
 #define AUDIOIODEVICE_H
 
-#include "audioformat.h"
-#include "commandsystem.h"
-#include "psmovingaverage.h"
-#include "frqspectrum.h"
-#include "fftrealfixlenwrapper.h"
+#include "system/audiooutput/audioformat.h"
+#include "system/commandsystem.h"
+#include "tool/psmovingaverage.h"
+#include "tool/frqspectrum.h"
+#include "tool/fftrealfixlenwrapper.h"
 
 #include <QIODevice>
 #include <QElapsedTimer>

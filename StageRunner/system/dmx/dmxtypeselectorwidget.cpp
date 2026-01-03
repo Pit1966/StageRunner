@@ -1,7 +1,7 @@
 #include "dmxtypeselectorwidget.h"
 #include "ui_dmxtypeselectorwidget.h"
 
-#include "dmx/dmxhelp.h"
+#include "system/dmx/dmxhelp.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/colorsettings.h"
 

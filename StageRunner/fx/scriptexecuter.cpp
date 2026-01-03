@@ -1,13 +1,13 @@
 #include "scriptexecuter.h"
 
+#include "system/log.h"
 #include "system/qt_versions.h"
 #include "system/videocontrol.h"
 #include "system/lightcontrol.h"
-#include "appcontrol/audiocontrol.h"
 #include "system/dmxchannel.h"
-#include "log.h"
-#include "tool/qtstatictools.h"
+#include "appcontrol/audiocontrol.h"
 #include "appcontrol/appcentral.h"
+#include "tool/qtstatictools.h"
 #include "fx/fxitem_includes.h"
 
 #include <QRegularExpression>
@@ -224,6 +224,12 @@ QString ScriptExecuter::getTargetFxItemFromPara(FxScriptLine *line , const QStri
 	return returnparas;
 }
 
+/**
+ * @brief Get leading part of a string, which is seperated by a space and remove it from original string
+ * @param parastr
+ * @param allowCommaSep
+ * @return
+ */
 QString ScriptExecuter::getFirstParaOfString(QString &parastr, bool allowCommaSep)
 {
 	parastr = parastr.simplified();
@@ -301,6 +307,26 @@ int ScriptExecuter::getPos(QString &restPara)
 	}
 
 	return pos;
+}
+
+int ScriptExecuter::convertToDmxVal(const QString &valstr)
+{
+	bool ok;
+	if (valstr.endsWith('%')) {
+		float val = valstr.left(valstr.size() - 1).toFloat(&ok);
+		if (ok) {
+			int ival = 255.0f * val / 100.0f;
+			return std::clamp(ival, 0, 255);
+		}
+	}
+	else {
+		int val = valstr.toInt(&ok);
+		val = std::clamp(val, 0,255);
+		if (ok)
+			return val;
+	}
+
+	return -1;
 }
 
 
@@ -1044,6 +1070,8 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 {
 	QString parastr = line->parameters();
 
+	int sceneNum = m_defStaticSceneNum;	// default static scene number
+
 	// get fixture name
 	QString shortId = getFirstParaOfString(parastr);
 	if (shortId == ':')
@@ -1071,7 +1099,51 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 	}
 	qDebug() << "fix" << shortId << "dmx" << dmxaddr;
 
+
+	// default values for possible parameters
+	int w = -1;	// white
+	int r = -1;	// red
+	int g = -1;	// green
+	int b = -1;	// blue
+
+	bool flagDim = false;
+
+	QStringList paras = parastr.split(' ');
 	// get sub command
+	while (!paras.isEmpty()) {
+		QString subcmd = paras.takeFirst().toLower();
+
+		if (paras.isEmpty()) {
+			m_lastScriptError += tr("Missing option value for '%1'").arg(subcmd);
+			return false;
+		}
+		if (subcmd == 'w') {
+			w = convertToDmxVal(paras.takeFirst());
+		}
+		else if (subcmd == 'r') {
+			r = convertToDmxVal(paras.takeFirst());
+		}
+		else if (subcmd == 'g') {
+			g = convertToDmxVal(paras.takeFirst());
+		}
+		else if (subcmd == 'b') {
+			b = convertToDmxVal(paras.takeFirst());
+		}
+	}
+
+	if (w >= 0) {
+		qDebug() << "white" << w;
+	}
+	if (r >= 0) {
+		qDebug() << "red" << r;
+	}
+	if (g >= 0) {
+		qDebug() << "green" << g;
+	}
+	if (b >= 0) {
+		qDebug() << "blue" << b;
+	}
+
 
 	return true;
 }

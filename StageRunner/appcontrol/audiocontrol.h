@@ -24,7 +24,7 @@
 #ifndef AUDIOCONTROL_H
 #define AUDIOCONTROL_H
 
-#include "commandsystem.h"
+#include "system/commandsystem.h"
 #include "config.h"
 #include "qt_versions.h"
 

@@ -22,14 +22,13 @@
 //=======================================================================
 
 #include "lightloop.h"
-#include "log.h"
-#include "fxlist.h"
-#include "fxitem.h"
-#include "fxsceneitem.h"
-#include "toolclasses.h"
-#include "lightcontrol.h"
-#include "dmxchannel.h"
-#include "toolclasses.h"
+#include "system/log.h"
+#include "system/lightcontrol.h"
+#include "system/dmxchannel.h"
+#include "fx/fxlist.h"
+#include "fx/fxitem.h"
+#include "fx/fxsceneitem.h"
+#include "tool/toolclasses.h"
 
 #include <QDebug>
 #include <QEventLoop>

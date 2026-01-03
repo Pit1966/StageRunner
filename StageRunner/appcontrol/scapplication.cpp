@@ -24,7 +24,7 @@
 #include "scapplication.h"
 
 #ifdef __unix__
-# include "unixsignalcatcher.h"
+# include "system/unixsignalcatcher.h"
 #endif
 
 #include <QApplication>

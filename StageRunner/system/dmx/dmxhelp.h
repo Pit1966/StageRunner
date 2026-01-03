@@ -1,7 +1,7 @@
 #ifndef DMXHELP_H
 #define DMXHELP_H
 
-#include "system/dmxtypes.h"
+#include "dmxtypes.h"
 #include <QtCore>
 
 class DMXHelp

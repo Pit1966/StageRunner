@@ -21,11 +21,11 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "audioformat.h"
-#include "audioplayer.h"
-#include "log.h"
-#include "audioslot.h"
-#include "psmovingaverage.h"
+#include "system/audiooutput/audioformat.h"
+#include "system/audiooutput/audioplayer.h"
+#include "system/log.h"
+#include "system/audioslot.h"
+#include "tool/psmovingaverage.h"
 
 #include <math.h>
 #include <QTimerEvent>

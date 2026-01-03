@@ -24,7 +24,15 @@
 #ifndef DMXTYPES_H
 #define DMXTYPES_H
 
-
+/**
+ * @brief The DmxChannelType enum
+ * DmxChannelType defines are taken from QLCPLUS project
+ *
+ * @see
+ * https://github.com/mcallegari/qlcplus/wiki/Fixture-definition-presets
+ * when changing this list
+ *
+ */
 enum DmxChannelType {
 	DMX_GENERIC,
 	DMX_INTENSITY_MASTER_DIMMER,

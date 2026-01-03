@@ -24,9 +24,9 @@
 #ifndef FXLISTEXECUTER_H
 #define FXLISTEXECUTER_H
 
-#include "commandsystem.h"
-#include "fx/fxscripttools.h"
+#include "system/commandsystem.h"
 #include "system/extelapsedtimer.h"
+#include "fx/fxscripttools.h"
 
 #include <QObject>
 #include <QString>

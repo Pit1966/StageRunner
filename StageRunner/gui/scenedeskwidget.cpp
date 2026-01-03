@@ -22,16 +22,16 @@
 //=======================================================================
 
 #include "scenedeskwidget.h"
-#include "log.h"
-#include "fxsceneitem.h"
-#include "dmxchannel.h"
-#include "appcentral.h"
-#include "lightcontrol.h"
-#include "qtstatictools.h"
-#include "customwidget/mixergroup.h"
-#include "customwidget/mixerchannel.h"
+#include "system/log.h"
+#include "system/dmxchannel.h"
+#include "system/lightcontrol.h"
 #include "system/dmx/dmxtypeselectorwidget.h"
 #include "system/dmx/dmxrangewidget.h"
+#include "fx/fxsceneitem.h"
+#include "appcontrol/appcentral.h"
+#include "tool/qtstatictools.h"
+#include "gui/customwidget/mixergroup.h"
+#include "gui/customwidget/mixerchannel.h"
 
 #include <QContextMenuEvent>
 #include <QKeyEvent>

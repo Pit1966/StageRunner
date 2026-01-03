@@ -21,9 +21,9 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
+#include "system/log.h"
 #include "lightloopthreadinterface.h"
 #include "lightloop.h"
-#include "log.h"
 
 #include <QDebug>
 

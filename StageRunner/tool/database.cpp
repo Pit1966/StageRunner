@@ -21,10 +21,10 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "database.h"
-#include "toolclasses.h"
-#include "varset.h"
-#include "log.h"
+#include "system/log.h"
+#include "tool/database.h"
+#include "tool/toolclasses.h"
+#include "tool/varset.h"
 
 #include <string.h>
 #include <QMessageBox>

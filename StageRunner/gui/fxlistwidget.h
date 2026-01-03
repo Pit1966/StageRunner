@@ -25,8 +25,8 @@
 #define FXLISTWIDGET_H
 
 #include "ui_fxlistwidget.h"
-#include "commandsystem.h"
-#include "toolclasses.h"
+#include "system/commandsystem.h"
+#include "tool/toolclasses.h"
 
 #include <QTableWidgetItem>
 #include <QTableWidget>

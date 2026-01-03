@@ -24,9 +24,9 @@
 #ifndef APPCENTRAL_H
 #define APPCENTRAL_H
 
-#include "commandsystem.h"
 #include "config.h"
-#include "dmxtypes.h"
+#include "system/commandsystem.h"
+#include "system/dmx/dmxtypes.h"
 
 #include <QList>
 #include <QObject>

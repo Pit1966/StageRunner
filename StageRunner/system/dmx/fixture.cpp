@@ -464,6 +464,14 @@ bool SR_Fixture::setFromJson(const QJsonObject &json)
 	return true;
 }
 
+int SR_Fixture::dmxAddrForDmxChannelType(DmxChannelType dmxType)
+{
+
+
+
+	return 0;
+}
+
 
 bool SR_Fixture::loadQLCFixture(const QString &path)
 {

@@ -10,11 +10,11 @@
 #include "mods/timeline/timelineruler.h"
 #include "mods/timeline/timelinecurve.h"
 #include "system/fxcontrol.h"
+#include "system/log.h"
 #include "appcontrol/appcentral.h"
 #include "gui/customwidget/extmimedata.h"
 #include "gui/fxlistwidgetitem.h"
 #include "gui/fxlistwidget.h"
-#include "log.h"
 
 #include <QMimeData>
 #include <QDragEnterEvent>

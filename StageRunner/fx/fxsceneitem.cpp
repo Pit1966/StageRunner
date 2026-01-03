@@ -21,13 +21,13 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "fxsceneitem.h"
-#include "dmxchannel.h"
-#include "lightcontrol.h"
-#include "appcentral.h"
-#include "lightloop.h"
-#include "lightloopthreadinterface.h"
+#include "fx/fxsceneitem.h"
+#include "system/dmxchannel.h"
+#include "system/lightcontrol.h"
 #include "system/dmx/dmxhelp.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/lightloop.h"
+#include "appcontrol/lightloopthreadinterface.h"
 
 FxSceneItem::FxSceneItem()
 	:FxItem()

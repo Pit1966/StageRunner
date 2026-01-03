@@ -24,8 +24,8 @@
 #ifndef MEDIAPLAYERAUDIOBACKEND_H
 #define MEDIAPLAYERAUDIOBACKEND_H
 
-#include "audioplayer.h"
-#include "commandsystem.h"
+#include "system/audiooutput/audioplayer.h"
+#include "system/commandsystem.h"
 
 #include <QMediaPlayer>
 #include <QAudioBuffer>

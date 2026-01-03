@@ -21,9 +21,9 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************************************/
 
-#include "prefvar.h"
-#include "varset.h"
-#include "log.h"
+#include "tool/prefvar.h"
+#include "tool/varset.h"
+#include "system/log.h"
 #include "configrev.h"
 // #include "../config.h"
 

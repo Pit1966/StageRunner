@@ -23,7 +23,7 @@
 
 #include "iodeviceaudiobackend6.h"
 #include "audioiodevice6.h"
-#include "audioslot.h"
+#include "system/audioslot.h"
 #include "system/log.h"
 #include "system/extelapsedtimer.h"
 

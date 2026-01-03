@@ -25,7 +25,7 @@
 #define DMXCHANPROPERTY_H
 
 #include "varset.h"
-#include "dmxtypes.h"
+#include "dmx/dmxtypes.h"
 
 class DmxChanProperty : public VarSet
 {

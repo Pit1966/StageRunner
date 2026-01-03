@@ -22,10 +22,10 @@
 //=======================================================================
 
 #include "sdl2audiobackend.h"
-#include "log.h"
-#include "audioslot.h"
-#include "appcentral.h"
-#include "audiocontrol.h"
+#include "system/log.h"
+#include "system/audioslot.h"
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
 
 #include <QDebug>
 

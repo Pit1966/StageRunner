@@ -25,7 +25,7 @@ INCLUDEPATH  += ../appcontrol
 INCLUDEPATH  += ../fx
 INCLUDEPATH  += ../gui
 INCLUDEPATH  += ../main
-INCLUDEPATH  += ../system
+# INCLUDEPATH  += ../system
 INCLUDEPATH  += ../thirdparty
 INCLUDEPATH  += ../tool
 INCLUDEPATH  += ../plugins/interfaces
@@ -307,12 +307,12 @@ HEADERS  += \
 	../system/convtools.h \
 	../system/dmx/dmxhelp.h \
 	../system/dmx/dmxrangewidget.h \
+	../system/dmx/dmxtypes.h \
 	../system/dmx/dmxtypeselectorwidget.h \
 	../system/dmx/fixture.h \
 	../system/dmx/fixturelayout.h \
 	../system/dmxchannel.h \
 	../system/dmxchanproperty.h \
-	../system/dmxtypes.h \
 	../system/dmxuniverseproperty.h \
 	../system/extelapsedtimer.h \
 	../system/fxcontrol.h \

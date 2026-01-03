@@ -23,11 +23,11 @@
 
 #include "fxplaylistitem.h"
 #include "fxlist.h"
-
-#include "appcentral.h"
-#include "audiocontrol.h"
 #include "fxitemobj.h"
-#include "fxcontrol.h"
+
+#include "appcontrol/appcentral.h"
+#include "appcontrol/audiocontrol.h"
+#include "system/fxcontrol.h"
 
 
 FxPlayListItem::FxPlayListItem(FxList *fxList)

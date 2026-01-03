@@ -24,9 +24,9 @@
 #ifndef SDL2AUDIOBACKEND_H
 #define SDL2AUDIOBACKEND_H
 
-#include "audioplayer.h"
-#include "audioformat.h"
-#include "commandsystem.h"
+#include "system/audiooutput/audioplayer.h"
+#include "system/audiooutput/audioformat.h"
+#include "system/commandsystem.h"
 
 #include <QElapsedTimer>
 

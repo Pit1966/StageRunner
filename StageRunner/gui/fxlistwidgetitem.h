@@ -25,7 +25,7 @@
 #define FXLISTWIDGETITEM_H
 
 #include "ui_fxlistwidgetitem.h"
-#include "commandsystem.h"
+#include "system/commandsystem.h"
 #include "tool/qt6_qt5_compat.h"
 
 class FxItem;

@@ -21,13 +21,13 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "execcenter.h"
-#include "fxitem.h"
-#include "fxlist.h"
-#include "executer.h"
-#include "scriptexecuter.h"
-#include "timelineexecuter.h"
-#include "log.h"
+#include "system/log.h"
+#include "fx/fxitem.h"
+#include "fx/fxlist.h"
+#include "fx/execcenter.h"
+#include "fx/executer.h"
+#include "fx/scriptexecuter.h"
+#include "fx/timelineexecuter.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/audiocontrol.h"
 #include "system/lightcontrol.h"

@@ -21,16 +21,16 @@
 //  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //=======================================================================
 
-#include "fxlist.h"
-#include "fxaudioitem.h"
-#include "fxsceneitem.h"
-#include "fxplaylistitem.h"
-#include "fxseqitem.h"
-#include "fxscriptitem.h"
-#include "fxcueitem.h"
-#include "fxtimelineitem.h"
-#include "log.h"
-#include "fxitemtool.h"
+#include "system/log.h"
+#include "fx/fxlist.h"
+#include "fx/fxaudioitem.h"
+#include "fx/fxsceneitem.h"
+#include "fx/fxplaylistitem.h"
+#include "fx/fxseqitem.h"
+#include "fx/fxscriptitem.h"
+#include "fx/fxcueitem.h"
+#include "fx/fxtimelineitem.h"
+#include "fx/fxitemtool.h"
 
 #include <QMutableListIterator>
 #include <QDateTime>
