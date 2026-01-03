@@ -157,12 +157,16 @@ private:
 	int m_dmxOffset = 0;		///< not used
 	int m_dmxFineOffset = 0;	///< used for dmx devices using 2 channels (or more) for a function with 16bit (or more)
 
+	DmxChannelType m_dmxChanType = DMX_GENERIC;
+
 public:
 	SR_Channel(SR_Fixture *parent);
 	SR_Channel(SR_Fixture *parent, SR_Channel *op);
 	inline const QString & name() const {return m_name;}
 	inline const QString & group() const {return m_group;}
 	inline const QString & preset() const {return m_preset;}
+
+	inline DmxChannelType dmxChannelType() const {return m_dmxChanType;}
 
 	bool loadQLCChannel(QXmlStreamReader &xml);
 	inline void setDmxOffset(int chanoffset) {m_dmxOffset = chanoffset;}
@@ -195,8 +199,8 @@ public:
 	inline QList<SR_Channel*> & channels() {return m_channels;}
 	bool loadQLCMode(QXmlStreamReader &xml);
 	bool insertChannelAt(int pos, SR_Channel *srChan);
-
 	int channelCount() const;
+	SR_Channel * channel(int idx);
 	QStringList getChannelTexts() const;
 	QStringList getChannelAndPresetTexts() const;
 
@@ -284,6 +288,7 @@ public:
 	const QString & shortIdent() const {return m_shortIdent;}
 	void setShortIdent(const QString &shortId) {m_shortIdent = shortId;}
 
+	inline int universe() const {return m_universe + 1;}
 	inline int dmxAddr() const {return m_dmxAddr;}
 	int dmxStartAddr() const;
 	int dmxEndAddr() const;

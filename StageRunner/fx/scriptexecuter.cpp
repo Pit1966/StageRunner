@@ -5,10 +5,12 @@
 #include "system/videocontrol.h"
 #include "system/lightcontrol.h"
 #include "system/dmxchannel.h"
+#include "system/dmx/fixture.h"
 #include "appcontrol/audiocontrol.h"
 #include "appcontrol/appcentral.h"
 #include "tool/qtstatictools.h"
 #include "fx/fxitem_includes.h"
+
 
 #include <QRegularExpression>
 
@@ -1091,14 +1093,13 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 		universe = m_defUniverse;
 	}
 
-	qint32 dmxaddr = myApp.fixtureDmxAddrForShortIdent(shortId, universe);
-	if (dmxaddr <= 0) {
-		m_lastScriptError += tr("DMX address for short id %1 not found in universe %2")
+	SR_Fixture *fix = myApp.findFixture(shortId, universe);
+	if (!fix) {
+		m_lastScriptError += tr("Fixture with short id %1 not found in universe %2")
 				.arg(shortId, universe < 0 ? "all" : QString::number(universe + 1));
 		return false;
 	}
-	qDebug() << "fix" << shortId << "dmx" << dmxaddr;
-
+	qDebug() << "fix" << shortId << "dmx offset" << fix->dmxStartAddr();
 
 	// default values for possible parameters
 	int w = -1;	// white
@@ -1132,16 +1133,20 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 	}
 
 	if (w >= 0) {
-		qDebug() << "white" << w;
+		int w_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_WHITE);
+		qDebug() << "white" << w << "@dmx" << w_addr;
 	}
 	if (r >= 0) {
-		qDebug() << "red" << r;
+		int r_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_RED);
+		qDebug() << "red" << r << "@dmx" << r_addr;
 	}
 	if (g >= 0) {
-		qDebug() << "green" << g;
+		int g_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_GREEN);
+		qDebug() << "green" << g << "@dmx" << g_addr;
 	}
 	if (b >= 0) {
-		qDebug() << "blue" << b;
+		int b_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_BLUE);
+		qDebug() << "blue" << b << "@dmx" << b_addr;
 	}
 
 

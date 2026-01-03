@@ -43,8 +43,13 @@ bool SR_Channel::loadQLCChannel(QXmlStreamReader &xml)
 		return false;
 	}
 	m_preset = attrs.value(SR_CHANNEL_PRESET).toString();
-	if (m_preset.size())
+	if (m_preset.size()) {
 		qDebug() << "preset" << m_preset;
+		Preset p = stringToPreset(m_preset);
+		m_dmxChanType = DmxChannelType(p);
+	} else {
+		m_dmxChanType = DMX_GENERIC;
+	}
 
 	while (xml.readNextStartElement()) {
 		if (xml.name() == SR_CHANNEL_GROUP) {
@@ -77,6 +82,7 @@ bool SR_Channel::setFromJson(const QJsonObject &json)
 	m_name = json["name"].toString();
 	m_group = json["group"].toString();
 	m_preset =json["preset"].toString();
+	m_dmxChanType = DmxChannelType(json["dmxtype"].toInt());
 	m_dmxOffset = json["dmxoffset"].toInt();
 	m_dmxFineOffset = json["dmxfineoffset"].toInt();
 	if (json.contains("dmxfineoffseet"))
@@ -189,6 +195,14 @@ bool SR_Mode::insertChannelAt(int pos, SR_Channel *srChan)
 int SR_Mode::channelCount() const
 {
 	return m_channels.size();
+}
+
+SR_Channel *SR_Mode::channel(int idx)
+{
+	if (idx >= 0 && idx < m_channels.size())
+		return m_channels.at(idx);
+
+	return nullptr;
 }
 
 QStringList SR_Mode::getChannelTexts() const
@@ -466,8 +480,26 @@ bool SR_Fixture::setFromJson(const QJsonObject &json)
 
 int SR_Fixture::dmxAddrForDmxChannelType(DmxChannelType dmxType)
 {
+	// loop over channels in order to find the specified channel
+	int mode = m_curMode;
+	if (mode < 0) {
+		if (m_modes.size()) {
+			mode = 0;
+		} else {
+			return 0;
+		}
+	}
+	else if (mode >= m_modes.size()) {
+		return 0;
+	}
 
+	SR_Mode *m = m_modes.at(mode);
 
+	for (int i=0; i<m->channelCount(); i++) {
+		SR_Channel *c = m->channel(i);
+		if (c->dmxChannelType() == dmxType)
+			return m_dmxAddr + i;
+	}
 
 	return 0;
 }

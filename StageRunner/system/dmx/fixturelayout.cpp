@@ -120,9 +120,18 @@ int FixtureLayout::getDeviceID(uint universe, uint dmxAddr)
  */
 int FixtureLayout::getDmxAddrForShortIdent(uint universe, const QString &shortIdentString)
 {
+	SR_Fixture *fix = getFixtureForShortIdent(universe, shortIdentString);
+	if (fix)
+		return fix->dmxAddr();
+
+	return 0;
+}
+
+SR_Fixture *FixtureLayout::getFixtureForShortIdent(uint universe, const QString &shortIdentString)
+{
 	universe--;
 	if (universe >= MAX_DMX_UNIVERSE || shortIdentString.isEmpty())
-		return -1;
+		return nullptr;
 
 	SR_FixtureList *fixlist = m_layouts[universe];
 
@@ -130,13 +139,13 @@ int FixtureLayout::getDmxAddrForShortIdent(uint universe, const QString &shortId
 		SR_Fixture *fix = fixlist->at(i);
 		if (shortIdentString.startsWith('~')) {
 			if (0 == QString::compare(shortIdentString.mid(1), fix->shortIdent(), Qt::CaseInsensitive))
-				return fix->dmxAddr();
+				return fix;
 		}
 		else {
 			if (fix->shortIdent() == shortIdentString)
-				return fix->dmxAddr();
+				return fix;
 		}
 	}
 
-	return -1;
+	return nullptr;
 }

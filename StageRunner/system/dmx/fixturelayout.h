@@ -26,6 +26,7 @@ public:
 	QString getDeviceShortIdent(uint universe, uint dmxAddr);
 	int getDeviceID(uint universe, uint dmxAddr);
 	int getDmxAddrForShortIdent(uint universe, const QString &shortIdentString);
+	SR_Fixture * getFixtureForShortIdent(uint universe, const QString &shortIdentString);
 
 signals:
 

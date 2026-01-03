@@ -63,6 +63,8 @@ class QThread;
 class NetServer;
 class DmxChannel;
 class FixtureLayout;
+class SR_Fixture;
+
 
 using namespace AUDIO;
 using namespace LIGHT;
@@ -212,6 +214,7 @@ public:
 	QString fixtureDeviceShortId(quint32 universe, qint32 dmxChan);
 	qint32 fixtureDeviceID(quint32 universe, qint32 dmxChan);
 	qint32 fixtureDmxAddrForShortIdent(const QString &shortIdentString, int universe = -1);
+	SR_Fixture * findFixture(const QString &shortIdentString, int universe = -1);
 
 	// Gui
 	bool hasSecondScreen() const {return m_hasSecondScreen;}

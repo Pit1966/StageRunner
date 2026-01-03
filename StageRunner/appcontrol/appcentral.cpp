@@ -24,7 +24,14 @@
 #include "system/log.h"
 #include "appcentral.h"
 #include "configrev.h"
-#include "appcontrol/audiocontrol.h"
+#include "audiocontrol.h"
+#include "project.h"
+#include "usersettings.h"
+#include "colorsettings.h"
+#include "ioplugincentral.h"
+#include "pluginmapping.h"
+#include "fxlistvarset.h"
+
 #include "fx/fxlist.h"
 #include "fx/fxitem.h"
 #include "fx/fxaudioitem.h"
@@ -32,28 +39,22 @@
 #include "fx/fxclipitem.h"
 #include "fx/fxscriptitem.h"
 #include "fx/fxtimelineitem.h"
-#include "project.h"
-#include "appcontrol/usersettings.h"
-#include "appcontrol/colorsettings.h"
-#include "ioplugincentral.h"
-#include "qlcioplugin.h"
+#include "plugins/interfaces/qlcioplugin.h"
 #include "system/audioworker.h"
 #include "system/fxcontrol.h"
 #include "system/lightcontrol.h"
 #include "system/messagehub.h"
-#include "appcontrol/pluginmapping.h"
 #include "fx/execcenter.h"
 #include "fx/executer.h"
-#include "fxlistvarset.h"
 #include "gui/fxlistwidget.h"
 #include "system/videocontrol.h"
 #include "system/dmxuniverseproperty.h"
-#include "../plugins/yadi/src/dmxmonitor.h"
 #include "system/netserver.h"
 #include "system/dmxchannel.h"
 #include "system/dmx/fixturelayout.h"
+#include "system/dmx/fixture.h"
 
-// #include "audioformat.h"
+#include "../plugins/yadi/src/dmxmonitor.h"
 
 
 #include <QFileDialog>
@@ -698,6 +699,21 @@ qint32 AppCentral::fixtureDmxAddrForShortIdent(const QString &shortIdentString, 
 		}
 	}
 	return 0;
+}
+
+SR_Fixture *AppCentral::findFixture(const QString &shortIdentString, int universe)
+{
+	if (universe > 0 && universe <= MAX_DMX_UNIVERSE) {
+		return fixLayout->getFixtureForShortIdent(universe, shortIdentString);
+	}
+	else {
+		for (int u=1; u<=MAX_DMX_UNIVERSE; u++) {
+			SR_Fixture *fix = fixLayout->getFixtureForShortIdent(u, shortIdentString);
+			if (fix)
+				return fix;
+		}
+	}
+	return nullptr;
 }
 
 QSize AppCentral::secondScreenSize() const
