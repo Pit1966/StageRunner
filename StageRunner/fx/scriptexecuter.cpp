@@ -1102,12 +1102,8 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 	qDebug() << "fix" << shortId << "dmx offset" << fix->dmxStartAddr();
 
 	// default values for possible parameters
-	int w = -1;	// white
-	int r = -1;	// red
-	int g = -1;	// green
-	int b = -1;	// blue
-
-	bool flagDim = false;
+	int colorIntens[4] = {-1,-1,-1,-1};			// this are R,G,B,W values
+	DmxChannelType types[4] = {DMX_INTENSITY_RED, DMX_INTENSITY_GREEN, DMX_INTENSITY_BLUE, DMX_INTENSITY_WHITE};
 
 	QStringList paras = parastr.split(' ');
 	// get sub command
@@ -1119,34 +1115,32 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 			return false;
 		}
 		if (subcmd == 'w') {
-			w = convertToDmxVal(paras.takeFirst());
+			colorIntens[3] = convertToDmxVal(paras.takeFirst());
 		}
 		else if (subcmd == 'r') {
-			r = convertToDmxVal(paras.takeFirst());
+			colorIntens[0] = convertToDmxVal(paras.takeFirst());
 		}
 		else if (subcmd == 'g') {
-			g = convertToDmxVal(paras.takeFirst());
+			colorIntens[1] = convertToDmxVal(paras.takeFirst());
 		}
 		else if (subcmd == 'b') {
-			b = convertToDmxVal(paras.takeFirst());
+			colorIntens[2] = convertToDmxVal(paras.takeFirst());
 		}
 	}
 
-	if (w >= 0) {
-		int w_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_WHITE);
-		qDebug() << "white" << w << "@dmx" << w_addr;
-	}
-	if (r >= 0) {
-		int r_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_RED);
-		qDebug() << "red" << r << "@dmx" << r_addr;
-	}
-	if (g >= 0) {
-		int g_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_GREEN);
-		qDebug() << "green" << g << "@dmx" << g_addr;
-	}
-	if (b >= 0) {
-		int b_addr = fix->dmxAddrForDmxChannelType(DMX_INTENSITY_BLUE);
-		qDebug() << "blue" << b << "@dmx" << b_addr;
+	// get scene instance.
+	FxSceneItem *fxs = myApp.unitLight->staticScene(universe, sceneNum);
+	int fadeMs = 2000;
+
+	for (int i=0; i<4; i++) {
+		if (colorIntens[i] >= 0) {
+			int addr = fix->dmxAddrForDmxChannelType(types[i]);
+			qDebug() << types[i] << "@dmx" << addr;
+			if (addr) {
+				DmxChannel *tube = fxs->tube(addr-1);
+				tube->fadeToDmxVal(MIX_EXTERN, colorIntens[i], fadeMs);
+			}
+		}
 	}
 
 

@@ -131,7 +131,7 @@ bool DmxChannel::initFadeCmd(int mixline, CtrlCmd cmd, qint32 time_ms, qint32 ta
 			break;
 		case CMD_SCENE_FADETO:
 			if (curValue[mixline] == target_value) return false;
-			fadeTargetValue[mixline] = target_value;
+			fadeTargetValue[mixline] = qMin(target_value, targetFullValue);
 			break;
 		default:
 			return false;
@@ -449,5 +449,23 @@ bool DmxChannel::clrPairedWith()
 
 	return false;
 }
+
+bool DmxChannel::fadeToVal(int mixline, qint32 value, qint32 fadeTimeMs)
+{
+	return initFadeCmd(mixline, CMD_SCENE_FADETO, fadeTimeMs, value);
+}
+
+bool DmxChannel::fadeToDmxVal(int mixline, qint32 dmxVal, qint32 fadeTimeMs)
+{
+	qint32 target_value = (float(dmxVal) + 0.5) * targetFullValue / 255;
+	return initFadeCmd(mixline, CMD_SCENE_FADETO, fadeTimeMs, target_value);
+}
+
+bool DmxChannel::fadeToPercent(int mixline, float percent, qint32 fadeTimeMs)
+{
+	qint32 target_value = percent * targetFullValue / 100.f;
+	return initFadeCmd(mixline, CMD_SCENE_FADETO, fadeTimeMs, target_value);
+}
+
 
 

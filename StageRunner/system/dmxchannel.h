@@ -99,6 +99,11 @@ public:
 	bool setPairedWith(DmxChannel *other);
 	bool clrPairedWith();
 
+	// convenience functions
+	bool fadeToVal(int mixline, qint32 value, qint32 fadeTimeMs = 0);
+	bool fadeToDmxVal(int mixline, qint32 dmxVal, qint32 fadeTimeMs = 0);
+	bool fadeToPercent(int mixline, float percent, qint32 fadeTimeMs = 0);
+
 private:
 	void init();
 };
