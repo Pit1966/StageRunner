@@ -121,7 +121,7 @@ void MixerChannel::setRefValue(int val, int colidx)
  */
 void MixerChannel::emitCurrentValue()
 {
-	emit mixerChannelSliderMoved(my_id, value());
+	emit mixerChannelSliderMoved(my_id, value(), value());
 }
 
 int MixerChannel::refValue()
@@ -260,10 +260,11 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 	if (knob_selected_f) {
 		float movedif = click_position.y() - event->pos().y();
 		int new_value = float(click_value) + ( movedif * maximum() / (pos_range_percent * height()));
-		if (new_value != value()) {
+		int old_value = value();
+		if (new_value != old_value) {
 			setValue( new_value );
 			emit sliderMoved(new_value);
-			emit mixerChannelSliderMoved(my_id, new_value);
+			emit mixerChannelSliderMoved(my_id, new_value, old_value);
 		}
 		update();
 	} else {

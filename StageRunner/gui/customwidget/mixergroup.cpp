@@ -88,7 +88,7 @@ MixerChannel *MixerGroup::appendMixer(int tubeId)
 	mixerlist.append(mixer);
 	mixerlayout->addWidget(mixer);
 	mixer->setObjectName(QString::number(mixer->id()));
-	connect(mixer,SIGNAL(mixerChannelSliderMoved(int,int)),this,SLOT(onMixerChannelMoved(int,int)));
+	connect(mixer,SIGNAL(mixerChannelSliderMoved(int,int,int)),this,SLOT(onMixerChannelMoved(int,int,int)));
 	connect(mixer,SIGNAL(mixerSelected(int,bool)),this,SLOT(onMixerChannelSelected(int,bool)));
 
 	int right_margin = width() - mixerlist.size() * mixer->backGroundWidth();
@@ -400,7 +400,7 @@ void MixerGroup::dropEvent(QDropEvent *event)
 	temp_drag_start_move_idx = -1;
 }
 
-void MixerGroup::onMixerChannelMoved(int id, int val)
+void MixerGroup::onMixerChannelMoved(int id, int val, int oldVal)
 {
 	if (id >= 0) {
 		if (val < 0)  {
@@ -412,18 +412,22 @@ void MixerGroup::onMixerChannelMoved(int id, int val)
 
 		MixerChannel *mix = getMixerById(id);
 		if (mix && selected_mixer.contains(mix)) {
+			int difVal = val - oldVal;
 			for (int i=0; i<selected_mixer.size(); i++) {
 				MixerChannel *m = selected_mixer.at(i);
 				if (m->id() != id) {
-					m->setValue(val);
+					m->setValue(m->value() + difVal);
 					// qDebug() << i << "id" << m->id() << "=" << m << "val" << val;
+					emit mixerGroupSliderMoved(m->id(), m->value());
 				}
-
-				emit mixerGroupSliderMoved(m->id(), val);
+				else {
+					emit mixerGroupSliderMoved(m->id(), val);
+				}
 			}
 		}
 		else {
 			emit mixerGroupSliderMoved(id, val);
+			qDebug() << "dif" << val - oldVal;
 		}
 	}
 }

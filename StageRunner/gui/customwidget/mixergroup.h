@@ -87,7 +87,7 @@ public slots:
 	void setRefSliderColorIndex(int colidx);
 
 private slots:
-	void onMixerChannelMoved(int id, int val);
+	void onMixerChannelMoved(int id, int val, int oldVal);
 	void onMixerChannelSelected(int id, bool state);
 
 signals:
