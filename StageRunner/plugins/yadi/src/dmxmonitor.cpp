@@ -129,8 +129,30 @@ void DmxMonitor::paintEvent(QPaintEvent *)
 					} else {
 						paint.setPen(m_valueColor);
 					}
-					QRect rect = paint.boundingRect(0,18,bar_dist,18,Qt::AlignCenter,QString::number(bar_value[t],16));
-					paint.drawText(bar_dist * t + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16) );
+					if (m_flags & F_ENABLE_SECOND_BAR_GROUP) {
+						QRect rect = paint.boundingRect(bar_dist/2,18,bar_dist/2,18,Qt::AlignCenter,QString::number(bar_value[t],16));
+						paint.drawText(bar_dist * t + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16));
+					} else {
+						QRect rect = paint.boundingRect(0,18,bar_dist,18,Qt::AlignCenter,QString::number(bar_value[t],16));
+						paint.drawText(bar_dist * t + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_value[t],16));
+					}
+				}
+			}
+		}
+
+		// second bar group text
+		if (legendYSize > 0 && (m_flags & F_ENABLE_SECOND_BAR_GROUP) && (m_flags&F_ENABLE_BAR_TEXTS)) {
+			int yp = height();
+			paint.resetTransform();
+			for (int t=0; t< bars; t++) {
+				if (bar_width >= 16 || bar_value[t] > 0) {
+					if (t >= used_bars) {
+						paint.setPen(Qt::red);
+					} else {
+						paint.setPen(Qt::green);
+					}
+					QRect rect = paint.boundingRect(0,18,bar_dist/2,18,Qt::AlignCenter,QString::number(bar_valueSec[t],16));
+					paint.drawText(bar_dist * t + rect.x(), yp - 4/*-rect.y()*/ , QString::number(bar_valueSec[t],16));
 				}
 			}
 		}

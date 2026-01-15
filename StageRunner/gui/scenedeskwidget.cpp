@@ -66,7 +66,7 @@ void SceneDeskWidget::init_gui()
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	connect(AppCentral::instance()->unitLight,SIGNAL(outputUniverseChanged(int,QByteArray)),this,SLOT(notifyChangedUniverse(int,QByteArray)));
-	connect(faderAreaWidget,SIGNAL(mixerSelected(bool,int)),this,SLOT(setTubeSelected(bool,int)));
+	connect(faderAreaWidget,SIGNAL(mixerSelected(int,bool)),this,SLOT(setTubeSelected(int,bool)));
 	connect(faderAreaWidget,SIGNAL(mixerDraged(int,int)),this,SLOT(if_mixerDraged(int,int)));
 
 	connect(channelCountSpin,SIGNAL(clickedAndChanged(int)),this,SLOT(onChannelCountSpinClickedAndChanged(int)),Qt::QueuedConnection);
@@ -193,7 +193,8 @@ bool SceneDeskWidget::setFxScene(const FxSceneItem *scene)
 			fader->setRefValue(ref_val);
 
 			// and of course we need a slot to react on slider movement
-			connect(fader,SIGNAL(mixerSliderMoved(int,int)),this,SLOT(set_mixer_val_on_moved(int,int)));
+			connect(faderAreaWidget, SIGNAL(mixerGroupSliderMoved(int,int)), this, SLOT(setMixerValueOnSliderMoved(int,int)));
+			// this is old connect. connect(fader,SIGNAL(mixerChannelSliderMoved(int,int)),this,SLOT(setMixerValueOnSliderMoved(int,int)));
 			// and we have to update the indicators for outside DMX level changes
 			// connect(this,SIGNAL(dmxValueWantsUpdate(int,int,int)),fader,SLOT(notifyChangedDmxChannel(int,int,int)));
 		}
@@ -281,7 +282,7 @@ DmxChannel *SceneDeskWidget::getTubeAtPos(QPoint pos, MixerChannel **mixerChanne
 	return tube;
 }
 
-void SceneDeskWidget::setTubeSelected(bool state, int id)
+void SceneDeskWidget::setTubeSelected(int id, bool state)
 {
 	if (!m_originFxScene) return;
 
@@ -405,12 +406,13 @@ void SceneDeskWidget::notifyChangedUniverse(int universe, const QByteArray &dmxV
 	// }
 }
 
-void SceneDeskWidget::set_mixer_val_on_moved(int val, int id)
+void SceneDeskWidget::setMixerValueOnSliderMoved(int id, int val)
 {
 	if (!FxItem::exists(m_originFxScene)) {
 		DEBUGERROR("Scene in Desk does not exist anymore!");
 		return;
 	}
+	qDebug() << Q_FUNC_INFO << "id" << id << "=" << val;
 
 	DmxChannel *tube = m_originFxScene->findTube(id);
 	if (!tube)
@@ -728,7 +730,7 @@ bool SceneDeskWidget::renumberDmxAddrForSelectedTubes()
 			tube->dmxChannel = dmx;
 			mix->setDmxAddr(dmx);
 			mix->update();
-			setTubeSelected(false, tubeId);
+			setTubeSelected(tubeId, false);
 			mix->setSelected(false);
 		}
 	}

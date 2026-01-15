@@ -141,10 +141,10 @@ public slots:
 	void setLabelText(const QString & text);
 
 signals:
-	void mixerSliderMoved(int val, int id);
+	void mixerChannelSliderMoved(int id, int val);
 	void clicked();
 	void rightClicked();
-	void mixerSelected(bool state, int id);
+	void mixerSelected(int id, bool state);
 
 public slots:
 

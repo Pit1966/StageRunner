@@ -85,14 +85,14 @@ private:
 
 public slots:
 	void notifyChangedUniverse(int universe, const QByteArray & dmxValues);
-	void setTubeSelected(bool state, int id);
+	void setTubeSelected(int id, bool state);
 	void setSceneEditable(bool state);
 	void setCurrentSceneLiveState(bool state);
 	void copyTubeSettingsToGui(int id);
 
 private slots:
 	void if_input_was_assigned(FxItem *fx);
-	void set_mixer_val_on_moved(int val, int id);
+	void setMixerValueOnSliderMoved(int id, int val);
 	void on_liveCheck_clicked(bool checked);
 	void on_hookedUniverseSpin_valueChanged(int arg1);
 	void on_hookedChannelSpin_valueChanged(int arg1);

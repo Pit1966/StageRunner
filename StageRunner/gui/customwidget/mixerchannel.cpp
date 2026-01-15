@@ -117,11 +117,11 @@ void MixerChannel::setRefValue(int val, int colidx)
 }
 
 /**
- * @brief Force emit if signal mixerSliderMoved with the current value
+ * @brief Force emit if signal mixerChannelSliderMoved with the current value
  */
 void MixerChannel::emitCurrentValue()
 {
-	emit mixerSliderMoved(value(), my_id);
+	emit mixerChannelSliderMoved(my_id, value());
 }
 
 int MixerChannel::refValue()
@@ -135,7 +135,7 @@ void MixerChannel::setSelected(bool state)
 		// qDebug() << Q_FUNC_INFO << "mixer" << my_id << state;
 		prop_selected_f = state;
 		update();
-		emit mixerSelected(state,int(my_id));
+		emit mixerSelected(int(my_id), state);
 	}
 }
 
@@ -263,7 +263,7 @@ void MixerChannel::mouseMoveEvent(QMouseEvent *event)
 		if (new_value != value()) {
 			setValue( new_value );
 			emit sliderMoved(new_value);
-			emit mixerSliderMoved(new_value, my_id);
+			emit mixerChannelSliderMoved(my_id, new_value);
 		}
 		update();
 	} else {

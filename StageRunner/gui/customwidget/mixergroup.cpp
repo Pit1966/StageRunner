@@ -88,8 +88,8 @@ MixerChannel *MixerGroup::appendMixer(int tubeId)
 	mixerlist.append(mixer);
 	mixerlayout->addWidget(mixer);
 	mixer->setObjectName(QString::number(mixer->id()));
-	connect(mixer,SIGNAL(mixerSliderMoved(int,int)),this,SLOT(on_mixer_moved(int,int)));
-	connect(mixer,SIGNAL(mixerSelected(bool,int)),this,SLOT(on_mixer_selected(bool,int)));
+	connect(mixer,SIGNAL(mixerChannelSliderMoved(int,int)),this,SLOT(onMixerChannelMoved(int,int)));
+	connect(mixer,SIGNAL(mixerSelected(int,bool)),this,SLOT(onMixerChannelSelected(int,bool)));
 
 	int right_margin = width() - mixerlist.size() * mixer->backGroundWidth();
 	if (right_margin > 0) {
@@ -203,13 +203,13 @@ bool MixerGroup::selectMixer(MixerChannel *mixer, int id, bool state)
 		if (!selected_mixer.contains(mixer)) {
 			selected_mixer.append(mixer);
 			mixer->setSelected(true);
-			emit mixerSelected(true, id);
+			emit mixerSelected(id, true);
 		}
 	} else {
 		if (selected_mixer.contains(mixer)) {
 			selected_mixer.removeAll(mixer);
 			mixer->setSelected(false);
-			emit mixerSelected(false, id);
+			emit mixerSelected(id, false);
 		}
 	}
 
@@ -252,7 +252,7 @@ void MixerGroup::unselectAllMixers()
 		MixerChannel *mix = selected_mixer.takeFirst();
 		if (mixerlist.contains(mix)) {
 			mix->setSelected(false);
-			emit mixerSelected(false, mix->id());
+			emit mixerSelected(mix->id(), false);
 		}
 	}
 }
@@ -400,7 +400,7 @@ void MixerGroup::dropEvent(QDropEvent *event)
 	temp_drag_start_move_idx = -1;
 }
 
-void MixerGroup::on_mixer_moved(int val, int id)
+void MixerGroup::onMixerChannelMoved(int id, int val)
 {
 	if (id >= 0) {
 		if (val < 0)  {
@@ -410,11 +410,25 @@ void MixerGroup::on_mixer_moved(int val, int id)
 			val = m_defaultMaxValue;
 		}
 
-		emit mixerSliderMoved(val, id);
+		MixerChannel *mix = getMixerById(id);
+		if (mix && selected_mixer.contains(mix)) {
+			for (int i=0; i<selected_mixer.size(); i++) {
+				MixerChannel *m = selected_mixer.at(i);
+				if (m->id() != id) {
+					m->setValue(val);
+					// qDebug() << i << "id" << m->id() << "=" << m << "val" << val;
+				}
+
+				emit mixerGroupSliderMoved(m->id(), val);
+			}
+		}
+		else {
+			emit mixerGroupSliderMoved(id, val);
+		}
 	}
 }
 
-void MixerGroup::on_mixer_selected(bool state, int id)
+void MixerGroup::onMixerChannelSelected(int id, bool state)
 {
 	static bool recursive_blocker = false;
 	if (recursive_blocker == true)

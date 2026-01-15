@@ -87,12 +87,12 @@ public slots:
 	void setRefSliderColorIndex(int colidx);
 
 private slots:
-	void on_mixer_moved(int val, int id);
-	void on_mixer_selected(bool state, int id);
+	void onMixerChannelMoved(int id, int val);
+	void onMixerChannelSelected(int id, bool state);
 
 signals:
-	void mixerSliderMoved(int val, int id);
-	void mixerSelected(bool state, int id);
+	void mixerGroupSliderMoved(int id, int val);
+	void mixerSelected(int id, bool state);
 	void mixerDraged(int fromIndex, int toIndex);
 
 };

@@ -723,6 +723,19 @@ void SR_FixtureList::addFixture(SR_Fixture *fix, int dmxAddr)
 		while (i < m_list.size()) {
 			if (m_list.at(i)->dmxAddr() > dmxAddr) {
 				found = true;
+				// check if there are enough dmx channels for fixture in front of the next in list
+				int lastAllowedChannel = m_list.at(i)->dmxAddr() - 1;
+				if (lastAllowedChannel < 1)
+					return;
+				// if new fixture overlaps the next fixture in the list, move decrement dmx address until there is enough space
+				// And check if the new target dmx addr is not occupied by another fixture
+				while (dmxAddr + fix->currentChannelCount() - 1 > lastAllowedChannel) {
+					dmxAddr--;
+					if (dmxAddr < 1)
+						return;
+					if (findFixtureByDmxAddr(dmxAddr))
+						return;
+				}
 				break;
 			}
 			else {
