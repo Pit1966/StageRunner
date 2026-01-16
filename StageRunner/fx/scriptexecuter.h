@@ -64,12 +64,15 @@ protected:
 	bool executeFix(FxScriptLine *line);
 
 
+	bool executeCommandBlock(const QString &cmds);
+
 	static bool executeSingleCmd(const QString &linestr);
 
 signals:
 	void listProgressStepChanged(int step1, int step2);
 
 	friend class ExecCenter;
+	friend class TimeLineExecuter;
 };
 
 #endif // SCRIPTEXECUTER_H

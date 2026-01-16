@@ -75,8 +75,9 @@ protected:
 	// propagade some mouse events to derived classes
 	virtual void leftClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 	virtual void rightClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
-	virtual void doubleClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event);}
 
+	/// If reimplemented, the function should return true, if the doubleClick was consumed
+	virtual bool doubleClicked(QGraphicsSceneMouseEvent *event) {Q_UNUSED(event); return false;}
 };
 
 } // namespace PS_TL

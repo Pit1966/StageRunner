@@ -29,6 +29,7 @@ Features:
 - done: Move to bin funtion in order to remove FxItems from main fxlist to an automatic created bin FxSeqItem
 - done: Add multiple audio files, when Filerequester is called by addFxAudio in context menu of FxListWidget
 - Play FxItems in FxSeqItem lists. (should be done with double click)
+- Color Config Settings? and especially color config for TimeLineItems: Colors are hardcoded for now in many places
 
 - FxTimeline add script command TimelineItem
 - loop timer in execloop konfigurierbar machen. Im Moment is die Granularität 10 Millisekunden.

@@ -165,6 +165,8 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 				TimeLineBox *tli = addTimeLineBox(obj->posMs, obj->lenMs, obj->label, trackID);
 				ExtTimeLineItem *extTLI = dynamic_cast<ExtTimeLineItem*>(tli);
 				extTLI->cloneItemDataFrom(obj);
+				extTLI->setConfigDat(obj->configDat);
+				/// @todo is this necessary? Should color settings be part of saved TimeLineItem?
 				// auto correct color setting
 				if (extTLI->linkedObjType() == LINKED_FX_SCENE) {
 					extTLI->setBackgroundColor(QColor(0x923d0c));
@@ -177,6 +179,10 @@ bool ExtTimeLineWidget::setFxTimeLineItem(FxTimeLineItem *fxt)
 				else if (extTLI->linkedObjType() == CMD_PAUSE) {
 					extTLI->setBackgroundColor(QColor(0xb02127));
 					extTLI->setBorderColor(QColor(0xb02127));
+				}
+				else if (extTLI->linkedObjType() == CMD_SCRIPT_CMD) {
+					extTLI->setBackgroundColor(QColor(0x224262));
+					extTLI->setBorderColor(QColor(0x222282));
 				}
 
 				hasItems = true;
@@ -240,8 +246,6 @@ bool ExtTimeLineWidget::copyToFxTimeLineItem(FxTimeLineItem *fxt)
 			obj->configDat = tli->getConfigDat();
 			if (extTLI) {
 				obj->cloneItemDataFrom(extTLI);
-				// obj->m_fxID = extTLI->m_fxID;
-				// obj->m_linkedObjType = extTLI->m_linkedObjType;
 			}
 
 			if (i < varset.size()) {
@@ -520,12 +524,13 @@ void FxTimeLineEditWidget::onMousePositionChanged(int ms)
 
 void FxTimeLineEditWidget::onTimeLineItemBoxDoubleClicked(TimeLineBox *item)
 {
-	qDebug() << "timelinebox item double clicked";
 	ExtTimeLineItem *eItem = qobject_cast<ExtTimeLineItem*>(item);
 	if (!eItem) return;
 
 	if (eItem->m_fxID <= 0)
 		return;
+
+	qDebug() << "timelinebox item double clicked -> search for linked FxItem";
 
 	FxItem *fx = FxItem::findFxById(eItem->m_fxID);
 	if (fx)

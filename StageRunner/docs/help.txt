@@ -81,6 +81,10 @@ FADEVOL slot <AUDIO_SLOT_NUMBER> { <TARGET_VOLUME_ABS>|<TARGET_VOLUME_PERCENT>% 
 	(for now absolute and percentage is the same, but absolute volume scale may change in future)
 	You may provide a fade time also
 
+FADEVOL stopaudio [<FADE_TIME>]
+	Stop all running audio effects.
+	If FADE_TIME is given, all audio effects will be faded to 0 in the given time interval.
+
 MODE [breakoncancel][,disablemultistart][,enablemultistart]
 	Set one ore more script execution mode(s).
 	breakoncancel: Stopping a script will immediately stop all commands inside the script. Otherwise the script will be stopped

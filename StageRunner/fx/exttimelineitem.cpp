@@ -87,17 +87,42 @@ bool ExtTimeLineItem::linkToFxItem(FxItem *fx)
 	return false;
 }
 
-// void ExtTimeLineItem::doubleClicked(QGraphicsSceneMouseEvent *event)
-// {
-// 	qDebug() << "double click";
-// 	if (m_fxID <= 0)
-// 		return;
+QString ExtTimeLineItem::getConfigDat() const
+{
+	if (m_linkedObjType != CMD_SCRIPT_CMD)
+		return {};
 
-// 	FxItem *fx = FxItem::findFxById(m_fxID);
-// 	if (fx->fxType() == FX_SCENE) {
+	return m_confStr01;
+}
 
-// 	}
-// }
+bool ExtTimeLineItem::setConfigDat(const QString &dat)
+{
+	if (m_linkedObjType != CMD_SCRIPT_CMD)
+		return true;
+
+	m_confStr01 = dat;
+	return true;
+}
+
+/**
+ * @brief ExtTimeLineItem::doubleClicked
+ * @param event
+ * @return should return true, if event was consumed.
+ */
+bool ExtTimeLineItem::doubleClicked(QGraphicsSceneMouseEvent *event)
+{
+	Q_UNUSED(event)
+
+	if (m_linkedObjType == CMD_SCRIPT_CMD) {
+		if (openScriptCommandDialog(m_confStr01))
+			update();
+
+		return true;
+	}
+
+	// event not consumed
+	return false;
+}
 
 
 void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
@@ -108,11 +133,15 @@ void ExtTimeLineItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	menu.addAction(tr("Link to Fx"), this, &ExtTimeLineItem::contextLinkToFx);
 	if (m_fxID == 0) {
 		menu.addAction(tr("Link to PAUSE"), this, &ExtTimeLineItem::contextLinkToPause);
+		if (m_linkedObjType != CMD_SCRIPT_CMD)
+			menu.addAction(tr("Link to script command"), this, &ExtTimeLineItem::contextLinkToScriptCmd);
 	}
 	menu.addAction(tr("Edit label"), this, &ExtTimeLineItem::contextEditLabel);
 
-	menu.addAction(tr("Edit fadeIN time"), this, &ExtTimeLineItem::contextFadeInTime);
-	menu.addAction(tr("Edit fadeOut time"), this, &ExtTimeLineItem::contextFadeOutTime);
+	if (m_linkedObjType >= LINKED_FX_SCENE && m_linkedObjType <= LINKED_FX_CLIP) {
+		menu.addAction(tr("Edit fadeIN time"), this, &ExtTimeLineItem::contextFadeInTime);
+		menu.addAction(tr("Edit fadeOut time"), this, &ExtTimeLineItem::contextFadeOutTime);
+	}
 
 
 	// get additional menu entries from overlays
@@ -288,6 +317,24 @@ void ExtTimeLineItem::contextLinkToPause()
 	m_colorBG = 0xb02127;
 	setDuration(2000);
 	m_maxDurationMs = 5000;
+	m_fadeInDurationMs = 0;
+	m_fadeOutDurationMs = 0;
+}
+
+void ExtTimeLineItem::contextLinkToScriptCmd()
+{
+	QString cmd;
+	if (!openScriptCommandDialog(cmd))
+		return;
+
+	m_linkedObjType = CMD_SCRIPT_CMD;
+	m_confStr01 = cmd;
+	m_colorBG = 0x224262;
+	m_colorBorder = 0x222282;
+	m_fadeInDurationMs = 0;
+	m_fadeOutDurationMs = 0;
+
+	update();
 }
 
 void ExtTimeLineItem::contextFadeInTime()
@@ -316,4 +363,17 @@ void ExtTimeLineItem::contextFadeOutTime()
 
 	m_fadeOutDurationMs = valms;
 	update();
+}
+
+bool ExtTimeLineItem::openScriptCommandDialog(QString &cmdRef)
+{
+	QString curCmd = m_confStr01;
+	bool ok;
+	QString newCmd = QInputDialog::getText(
+				nullptr, tr("Edit script item"), tr("Enter script command"), {}, curCmd, &ok);
+	if (!ok)
+		return false;
+
+	cmdRef = newCmd;
+	return true;
 }

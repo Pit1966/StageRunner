@@ -97,6 +97,8 @@ protected:
 	bool execObjBeginPosForFx(int fxID, Event &ev);
 	bool execObjEndPosForFx(int fxID, Event &ev);
 
+	bool execScriptItem(Event &ev);
+
 	void addFxToActiveAudioList(FxItem *fx);
 	void addFxToActiveScriptList(FxItem *fx);
 

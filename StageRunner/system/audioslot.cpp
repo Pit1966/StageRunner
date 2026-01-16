@@ -384,13 +384,17 @@ bool AudioSlot::pauseFxAudio(bool state)
 
 bool AudioSlot::fadeoutFxAudio(int targetVolume, int time_ms, bool fadeToMode)
 {
-	if (time_ms <= 0) {
-		qDebug("AudioSlot::fadeoutFxAudio Fade out time = %d",time_ms);
+	if (time_ms < 0) {
+		qWarning("AudioSlot::fadeoutFxAudio Fade out time = %d",time_ms);
 		return false;
 	}
 
 	if (m_audioPlayer->state() != AUDIO_RUNNING)
 		return false;
+
+	if (time_ms == 0 && fadeToMode == false) {
+		return stopFxAudio();
+	}
 
 	if (!FxItem::exists(m_currentFx))
 		return false;

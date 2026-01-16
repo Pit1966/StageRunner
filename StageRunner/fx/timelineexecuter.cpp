@@ -6,14 +6,10 @@
 #include "system/videocontrol.h"
 #include "appcontrol/appcentral.h"
 #include "appcontrol/audiocontrol.h"
-#include "fx/fxitem.h"
-#include "fx/fxtimelineitem.h"
+#include "fx/fxitem_includes.h"
 #include "fx/fxtimelineobj.h"
-#include "fx/fxaudioitem.h"
-#include "fx/fxclipitem.h"
-#include "fx/fxsceneitem.h"
 #include "fx/fxtimelinetrack.h"
-#include "fx/fxscriptitem.h"
+#include "fx/scriptexecuter.h"
 #include "mods/timeline/timelinebox.h"
 #include "mods/timeline/timelinecurve.h"
 
@@ -94,6 +90,9 @@ bool TimeLineExecuter::processExecuter()
 #ifdef QT_DEBUG
 			qDebug() << " timeline -> set paused";
 #endif
+		}
+		else if (obj->type() == CMD_SCRIPT_CMD) {
+			execScriptItem(ev);
 		}
 	}
 	else if (ev.evType == EV_STOP) {
@@ -611,6 +610,16 @@ bool TimeLineExecuter::execObjEndPosForFx(int fxID, Event &ev)
 	}
 
 	return ok;
+}
+
+bool TimeLineExecuter::execScriptItem(Event &ev)
+{
+	if (!ev.obj)
+		return false;
+
+	ScriptExecuter exe(AppCentral::ref(), nullptr, m_fxTimeLine);
+	return exe.executeCommandBlock(ev.obj->configDat);
+
 }
 
 void TimeLineExecuter::addFxToActiveAudioList(FxItem *fx)

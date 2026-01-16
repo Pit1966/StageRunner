@@ -3,8 +3,17 @@
 
 #include "fx/fx_defines.h"
 
+#include <QString>
+
 class FxItem;
 
+
+/**
+ * @brief The TimeLineItemData class
+ *
+ * @note this class is used as a base class of TimeLineObj and ExtTimeLineItem.
+ * Storing and loading data takes place in TimeLineObj.
+ */
 class TimeLineItemData
 {
 protected:

@@ -99,7 +99,9 @@ void TimeLineBox::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void TimeLineBox::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
 	// qDebug() << "double clicked item" << m_label;
-	doubleClicked(event);
+	if (doubleClicked(event))
+		return;		// virtual function in derived class has consumed the event.
+
 	m_timeline->propagateTimeLineBoxDoubleClicked(this);
 }
 

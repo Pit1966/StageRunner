@@ -454,7 +454,7 @@ bool ScriptExecuter::executeLine(FxScriptLine *line, bool & reExecDelayed)
 
 	if (!ok) {
 		LOGERROR(tr("Script '<font color=#6666ff>%1</font>': Line #%2: <font color=darkOrange>Failed to execute script line</font> ('<font color=#6666ff>%3</font>')%4")
-				 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script name"),
+				 .arg(m_fxScriptItem ? m_fxScriptItem->name() : QString("no script item"),
 					  QString::number(line->lineNumber()),
 					  QString("%1 %2").arg(line->command(), line->parameters()),
 					  m_lastScriptError.size() ? QString(": %1").arg(m_lastScriptError) : QString()));
@@ -873,6 +873,15 @@ bool ScriptExecuter::executeFadeVolume(FxScriptLine *line)
 	if (type == "slot") {
 		slotno = getFirstParaOfString(parastr).toInt();
 	}
+	else if (type == "stopaudio") {
+		QString timestr = getFirstParaOfString(parastr);
+		int timeMs = QtStaticTools::timeStringToMS(timestr);
+		if (timeMs <= 0) {
+			myApp.stopAllFxAudio();
+		} else {
+			myApp.fadeoutAllFxAudio(timeMs);
+		}
+	}
 	else {
 		m_lastScriptError = tr("Unknown parameter type '%1' for FADEVOL command: (use [slot])").arg(type);
 		return false;
@@ -1145,6 +1154,34 @@ bool ScriptExecuter::executeFix(FxScriptLine *line)
 
 
 	return true;
+}
+
+
+/**
+ * @brief Execute script without wait and pause
+ * @param cmds A semicolon seperated list of script lines
+ * @return true on success; false on failure or empty script
+ */
+bool ScriptExecuter::executeCommandBlock(const QString &cmds)
+{
+	// split command lines
+	m_script.clear();
+	FxScriptItem::rawToScript(cmds, m_script);
+
+	bool executed = false;
+	for (int i=0; i<m_script.size(); i++) {
+		FxScriptLine *line = m_script.at(i);
+		if (line->commandKey() == KW_WAIT || line->commandKey() == KW_WAIT)
+			continue;
+
+		bool reexecdelayed = false;
+		bool ok = executeLine(line, reexecdelayed);
+		if (!ok)
+			return false;
+		executed = true;
+	}
+
+	return executed;
 }
 
 bool ScriptExecuter::executeSingleCmd(const QString &linestr)

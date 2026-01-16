@@ -93,6 +93,7 @@ public:
 
 	int lineNumber() const {return m_lineNum;}
 	const QString & command() const {return m_cmd;}
+	SCRIPT::KEY_WORD commandKey() const {return m_cmdKey;}
 	const QString & parameters() const {return m_paras;}
 	int loopCount() const {return m_loopCount;}
 	void incLoopCount() {m_loopCount++;}

@@ -11,6 +11,9 @@ class FxItem;
 class ExtTimeLineItem : public PS_TL::TimeLineBox, public TimeLineItemData
 {
 	Q_OBJECT
+private:
+	// more configuration for different LINKED_OBJ_TYPEs
+	QString m_confStr01;			// only used by CMD_SCRIPT_CMD
 
 public:
 	ExtTimeLineItem(PS_TL::TimeLineWidget *timeline, int trackId = 1);
@@ -18,9 +21,13 @@ public:
 	FxItem * linkToFxWithId(int fxId);
 	bool linkToFxItem(FxItem *fx);
 
+	// reimplemented functions from TimeLineItem
+	QString getConfigDat() const override;
+	bool setConfigDat(const QString &dat) override;
+
 protected:
 	// reimplementations from base class
-	// void doubleClicked(QGraphicsSceneMouseEvent *event) override;
+	bool doubleClicked(QGraphicsSceneMouseEvent *event) override;
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -31,14 +38,16 @@ protected:
 	int fadeOutTime() const override;
 	void setFadeOutTime(int ms) override;
 
-
 private:
 	void contextDeleteMe();
 	void contextEditLabel();
 	void contextLinkToFx();
 	void contextLinkToPause();
+	void contextLinkToScriptCmd();
 	void contextFadeInTime();
 	void contextFadeOutTime();
+
+	bool openScriptCommandDialog(QString &cmdRef);
 
 	friend class FxTimeLineEditWidget;
 	friend class ExtTimeLineWidget;

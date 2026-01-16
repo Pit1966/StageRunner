@@ -974,6 +974,8 @@ void AudioControl::fadeVolTo(int slot, int targetVolume, int time_ms)
 	msg.executer = audioSlots[slot]->currentExecuter();
 	emit audioThreadCtrlMsgEmitted(msg);
 
+	qDebug() << "fadeVolTo" << slot << targetVolume << time_ms << "ms";
+
 	// audioSlots[slot]->fadeinFxAudio(targetVolume, time_ms);
 }
 

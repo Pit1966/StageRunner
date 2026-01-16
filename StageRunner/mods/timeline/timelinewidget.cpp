@@ -742,7 +742,7 @@ void TimeLineWidget::checkMousePos(qreal x, qreal y)
 
 void TimeLineWidget::propagateTimeLineBoxDoubleClicked(TimeLineBox *item)
 {
-	qDebug() << Q_FUNC_INFO;
+	// qDebug() << Q_FUNC_INFO << item;
 	emit timeLineBoxDoubleClicked(item);
 }
 
