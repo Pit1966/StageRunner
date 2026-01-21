@@ -67,6 +67,7 @@
 #include "mods/timeline/timelinebox.h"
 #include "widgets/fxtimelineeditwidget.h"
 #include "system/dmx/fixturelayout.h"
+#include "mods/markdown/mdviewwidget.h"
 
 #include "../plugins/yadi/src/dmxmonitor.h"
 
@@ -1633,5 +1634,18 @@ void StageRunnerMainWin::on_showFontsButton_clicked()
 #endif
 
 	fontTree->show();
+}
+
+
+void StageRunnerMainWin::on_actionAboutOpenHelpText_triggered()
+{
+	if (!m_mdView) {
+		m_mdView = new MDViewWidget();
+		m_mdView->show();
+	}
+	else {
+		m_mdView->show();
+		m_mdView->raise();
+	}
 }
 

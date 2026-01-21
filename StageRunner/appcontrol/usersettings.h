@@ -38,6 +38,7 @@ public:
 	pstring pLastProjectLoadPath;
 	pstring pLastAudioTrackImportPath;
 	pstring pLastCondolidatePath;
+	pstring pLastHelpDocPath;
 	pint32 pAudioBufferSize;
 	pint32 pDefaultAudioFadeoutTimeMs;
 	pbool pProhibitAudioDoubleStart;

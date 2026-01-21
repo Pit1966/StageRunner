@@ -65,6 +65,7 @@ void UserSettings::init()
 	addExistingVar(pLastProjectLoadPath,"LastProjectLoadPath");
 	addExistingVar(pLastProjectSavePath,"LastProjectSavePath");
 	addExistingVar(pLastCondolidatePath,"LastConsolidatePath");
+	addExistingVar(pLastHelpDocPath,"LastHelpDocPath");
 	addExistingVar(pAudioBufferSize,"AudioBufferSize",100,100000,18000);
 //				   ,QObject::tr("Audio buffer size for audio playback in the audio slots"));
 	addExistingVar(pDefaultAudioFadeoutTimeMs,"DefaultAudioFadeoutTimeMs",0,10000,5001);

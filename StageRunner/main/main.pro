@@ -155,6 +155,7 @@ SOURCES += \
 	../gui/style/lightdeskstyle.cpp \
 	../gui/universeeditorwidget.cpp \
 	../gui/videostatuswidget.cpp \
+	../mods/markdown/mdviewwidget.cpp \
 	../mods/timeline/timeline_classes.cpp \
 	../mods/timeline/timelinebox.cpp \
 	../mods/timeline/timelinecursor.cpp \
@@ -191,6 +192,9 @@ SOURCES += \
 	../system/runguard.cpp \
 	../system/variantmapserializer.cpp \
 	../system/videocontrol.cpp \
+	../thirdparty/md4d/src/entity.c \
+	../thirdparty/md4d/src/md4c-html.c \
+	../thirdparty/md4d/src/md4c.c \
 	../thirdparty/widget/qsynthdialclassicstyle.cpp \
 	../thirdparty/widget/qsynthdialpeppinostyle.cpp \
 	../thirdparty/widget/qsynthdialskulpturestyle.cpp \
@@ -288,6 +292,7 @@ HEADERS  += \
 	../gui/style/lightdeskstyle.h \
 	../gui/universeeditorwidget.h \
 	../gui/videostatuswidget.h \
+	../mods/markdown/mdviewwidget.h \
 	../mods/timeline/timeline_classes.h \
 	../mods/timeline/timeline_defines.h \
 	../mods/timeline/timelinebox.h \
@@ -348,6 +353,9 @@ HEADERS  += \
 	../thirdparty/fftreal2/ffft/OscSinCos.h \
 	../thirdparty/fftreal2/ffft/OscSinCos.hpp \
 	../thirdparty/fftreal2/ffft/def.h \
+	../thirdparty/md4d/src/entity.h \
+	../thirdparty/md4d/src/md4c-html.h \
+	../thirdparty/md4d/src/md4c.h \
 	../thirdparty/widget/qsynthdialclassicstyle.h \
 	../thirdparty/widget/qsynthdialpeppinostyle.h \
 	../thirdparty/widget/qsynthdialskulpturestyle.h \
@@ -394,6 +402,7 @@ FORMS    += \
 	../gui/stagerunnermainwin.ui \
 	../gui/universeeditorwidget.ui \
 	../gui/videostatuswidget.ui \
+	../mods/markdown/mdviewwidget.ui \
 	../system/dmx/dmxrangewidget.ui \
 	../system/dmx/dmxtypeselectorwidget.ui \
 	../system/messagedialog.ui \

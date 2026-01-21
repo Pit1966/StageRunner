@@ -47,6 +47,7 @@ class UniverseEditorWidget;
 class FxPlayListItem;
 class FxTimeLineItem;
 class FxSeqItem;
+class MDViewWidget;
 
 class StageRunnerMainWin : public QMainWindow, private Ui::StageRunnerMainWin
 {
@@ -59,6 +60,7 @@ private:
 	PsDockWidget *sequence_status_dock	= nullptr;
 	PsDockWidget *template_dock			= nullptr;
 	UniverseEditorWidget *m_universeEditor = nullptr;
+	MDViewWidget *m_mdView				= nullptr;
 
 	QLabel *m_timeLabel		= nullptr;
 	QTimer m_statusTimer;							///< feeds time label
@@ -162,6 +164,7 @@ private slots:
 	void on_actionDelete_FX_Item_triggered();
 	void on_actionClose_video_window_triggered();
 	void on_showFontsButton_clicked();
+	void on_actionAboutOpenHelpText_triggered();
 
 private:
 	void init();

@@ -139,33 +139,33 @@
             <property name="verticalSpacing">
              <number>6</number>
             </property>
-            <item row="6" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item row="1" column="0">
+             <widget class="QPushButton" name="addFxSceneButton">
+              <property name="text">
+               <string>Add Scene Fx</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
               <property name="topMargin">
                <number>0</number>
               </property>
               <item>
-               <widget class="QPushButton" name="loadUniverseButton">
+               <widget class="QPushButton" name="addAudioPlayListButton">
                 <property name="text">
-                 <string>Load Universe</string>
+                 <string>Add Audio Play List FX</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="saveUniverseButton">
+               <widget class="QPushButton" name="addAudioTrackButton">
                 <property name="text">
-                 <string>Save Universe</string>
+                 <string>Add Audio Track To Play List Fx</string>
                 </property>
                </widget>
               </item>
              </layout>
-            </item>
-            <item row="8" column="0">
-             <widget class="QPushButton" name="stopMainLoopButton">
-              <property name="text">
-               <string>Stop main loop for 8 seconds</string>
-              </property>
-             </widget>
             </item>
             <item row="0" column="0">
              <widget class="QPushButton" name="addAudioFxButton">
@@ -179,13 +179,6 @@
                <string>Import and Add Audio Fx</string>
               </property>
              </widget>
-            </item>
-            <item row="7" column="0">
-             <layout class="QVBoxLayout" name="timelineLayout">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-             </layout>
             </item>
             <item row="9" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -218,29 +211,22 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QPushButton" name="addFxSceneButton">
-              <property name="text">
-               <string>Add Scene Fx</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item row="6" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
               <property name="topMargin">
                <number>0</number>
               </property>
               <item>
-               <widget class="QPushButton" name="addAudioPlayListButton">
+               <widget class="QPushButton" name="loadUniverseButton">
                 <property name="text">
-                 <string>Add Audio Play List FX</string>
+                 <string>Load Universe</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="addAudioTrackButton">
+               <widget class="QPushButton" name="saveUniverseButton">
                 <property name="text">
-                 <string>Add Audio Track To Play List Fx</string>
+                 <string>Save Universe</string>
                 </property>
                </widget>
               </item>
@@ -265,6 +251,20 @@
                 </property>
                </widget>
               </item>
+             </layout>
+            </item>
+            <item row="8" column="0">
+             <widget class="QPushButton" name="stopMainLoopButton">
+              <property name="text">
+               <string>Stop main loop for 8 seconds</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <layout class="QVBoxLayout" name="timelineLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
              </layout>
             </item>
            </layout>
@@ -348,6 +348,7 @@
     </property>
     <addaction name="actionInfo"/>
     <addaction name="actionNotes"/>
+    <addaction name="actionAboutOpenHelpText"/>
    </widget>
    <widget class="QMenu" name="menuDocks">
     <property name="title">
@@ -586,6 +587,11 @@
   <action name="actionLight_InitDefaultUniverses">
    <property name="text">
     <string>Init default universe(s)</string>
+   </property>
+  </action>
+  <action name="actionAboutOpenHelpText">
+   <property name="text">
+    <string>Open Help Text</string>
    </property>
   </action>
  </widget>
