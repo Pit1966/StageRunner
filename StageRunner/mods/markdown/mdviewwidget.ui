@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
-    <height>511</height>
+    <width>1044</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,13 @@
     </layout>
    </item>
    <item>
-    <widget class="QTextEdit" name="mdViewEdit"/>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QTextEdit" name="mdEdit"/>
+     <widget class="QTextBrowser" name="mdView"/>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">

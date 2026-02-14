@@ -13,8 +13,10 @@ class MDViewWidget : public QWidget
 private:
 	Ui::MDViewWidget *ui;
 	QString m_currentFile;
-
+	QByteArray m_mdData;
 	QString m_viewHtmlData;
+
+	bool m_mdParseActive	= false;
 
 public:
 	explicit MDViewWidget(QWidget *parent = nullptr);
@@ -24,10 +26,13 @@ protected:
 	static void cbProcessOutput(const char *input, unsigned input_size, void *myobj);
 
 private slots:
+	void renderMD(bool keepScrollAnchor = false);
+
 	void on_fileChooserButton_clicked();
 
 	void on_closeButton_clicked();
 	void on_showButton_clicked();
+	void on_mdEdit_textChanged();
 };
 
 #endif // MDVIEWWIDGET_H

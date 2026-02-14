@@ -472,7 +472,9 @@ OTHER_FILES += \
 
 DISTFILES += \
     ../devel.txt \
+    ../docs/help.md \
     ../docs/help.txt \
+    ../docs/stagerunner_help.md \
     ../todo.txt \
     ../macos_notes.txt \
     ../platforms/macos/nametool.pri \
