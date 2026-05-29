@@ -65,13 +65,19 @@
         <file>gfx/icons/video.png</file>
         <file>gfx/icons/script.png</file>
         <file>gfx/icons/audio_pause_red.png</file>
-        <file>docs/help.txt</file>
         <file>gfx/icons/picclip.png</file>
         <file>gfx/pics/stonechip_01.png</file>
         <file>gfx/pics/screen_black.png</file>
         <file>gfx/icons/config-date_green.png</file>
         <file>gfx/icons/timeline_item.svg</file>
         <file>gfx/icons/timeline_item.png</file>
+        <file>gfx/icons/dialog-warning.png</file>
+        <file>gfx/icons/bulb.png</file>
+        <file>gfx/icons/usbstick.png</file>
+        <file alias="warning">gfx/icons/gainknob.png</file>
+        <file>gfx/customwidget/desk_knob_left_red.png</file>
+        <file>gfx/customwidget/desk_knob_mid_red.png</file>
+        <file>gfx/customwidget/desk_knob_right_red.png</file>
         <file>fonts/DejaVuSans-Bold.ttf</file>
         <file>fonts/DejaVuSans.ttf</file>
         <file>fonts/DejaVuSansMono.ttf</file>
@@ -80,12 +86,7 @@
         <file>fonts/SourceCodePro-Regular.otf</file>
         <file>fonts/SourceCodePro-Semibold.otf</file>
         <file>fonts/SourceSansPro-ExtraLight.otf</file>
-        <file>gfx/icons/dialog-warning.png</file>
-        <file>gfx/icons/bulb.png</file>
-        <file>gfx/icons/usbstick.png</file>
-        <file alias="warning">gfx/icons/gainknob.png</file>
-        <file>gfx/customwidget/desk_knob_left_red.png</file>
-        <file>gfx/customwidget/desk_knob_mid_red.png</file>
-        <file>gfx/customwidget/desk_knob_right_red.png</file>
+        <file>docs/help.txt</file>
+        <file>docs/stagerunner_help.md</file>
     </qresource>
 </RCC>

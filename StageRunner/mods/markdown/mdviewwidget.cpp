@@ -19,6 +19,7 @@ MDViewWidget::MDViewWidget(QWidget *parent) :
 	ui->setupUi(this);
 
 	ui->mdView->setOpenExternalLinks(true);
+	ui->editButton->hide();
 
 	// QPalette pal = ui->mdView->palette();
 	// pal.setColor(QPalette::Link, QColor("#2685b4"));
@@ -30,6 +31,38 @@ MDViewWidget::~MDViewWidget()
 {
 	delete ui;
 }
+
+bool MDViewWidget::loadDocument(const QString &filePath)
+{
+	m_mdParseActive = false;
+
+	if (!QFile::exists(filePath))
+		return false;
+
+	QFile file(filePath);
+	if (!file.open(QFile::ReadOnly))
+		return false;
+
+	m_mdData = file.readAll();
+	ui->mdEdit->setPlainText(QString::fromUtf8(m_mdData));
+	m_mdParseActive = true;
+	return true;
+}
+
+bool MDViewWidget::renderDocument()
+{
+	if (!m_mdParseActive)
+		return false;
+
+	renderMD();
+
+	ui->mdEdit->hide();
+	ui->editButton->show();
+	ui->showButton->hide();
+	return true;
+}
+
+
 
 void MDViewWidget::cbProcessOutput(const char *input, unsigned int input_size, void *myobj)
 {
@@ -105,6 +138,22 @@ void MDViewWidget::on_mdEdit_textChanged()
 		m_mdData = ui->mdEdit->toPlainText().toUtf8();
 		m_viewHtmlData.clear();
 		renderMD(true);
+	}
+}
+
+
+void MDViewWidget::on_editButton_clicked()
+{
+	if (ui->mdEdit->isHidden()) {
+		ui->mdEdit->show();
+		ui->editButton->setText("Close Editor");
+		ui->showButton->show();
+	}
+	else {
+		ui->mdEdit->hide();
+		ui->editButton->setText("Edit");
+		ui->showButton->hide();
+		renderMD();
 	}
 }
 

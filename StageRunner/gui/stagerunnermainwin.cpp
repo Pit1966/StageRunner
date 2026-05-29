@@ -1642,6 +1642,9 @@ void StageRunnerMainWin::on_actionAboutOpenHelpText_triggered()
 	if (!m_mdView) {
 		m_mdView = new MDViewWidget();
 		m_mdView->show();
+		if (m_mdView->loadDocument(":/docs/stagerunner_help.md")) {
+			m_mdView->renderDocument();
+		}
 	}
 	else {
 		m_mdView->show();

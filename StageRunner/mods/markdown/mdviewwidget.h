@@ -22,6 +22,9 @@ public:
 	explicit MDViewWidget(QWidget *parent = nullptr);
 	~MDViewWidget();
 
+	bool loadDocument(const QString &filePath);
+	bool renderDocument();
+
 protected:
 	static void cbProcessOutput(const char *input, unsigned input_size, void *myobj);
 
@@ -33,6 +36,7 @@ private slots:
 	void on_closeButton_clicked();
 	void on_showButton_clicked();
 	void on_mdEdit_textChanged();
+	void on_editButton_clicked();
 };
 
 #endif // MDVIEWWIDGET_H
